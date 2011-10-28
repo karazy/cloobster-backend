@@ -1,5 +1,6 @@
 package net.eatsense.persistence;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.inject.Inject;
 import com.vercer.engine.persist.ObjectDatastore;
 
@@ -20,8 +21,8 @@ public abstract class Repository<T> {
 		this.datastore = datastore;
 	}
 	
-	public void save(T obj) {
-		datastore.store(obj);
+	public Key save(T obj) {
+		return datastore.store(obj);
 	}
 	
 	public void update(T obj) {
