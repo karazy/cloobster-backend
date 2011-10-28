@@ -1,0 +1,23 @@
+package net.eatsense.domain;
+
+import java.util.List;
+
+import com.vercer.engine.persist.annotation.Child;
+import com.vercer.engine.persist.annotation.Key;
+import com.vercer.engine.persist.annotation.Parent;
+
+public class Area {
+	
+	@Key
+	private Long id;
+	
+	private String name;
+	
+	@Parent
+	private Restaurant restaurant;
+	
+	@Child
+	private List<Barcode> barcodes;
+
+}
+	
