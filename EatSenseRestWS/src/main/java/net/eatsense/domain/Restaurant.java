@@ -1,21 +1,24 @@
 package net.eatsense.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.vercer.engine.persist.annotation.Child;
-import com.vercer.engine.persist.annotation.Embed;
-import com.vercer.engine.persist.annotation.Key;
-import com.vercer.engine.persist.annotation.Parent;
+import com.google.code.twig.annotation.Child;
+import com.google.code.twig.annotation.Embedded;
+import com.google.code.twig.annotation.Entity;
+import com.google.code.twig.annotation.Id;
 
 
+
+@Entity(allocateIdsBy=10)
 public class Restaurant {
 	
-	@Key
+	@Id
 	private Long id;
 	
 	private String name;
 	
-	@Embed
+	@Embedded
 	private Address address;
 	
 	private String description;
@@ -24,6 +27,10 @@ public class Restaurant {
 	
 	@Child
 	private List<Area> areas;
+	
+	public Restaurant() {
+		this.areas = new ArrayList<Area>();
+	}
 
 	public Long getId() {
 		return id;

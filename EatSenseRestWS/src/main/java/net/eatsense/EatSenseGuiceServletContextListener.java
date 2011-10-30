@@ -6,6 +6,8 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
+
+
 public class EatSenseGuiceServletContextListener extends GuiceServletContextListener{
 
 //	@Override
@@ -18,11 +20,13 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 	      return Guice.createInjector(new JerseyServletModule() {
 	         @Override
 	         protected void configureServlets() {
-	            
+//	            bind(RestaurantResource.class);
+//	            bind(ObjectDatastore.class).to(AnnotationObjectDatastore.class).in(Singleton.class);
 	            // Route all requests through GuiceContainer
 	            serve("/*").with(GuiceContainer.class);
 	         }
 	      }, new EatSenseDomainModule());
 	   }
+
 
 }

@@ -1,8 +1,9 @@
 package net.eatsense.persistence;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.code.twig.ObjectDatastore;
 import com.google.inject.Inject;
-import com.vercer.engine.persist.ObjectDatastore;
+
 
 /**
  * Generic repository. Acts as intermediate layer between datastore and domain objects.
@@ -14,15 +15,15 @@ import com.vercer.engine.persist.ObjectDatastore;
  */
 public abstract class Repository<T> {
 	
-	private ObjectDatastore datastore;
+	protected ObjectDatastore datastore;
 	
 	@Inject
 	public Repository(ObjectDatastore datastore) {
 		this.datastore = datastore;
 	}
 	
-	public Key save(T obj) {
-		return datastore.store(obj);
+	public Key save(T obj) {		
+		return datastore.store().instance(obj).now();
 	}
 	
 	public void update(T obj) {

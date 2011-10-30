@@ -1,15 +1,15 @@
 package net.eatsense.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.vercer.engine.persist.annotation.Child;
-import com.vercer.engine.persist.annotation.Embed;
-import com.vercer.engine.persist.annotation.Key;
-import com.vercer.engine.persist.annotation.Parent;
+import com.google.code.twig.annotation.Child;
+import com.google.code.twig.annotation.Parent;
+
+
 
 public class Area {
 	
-	@Key
 	private Long id;
 	
 	private String name;
@@ -17,9 +17,13 @@ public class Area {
 	@Parent
 	private Restaurant restaurant;
 	
-	@Embed
+	@Child
 	private List<Barcode> barcodes;
 
+	public Area() {
+		barcodes = new ArrayList<Barcode>();
+	}
+	
 	public Long getId() {
 		return id;
 	}

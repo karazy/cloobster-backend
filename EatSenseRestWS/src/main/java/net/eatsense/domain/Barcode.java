@@ -1,11 +1,15 @@
 package net.eatsense.domain;
 
-import com.vercer.engine.persist.annotation.Key;
+import com.google.code.twig.annotation.Parent;
+
+
 
 public class Barcode {
 	
-	@Key
 	private Long id;
+	
+	@Parent
+	private Area area;
 	
 	private String code;
 	
@@ -25,6 +29,14 @@ public class Barcode {
 
 	public void setCode(String code) {
 		this.code = code;
+	}	
+
+	public Area getArea() {
+		return area;
+	}
+
+	public void setArea(Area area) {
+		this.area = area;
 	}
 
 	public byte[] getBarcode() {
