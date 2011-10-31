@@ -3,14 +3,13 @@ package net.eatsense.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.code.twig.annotation.Child;
-import com.google.code.twig.annotation.Embedded;
-import com.google.code.twig.annotation.Entity;
-import com.google.code.twig.annotation.Id;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import com.googlecode.objectify.Key;
 
 
 
-@Entity(allocateIdsBy=10)
 public class Restaurant {
 	
 	@Id
@@ -18,14 +17,11 @@ public class Restaurant {
 	
 	private String name;
 	
-	@Embedded
-	private Address address;
 	
 	private String description;
 	
 	private byte[] logo;
 	
-	@Child
 	private List<Area> areas;
 	
 	public Restaurant() {
@@ -46,14 +42,6 @@ public class Restaurant {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Address getAddress() {
-		return address;
-	}
-
-	public void setAddress(Address address) {
-		this.address = address;
 	}
 
 	public String getDescription() {
@@ -78,6 +66,11 @@ public class Restaurant {
 
 	public void setAreas(List<Area> areas) {
 		this.areas = areas;
+	}
+	
+	@Transient
+	Key<Restaurant> getKey() {
+	   return new Key<Restaurant>(Restaurant.class, id);
 	}
 	
 	

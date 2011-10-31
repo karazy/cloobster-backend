@@ -1,45 +1,70 @@
 package net.eatsense.persistence;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.code.twig.ObjectDatastore;
-import com.google.inject.Inject;
+import java.util.List;
 
+import net.eatsense.domain.Area;
+import net.eatsense.domain.Barcode;
+import net.eatsense.domain.Restaurant;
+
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyService;
 
 /**
- * Generic repository. Acts as intermediate layer between datastore and domain objects.
- * Similar to a DAO.
+ * Generic repository. Acts as intermediate layer between datastore and domain
+ * objects. Similar to a DAO.
  * 
  * @author freifschneider
- *
+ * 
  * @param <T>
  */
 public abstract class Repository<T> {
-	
-	protected ObjectDatastore datastore;
-	
+
+	static {
+		ObjectifyService.register(Restaurant.class);
+		ObjectifyService.register(Area.class);
+		ObjectifyService.register(Barcode.class);
+	}
+
+	protected ObjectifyService datastore;
+
 	@Inject
-	public Repository(ObjectDatastore datastore) {
+	public Repository(ObjectifyService datastore) {
 		this.datastore = datastore;
 	}
-	
-	public Key save(T obj) {		
-		return datastore.store().instance(obj).now();
+
+	public Key<T> saveOrUpdate(T obj) {
+		Objectify oiy = ObjectifyService.begin();
+		return oiy.put(obj);
 	}
-	
-	public void update(T obj) {
-		datastore.update(obj);
-	}
-	
+
+//	public void update(T obj) {
+//		Objectify oiy = ObjectifyService.begin();
+//		oiy.
+//		datastore.update(obj);
+//	}
+
 	public void delete(T obj) {
-		datastore.delete(obj);
+		Objectify oiy = ObjectifyService.begin();
+		oiy.delete(obj);
+	}
+
+	public T findByKey(long id, Class<T> clazz) {
+		Objectify oiy = ObjectifyService.begin();
+		Key<T> key = new Key<T>(clazz, id);
+		return oiy.find(key);
 	}
 	
-	public T findByKey(long key, Class<T> clazz) {
-		return datastore.load(clazz, key);
+	public <V> T getByKey(Key<V> owner, Class<T> clazz, long id ) {
+		Objectify oiy = ObjectifyService.begin();
+		return oiy.get(new Key<T>(owner, clazz, id));
 	}
 	
 	
-	
-	
+	public <V> List<V> getChildren(Class<V> clazz, Key<T> parentKey) {
+		Objectify oiy = ObjectifyService.begin();
+		return oiy.query(clazz).ancestor(parentKey).list();
+	}
 
 }

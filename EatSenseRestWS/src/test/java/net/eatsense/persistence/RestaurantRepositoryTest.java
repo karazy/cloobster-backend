@@ -1,8 +1,10 @@
 package net.eatsense.persistence;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import junit.framework.Assert;
-
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Barcode;
@@ -12,11 +14,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.googlecode.objectify.Key;
 
 public class RestaurantRepositoryTest {
 	
@@ -26,12 +28,16 @@ public class RestaurantRepositoryTest {
     
     private Injector injector;
     private RestaurantRepository rr;
+    private AreaRepository ar;
+    private BarcodeRepository br;
 
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule());
 		rr = injector.getInstance(RestaurantRepository.class);
+		ar = injector.getInstance(AreaRepository.class);
+		br = injector.getInstance(BarcodeRepository.class);
 	}
 
 	@After
@@ -49,7 +55,7 @@ public class RestaurantRepositoryTest {
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		r.setId(1l);
-		rr.save(r);
+		rr.saveOrUpdate(r);
 		
 		found = rr.findByKey(1l, Restaurant.class);
 		assertNotNull(found);
@@ -65,14 +71,14 @@ public class RestaurantRepositoryTest {
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 //		r.setId(1l);
-		Key key = rr.save(r);
+		Key<Restaurant> key = rr.saveOrUpdate(r);
 		
 		found = rr.findByKey(key.getId(), Restaurant.class);
 		assertEquals("Heidi und Paul", found.getName());
 		found = null;
 		
 		r.setName("Vappiano");		
-		rr.update(r);
+		rr.saveOrUpdate(r);
 		
 		found = rr.findByKey(key.getId(), Restaurant.class);
 		assertEquals("Vappiano", found.getName());
@@ -84,7 +90,7 @@ public class RestaurantRepositoryTest {
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		r.setId(1l);
-		rr.save(r);
+		rr.saveOrUpdate(r);
 		
 		Restaurant found = rr.findByKey(1l, Restaurant.class);
 		assertNotNull(found);
@@ -96,54 +102,50 @@ public class RestaurantRepositoryTest {
 	}
 	
 	@Test
-	public void testQueryBarcode() {
+	public void testFindRestaurantByArea() {
 		Restaurant r = new Restaurant();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
-		r.setId(1l);
+//		r.setId(1l);
+		Key<Restaurant> kR = rr.saveOrUpdate(r);
+		
 		Area a = new Area();
-		a.setId(2l);
 		a.setName("Lounge");
+		a.setRestaurant(kR);
+//		r.getAreas().add(a);
 		
+		Key<Area> kA = ar.saveOrUpdate(a);
+		Area foundA = ar.getByKey(kR, Area.class, kA.getId());
 		
-		String bcode = "XYZ123";
-		Barcode b = new Barcode();
-		b.setId(3l);
-		b.setCode(bcode);
-		
-		a.getBarcodes().add(b);
-		r.getAreas().add(a);
-		
-		rr.save(r);
-		
-		Restaurant found = rr.findByKey(1l, Restaurant.class);
+		Restaurant found = rr.findByKey(foundA.getRestaurant().getId(), Restaurant.class);
 		assertNotNull(found);
-		assertEquals(1, found.getAreas().size());
-		
-		found = rr.findByBarcode(bcode);
-		assertEquals(bcode, found.getAreas().get(0).getBarcodes().get(0).getCode());
-		
+		assertEquals(kR.getId(), (long) found.getId());
+
+//		found = rr.findByArea(a.getName());
+//		assertEquals("Lounge", found.getAreas().get(0).getName());
 	}
 	
 	@Test
-	public void testQueryArea() {
+	public void testFindRestaurantByBarcode() {
 		Restaurant r = new Restaurant();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
-		r.setId(1l);
+		Key<Restaurant> kR = rr.saveOrUpdate(r);
+		
 		Area a = new Area();
-		a.setId(2l);
 		a.setName("Lounge");
-		r.getAreas().add(a);
+		a.setRestaurant(kR);
+		Key<Area> kA = ar.saveOrUpdate(a);
 		
-		rr.save(r);
+		Barcode b = new Barcode();
+		b.setCode("b4rc0de");
+		b.setArea(kA);
+		Key<Barcode> kB = br.saveOrUpdate(b); 
 		
-		Restaurant found = rr.findByKey(1l, Restaurant.class);
+		Barcode foundB = br.getByKey(kA, Barcode.class, kB.getId());
+		
+		Restaurant found = rr.findByKey(foundB.getArea().getParent().getId(), Restaurant.class);
 		assertNotNull(found);
-		assertEquals(1, found.getAreas().size());
-		
-		found = rr.findByArea(a.getName());
-		assertEquals("Lounge", found.getAreas().get(0).getName());
-		
+		assertEquals(kR.getId(), (long) found.getId());
 	}
 }

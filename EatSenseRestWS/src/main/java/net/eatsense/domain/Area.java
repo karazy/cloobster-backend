@@ -1,27 +1,27 @@
 package net.eatsense.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.Id;
 
-import com.google.code.twig.annotation.Child;
-import com.google.code.twig.annotation.Parent;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Parent;
 
 
 
 public class Area {
 	
+	@Id
 	private Long id;
 	
 	private String name;
 	
 	@Parent
-	private Restaurant restaurant;
+	private Key<Restaurant> restaurant;
 	
-	@Child
-	private List<Barcode> barcodes;
+//	@Child
+//	private List<Barcode> barcodes;
 
 	public Area() {
-		barcodes = new ArrayList<Barcode>();
+//		barcodes = new ArrayList<Barcode>();
 	}
 	
 	public Long getId() {
@@ -40,21 +40,21 @@ public class Area {
 		this.name = name;
 	}
 
-	public Restaurant getRestaurant() {
+	public Key<Restaurant> getRestaurant() {
 		return restaurant;
 	}
 
-	public void setRestaurant(Restaurant restaurant) {
+	public void setRestaurant(Key<Restaurant> restaurant) {
 		this.restaurant = restaurant;
 	}
 
-	public List<Barcode> getBarcodes() {
-		return barcodes;
-	}
-
-	public void setBarcodes(List<Barcode> barcodes) {
-		this.barcodes = barcodes;
-	}
+//	public List<Barcode> getBarcodes() {
+//		return barcodes;
+//	}
+//
+//	public void setBarcodes(List<Barcode> barcodes) {
+//		this.barcodes = barcodes;
+//	}
 	
 	
 
