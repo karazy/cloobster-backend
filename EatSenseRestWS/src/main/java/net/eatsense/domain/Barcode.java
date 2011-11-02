@@ -1,6 +1,7 @@
 package net.eatsense.domain;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
@@ -50,6 +51,9 @@ public class Barcode {
 		this.barcode = barcode;
 	}
 	
-	
+	@Transient
+	public Key<Barcode> getKey() {
+	   return new Key<Barcode>(Barcode.class, id);
+	}
 
 }

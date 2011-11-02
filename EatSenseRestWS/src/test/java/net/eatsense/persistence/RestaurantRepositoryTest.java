@@ -144,7 +144,11 @@ public class RestaurantRepositoryTest {
 		
 		Barcode foundB = br.getByKey(kA, Barcode.class, kB.getId());
 		
-		Restaurant found = rr.findByKey(foundB.getArea().getParent().getId(), Restaurant.class);
+//		Restaurant found = rr.findByKey(foundB.getArea().getParent().getId(), Restaurant.class);
+//		assertNotNull(found);
+//		assertEquals(kR.getId(), (long) found.getId());
+		
+		Restaurant found = rr.findByBarcode("b4rc0de");
 		assertNotNull(found);
 		assertEquals(kR.getId(), (long) found.getId());
 	}

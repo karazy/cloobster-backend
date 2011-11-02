@@ -69,7 +69,7 @@ public class Restaurant {
 	}
 	
 	@Transient
-	Key<Restaurant> getKey() {
+	public Key<Restaurant> getKey() {
 	   return new Key<Restaurant>(Restaurant.class, id);
 	}
 	
