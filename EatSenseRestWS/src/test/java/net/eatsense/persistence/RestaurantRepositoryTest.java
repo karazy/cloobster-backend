@@ -3,7 +3,6 @@ package net.eatsense.persistence;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 import junit.framework.Assert;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Area;
@@ -138,15 +137,9 @@ public class RestaurantRepositoryTest {
 		Key<Area> kA = ar.saveOrUpdate(a);
 		
 		Barcode b = new Barcode();
-		b.setCode("b4rc0de");
+		b.setBarcode("b4rc0de");
 		b.setArea(kA);
 		Key<Barcode> kB = br.saveOrUpdate(b); 
-		
-		Barcode foundB = br.getByKey(kA, Barcode.class, kB.getId());
-		
-//		Restaurant found = rr.findByKey(foundB.getArea().getParent().getId(), Restaurant.class);
-//		assertNotNull(found);
-//		assertEquals(kR.getId(), (long) found.getId());
 		
 		Restaurant found = rr.findByBarcode("b4rc0de");
 		assertNotNull(found);

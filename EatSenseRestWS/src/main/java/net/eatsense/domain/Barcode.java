@@ -15,9 +15,9 @@ public class Barcode {
 	@Parent
 	private Key<Area> area;
 	
-	private String code;
+	private String barcode;
 	
-	private byte[] barcode;
+	private byte[] barcodeData;
 
 	public Long getId() {
 		return id;
@@ -27,12 +27,12 @@ public class Barcode {
 		this.id = id;
 	}
 
-	public String getCode() {
-		return code;
+	public String getBarcode() {
+		return barcode;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setBarcode(String code) {
+		this.barcode = code;
 	}	
 
 	public Key<Area> getArea() {
@@ -43,12 +43,12 @@ public class Barcode {
 		this.area = area;
 	}
 
-	public byte[] getBarcode() {
-		return barcode;
+	public byte[] getBarcodeData() {
+		return barcodeData;
 	}
 
-	public void setBarcode(byte[] barcode) {
-		this.barcode = barcode;
+	public void setBarcodeData(byte[] barcodeData) {
+		this.barcodeData = barcodeData;
 	}
 	
 	@Transient

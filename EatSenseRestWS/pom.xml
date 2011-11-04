@@ -29,24 +29,26 @@
 		<jersey.version>1.9.1</jersey.version>
 		<!-- guice -->
 		<guice.version>3.0</guice.version>
+		<!-- logging -->
+		<slf4j.version>1.6.3</slf4j.version>
+		<!-- objectify -->
+		<objectify.version>3.0</objectify.version>
 
 	</properties>
 
 	<repositories>
-	<!-- 
-		<repository>
-			<id>twig</id>
-			<url>http://mvn.twig-persist.googlecode.com/hg</url>
-		</repository>
-	 -->
-		<repository>
-			<id>maven-restlet</id>
-			<name>Public online Restlet repository</name>
-			<url>http://maven.restlet.org</url>
-		</repository>
+		<!-- <repository> <id>twig</id> <url>http://mvn.twig-persist.googlecode.com/hg</url> 
+			</repository> <repository> <id>maven-restlet</id> <name>Public online Restlet 
+			repository</name> <url>http://maven.restlet.org</url> </repository> -->
 		<repository>
 			<id>objectify-appengine</id>
 			<url>http://objectify-appengine.googlecode.com/svn/maven</url>
+		</repository>
+		<repository>
+			<id>sli4j-repository</id>
+			<name>sli4j Repository for Maven</name>
+			<url>http://sli4j.googlecode.com/svn/repo</url>
+			<layout>default</layout>
 		</repository>
 	</repositories>
 
@@ -54,17 +56,12 @@
 
 		<!-- Objectify/Twig for object persistence -->
 
-<!--
-		<dependency>
-			<groupId>com.google.code.twig</groupId>
-			<artifactId>twig-persist</artifactId>
-			<version>2.0-beta3</version>
-		</dependency>
- -->
+		<!-- <dependency> <groupId>com.google.code.twig</groupId> <artifactId>twig-persist</artifactId> 
+			<version>2.0-beta3</version> </dependency> -->
 		<dependency>
 			<groupId>com.googlecode.objectify</groupId>
 			<artifactId>objectify</artifactId>
-			<version>3.0</version>
+			<version>${objectify.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.persistence</groupId>
@@ -74,18 +71,22 @@
 
 
 
-		<!-- Required by Hibernate validator because slf4j-log4j is optional in 
-			the hibernate-validator POM -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.1</version>
-		</dependency>
+		<!-- Logging slf4j -->
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.1</version>
+			<version>${slf4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+
+		<!-- Automatic injection of logger object. Didn't work for me <dependency> 
+			<groupId>com.googlecode.sli4j</groupId> <artifactId>sli4j-slf4j</artifactId> 
+			<version>2.0</version> </dependency> -->
 
 		<!-- Google App Engine (GAE) -->
 		<dependency>
@@ -120,11 +121,21 @@
 			<artifactId>guice</artifactId>
 			<version>${guice.version}</version>
 		</dependency>
+
+		<!-- Jersey for RESTful webservices -->
+		<!-- jersey core -->
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
+		<!-- used to process JAXB annotations -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-json</artifactId>
+			<version>${jersey.version}</version>
+		</dependency>
+		<!-- Configure jersey through guice -->
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-guice</artifactId>

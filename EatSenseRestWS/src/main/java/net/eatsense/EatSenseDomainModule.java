@@ -6,20 +6,15 @@ import net.eatsense.restws.RestaurantResource;
 
 import com.google.inject.AbstractModule;
 import com.googlecode.objectify.ObjectifyService;
+
 public class EatSenseDomainModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-//		bind(ObjectDatastore.class).to(AnnotationObjectDatastore.class).in(Singleton.class);
 		bind(RestaurantResource.class);
 		bind(Area.class);
 		bind(Barcode.class);
 		bind(ObjectifyService.class);
 	}
-	
-//	@Provides
-//	Objectify provideObjectify() {
-//		Objectify obj = ObjectifyService.begin();
-//		return obj;
-//	}
+
 }
