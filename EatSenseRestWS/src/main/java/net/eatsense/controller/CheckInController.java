@@ -26,6 +26,7 @@ public class CheckInController {
 	@Inject
 	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo) {
 		this.restaurantRepo = r;
+		
 		this.checkInRepo = checkInRepo;
 	}
 

@@ -1,6 +1,6 @@
 package net.eatsense.representation;
 
-import javax.xml.bind.annotation.XmlRootElement;
+
 
 /**
  * Represents information transferred after submitting a barcode for checkIn.
@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Frederik Reifschneider
  * 
  */
-@XmlRootElement
+//@XmlRootElement
 public class CheckIn {
 
 	/**

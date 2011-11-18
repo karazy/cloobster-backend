@@ -19,7 +19,7 @@ public class RestaurantRepository extends GenericRepository<Restaurant> {
 	}
 	
 	public Restaurant findByBarcode(String code) {
-		Objectify oiy = datastore.begin();
+		Objectify oiy = ObjectifyService.begin();
 		Query<Barcode> query = oiy.query(Barcode.class).filter("barcode", code);		
 		Barcode bc = query.get();
 		Area area = null;
