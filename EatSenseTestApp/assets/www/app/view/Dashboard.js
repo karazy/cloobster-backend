@@ -29,11 +29,6 @@ Ext.define('EatSense.view.Dashboard', {
             ui: 'round'
             },
             {
-                xtype: 'textfield',
-                label: 'Barcode',
-                name: 'barcodeTF'
-            },
-             {
             xtype: 'button',
            	itemId: 'settingsBtn',
             text: 'Settings',

@@ -7,7 +7,7 @@ Ext.define('EatSense.model.CheckIn', {
 	],
 	proxy: {
 		type: 'rest',
-		url: 'http://2.karazy-eatsense.appspot.com/restaurant/spot/', 
+		url: 'http://192.168.1.111:8888/restaurant/spot/', 
 		reader: {
 			type: 'json',
 		}
