@@ -47,7 +47,7 @@ public class RestaurantRepositoryTest {
 	@Test
 	public void testSave() {
 		
-		Restaurant found = rr.findByKey(1l, Restaurant.class);
+		Restaurant found = rr.findByKey(1l);
 		assertNull(found);
 		
 		Restaurant r = new Restaurant();
@@ -56,14 +56,14 @@ public class RestaurantRepositoryTest {
 		r.setId(1l);
 		rr.saveOrUpdate(r);
 		
-		found = rr.findByKey(1l, Restaurant.class);
+		found = rr.findByKey(1l);
 		assertNotNull(found);
 		
 	}
 
 	@Test
 	public void testUpdate() {
-		Restaurant found = rr.findByKey(1l, Restaurant.class);
+		Restaurant found = rr.findByKey(1l);
 		Assert.assertNull(found);
 		
 		Restaurant r = new Restaurant();
@@ -72,14 +72,14 @@ public class RestaurantRepositoryTest {
 //		r.setId(1l);
 		Key<Restaurant> key = rr.saveOrUpdate(r);
 		
-		found = rr.findByKey(key.getId(), Restaurant.class);
+		found = rr.findByKey(key.getId());
 		assertEquals("Heidi und Paul", found.getName());
 		found = null;
 		
 		r.setName("Vappiano");		
 		rr.saveOrUpdate(r);
 		
-		found = rr.findByKey(key.getId(), Restaurant.class);
+		found = rr.findByKey(key.getId());
 		assertEquals("Vappiano", found.getName());
 	}
 
@@ -91,12 +91,12 @@ public class RestaurantRepositoryTest {
 		r.setId(1l);
 		rr.saveOrUpdate(r);
 		
-		Restaurant found = rr.findByKey(1l, Restaurant.class);
+		Restaurant found = rr.findByKey(1l);
 		assertNotNull(found);
 		
 		rr.delete(r);
 		
-		found = rr.findByKey(1l, Restaurant.class);
+		found = rr.findByKey(1l);
 		assertNull(found);
 	}
 	
@@ -105,23 +105,21 @@ public class RestaurantRepositoryTest {
 		Restaurant r = new Restaurant();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
-//		r.setId(1l);
+
 		Key<Restaurant> kR = rr.saveOrUpdate(r);
 		
 		Area a = new Area();
 		a.setName("Lounge");
 		a.setRestaurant(kR);
-//		r.getAreas().add(a);
+
 		
 		Key<Area> kA = ar.saveOrUpdate(a);
-		Area foundA = ar.getByKey(kR, Area.class, kA.getId());
+		Area foundA = ar.getByKey(kR, kA.getId());
 		
-		Restaurant found = rr.findByKey(foundA.getRestaurant().getId(), Restaurant.class);
+		Restaurant found = rr.findByKey(foundA.getRestaurant().getId());
 		assertNotNull(found);
 		assertEquals(kR.getId(), (long) found.getId());
 
-//		found = rr.findByArea(a.getName());
-//		assertEquals("Lounge", found.getAreas().get(0).getName());
 	}
 	
 	@Test

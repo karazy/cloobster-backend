@@ -1,11 +1,10 @@
 package net.eatsense.domain;
 
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.googlecode.objectify.Key;
 
-@XmlRootElement
+
 public class Restaurant extends GenericEntity {
 
 	private String name;

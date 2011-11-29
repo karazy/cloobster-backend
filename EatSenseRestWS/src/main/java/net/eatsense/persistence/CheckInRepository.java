@@ -1,15 +1,12 @@
 package net.eatsense.persistence;
 
-import net.eatsense.representation.CheckIn;
-
-import com.google.inject.Inject;
-import com.googlecode.objectify.ObjectifyService;
+import net.eatsense.domain.CheckIn;
 
 public class CheckInRepository extends GenericRepository<CheckIn> {
-
-	@Inject
-	public CheckInRepository(ObjectifyService datastore) {
-		super(datastore);
-	}
 	
+	public CheckInRepository() {
+		super();
+		super.clazz = CheckIn.class;
+	}
+
 }

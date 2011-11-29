@@ -2,6 +2,7 @@ package net.eatsense.restws;
 
 import java.util.Collection;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -11,7 +12,7 @@ import javax.ws.rs.Produces;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.RestaurantRepository;
-import net.eatsense.representation.CheckIn;
+import net.eatsense.representation.CheckInDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
@@ -42,12 +43,12 @@ public class RestaurantResource {
 	 * 
 	 * @param code
 	 *            barcode
-	 * @return {@link CheckIn} information providing status etc.
+	 * @return {@link CheckInDTO} information providing status etc.
 	 */
 	@GET
 	@Produces("application/json")
 	@Path("spot/{code}")
-	public CheckIn checkInIntent(@PathParam("code") String code) {
+	public CheckInDTO checkInIntent(@PathParam("code") String code) {
 		return checkInCtr.checkInIntent(code);
 	}
 
@@ -61,6 +62,16 @@ public class RestaurantResource {
 	public void checkIn(@PathParam("code") String code) {
 		checkInCtr.checkIn(code);
 	}
+	
+	/**
+	 * Called if user cancels checkIn
+	 * @param userId
+	 */
+	@DELETE
+	@Path("spot/{userId}")
+	public void cancelCheckIn(@PathParam("userId") String userId) {
+		checkInCtr.cancelCheckIn(userId);
+	}
 
 	/**
 	 * Returns a list of all restaurants
@@ -70,7 +81,7 @@ public class RestaurantResource {
 	@GET
 	@Produces("application/json")
 	public String listAll() {
-		Collection<Restaurant> list = restaurantrepo.getAll(Restaurant.class);
+		Collection<Restaurant> list = restaurantrepo.getAll();
 		StringBuffer sb = new StringBuffer();
 		sb.append("Restaurants: ");
 		for (Restaurant restaurant : list) {

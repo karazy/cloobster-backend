@@ -25,7 +25,6 @@ Ext.define('EatSense.view.Dashboard', {
             xtype: 'button',
            	id: 'checkInBtn',
             text: 'CheckIn',
-            centered: false,
             ui: 'round'
             },
             {
@@ -33,11 +32,10 @@ Ext.define('EatSense.view.Dashboard', {
                 label: 'Barcode',
                 name: 'barcodeTF'
             },
-             {
+            {
             xtype: 'button',
            	itemId: 'settingsBtn',
             text: 'Settings',
-            centered: false,
             ui: 'round',
             }
             ]

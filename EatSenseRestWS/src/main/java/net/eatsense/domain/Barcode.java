@@ -1,31 +1,26 @@
 package net.eatsense.domain;
 
-import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
 
-public class Barcode {
-	
-	@Id
-	private Long id;
+public class Barcode extends GenericEntity{
 	
 	@Parent
 	private Key<Area> area;
 	
 	private String barcode;
 	
+	/**
+	 * A human readable identifier for the spot where the barcode is located.
+	 * E.g. Table 4, Lounge etc.
+	 */
+	private String spot;
+	
 	private byte[] barcodeData;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getBarcode() {
 		return barcode;
@@ -53,7 +48,17 @@ public class Barcode {
 	
 	@Transient
 	public Key<Barcode> getKey() {
-	   return new Key<Barcode>(Barcode.class, id);
+	   return new Key<Barcode>(Barcode.class, getId());
 	}
+
+	public String getSpot() {
+		return spot;
+	}
+
+	public void setSpot(String spot) {
+		this.spot = spot;
+	}
+	
+	
 
 }

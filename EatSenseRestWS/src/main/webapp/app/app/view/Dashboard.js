@@ -33,7 +33,7 @@ Ext.define('EatSense.view.Dashboard', {
                 label: 'Barcode',
                 name: 'barcodeTF'
             },
-             {
+            {
             xtype: 'button',
            	itemId: 'settingsBtn',
             text: 'Settings',

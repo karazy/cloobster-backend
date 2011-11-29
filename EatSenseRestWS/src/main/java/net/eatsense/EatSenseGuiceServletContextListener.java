@@ -2,13 +2,14 @@ package net.eatsense;
 
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Barcode;
+import net.eatsense.domain.CheckIn;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.RestaurantResource;
 
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
-import com.googlecode.objectify.ObjectifyService;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -25,10 +26,20 @@ public class EatSenseGuiceServletContextListener extends
 						bind(RestaurantResource.class);
 						bind(Area.class);
 						bind(Barcode.class);
-						bind(ObjectifyService.class);
+						bind(CheckIn.class);
+//						bind(RestaurantRepository.class);
+						bind(GenericRepository.class);
+//						bind(AreaRepository.class);
+//						bind(CheckInRepository.class);
+//						bind(BarcodeRepository.class);
+//						bind(new TypeLiteral<GenericRepository<Restaurant>>(){}).to(new TypeLiteral<RestaurantRepository>(){});
+//						bind(new TypeLiteral<GenericRepository<Area>>(){}).to(new TypeLiteral<AreaRepository>(){});
+//						bind(new TypeLiteral<GenericRepository<Barcode>>(){}).to(new TypeLiteral<BarcodeRepository>(){});
+//						bind(new TypeLiteral<GenericRepository<CheckIn>>(){}).to(new TypeLiteral<CheckInRepository>(){});
+						//bind(ObjectifyService.class);
 						// Route all requests through GuiceContainer
-						serve("/*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
-
+						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
+						
 					}
 
 				});

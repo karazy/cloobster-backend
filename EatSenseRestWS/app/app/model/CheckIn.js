@@ -1,9 +1,11 @@
 Ext.define('EatSense.model.CheckIn', {
 	extend: 'Ext.data.Model',
+	idProperty: 'userId',
 	fields: [
 		{name: 'status', type: 'string'},
 		{name: 'restaurantName', type: 'string'},
-		{name: 'locationName', type: 'string'}
+		{name: 'spot', type: 'string'},
+		{name: 'userId', type: 'string'}
 	],
 	proxy: {
 		type: 'rest',
