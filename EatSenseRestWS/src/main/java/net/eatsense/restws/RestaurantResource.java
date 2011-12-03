@@ -1,6 +1,7 @@
 package net.eatsense.restws;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -58,9 +59,22 @@ public class RestaurantResource {
 	 * @param code
 	 */
 	@PUT
-	@Path("spot/{code}")
-	public void checkIn(@PathParam("code") String code) {
-		checkInCtr.checkIn(code);
+	@Path("spot/{userId}")
+	@Produces("application/json")
+	public void checkIn(@PathParam("userId") String userId,@PathParam("nickname") String nickname) {
+		checkInCtr.checkIn(userId, nickname);
+	}
+	
+	/**
+	 * Loads other users checkedIn at this spot.
+	 * @param userId
+	 * @return
+	 */
+	@PUT
+	@Path("spot/{userId}")
+	@Produces("application/json")
+	public Map<String, String> getUsersAtSpot(@PathParam("userId") String userId) {
+		return checkInCtr.getUsersAtSpot(userId);
 	}
 	
 	/**

@@ -2,6 +2,7 @@ package net.eatsense.representation;
 
 
 
+
 /**
  * Represents information transferred after submitting a barcode for checkIn.
  * This class is intended only for representation and will NOT BE persisted.
@@ -31,6 +32,12 @@ public class CheckInDTO {
 	 * The userId used to identify this user.
 	 */
 	private String userId;
+	
+	/**
+	 * A users nickname used for this checkin.
+	 * E. g. Peter Pan or Funny Bee ;)
+	 */
+	private String nickname;
 	
 
 	public String getStatus() {
@@ -65,6 +72,16 @@ public class CheckInDTO {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	
 
 
 

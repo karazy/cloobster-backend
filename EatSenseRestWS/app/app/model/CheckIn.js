@@ -5,7 +5,8 @@ Ext.define('EatSense.model.CheckIn', {
 		{name: 'status', type: 'string'},
 		{name: 'restaurantName', type: 'string'},
 		{name: 'spot', type: 'string'},
-		{name: 'userId', type: 'string'}
+		{name: 'userId', type: 'string'},
+		{name: 'nickname', type: 'string'}
 	],
 	proxy: {
 		type: 'rest',

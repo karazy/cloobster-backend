@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.util.DAOBase;
@@ -31,6 +32,7 @@ public class GenericRepository<T> extends DAOBase{
 	protected Class<T> clazz;
 
 	static {
+		//Register classes with Objectify
 		ObjectifyService.register(Restaurant.class);
 		ObjectifyService.register(Area.class);
 		ObjectifyService.register(Barcode.class);
@@ -46,40 +48,79 @@ public class GenericRepository<T> extends DAOBase{
 		//this.datastore = datastore;
 	}
 
+	/**
+	 * Saves or update given object.
+	 * @param obj
+	 * 		Object to save.
+	 * @return
+	 * 		Generated/existing key
+	 */
 	public Key<T> saveOrUpdate(T obj) {
 		logger.info("saveOrUpdate {} ", obj);
-//		Objectify ofy() = ObjectifyService.begin();
 		return ofy().put(obj);
 	}
 
+	/**
+	 * Delete object
+	 * @param obj
+	 * 		Object to delete.
+	 */
 	public void delete(T obj) {
 		logger.info("delete {} ", obj);
-//		Objectify ofy() = ObjectifyService.begin();
 		ofy().delete(obj);
 	}
 
+	/**
+	 * Finds an object by id
+	 * @param id
+	 * 		Id of entity to find.
+	 * @return
+	 * 		Found entity. <code>null</code> if no entity with this id exists.
+	 */
 	public T findByKey(long id) {
 		logger.info("findByKey {} ", id);
-//		Objectify ofy() = ObjectifyService.begin();
 		Key<T> key = new Key<T>(clazz, id);
 		return ofy().find(key);
 	}
 
+	/**
+	 * Gets entity by key.
+	 * 
+	 * @param owner
+	 * 		parent of entity
+	 * @param id
+	 * 		Id of entity to load
+	 * @return
+	 * 		Found entity
+	 */
 	public <V> T getByKey(Key<V> owner, long id) {
-		logger.info("getByKey {} ", id);
-//		Objectify ofy() = ObjectifyService.begin();
+		logger.info("getByKey {} ", id); 
 		return ofy().get(new Key<T>(owner, clazz, id));
 	}
 
-	public <V> List<V> getChildren(Class<V> clazz, Key<T> parentKey) {
+	/**
+	 * Returns children of an entity.
+	 * Performs an ancestor query.
+	 * 
+	 * @param childClazz
+	 * 			Type of children to return.
+	 * @param parentKey
+	 * 			Key of parent. Doesn't have to be the direct parent.
+	 * @return
+	 * 		List with children of type V
+	 */
+	public <V> List<V> getChildren(Class<V> childClazz, Key<T> parentKey) {
 		logger.info("getChildren for {} ", parentKey);
-//		Objectify ofy() = ObjectifyService.begin();
-		return ofy().query(clazz).ancestor(parentKey).list();
+		return ofy().query(childClazz).ancestor(parentKey).list();
 	}
 
+	/**
+	 * Gets all entities of type T.
+	 * @return
+	 * 		Collection of entities of type T
+	 */
 	public Collection<T> getAll() {
 		logger.info("getAll entities of type {} ", clazz);
-//		Objectify ofy() = ObjectifyService.begin();
 		Collection<T> list = ofy().query(clazz).list();
 		return list;
 	}
@@ -101,7 +142,34 @@ public class GenericRepository<T> extends DAOBase{
 		q.filter(propName, propValue);
 
 		return q.get();
+	}
+	
+	/**
+	 * Convenience method to get all objects matching a single property
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public List<T> getListByProperty(String propName, Object propValue)
+	{
+		Query<T> q = ofy().query(clazz);
 
+		q.filter(propName, propValue);
+
+		return q.list();
+
+	}
+	
+	/**
+	 * Returns the {@link Objectify} object to directly query datastore. 
+	 * @return
+	 */
+	public Objectify getOfy() {
+		return ofy();
 	}
 
 }

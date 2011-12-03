@@ -2,6 +2,9 @@ package net.eatsense.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.Map;
+
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Barcode;
@@ -67,16 +70,43 @@ public class CheckInControllerTest {
 	public void tearDown() throws Exception {
 		helper.tearDown();
 	}
-
+	
 	@Test
-	public void testCheckInProcess() {
+	public void testCheckInProcessStandardCheckIn() {		
 		CheckInDTO data = ctr.checkInIntent("b4rc0de");
 		assertEquals("Heidi und Paul", data.getRestaurantName());
 		assertNotNull(data.getUserId());
-		ctr.checkIn(data.getUserId());
+		assertNotNull(data.getNickname());
+		data.setNickname("FakeNik");
+		ctr.checkIn(data.getUserId(), data.getNickname());
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
-		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());		
+		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());
+		assertEquals("FakeNik", chkin.getNickname());
 		
+	}
+	
+	@Test
+	public void testCheckInProcessLinkedCheckIn() {
+		//checkIn user 1
+		CheckInDTO data = ctr.checkInIntent("b4rc0de");
+		data.setNickname("Peter Pan");
+		ctr.checkIn(data.getUserId(), data.getNickname());
+		//checkIn user 2
+		CheckInDTO data2 = ctr.checkInIntent("b4rc0de");
+		data2.setNickname("Papa Schlumpf");
+		String returnVal = ctr.checkIn(data2.getUserId(), data2.getNickname());
+		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
+		//if another user is checked in youReNotAlone is returned
+		assertEquals("youReNotAlone", returnVal);
+		//load users at same spot
+		Map<String,String> users = ctr.getUsersAtSpot(data.getUserId());
+		assertEquals(1, users.size());
+		assertEquals("Papa Schlumpf", users.get(data2.getUserId()));
+		//link user
+		ctr.linkToUser(data.getUserId(), data2.getUserId());
+		//check if user is linked
+		chkin = cr.getByProperty("userId", data.getUserId());
+		assertEquals(data2.getUserId(), chkin.getLinkedUserId());
 	}
 
 }
