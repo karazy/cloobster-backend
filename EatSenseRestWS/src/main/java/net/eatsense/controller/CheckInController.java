@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.eatsense.domain.Barcode;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
@@ -53,7 +53,7 @@ public class CheckInController {
 		CheckInDTO checkInDto = new CheckInDTO();
 		if (barcode != null && barcode.length() > 0) {
 			Restaurant restaurant = restaurantRepo.findByBarcode(barcode);
-			Barcode bc = barcodeRepo.getByProperty("barcode", barcode);
+			Spot bc = barcodeRepo.getByProperty("barcode", barcode);
 			if (restaurant != null) {
 				logger.info("CheckIn attempt with barcode {}", barcode);
 				String tmpUserId = IdHelper.generateId();
@@ -82,7 +82,7 @@ public class CheckInController {
 	}
 
 	/**
-	 * Step 2 in CheckIn Process. An entry in checkIn database already existis
+	 * Step 2 in CheckIn Process. An entry in checkIn database already exists
 	 * with status {@link CheckInStatus#INTENT}.
 	 * 
 	 * @param userId
@@ -90,25 +90,27 @@ public class CheckInController {
 	 * @param nickname
 	 *            Either the pregenerated or a custom user nickname.
 	 */
-	public String checkIn(String userId, String nickname) {
+	public CheckInDTO checkIn(String userId, CheckInDTO checkIn) {
 		// TODO validate params!
 		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
-
+		
 		if (chkin.getStatus() == CheckInStatus.INTENT) {
 			logger.info("CheckIn with userId {}", userId);
 			chkin.setStatus(CheckInStatus.CHECKEDIN);
-			chkin.setNickname(nickname);
+			//TODO check nickname
+			
 			checkInRepo.saveOrUpdate(chkin);
 			// TODO only query with status != CheckInStatus.INTENT
 			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
 			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
-				return "youReNotAlone";
-			}
-			return "success";
-		} else {
-			// Error handling
-			return "error";
+				checkIn.setStatus(CheckInStatus.YOUARENOTALONE.toString());
+			} else {
+				checkIn.setStatus(CheckInStatus.CHECKEDIN.toString());
+			}	
 		}
+		//TODO Error handling
+		
+		return checkIn;
 	}
 
 	/**
@@ -145,19 +147,16 @@ public class CheckInController {
 	 * 
 	 * @param userId
 	 * @param linkedUserId
-	 * @return
 	 */
-	public String linkToUser(String userId, String linkedUserId) {
+	public void linkToUser(String userId, String linkedUserId) {
 		CheckIn checkInUser = checkInRepo.getByProperty("userId", userId);
 		CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", linkedUserId);
 		if(checkInUser != null && checkInLinkedUser != null) {
 			if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && checkInLinkedUser.getStatus() != CheckInStatus.INTENT && checkInLinkedUser.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
 				checkInUser.setLinkedUserId(linkedUserId);
 				checkInRepo.saveOrUpdate(checkInUser);
-				return "success";
 			}
 		}
-		return "error";
 	}
 
 	/**
@@ -166,18 +165,19 @@ public class CheckInController {
 	 * 
 	 * @param userId
 	 *            User issuing this request.
-	 * @return
 	 */
-	public String cancelCheckIn(String userId) {
+	public void cancelCheckIn(String userId) {
+		//Don't return something. User is not really interested if check in cancel failed.
+		//System has to deal with this.
 		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
 
 		if (chkin.getStatus() == CheckInStatus.INTENT) {
 			logger.info("Cancel CheckIn with userId {}", userId);
 			checkInRepo.delete(chkin);
-			return "success";
+			
 		} else {
 			// Error handling
-			return "error";
+			
 		}
 	}
 

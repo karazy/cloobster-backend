@@ -1,7 +1,7 @@
 package net.eatsense.domain;
 
 /**
- * Status codes for a user/guests restaurant visit. 
+ * Status codes reflecting the whole process of a guests visit.
  * 
  * @author Frederik Reifschneider
  *
@@ -9,9 +9,13 @@ package net.eatsense.domain;
 public enum CheckInStatus {
 	
 	/**
-	 * User tries to checkin
+	 * User tries to check in.
 	 */
-	INTENT, 
+	INTENT,
+	/**
+	 * Returned after check in and indicating that others are checked in at the same spot.
+	 */
+	YOUARENOTALONE,
 	/**
 	 * User checked in.
 	 */

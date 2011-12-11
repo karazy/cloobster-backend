@@ -37,9 +37,6 @@
 	</properties>
 
 	<repositories>
-		<!-- <repository> <id>twig</id> <url>http://mvn.twig-persist.googlecode.com/hg</url> 
-			</repository> <repository> <id>maven-restlet</id> <name>Public online Restlet 
-			repository</name> <url>http://maven.restlet.org</url> </repository> -->
 		<repository>
 			<id>objectify-appengine</id>
 			<url>http://objectify-appengine.googlecode.com/svn/maven</url>

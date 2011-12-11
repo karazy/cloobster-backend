@@ -3,12 +3,15 @@ package net.eatsense.restws;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Restaurant;
@@ -61,8 +64,10 @@ public class RestaurantResource {
 	@PUT
 	@Path("spot/{userId}")
 	@Produces("application/json")
-	public void checkIn(@PathParam("userId") String userId,@PathParam("nickname") String nickname) {
-		checkInCtr.checkIn(userId, nickname);
+	@Consumes("application/json")
+	public CheckInDTO checkIn(@PathParam("userId") String userId, CheckInDTO checkIn) { 
+		
+		return checkInCtr.checkIn(userId, checkIn);
 	}
 	
 	/**
@@ -70,10 +75,10 @@ public class RestaurantResource {
 	 * @param userId
 	 * @return
 	 */
-	@PUT
-	@Path("spot/{userId}")
+	@GET
+	@Path("spot/users/")
 	@Produces("application/json")
-	public Map<String, String> getUsersAtSpot(@PathParam("userId") String userId) {
+	public Map<String, String> getUsersAtSpot(@QueryParam("userId") String userId) { 
 		return checkInCtr.getUsersAtSpot(userId);
 	}
 	

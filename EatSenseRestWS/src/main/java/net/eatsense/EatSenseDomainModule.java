@@ -1,7 +1,7 @@
 package net.eatsense;
 
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Barcode;
+import net.eatsense.domain.Spot;
 import net.eatsense.restws.RestaurantResource;
 
 import com.google.inject.AbstractModule;
@@ -22,7 +22,7 @@ public class EatSenseDomainModule extends AbstractModule {
 	protected void configure() {
 		bind(RestaurantResource.class);
 		bind(Area.class);
-		bind(Barcode.class);
+		bind(Spot.class);
 		bind(ObjectifyService.class);
 	}
 

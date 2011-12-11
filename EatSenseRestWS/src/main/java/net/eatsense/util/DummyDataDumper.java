@@ -1,17 +1,17 @@
 package net.eatsense.util;
 
+import net.eatsense.domain.Area;
+import net.eatsense.domain.Spot;
+import net.eatsense.domain.Restaurant;
+import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.BarcodeRepository;
+import net.eatsense.persistence.RestaurantRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
-
-import net.eatsense.domain.Area;
-import net.eatsense.domain.Barcode;
-import net.eatsense.domain.Restaurant;
-import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BarcodeRepository;
-import net.eatsense.persistence.RestaurantRepository;
 
 public class DummyDataDumper {
 
@@ -48,10 +48,10 @@ public class DummyDataDumper {
 		a.setRestaurant(kR);
 		Key<Area> kA = ar.saveOrUpdate(a);
 
-		Barcode b = new Barcode();
+		Spot b = new Spot();
 		b.setBarcode(barcode);
 		b.setArea(kA);
-		Key<Barcode> kB = br.saveOrUpdate(b);
+		Key<Spot> kB = br.saveOrUpdate(b);
 	}
 
 }

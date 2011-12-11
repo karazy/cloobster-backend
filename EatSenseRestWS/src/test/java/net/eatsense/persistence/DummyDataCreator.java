@@ -2,7 +2,7 @@ package net.eatsense.persistence;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Barcode;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
 
 import org.junit.Before;
@@ -45,10 +45,10 @@ public class DummyDataCreator {
     		a.setRestaurant(kR);
     		Key<Area> kA = ar.saveOrUpdate(a);
     		
-    		Barcode b = new Barcode();
+    		Spot b = new Spot();
     		b.setBarcode("b4rc0de");
     		b.setArea(kA);
-    		Key<Barcode> kB = br.saveOrUpdate(b); 
+    		Key<Spot> kB = br.saveOrUpdate(b); 
     	}
 
 

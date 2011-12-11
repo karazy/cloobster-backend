@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNull;
 import junit.framework.Assert;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Barcode;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
 
 import org.junit.After;
@@ -134,10 +134,10 @@ public class RestaurantRepositoryTest {
 		a.setRestaurant(kR);
 		Key<Area> kA = ar.saveOrUpdate(a);
 		
-		Barcode b = new Barcode();
+		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
 		b.setArea(kA);
-		Key<Barcode> kB = br.saveOrUpdate(b); 
+		Key<Spot> kB = br.saveOrUpdate(b); 
 		
 		Restaurant found = rr.findByBarcode("b4rc0de");
 		assertNotNull(found);

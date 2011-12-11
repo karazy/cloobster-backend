@@ -46,7 +46,7 @@ public class CheckIn extends GenericEntity{
 	/**
 	 * Spot in this restaurant.
 	 */
-	private Key<Barcode> spot;
+	private Key<Spot> spot;
 
 	public String getUserId() {
 		return userId;
@@ -64,11 +64,11 @@ public class CheckIn extends GenericEntity{
 		this.restaurant = restaurant;
 	}
 
-	public Key<Barcode> getSpot() {
+	public Key<Spot> getSpot() {
 		return spot;
 	}
 
-	public void setSpot(Key<Barcode> spot) {
+	public void setSpot(Key<Spot> spot) {
 		this.spot = spot;
 	}
 

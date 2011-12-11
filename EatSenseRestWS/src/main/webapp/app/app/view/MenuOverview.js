@@ -15,7 +15,6 @@ Ext.define('EatSense.view.MenuOverview', {
 				align : 'center',
 			},
 			defaults : {
-				// flex : 1,
 				margin : 5
 			},
 			items : [ {
@@ -36,7 +35,7 @@ Ext.define('EatSense.view.MenuOverview', {
 			}, {
 				xtype : 'button',
 				itemId : 'subMenu4',
-				text : 'GEtränke',
+				text : 'Getr√§nke',
 				ui : 'round',
 			} ]
 		} ]

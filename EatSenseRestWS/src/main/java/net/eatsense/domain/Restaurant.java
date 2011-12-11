@@ -5,12 +5,27 @@ import javax.persistence.Transient;
 import com.googlecode.objectify.Key;
 
 
+/**
+ * Represents a location where you can check in and order food/drinks what ever.
+ * 
+ * @author Frederik Reifschneider
+ *
+ */
 public class Restaurant extends GenericEntity {
 
+	/**
+	 * Name of location.
+	 */
 	private String name;
 
+	/**
+	 * Description of location.
+	 */
 	private String description;
 
+	/**
+	 * Location's logo.
+	 */
 	private byte[] logo;
 
 
