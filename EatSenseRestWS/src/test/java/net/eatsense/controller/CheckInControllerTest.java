@@ -78,7 +78,7 @@ public class CheckInControllerTest {
 		assertNotNull(data.getUserId());
 		assertNotNull(data.getNickname());
 		data.setNickname("FakeNik");
-		ctr.checkIn(data.getUserId(), data.getNickname());
+		ctr.checkIn(data.getUserId(), data);
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
 		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());
 		assertEquals("FakeNik", chkin.getNickname());
@@ -90,11 +90,11 @@ public class CheckInControllerTest {
 		//checkIn user 1
 		CheckInDTO data = ctr.checkInIntent("b4rc0de");
 		data.setNickname("Peter Pan");
-		ctr.checkIn(data.getUserId(), data.getNickname());
+		ctr.checkIn(data.getUserId(), data);
 		//checkIn user 2
 		CheckInDTO data2 = ctr.checkInIntent("b4rc0de");
 		data2.setNickname("Papa Schlumpf");
-		String returnVal = ctr.checkIn(data2.getUserId(), data2.getNickname());
+		String returnVal = ctr.checkIn(data2.getUserId(), data2).getStatus();
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
 		//if another user is checked in youReNotAlone is returned
 		assertEquals("youReNotAlone", returnVal);
