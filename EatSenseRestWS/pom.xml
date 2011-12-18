@@ -19,6 +19,9 @@
 		<gae.version>1.6.0</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
+		
+		<!-- Maven GAE Plugin -->
+		<maven.gae.plugin>0.9.2</maven.gae.plugin>
 
 		<!-- Don't let your Mac use a crazy non-standard encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -172,7 +175,7 @@
 			<plugin>
 				<groupId>net.kindleit</groupId>
 				<artifactId>maven-gae-plugin</artifactId>
-				<version>0.9.2</version>
+				<version>${maven.gae.plugin}</version>
 				<executions>
 					<execution>
 						<id />

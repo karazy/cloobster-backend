@@ -1,3 +1,6 @@
-#Wed Nov 02 07:14:22 CET 2011
+#Sun Dec 18 22:53:30 CET 2011
 eclipse.preferences.version=1
 gaeDeployDialogSettings=
+gaeIsEclipseDefaultInstPath=false
+googleCloudSqlEnabled=false
+localDevMySqlEnabled=true
