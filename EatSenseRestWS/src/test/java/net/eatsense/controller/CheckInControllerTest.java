@@ -97,7 +97,7 @@ public class CheckInControllerTest {
 		String returnVal = ctr.checkIn(data2.getUserId(), data2).getStatus();
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
 		//if another user is checked in youReNotAlone is returned
-		assertEquals("youReNotAlone", returnVal);
+		assertEquals("YOUARENOTALONE", returnVal);
 		//load users at same spot
 		Map<String,String> users = ctr.getUsersAtSpot(data.getUserId());
 		assertEquals(1, users.size());

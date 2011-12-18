@@ -98,7 +98,7 @@ public class CheckInController {
 			logger.info("CheckIn with userId {}", userId);
 			chkin.setStatus(CheckInStatus.CHECKEDIN);
 			//TODO check nickname
-			
+			chkin.setNickname(checkIn.getNickname());
 			checkInRepo.saveOrUpdate(chkin);
 			// TODO only query with status != CheckInStatus.INTENT
 			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
