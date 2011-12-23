@@ -15,13 +15,10 @@ import com.googlecode.objectify.annotation.Parent;
  */
 public class Spot extends GenericEntity{
 	
-	//TODO obsolete, refactor domain model!
-	@Parent
-	private Key<Area> area;
-	
 	/**
 	 * The restaurant this spot belongs to.
 	 */
+	@Parent
 	private Key<Restaurant> restaurant;
 	
 	/**
@@ -50,14 +47,6 @@ public class Spot extends GenericEntity{
 		this.barcode = code;
 	}	
 
-	public Key<Area> getArea() {
-		return area;
-	}
-
-	public void setArea(Key<Area> area) {
-		this.area = area;
-	}
-	
 	@Transient
 	public Key<Spot> getKey() {
 	   return new Key<Spot>(Spot.class, getId());

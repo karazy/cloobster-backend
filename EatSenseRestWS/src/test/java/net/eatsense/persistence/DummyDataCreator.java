@@ -1,7 +1,6 @@
 package net.eatsense.persistence;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Area;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
 
@@ -21,7 +20,6 @@ public class DummyDataCreator {
         
         private Injector injector;
         private RestaurantRepository rr;
-        private AreaRepository ar;
         private SpotRepository br;
         
     	@Before
@@ -29,7 +27,6 @@ public class DummyDataCreator {
     		helper.setUp();
     		injector = Guice.createInjector(new EatSenseDomainModule());
     		rr = injector.getInstance(RestaurantRepository.class);
-    		ar = injector.getInstance(AreaRepository.class);
     		br = injector.getInstance(SpotRepository.class);
     	}
     	
@@ -40,14 +37,8 @@ public class DummyDataCreator {
     		r.setDescription("Geiles Bio Burger Restaurant.");
     		Key<Restaurant> kR = rr.saveOrUpdate(r);
     		
-    		Area a = new Area();
-    		a.setName("Hauptraum");
-    		a.setRestaurant(kR);
-    		Key<Area> kA = ar.saveOrUpdate(a);
-    		
     		Spot b = new Spot();
     		b.setBarcode("b4rc0de");
-    		b.setArea(kA);
     		Key<Spot> kB = br.saveOrUpdate(b); 
     	}
 

@@ -94,6 +94,7 @@ public class CheckInController {
 	 */
 	public CheckInDTO checkIn(String userId, CheckInDTO checkIn) {
 		// TODO validate params!
+		logger.info("Searching for CheckIn with userId {}", userId);
 		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
 		
 		if (chkin.getStatus() == CheckInStatus.INTENT) {
