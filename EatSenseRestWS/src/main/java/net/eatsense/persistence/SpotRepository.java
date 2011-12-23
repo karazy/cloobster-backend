@@ -2,9 +2,9 @@ package net.eatsense.persistence;
 
 import net.eatsense.domain.Spot;
 
-public class BarcodeRepository extends GenericRepository<Spot> {
+public class SpotRepository extends GenericRepository<Spot> {
 	
-	public BarcodeRepository() {
+	public SpotRepository() {
 		super();
 		super.clazz = Spot.class;
 	}

@@ -4,7 +4,7 @@ import net.eatsense.domain.Area;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BarcodeRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.RestaurantRepository;
 
 import org.slf4j.Logger;
@@ -19,10 +19,10 @@ public class DummyDataDumper {
 
 	private RestaurantRepository rr;
 	private AreaRepository ar;
-	private BarcodeRepository br;
+	private SpotRepository br;
 
 	@Inject
-	public DummyDataDumper(RestaurantRepository rr, AreaRepository ar, BarcodeRepository br) {
+	public DummyDataDumper(RestaurantRepository rr, AreaRepository ar, SpotRepository br) {
 		this.rr = rr;
 		this.ar = ar;
 		this.br = br;

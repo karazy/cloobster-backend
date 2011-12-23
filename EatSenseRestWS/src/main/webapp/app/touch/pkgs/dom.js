@@ -80,29 +80,15 @@ Ext.EventManager.un = Ext.EventManager.removeListener;
  * functions (like {@link #apply}, {@link #min} and others), but most of the framework that you use day to day exists
  * in specialized classes (for example {@link Ext.Panel}, {@link Ext.Carousel} and others).
  *
- * If you are new to Sencha Touch we recommend starting with the [Getting Started Guide][getting_started] to
- * get a feel for how the framework operates. After that, use the more focused guides on subjects like panels, forms and data
- * to broaden your understanding. The MVC guides take you through the process of building full applications using the
- * framework, and detail how to deploy them to production.
+ * If you are new to Sencha Touch we recommend starting with the getting started guides to get a feel for how the
+ * framework operates. After that, use the more focused guides on subjects like panels, forms and data to broaden
+ * your understanding. The MVC guides take you through the process of building full applications using the framework,
+ * and detail how to deploy them to production.
  *
  * The functions listed below are mostly utility functions used internally by many of the classes shipped in the
  * framework, but also often useful in your own apps.
- *
- * A method that is crucial to beginning your application is {@link #setup Ext.setup}. Please refer to it's documentation, or the
- * [Getting Started Guide][getting_started] as a reference on beginning your application.
- *
- *     Ext.setup({
- *         onReady: function() {
- *             Ext.Viewport.add({
- *                 xtype: 'component',
- *                 html: 'Hello world!'
- *             });
- *         }
- *     });
- *
- * [getting_started]: #!/guide/getting_started
  */
-Ext.setVersion('touch', '2.0.0.pr3');
+Ext.setVersion('touch', '2.0.0.pr1');
 
 Ext.apply(Ext, {
     /**
@@ -284,6 +270,7 @@ function(el){
             },
             touchGesture: {
                 xclass: 'Ext.event.publisher.TouchGesture',
+                moveThrottle: 3,
                 recognizers: {
                     drag: {
                         xclass: 'Ext.event.recognizer.Drag'
@@ -342,100 +329,6 @@ function(el){
         }
     },
 
-    //<feature logger>
-    log: function(msg) {
-        return Ext.Logger.log(msg);
-    },
-    //</feature>
-
-    /**
-     * Ext.setup is used to launch a basic application. It handles creating an {@link Ext.Viewport} instance for you.
-     *
-     *     Ext.setup({
-     *         onReady: function() {
-     *             Ext.Viewport.add({
-     *                 xtype: 'component',
-     *                 html: 'Hello world!'
-     *             });
-     *         }
-     *     });
-     *
-     * @param {Object} config An object with the following config options:
-     *
-     * @param {Function} config.onReady
-     * A function to be called when the application is ready. Your application logic should be here. Please see the example above.
-     *
-     * @param {Object} config.viewport
-     * An object to be used when creating the global {@link Ext.Viewport} instance. Please refer to the {@link Ext.Viewport}
-     * documentation for more information.
-     *
-     *     Ext.setup({
-     *         viewport: {
-     *             layout: 'vbox'
-     *         },
-     *         onReady: function() {
-     *             Ext.Viewport.add({
-     *                 flex: 1,
-     *                 html: 'top (flex: 1)'
-     *             });
-     *
-     *             Ext.Viewport.add({
-     *                 flex: 4,
-     *                 html: 'bottom (flex: 4)'
-     *             });
-     *         }
-     *     });
-     *
-     * @param {String[]} config.requires
-     * An array of required classes for your application which will be automatically loaded if {@link Ext.Loader#enabled} is set
-     * to `true`. Please refer to {@link Ext.Loader} and {@link Ext.Loader#require} for more information.
-     *
-     *     Ext.setup({
-     *         requires: ['Ext.Button', 'Ext.tab.Panel'],
-     *         onReady: function() {
-     *             //...
-     *         }
-     *     });
-     *
-     * @param {Object} config.eventPublishers
-     * Sencha Touch, by default, includes various {@link Ext.event.recognizer.Recognizer} subclasses to recognise events fired
-     * in your application. The list of default recognisers can be found in the documentation for {@link Ext.event.recognizer.Recognizer}.
-     *
-     * To change the default recognisers, you can use the following syntax:
-     *
-     *     Ext.setup({
-     *         eventPublishers: {
-     *             touchGesture: {
-     *                 recognizers: {
-     *                     swipe: {
-     *                         //this will include both vertical and horizontal swipe recognisers
-     *                         xclass: 'Ext.event.recognizer.Swipe'
-     *                     }
-     *                 }
-     *             }
-     *         },
-     *         onReady: function() {
-     *             //...
-     *         }
-     *     });
-     *
-     * You can also disable recognizers using this syntax:
-     *
-     *     Ext.setup({
-     *         eventPublishers: {
-     *             touchGesture: {
-     *                 recognizers: {
-     *                     swipe: null,
-     *                     pinch: null,
-     *                     rotate: null
-     *                 }
-     *             }
-     *         },
-     *         onReady: function() {
-     *             //...
-     *         }
-     *     });
-     */
     setup: function(config) {
         var defaultSetupConfig = Ext.defaultSetupConfig,
             onReady = config.onReady || Ext.emptyFn,
@@ -453,7 +346,6 @@ function(el){
         delete config.scope;
 
         requires.push('Ext.event.Dispatcher');
-        requires.push('Ext.dom.CompositeElementLite'); // this is so Ext.select exists
 
         Ext.require(requires);
 
@@ -520,91 +412,8 @@ function(el){
 
     /**
      * Loads Ext.app.Application class and starts it up with given configuration after the page is ready.
-     *
-     *     Ext.application({
-     *         launch: function() {
-     *             alert('Application launched!');
-     *         }
-     *     });
-     *
-     * See {@link Ext.app.Application} for details.
-     *
-     * @param {Object} config An object with the following config options:
-     *
-     * @param {Function} config.launch
-     * A function to be called when the application is ready. Your application logic should be here. Please see {@link Ext.app.Application}
-     * for details.
-     *
-     * @param {Object} config.viewport
-     * An object to be used when creating the global {@link Ext.Viewport} instance. Please refer to the {@link Ext.Viewport}
-     * documentation for more information.
-     *
-     *     Ext.application({
-     *         viewport: {
-     *             layout: 'vbox'
-     *         },
-     *         launch: function() {
-     *             Ext.Viewport.add({
-     *                 flex: 1,
-     *                 html: 'top (flex: 1)'
-     *             });
-     *
-     *             Ext.Viewport.add({
-     *                 flex: 4,
-     *                 html: 'bottom (flex: 4)'
-     *             });
-     *         }
-     *     });
-     *
-     * @param {String[]} config.requires
-     * An array of required classes for your application which will be automatically loaded if {@link Ext.Loader#enabled} is set
-     * to `true`. Please refer to {@link Ext.Loader} and {@link Ext.Loader#require} for more information.
-     *
-     *     Ext.application({
-     *         requires: ['Ext.Button', 'Ext.tab.Panel'],
-     *         launch: function() {
-     *             //...
-     *         }
-     *     });
-     *
-     * @param {Object} config.eventPublishers
-     * Sencha Touch, by default, includes various {@link Ext.event.recognizer.Recognizer} subclasses to recognise events fired
-     * in your application. The list of default recognisers can be found in the documentation for {@link Ext.event.recognizer.Recognizer}.
-     *
-     * To change the default recognisers, you can use the following syntax:
-     *
-     *     Ext.application({
-     *         eventPublishers: {
-     *             touchGesture: {
-     *                 recognizers: {
-     *                     swipe: {
-     *                         //this will include both vertical and horizontal swipe recognisers
-     *                         xclass: 'Ext.event.recognizer.Swipe'
-     *                     }
-     *                 }
-     *             }
-     *         },
-     *         launch: function() {
-     *             //...
-     *         }
-     *     });
-     *
-     * You can also disable recognizers using this syntax:
-     *
-     *     Ext.application({
-     *         eventPublishers: {
-     *             touchGesture: {
-     *                 recognizers: {
-     *                     swipe: null,
-     *                     pinch: null,
-     *                     rotate: null
-     *                 }
-     *             }
-     *         },
-     *         launch: function() {
-     *             //...
-     *         }
-     *     });
+     * See Ext.app.Application for details.
+     * @param {Object} config
      */
     application: function(config) {
         var onReady,
@@ -740,17 +549,9 @@ function(el){
                 return manager.instantiateByAlias(aliasNamespace + '.' + config.type, config);
             }
         }
-        else if (typeof config == 'string') {
-            return Ext.getCmp(config);
-        }
 
         if (config === true) {
-            if (instance) {
-                return instance;
-            }
-            else {
-                return manager.instantiate(classReference);
-            }
+            return manager.instantiate(classReference);
         }
 
         //<debug error>
@@ -805,21 +606,31 @@ function(el){
             message = "'" + oldName + "' is deprecated, please use '" + newName + "' instead";
         }
 
-        Ext.Object.redefineProperty(object, oldName,
-            function() {
-                //<debug warn>
-                Ext.Logger.deprecate(message, 1);
-                //</debug>
+        function getter() {
+            //<debug warn>
+            Ext.Logger.deprecate(message, 1);
+            //</debug>
 
-                return this[newName];
-            },
-            function(value) {
-                //<debug warn>
-                Ext.Logger.deprecate(message, 1);
-                //</debug>
-                this[newName] = value;
-            }
-        );
+            return this[newName];
+        }
+
+        function setter(value) {
+            //<debug warn>
+            Ext.Logger.deprecate(message, 1);
+            //</debug>
+            this[newName] = value;
+        }
+
+        if ('defineProperty' in Object) {
+            Object.defineProperty(object, oldName, {
+                get: getter,
+                set: setter
+            });
+        }
+        else {
+            object.__defineGetter__(oldName, getter);
+            object.__defineSetter__(oldName, setter);
+        }
     },
 
     /**
@@ -1022,20 +833,12 @@ function(el){
                 scope: scope
             });
 
-            if (Ext.browser.is.PhoneGap) {
-                if (!Ext.readyListenerAttached) {
-                    Ext.readyListenerAttached = true;
-                    document.addEventListener('deviceready', triggerFn, false);
-                }
+            if (document.readyState.match(/interactive|complete|loaded/) !== null) {
+                triggerFn();
             }
-            else {
-                if (document.readyState.match(/interactive|complete|loaded/) !== null) {
-                    triggerFn();
-                }
-                else if (!Ext.readyListenerAttached) {
-                    Ext.readyListenerAttached = true;
-                    window.addEventListener('DOMContentLoaded', triggerFn, false);
-                }
+            else if (!Ext.readyListenerAttached) {
+                Ext.readyListenerAttached = true;
+                window.addEventListener('DOMContentLoaded', triggerFn, false);
             }
         }
     },
@@ -1239,7 +1042,6 @@ Ext.define('Ext.env.Browser', {
             engineName = engineNames.other,
             browserVersion = '',
             engineVersion = '',
-            isWebView = false,
             is, i, name;
 
         if (browserMatch) {
@@ -1292,17 +1094,8 @@ Ext.define('Ext.env.Browser', {
 
         this.setFlag('Standalone', !!navigator.standalone);
 
-        if (typeof window.PhoneGap != 'undefined') {
-            isWebView = true;
-            this.setFlag('PhoneGap');
-        }
-        else if (!!window.isNK) {
-            isWebView = true;
-            this.setFlag('Sencha');
-        }
-
-        // Flag to check if it we are in the WebView
-        this.setFlag('WebView', isWebView);
+        // Flag to check if it we are in the WebView (NKBuild)
+        this.setFlag('WebView', !!window.isNK);
 
         this.isStrict = document.compatMode == "CSS1Compat";
 
@@ -1816,23 +1609,16 @@ Ext.define('Ext.dom.AbstractQuery', {
 
         for (i = 0,qlen = q.length; i < qlen; i++) {
             if (typeof q[i] == 'string') {
-                
-                //support for node attribute selection
-                if (typeof q[i][0] == '@') {
-                    nodes = root.getAttributeNode(q[i].substring(1));
-                    results.push(nodes);
-                } else {
-                    nodes = root.querySelectorAll(q[i]);
+                nodes = root.querySelectorAll(q[i]);
 
-                    for (j = 0,nlen = nodes.length; j < nlen; j++) {
-                        results.push(nodes[j]);
-                    }
+                for (j = 0,nlen = nodes.length; j < nlen; j++) {
+                    results.push(nodes[j]);
                 }
             }
         }
 
         return results;
-    },    
+    },
 
     /**
      * Selects a single element.
@@ -3459,21 +3245,11 @@ Element.override({
       * Gets the current position of the element based on page coordinates.  Element must be part of the DOM tree to have page coordinates (display:none or elements not appended return false).
       * @return {Array} The XY position of the element
       */
-
     getXY: function() {
-        var webkitConvert = window.webkitConvertPointFromNodeToPage;
-        if (webkitConvert) {
-            return function() {
-                var point = webkitConvert(this.dom, new WebKitPoint(0, 0));
-                return [point.x, point.y];
-            }
-        }
-        else return function() {
-            var rect = this.dom.getBoundingClientRect(),
-                rnd = Math.round;
-            return [rnd(rect.left + window.pageXOffset), rnd(rect.top + window.pageYOffset)];
-        }
-    }(),
+        // @FEATUREDETECT
+        var point = window.webkitConvertPointFromNodeToPage(this.dom, new WebKitPoint(0, 0));
+        return [point.x, point.y];
+    },
 
     /**
       * Returns the offsets of this element from the passed element. Both element must be part of the DOM tree and not have display:none to have page coordinates.

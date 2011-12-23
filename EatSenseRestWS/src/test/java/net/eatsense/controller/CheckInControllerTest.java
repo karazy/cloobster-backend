@@ -3,6 +3,7 @@ package net.eatsense.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
 import java.util.Map;
 
 import net.eatsense.EatSenseDomainModule;
@@ -11,8 +12,9 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.User;
 import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BarcodeRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
@@ -36,7 +38,7 @@ public class CheckInControllerTest {
 	    private CheckInController ctr;
 	    private RestaurantRepository rr;
 	    private AreaRepository ar;
-	    private BarcodeRepository br;
+	    private SpotRepository br;
 	    private CheckInRepository cr;
 
 	@Before
@@ -46,7 +48,7 @@ public class CheckInControllerTest {
 		ctr = injector.getInstance(CheckInController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
 		ar = injector.getInstance(AreaRepository.class);
-		br = injector.getInstance(BarcodeRepository.class);
+		br = injector.getInstance(SpotRepository.class);
 		cr = injector.getInstance(CheckInRepository.class);
 		
 		//create necessary data in datastore
@@ -99,9 +101,10 @@ public class CheckInControllerTest {
 		//if another user is checked in youReNotAlone is returned
 		assertEquals("YOUARENOTALONE", returnVal);
 		//load users at same spot
-		Map<String,String> users = ctr.getUsersAtSpot(data.getUserId());
+		List<User> users = ctr.getUsersAtSpot(data.getUserId());
 		assertEquals(1, users.size());
-		assertEquals("Papa Schlumpf", users.get(data2.getUserId()));
+		//the second checked in user should be Papa Schlumpf
+		assertEquals("Papa Schlumpf", users.get( 0 ).getNickname());
 		//link user
 		ctr.linkToUser(data.getUserId(), data2.getUserId());
 		//check if user is linked

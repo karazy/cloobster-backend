@@ -1,6 +1,8 @@
 package net.eatsense.restws;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -15,6 +17,7 @@ import javax.ws.rs.core.Response;
 
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.util.DummyDataDumper;
@@ -78,9 +81,21 @@ public class RestaurantResource {
 	@GET
 	@Path("spot/users/")
 	@Produces("application/json")
-	public Map<String, String> getUsersAtSpot(@QueryParam("userId") String userId) { 
+	public List<User> getUsersAtSpot(@QueryParam("userId") String userId) { 
 		return checkInCtr.getUsersAtSpot(userId);
 	}
+
+	/**
+	 * Loads other users checkedIn at this spot.
+	 * @param userId
+	 * @return
+	 */
+	@GET
+	@Path("spot/users/")
+	public void linkToUser(@QueryParam("userId") String userId, @QueryParam("linkedUserId") String linkedUserId) { 
+		checkInCtr.linkToUser(userId, linkedUserId);
+	}
+
 	
 	/**
 	 * Called if user cancels checkIn

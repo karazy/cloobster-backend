@@ -5,8 +5,7 @@
  */
 @mixin sencha-msgbox {
   .x-msgbox {
-    min-width: 15em;
-    max-width: 20em;
+    min-width: 13em;
     padding: 0.8em;
     -webkit-box-shadow: rgba(#000, .4) 0 .1em .5em;
     @if $include-border-radius { @include border-radius($panel-border-radius); }
@@ -15,10 +14,6 @@
     .x-title {
       font-size: .9em;
       line-height: 1.4em;
-    }
-
-    .x-body {
-      background:transparent !important;
     }
 
     .x-toolbar {
@@ -36,23 +31,14 @@
     }
 
     .x-field {
-      margin: .4em .4em 0 .4em;
-      min-height:2em;
-      background: #fff;
-      @if $include-border-radius { @include border-radius(.2em); }
-
-      &:last-child {
-        margin-bottom: .4em;
-      }
-
-      .x-clear-icon {
-        margin: .4em;
-      }
+      padding: .4em;
     }
 
     .x-form-field {
+      margin-top: .6em;
       min-height:1.5em;
       -webkit-appearance: none;
+      @if $include-border-radius { @include border-radius(.2em); }
     }
   }
 
@@ -60,7 +46,6 @@
     font-size: .9em;
     text-align: center;
     padding: 6px 0;
-    line-height: 1.4em;
   }
 
   .x-msgbox-buttons {

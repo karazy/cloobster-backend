@@ -115,11 +115,8 @@ $include-button-highlights: $include-highlights !default;
   .x-iconalign-bottom, .x-iconalign-right {
     @include box-direction(normal);
   }
-  .x-iconalign-bottom {
+  .x-iconalign-left, .x-iconalign-top {
     @include box-direction(reverse);
-  }
-  .x-iconalign-center {
-    @include box-pack(center);
   }
   .x-iconalign-left .x-button-label {
     margin-left: $toolbar-spacing * 1.5;
@@ -243,18 +240,14 @@ $include-button-highlights: $include-highlights !default;
   // SegmentedButtons
   .x-segmentedbutton .x-button {
     margin: 0;
+    @if $include-border-radius { @include border-radius(0); }
 
-    @if $include-border-radius {
-      @include border-radius(0); 
-      
-      &.x-first {
-        @include border-left-radius($button-radius);
-      }
-      &.x-last {
-        @include border-right-radius($button-radius);
-      }
+    &:first-child {
+      @if $include-border-radius { @include border-left-radius($button-radius); }
     }
-
+    &:last-child {
+      @if $include-border-radius { @include border-right-radius($button-radius); }
+    }
     &:not(:first-child) {
       border-left: 0;
     }

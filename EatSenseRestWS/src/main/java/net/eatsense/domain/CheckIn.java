@@ -100,8 +100,4 @@ public class CheckIn extends GenericEntity{
 	public void setLinkedUserId(String linkedUserId) {
 		this.linkedUserId = linkedUserId;
 	}
-	
-	
-	
-
 }
