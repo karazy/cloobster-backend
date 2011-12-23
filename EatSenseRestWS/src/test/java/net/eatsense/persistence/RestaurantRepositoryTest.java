@@ -28,7 +28,7 @@ public class RestaurantRepositoryTest {
     private Injector injector;
     private RestaurantRepository rr;
     private AreaRepository ar;
-    private BarcodeRepository br;
+    private SpotRepository br;
 
 	@Before
 	public void setUp() throws Exception {
@@ -36,7 +36,7 @@ public class RestaurantRepositoryTest {
 		injector = Guice.createInjector(new EatSenseDomainModule());
 		rr = injector.getInstance(RestaurantRepository.class);
 		ar = injector.getInstance(AreaRepository.class);
-		br = injector.getInstance(BarcodeRepository.class);
+		br = injector.getInstance(SpotRepository.class);
 	}
 
 	@After

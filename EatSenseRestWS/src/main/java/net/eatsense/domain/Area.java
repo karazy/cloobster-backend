@@ -1,14 +1,9 @@
 package net.eatsense.domain;
 
-import javax.persistence.Id;
-
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
-public class Area {
-
-	@Id
-	private Long id;
+public class Area extends GenericEntity {
 
 	private String name;
 
@@ -17,14 +12,6 @@ public class Area {
 
 	public Area() {
 
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getName() {

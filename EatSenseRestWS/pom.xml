@@ -33,7 +33,7 @@
 		<!-- guice -->
 		<guice.version>3.0</guice.version>
 		<!-- logging -->
-		<slf4j.version>1.6.3</slf4j.version>
+		<slf4j.version>1.6.4</slf4j.version>
 		<!-- objectify -->
 		<objectify.version>3.0</objectify.version>
 

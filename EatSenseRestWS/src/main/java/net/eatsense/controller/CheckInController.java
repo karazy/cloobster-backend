@@ -1,5 +1,6 @@
 package net.eatsense.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,8 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
-import net.eatsense.persistence.BarcodeRepository;
+import net.eatsense.domain.User;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
@@ -32,10 +34,10 @@ public class CheckInController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private RestaurantRepository restaurantRepo;
 	private CheckInRepository checkInRepo;
-	private BarcodeRepository barcodeRepo;
+	private SpotRepository barcodeRepo;
 
 	@Inject
-	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, BarcodeRepository barcodeRepo) {
+	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo) {
 		this.restaurantRepo = r;
 		this.checkInRepo = checkInRepo;
 		this.barcodeRepo = barcodeRepo;
@@ -122,17 +124,27 @@ public class CheckInController {
 	 *         users nickname If no other users at this spot exist
 	 *         <code>null</code>.
 	 */
-	public Map<String, String> getUsersAtSpot(String userId) {
-		Map<String, String> usersAtSpot = null;
+	public List<User> getUsersAtSpot(String userId) {
+		List<User> usersAtSpot = null;
 		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
+		
 		if (chkin.getStatus() == CheckInStatus.CHECKEDIN) {
+			
 			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
+			
 			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
-				usersAtSpot = new HashMap<String, String>();
+				usersAtSpot = new ArrayList<User>();
+				
 				// Other users at this table exist.
 				for (CheckIn checkIn : checkInsAtSpot) {
+					
 					if(!checkIn.getUserId().equals(userId)) {
-						usersAtSpot.put(checkIn.getUserId(), checkIn.getNickname());
+						User user = new User();
+						
+						user.setUserId(checkIn.getUserId());
+						user.setNickname(checkIn.getNickname());
+						
+						usersAtSpot.add(user);
 					}
 				}
 			}

@@ -1,8 +1,9 @@
 package net.eatsense;
 
+
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.RestaurantResource;
 
@@ -45,6 +46,7 @@ public class EatSenseGuiceServletContextListener extends
 //						bind(new TypeLiteral<GenericRepository<CheckIn>>(){}).to(new TypeLiteral<CheckInRepository>(){});
 						//bind(ObjectifyService.class);
 						// Route all requests through GuiceContainer
+						// "(.)*restaurant(.)*"
 						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
 						
 					}
