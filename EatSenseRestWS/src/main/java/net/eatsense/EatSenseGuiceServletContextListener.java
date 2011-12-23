@@ -13,7 +13,7 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
-
+ 
 /**
  * Configures google guice for use in a servlet environment.
  * All condifured requests are send through the guice servlet.

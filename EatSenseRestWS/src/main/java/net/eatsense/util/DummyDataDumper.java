@@ -41,6 +41,7 @@ public class DummyDataDumper {
 
 		Spot b = new Spot();
 		b.setBarcode(barcode);
+		b.setRestaurant(kR);
 		Key<Spot> kB = br.saveOrUpdate(b);
 	}
 

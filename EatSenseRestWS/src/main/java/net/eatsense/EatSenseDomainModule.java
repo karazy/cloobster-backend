@@ -14,7 +14,7 @@ import com.googlecode.objectify.ObjectifyService;
  * 
  * @author Frederik Reifschneider
  *
- */
+ */ 
 public class EatSenseDomainModule extends AbstractModule {
 
 	@Override

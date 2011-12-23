@@ -4,17 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
-import java.util.Map;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
-import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 
 import org.junit.After;

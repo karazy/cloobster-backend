@@ -23,7 +23,7 @@ public class RestaurantRepositoryTest {
 
     private final LocalServiceTestHelper helper =
         new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-    
+     
     private Injector injector;
     private RestaurantRepository rr;
     private SpotRepository br;

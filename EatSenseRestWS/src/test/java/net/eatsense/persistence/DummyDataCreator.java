@@ -21,7 +21,7 @@ public class DummyDataCreator {
         private Injector injector;
         private RestaurantRepository rr;
         private SpotRepository br;
-        
+         
     	@Before
     	public void setUp() throws Exception {
     		helper.setUp();
@@ -39,6 +39,7 @@ public class DummyDataCreator {
     		
     		Spot b = new Spot();
     		b.setBarcode("b4rc0de");
+    		b.setRestaurant(kR);
     		Key<Spot> kB = br.saveOrUpdate(b); 
     	}
 
