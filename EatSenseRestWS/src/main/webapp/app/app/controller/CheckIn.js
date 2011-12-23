@@ -12,7 +12,8 @@ Ext.define('EatSense.controller.CheckIn', {
 		'CheckinWithOthers'
 	],
 	stores : [
-	'CheckIn'
+	'CheckIn',
+	'User'
 	],
 	refs: [
         {
@@ -41,6 +42,10 @@ Ext.define('EatSense.controller.CheckIn', {
         {
         	ref: 'checkinwithothers',
         	selector: 'checkinwithothers'
+        },
+        {
+        	ref: 'userlist',
+        	selector: '#checkinDlg2Userlist'
         }
     ],
     init: function() {
@@ -52,6 +57,9 @@ Ext.define('EatSense.controller.CheckIn', {
             },
             '#confirmCheckInBt': {
             	tap: this.checkIn
+            }, 
+            '#checkinDlg2Userlist': {
+            	select: this.linkToUser
             }
         });
     	 
@@ -86,7 +94,6 @@ Ext.define('EatSense.controller.CheckIn', {
 		var checkInDialog = this.getCheckinconfirmation(), main = this.getMain();
 		this.getNickname().setValue(options.model.data.nickname);
 		this.models.activeCheckIn = options.model;
-		//checkInDialog.checkInData = options.model;
 		main.setActiveItem(checkInDialog);	     
    },
    /**
@@ -107,6 +114,9 @@ Ext.define('EatSense.controller.CheckIn', {
 			   	     if(response.data.status == 'YOUARENOTALONE') {
 			   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
 			   	    	 var userId = response.data.userId;
+			   	    	 that.showCheckinWithOthers({userId : userId});
+			   	       
+			   	    /*	 
 			   	    	Ext.Ajax.request({
 			   	    	    url: '/restaurant/spot/users/',
 			   	    	    method: 'GET',
@@ -121,7 +131,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			   	    	    	});
 			   	    	    }
 			   	    	});
-			   			   
+			   			   */
 			   		   } else {
 			   			   //show menu
 			   			   that.showMenu();
@@ -140,13 +150,36 @@ Ext.define('EatSense.controller.CheckIn', {
 	   options.model.destroy();	   
    },
    
-   linkToUser: function(options) {
-	   //set list content in view
+   showCheckinWithOthers: function(options) {
+	   var checkinwithothersDlg = this.getCheckinwithothers(), main = this.getMain();
 	   
-	   //show vie
-	   
+	    var userListStore = Ext.create('Ext.data.Store', {
+	   			   model: 'User',
+	   			   proxy: {
+	   				   type: 'rest',
+	   				   url : '/restaurant/spot/users?userId'+options.userId,
+	   				   reader: {
+	   					   type: 'json'
+	   			   		},
+	   			   }
+	   		   });
+	     //set list content in view	  
+	  	 getUserList().store = userListStore; 
+	  	   
+	  	 getUserList().store.load({
+	   	       scope   : this,
+	   	       callback: function(records, operation, success) {
+	   	    	   //show view
+	   	    	   main.setActiveItem(checkinwithothersDlg);
+	   	       }
+	   	 });
    },
-
+   linkToUser: function(options) {
+	   var menu = this.getMenuoverview(), main = this.getMain();
+	   
+		main.setActiveItem(menu);
+		
+   },
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
 		var menu = this.getMenuoverview(), main = this.getMain();

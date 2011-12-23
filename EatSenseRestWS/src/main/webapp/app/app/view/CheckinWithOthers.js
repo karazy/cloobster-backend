@@ -31,7 +31,7 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 			}, {
 				xtype : 'list',
 				id : 'checkinDlg2Userlist',
-				required: true,
+				required: true,   			   
 				itemTpl: '<div><strong>{nickname}</strong></div>'
 				// this.checkInData.nickname,
 			}, {

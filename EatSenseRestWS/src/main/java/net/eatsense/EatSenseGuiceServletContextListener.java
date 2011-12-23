@@ -1,8 +1,8 @@
 package net.eatsense;
 
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.RestaurantResource;
 
