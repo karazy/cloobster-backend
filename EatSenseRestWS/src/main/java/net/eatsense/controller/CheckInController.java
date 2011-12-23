@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -95,21 +96,32 @@ public class CheckInController {
 	public CheckInDTO checkIn(String userId, CheckInDTO checkIn) {
 		// TODO validate params!
 		logger.info("Searching for CheckIn with userId {}", userId);
-		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
+		CheckIn chkinDatastore = checkInRepo.getByProperty("userId", userId);
 		
-		if (chkin.getStatus() == CheckInStatus.INTENT) {
-			logger.info("CheckIn with userId {}", userId);
-			chkin.setStatus(CheckInStatus.CHECKEDIN);
+		if (chkinDatastore.getStatus() == CheckInStatus.INTENT) {
+			logger.info("CheckIn with userId {}", userId);			
+			chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
 			//TODO check nickname
-			chkin.setNickname(checkIn.getNickname());
-			checkInRepo.saveOrUpdate(chkin);
+			chkinDatastore.setNickname(checkIn.getNickname());
+			checkInRepo.saveOrUpdate(chkinDatastore);
+			
 			// TODO only query with status != CheckInStatus.INTENT
-			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
+			
+			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkinDatastore.getSpot()); 
+			Iterator<CheckIn> it = checkInsAtSpot.iterator();
+			while(it.hasNext()) {
+				CheckIn next = it.next();
+				if(next.getStatus() == CheckInStatus.INTENT || next.getUserId().equals(chkinDatastore.getUserId())) {
+					it.remove();
+				}
+			}
+			
 			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
 				checkIn.setStatus(CheckInStatus.YOUARENOTALONE.toString());
 			} else {
 				checkIn.setStatus(CheckInStatus.CHECKEDIN.toString());
-			}	
+			}
+			
 		}
 		//TODO Error handling
 		
