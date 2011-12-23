@@ -8,7 +8,8 @@ Ext.define('EatSense.controller.CheckIn', {
 		'Main',
 		'Dashboard',
 		'MenuOverview',
-		'Checkinconfirmation'
+		'Checkinconfirmation',
+		'CheckinWithOthers'
 	],
 	stores : [
 	'CheckIn'
@@ -36,6 +37,10 @@ Ext.define('EatSense.controller.CheckIn', {
         {
         	ref: 'menuoverview',
         	selector: 'menuoverview'
+        }, 
+        {
+        	ref: 'checkinwithothers',
+        	selector: 'checkinwithothers'
         }
     ],
     init: function() {
@@ -101,6 +106,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			   	    success: function(response) {
 			   	     if(response.data.status == 'YOUARENOTALONE') {
 			   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
+			   	    	 var userId = response.data.userId;
 			   	    	Ext.Ajax.request({
 			   	    	    url: '/restaurant/spot/users/',
 			   	    	    method: 'GET',
@@ -109,9 +115,10 @@ Ext.define('EatSense.controller.CheckIn', {
 			   	    	    },
 			   	    	    success: function(response){
 			   	    	    	var userList = Ext.decode(response.responseText);
-			   	    	   //linkToUser(String userId, String linkedUserId)
-					   			   //show Menu
-			   	    	    	that.showMenu();
+			   	    	    	linkToUser({
+			   	    	    		userId :  userId,
+			   	    	    		userList : userList
+			   	    	    	});
 			   	    	    }
 			   	    	});
 			   			   
@@ -132,7 +139,14 @@ Ext.define('EatSense.controller.CheckIn', {
 	   console.log("CheckIn Controller -> cancelCheckIn");
 	   options.model.destroy();	   
    },
- 
+   
+   linkToUser: function(options) {
+	   //set list content in view
+	   
+	   //show vie
+	   
+   },
+
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
 		var menu = this.getMenuoverview(), main = this.getMain();
