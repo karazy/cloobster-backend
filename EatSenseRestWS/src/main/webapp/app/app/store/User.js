@@ -1,5 +1,5 @@
-Ext.define('EatSense.store.CheckIn', {
+Ext.define('EatSense.store.User', {
     extend  : 'Ext.data.Store',
-    model   : 'EatSense.model.CheckIn',
-    requires: ['EatSense.model.CheckIn'],
+    model   : 'EatSense.model.User',
+    requires: ['EatSense.model.User'],
 });
