@@ -84,6 +84,18 @@ public class RestaurantResource {
 	public List<User> getUsersAtSpot(@QueryParam("userId") String userId) { 
 		return checkInCtr.getUsersAtSpot(userId);
 	}
+
+	/**
+	 * Loads other users checkedIn at this spot.
+	 * @param userId
+	 * @return
+	 */
+	@GET
+	@Path("spot/users/")
+	public void linkToUser(@QueryParam("userId") String userId, @QueryParam("linkedUserId") String linkedUserId) { 
+		checkInCtr.linkToUser(userId, linkedUserId);
+	}
+
 	
 	/**
 	 * Called if user cancels checkIn
