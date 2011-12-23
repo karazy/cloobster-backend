@@ -1,6 +1,5 @@
 package net.eatsense;
 
-import net.eatsense.domain.Area;
 import net.eatsense.domain.Spot;
 import net.eatsense.restws.RestaurantResource;
 
@@ -21,7 +20,6 @@ public class EatSenseDomainModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(RestaurantResource.class);
-		bind(Area.class);
 		bind(Spot.class);
 		bind(ObjectifyService.class);
 	}

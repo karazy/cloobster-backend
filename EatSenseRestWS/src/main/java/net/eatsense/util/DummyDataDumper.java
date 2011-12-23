@@ -1,9 +1,7 @@
 package net.eatsense.util;
 
-import net.eatsense.domain.Area;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
-import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.RestaurantRepository;
 
@@ -18,13 +16,11 @@ public class DummyDataDumper {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private RestaurantRepository rr;
-	private AreaRepository ar;
 	private SpotRepository br;
 
 	@Inject
-	public DummyDataDumper(RestaurantRepository rr, AreaRepository ar, SpotRepository br) {
+	public DummyDataDumper(RestaurantRepository rr, SpotRepository br) {
 		this.rr = rr;
-		this.ar = ar;
 		this.br = br;
 	}
 
@@ -43,14 +39,8 @@ public class DummyDataDumper {
 		r.setDescription(desc);
 		Key<Restaurant> kR = rr.saveOrUpdate(r);
 
-		Area a = new Area();
-		a.setName(areaName);
-		a.setRestaurant(kR);
-		Key<Area> kA = ar.saveOrUpdate(a);
-
 		Spot b = new Spot();
 		b.setBarcode(barcode);
-		b.setArea(kA);
 		Key<Spot> kB = br.saveOrUpdate(b);
 	}
 

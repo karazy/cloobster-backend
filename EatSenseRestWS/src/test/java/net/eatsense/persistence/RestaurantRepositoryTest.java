@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import junit.framework.Assert;
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Area;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
 
@@ -27,7 +26,6 @@ public class RestaurantRepositoryTest {
     
     private Injector injector;
     private RestaurantRepository rr;
-    private AreaRepository ar;
     private SpotRepository br;
 
 	@Before
@@ -35,7 +33,6 @@ public class RestaurantRepositoryTest {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule());
 		rr = injector.getInstance(RestaurantRepository.class);
-		ar = injector.getInstance(AreaRepository.class);
 		br = injector.getInstance(SpotRepository.class);
 	}
 
@@ -101,42 +98,16 @@ public class RestaurantRepositoryTest {
 	}
 	
 	@Test
-	public void testFindRestaurantByArea() {
-		Restaurant r = new Restaurant();
-		r.setName("Heidi und Paul");
-		r.setDescription("Geiles Bio Burger Restaurant.");
-
-		Key<Restaurant> kR = rr.saveOrUpdate(r);
-		
-		Area a = new Area();
-		a.setName("Lounge");
-		a.setRestaurant(kR);
-
-		
-		Key<Area> kA = ar.saveOrUpdate(a);
-		Area foundA = ar.getByKey(kR, kA.getId());
-		
-		Restaurant found = rr.findByKey(foundA.getRestaurant().getId());
-		assertNotNull(found);
-		assertEquals(kR.getId(), (long) found.getId());
-
-	}
-	
-	@Test
 	public void testFindRestaurantByBarcode() {
 		Restaurant r = new Restaurant();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		Key<Restaurant> kR = rr.saveOrUpdate(r);
 		
-		Area a = new Area();
-		a.setName("Lounge");
-		a.setRestaurant(kR);
-		Key<Area> kA = ar.saveOrUpdate(a);
-		
 		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
-		b.setArea(kA);
+		b.setRestaurant(kR);
+		
 		Key<Spot> kB = br.saveOrUpdate(b); 
 		
 		Restaurant found = rr.findByBarcode("b4rc0de");

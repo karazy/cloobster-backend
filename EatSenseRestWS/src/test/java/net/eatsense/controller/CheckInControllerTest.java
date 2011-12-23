@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Area;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.User;
-import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
@@ -37,7 +35,6 @@ public class CheckInControllerTest {
 	    private Injector injector;
 	    private CheckInController ctr;
 	    private RestaurantRepository rr;
-	    private AreaRepository ar;
 	    private SpotRepository br;
 	    private CheckInRepository cr;
 
@@ -47,7 +44,6 @@ public class CheckInControllerTest {
 		injector = Guice.createInjector(new EatSenseDomainModule());
 		ctr = injector.getInstance(CheckInController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
-		ar = injector.getInstance(AreaRepository.class);
 		br = injector.getInstance(SpotRepository.class);
 		cr = injector.getInstance(CheckInRepository.class);
 		
@@ -57,14 +53,9 @@ public class CheckInControllerTest {
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		Key<Restaurant> kR = rr.saveOrUpdate(r);
 		
-		Area a = new Area();
-		a.setName("Lounge");
-		a.setRestaurant(kR);
-		Key<Area> kA = ar.saveOrUpdate(a);
-		
 		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
-		b.setArea(kA);
+		b.setRestaurant(kR);
 		Key<Spot> kB = br.saveOrUpdate(b); 
 	}
 
