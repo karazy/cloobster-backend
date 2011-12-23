@@ -1,19 +1,17 @@
 package net.eatsense.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
-import net.eatsense.persistence.SpotRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
@@ -105,8 +103,6 @@ public class CheckInController {
 			chkinDatastore.setNickname(checkIn.getNickname());
 			checkInRepo.saveOrUpdate(chkinDatastore);
 			
-			// TODO only query with status != CheckInStatus.INTENT
-			
 			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkinDatastore.getSpot()); 
 			Iterator<CheckIn> it = checkInsAtSpot.iterator();
 			while(it.hasNext()) {
@@ -151,7 +147,7 @@ public class CheckInController {
 				// Other users at this table exist.
 				for (CheckIn checkIn : checkInsAtSpot) {
 					
-					if(!checkIn.getUserId().equals(userId)) {
+					if(!checkIn.getUserId().equals(userId) && checkIn.getLinkedUserId() == null) {
 						User user = new User();
 						
 						user.setUserId(checkIn.getUserId());
