@@ -2889,7 +2889,7 @@ var ExtObject = Ext.Object = {
      * @return {String[]} An array of keys from the object
      * @method
      */
-    getKeys: ('keys' in Object) ? Object.keys : function(object) {
+    getKeys: ('keys' in Object.prototype) ? Object.keys : function(object) {
         var keys = [],
             property;
 
@@ -2960,37 +2960,9 @@ var ExtObject = Ext.Object = {
         objectClass.prototype = prototype;
 
         return objectClass;
-    },
-
-    redefineProperty: function() {
-        if ('defineProperty' in Object) {
-            return function(object, property, getter, setter) {
-                var obj = {
-                    configurable: true,
-                    enumerable: true
-                };
-
-                if (getter) {
-                    obj.get = getter;
-                }
-                if (setter) {
-                    obj.set = setter;
-                }
-                Object.defineProperty(object, property, obj);
-            };
-        }
-        else {
-            return function(object, property, getter, setter) {
-                if (getter) {
-                    object.__defineGetter__(property, getter);
-                }
-                if (setter) {
-                    object.__defineSetter__(property, setter);
-                }
-            };
-        }
-    }()
+    }
 };
+
 
 /**
  * A convenient alias method for {@link Ext.Object#merge}
@@ -4088,6 +4060,8 @@ var noArgs = [],
          *     Ext.define('My.Cat', {
          *         constructor: function() {
          *             alert("I'm a cat!");
+         *
+         *             return this;
          *         }
          *     });
          *
@@ -4372,6 +4346,8 @@ var noArgs = [],
          *             alert(this.self.speciesName);   // dependent on 'this'
          *
          *             statics.totalCreated++;
+         *
+         *             return this;
          *         },
          *
          *         clone: function() {
@@ -4546,6 +4522,8 @@ var noArgs = [],
          *
          *         constructor: function() {
          *             alert(this.self.speciesName); / dependentOL on 'this'
+         *
+         *             return this;
          *         },
          *
          *         clone: function() {
@@ -4589,6 +4567,8 @@ var noArgs = [],
          *
          *         constructor: function(config) {
          *             this.initConfig(config);
+         *
+         *             return this;
          *         }
          *     });
          *
@@ -4608,7 +4588,7 @@ var noArgs = [],
                 defaultConfig = new this.configClass,
                 defaultConfigList = this.initConfigList,
                 hasConfig = this.hasConfigMap,
-                nameMap, i, ln, name, initializedName;
+                nameMap, i, ln, name, initializedName, value;
 
             this.initConfig = Ext.emptyFn;
 
@@ -4623,10 +4603,7 @@ var noArgs = [],
                     if (hasConfig[name]) {
                         if (instanceConfig[name] !== null) {
                             defaultConfigList.push(name);
-                            nameMap = configNameCache[name];
-
-                            this[nameMap.initialized] = false;
-                            this[nameMap.get] = this[nameMap.initGet];
+                            this[configNameCache[name].initialized] = false;
                         }
                     }
                 }
@@ -4759,6 +4736,8 @@ var noArgs = [],
      *     Ext.define('My.Cat', {
      *         constructor: function() {
      *             alert("I'm a cat!");
+     *
+     *             return this;
      *         }
      *     });
      *
@@ -5282,12 +5261,10 @@ var noArgs = [],
                 map = cache[name] = {
                     internal: '_' + name,
                     initialized: '_is' + capitalizedName + 'Initialized',
-                    initializing: 'is' + capitalizedName + 'Initializing',
                     apply: 'apply' + capitalizedName,
                     update: 'update' + capitalizedName,
-                    set: 'set' + capitalizedName,
-                    get: 'get' + capitalizedName,
-                    initGet: 'initGet' + capitalizedName,
+                    'set': 'set' + capitalizedName,
+                    'get': 'get' + capitalizedName,
                     doSet : 'doSet' + capitalizedName,
                     changeEvent: name.toLowerCase() + 'change'
                 }
@@ -5425,8 +5402,6 @@ var noArgs = [],
                 updateName = nameMap.update,
                 setName = nameMap.set,
                 getName = nameMap.get,
-                initGetName = nameMap.initGet,
-                initializingName = nameMap.initializing,
                 hasOwnSetter = (setName in prototype) || data.hasOwnProperty(setName),
                 hasOwnApplier = (applyName in prototype) || data.hasOwnProperty(applyName),
                 hasOwnUpdater = (updateName in prototype) || data.hasOwnProperty(updateName),
@@ -5480,14 +5455,12 @@ var noArgs = [],
                     };
                 }
 
-                data[getName] = prototype[initGetName] = function() {
+                data[getName] = function() {
                     var currentGetter;
 
                     if (!this[initializedName]) {
                         this[initializedName] = true;
-                        this[initializingName] = true;
                         this[setName](this.config[name]);
-                        this[initializingName] = false;
                     }
 
                     currentGetter = this[getName];
@@ -7683,7 +7656,9 @@ This process will be automated with Sencha Command, to be released and documente
             }
         },
 
-        // documented above
+        /**
+         * @ignore
+         */
         syncRequire: function() {
             var syncModeEnabled = this.syncModeEnabled;
 
@@ -7700,7 +7675,9 @@ This process will be automated with Sencha Command, to be released and documente
             this.refreshQueue();
         },
 
-        // documented above
+        /**
+         * @ignore
+         */
         require: function(expressions, fn, scope, excludes) {
             var excluded = {},
                 included = {},
