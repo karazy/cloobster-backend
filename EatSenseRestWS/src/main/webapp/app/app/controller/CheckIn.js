@@ -151,33 +151,49 @@ Ext.define('EatSense.controller.CheckIn', {
    },
    
    showCheckinWithOthers: function(options) {
+	   console.log("CheckIn Controller -> showCheckinWithOthers");
 	   var checkinwithothersDlg = this.getCheckinwithothers(), main = this.getMain();
 	   
 	    var userListStore = Ext.create('Ext.data.Store', {
-	   			   model: 'User',
+	   			   model: 'EatSense.model.User',
 	   			   proxy: {
 	   				   type: 'rest',
-	   				   url : '/restaurant/spot/users?userId'+options.userId,
+	   				   url : '/restaurant/spot/users?userId='+options.userId,
 	   				   reader: {
 	   					   type: 'json'
 	   			   		},
 	   			   }
 	   		   });
 	     //set list content in view	  
-	  	 getUserList().store = userListStore; 
-	  	   
-	  	 getUserList().store.load({
+	  	 this.getUserlist().setStore(userListStore); 
+	  	   /*
+	  	 this.getUserlist().getStore().load({
 	   	       scope   : this,
 	   	       callback: function(records, operation, success) {
 	   	    	   //show view
-	   	    	   main.setActiveItem(checkinwithothersDlg);
+	   	    	   if(success) {
+	   	    		   this.getUserlist().update();	   	    		  
+	   	    	   };	   	    	   
 	   	       }
-	   	 });
+	   	 }); */
+	  	 this.getUserlist().getStore().load();
+	  	main.setActiveItem(checkinwithothersDlg);
    },
-   linkToUser: function(options) {
+   linkToUser: function(dataview, record) {
+	   console.log("CheckIn Controller -> linkToUser");
 	   var menu = this.getMenuoverview(), main = this.getMain();
 	   
-		main.setActiveItem(menu);
+	    	Ext.Ajax.request({
+	    	    url: '/restaurant/spot/users',
+	    	    method: 'POST',
+	    	    params: {
+	    	        userId: this.models.activeCheckIn.data.userId,
+	    	        linkedUserId: record.data.userId
+	    	    },
+	    	    success: function(response){
+	    	    	main.setActiveItem(menu);
+	    	    }
+	    	});
 		
    },
 	showMenu : function() {
