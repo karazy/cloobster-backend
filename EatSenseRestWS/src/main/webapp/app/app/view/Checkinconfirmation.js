@@ -17,18 +17,15 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			},
 			defaults : {
 				margin : 5,
-//				docked: 'top'
-//				flex : 1
 			},
 			items : [ {
 				xtype : 'label',
 				styleHtmlContent: true,
-			//	height:'100px',
-				html : '<h1>CheckIn</h1>Do you want to check in at ' //+ if(this.data.checkInData !== undefined) this.data.checkInData.restaurantName
+				id: 'checkInDlg1Label1',
+				html : '<h1>CheckIn</h1>Do you want to check in at'
 			}, {
 				xtype: 'label',
 				styleHtmlContent: true,
-				//height: '100px',
 				html: 'Choose a nickname associated with your checkIn:'
 			}, {
 				xtype : 'textfield',
@@ -40,12 +37,14 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				id : 'confirmCheckInBt',
 				text : 'CheckIn',
 				ui : 'round'
-			}]
+			},
+			{
+				xtype : 'button',
+				id : 'cancelCheckInBt',
+				text : 'Cancel',
+				ui : 'round'
+			}
+			]
 		} ]
     }
-	/*,
-    constructor: function() {
-    	//this.data =
-    	alert('test');
-    } */
 });
