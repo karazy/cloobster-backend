@@ -113,15 +113,9 @@ public class RestaurantResource {
 	 */
 	@GET
 	@Produces("application/json")
-	public String listAll() {
+	public Collection<Restaurant> listAll() {
 		Collection<Restaurant> list = restaurantrepo.getAll();
-		StringBuffer sb = new StringBuffer();
-		sb.append("Restaurants: ");
-		for (Restaurant restaurant : list) {
-			sb.append(restaurant.getName());
-			sb.append(" - ");
-		}
-		return sb.toString();
+		return list;
 	}
 
 	@PUT

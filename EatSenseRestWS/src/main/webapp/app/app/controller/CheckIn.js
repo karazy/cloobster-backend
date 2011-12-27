@@ -92,16 +92,28 @@ Ext.define('EatSense.controller.CheckIn', {
      */    
     checkInIntent: function(options) {
     	console.log('CheckIn Controller -> checkIn');
-    	var barcode = this.getSearchfield().getValue();
-    	var that = this;
-    	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
-    		synchronous: true,
-    	    success: function(model) {
-    	    	console.log("CheckInIntent Status: " + model.get('status'));
-    	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	    	
-    	    	that.checkInConfirm({model:model});
-    	    }
-    	});
+    	var barcode = Ext.String.trim(this.getSearchfield().getValue());
+    	//validate barcode field
+    	if(barcode.length == 0) {
+    		Ext.Msg.alert('Barcode Error', 'The barcode you provided is not valid or empty!', Ext.emptyFn);
+    	} else {
+        	var that = this;
+        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
+        		synchronous: true,
+        	    success: function(model) {
+        	    	console.log("CheckInIntent Status: " + model.get('status'));
+        	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	  
+        	    	if(model.data.status == "INTENT") {
+        	    		that.checkInConfirm({model:model});
+        	    	} else if(model.data.status == "BARCODE_ERROR") {
+        	    		Ext.Msg.alert('Barcode Error', 'The barcode you provided is not valid or empty!', Ext.emptyFn);
+        	    	} else {
+        	    		Ext.Msg.alert('Error', 'Sorry! An unknown error occured! We are working hard to fix this issue.', Ext.emptyFn);
+        	    	}
+        	    	
+        	    }
+        	});
+    	}
    },
    /**
     * CheckIn Process
@@ -110,7 +122,7 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    checkInConfirm: function(options) {
 	   console.log("CheckIn Controller -> checkInConfirm");
-	   this.getCheckInDlg1Label1().setHtml('<h1>CheckIn</h1>Do you want to check in at <strong>'+options.model.data.restaurantName+'</strong>');
+	   this.getCheckInDlg1Label1().setHtml('<h1>CheckIn</h1>Do you want to check in at <strong>'+options.model.data.spot+' at '+options.model.data.restaurantName+'</strong>');
 		var checkInDialog = this.getCheckinconfirmation(), main = this.getMain();
 		this.getNickname().setValue(options.model.data.nickname);
 		this.models.activeCheckIn = options.model;
@@ -124,23 +136,28 @@ Ext.define('EatSense.controller.CheckIn', {
    checkIn: function(){
 	   var that = this;
 	   //get CheckIn Object and save it. 
-	   var nickname = this.getNickname().getValue();
-	   this.models.activeCheckIn.data.nickname = nickname;
-	 //checkIn(String userId, String nickname)
-	   this.models.activeCheckIn.save(
-			   {
-			   	    success: function(response) {
-			   	     if(response.data.status == 'YOUARENOTALONE') {
-			   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
-			   	    	 var userId = response.data.userId;
-			   	    	 that.showCheckinWithOthers({userId : userId});
-			   		   } else {
-			   			   //show menu
-			   			   that.showMenu();
-			   		   }
-			   	    }
-			   }	   
-	   );
+	   var nickname = Ext.String.trim(this.getNickname().getValue());
+	   if(nickname.length < 3) {
+		   Ext.Msg.alert('Nickname Error', 'Your nickname must contain at least 3 characters.', Ext.emptyFn);
+	   } else {
+		   this.models.activeCheckIn.data.nickname = nickname;
+			 //checkIn(String userId, String nickname)
+			   this.models.activeCheckIn.save(
+					   {
+					   	    success: function(response) {
+					   	     if(response.data.status == 'YOUARENOTALONE') {
+					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
+					   	    	 var userId = response.data.userId;
+					   	    	 that.showCheckinWithOthers({userId : userId});
+					   		   } else {
+					   			   //show menu
+					   			   that.showMenu();
+					   		   }
+					   	    }
+					   }	   
+			   );
+	   }
+
 	  
 	   
 	 

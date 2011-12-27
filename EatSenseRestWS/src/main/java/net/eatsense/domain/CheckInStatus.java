@@ -13,6 +13,10 @@ public enum CheckInStatus {
 	 */
 	INTENT,
 	/**
+	 * User provided a wrong barcode.
+	 */
+	BARCODE_ERROR,
+	/**
 	 * Returned after check in and indicating that others are checked in at the same spot.
 	 */
 	YOUARENOTALONE,

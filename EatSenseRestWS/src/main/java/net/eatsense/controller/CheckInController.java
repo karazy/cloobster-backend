@@ -52,32 +52,32 @@ public class CheckInController {
 	public CheckInDTO checkInIntent(String barcode) {
 		CheckIn checkIn = new CheckIn();
 		CheckInDTO checkInDto = new CheckInDTO();
-		if (barcode != null && barcode.length() > 0) {
+		if (barcode != null && barcode.trim().length() > 0) {
 			Restaurant restaurant = restaurantRepo.findByBarcode(barcode);
-			Spot bc = barcodeRepo.getByProperty("barcode", barcode);
+			Spot spot = barcodeRepo.getByProperty("barcode", barcode);
 			if (restaurant != null) {
 				logger.info("CheckIn attempt with barcode {}", barcode);
 				String tmpUserId = IdHelper.generateId();
 				String tmpNickName = NicknameGenerator.generateNickname();
 				// set values for dto object
 				checkInDto.setRestaurantName(restaurant.getName());
-				checkInDto.setStatus("success");
+				checkInDto.setStatus(CheckInStatus.INTENT.toString());
 				checkInDto.setUserId(tmpUserId);
-				checkInDto.setSpot("Dummy Table");
+				checkInDto.setSpot(spot.getName());
 				checkInDto.setNickname(tmpNickName);
 				// set values for domain object
 				checkIn.setRestaurant(restaurant.getKey());
-				checkIn.setSpot(bc.getKey());
+				checkIn.setSpot(spot.getKey());
 				checkIn.setUserId(tmpUserId);
 				checkIn.setStatus(CheckInStatus.INTENT);
 				checkInRepo.saveOrUpdate(checkIn);
 			} else {
-				logger.info("CheckIn attempt failed! Reason: invalid code");
-				checkInDto.setStatus("invalidCode");
+				logger.info("CheckIn attempt failed! Reason: " + barcode + " is not a valid code.");
+				checkInDto.setStatus(CheckInStatus.BARCODE_ERROR.toString());
 			}
 		} else {
-			logger.info("CheckIn attempt failed! Reason: code missing");
-			checkInDto.setStatus("missingCode");
+			logger.info("CheckIn attempt failed! Reason: no barcode provided.");
+			checkInDto.setStatus(CheckInStatus.BARCODE_ERROR.toString());
 		}
 		return checkInDto;
 	}
@@ -99,7 +99,7 @@ public class CheckInController {
 		if (chkinDatastore.getStatus() == CheckInStatus.INTENT) {
 			logger.info("CheckIn with userId {}", userId);			
 			chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
-			//TODO check nickname
+			//TODO validation check nickname
 			chkinDatastore.setNickname(checkIn.getNickname());
 			checkInRepo.saveOrUpdate(chkinDatastore);
 			

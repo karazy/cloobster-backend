@@ -39,10 +39,11 @@ public class DummyDataDumper {
 		r.setDescription(desc);
 		Key<Restaurant> kR = rr.saveOrUpdate(r);
 
-		Spot b = new Spot();
-		b.setBarcode(barcode);
-		b.setRestaurant(kR);
-		Key<Spot> kB = br.saveOrUpdate(b);
+		Spot spot = new Spot();
+		spot.setBarcode(barcode);
+		spot.setRestaurant(kR);
+		spot.setName(areaName);
+		Key<Spot> kB = br.saveOrUpdate(spot);
 	}
 
 }
