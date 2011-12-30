@@ -194,7 +194,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   				   url : '/restaurant/spot/users?userId='+options.userId,
 	   				   reader: {
 	   					   type: 'json'
-	   			   		},
+	   			   		}
 	   			   }
 	   		   });
 	     //set list content in view	  
@@ -214,12 +214,13 @@ Ext.define('EatSense.controller.CheckIn', {
     	Ext.Ajax.request({
     	    url: '/restaurant/spot/users',
     	    method: 'POST',
+    	    scope: this,
     	    params: {
     	        userId: this.models.activeCheckIn.data.userId,
     	        linkedUserId: record.data.userId
     	    },
     	    success: function(response){
-    	    	that.showMenu();
+    	    	this.showMenu();
     	    }
     	});
 		
@@ -242,7 +243,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 				   url : '/restaurant/'+restaurantId+'/menu',
 	 				   reader: {
 	 					   type: 'json'
-	 			   		},
+	 			   		}
 	 			   }
 	 		 });
 			 this.getMenulist().setStore(menuListStore);
@@ -250,8 +251,8 @@ Ext.define('EatSense.controller.CheckIn', {
 				 scope   : this,
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-			    	 that.getController('Menu').models.menudata = records;
-			    	 main.setActiveItem(menu);
+			    	 that.getController('Menu').models.menudata = records;			    	 
+			    	 main.setActiveItem(menu);			    	 
 			    	 }
 			     }
 			 });

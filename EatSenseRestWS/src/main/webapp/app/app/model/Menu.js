@@ -12,5 +12,5 @@ Ext.define('EatSense.model.Menu', {
 			type: 'json',
 		}
 	},
-	hasMany: { model: 'Product', name: 'products' }
+	hasMany: 'Product'
 });

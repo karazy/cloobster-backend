@@ -14,5 +14,5 @@ Ext.define('EatSense.model.Product', {
 			type: 'json',
 		}
 	},
-	belongsTo: 'Menu'
+	belongsTo: 'EatSense.model.Menu'
 });
