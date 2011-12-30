@@ -49,7 +49,7 @@ public class Spot extends GenericEntity{
 
 	@Transient
 	public Key<Spot> getKey() {
-	   return new Key<Spot>(Spot.class, getId());
+	   return new Key<Spot>(getRestaurant(), Spot.class, getId());
 	}
 
 	public String getName() {

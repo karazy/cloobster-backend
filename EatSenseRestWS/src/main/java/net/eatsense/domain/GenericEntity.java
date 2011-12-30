@@ -2,8 +2,6 @@ package net.eatsense.domain;
 
 import javax.persistence.Id;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 /**
  * Base class for all entities.
  * Provides some common fields.
