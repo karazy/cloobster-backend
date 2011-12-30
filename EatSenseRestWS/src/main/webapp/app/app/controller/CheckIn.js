@@ -156,7 +156,6 @@ Ext.define('EatSense.controller.CheckIn', {
 					   	    	 var userId = response.data.userId;
 					   	    	 that.showCheckinWithOthers({userId : userId});
 					   		   } else {
-					   			   //show menu
 					   			   that.showMenu();
 					   		   }
 					   	    }
@@ -171,7 +170,7 @@ Ext.define('EatSense.controller.CheckIn', {
    },
    /**
     * CheckIn Process
-    * Step 2 alt: Cancle Process
+    * Step 2 alt: cancel process
     */
    cancelCheckIn: function(options) {
 	   console.log("CheckIn Controller -> cancelCheckIn");
@@ -179,7 +178,11 @@ Ext.define('EatSense.controller.CheckIn', {
 	   this.models.activeCheckIn.destroy();	   
 	   main.setActiveItem(dashboardView);
    },
-   
+   /**
+    * CheckIn Process
+    * Step 4: List other users located at this spot
+    * @param options
+    */
    showCheckinWithOthers: function(options) {
 	   console.log("CheckIn Controller -> showCheckinWithOthers");
 	   var checkinwithothersDlg = this.getCheckinwithothers(), main = this.getMain();
@@ -199,30 +202,41 @@ Ext.define('EatSense.controller.CheckIn', {
 	  	 this.getUserlist().getStore().load();
 	  	main.setActiveItem(checkinwithothersDlg);
    },
+   /**
+    * CheckIn Process
+    * Step 4-I: Link user to a chosen person 
+    * @param dataview
+    * @param record
+    */
    linkToUser: function(dataview, record) {
 	   console.log("CheckIn Controller -> linkToUser");
-	   var menu = this.getMenuoverview(), main = this.getMain();
 	   
-	    	Ext.Ajax.request({
-	    	    url: '/restaurant/spot/users',
-	    	    method: 'POST',
-	    	    params: {
-	    	        userId: this.models.activeCheckIn.data.userId,
-	    	        linkedUserId: record.data.userId
-	    	    },
-	    	    success: function(response){
-	    	    	main.setActiveItem(menu);
-	    	    }
-	    	});
+    	Ext.Ajax.request({
+    	    url: '/restaurant/spot/users',
+    	    method: 'POST',
+    	    params: {
+    	        userId: this.models.activeCheckIn.data.userId,
+    	        linkedUserId: record.data.userId
+    	    },
+    	    success: function(response){
+    	    	that.showMenu();
+    	    }
+    	});
 		
    },
+   /**
+    * CheckIn Process
+    * Step 5: Show menu to user 
+    * @param dataview
+    * @param record
+    */
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
 		 var menu = this.getMenuoverview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this;
 		 if(restaurantId.toString().length != 0) {
 			 //load menudata and store it in MenuController
 			 var menuListStore = Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.User',
+	 			   model: 'EatSense.model.Menu',
 	 			   proxy: {
 	 				   type: 'rest',
 	 				   url : '/restaurant/'+restaurantId+'/menu',
