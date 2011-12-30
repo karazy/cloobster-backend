@@ -2,6 +2,7 @@ package net.eatsense;
 
 
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Menu;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.RestaurantResource;
@@ -33,6 +34,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(RestaurantResource.class);
 						bind(Spot.class);
 						bind(CheckIn.class);
+						bind(Menu.class);
 //						bind(RestaurantRepository.class);
 						bind(GenericRepository.class);
 //						bind(AreaRepository.class);

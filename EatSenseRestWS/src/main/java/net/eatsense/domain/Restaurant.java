@@ -61,6 +61,7 @@ public class Restaurant extends GenericEntity {
 	@Transient
 	@JsonIgnore
 	public Key<Restaurant> getKey() {
+		
 		return new Key<Restaurant>(Restaurant.class, super.getId());
 	}
 

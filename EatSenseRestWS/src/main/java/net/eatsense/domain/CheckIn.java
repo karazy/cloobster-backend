@@ -81,8 +81,8 @@ public class CheckIn extends GenericEntity{
 	}
 		
 	@Transient
-	public Key<Restaurant> getKey() {
-		return new Key<Restaurant>(Restaurant.class, super.getId());
+	public Key<CheckIn> getKey() {
+		return new Key<CheckIn>(CheckIn.class, super.getId());
 	}
 
 	public String getNickname() {

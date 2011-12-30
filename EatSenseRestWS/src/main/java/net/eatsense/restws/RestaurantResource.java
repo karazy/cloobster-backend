@@ -15,10 +15,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.MenuDTO;
 import net.eatsense.util.DummyDataDumper;
  
 import com.google.inject.Inject;
@@ -36,11 +38,13 @@ public class RestaurantResource {
 	private RestaurantRepository restaurantrepo;
 	private DummyDataDumper ddd;
 	private CheckInController checkInCtr;
+	private MenuController menuCtr;
 
 	@Inject
-	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd) {
+	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd, MenuController menuCtr) {
 		this.restaurantrepo = repo;
 		this.checkInCtr = checkInCtr;
+		this.menuCtr = menuCtr;
 		this.ddd = ddd;
 	}
 
@@ -52,7 +56,7 @@ public class RestaurantResource {
 	 * @return {@link CheckInDTO} information providing status etc.
 	 */
 	@GET
-	@Produces("application/json")
+	@Produces("application/json; charset=UTF-8")
 	@Path("spot/{code}")
 	public CheckInDTO checkInIntent(@PathParam("code") String code) {
 		return checkInCtr.checkInIntent(code);
@@ -65,8 +69,8 @@ public class RestaurantResource {
 	 */
 	@PUT
 	@Path("spot/{userId}")
-	@Produces("application/json")
-	@Consumes("application/json")
+	@Produces("application/json; charset=UTF-8")
+	@Consumes("application/json; charset=UTF-8")
 	public CheckInDTO checkIn(@PathParam("userId") String userId, CheckInDTO checkIn) { 
 		
 		return checkInCtr.checkIn(userId, checkIn);
@@ -75,12 +79,12 @@ public class RestaurantResource {
 	/**
 	 * Loads other users checkedIn at this spot.
 	 * @param userId
-	 * @return
+	 * @return collection of checkedIn users
 	 */
 	@GET
 	@Path("spot/users/")
-	@Produces("application/json")
-	public List<User> getUsersAtSpot(@QueryParam("userId") String userId) { 
+	@Produces("application/json; charset=UTF-8")
+	public Collection<User> getUsersAtSpot(@QueryParam("userId") String userId) { 
 		return checkInCtr.getUsersAtSpot(userId);
 	}
 
@@ -112,10 +116,18 @@ public class RestaurantResource {
 	 * @return all restaurants
 	 */
 	@GET
-	@Produces("application/json")
+	@Produces("application/json; charset=UTF-8")
 	public Collection<Restaurant> listAll() {
-		Collection<Restaurant> list = restaurantrepo.getAll();
+		Collection<Restaurant> list =  restaurantrepo.getAll();
 		return list;
+	}
+	
+	@GET
+	@Path("menu/{restaurantId}")
+	@Produces("application/json; charset=UTF-8")
+	public Collection<MenuDTO> getMenus(@PathParam("restaurantId") Long restaurantId)
+	{
+		return menuCtr.getMenus(restaurantId);
 	}
 
 	@PUT
