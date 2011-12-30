@@ -40,6 +40,12 @@ public class MenuController {
 		this.productRepo = pr;
 	}
 	
+	/**
+	 * Return all menus with corresponding products of a given restaurant.
+	 * 
+	 * @param restaurantId entity id of the restaurant
+	 * @return list of menus with products
+	 */
 	public Collection<MenuDTO> getMenus(long restaurantId){
 		if(restaurantId == 0 )
 			throw new IllegalArgumentException("Invalid restaurant key specified.");
