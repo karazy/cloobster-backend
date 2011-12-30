@@ -69,6 +69,7 @@ public class CheckInControllerTest {
 		assertEquals("Heidi und Paul", data.getRestaurantName());
 		assertNotNull(data.getUserId());
 		assertNotNull(data.getNickname());
+		assertNotNull(data.getRestaurantId());
 		data.setNickname("FakeNik");
 		ctr.checkIn(data.getUserId(), data);
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
