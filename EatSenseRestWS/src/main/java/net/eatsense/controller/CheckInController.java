@@ -61,6 +61,7 @@ public class CheckInController {
 				String tmpNickName = NicknameGenerator.generateNickname();
 				// set values for dto object
 				checkInDto.setRestaurantName(restaurant.getName());
+				checkInDto.setRestaurantId(restaurant.getId());
 				checkInDto.setStatus(CheckInStatus.INTENT.toString());
 				checkInDto.setUserId(tmpUserId);
 				checkInDto.setSpot(spot.getName());

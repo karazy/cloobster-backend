@@ -22,6 +22,11 @@ public class CheckInDTO {
 	 * Restaurants name
 	 */
 	private String restaurantName;
+	
+	/**
+	 * Restaurants UID
+	 */
+	private Long restaurantId;
 
 	/**
 	 * Name of location inside the restaurant
@@ -79,6 +84,14 @@ public class CheckInDTO {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public Long getRestaurantId() {
+		return restaurantId;
+	}
+
+	public void setRestaurantId(Long restaurantId) {
+		this.restaurantId = restaurantId;
 	}
 
 	
