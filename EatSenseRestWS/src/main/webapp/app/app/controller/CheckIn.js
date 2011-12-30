@@ -220,23 +220,47 @@ Ext.define('EatSense.controller.CheckIn', {
 		console.log("CheckIn Controller -> showMenu");
 		 var menu = this.getMenuoverview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this;
 		 if(restaurantId.toString().length != 0) {
-				//load menudata and store it in MenuController		
-				
+			 //load menudata and store it in MenuController
+			 var menuListStore = Ext.create('Ext.data.Store', {
+	 			   model: 'EatSense.model.User',
+	 			   proxy: {
+	 				   type: 'rest',
+	 				   url : '/restaurant/'+restaurantId+'/menu',
+	 				   reader: {
+	 					   type: 'json'
+	 			   		},
+	 			   }
+	 		 });
+			 this.getMenulist().setStore(menuListStore);
+			 this.getMenulist().getStore().load({
+				 scope   : this,
+			     callback: function(records, operation, success) {
+			    	 if(success) {
+			    	 that.getController('Menu').models.menudata = records;
+			    	 main.setActiveItem(menu);
+			    	 }
+			     }
+			 });
+			 //TESTS
+			 //main.setActiveItem(menu);	
 //				Ext.ModelManager.getModel('EatSense.model.Menu').load(restaurantId, {
 //			  //	 this.getMenulist().getStore().load(restaurantId, {
 //					 success: function(model) {
 //						// this.getMenulist().setStore(this.getMenuStore());
-//						 that.getMenulist().data = model.data;
+//						 that.getMenulist().setStore(model.store);
 //						 that.getController('Menu').models.menudata = model;
 //						 main.setActiveItem(menu);			  	 
 //		     	    }
 //				});
 		 }
+
+//		 this.getMenuStore().filters.items[0].value = restaurantId;
 //		 this.getMenulist().setStore(this.getMenuStore());
-		 var testData = [{'title': 'Speisen'},
-         {'title': 'Getraenke'}];
-		this.getMenulist().data = testData;
-		 main.setActiveItem(menu);	
+//		 this.getMenulist().getStore().load();
+//		 var testData = [{'title': 'Speisen'},
+//         {'title': 'Getraenke'}];
+//		this.getMenulist().data = testData;
+//		 main.setActiveItem(menu);	
 				
 	}
 });
