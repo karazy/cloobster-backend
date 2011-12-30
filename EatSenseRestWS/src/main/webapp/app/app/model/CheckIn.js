@@ -12,6 +12,7 @@ Ext.define('EatSense.model.CheckIn', {
 	proxy: {
 		type: 'rest',
 		url: '/restaurant/spot/', 
+		//appendId: false,
 		reader: {
 			type: 'json',
 		}

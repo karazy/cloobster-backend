@@ -1,5 +1,6 @@
 Ext.define('EatSense.model.Menu', {
 	extend: 'Ext.data.Model',
+	requires: ['EatSense.model.Product'],
 	idProperty: 'id',
 	fields: [
 	    {name: 'id', type: 'string'},
@@ -12,5 +13,5 @@ Ext.define('EatSense.model.Menu', {
 			type: 'json',
 		}
 	},
-	hasMany: 'Product'
+	hasMany: {model: 'EatSense.model.Product', name: 'products'}
 });

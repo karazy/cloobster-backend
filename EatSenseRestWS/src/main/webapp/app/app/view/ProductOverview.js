@@ -22,7 +22,7 @@ Ext.define('EatSense.view.ProductOverview', {
 				width: '150px',
 				styleHtmlContent: true, 
 				fullScreen: true,				
-				itemTpl: '<div><strong>{name}</strong> - {privce}</div>'
+				itemTpl: '<div><strong>{name}</strong> - {price}</div>'
 			}]
 		} ]
 	}

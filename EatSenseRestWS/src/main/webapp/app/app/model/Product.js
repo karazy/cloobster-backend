@@ -6,13 +6,13 @@ Ext.define('EatSense.model.Product', {
 		{name: 'name', type: 'string'},
 		{name: 'shortDesc', type: 'string'},
 		{name: 'price', type: 'string'}
-	],
-	proxy: {
-		type: 'rest',
-		url: '/restaurant/menu/product/', 
-		reader: {
-			type: 'json',
-		}
-	},
-	belongsTo: 'EatSense.model.Menu'
+	]
+//,
+//	proxy: {
+//		type: 'rest',
+//		url: '/restaurant/menu/product/', 
+//		reader: {
+//			type: 'json',
+//		}
+//	}
 });

@@ -16,6 +16,12 @@ Ext.define('EatSense.controller.Menu', {
 	refs: [
         {
             ref       : 'main',
+            selector  : 'mainview',
+            xtype     : 'mainview',
+            autoCreate: true
+        },
+        {
+            ref       : 'main',
             selector  : 'main',
             xtype     : 'main'
         },
@@ -26,7 +32,8 @@ Ext.define('EatSense.controller.Menu', {
         {
         	ref: 'productlist',
         	selector : '#productlist'        	
-        }, {
+        }, 
+        {
         	ref: 'productoverview',
         	selector: 'productoverview'
         }
@@ -42,13 +49,22 @@ Ext.define('EatSense.controller.Menu', {
     	 //store retrieved models
     	 var models = {};
     	 this.models = models;
+    	 //models.menudata holds all menu related data
     },
     /**
      * shows the list of products of a menu 
      */
-    showProductlist: function() {
-    	var main = this.getMain, productoverview = this.getProductoverview();
-    	//load products 
+    showProductlist: function(dataview, record) {
+    	var main = this.getMain(), pov = this.getProductoverview(),
+    	prodStore = record.productsStore;
+    	//load products into a store 
+//    	 var menuListStore = Ext.create('Ext.data.Store', {
+//			   model: 'EatSense.model.Product',
+//			   data: record.
+//		 });
+    	this.getProductlist().setStore(prodStore);
+    	//this.getProductlist().getStore().load();
+    	main.setActiveItem(pov);
     	//show product list
     }
         	

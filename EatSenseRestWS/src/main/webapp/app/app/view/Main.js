@@ -1,8 +1,8 @@
 Ext.define('EatSense.view.Main', {
 	extend : 'Ext.Container',
-	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation' ],
+	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers' ],
 	config : {
-		fullscreen : false,
+		fullscreen : true,
 		layout : 'card',
 		activeItem : 0,
 		items : [ {
@@ -17,6 +17,10 @@ Ext.define('EatSense.view.Main', {
 		}, {
 			layout: 'fit',
 			xtype: 'checkinwithothers'
+		},
+		{
+			layout: 'fit',
+			xtype: 'productoverview'
 		} 
 		]
 	}
