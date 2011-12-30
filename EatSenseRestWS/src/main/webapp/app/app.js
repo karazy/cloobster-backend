@@ -1,6 +1,6 @@
 Ext.Loader.setConfig({enabled:true});
 Ext.application({
     name: 'EatSense',
-    controllers: ['CheckIn'],
-    models: ['CheckIn', 'User']
+    controllers: ['CheckIn', 'Menu'],
+    models: ['CheckIn', 'User', 'Menu', 'Product']
 });

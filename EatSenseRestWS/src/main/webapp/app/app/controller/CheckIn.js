@@ -6,14 +6,15 @@ Ext.define('EatSense.controller.CheckIn', {
     
 	views : [
 		'Main',
-		'Dashboard',
-		'MenuOverview',
+		'Dashboard',		
 		'Checkinconfirmation',
-		'CheckinWithOthers'
+		'CheckinWithOthers',
+		'MenuOverview'
 	],
 	stores : [
 	'CheckIn',
-	'User'
+	'User',
+	'Menu'
 	],
 	refs: [
         {
@@ -58,11 +59,16 @@ Ext.define('EatSense.controller.CheckIn', {
         {
         	ref: 'cancelCheckInBt',
         	selector: '#cancelCheckInBt'
+        },
+        {
+        	ref: 'menulist',
+        	selector: '#menulist'
         }
         
     ],
     init: function() {
     	console.log('initialized CheckInController');
+    	//ONLY CREATE ONCE!!!
     	this.getMainView().create();
     	 this.control({
             '#checkInBtn': {
@@ -212,8 +218,26 @@ Ext.define('EatSense.controller.CheckIn', {
    },
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
-		var menu = this.getMenuoverview(), main = this.getMain();
-		main.setActiveItem(menu);
+		 var menu = this.getMenuoverview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this;
+		 if(restaurantId.toString().length != 0) {
+				//load menudata and store it in MenuController		
+				
+//				Ext.ModelManager.getModel('EatSense.model.Menu').load(restaurantId, {
+//			  //	 this.getMenulist().getStore().load(restaurantId, {
+//					 success: function(model) {
+//						// this.getMenulist().setStore(this.getMenuStore());
+//						 that.getMenulist().data = model.data;
+//						 that.getController('Menu').models.menudata = model;
+//						 main.setActiveItem(menu);			  	 
+//		     	    }
+//				});
+		 }
+//		 this.getMenulist().setStore(this.getMenuStore());
+		 var testData = [{'title': 'Speisen'},
+         {'title': 'Getraenke'}];
+		this.getMenulist().data = testData;
+		 main.setActiveItem(menu);	
+				
 	}
 });
 

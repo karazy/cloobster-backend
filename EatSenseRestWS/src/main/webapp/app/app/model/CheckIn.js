@@ -4,6 +4,7 @@ Ext.define('EatSense.model.CheckIn', {
 	fields: [
 		{name: 'status', type: 'string'},
 		{name: 'restaurantName', type: 'string'},
+		{name: 'restaurantId', type: 'string'},
 		{name: 'spot', type: 'string'},
 		{name: 'userId', type: 'string'},
 		{name: 'nickname', type: 'string'}
