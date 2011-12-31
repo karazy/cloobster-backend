@@ -68,8 +68,8 @@ Ext.define('EatSense.controller.Menu', {
     showProductlist: function(dataview, record) {
     	var main = this.getMain(), pov = this.getProductoverview(),
     	prodStore = record.productsStore;
-//    	this.getMenulist().deselect(record);
     	this.getProductlist().setStore(prodStore);
+    	this.getMenulist().refresh();
     	main.setActiveItem(pov);
     },
 	showMenu : function(a, b, c, d, e) {

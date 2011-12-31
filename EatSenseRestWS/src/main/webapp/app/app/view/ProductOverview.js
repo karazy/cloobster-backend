@@ -7,43 +7,28 @@ Ext.define('EatSense.view.ProductOverview', {
 			docked : 'top',
 			xtype : 'toolbar',
 			title : 'Menu',
-			items: [
-				{
-					xtype : 'button',
-					id : 'productOvBackBt',
-					text : 'back',
-					ui : 'back'
-				}
-			]
-		
-		}, 
-//		{
-//			xtype : 'panel',
-//			layout : {
-//				type : 'vbox',
-////				pack : 'center',
-//				align : 'center'
-//			},
-//			items : [ {
-//				xtype : 'list',
-//				id : 'productlist',
-//				type: 'fit',
-//				height: '200px',
-//				width: '150px',
-//				styleHtmlContent: true, 
-//				fullScreen: true,				
-//				itemTpl: '<div><strong>{name}</strong> - {price}</div>'
-//			}]
-//		} 
-		{
+			items : [ {
+				xtype : 'button',
+				id : 'productOvBackBt',
+				text : 'back',
+				ui : 'back'
+			} ]
+
+		}, {
 			xtype : 'list',
-			layout: {
-				align: 'center'
+			layout : {
+				align : 'center'
 			},
 			id : 'productlist',
-			type: 'fit',			
-			itemTpl: '<div><strong>{name}</strong> - {price}</div>'
-		}
-		]
+			type : 'fit',
+			allowDeselect : true,
+			itemTpl : '<div><strong>{name}</strong> - {price}</div>',
+			listeners : {
+				itemtap : function(dv, ix, item, e) {
+//					dv.getSelected().clear();
+					console.log('ProductOverview -> listener itemtap');
+				}
+			}
+		} ]
 	}
 });

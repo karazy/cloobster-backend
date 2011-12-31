@@ -6,8 +6,15 @@ Ext.define('EatSense.view.Checkinconfirmation', {
         items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'CheckIn Confirmation'
-				//TODO add cancel button
+			title : 'CheckIn Confirmation',
+			items: [
+				{
+					xtype : 'button',
+					id : 'cancelCheckInBt',
+					text : 'Cancel',
+					ui : 'back'
+				}  
+			]
 		}, {
 			xtype : 'panel',
 			layout : {
@@ -36,13 +43,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				xtype : 'button',
 				id : 'confirmCheckInBt',
 				text : 'CheckIn',
-				ui : 'round'
-			},
-			{
-				xtype : 'button',
-				id : 'cancelCheckInBt',
-				text : 'Cancel',
-				ui : 'round'
+				ui : 'normal'
 			}
 			]
 		} ]

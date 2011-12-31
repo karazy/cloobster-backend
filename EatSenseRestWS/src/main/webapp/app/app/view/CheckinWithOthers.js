@@ -29,7 +29,7 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 				xtype: 'label',
 				id : 'checkInDlg2Label2',
 				styleHtmlContent: true,  
-				html: 'Do you want to check in with somebody?'
+				html: 'Select the person in the list you want to check in with or hit <i>On my own!</i>!'
 			}, 
 			{
 				xtype : 'list',
@@ -42,8 +42,8 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 			}, {
 				xtype : 'button',
 				id : 'checkinDlg2CancelBt',
-				text : 'Cancel',
-				ui : 'round'
+				text : 'On my own!',
+				ui : 'normal'
 			}]
 		} ]
     }

@@ -26,7 +26,7 @@ Ext.define('EatSense.view.Dashboard', {
             xtype: 'button',
            	id: 'checkInBtn',
             text: 'CheckIn',
-            ui: 'round'
+            ui: 'normal'
             },
             {
                 xtype: 'textfield',
@@ -37,7 +37,7 @@ Ext.define('EatSense.view.Dashboard', {
             xtype: 'button',
            	itemId: 'settingsBtn',
             text: 'Settings',
-            ui: 'round',
+            ui: 'normal',
             }
             ]
         }]

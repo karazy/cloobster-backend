@@ -11,17 +11,23 @@ Ext.define('EatSense.view.MenuOverview', {
 			xtype : 'list',
 			id : 'menulist',
 			type : 'fit',
+			allowDeselect: true,
 			itemTpl : '<div>{title}</div>',
-//			listeners: {
-//				itemtap: function(dv, ix, item, e) {
-//					// Delay the selection clear
-//					// so they get a nice blue flash for HCI's sake
-////					setTimeout(function(){dv.deselect(ix);},500);
+			listeners: {
+				itemtap: function(dv, ix, item, e) {
+					// Delay the selection clear
+					// so they get a nice blue flash for HCI's sake
+//					setTimeout(function(){dv.deselect(ix);},500);
 //					dv.deselect(ix);
 //					dv.deselect(item);
-//					console.log('in item listener');
-//				}
-//			}
+//					dv.getSelected().clear();
+					console.log('MenuOverview -> listener itemtap');
+				},
+				deactivate: function(eOpts) {
+					console.log('MenuOverview -> listener deactivate');
+					}
+				}
+			
 		} ]
 	}
 });
