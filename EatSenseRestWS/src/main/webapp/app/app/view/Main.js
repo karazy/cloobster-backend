@@ -3,7 +3,13 @@ Ext.define('EatSense.view.Main', {
 	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers' ],
 	config : {
 		fullscreen : true,
-		layout : 'card',
+		layout : {
+			type: 'card'
+//			animation: {
+//	            type: 'slide',
+//	            direction: 'left'
+//	        }			
+		},
 		activeItem : 0,
 		items : [ {
 			layout : 'fit',

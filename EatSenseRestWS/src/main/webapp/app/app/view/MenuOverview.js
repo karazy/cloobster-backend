@@ -8,22 +8,20 @@ Ext.define('EatSense.view.MenuOverview', {
 			xtype : 'toolbar',
 			title : 'Menu'
 		}, {
-			xtype : 'panel',
-			layout : {
-				type : 'vbox',
-				pack : 'center',
-				align : 'center',
-			},
-			items : [ {
-				xtype : 'list',
-				id : 'menulist',
-				type: 'fit',
-				height: '200px',
-				width: '150px',
-				styleHtmlContent: true, 
-				fullScreen: true,				
-				itemTpl: '<div>{title}</div>'
-			}]
+			xtype : 'list',
+			id : 'menulist',
+			type : 'fit',
+			itemTpl : '<div>{title}</div>',
+//			listeners: {
+//				itemtap: function(dv, ix, item, e) {
+//					// Delay the selection clear
+//					// so they get a nice blue flash for HCI's sake
+////					setTimeout(function(){dv.deselect(ix);},500);
+//					dv.deselect(ix);
+//					dv.deselect(item);
+//					console.log('in item listener');
+//				}
+//			}
 		} ]
 	}
 });

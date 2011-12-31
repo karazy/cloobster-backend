@@ -1,7 +1,7 @@
 Ext.define('EatSense.view.CheckinWithOthers', {
     extend: 'Ext.Panel',
     xtype: 'checkinwithothers',
-    fullscreen : false,
+    fullscreen : true,
     config: {
         items : [ {
 			docked : 'top',
@@ -17,15 +17,14 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 			},
 			defaults : {
 				margin : 5,
-				//width: '150px',
-				//height: '200px'
-				//flex : 1
+				type: 'fit',
+				
 			},
 			items : [ {
 				xtype : 'label',
 				id : 'checkInDlg2Label1',
 				styleHtmlContent: true, 
-				html : 'Others are already at this spot.' //+ if(this.data.checkInData !== undefined) this.data.checkInData.restaurantName
+				html : 'Others are already at this spot.'
 			}, {
 				xtype: 'label',
 				id : 'checkInDlg2Label2',
@@ -35,11 +34,9 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 			{
 				xtype : 'list',
 				id : 'checkinDlg2Userlist',
+				flex: 6,
 				type: 'fit',
-				height: '200px',
-				width: '150px',
-				styleHtmlContent: true, 
-				fullScreen: true,				
+				width: '100%',				
 				itemTpl: '<div><strong>{nickname}</strong></div>'
 				
 			}, {

@@ -36,6 +36,14 @@ Ext.define('EatSense.controller.Menu', {
         {
         	ref: 'productoverview',
         	selector: 'productoverview'
+        },
+        {
+        	ref: 'menuoverview',
+        	selector: 'menuoverview'
+        }, 
+        {
+        	ref: 'backToMenu',
+        	selector: '#productOvBackBt'
         }
     ],
     init: function() {
@@ -43,6 +51,9 @@ Ext.define('EatSense.controller.Menu', {
     	 this.control({
     		 '#menulist': {
              	select: this.showProductlist
+             },
+             '#productOvBackBt': {
+            	 tap: this.showMenu
              }
         });
     	 
@@ -57,16 +68,16 @@ Ext.define('EatSense.controller.Menu', {
     showProductlist: function(dataview, record) {
     	var main = this.getMain(), pov = this.getProductoverview(),
     	prodStore = record.productsStore;
-    	//load products into a store 
-//    	 var menuListStore = Ext.create('Ext.data.Store', {
-//			   model: 'EatSense.model.Product',
-//			   data: record.
-//		 });
+//    	this.getMenulist().deselect(record);
     	this.getProductlist().setStore(prodStore);
-    	//this.getProductlist().getStore().load();
     	main.setActiveItem(pov);
-    	//show product list
-    }
-        	
+    },
+	showMenu : function(a, b, c, d, e) {
+		console.log("Menu Controller -> showMenu");
+		 var menu = this.getMenuoverview(), main = this.getMain();
+		 this.getMenulist().setClearSelectionOnDeactivate(true);
+		 main.setActiveItem(menu);			  	 
+		 }
+     	
 });
 

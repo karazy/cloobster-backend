@@ -22,7 +22,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				xtype : 'label',
 				styleHtmlContent: true,
 				id: 'checkInDlg1Label1',
-				html : '<h1>CheckIn</h1>Do you want to check in at'
+				html : 'Do you want to check in at'
 			}, {
 				xtype: 'label',
 				styleHtmlContent: true,

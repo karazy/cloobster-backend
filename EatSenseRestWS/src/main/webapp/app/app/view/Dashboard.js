@@ -14,11 +14,12 @@ Ext.define('EatSense.view.Dashboard', {
         	layout: {
             	type : 'vbox',
             	pack : 'center',
-            	align: 'center',
+            	align: 'center',            	
         	},
         	defaults: {
                 //flex  : 1,
-                margin: 5
+                margin: 5,
+                type : 'fit'
             },
          	items: [
             {
@@ -31,7 +32,6 @@ Ext.define('EatSense.view.Dashboard', {
                 xtype: 'textfield',
                 label: 'Barcode',
                 name: 'barcodeTF'
-                //value: 'serg2011'
             },
             {
             xtype: 'button',
