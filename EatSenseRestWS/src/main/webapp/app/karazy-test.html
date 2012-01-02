@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>EatSense</title>
+<link rel="stylesheet" href="touch/resources/css/sencha-touch.css" type="text/css">
+<script type="text/javascript" charset="utf-8" src="phonegap-1.1.0.js"></script>
+<script type="text/javascript" charset="utf-8" src="lib/karazy-i18n-0.1.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+        document.addEventListener("deviceready", function () {
+        	if(!Karazy) {
+        		alert('Karazy plugin not loaded');
+        		console.log('Karazy plugin not loaded');
+        	} else {
+        		console.log('Karazy plugin loaded!');
+        		console.log('starting tests ...');
+        		var i18nPlugin = Karazy.i18n.getInstance();
+        	}
+        	
+        }, false);
+	</script>
+</body>
+</html>
