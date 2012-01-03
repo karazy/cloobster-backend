@@ -6,7 +6,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
         items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'CheckIn Confirmation',
+			title : i18nPlugin.translate('checkInTitle'),
 			items: [
 				{
 					xtype : 'button',
@@ -29,11 +29,11 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				xtype : 'label',
 				styleHtmlContent: true,
 				id: 'checkInDlg1Label1',
-				html : 'Do you want to check in at'
+				html :  i18nPlugin.translate('checkInStep1Label1')
 			}, {
 				xtype: 'label',
 				styleHtmlContent: true,
-				html: 'Choose a nickname associated with your checkIn:'
+				html: i18nPlugin.translate('checkInStep1Label2')
 			}, {
 				xtype : 'textfield',
 				id : 'nicknameTf',
@@ -42,7 +42,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			}, {
 				xtype : 'button',
 				id : 'confirmCheckInBt',
-				text : 'CheckIn',
+				text : i18nPlugin.translate('checkInButton'),
 				ui : 'normal'
 			}
 			]

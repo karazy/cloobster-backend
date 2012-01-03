@@ -128,7 +128,9 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    checkInConfirm: function(options) {
 	   console.log("CheckIn Controller -> checkInConfirm");
-	   this.getCheckInDlg1Label1().setHtml('Do you want to check in at <strong>'+options.model.data.spot+' at '+options.model.data.restaurantName+'</strong>');
+	  
+	   //'Do you want to check in at <strong>'+options.model.data.spot+' at '+options.model.data.restaurantName+'</strong>'	   
+	   this.getCheckInDlg1Label1().setHtml(i18nPlugin.translate('checkInStep1Label1', options.model.data.spot, options.model.data.restaurantName));
 		var checkInDialog = this.getCheckinconfirmation(), main = this.getMain();
 		this.getNickname().setValue(options.model.data.nickname);
 		this.models.activeCheckIn = options.model;
