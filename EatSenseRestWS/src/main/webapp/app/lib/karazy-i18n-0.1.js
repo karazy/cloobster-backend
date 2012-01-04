@@ -1,7 +1,9 @@
-/*Karazy namespace. Create if not existend.*/
+/*Karazy namespace. Create if not exists.*/
 var Karazy = (Karazy) ? Karazy : {};
 
-/* Karazy LocaleManager Singleton */
+/**
+ *  Karazy LocaleManager Singleton 
+ */
 Karazy.i18n = (function() {
 	
 	
@@ -94,6 +96,9 @@ Karazy.i18n = (function() {
 			 * Translates the given key into the corresponding value in selected language.
 			 * @param key
 			 * 		The key used to find a specific translation.
+			 * 			args
+			 * 			if the translated string contains placeholders in form of {0}, {1} ... additional parameters
+			 * 			with replacing values can be submited
 			 * @returns
 			 * 		Translation.
 			 */
@@ -102,7 +107,10 @@ Karazy.i18n = (function() {
 					 var value = translations[key];
 					 if(arguments.length > 1) {
 						 //this is a string with placeholders
-						 value = Ext.String.format(value, arguments[1], arguments[2]);
+						 //replace key with retrieved value and the call Ext.String.format
+						 //we need apply because we don't know the number of arguments
+						 arguments[0] = value;
+						 value = Ext.String.format.apply(this, arguments);
 					 }
 					 return value;
 				 }
@@ -122,12 +130,12 @@ Karazy.i18n = (function() {
 		
 	}
 	
+	/*Used to create one singleton instance.*/
 	var getInstance = function() {
 		if (!instance) {
             // create a instance
             instance = constructor();
         }
-
         // return the instance of the singletonClass
         return instance;
 	};

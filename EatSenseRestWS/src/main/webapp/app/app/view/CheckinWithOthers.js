@@ -24,12 +24,12 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 				xtype : 'label',
 				id : 'checkInDlg2Label1',
 				styleHtmlContent: true, 
-				html : 'Others are already at this spot.'
+				html : i18nPlugin.translate('checkInStep2Label1')
 			}, {
 				xtype: 'label',
 				id : 'checkInDlg2Label2',
 				styleHtmlContent: true,  
-				html: 'Select the person in the list you want to check in with or hit <i>On my own!</i>!'
+				html: i18nPlugin.translate('checkInStep2Label2')
 			}, 
 			{
 				xtype : 'list',
@@ -42,7 +42,7 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 			}, {
 				xtype : 'button',
 				id : 'checkinDlg2CancelBt',
-				text : 'On my own!',
+				text : i18nPlugin.translate('checkInStep2OnMyOwnButton'),
 				ui : 'normal'
 			}]
 		} ]

@@ -11,7 +11,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				{
 					xtype : 'button',
 					id : 'cancelCheckInBt',
-					text : 'Cancel',
+					text : i18nPlugin.translate('cancel'),
 					ui : 'back'
 				}  
 			]
@@ -42,7 +42,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			}, {
 				xtype : 'button',
 				id : 'confirmCheckInBt',
-				text : i18nPlugin.translate('checkInButton'),
+				text : i18nPlugin.translate('checkInStep1Button'),
 				ui : 'normal'
 			}
 			]

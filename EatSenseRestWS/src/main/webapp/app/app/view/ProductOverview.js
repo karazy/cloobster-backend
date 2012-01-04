@@ -6,11 +6,11 @@ Ext.define('EatSense.view.ProductOverview', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'Menu',
+			title : i18nPlugin.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',
 				id : 'productOvBackBt',
-				text : 'back',
+				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			} ]
 
@@ -22,7 +22,7 @@ Ext.define('EatSense.view.ProductOverview', {
 			id : 'productlist',
 			type : 'fit',
 			allowDeselect : true,
-			itemTpl : '<div><strong>{name}</strong> - {price}</div>',
+			itemTpl : '<div><strong>{name}</strong> - {price}€</div>',
 			listeners : {
 				itemtap : function(dv, ix, item, e) {
 //					dv.getSelected().clear();

@@ -6,7 +6,7 @@ Ext.define('EatSense.view.MenuOverview', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'Menu'
+			title : i18nPlugin.translate('menuTitle')
 		}, {
 			xtype : 'list',
 			id : 'menulist',
