@@ -18,7 +18,7 @@ var de_translation =
 "checkInStep2Label2" : "Falls du mit jemandem gemeinsam einchecken möchtest wähle sie/ihn aus der Liste oder drücke auf <i>Ich zieh mein eigenes Ding durch!</i>",
 "checkInStep2OnMyOwnButton" : "Ich zieh mein eigens Ding durch!",
 "checkInErrorBarcode" : "Der Barcode ist nicht valide oder leer!",
-"checkInErrorNickname":"Dein Nickname darf nicht leer sein und aus min. 4 Zeichen bestehen.",
+"checkInErrorNickname":"Dein Nickname darf nicht leer sein und muss zwischen {0} und {1} Zeichen lang sein.",
 "checkInErrorNicknameExists":"Der Nickname wird an diesem Spot bereits benutzt. Bitte such dir einen Anderen aus.",
 
 //Menu

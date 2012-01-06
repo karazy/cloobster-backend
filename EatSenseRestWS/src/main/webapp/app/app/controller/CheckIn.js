@@ -152,7 +152,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   //get CheckIn Object and save it. 
 	   var nickname = Ext.String.trim(this.getNickname().getValue());
 	   if(nickname.length < 3) {
-		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname'), Ext.emptyFn);
+		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {
 		   this.models.activeCheckIn.data.nickname = nickname;
 			 //checkIn(String userId, String nickname)
@@ -163,8 +163,15 @@ Ext.define('EatSense.controller.CheckIn', {
 					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
 					   	    	 var userId = response.data.userId;
 					   	    	 that.showCheckinWithOthers({userId : userId});
-					   		   } else {
+					   		   }
+					   		   else if(response.data.status == 'CHECKEDIN') {
 					   			   that.showMenu();
+					   		   }
+					   		   else if(response.data.status == 'VALIDATION_ERROR') {
+					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
+					   		   }
+					   		   else {
+					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
 					   		   }
 					   	    }
 					   }	   
