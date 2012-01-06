@@ -1,3 +1,6 @@
+/**
+ * Displays products belonging to a menu.
+ */
 Ext.define('EatSense.view.ProductOverview', {
 	extend : 'Ext.Container',
 	xtype : 'productoverview',
@@ -6,6 +9,7 @@ Ext.define('EatSense.view.ProductOverview', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
+			itemId: 'toolbar',
 			title : i18nPlugin.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',

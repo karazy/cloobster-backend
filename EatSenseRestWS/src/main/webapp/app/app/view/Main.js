@@ -1,3 +1,6 @@
+/**
+ * The viewport. Defining the global layout for the application.
+ */
 Ext.define('EatSense.view.Main', {
 	extend : 'Ext.Container',
 	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers' ],

@@ -1,3 +1,7 @@
+/**
+ * The dashboard represents the main screen of the application.
+ * From here the user can navigate, access his order history or change his settings.
+ */
 Ext.define('EatSense.view.Dashboard', {
     extend: 'Ext.Container',
     xtype: 'dashboard',
