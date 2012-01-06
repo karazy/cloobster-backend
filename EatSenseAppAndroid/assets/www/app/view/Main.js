@@ -1,14 +1,14 @@
 Ext.define('EatSense.view.Main', {
 	extend : 'Ext.Container',
-	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview' ],
+	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers' ],
 	config : {
-		fullscreen : false,
+		fullscreen : true,
 		layout : {
-			type: 'card',
-			animation: {
-				type: 'slide',
-				direction: 'left'
-			}
+			type: 'card'
+//			animation: {
+//	            type: 'slide',
+//	            direction: 'left'
+//	        }			
 		},
 		activeItem : 0,
 		items : [ {
@@ -17,6 +17,20 @@ Ext.define('EatSense.view.Main', {
 		}, {
 			layout : 'fit',
 			xtype : 'menuoverview'
-		} ]
+		}, {
+			layout : 'fit',
+			xtype : 'checkinconfirmation'
+		}, {
+			layout: 'fit',
+			xtype: 'checkinwithothers'
+		},
+		{
+			layout: 'fit',
+			xtype: 'productoverview'
+		},
+		{
+			xtype: 'productdetail'
+		} 
+		]
 	}
 });

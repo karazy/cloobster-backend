@@ -1,44 +1,33 @@
 Ext.define('EatSense.view.MenuOverview', {
 	extend : 'Ext.Container',
 	xtype : 'menuoverview',
-	fullscreen : true,
+	fullscreen : false,
 	config : {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'Menu'
+			title : i18nPlugin.translate('menuTitle')
 		}, {
-			xtype : 'panel',
-			layout : {
-				type : 'vbox',
-				pack : 'center',
-				align : 'center',
-			},
-			defaults : {
-				// flex : 1,
-				margin : 5
-			},
-			items : [ {
-				xtype : 'button',
-				id : 'subMenu1',
-				text : 'Vorspeisen',
-				ui : 'round'
-			}, {
-				xtype : 'button',
-				itemId : 'subMenu2',
-				text : 'Hauptspeisen',
-				ui : 'round',
-			}, {
-				xtype : 'button',
-				itemId : 'subMenu3',
-				text : 'Desert',
-				ui : 'round',
-			}, {
-				xtype : 'button',
-				itemId : 'subMenu4',
-				text : 'Getränke',
-				ui : 'round',
-			} ]
+			xtype : 'list',
+			id : 'menulist',
+			type : 'fit',
+			allowDeselect: true,
+			itemTpl : '<div>{title}</div>',
+			listeners: {
+				itemtap: function(dv, ix, item, e) {
+					// Delay the selection clear
+					// so they get a nice blue flash for HCI's sake
+//					setTimeout(function(){dv.deselect(ix);},500);
+//					dv.deselect(ix);
+//					dv.deselect(item);
+//					dv.getSelected().clear();
+					console.log('MenuOverview -> listener itemtap');
+				},
+				deactivate: function(eOpts) {
+					console.log('MenuOverview -> listener deactivate');
+					}
+				}
+			
 		} ]
 	}
 });

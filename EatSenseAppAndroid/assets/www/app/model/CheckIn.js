@@ -4,13 +4,15 @@ Ext.define('EatSense.model.CheckIn', {
 	fields: [
 		{name: 'status', type: 'string'},
 		{name: 'restaurantName', type: 'string'},
+		{name: 'restaurantId', type: 'string'},
 		{name: 'spot', type: 'string'},
-		{name: 'userId', type: 'string'}
+		{name: 'userId', type: 'string'},
+		{name: 'nickname', type: 'string'}
 	],
 	proxy: {
 		type: 'rest',
-		//http://2.karazy-eatsense.appspot.com
-		url: 'http://2.karazy-eatsense.appspot.com/restaurant/spot/', 
+		url: '/restaurant/spot/', 
+		//appendId: false,
 		reader: {
 			type: 'json',
 		}
