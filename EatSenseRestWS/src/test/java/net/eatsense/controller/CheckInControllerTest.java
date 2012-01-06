@@ -16,6 +16,7 @@ import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 
+import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class CheckInControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(CheckInController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
 		br = injector.getInstance(SpotRepository.class);
@@ -77,6 +78,28 @@ public class CheckInControllerTest {
 		assertEquals("FakeNik", chkin.getNickname());
 		
 	}
+	
+	@Test
+	public void testCheckInProcessValidationError() {		
+		CheckInDTO data = ctr.checkInIntent("b4rc0de");
+		assertEquals("Heidi und Paul", data.getRestaurantName());
+		assertNotNull(data.getUserId());
+		assertNotNull(data.getNickname());
+		assertNotNull(data.getRestaurantId());
+		// set nickname too short for this test
+		data.setNickname("Fa");
+		CheckInDTO data2 =  ctr.checkIn(data.getUserId(), data);
+		// validation error should happen
+		assertEquals(CheckInStatus.VALIDATION_ERROR.toString() ,data2.getStatus() );
+		
+		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
+		// status should still be intent
+		assertEquals(CheckInStatus.INTENT, chkin.getStatus());
+		// no nickname should have been written
+		assertEquals(null , chkin.getNickname());
+		
+	}
+	
 	
 	@Test
 	public void testCheckInProcessLinkedCheckIn() {

@@ -4,6 +4,7 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
 
+import org.apache.bval.guice.ValidationModule;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class DummyDataCreator {
     	@Before
     	public void setUp() throws Exception {
     		helper.setUp();
-    		injector = Guice.createInjector(new EatSenseDomainModule());
+    		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
     		rr = injector.getInstance(RestaurantRepository.class);
     		br = injector.getInstance(SpotRepository.class);
     	}

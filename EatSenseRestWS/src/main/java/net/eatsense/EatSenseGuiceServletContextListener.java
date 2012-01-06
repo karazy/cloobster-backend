@@ -1,6 +1,8 @@
 package net.eatsense;
 
 
+import org.apache.bval.guice.ValidationModule;
+
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Spot;
@@ -51,7 +53,7 @@ public class EatSenseGuiceServletContextListener extends
 						
 					}
 
-				});
+				}, new ValidationModule());
 	}
 
 }
