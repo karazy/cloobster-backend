@@ -3,12 +3,18 @@ package net.eatsense.controller;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
+import net.eatsense.domain.validation.CheckInStep2;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -41,6 +47,13 @@ public class CheckInController {
 		this.checkInRepo = checkInRepo;
 		this.barcodeRepo = barcodeRepo;
 	}
+	
+	@Inject
+    private Validator validator;
+
+    public void setValidator(Validator validator) {
+        this.validator = validator;
+    }
 
 	/**
 	 * Step 1 in checkIn process. User scanned barcode and and it is checked if
@@ -59,6 +72,7 @@ public class CheckInController {
 				logger.info("CheckIn attempt with barcode {}", barcode);
 				String tmpUserId = IdHelper.generateId();
 				String tmpNickName = NicknameGenerator.generateNickname();
+				
 				// set values for dto object
 				checkInDto.setRestaurantName(restaurant.getName());
 				checkInDto.setRestaurantId(restaurant.getId());
@@ -66,12 +80,25 @@ public class CheckInController {
 				checkInDto.setUserId(tmpUserId);
 				checkInDto.setSpot(spot.getName());
 				checkInDto.setNickname(tmpNickName);
+				
 				// set values for domain object
 				checkIn.setRestaurant(restaurant.getKey());
 				checkIn.setSpot(spot.getKey());
 				checkIn.setUserId(tmpUserId);
 				checkIn.setStatus(CheckInStatus.INTENT);
-				checkInRepo.saveOrUpdate(checkIn);
+				
+				// validation 
+				Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn);
+				if( constraintViolations.isEmpty() )  {
+					checkInRepo.saveOrUpdate(checkIn);
+				}
+				else {
+					logger.info("checkInIntent(): CheckIn object validation failed. Message(s):");
+					for (ConstraintViolation<CheckIn> violation : constraintViolations) {
+						logger.info( violation.getMessage() );
+					}
+					checkInDto.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
+				}
 			} else {
 				logger.info("CheckIn attempt failed! Reason: " + barcode + " is not a valid code.");
 				checkInDto.setStatus(CheckInStatus.BARCODE_ERROR.toString());
@@ -93,16 +120,38 @@ public class CheckInController {
 	 *            Either the pregenerated or a custom user nickname.
 	 */
 	public CheckInDTO checkIn(String userId, CheckInDTO checkIn) {
-		// TODO validate params!
+		if(userId == null || userId.isEmpty()) {
+			logger.info("Error: userId is null or empty");
+			checkIn.setStatus(CheckInStatus.ERROR.toString());
+			
+			return checkIn; 
+		}
+			
 		logger.info("Searching for CheckIn with userId {}", userId);
 		CheckIn chkinDatastore = checkInRepo.getByProperty("userId", userId);
 		
-		if (chkinDatastore.getStatus() == CheckInStatus.INTENT) {
+		if (chkinDatastore != null && chkinDatastore.getStatus() == CheckInStatus.INTENT) {
 			logger.info("CheckIn with userId {}", userId);			
-			chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
-			//TODO validation check nickname
+						
 			chkinDatastore.setNickname(checkIn.getNickname());
-			checkInRepo.saveOrUpdate(chkinDatastore);
+			
+			// validation 
+			Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(chkinDatastore, Default.class, CheckInStep2.class);
+			if( constraintViolations.isEmpty() )  {
+				chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
+				checkInRepo.saveOrUpdate(chkinDatastore);
+			}
+			else {
+				// constraint violations occurred setting status and logging error
+				logger.info("CheckIn object validation failed. Message(s):");
+				for (ConstraintViolation<CheckIn> violation : constraintViolations) {
+					logger.info( violation.getMessage() );
+				}
+				
+				checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
+				
+				return checkIn;
+			}
 			
 			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkinDatastore.getSpot()); 
 			Iterator<CheckIn> it = checkInsAtSpot.iterator();
@@ -120,7 +169,10 @@ public class CheckInController {
 			}
 			
 		}
-		//TODO Error handling
+		else  {
+			logger.info("Error: checkIn not found in datastore or status is not INTENT");
+			checkIn.setStatus(CheckInStatus.ERROR.toString());
+		}
 		
 		return checkIn;
 	}
@@ -148,7 +200,7 @@ public class CheckInController {
 				// Other users at this table exist.
 				for (CheckIn checkIn : checkInsAtSpot) {
 					
-					if(!checkIn.getUserId().equals(userId) && checkIn.getLinkedUserId() == null) {
+					if(!checkIn.getUserId().equals(userId) && checkIn.getLinkedUserId() == null && checkIn.getStatus() != CheckInStatus.INTENT) {
 						User user = new User();
 						
 						user.setUserId(checkIn.getUserId());

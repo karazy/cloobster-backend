@@ -35,6 +35,15 @@ public enum CheckInStatus {
 	/**
 	 * User wants to pay.
 	 */
-	PAYMENT_REQUEST
+	PAYMENT_REQUEST,	
+	/**
+	 * Error during object validation. 
+	 */
+	VALIDATION_ERROR,
+	
+	/**
+	 * General error during checkin
+	 */
+	ERROR
 
 }

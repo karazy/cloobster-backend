@@ -1,6 +1,10 @@
 package net.eatsense.domain;
 
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import net.eatsense.domain.validation.CheckInStep2;
 
 import com.googlecode.objectify.Key;
 
@@ -18,18 +22,22 @@ public class CheckIn extends GenericEntity{
 	 * Unique UserId. Generated on checkIn if this user doesn't have a 
 	 * user account.
 	 */
+	@NotNull
 	private String userId;
 	
 	/**
 	 * Status of this checkIn.
 	 * {@link CheckInStatus}
 	 */
+	@NotNull
 	private CheckInStatus status;
 	
 	/**
 	 * A users nickname used for this checkin.
 	 * E. g. Peter Pan or Funny Bee ;)
 	 */
+	@NotNull(groups=CheckInStep2.class)
+	@Size(min = 3, max = 14, groups=CheckInStep2.class)
 	private String nickname;
 	
 	/**
@@ -41,11 +49,13 @@ public class CheckIn extends GenericEntity{
 	/**
 	 * Restaurant this checkIn belongs to.
 	 */
+	@NotNull
 	private Key<Restaurant> restaurant;
 	
 	/**
 	 * Spot in this restaurant.
 	 */
+	@NotNull
 	private Key<Spot> spot;
 
 	public String getUserId() {
