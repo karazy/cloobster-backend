@@ -1,3 +1,7 @@
+/**
+ * Checkin Step 4
+ * Display a list of other users located at this particular spot.
+ */
 Ext.define('EatSense.view.CheckinWithOthers', {
     extend: 'Ext.Panel',
     xtype: 'checkinwithothers',

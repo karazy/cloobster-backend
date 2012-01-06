@@ -5,6 +5,7 @@ Ext.define('EatSense.model.Product', {
 	    {name: 'id', type: 'string'},
 		{name: 'name', type: 'string'},
 		{name: 'shortDesc', type: 'string'},
+		{name: 'longDesc', type: 'string'},
 		{name: 'price', type: 'string'}
 	]
 //,

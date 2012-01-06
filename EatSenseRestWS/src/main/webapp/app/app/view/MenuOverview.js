@@ -1,3 +1,9 @@
+/**
+ * Displays the restaurants menu(s).
+ * E. g.
+ * Burgers, Drinks, Steaks, Salads
+ * 
+ */
 Ext.define('EatSense.view.MenuOverview', {
 	extend : 'Ext.Container',
 	xtype : 'menuoverview',

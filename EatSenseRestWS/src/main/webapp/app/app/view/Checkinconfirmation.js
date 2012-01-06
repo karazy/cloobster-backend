@@ -1,3 +1,7 @@
+/**
+ * Checkin Step 2
+ * User has to confirm that he wants to checkin and has to choose a nickname.
+ */
 Ext.define('EatSense.view.Checkinconfirmation', {
     extend: 'Ext.Panel',
     xtype: 'checkinconfirmation',
