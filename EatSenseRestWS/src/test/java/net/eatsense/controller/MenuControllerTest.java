@@ -23,6 +23,7 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 
+import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class MenuControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(MenuController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
 		pr = injector.getInstance(ProductRepository.class);

@@ -1,5 +1,8 @@
 package net.eatsense.representation;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 
 
 
@@ -93,9 +96,4 @@ public class CheckInDTO {
 	public void setRestaurantId(Long restaurantId) {
 		this.restaurantId = restaurantId;
 	}
-
-	
-
-
-
 }

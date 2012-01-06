@@ -36,6 +36,9 @@
 		<slf4j.version>1.6.4</slf4j.version>
 		<!-- objectify -->
 		<objectify.version>3.0</objectify.version>
+		
+		<!--  apache bean validation -->
+		<bval.version>0.3-incubating</bval.version>
 
 	</properties>
 
@@ -53,6 +56,22 @@
 	</repositories>
 
 	<dependencies>
+		<!-- Apache Bean Validation dependencies -->
+		<dependency>
+        	<groupId>org.apache.geronimo.specs</groupId>
+        	<artifactId>geronimo-validation_1.0_spec</artifactId>
+        	<version>1.1</version>
+    	</dependency>
+    	<dependency>
+        	<groupId>org.apache.bval</groupId>
+        	<artifactId>org.apache.bval.bundle</artifactId>
+        	<version>${bval.version}</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.apache.bval</groupId>
+    		<artifactId>bval-guice</artifactId>
+    		<version>${bval.version}</version>
+		</dependency>
 
 		<!-- Objectify/Twig for object persistence -->
 
