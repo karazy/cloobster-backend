@@ -92,6 +92,7 @@ public class CheckInControllerTest {
 		CheckInDTO data2 =  ctr.checkIn(data.getUserId(), data);
 		// validation error should happen
 		assertEquals(CheckInStatus.VALIDATION_ERROR.toString() ,data2.getStatus() );
+		assertEquals("checkInErrorNickname", data2.getError().getErrorKey());
 		
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());
 		// status should still be intent
@@ -104,6 +105,7 @@ public class CheckInControllerTest {
 		data2 =  ctr.checkIn(data.getUserId(), data);
 		// validation error should happen
 		assertEquals(CheckInStatus.VALIDATION_ERROR.toString() ,data2.getStatus() );
+		assertEquals("checkInErrorNickname", data2.getError().getErrorKey());
 				
 		chkin = cr.getByProperty("userId", data.getUserId());
 		// status should still be intent
@@ -119,6 +121,8 @@ public class CheckInControllerTest {
 		chkin = cr.getByProperty("userId", data.getUserId());
 		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());
 		assertEquals("FakeNik", chkin.getNickname());
+		
+
 	}
 	
 	
