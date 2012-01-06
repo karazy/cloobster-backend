@@ -37,7 +37,7 @@ public class CheckIn extends GenericEntity{
 	 * E. g. Peter Pan or Funny Bee ;)
 	 */
 	@NotNull(groups=CheckInStep2.class)
-	@Size(min = 3, max = 14, groups=CheckInStep2.class)
+	@Size(min = 3, max = 25, groups=CheckInStep2.class)
 	private String nickname;
 	
 	/**

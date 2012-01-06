@@ -145,7 +145,8 @@ public class CheckInController {
 				// constraint violations occurred setting status and logging error
 				logger.info("CheckIn object validation failed. Message(s):");
 				for (ConstraintViolation<CheckIn> violation : constraintViolations) {
-					logger.info( violation.getMessage() );
+					
+					logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
 				}
 				
 				checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
