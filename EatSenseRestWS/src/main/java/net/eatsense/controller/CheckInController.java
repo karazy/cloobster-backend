@@ -19,6 +19,7 @@ import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.ErrorDTO;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
 
@@ -138,6 +139,7 @@ public class CheckInController {
 			// validation 
 			Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(chkinDatastore, Default.class, CheckInStep2.class);
 			if( constraintViolations.isEmpty() )  {
+				
 				chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
 				checkInRepo.saveOrUpdate(chkinDatastore);
 			}
@@ -150,6 +152,8 @@ public class CheckInController {
 				}
 				
 				checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
+				
+				checkIn.setError( new ErrorDTO("checkInValidationError", "nickname") ) ;
 				
 				return checkIn;
 			}

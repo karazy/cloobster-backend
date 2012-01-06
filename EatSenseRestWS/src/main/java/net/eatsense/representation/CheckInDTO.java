@@ -47,6 +47,8 @@ public class CheckInDTO {
 	 */
 	private String nickname;
 	
+	private ErrorDTO error;
+	
 
 	public String getStatus() {
 		return status;
@@ -95,5 +97,13 @@ public class CheckInDTO {
 
 	public void setRestaurantId(Long restaurantId) {
 		this.restaurantId = restaurantId;
+	}
+
+	public ErrorDTO getError() {
+		return error;
+	}
+
+	public void setError(ErrorDTO error) {
+		this.error = error;
 	}
 }

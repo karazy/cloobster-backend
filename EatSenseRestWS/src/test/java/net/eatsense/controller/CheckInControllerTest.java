@@ -86,7 +86,8 @@ public class CheckInControllerTest {
 		assertNotNull(data.getUserId());
 		assertNotNull(data.getNickname());
 		assertNotNull(data.getRestaurantId());
-		// set nickname too short for this test
+		
+		//Part1: set nickname too short for this test
 		data.setNickname("Fa");
 		CheckInDTO data2 =  ctr.checkIn(data.getUserId(), data);
 		// validation error should happen
@@ -98,6 +99,26 @@ public class CheckInControllerTest {
 		// no nickname should have been written
 		assertEquals(null , chkin.getNickname());
 		
+		//Part2: set nickname too long for this test
+		data.setNickname("Fa123456789012345678901234567890");
+		data2 =  ctr.checkIn(data.getUserId(), data);
+		// validation error should happen
+		assertEquals(CheckInStatus.VALIDATION_ERROR.toString() ,data2.getStatus() );
+				
+		chkin = cr.getByProperty("userId", data.getUserId());
+		// status should still be intent
+		assertEquals(CheckInStatus.INTENT, chkin.getStatus());
+		// no nickname should have been written
+		assertEquals(null , chkin.getNickname());
+		
+		// Part3: set nickname right now
+		data.setNickname("FakeNik");
+		data2 = ctr.checkIn(data.getUserId(), data);
+		assertEquals(CheckInStatus.CHECKEDIN.toString() ,data2.getStatus() );
+		
+		chkin = cr.getByProperty("userId", data.getUserId());
+		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());
+		assertEquals("FakeNik", chkin.getNickname());
 	}
 	
 	
