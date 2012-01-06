@@ -1,4 +1,4 @@
-Ext.define('EatSense.controller.CheckIn', {
+Ext.define('EatSense.controller.Menu', {
     extend: 'Ext.app.Controller',
     config: {
         profile: Ext.os.deviceType.toLowerCase()
@@ -6,59 +6,94 @@ Ext.define('EatSense.controller.CheckIn', {
     
 	views : [
 		'Main',
-		'Dashboard'
+		'Dashboard',
+		'MenuOverview',
+		'ProductOverview',
+		'ProductDetail'
 	],
 	stores : [
-	'CheckIn'
+	'Menu'
 	],
 	refs: [
         {
             ref       : 'main',
-            selector  : 'main',
-            xtype     : 'main',
+            selector  : 'mainview',
+            xtype     : 'mainview',
             autoCreate: true
         },
         {
-        	ref: 'searchfield',
-        	selector : 'dashboard textfield'
-        	
+            ref       : 'main',
+            selector  : 'main',
+            xtype     : 'main'
+        },
+        {
+        	ref: 'menulist',
+        	selector : '#menulist'        	
+        },
+        {
+        	ref: 'productlist',
+        	selector : '#productlist'        	
+        }, 
+        {
+        	ref: 'productoverview',
+        	selector: 'productoverview'
+        },
+        {
+        	ref: 'menuoverview',
+        	selector: 'menuoverview'
+        }, 
+        {
+        	ref: 'productdetail',
+        	selector: 'productdetail'        	
+        },
+        {
+        	ref: 'backToMenu',
+        	selector: '#productOvBackBt'
         }
     ],
     init: function() {
-    	console.log('initialized CheckInController');
-    	this.getMainView().create();
+    	console.log('initialized MenuController');
     	 this.control({
-            '#checkInBtn': {
-                tap: this.checkIn
-            }
+    		 '#menulist': {
+             	select: this.showProductlist
+             },
+             '#productlist' : {
+            	select: this.showProductDetail 
+             },
+             '#productOvBackBt': {
+            	 tap: this.showMenu
+             }
         });
+    	 
+    	 //store retrieved models
+    	 var models = {};
+    	 this.models = models;
+    	 //models.menudata holds all menu related data
     },
-        
-    checkIn: function(options) {
-    	console.log('checkIn attempt');
-    	var barcode = "no code";
-    	console.log("before scanning");
-    	window.plugins.barcodeScanner.scan( function(result, barcode) {
-    		barcode = result.text;		    	
-    		console.log('scanned barcode ' + barcode);
-        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
-        	    success: function(model) {
-        	    	console.log("CheckIn Status: " + model.get('status'));
-        	    	console.log("CheckIn Restaurant: " + model.get('restaurantName'));
-        	    	Ext.Msg.confirm("CheckIn", "Bei "+ model.get('restaurantName') +" einchecken?", Ext.emptyFn);
-        	    },
-        	    failure: function(record, operation) {
-        	    	Ext.Msg.alert("Failed loading barcode: " + barcode, Ext.emptyFn);
-        	    }
-        	});
-	    	}, function(error) {
-	    			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
-	        }
-    	);
-    	console.log("after scanning");
-
-    	
-    
-   }	
+    /**
+     * shows the list of products of a menu 
+     */
+    showProductlist: function(dataview, record) {
+    	var main = this.getMain(), pov = this.getProductoverview(),
+    	prodStore = record.productsStore;
+    	this.getProductlist().setStore(prodStore);
+    	this.getMenulist().refresh();
+    	main.setActiveItem(pov);
+    },
+	showMenu : function(a, b, c, d, e) {
+		console.log("Menu Controller -> showMenu");
+		 var menu = this.getMenuoverview(), main = this.getMain(),detail = this.getProductdetail();
+		 this.getMenulist().setClearSelectionOnDeactivate(true);
+		 detail.floating = false;
+		 detail.hide();
+		 main.setActiveItem(menu);			  	 
+	},
+	showProductDetail: function(dataview, record) {
+		 var detail = this.getProductdetail(), main = this.getMain();
+		 detail.floating = true;
+		 detail.show();
+		//var detailPanel = new EatSense.view.ProductDetail();
+	}
+     	
 });
 

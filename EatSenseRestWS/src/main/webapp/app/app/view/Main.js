@@ -27,6 +27,9 @@ Ext.define('EatSense.view.Main', {
 		{
 			layout: 'fit',
 			xtype: 'productoverview'
+		},
+		{
+			xtype: 'productdetail'
 		} 
 		]
 	}
