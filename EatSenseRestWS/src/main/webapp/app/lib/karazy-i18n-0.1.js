@@ -25,7 +25,13 @@ Karazy.i18n = (function() {
 	/**
 	 * 
 	 */
-	var resFolder = "../res/", prefix = "eatsense", suffix=".json";
+	//var resFolder = "../res/", prefix = "eatsense", suffix=".json";
+
+	
+	/**
+	 * Ext store holding translation values
+	 */
+	var _store;
 	
 	
 	//private functions
@@ -45,7 +51,8 @@ Karazy.i18n = (function() {
 
 	
 	//Phonegap functions
-	
+	//This is another approach. Using phonegaps file capabilities
+	/*
 //	 function onDeviceReady() {
 //	        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 //	    }
@@ -77,7 +84,7 @@ Karazy.i18n = (function() {
 	    function fail(evt) {
 	        console.log(evt.target.error.code);
 	    }
-
+*/
 	
 	
 	/**
@@ -85,26 +92,47 @@ Karazy.i18n = (function() {
 	 * Constructor used for initialization.
 	 */
 	function constructor() {
-		//check browser/system locale and load corresponding locale file
+		//get browser/system locale 
 		var lang = getLanguage();
-		//in a later state read language files from system
-		//translations = readLocaleFile(lang);
+		
+		//Create Ext model and store
+		Ext.define('Translation', {
+			extend: 'Ext.data.Model',
+			idProperty: 'key',
+			fields: [
+				{name: 'key', type: 'string'},
+				{name: 'translation', type: 'string'}
+			],
+			proxy: {
+				type: 'ajax',
+				url: 'res/eatsense-'+lang+'.json', 
+				//appendId: false,
+				reader: {
+					type: 'json',
+				}
+			}
+		});
 
+		_store = Ext.create('Ext.data.Store', {
+		    model   : 'Translation'
+		});
+		
+	
 		/*public methods*/
 		return {
 			/**
 			 * Translates the given key into the corresponding value in selected language.
 			 * @param key
 			 * 		The key used to find a specific translation.
-			 * 			args
 			 * 			if the translated string contains placeholders in form of {0}, {1} ... additional parameters
 			 * 			with replacing values can be submited
 			 * @returns
 			 * 		Translation.
 			 */
-			 translate: function(key) {		
-				 if (translations[key] && translations[key] !== '') {
-					 var value = translations[key];
+			 translate: function(key) {
+				 var translationObj = this.getStore().getById(key), value ="";
+				 if(translationObj !== undefined && translationObj != null) {
+					 value = translationObj.data.translation;
 					 if(arguments.length > 1) {
 						 //this is a string with placeholders
 						 //replace key with retrieved value and the call Ext.String.format
@@ -112,9 +140,19 @@ Karazy.i18n = (function() {
 						 arguments[0] = value;
 						 value = Ext.String.format.apply(this, arguments);
 					 }
-					 return value;
 				 }
-				 return '';
+//				 if (translations[key] && translations[key] !== '') {
+//					 value = translations[key];
+//					 if(arguments.length > 1) {
+//						 //this is a string with placeholders
+//						 //replace key with retrieved value and the call Ext.String.format
+//						 //we need apply because we don't know the number of arguments
+//						 arguments[0] = value;
+//						 value = Ext.String.format.apply(this, arguments);
+//					 }
+//					 
+//				 }
+				 return value;
 			 },
 			 /**
 			  * Used to manually set translation object.
@@ -124,6 +162,23 @@ Karazy.i18n = (function() {
 			  */
 			setTranslations: function(trans) {
 				translations = trans;
+			},
+			
+			getStore: function() {
+				return _store;
+			},
+			/**
+			 * Loads translation data into the store. When operation is finished executes the given callback function.
+			 * @param callback
+			 */
+			init: function(callback) {
+				_store.load({
+					     scope   : this,
+					     callback: function(records, operation, success) {
+					     //the operation object contains all of the details of the load operation
+						     callback();
+					     }
+				     });
 			}
 			
 		};

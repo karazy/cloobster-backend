@@ -1,12 +1,24 @@
 var i18nPlugin = Karazy.i18n;
 i18nPlugin.setTranslations(de_translation);
+// i18nPlugin.setTranslations(de_translation);
 
-Ext.Loader.setConfig({enabled:true});
-Ext.application({
-    name: 'EatSense',
-    controllers: ['CheckIn', 'Menu'],
-    models: ['CheckIn', 'User', 'Menu', 'Product'],
-    launch: function() {
+i18nPlugin.init(function() {
 
-    }
+	Ext.Loader.setConfig({
+		enabled : true
+	});
+	Ext.application({
+		name : 'EatSense',
+		controllers : [ 'CheckIn', 'Menu' ],
+		models : [ 'CheckIn', 'User', 'Menu', 'Product' ],
+		init : function() {
+			// i18nPlugin = Karazy.i18n;
+			// i18nPlugin.setTranslations(de_translation);
+			console.log('init');
+		},
+		launch : function() {
+			console.log('launch');
+		}
+	});
+
 });
