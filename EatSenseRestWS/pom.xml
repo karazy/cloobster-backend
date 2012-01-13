@@ -19,7 +19,7 @@
 		<gae.version>1.6.1</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
-		
+
 		<!-- Maven GAE Plugin -->
 		<maven.gae.plugin>0.9.2</maven.gae.plugin>
 
@@ -36,8 +36,8 @@
 		<slf4j.version>1.6.4</slf4j.version>
 		<!-- objectify -->
 		<objectify.version>3.0</objectify.version>
-		
-		<!--  apache bean validation -->
+
+		<!-- apache bean validation -->
 		<bval.version>0.3-incubating</bval.version>
 
 	</properties>
@@ -58,19 +58,19 @@
 	<dependencies>
 		<!-- Apache Bean Validation dependencies -->
 		<dependency>
-        	<groupId>org.apache.geronimo.specs</groupId>
-        	<artifactId>geronimo-validation_1.0_spec</artifactId>
-        	<version>1.1</version>
-    	</dependency>
-    	<dependency>
-        	<groupId>org.apache.bval</groupId>
-        	<artifactId>org.apache.bval.bundle</artifactId>
-        	<version>${bval.version}</version>
-    	</dependency>
-    	<dependency>
-    		<groupId>org.apache.bval</groupId>
-    		<artifactId>bval-guice</artifactId>
-    		<version>${bval.version}</version>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-validation_1.0_spec</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bval</groupId>
+			<artifactId>org.apache.bval.bundle</artifactId>
+			<version>${bval.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bval</groupId>
+			<artifactId>bval-guice</artifactId>
+			<version>${bval.version}</version>
 		</dependency>
 
 		<!-- Objectify/Twig for object persistence -->
@@ -247,18 +247,17 @@
 								</resource>
 							</resources>
 						</configuration>
-					</execution>
+					</execution> 
 					<execution>
-						<id>copy-app</id>
-						<phase>compile</phase>
+						<phase>generate-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/copytest</outputDirectory>
 							<resources>
 								<resource>
-									<directory>app/</directory>
+									<directory>../EatSenseApp/WebContent/app/</directory>
 								</resource>
 							</resources>
 						</configuration>

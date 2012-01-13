@@ -1,5 +1,6 @@
 Ext.define('EatSense.model.CheckIn', {
 	extend: 'Ext.data.Model',
+	requires: ['EatSense.model.Error'],
 	idProperty: 'userId',
 	fields: [
 		{name: 'status', type: 'string'},
@@ -16,5 +17,9 @@ Ext.define('EatSense.model.CheckIn', {
 		reader: {
 			type: 'json',
 		}
-	}
+	},
+	associations : {
+        type : "hasOne",
+        model : "EatSense.model.Error"
+    }
 });

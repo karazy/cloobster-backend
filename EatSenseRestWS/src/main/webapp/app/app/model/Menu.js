@@ -11,7 +11,7 @@ Ext.define('EatSense.model.Menu', {
 		url: '/restaurant/menu/', 
 		reader: {
 			type: 'json',
-		}
+		} 
 	},
 	hasMany: {model: 'EatSense.model.Product', name: 'products'}
 });
