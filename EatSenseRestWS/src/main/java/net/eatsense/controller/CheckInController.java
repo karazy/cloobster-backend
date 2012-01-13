@@ -170,6 +170,17 @@ public class CheckInController {
 					//abort checkin
 					return checkIn;
 				}
+				
+				
+			}
+			
+			while(it.hasNext()) {
+				CheckIn next = it.next();
+				
+				if(next.getUserId().equals(userId) || !isPaymentLinkPossible(next)) {
+					// filter this checkin because user is not available for linking
+					it.remove();
+				}
 			}
 			
 			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
@@ -214,7 +225,7 @@ public class CheckInController {
 				// Other users at this table exist.
 				for (CheckIn checkIn : checkInsAtSpot) {
 					
-					if(!checkIn.getUserId().equals(userId) && checkIn.getLinkedUserId() == null && checkIn.getStatus() != CheckInStatus.INTENT && checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
+					if(!checkIn.getUserId().equals(userId) && isPaymentLinkPossible(checkIn)) {
 						User user = new User();
 						
 						user.setUserId(checkIn.getUserId());
@@ -239,8 +250,9 @@ public class CheckInController {
 	public void linkToUser(String userId, String linkedUserId) {
 		CheckIn checkInUser = checkInRepo.getByProperty("userId", userId);
 		CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", linkedUserId);
+		
 		if(checkInUser != null && checkInLinkedUser != null) {
-			if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && checkInLinkedUser.getStatus() != CheckInStatus.INTENT && checkInLinkedUser.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
+			if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && isPaymentLinkPossible(checkInLinkedUser)) {
 				checkInUser.setLinkedUserId(linkedUserId);
 				checkInRepo.saveOrUpdate(checkInUser);
 			}
@@ -258,13 +270,19 @@ public class CheckInController {
 		//Don't return something. User is not really interested if check in cancel failed.
 		//System has to deal with this.
 		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
-
+		
+		if (chkin == null) { // CheckIn not found for this userId
+			logger.info("Error: Recieved cancel for CheckIn with userId {}, but this userId was not found.", userId);
+			return;
+		}
+			
 		if (chkin.getStatus() == CheckInStatus.INTENT) {
 			logger.info("Cancel CheckIn with userId {}", userId);
 			checkInRepo.delete(chkin);
 			
 		} else {
 			// Error handling
+			logger.info("Error: Recieved cancel for CheckIn with userId {}, but status was not INTENT.", userId);
 			
 		}
 	}
@@ -278,23 +296,34 @@ public class CheckInController {
 	 */
 	private List<CheckIn> getOtherChekIns(CheckIn chkin)
 	{
-		List<CheckIn> usersAtSpot = null;
+		List<CheckIn> otherCheckIns = null;
 		
-			
 		List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
 		
 		if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
-			usersAtSpot = new ArrayList<CheckIn>();
+			otherCheckIns = new ArrayList<CheckIn>();
 			
 			// Other users at this table exist.
 			for (CheckIn checkIn : checkInsAtSpot) {
 				
-				if(!checkIn.getUserId().equals(chkin.getUserId()) && checkIn.getLinkedUserId() == null && checkIn.getStatus() != CheckInStatus.INTENT ) {
-					usersAtSpot.add(checkIn);
+				if(!checkIn.getUserId().equals(chkin.getUserId()) && checkIn.getStatus() != CheckInStatus.INTENT ) {
+					otherCheckIns.add(checkIn);
 				}
 			}
 		}
-		return usersAtSpot;
+		return otherCheckIns;
 	}
-
+	
+	/**
+	 * Helper method for condition checks of an existing CheckIn
+	 * 
+	 * @param CheckIn object which needs to be checked available linking
+	 * @return TRUE if all conditions are met so this existing checked in user available for payment linking
+	 */
+	private boolean isPaymentLinkPossible(CheckIn existingCheckIn) {
+		
+		return (existingCheckIn.getLinkedUserId() == null && 
+				existingCheckIn.getStatus() != CheckInStatus.INTENT && 
+				existingCheckIn.getStatus() != CheckInStatus.PAYMENT_REQUEST);
+	}
 }
