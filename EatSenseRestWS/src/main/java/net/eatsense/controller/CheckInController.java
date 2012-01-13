@@ -19,6 +19,7 @@ import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.ErrorDTO;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
 
@@ -137,29 +138,37 @@ public class CheckInController {
 			
 			// validation 
 			Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(chkinDatastore, Default.class, CheckInStep2.class);
-			if( constraintViolations.isEmpty() )  {
-				chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
-				checkInRepo.saveOrUpdate(chkinDatastore);
-			}
-			else {
+			if( !constraintViolations.isEmpty() )  {
 				// constraint violations occurred setting status and logging error
-				logger.info("CheckIn object validation failed. Message(s):");
+				logger.info("CheckIn validation failed. Message(s):");
 				for (ConstraintViolation<CheckIn> violation : constraintViolations) {
-					
 					logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
+					if( violation.getPropertyPath().toString().equals("nickname") ) {
+						
+						checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
+						
+						checkIn.setError( new ErrorDTO("checkInErrorNickname", "3", "25") ) ;
+					}
+					else {
+						checkIn.setStatus(CheckInStatus.ERROR.toString() );
+						return checkIn;
+					}
 				}
 				
-				checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
-				
 				return checkIn;
-			}
-			
-			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkinDatastore.getSpot()); 
+			}			
+     					
+			List<CheckIn> checkInsAtSpot = getOtherChekIns(chkinDatastore);
 			Iterator<CheckIn> it = checkInsAtSpot.iterator();
 			while(it.hasNext()) {
 				CheckIn next = it.next();
-				if(next.getStatus() == CheckInStatus.INTENT || next.getUserId().equals(chkinDatastore.getUserId())) {
-					it.remove();
+				
+				if(next.getNickname().equals(chkinDatastore.getNickname() ) ) {
+					logger.info("Error: checkin with duplicate nickname tried: "+ chkinDatastore.getNickname());
+					checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
+					checkIn.setError( new ErrorDTO("checkInErrorNicknameExists") ) ;
+					//abort checkin
+					return checkIn;
 				}
 			}
 			
@@ -168,6 +177,10 @@ public class CheckInController {
 			} else {
 				checkIn.setStatus(CheckInStatus.CHECKEDIN.toString());
 			}
+			
+			// save the checkin
+			chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
+			checkInRepo.saveOrUpdate(chkinDatastore);
 			
 		}
 		else  {
@@ -193,7 +206,7 @@ public class CheckInController {
 		
 		if (chkin.getStatus() == CheckInStatus.CHECKEDIN) {
 			
-			List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
+			List<CheckIn> checkInsAtSpot = getOtherChekIns(chkin);
 			
 			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
 				usersAtSpot = new ArrayList<User>();
@@ -201,7 +214,7 @@ public class CheckInController {
 				// Other users at this table exist.
 				for (CheckIn checkIn : checkInsAtSpot) {
 					
-					if(!checkIn.getUserId().equals(userId) && checkIn.getLinkedUserId() == null && checkIn.getStatus() != CheckInStatus.INTENT) {
+					if(!checkIn.getUserId().equals(userId) && checkIn.getLinkedUserId() == null && checkIn.getStatus() != CheckInStatus.INTENT && checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
 						User user = new User();
 						
 						user.setUserId(checkIn.getUserId());
@@ -254,6 +267,34 @@ public class CheckInController {
 			// Error handling
 			
 		}
+	}
+	
+	/**
+	 * Return other checkings at the same spot.
+	 * 
+	 * 
+	 * @param chkin A user
+	 * @return All users at spot checkedin.
+	 */
+	private List<CheckIn> getOtherChekIns(CheckIn chkin)
+	{
+		List<CheckIn> usersAtSpot = null;
+		
+			
+		List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
+		
+		if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
+			usersAtSpot = new ArrayList<CheckIn>();
+			
+			// Other users at this table exist.
+			for (CheckIn checkIn : checkInsAtSpot) {
+				
+				if(!checkIn.getUserId().equals(chkin.getUserId()) && checkIn.getLinkedUserId() == null && checkIn.getStatus() != CheckInStatus.INTENT ) {
+					usersAtSpot.add(checkIn);
+				}
+			}
+		}
+		return usersAtSpot;
 	}
 
 }
