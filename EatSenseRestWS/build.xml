@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EatSenseRestWS" default="default" basedir=".">
+	<target name="default">
+		<echo message="Hello World from build.xml" />
+		
+		
+		
+		<move todir="target" includeemptydirs="false">
+			<fileset dir="target">
+			</fileset>
+			
+			<regexpmapper from="^(.+)\.desktop\.(.+)$$" to="\1.\2" />
+			<!--<regexpmapper from="^(.*)\.java$$" to="\1.java.bak"/>  -->
+			
+		</move>
+	</target>
+</project>

@@ -11,7 +11,7 @@ Ext.define('EatSense.model.CheckIn', {
 	],
 	proxy: {
 		type: 'rest',
-		url: '/restaurant/spot/', 
+		url: 'http://192.168.1.111:8888/restaurant/spot', 
 		//appendId: false,
 		reader: {
 			type: 'json',

@@ -12,6 +12,7 @@
         android:smallScreens="true" />
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -33,37 +34,38 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
+            android:name=".EatSenseTestApp"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/app_name"
-            android:name=".EatSenseTestApp" >
-            <intent-filter >
+            android:label="@string/app_name" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
+            android:name="com.phonegap.DroidGap"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/app_name"
-            android:name="com.phonegap.DroidGap" >
-            <intent-filter >
+            android:label="@string/app_name" >
+            <intent-filter>
             </intent-filter>
         </activity>
         <activity
-            android:configChanges="orientation|keyboardHidden"
             android:name="com.google.zxing.client.android.CaptureActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="stateAlwaysHidden" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="com.phonegap.plugins.barcodescanner.SCAN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:label="@string/share_name"
-            android:name="com.google.zxing.client.android.encode.EncodeActivity" >
-            <intent-filter >
+            android:name="com.google.zxing.client.android.encode.EncodeActivity"
+            android:label="@string/share_name" >
+            <intent-filter>
                 <action android:name="com.phonegap.plugins.barcodescanner.ENCODE" />
 
                 <category android:name="android.intent.category.DEFAULT" />

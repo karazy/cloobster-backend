@@ -40,6 +40,9 @@
 		<!-- apache bean validation -->
 		<bval.version>0.3-incubating</bval.version>
 
+		<!-- ant run plugin -->
+		<antrun.version>1.7</antrun.version>
+
 	</properties>
 
 	<repositories>
@@ -170,6 +173,12 @@
 			<artifactId>jersey-guice</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
+		<!-- Ant run plugin for special purposes -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>${antrun.version}</version>
+		</dependency>
 
 
 		<!-- Unit tests -->
@@ -247,23 +256,46 @@
 								</resource>
 							</resources>
 						</configuration>
-					</execution> 
+					</execution>
 					<execution>
-						<phase>generate-resources</phase>
+						<phase>package</phase>
+						<id>copy_app</id>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/${project.build.finalName}/copytest</outputDirectory>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 							<resources>
 								<resource>
 									<directory>../EatSenseApp/WebContent/app/</directory>
+									<excludes>
+										<exclude>*.phone.*</exclude>
+									</excludes>
 								</resource>
 							</resources>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>${antrun.version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<ant target="default" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
 			<plugin>
@@ -293,6 +325,19 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-resources-plugin</artifactId>
+										<versionRange>[2.0.0,)</versionRange>
+										<goals>
+											<goal>copy-resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
 										<groupId>net.kindleit</groupId>
 										<artifactId>maven-gae-plugin</artifactId>
 										<versionRange>[0.7.3,)</versionRange>
@@ -310,6 +355,7 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+
 			</plugins>
 		</pluginManagement>
 	</build>
