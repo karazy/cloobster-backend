@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.karazy.eatsense</groupId>
+	<artifactId>EatSenseRestWS</artifactId>
+	<packaging>war</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>net.karazy.eatsense.EatSenseRestWS</name>
+
+	<properties>
+
+		<!-- GWT needs at least java 1.6 -->
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+
+		<!-- GAE properties -->
+		<gae.version>1.6.1</gae.version>
+		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
+		<gae.application.version>1</gae.application.version>
+
+		<!-- Maven GAE Plugin -->
+		<maven.gae.plugin>0.9.2</maven.gae.plugin>
+
+		<!-- Don't let your Mac use a crazy non-standard encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- Jersey -->
+		<jetty.version>7.4.1.v20110513</jetty.version>
+		<jersey.version>1.9.1</jersey.version>
+		<!-- guice -->
+		<guice.version>3.0</guice.version>
+		<!-- logging -->
+		<slf4j.version>1.6.4</slf4j.version>
+		<!-- objectify -->
+		<objectify.version>3.0</objectify.version>
+
+		<!-- apache bean validation -->
+		<bval.version>0.3-incubating</bval.version>
+
+		<!-- ant run plugin -->
+		<antrun.version>1.7</antrun.version>
+
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>objectify-appengine</id>
+			<url>http://objectify-appengine.googlecode.com/svn/maven</url>
+		</repository>
+		<repository>
+			<id>sli4j-repository</id>
+			<name>sli4j Repository for Maven</name>
+			<url>http://sli4j.googlecode.com/svn/repo</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- Apache Bean Validation dependencies -->
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-validation_1.0_spec</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bval</groupId>
+			<artifactId>org.apache.bval.bundle</artifactId>
+			<version>${bval.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bval</groupId>
+			<artifactId>bval-guice</artifactId>
+			<version>${bval.version}</version>
+		</dependency>
+
+		<!-- Objectify/Twig for object persistence -->
+
+		<!-- <dependency> <groupId>com.google.code.twig</groupId> <artifactId>twig-persist</artifactId> 
+			<version>2.0-beta3</version> </dependency> -->
+		<dependency>
+			<groupId>com.googlecode.objectify</groupId>
+			<artifactId>objectify</artifactId>
+			<version>${objectify.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+
+
+		<!-- Logging slf4j -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+
+		<!-- Automatic injection of logger object. Didn't work for me <dependency> 
+			<groupId>com.googlecode.sli4j</groupId> <artifactId>sli4j-slf4j</artifactId> 
+			<version>2.0</version> </dependency> -->
+
+		<!-- Google App Engine (GAE) -->
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-1.0-sdk</artifactId>
+			<version>${gae.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-testing</artifactId>
+			<version>${gae.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-stubs</artifactId>
+			<version>${gae.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-labs</artifactId>
+			<version>${gae.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>${guice.version}</version>
+		</dependency>
+
+		<!-- Jersey for RESTful webservices -->
+		<!-- jersey core -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>${jersey.version}</version>
+		</dependency>
+		<!-- used to process JAXB annotations -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-json</artifactId>
+			<version>${jersey.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jaxb-impl</artifactId>
+					<groupId>com.sun.xml.bind</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jaxb-api</artifactId>
+					<groupId>javax.xml.bind</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Configure jersey through guice -->
+		<dependency>
+			<groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-guice</artifactId>
+			<version>${jersey.version}</version>
+		</dependency>
+		<!-- Ant run plugin for special purposes -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>${antrun.version}</version>
+		</dependency>
+
+
+		<!-- Unit tests -->
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency> 
+	</dependencies>
+
+	<build>
+		<!-- Generate compiled stuff in the folder used for development mode -->
+		<outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+
+		<plugins>
+
+
+
+			<!-- Google App Engine plugin -->
+			<plugin>
+				<groupId>net.kindleit</groupId>
+				<artifactId>maven-gae-plugin</artifactId>
+				<version>${maven.gae.plugin}</version>
+				<executions>
+					<execution>
+						<id />
+						<!-- <phase>validate</phase> -->
+						<phase>package</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+						<!-- <jvmFlags>
+								<jvmFlag>-Xdebug</jvmFlag>
+								<jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</jvmFlag>
+							</jvmFlags> -->
+							
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Add source folders to test classpath in order to run gwt-tests as 
+				normal junit-tests -->
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<additionalClasspathElements>
+						<additionalClasspathElement>${project.build.sourceDirectory}</additionalClasspathElement>
+						<additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
+					</additionalClasspathElements>
+					<useManifestOnlyJar>false</useManifestOnlyJar>
+					<forkMode>always</forkMode>
+
+					<!-- Folder for generated testing stuff -->
+					<systemProperties>
+						<property>
+							<name>gwt.args</name>
+							<value>-out ${project.build.directory}/${project.build.finalName}</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
+
+			<!-- Copy static web files before executing gwt:run -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4.2</version>
+				<executions>
+			
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/webapp</directory>
+								</resource>
+								<resource>
+									<directory>../EatSenseApp/WebContent/</directory>
+									<excludes>
+										<exclude>*.phone.*</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>${antrun.version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<ant target="default" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.8</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+					<wtpversion>2.0</wtpversion>
+					<additionalProjectnatures>
+						<projectnature>com.google.appengine.eclipse.core.gaeNature</projectnature>
+					</additionalProjectnatures>
+				</configuration>
+			</plugin>
+		</plugins>
+
+		<!-- Required by m2e for import into eclipse. No effect on command line 
+			builds -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-resources-plugin</artifactId>
+										<versionRange>[2.0.0,)</versionRange>
+										<goals>
+											<goal>copy-resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>${antrun.version}</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>net.kindleit</groupId>
+										<artifactId>maven-gae-plugin</artifactId>
+										<versionRange>[0.7.3,)</versionRange>
+										<goals>
+											<goal>unpack</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

@@ -207,10 +207,16 @@
 				<executions>
 					<execution>
 						<id />
-						<phase>validate</phase>
+						<!-- <phase>validate</phase> -->
+						<phase>package</phase>
 						<goals>
 							<goal>unpack</goal>
 						</goals>
+						<configuration>
+							<!-- <jvmFlags> <jvmFlag>-Xdebug</jvmFlag> <jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</jvmFlag> 
+								</jvmFlags> -->
+
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -254,22 +260,10 @@
 								<resource>
 									<directory>src/main/webapp</directory>
 								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
-						<phase>package</phase>
-						<id>copy_app</id>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
-							<resources>
 								<resource>
-									<directory>../EatSenseApp/WebContent/app/</directory>
+									<directory>../EatSenseApp/WebContent/</directory>
 									<excludes>
-										<exclude>*.phone.*</exclude>
+										<exclude>**/*.phone.*</exclude>
 									</excludes>
 								</resource>
 							</resources>
@@ -294,6 +288,29 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>maven-replacer-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<file>target/${project.build.finalName}/app/lib/karazy-config.js</file>
+					<replacements>
+						<replacement>
+							<token>#SERVICE_URL</token>
+							<value>http://localhost:8888</value>
+						</replacement>
+					</replacements>
+				</configuration>
 			</plugin>
 
 
@@ -322,6 +339,7 @@
 					<version>1.0.0</version>
 					<configuration>
 						<lifecycleMappingMetadata>
+
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
@@ -330,6 +348,32 @@
 										<versionRange>[2.0.0,)</versionRange>
 										<goals>
 											<goal>copy-resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>${antrun.version}</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.google.code.maven-replacer-plugin</groupId>
+										<artifactId>maven-replacer-plugin</artifactId>
+										<versionRange>1.4.0</versionRange>
+										<goals>
+											<goal>replace</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
@@ -349,8 +393,6 @@
 										<execute />
 									</action>
 								</pluginExecution>
-
-
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
