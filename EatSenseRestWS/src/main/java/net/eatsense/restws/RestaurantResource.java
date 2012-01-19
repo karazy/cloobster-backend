@@ -33,7 +33,7 @@ import com.google.inject.Inject;
  * 
  */
 @Path("/restaurant")
-public class RestaurantResource {
+public class RestaurantResource{
 
 	private RestaurantRepository restaurantrepo;
 	private DummyDataDumper ddd;

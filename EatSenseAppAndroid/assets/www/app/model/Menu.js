@@ -8,10 +8,10 @@ Ext.define('EatSense.model.Menu', {
 	],
 	proxy: {
 		type: 'rest',
-		url: 'http://192.168.1.111:8888/restaurant/menu', 
+		url: '/restaurant/menu/', 
 		reader: {
 			type: 'json',
-		}
+		} 
 	},
 	hasMany: {model: 'EatSense.model.Product', name: 'products'}
 });

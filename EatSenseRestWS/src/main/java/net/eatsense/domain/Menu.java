@@ -5,7 +5,7 @@ import javax.persistence.Transient;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
-public class Menu extends GenericEntity {
+public class Menu extends GenericEntity{
 	
 	private String title;
 	

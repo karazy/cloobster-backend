@@ -7,11 +7,11 @@ Ext.define('EatSense.view.Main', {
 	config : {
 		fullscreen : true,
 		layout : {
-			type: 'card'
-//			animation: {
-//	            type: 'slide',
-//	            direction: 'left'
-//	        }			
+			type: 'card',
+			animation: {
+	            type: 'slide',
+	            direction: 'left'
+	        }			
 		},
 		activeItem : 0,
 		items : [ {

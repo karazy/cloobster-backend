@@ -131,8 +131,11 @@ Karazy.i18n = (function() {
 			 * Translates the given key into the corresponding value in selected language.
 			 * @param key
 			 * 		The key used to find a specific translation.
-			 * 			if the translated string contains placeholders in form of {0}, {1} ... additional parameters
-			 * 			with replacing values can be submited
+			 * 			if the translated string contains placeholders in form of {0}, {1} ... 
+			 * 			1. additional parameters with replacing values 
+			 * 			OR
+			 * 			2. an array containing placeholders
+			 * 			can be submited
 			 * @returns
 			 * 		Translation.
 			 */
@@ -156,8 +159,20 @@ Karazy.i18n = (function() {
 						 //this is a string with placeholders
 						 //replace key with retrieved value and the call Ext.String.format
 						 //we need apply because we don't know the number of arguments
-						 arguments[0] = value;
-						 value = Ext.String.format.apply(this, arguments);
+						 var _array;
+						 
+						 if(Object.prototype.toString.call(arguments[1]) === '[object Array]') {
+							 _array = new Array();
+							 _array[0] = value;
+							 for(var i = 0; i < arguments[1].length; i++) {
+								 _array[i+1] = arguments[1][i];
+							 }
+						 }	else {
+							 arguments[0] = value;
+							 _array = arguments;
+						 }						 						 						 
+						 
+						 value = Ext.String.format.apply(this, _array);
 					 }
 				 }
 				 return value;

@@ -1,5 +1,6 @@
 Ext.define('EatSense.model.CheckIn', {
 	extend: 'Ext.data.Model',
+	requires: ['EatSense.model.Error'],
 	idProperty: 'userId',
 	fields: [
 		{name: 'status', type: 'string'},
@@ -11,10 +12,15 @@ Ext.define('EatSense.model.CheckIn', {
 	],
 	proxy: {
 		type: 'rest',
-		url: 'http://192.168.1.111:8888/restaurant/spot', 
+		url: '/restaurant/spot/', 
 		//appendId: false,
 		reader: {
 			type: 'json',
 		}
-	}
+	},
+	//BUG (Sencha) doesn't work currently
+	associations : {
+        type : "hasOne",
+        model : "EatSense.model.Error"
+    }
 });

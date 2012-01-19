@@ -99,12 +99,12 @@ Ext.define('EatSense.controller.CheckIn', {
     	 this.models = models;
     	 
     	 //private functions
-    	 this.doCheckInIntent = function(barcode, scope) {
+    	 this.doCheckInIntent = function(barcode) {
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
     	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	    	} else {
-    	        	var that = scope; //
+    	        	var that = this;
     	        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
     	        	    success: function(model) {
     	        	    	console.log("CheckInIntent Status: " + model.get('status'));
@@ -118,14 +118,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	    	}
     	        	    	
     	        	    }
-    	        	,
-    	        	    failure: function(record, operation) {
-    	        	    	console.log('Error: '+operation+' '+record);
-    	        	    	Ext.Msg.alert('Error: '+operation+' '+record);    	        	    	
-    	        	    },
     	        	});
     	    	}
-    	 }
+    	 };
     },
     /**
      * CheckIn Process
@@ -133,42 +128,14 @@ Ext.define('EatSense.controller.CheckIn', {
      */    
     checkInIntent: function(options) {
     	console.log('CheckIn Controller -> checkIn');
-    	var barcode, me = this;
+    	var barcode, that = this;
     	if(this.getProfile() == 'desktop' || !window.plugins.barcodeScanner) {
-    		barcode = Ext.String.trim(this.getSearchfield().getValue());
-    		me.doCheckInIntent(barcode);
+    		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
+    		this.doCheckInIntent(barcode);
     	} else if(this.getProfile() == 'phone') {
-    		console.log('calling barcodescanner plugin');
     		window.plugins.barcodeScanner.scan(function(result, barcode) {
     			barcode = result.text;
-    			console.log('captured barcode '+barcode);
-//    			me.doCheckInIntent(barcode, me);
-    			//---TEST
-    			if(barcode.length == 0) {
-    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-    	    	} else {
-    	        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
-    	        	    success: function(model) {
-    	        	    	console.log("CheckInIntent Status: " + model.get('status'));
-    	        	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	  
-    	        	    	if(model.data.status == "INTENT") {
-    	        	    		me.checkInConfirm({model:model});
-    	        	    	} else if(model.data.status == "BARCODE_ERROR") {
-    	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-    	        	    	} else {
-    	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-    	        	    	}
-    	        	    	
-    	        	    },
-    	        	    failure: function(record, operation) {
-    	        	    	console.log('Error: '+operation+' '+record);
-    	        	    	Ext.Msg.alert('Error: '+operation+' '+record);    	        	    	
-    	        	    },
-    	        	});
-    	    	}
-    			
-    			//---TEST
-    			
+    			that.doCheckInIntent(barcode);
     		}, function(error) {
     			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
     		});
@@ -211,14 +178,13 @@ Ext.define('EatSense.controller.CheckIn', {
 					   	     if(response.data.status == 'YOUARENOTALONE') {
 					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
 					   	    	 var userId = response.data.userId;
-					   	    	 console.log('YOUARENOTALONE calling showCheckinWithOthers with userId '+userId);
 					   	    	 that.showCheckinWithOthers({userId : userId});
 					   		   }
 					   		   else if(response.data.status == 'CHECKEDIN') {
 					   			   that.showMenu();
 					   		   }
 					   		   else if(response.data.status == 'VALIDATION_ERROR') {
-					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
+					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.raw.error.errorKey,response.raw.error.substitutions), Ext.emptyFn);
 					   		   }
 					   		   else {
 					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
@@ -251,32 +217,26 @@ Ext.define('EatSense.controller.CheckIn', {
    showCheckinWithOthers: function(options) {
 	   console.log("CheckIn Controller -> showCheckinWithOthers");
 	   var checkinwithothersDlg = this.getCheckinwithothers(), main = this.getMain();
-	   console.log("CheckIn Controller -> showCheckinWithOthers 1");
+	   
 	    var userListStore = Ext.create('Ext.data.Store', {
 	   			   model: 'EatSense.model.User',
 	   			   proxy: {
 	   				   type: 'rest',
-	   				   url : 'http://192.168.1.103:8888/restaurant/spot/users?userId='+options.userId,
+	   				   url : '/restaurant/spot/users?userId='+options.userId,
 	   				   reader: {
 	   					   type: 'json'
 	   			   		}
 	   			   }
 	   		   });
-	    console.log("CheckIn Controller -> showCheckinWithOthers 2");
 	     //set list content in view	  
 	  	 this.getUserlist().setStore(userListStore); 
-	  	console.log("CheckIn Controller -> showCheckinWithOthers 3");
 	  	 this.getUserlist().getStore().load({
 	  	     scope   : this,
 	  	     callback: function(records, operation, success) {
 	  	     //the operation object contains all of the details of the load operation
-	  	    	 console.log(success);
-	  	    	 console.log(operation.action);
-		  	     console.log(records);
-		  	     console.log(records.length);
+	  	     console.log(records);
 	  	     }
 	  	     });
-	  	console.log("CheckIn Controller -> showCheckinWithOthers 4");
 	  	main.setActiveItem(checkinwithothersDlg);
    },
    /**
@@ -289,7 +249,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   console.log("CheckIn Controller -> linkToUser");
 	   
     	Ext.Ajax.request({
-    	    url: 'http://192.168.1.103:8888/restaurant/spot/users',
+    	    url: '/restaurant/spot/users',
     	    method: 'POST',
     	    scope: this,
     	    params: {
@@ -317,7 +277,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   model: 'EatSense.model.Menu',
 	 			   proxy: {
 	 				   type: 'rest',
-	 				   url : 'http://192.168.1.103:8888/restaurant/'+restaurantId+'/menu',
+	 				   url : '/restaurant/'+restaurantId+'/menu',
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}

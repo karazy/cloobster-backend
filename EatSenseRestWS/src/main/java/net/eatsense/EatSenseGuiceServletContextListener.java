@@ -30,8 +30,8 @@ public class EatSenseGuiceServletContextListener extends
 	@Override
 	protected Injector getInjector() {
 		return Guice.createInjector(
-				new JerseyServletModule() {
-					@Override
+				new JerseyServletModule() { 
+					@Override 					
 					protected void configureServlets() {
 						bind(RestaurantResource.class);
 						bind(Spot.class);

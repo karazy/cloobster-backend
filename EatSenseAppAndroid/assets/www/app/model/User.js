@@ -7,7 +7,7 @@ Ext.define('EatSense.model.User', {
 	 	],
 	 	proxy: {
 	 		type: 'rest',
-	 		url: 'http://192.168.1.111:8888/user', 
+	 		url: '/user/', 
 	 		reader: {
 	 			type: 'json',
 	 		}

@@ -17,7 +17,7 @@ public class Restaurant extends GenericEntity {
 
 	/**
 	 * Name of location.
-	 */
+	 */ 
 	private String name;
 
 	/**
