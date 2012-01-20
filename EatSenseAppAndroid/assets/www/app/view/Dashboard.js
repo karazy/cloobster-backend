@@ -1,3 +1,7 @@
+/**
+ * The dashboard represents the main screen of the application.
+ * From here the user can navigate, access his order history or change his settings.
+ */
 Ext.define('EatSense.view.Dashboard', {
     extend: 'Ext.Container',
     xtype: 'dashboard',
@@ -25,18 +29,19 @@ Ext.define('EatSense.view.Dashboard', {
             {
             xtype: 'button',
            	id: 'checkInBtn',
-            text: 'CheckIn',
+            text: i18nPlugin.translate('checkInButton'),
             ui: 'normal'
             },
             {
                 xtype: 'textfield',
-                label: 'Barcode',
-                name: 'barcodeTF'
+                label: i18nPlugin.translate('barcode'),
+                name: 'barcodeTF',
+                hidden: (profile == 'phone' && window.plugins.barcodeScanner)? true : false
             },
             {
             xtype: 'button',
            	itemId: 'settingsBtn',
-            text: 'Settings',
+            text: i18nPlugin.translate('settingsButton'),
             ui: 'normal',
             }
             ]

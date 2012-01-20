@@ -1,0 +1,60 @@
+[ 
+  //general translations
+  { "key" : "ok",
+    "translation" : "Ok"
+  },
+  { "key" : "cancel",
+    "translation" : "Abbrechen"
+  },
+  { "key" : "back",
+    "translation" : "zurück"
+  },
+  { "key" : "errorTitle",
+    "translation" : "Fehler"
+  },
+  { "key" : "errorMsg",
+    "translation" : "Entschuldige! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!"
+  },
+  //main menu
+  { "key" : "checkInButton",
+    "translation" : "CheckIn"
+  },
+  { "key" : "settingsButton",
+    "translation" : "Einstellungen"
+  },
+  //checkin process
+  { "key" : "checkInTitle",
+    "translation" : "CheckIn Bestätigung"
+  },
+  { "key" : "checkInStep1Label1",
+    "translation" : "Möchtest du bei <strong>{0} bei {1}</strong> einchecken?"
+  },
+  { "key" : "checkInStep1Label2",
+    "translation" : "Gib einen Nickname ein oder benutze den Vorgegebenen um hier einzuchecken."
+  },
+  { "key" : "checkInStep1Button",
+    "translation" : "Los gehts!"
+  },
+  { "key" : "checkInStep2Label1",
+    "translation" : "Andere haben hier bereits eingecheckt."
+  },
+  { "key" : "checkInStep2Label2",
+    "translation" : "Falls du mit jemandem gemeinsam einchecken möchtest wähle sie/ihn aus der Liste oder drücke auf <i>Ich zieh mein eigenes Ding durch!</i>"
+  },
+  { "key" : "checkInStep2OnMyOwnButton",
+    "translation" : "Ich zieh mein eigens Ding durch!"
+  },
+  { "key" : "checkInErrorBarcode",
+    "translation" : "Der Barcode ist nicht valide oder leer!"
+  },
+  { "key" : "checkInErrorNickname",
+    "translation" : "Dein Nickname darf nicht leer sein und muss zwischen {0} und {1} Zeichen lang sein."
+  },
+  { "key" : "checkInErrorNicknameExists",
+    "translation" : "Der Nickname wird an diesem Spot bereits benutzt. Bitte such dir einen Anderen aus."
+  },
+  //menu
+  { "key" : "menuTitle",
+    "translation" : "Menü"
+  }
+]

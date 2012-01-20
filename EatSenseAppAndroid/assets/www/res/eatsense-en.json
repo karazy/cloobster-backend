@@ -7,4 +7,8 @@
 'Select the person in the list you want to check in with or hit <i>On my own!</i>!
 'On my own!'
 
+
+The barcode you provided is not valid or empty!
+'Sorry! An unknown error occured! We are working hard to fix this issue.'
+'Your nickname must contain at least 3 characters.'
 */

@@ -97,6 +97,30 @@ Ext.define('EatSense.controller.CheckIn', {
     	 
     	 var models = {};
     	 this.models = models;
+    	 
+    	 //private functions
+    	 this.doCheckInIntent = function(barcode) {
+    	    	//validate barcode field
+    	    	if(barcode.length == 0) {
+    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
+    	    	} else {
+    	        	var that = this;
+    	        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
+    	        	    success: function(model) {
+    	        	    	console.log("CheckInIntent Status: " + model.get('status'));
+    	        	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	  
+    	        	    	if(model.data.status == "INTENT") {
+    	        	    		that.checkInConfirm({model:model});
+    	        	    	} else if(model.data.status == "BARCODE_ERROR") {
+    	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
+    	        	    	} else {
+    	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
+    	        	    	}
+    	        	    	
+    	        	    }
+    	        	});
+    	    	}
+    	 };
     },
     /**
      * CheckIn Process
@@ -104,28 +128,20 @@ Ext.define('EatSense.controller.CheckIn', {
      */    
     checkInIntent: function(options) {
     	console.log('CheckIn Controller -> checkIn');
-    	var barcode = Ext.String.trim(this.getSearchfield().getValue());
-    	//validate barcode field
-    	if(barcode.length == 0) {
-    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-    	} else {
-        	var that = this;
-        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
-        		synchronous: true,
-        	    success: function(model) {
-        	    	console.log("CheckInIntent Status: " + model.get('status'));
-        	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	  
-        	    	if(model.data.status == "INTENT") {
-        	    		that.checkInConfirm({model:model});
-        	    	} else if(model.data.status == "BARCODE_ERROR") {
-        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-        	    	} else {
-        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-        	    	}
-        	    	
-        	    }
-        	});
+    	var barcode, that = this;
+    	if(this.getProfile() == 'desktop' || !window.plugins.barcodeScanner) {
+    		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
+    		this.doCheckInIntent(barcode);
+    	} else if(this.getProfile() == 'phone') {
+    		window.plugins.barcodeScanner.scan(function(result, barcode) {
+    			barcode = result.text;
+    			that.doCheckInIntent(barcode);
+    		}, function(error) {
+    			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
+    		});
     	}
+    	
+
    },
    /**
     * CheckIn Process
@@ -168,7 +184,7 @@ Ext.define('EatSense.controller.CheckIn', {
 					   			   that.showMenu();
 					   		   }
 					   		   else if(response.data.status == 'VALIDATION_ERROR') {
-					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
+					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.raw.error.errorKey,response.raw.error.substitutions), Ext.emptyFn);
 					   		   }
 					   		   else {
 					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
@@ -214,7 +230,13 @@ Ext.define('EatSense.controller.CheckIn', {
 	   		   });
 	     //set list content in view	  
 	  	 this.getUserlist().setStore(userListStore); 
-	  	 this.getUserlist().getStore().load();
+	  	 this.getUserlist().getStore().load({
+	  	     scope   : this,
+	  	     callback: function(records, operation, success) {
+	  	     //the operation object contains all of the details of the load operation
+	  	     console.log(records);
+	  	     }
+	  	     });
 	  	main.setActiveItem(checkinwithothersDlg);
    },
    /**

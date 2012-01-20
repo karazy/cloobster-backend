@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.zxing;
+package com.google.zxing; 
 
 import java.util.Hashtable;
 
@@ -24,7 +24,7 @@ import java.util.Hashtable;
  * @author Sean Owen
  */
 public final class BarcodeFormat {
-
+ 
   // No, we can't use an enum here. J2ME doesn't support it.
 
   private static final Hashtable VALUES = new Hashtable();

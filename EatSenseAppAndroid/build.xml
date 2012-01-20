@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EatSenseAndroidApp" default="copySenchaApp" basedir=".">
+	<property name="appDir" value="../EatSenseRestWS/src/main/webapp/app"/>
+	<property name="config" value="assets/www/lib/karazy-config.js"/>
+	
+	<target name="copySenchaApp" depends="">
+		<echo message="Copy App" />
+		<copy todir="assets/www">
+		    <fileset dir="${appDir}">
+		    	<exclude name="**/*.desktop.*"/>
+		    </fileset>
+		  </copy>
+	</target>	
+	
+	<target name="renameFiles" depends="copySenchaApp">
+		<echo message="Rename files" />
+		<move todir="." includeemptydirs="false">
+			<fileset dir=".">
+			</fileset>			
+			<regexpmapper from="^(.+)\.phone\.(.+)$$" to="\1.\2" />			
+		</move>
+	</target>
+	
+	<target name="replaceConfig" depends="renameFiles">
+		<echo message="Setting config values" />
+		<replaceregexp file="${config}"  match="(serviceUrl :) .*"
+            replace="\1 'http://192.168.1.111:8888'"
+            byline="true">			
+		</replaceregexp>
+	</target>
+</project>

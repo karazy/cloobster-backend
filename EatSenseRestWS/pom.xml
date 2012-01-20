@@ -19,7 +19,7 @@
 		<gae.version>1.6.1</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
-		
+
 		<!-- Maven GAE Plugin -->
 		<maven.gae.plugin>0.9.2</maven.gae.plugin>
 
@@ -36,9 +36,12 @@
 		<slf4j.version>1.6.4</slf4j.version>
 		<!-- objectify -->
 		<objectify.version>3.0</objectify.version>
-		
-		<!--  apache bean validation -->
+
+		<!-- apache bean validation -->
 		<bval.version>0.3-incubating</bval.version>
+
+		<!-- ant run plugin -->
+		<antrun.version>1.7</antrun.version>
 
 	</properties>
 
@@ -58,19 +61,19 @@
 	<dependencies>
 		<!-- Apache Bean Validation dependencies -->
 		<dependency>
-        	<groupId>org.apache.geronimo.specs</groupId>
-        	<artifactId>geronimo-validation_1.0_spec</artifactId>
-        	<version>1.1</version>
-    	</dependency>
-    	<dependency>
-        	<groupId>org.apache.bval</groupId>
-        	<artifactId>org.apache.bval.bundle</artifactId>
-        	<version>${bval.version}</version>
-    	</dependency>
-    	<dependency>
-    		<groupId>org.apache.bval</groupId>
-    		<artifactId>bval-guice</artifactId>
-    		<version>${bval.version}</version>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-validation_1.0_spec</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bval</groupId>
+			<artifactId>org.apache.bval.bundle</artifactId>
+			<version>${bval.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bval</groupId>
+			<artifactId>bval-guice</artifactId>
+			<version>${bval.version}</version>
 		</dependency>
 
 		<!-- Objectify/Twig for object persistence -->
@@ -170,6 +173,12 @@
 			<artifactId>jersey-guice</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
+		<!-- Ant run plugin for special purposes -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>${antrun.version}</version>
+		</dependency>
 
 
 		<!-- Unit tests -->
@@ -198,10 +207,18 @@
 				<executions>
 					<execution>
 						<id />
+						<!-- <phase>validate</phase> -->
 						<phase>validate</phase>
 						<goals>
 							<goal>unpack</goal>
 						</goals>
+						<configuration>
+							<jvmFlags>
+								<jvmFlag>-Xdebug</jvmFlag>
+								<jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</jvmFlag>
+							</jvmFlags>
+
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -235,36 +252,78 @@
 				<version>2.4.2</version>
 				<executions>
 					<execution>
-						<phase>compile</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
 							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 							<resources>
+								<!-- <resource>
+									<directory>src/main/resources</directory>
+
+								</resource>-->
+								
+
 								<resource>
 									<directory>src/main/webapp</directory>
+									<excludes>
+										<exclude>**/*.phone.*</exclude>
+									</excludes>
 								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-app</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
-							<resources>
-								<resource>
-									<directory>app/</directory>
-								</resource>
+
 							</resources>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>build-helper-maven-plugin</artifactId> 
+				<version>1.7</version> <executions> <execution> <id>add-resource</id> <phase>compile</phase> 
+				<goals> <goal>add-resource</goal> </goals> <configuration> <resources> <resource> 
+				<directory>../EatSenseApp/WebContent/</directory> <targetPath>${project.build.directory}/${project.build.finalName}</targetPath> 
+				<excludes> <exclude>**/*.phone.*</exclude> </excludes> </resource> </resources> 
+				<resource> </resource> </configuration> </execution> </executions> </plugin> -->
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>${antrun.version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<ant target="default" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>maven-replacer-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<file>target/${project.build.finalName}/app/lib/karazy-config.js</file>
+					<replacements>
+						<replacement>
+							<token>(serviceUrl :) .*</token>
+							<value>$1 'http://localhost:8888'</value>
+						</replacement>
+					</replacements>
+				</configuration>
+			</plugin>
+
 
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
 			<plugin>
@@ -291,7 +350,52 @@
 					<version>1.0.0</version>
 					<configuration>
 						<lifecycleMappingMetadata>
+
 							<pluginExecutions>
+								<!-- <pluginExecution> <pluginExecutionFilter> <groupId>org.codehaus.mojo</groupId> 
+									<artifactId>build-helper-maven-plugin</artifactId> <versionRange>1.7</versionRange> 
+									<goals> <goal>add-resource</goal> </goals> </pluginExecutionFilter> <action> 
+									<execute /> </action> </pluginExecution> -->
+
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-resources-plugin</artifactId>
+										<versionRange>[2.0.0,)</versionRange>
+										<goals>
+											<goal>copy-resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>${antrun.version}</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.google.code.maven-replacer-plugin</groupId>
+										<artifactId>maven-replacer-plugin</artifactId>
+										<versionRange>1.4.0</versionRange>
+										<goals>
+											<goal>replace</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>net.kindleit</groupId>
@@ -305,12 +409,11 @@
 										<execute />
 									</action>
 								</pluginExecution>
-
-
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+
 			</plugins>
 		</pluginManagement>
 	</build>

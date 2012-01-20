@@ -9,7 +9,7 @@ import javax.persistence.Id;
  * @author Frederik Reifschneider
  *
  */
-public abstract class GenericEntity {
+public abstract class GenericEntity{
 	
 	/**
 	 * Unique identifier for this entity.
