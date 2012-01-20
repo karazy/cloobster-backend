@@ -2,141 +2,188 @@
  * 
  */
 
-Ext.application({
-	launch : function() {
+Ext
+		.application({
+			launch : function() {
 
-		var panel = Ext.create('Ext.Panel', {
-			fullscreen : true,
-			id : 'testPanel',
-			scrollable : 'vertical',
-			layout : {
-				type : 'vbox'
-			},
-			defaults : {
-				styleHtmlContent : false,
-			},
-			items : [ {
-				docked : 'top',
-				xtype : 'toolbar',
-				title : 'Product detail',
-				items : [ {
-					xtype : 'button',
-					text : 'back',
-					ui : 'back'
-				} ]
+				var panel = Ext
+						.create(
+								'Ext.Panel',
+								{
+									fullscreen : true,
+									id : 'testPanel',
+									scrollable : 'vertical',
+									layout : {
+										type : 'vbox',
+										align : 'middle',
+									// pack : 'center'
+									},
+									defaults : {
+										styleHtmlContent : false,
+									},
+									items : [
+											{
+												docked : 'top',
+												xtype : 'toolbar',
+												title : 'Product detail',
+												items : [ {
+													xtype : 'button',
+													text : 'back',
+													ui : 'back'
+												} ]
 
-			}, {
-				xtype : 'panel',
-				docked : 'top',
-//				
-				items : [ {
-					xtype : 'label',
-					html : '<div><h2>Product Name</h2><p>Detailed product description.</p></div>'
-				}, {
-					xtype : 'panel',
-					layout : 'hbox',
-					flex : 1,
-					// html: 'spinner + button panel',
-					items : [ {
-						xtype : 'spinnerfield',
-						increment : 1
-					}, {
-						xtype : 'button',
-						text : 'Card'
-					} ]
-				} ]
-			}, {
-				xtype : 'panel',
-				itemId : 'choicePanel',
-				// scrollable : 'vertical',
-				items : [ {
-					xtype : 'label',
-					html : '<p>Options panel</p>'
-				}, {
-					xtype : 'panel',
-					itemId : 'radioButtonPanel',
-					layout : {
-						type : 'vbox',
-						align : 'stretch'
-					},
-					items : [ {
-						xtype : 'label',
+											},
+											{
+												xtype : 'panel',
+												docked : 'top',
+												
+												layout : {
+													align : 'middle',
+													type : 'hbox'
+												// pack : 'center'
+												},
+												items : [
+														{
+															xtype : 'label',
+															flex: 2,
+															html : '<div><h2>Product Name</h2><p>Detailed product description.</p></div>'
+														},
+														{
+															xtype : 'panel',
+															flex: 1,
+															border : '5',
+															layout : {
+																type : 'vbox',
+																align : 'stretch'
+															},
+//															flex : 1,
+															// html: 'spinner +
+															// button panel',
+															items : [
+																	{
+																		xtype : 'spinnerfield',
+																		increment : 1
+																	},
+																	{
+																		xtype : 'button',
+																		text : 'Card'
+																	} ]
+														} ]
+											},
+											{
+												xtype : 'panel',
+												itemId : 'choicePanel',
+												// scrollable : 'vertical',
+												items : [
+														{
+															xtype : 'label',
+															html : '<p>Options panel</p>'
+														},
+														{
+															xtype : 'panel',
+															itemId : 'radioButtonPanel',
+															layout : {
+																type : 'vbox',
+															// align : 'stretch'
+															},
+															items : [
+																	{
+																		xtype : 'label',
 
-						html : '<p>Mandatory options (radio buttons)</p>'
-					}, {
-						xtype : 'panel',
-						// height : 40,
-						layout : {
-							type : 'vbox',
-							// align : 'stretch'
-							pack : 'center'
-						},
-						items : [ {
-							xtype : 'radiofield',
-							value : '1',
-							name : 'group1',
-							label : 'Radio 1',
-							checked : true
-						}, {
-							xtype : 'radiofield',
-							value : '2',
-							name : 'group1',
-							label : 'Radio 2'
-						}
-						, {
-							xtype : 'radiofield',
-							value : '3',
-							name : 'group1',
-							label : 'Radio 3'
-						}]
+																		html : '<p>Mandatory options (radio buttons)</p>'
+																	},
+																	{
+																		xtype : 'panel',
+																		// height
+																		// : 40,
+																		layout : {
+																			type : 'vbox',
+																		// align
+																		// :
+																		// 'stretch'
+																		// pack
+																		// :
+																		// 'center'
+																		},
+																		defaults : {
+																			labelWidth : '50%'
+																		},
+																		items : [
+																				{
+																					xtype : 'radiofield',
+																					value : '1',
+																					name : 'group1',
+																					label : 'Radio 1',
+																					checked : true
+																				},
+																				{
+																					xtype : 'radiofield',
+																					value : '2',
+																					name : 'group1',
+																					label : 'Radio 2'
+																				},
+																				{
+																					xtype : 'radiofield',
+																					value : '3',
+																					name : 'group1',
+																					label : 'Radio 3'
+																				} ]
 
-					}
+																	}
 
-					]
-				}, {
-					xtype : 'panel',
-					items : [ {
-						xtype : 'label',
-						html : '<p>Optional options (checkboxes)</p>'
-					}, {
-						xtype : 'panel',
-						// height : 40,
-						layout : {
-							type : 'vbox',
-							align : 'stretch'
-						},
-						items : [ {
-							xtype : 'checkboxfield',
-							value : '1',
-							name : 'group2',
-							label : 'Checkbox 1',
-						}, {
-							xtype : 'checkboxfield',
-							value : '2',
-							name : 'group2',
-							label : 'Checkbox 2'
-						} ]
+															]
+														},
+														{
+															xtype : 'panel',
+															items : [
+																	{
+																		xtype : 'label',
+																		html : '<p>Optional options (checkboxes)</p>'
+																	},
+																	{
+																		xtype : 'panel',
+																		// height
+																		// : 40,
+																		layout : {
+																			type : 'vbox',
+																		// align
+																		// :
+																		// 'stretch'
+																		},
+																		items : [
+																				{
+																					xtype : 'checkboxfield',
+																					value : '1',
+																					name : 'group2',
+																					label : 'Checkbox 1',
+																				},
+																				{
+																					xtype : 'checkboxfield',
+																					value : '2',
+																					name : 'group2',
+																					label : 'Checkbox 2'
+																				} ]
 
-					} ]
-				} ]
+																	} ]
+														} ]
+											}
+
+									]
+
+								});
+
+				var radioBt = Ext.create('Ext.field.Radio', {
+					name : 'group1',
+					value : '4',
+					label : 'Dynamic radio button',
+				// styleHtmlContent : true,
+				});
+
+				panel.getComponent('choicePanel').getComponent(
+						'radioButtonPanel').add(radioBt);
+
 			}
-
-			]
-
 		});
-		
-		var radioBt = Ext.create('Ext.field.Radio', {
-			 name : 'group1',
-			 value : '4',
-			 label : 'Dynamic radio button',
-			 styleHtmlContent : true,
-		 });
-		
-		panel.getComponent('choicePanel').getComponent('radioButtonPanel').add(radioBt);
-		
-
-	}
-});
 
 /*
  * 

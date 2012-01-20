@@ -124,39 +124,33 @@ Ext.define('EatSense.controller.Menu', {
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
 		this.models.activeProduct = record.data;
-		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesPanel');
+		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
 		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
-		 this.getProdDetailLabel().setHtml('<p>'+record.data.longDesc+'</p><p style="text-align:right; font-size:6em;">'+record.data.price+'</p>');
+		 this.getProdDetailLabel().setHtml('<span style ="float:right;">'+record.data.longDesc+'</span><span style="font-size:4em; ">'+record.data.price+'</span>');
 		 //dynamically add choices if present		 
 		 if(typeof record.choicesStore !== 'undefined') {
 			 for(var i =0; i < record.choicesStore.data.items.length; i++) {
 				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
 				 //.getComponent('choiceInfoPanel')
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
 				 //single choice. Create Radio buttons
+				 var optionType = '';
 				 if(choice.data.minOccurence == 1 && choice.data.maxOccurence == 1) {
-					 Ext.each(choice.data.options, function(item) {
-						 var radioBt = Ext.create('Ext.field.Radio', {
-							 name : choice.data.id,
-							 value : item,
-							 label : item.name
-						 });
-						 optionsDetailPanel.getComponent('optionsPanel').add(radioBt);
-					 });
-				 } 
-				 //multiple choice
-				 else {
-					 Ext.each(choice.data.options, function(item) {
-						 var checkbox = Ext.create('Ext.field.Checkbox', {
-							 name : choice.data.id,
-							 value : item,
-							 label : item.name
-						 });
-						 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
-					 });
+					 optionType = 'Ext.field.Radio';
+				 	} 
+				 else {//multiple choice
+					 optionType = 'Ext.field.Checkbox';					 
 				 }
+				 Ext.each(choice.data.options, function(item) {
+					 var checkbox = Ext.create(optionType, {
+						 name : choice.data.id,
+						 value : item,
+						 label : item.name
+					 });
+					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
+				 });
 				 choicesPanel.add(optionsDetailPanel);
 			 }
 		 }

@@ -1,5 +1,5 @@
 /**
- * 
+ * Displays details and options/extras of a product.
  */
 Ext.define('EatSense.view.ProductDetail', {
 	extend : 'Ext.Panel',
@@ -7,13 +7,10 @@ Ext.define('EatSense.view.ProductDetail', {
 	scrollable : 'vertical',
 	layout : {
 		type : 'vbox',
-	// width : '200',
-	// height : '200',
-	// align : 'stretch',
-	// pack : 'center',
+		align : 'middle'
 	},
 	defaults : {
-		styleHtmlContent : false,
+//		styleHtmlContent : false,
 	},
 	config : {
 		// styleHtmlContent : true,
@@ -31,19 +28,28 @@ Ext.define('EatSense.view.ProductDetail', {
 		}, {
 			xtype : 'panel',
 			docked : 'top',
+			layout : {
+				type : 'hbox',
+				align : 'middle'
+			},
+			
 			items : [ {
 				xtype : 'label',
+				flex : 2,
 				id : 'prodDetailLabel',
-				styleHtmlContent : true,
 			}, {
 				xtype : 'panel',
-				layout : 'hbox',
-				items : [
-				{
+				layout : {
+					type : 'vbox',
+					align : 'stretch'
+				},
+				flex : 1,
+				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
 					itemdId : 'productSpinner',
-					//FIXME not working in PR 3
+					value : 1,
+					// FIXME not working in PR 3
 					// minValue : '1',
 					// maxValue : '10',
 					cycle : true,
@@ -51,14 +57,25 @@ Ext.define('EatSense.view.ProductDetail', {
 				}, {
 					xtype : 'button',
 					id : 'prodDetailCardBt',
-					// iconCls: 'home',
-					// iconMask: true,
-					text : 'Card',
+					iconCls : 'home',
+					iconMask : true,
+				// text : 'Card',
 				} ]
 			} ]
 		}, {
 			xtype : 'panel',
-			itemId : 'choicesPanel'
+			itemId : 'choicesWrapper',
+			items : [
+				{
+					xtype : 'label',
+					html :  i18nPlugin.translate('choicesPanelTitle')
+				},
+				{
+					xtype : 'panel',
+					itemId : 'choicesPanel'
+				}
+				
+			]
 		} ]
 	}
 });

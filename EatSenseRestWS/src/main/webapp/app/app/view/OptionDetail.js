@@ -7,10 +7,12 @@ Ext.define('EatSense.view.OptionDetail', {
 
 	layout : {
 		type : 'vbox',
-//		align : 'stretch',
-		pack : 'center',
+		 align : 'middle'
 	},
 	config : {
+		defaults : {
+			labelWidth : '50%'
+		},
 		items : [ {
 			xtype : 'label',
 			itemId : 'choiceTextLbl',
@@ -18,7 +20,7 @@ Ext.define('EatSense.view.OptionDetail', {
 			xtype : 'panel',
 			layout : {
 				type : 'vbox',
-				pack : 'center'
+				align : 'stretch'
 			},
 			itemId : 'optionsPanel',
 

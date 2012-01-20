@@ -24,7 +24,8 @@ var translation = {
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 
 		// Menu
-		"menuTitle" : "Menü"
+		"menuTitle" : "Menü",
+		"choicesPanelTitle" : "Optionen"
 
 	}
 
