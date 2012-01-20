@@ -27,6 +27,27 @@ Ext.define('EatSense.view.ProductDetail', {
 		{
 			xtype : 'label',
 			id : 'prodDetailLabel',
-		} ]
+		},
+		{
+			xtype : 'spinnerfield',
+			increment: 1,
+			itemdId: 'productSpinner',
+//			minValue : '1',
+//			maxValue : '10',
+			cycle : true
+			
+		},
+		{
+			xtype: 'button',
+			id: 'prodDetailCardBt',
+			iconCls: 'home',
+			iconMask: true
+		},
+		{
+			xtype: 'panel',
+			layout: 'fit',
+			itemId: 'optionsPanel'
+		}
+		]
 	}
 });

@@ -8,7 +8,7 @@ Ext.Loader.setConfig({
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product' ],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product','Choice', 'Option', 'Error' ],
 	launch : function() {
     	this.launched = true;
         this.mainLaunch();

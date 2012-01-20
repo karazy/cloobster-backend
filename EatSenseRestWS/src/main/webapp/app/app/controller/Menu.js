@@ -15,7 +15,8 @@ Ext.define('EatSense.controller.Menu', {
 		'Dashboard',
 		'MenuOverview',
 		'ProductOverview',
-		'ProductDetail'
+		'ProductDetail',
+		'OptionDetail'
 	],
 	stores : [
 	'Menu'
@@ -79,6 +80,9 @@ Ext.define('EatSense.controller.Menu', {
              }, 
              '#prodDetailBackBt': {
             	 tap: this.backToProductOverview
+             },
+             '#prodDetailCardBt' : {
+            	 tap: this.addProductToCard
              }
         });
     	 
@@ -119,10 +123,36 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
-		 var detail = this.getProductdetail(), main = this.getMain();
+		this.models.activeProduct = record.data;
+		 var detail = this.getProductdetail(), main = this.getMain(), optionsPanel =  this.getProductdetail().getComponent('optionsPanel');
 		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
 		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
 		 this.getProdDetailLabel().setHtml('<p>'+record.data.longDesc+'</p><p style="text-align:right; font-size:6em;">'+record.data.price+'</p>');
+		 //dynamically add options		 
+		 for(var choice in record.choices) {
+			 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+			 optionsDetailPanel.getComponent('choiceTextLbl').setText(choice.text);
+			 //single choice. Create Radio buttons
+			 if(choice.minOccurence == 1 && choice.maxOccurence == 1) {
+				 for(var item in choice.options) {
+					 var radioBt = Ext.create('Ext.field.Radio');
+					 radioBt.name = choice.id;
+					 radioBt.value = item;
+					 radioBt.label = item.name;
+					 optionsDetailPanel.getComponent('optionsPanel').add(radioBt);
+				 }
+			 } else {
+				 for(var item in choice.options) {
+					 var checkbox = Ext.create('Ext.field.Checkbox');
+					 checkbox.name = choice.id;
+					 checkbox.value = item;
+					 checkbox.label = item.name;
+					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
+				 }
+			 }
+			 optionsPanel.add(optionsDetailPanel);
+		 }
+		 
 		 main.setActiveItem(detail);
 	},
 	/**
@@ -131,8 +161,16 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	backToProductOverview: function(button) {
 		console.log("Menu Controller -> backToProductOverview");
+		this.models.activeProduct = null;
 		var main = this.getMain(), pov = this.getProductoverview();
 		 main.setActiveItem(pov);
+	},
+	/**
+	 * Adds the current product to card.
+	 * @param button
+	 */
+	addProductToCard: function(button) {
+		//get active product and set choice values
 	}
      	
 });
