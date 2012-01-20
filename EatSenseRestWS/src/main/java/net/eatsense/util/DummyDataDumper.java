@@ -56,8 +56,8 @@ public class DummyDataDumper {
 
 		//Getränke
 		Key<Menu> kM = createMenu(kR, "Getränke", "Alkoholische, nicht-Alkoholische, heisse und kalte Getränke.");
-		createProduct(kM, "kalte Milch", 1.5f, "lecker Milch", "Frische Bio-Milch von glücklichen Kühen direkt aus dem Schloss Bauernhof");
-		createProduct(kM, "Weizen", 3.0f, "helles Hefeweizen vom Fass 0,5l",
+		createAndSaveProduct(kM, "kalte Milch", 1.5f, "lecker Milch", "Frische Bio-Milch von glücklichen Kühen direkt aus dem Schloss Bauernhof");
+		createAndSaveProduct(kM, "Weizen", 3.0f, "helles Hefeweizen vom Fass 0,5l",
 				"Helles Hefeweizen vom Fass aus der Darmstädter Hofbrauerei im 0.5l Glas, 4.9% vol. Alkohol.");
 		
 		kM = createMenu(kR, "Hauptgerichte", "Schwein, Rind und vegetarische Speisen");
