@@ -1,11 +1,5 @@
 package net.eatsense.representation;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-
-
-
 /**
  * Represents information transferred after submitting a barcode for checkIn.
  * This class is intended only for representation and will NOT BE persisted.

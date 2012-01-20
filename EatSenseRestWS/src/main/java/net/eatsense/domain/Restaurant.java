@@ -6,7 +6,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
 
-
 /**
  * Represents a location where you can check in and order food/drinks what ever.
  * 
