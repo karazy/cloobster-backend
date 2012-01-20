@@ -252,56 +252,37 @@
 				<version>2.4.2</version>
 				<executions>
 					<execution>
-						<phase>compile</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
 							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 							<resources>
-								<!-- -->
-								<resource>
+								<!-- <resource>
 									<directory>src/main/resources</directory>
+
+								</resource>-->
+								
+
+								<resource>
+									<directory>src/main/webapp</directory>
 									<excludes>
 										<exclude>**/*.phone.*</exclude>
 									</excludes>
 								</resource>
 
-								<resource>
-									<directory>src/main/webapp</directory>
-								</resource>
-
 							</resources>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<id>add-resource</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>add-resource</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<!-- <resource> <directory>../EatSenseApp/WebContent/</directory> 
-									<targetPath>${project.build.directory}/${project.build.finalName}</targetPath> 
-									<excludes> <exclude>**/*.phone.*</exclude> </excludes> </resource> -->
-
-							</resources>
-							<resource>
-							</resource>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>build-helper-maven-plugin</artifactId> 
+				<version>1.7</version> <executions> <execution> <id>add-resource</id> <phase>compile</phase> 
+				<goals> <goal>add-resource</goal> </goals> <configuration> <resources> <resource> 
+				<directory>../EatSenseApp/WebContent/</directory> <targetPath>${project.build.directory}/${project.build.finalName}</targetPath> 
+				<excludes> <exclude>**/*.phone.*</exclude> </excludes> </resource> </resources> 
+				<resource> </resource> </configuration> </execution> </executions> </plugin> -->
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>${antrun.version}</version>
@@ -371,19 +352,11 @@
 						<lifecycleMappingMetadata>
 
 							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>build-helper-maven-plugin</artifactId>
-										<versionRange>1.7</versionRange>
-										<goals>
-											<goal>add-resource</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute />
-									</action>
-								</pluginExecution>
+								<!-- <pluginExecution> <pluginExecutionFilter> <groupId>org.codehaus.mojo</groupId> 
+									<artifactId>build-helper-maven-plugin</artifactId> <versionRange>1.7</versionRange> 
+									<goals> <goal>add-resource</goal> </goals> </pluginExecutionFilter> <action> 
+									<execute /> </action> </pluginExecution> -->
+
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>org.apache.maven.plugins</groupId>
