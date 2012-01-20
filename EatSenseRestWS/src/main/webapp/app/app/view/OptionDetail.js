@@ -4,27 +4,24 @@
 Ext.define('EatSense.view.OptionDetail', {
 	extend : 'Ext.Panel',
 	xtype : 'optiondetail',
+
 	layout : {
-		type : 'fit',
+		type : 'vbox',
+//		align : 'stretch',
+		pack : 'center',
 	},
 	config : {
-		styleHtmlContent : true,
 		items : [ {
-			docked : 'top',
-			xtype : 'panel',
-			items : [ {
-				xtype : 'label',
-				itemId : 'choiceTextLbl'
-			}, {
-				xtype : 'label',
-				itemId : 'choiceTitleLbl',
-				text : 'Wähle'
-			} ]
+			xtype : 'label',
+			itemId : 'choiceTextLbl',
 		}, {
-			xtype : 'formpanel',
-			layout : 'fit',
+			xtype : 'panel',
+			layout : {
+				type : 'vbox',
+				pack : 'center'
+			},
 			itemId : 'optionsPanel',
-			
+
 		} ]
 	}
 });

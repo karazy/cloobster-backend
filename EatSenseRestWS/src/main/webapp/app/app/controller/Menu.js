@@ -124,35 +124,42 @@ Ext.define('EatSense.controller.Menu', {
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
 		this.models.activeProduct = record.data;
-		 var detail = this.getProductdetail(), main = this.getMain(), optionsPanel =  this.getProductdetail().getComponent('optionsPanel');
+		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesPanel');
 		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
 		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
 		 this.getProdDetailLabel().setHtml('<p>'+record.data.longDesc+'</p><p style="text-align:right; font-size:6em;">'+record.data.price+'</p>');
-		 //dynamically add options		 
-		 for(var choice in record.choices) {
-			 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-			 optionsDetailPanel.getComponent('choiceTextLbl').setText(choice.text);
-			 //single choice. Create Radio buttons
-			 if(choice.minOccurence == 1 && choice.maxOccurence == 1) {
-				 for(var item in choice.options) {
-					 var radioBt = Ext.create('Ext.field.Radio');
-					 radioBt.name = choice.id;
-					 radioBt.value = item;
-					 radioBt.label = item.name;
-					 optionsDetailPanel.getComponent('optionsPanel').add(radioBt);
+		 //dynamically add choices if present		 
+		 if(typeof record.choicesStore !== 'undefined') {
+			 for(var i =0; i < record.choicesStore.data.items.length; i++) {
+				 var choice = record.choicesStore.data.items[i];
+				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+				 //.getComponent('choiceInfoPanel')
+				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+				 //single choice. Create Radio buttons
+				 if(choice.data.minOccurence == 1 && choice.data.maxOccurence == 1) {
+					 Ext.each(choice.data.options, function(item) {
+						 var radioBt = Ext.create('Ext.field.Radio', {
+							 name : choice.data.id,
+							 value : item,
+							 label : item.name
+						 });
+						 optionsDetailPanel.getComponent('optionsPanel').add(radioBt);
+					 });
+				 } 
+				 //multiple choice
+				 else {
+					 Ext.each(choice.data.options, function(item) {
+						 var checkbox = Ext.create('Ext.field.Checkbox', {
+							 name : choice.data.id,
+							 value : item,
+							 label : item.name
+						 });
+						 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
+					 });
 				 }
-			 } else {
-				 for(var item in choice.options) {
-					 var checkbox = Ext.create('Ext.field.Checkbox');
-					 checkbox.name = choice.id;
-					 checkbox.value = item;
-					 checkbox.label = item.name;
-					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
-				 }
+				 choicesPanel.add(optionsDetailPanel);
 			 }
-			 optionsPanel.add(optionsDetailPanel);
 		 }
-		 
 		 main.setActiveItem(detail);
 	},
 	/**
@@ -162,6 +169,7 @@ Ext.define('EatSense.controller.Menu', {
 	backToProductOverview: function(button) {
 		console.log("Menu Controller -> backToProductOverview");
 		this.models.activeProduct = null;
+		this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 		var main = this.getMain(), pov = this.getProductoverview();
 		 main.setActiveItem(pov);
 	},
@@ -171,6 +179,7 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	addProductToCard: function(button) {
 		//get active product and set choice values
+		this.backToProductOverview();
 	}
      	
 });
