@@ -1,9 +1,12 @@
 package net.eatsense.domain;
 
+import java.util.List;
+
 import javax.persistence.Transient;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 public class Product extends GenericEntity {
 	private String name;
@@ -20,6 +23,8 @@ public class Product extends GenericEntity {
 	@Parent
 	private Key<Menu> menu;
 	
+	@Unindexed
+	private List<Key<Choice>> choices;
 	
 	public String getName() {
 		return name;
@@ -74,6 +79,16 @@ public class Product extends GenericEntity {
 	@Transient
 	public Key<Product> getKey() {
 		return new Key<Product>(getMenu(), Product.class, super.getId());
+	}
+
+
+	public List<Key<Choice>> getChoices() {
+		return choices;
+	}
+
+
+	public void setChoices(List<Key<Choice>> choices) {
+		this.choices = choices;
 	}
 	
 }

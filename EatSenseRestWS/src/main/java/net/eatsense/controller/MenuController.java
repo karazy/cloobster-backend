@@ -1,10 +1,14 @@
 package net.eatsense.controller;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import net.eatsense.domain.Choice;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Menu;
 import net.eatsense.persistence.CheckInRepository;
@@ -12,6 +16,7 @@ import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 
@@ -69,6 +74,8 @@ public class MenuController {
 				 dto.setShortDesc( p.getShortDesc() );
 				 dto.setPrice( p.getPrice() );
 				 
+				 dto.setChoices(retrieveChoicesForProduct(p));
+				 
 				 productDTOs.add(dto);
 			 }
 			 menuDTO.setTitle(menu.getTitle());
@@ -78,6 +85,52 @@ public class MenuController {
 		}
 		
 		return menuDTOs;
+	}
+	
+	private Collection<ChoiceDTO> retrieveChoicesForProduct(Product p)
+	{
+		ArrayList<ChoiceDTO> choices = null;
+		
+		Map<Key<Choice>,Choice> result = null;
+		
+		if(p != null && p.getChoices() != null && !p.getChoices().isEmpty()) 
+		  result = productRepo.getOfy().get(p.getChoices());
+		
+		if(result != null && !result.isEmpty())  {
+			choices = new ArrayList<ChoiceDTO>();
+			
+			for (Choice choice : result.values())  {
+				ChoiceDTO dto = new ChoiceDTO();
+				
+				dto.setId(choice.getId());
+				dto.setIncluded(choice.getIncludedChoices());
+				dto.setMaxOccurence(choice.getMaxOccurence());
+				dto.setMinOccurence(choice.getMinOccurence());
+				dto.setOverridePrice(choice.getOverridePrice());
+				dto.setPrice(choice.getPrice());
+				dto.setText(choice.getText());
+				
+				if( choice.getAvailableChoices() != null && !choice.getAvailableChoices().isEmpty() ) {
+					dto.setOptions(choice.getAvailableChoices());
+					
+				}
+				else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {
+					ArrayList<ProductOption> options = new ArrayList<ProductOption>();
+					Map<Key<Product>,Product> products =  productRepo.getOfy().get(choice.getAvailableProducts());
+					
+					for (Product choiceProduct : products.values() ) {
+						options.add(new ProductOption(choiceProduct.getName(), choiceProduct.getPrice(), choiceProduct.getId()));
+					}
+					
+					dto.setOptions(options);
+				}
+				
+				choices.add( dto );
+				
+			}
+		}
+		
+		return choices; 		
 	}
 	
 }

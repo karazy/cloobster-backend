@@ -3,6 +3,7 @@ package net.eatsense.persistence;
 import java.util.Collection;
 import java.util.List;
 
+import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
@@ -39,6 +40,7 @@ public class GenericRepository<T> extends DAOBase{
 		ObjectifyService.register(Menu.class);
 		ObjectifyService.register(Product.class);
 		ObjectifyService.register(CheckIn.class);
+		ObjectifyService.register(Choice.class);
 	}
 
 	protected ObjectifyService datastore;

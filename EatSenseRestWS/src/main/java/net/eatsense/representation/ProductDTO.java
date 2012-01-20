@@ -1,5 +1,7 @@
 package net.eatsense.representation;
 
+import java.util.Collection;
+
 public class ProductDTO {
 	private String name;
 	private String shortDesc;
@@ -8,6 +10,8 @@ public class ProductDTO {
 	 */
 	private String longDesc;
 	private Float price;
+	
+	private Collection<ChoiceDTO> choices;
 	
 	public String getName() {
 		return name;
@@ -46,5 +50,15 @@ public class ProductDTO {
 
 	public void setPrice(Float price) {
 		this.price = price;
+	}
+
+
+	public Collection<ChoiceDTO> getChoices() {
+		return choices;
+	}
+
+
+	public void setChoices(Collection<ChoiceDTO> choices) {
+		this.choices = choices;
 	}
 }

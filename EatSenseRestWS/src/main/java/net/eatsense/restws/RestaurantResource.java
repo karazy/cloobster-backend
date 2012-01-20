@@ -1,8 +1,11 @@
 package net.eatsense.restws;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
-import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -23,6 +26,8 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.util.DummyDataDumper;
  
+import com.google.appengine.repackaged.org.json.JSONException;
+import com.google.appengine.repackaged.org.json.JSONObject;
 import com.google.inject.Inject;
 
 /**
@@ -128,6 +133,33 @@ public class RestaurantResource {
 	public Collection<MenuDTO> getMenus(@PathParam("restaurantId") Long restaurantId)
 	{
 		return menuCtr.getMenus(restaurantId);
+	}
+	
+	@GET
+	@Path("import/{spreadsheetKey}")
+	@Produces("text/html; charset=utf-8")
+	public String getSpreadsheetTest(@PathParam("spreadsheetKey") String spreadsheetKey) throws JSONException
+	{
+		String returnString = "";
+		try {
+            URL url = new URL("https://spreadsheets.google.com/feeds/worksheets/"+ spreadsheetKey + "/public/basic?alt=json");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            String line;
+            
+            while ((line = reader.readLine()) != null) {
+                returnString += line;
+            }
+            reader.close();
+            
+            JSONObject spreadsheets = new JSONObject(returnString);
+            return spreadsheets.toString();
+            
+        } catch (MalformedURLException e) {
+            // ...
+        } catch (IOException e) {
+            // ...
+        }
+		return "fail!";
 	}
 
 	@PUT

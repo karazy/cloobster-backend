@@ -288,7 +288,7 @@ public class CheckInController {
 	}
 	
 	/**
-	 * Return other checkings at the same spot.
+	 * Return other checkins at the same spot.
 	 * 
 	 * 
 	 * @param chkin A user
