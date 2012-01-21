@@ -12,4 +12,4 @@ Karazy.config = (function() {
 		
 	};
 	
-});
+})();

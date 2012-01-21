@@ -127,7 +127,7 @@ Ext.define('EatSense.controller.Menu', {
 		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
 		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
-		 this.getProdDetailLabel().setHtml('<span style ="float:right;">'+record.data.longDesc+'</span><span style="font-size:4em; ">'+record.data.price+'</span>');
+		 this.getProdDetailLabel().setHtml('<span style ="float:right;">'+record.data.longDesc+'</span><span style="font-size:2em; ">'+record.data.price+'</span>');
 		 //dynamically add choices if present		 
 		 if(typeof record.choicesStore !== 'undefined') {
 			 for(var i =0; i < record.choicesStore.data.items.length; i++) {
@@ -163,7 +163,7 @@ Ext.define('EatSense.controller.Menu', {
 	backToProductOverview: function(button) {
 		console.log("Menu Controller -> backToProductOverview");
 		this.models.activeProduct = null;
-		this.getProductdetail().getComponent('choicesPanel').removeAll(false);
+		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		var main = this.getMain(), pov = this.getProductoverview();
 		 main.setActiveItem(pov);
 	},

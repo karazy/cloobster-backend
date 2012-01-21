@@ -3,8 +3,7 @@
  */
 Ext.define('EatSense.view.ProductDetail', {
 	extend : 'Ext.Panel',
-	xtype : 'productdetail',
-	scrollable : 'vertical',
+	xtype : 'productdetail',	
 	layout : {
 		type : 'vbox',
 		align : 'middle'
@@ -13,6 +12,7 @@ Ext.define('EatSense.view.ProductDetail', {
 //		styleHtmlContent : false,
 	},
 	config : {
+		scrollable : 'vertical',
 		// styleHtmlContent : true,
 		items : [ {
 			docked : 'top',
@@ -28,38 +28,44 @@ Ext.define('EatSense.view.ProductDetail', {
 		}, {
 			xtype : 'panel',
 			docked : 'top',
+			style : 'background-color:#B88A00;border-bottom:5px;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px; padding: 10px',
 			layout : {
-				type : 'hbox',
-				align : 'middle'
+				type : 'vbox',
+//				align : 'middle'
 			},
 			
 			items : [ {
 				xtype : 'label',
-				flex : 2,
 				id : 'prodDetailLabel',
 			}, {
 				xtype : 'panel',
 				layout : {
-					type : 'vbox',
+					type : 'hbox',
 					align : 'stretch'
 				},
-				flex : 1,
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
 					itemdId : 'productSpinner',
+					style : 'background-color:white;',
 					value : 1,
+					flex : 3,
 					// FIXME not working in PR 3
 					// minValue : '1',
 					// maxValue : '10',
 					cycle : true,
 
-				}, {
+				},
+				{
+					xtype: 'spacer',
+					flex: 1
+				},
+				{
 					xtype : 'button',
 					id : 'prodDetailCardBt',
-					iconCls : 'home',
+					iconCls : 'compose',
 					iconMask : true,
-				// text : 'Card',
+					flex : 2
 				} ]
 			} ]
 		}, {

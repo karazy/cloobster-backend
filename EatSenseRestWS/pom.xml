@@ -318,7 +318,7 @@
 					<replacements>
 						<replacement>
 							<token>(serviceUrl :) .*</token>
-							<value>$1 'http://localhost:8888'</value>
+							<value>$1 ''</value>
 						</replacement>
 					</replacements>
 				</configuration>

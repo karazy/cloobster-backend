@@ -99,9 +99,12 @@ Ext.define('EatSense.controller.CheckIn', {
     	 this.models = models;
     	 
     	 //private functions
-    	 this.doCheckInIntent = function(barcode) {
+    	 
+    	 //called by checkInIntent. 
+    	 this.doCheckInIntent = function(barcode, button) {
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
+    	    		this.getDashboard().setMask(false);
     	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	    	} else {
     	        	var that = this;
@@ -115,9 +118,13 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	        	    	} else {
     	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-    	        	    	}
-    	        	    	
+    	        	    	}    	        	    	
+    	        	    },
+    	        	    callback: function() {
+    	        	    	that.getDashboard().setMask(false);
+    	        	    	button.enable();
     	        	    }
+    	        	    
     	        	});
     	    	}
     	 };
@@ -126,19 +133,25 @@ Ext.define('EatSense.controller.CheckIn', {
      * CheckIn Process
      * Step 1: barcode is scanned and send to server
      */    
-    checkInIntent: function(options) {
+    checkInIntent: function(button) {
     	console.log('CheckIn Controller -> checkIn');
+    	//disable button to prevent multiple checkins
+    	button.disable();
     	var barcode, that = this;
     	if(this.getProfile() == 'desktop' || !window.plugins.barcodeScanner) {
-    		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
-    		this.doCheckInIntent(barcode);
-    	} else if(this.getProfile() == 'phone') {
-    		window.plugins.barcodeScanner.scan(function(result, barcode) {
+    		barcode = Ext.String.trim(this.getSearchfield().getValue());    
+    		this.getDashboard().setMask(true);
+    		this.doCheckInIntent(barcode, button);
+    	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
+    			window.plugins.barcodeScanner.scan(function(result, barcode) {
     			barcode = result.text;
-    			that.doCheckInIntent(barcode);
+    			that.getDashboard().setMask(true);
+    			that.doCheckInIntent(barcode, button);
     		}, function(error) {
     			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
     		});
+    	} else {
+    		button.enable();
     	}
     	
 
@@ -222,7 +235,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   			   model: 'EatSense.model.User',
 	   			   proxy: {
 	   				   type: 'rest',
-	   				   url : '/restaurant/spot/users?userId='+options.userId,
+	   				   url : globalConf.serviceUrl+'/restaurant/spot/users?userId='+options.userId,
 	   				   reader: {
 	   					   type: 'json'
 	   			   		}
@@ -249,7 +262,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   console.log("CheckIn Controller -> linkToUser");
 	   
     	Ext.Ajax.request({
-    	    url: '/restaurant/spot/users',
+    	    url: globalConf.serviceUrl+'/restaurant/spot/users',
     	    method: 'POST',
     	    scope: this,
     	    params: {
@@ -277,7 +290,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   model: 'EatSense.model.Menu',
 	 			   proxy: {
 	 				   type: 'rest',
-	 				   url : '/restaurant/'+restaurantId+'/menu',
+	 				   url : globalConf.serviceUrl+'/restaurant/'+restaurantId+'/menu',
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}

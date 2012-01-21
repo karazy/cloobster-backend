@@ -8,7 +8,7 @@ Ext.define('EatSense.model.Menu', {
 	],
 	proxy: {
 		type: 'rest',
-		url: '/restaurant/menu/', 
+		url: globalConf.serviceUrl+'/restaurant/menu/', 
 		reader: {
 			type: 'json',
 		} 

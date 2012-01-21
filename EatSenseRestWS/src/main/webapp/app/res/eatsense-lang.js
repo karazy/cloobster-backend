@@ -8,6 +8,7 @@ var translation = {
 		"barcode" : "Barcode",
 		"errorTitle" : "Fehler",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
+		"loadingMsg" : "Laden ...",
 		// main menu
 		"checkInButton" : "CheckIn",
 		"settingsButton" : "Einstellungen",

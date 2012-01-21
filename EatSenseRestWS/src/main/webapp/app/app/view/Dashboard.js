@@ -6,7 +6,11 @@ Ext.define('EatSense.view.Dashboard', {
     extend: 'Ext.Container',
     xtype: 'dashboard',
     fullscreen: true,
-    config: {        
+    config: {
+    	mask : {
+    		message : i18nPlugin.translate('loadingMsg'),
+    		hidden : true
+    	},
         items: [
         	{
         	docked: 'top',

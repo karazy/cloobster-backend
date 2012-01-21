@@ -1,7 +1,3 @@
-/**
- * 
- */
-
 Ext
 		.application({
 			launch : function() {
@@ -15,8 +11,7 @@ Ext
 									scrollable : 'vertical',
 									layout : {
 										type : 'vbox',
-										align : 'middle',
-									// pack : 'center'
+//										align : 'middle',
 									},
 									defaults : {
 										styleHtmlContent : false,
@@ -25,55 +20,68 @@ Ext
 											{
 												docked : 'top',
 												xtype : 'toolbar',
-												title : 'Product detail',
-												items : [ {
-													xtype : 'button',
-													text : 'back',
-													ui : 'back'
-												} ]
+												// title : 'Product detail',
+												// left : '100',
+												items : [
+														{
+															xtype : 'button',
+															text : 'back',
+															ui : 'back'
+														},
+														{
+															xtype : 'label',
+															docked : 'right',
+															html : '<span style="font-size: 2em;color:white;">Product detail</span>',
+
+														} ]
 
 											},
 											{
 												xtype : 'panel',
 												docked : 'top',
-												
+												style : 'background-color:#B88A00;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px;padding-bottom: 10em;',
+
 												layout : {
-													align : 'middle',
-													type : 'hbox'
-												// pack : 'center'
+													type : 'vbox',
+//													pack : 'center'
 												},
 												items : [
 														{
 															xtype : 'label',
-															flex: 2,
-															html : '<div><h2>Product Name</h2><p>Detailed product description.</p></div>'
+															html : '<div style="text-align:left;"><h2>Product Name</h2><p>Detailed product description.</p></div>'
 														},
 														{
 															xtype : 'panel',
-															flex: 1,
-															border : '5',
 															layout : {
-																type : 'vbox',
-																align : 'stretch'
+																type : 'hbox',
+																align : 'strech'
 															},
-//															flex : 1,
-															// html: 'spinner +
-															// button panel',
+															defaults : {
+															},
 															items : [
 																	{
 																		xtype : 'spinnerfield',
-																		increment : 1
+																		increment : 1,
+																		flex : 3,
+																		value : 1,
+																		style : 'background-color:white;'
 																	},
 																	{
+																		xytpe : 'sapcer',
+																		flex : 1
+
+																	},
+
+																	{
 																		xtype : 'button',
-																		text : 'Card'
+																		text : 'Card',
+																		flex : 2
 																	} ]
 														} ]
 											},
 											{
 												xtype : 'panel',
 												itemId : 'choicePanel',
-												// scrollable : 'vertical',
 												items : [
 														{
 															xtype : 'label',
@@ -84,7 +92,6 @@ Ext
 															itemId : 'radioButtonPanel',
 															layout : {
 																type : 'vbox',
-															// align : 'stretch'
 															},
 															items : [
 																	{
@@ -94,16 +101,8 @@ Ext
 																	},
 																	{
 																		xtype : 'panel',
-																		// height
-																		// : 40,
 																		layout : {
 																			type : 'vbox',
-																		// align
-																		// :
-																		// 'stretch'
-																		// pack
-																		// :
-																		// 'center'
 																		},
 																		defaults : {
 																			labelWidth : '50%'
@@ -176,7 +175,6 @@ Ext
 					name : 'group1',
 					value : '4',
 					label : 'Dynamic radio button',
-				// styleHtmlContent : true,
 				});
 
 				panel.getComponent('choicePanel').getComponent(
@@ -184,20 +182,3 @@ Ext
 
 			}
 		});
-
-/*
- * 
- * layout : { type : 'vbox', // width : '200', // height : '200', align :
- * 'stretch', pack : 'center', }, defaults : {
- * 
- * margin : 5, type : 'fit' }, config : { // styleHtmlContent : true, items : [ {
- * docked : 'top', xtype : 'toolbar', itemId : 'toolbar', title : 'title', items : [ {
- * xtype : 'button', ui : 'back', text : 'back' } ] }, { xtype : 'label', html : '<p>DUMMY
- * TEXT</p>', styleHtmlContent : true, }, // { // xtype : 'button', // id :
- * 'prodDetailCardBt', // // iconCls: 'home', // // iconMask: true, // text :
- * 'In den Warenkorb', // }, { xtype : 'spinnerfield', increment : 1, itemdId :
- * 'productSpinner', // minValue : '1', // maxValue : '10', cycle : true,
- * styleHtmlContent : true, }, { xtype : 'panel', layout : { type : 'vbox',
- * width : '150', height : '200' }, itemId : 'choicesPanel' } ] }
- * 
- */
