@@ -1,11 +1,24 @@
 package net.eatsense.domain;
 
+import javax.validation.constraints.NotNull;
 
-public class Nickname extends GenericEntity{
-	
+/**
+ * Used to load nickname parts from database and combine them to a full
+ * nickname.
+ * 
+ * @author Frederik Reifschneider
+ * 
+ */
+public class Nickname extends GenericEntity {
+
+	@NotNull
 	private String fragment;
-	
+
+	@NotNull
 	private NicknameType type;
+	
+	@NotNull
+	private Gender gender;
 
 	public String getFragment() {
 		return fragment;
@@ -22,7 +35,14 @@ public class Nickname extends GenericEntity{
 	public void setType(NicknameType type) {
 		this.type = type;
 	}
-	
+
+	public Gender getGender() {
+		return gender;
+	}
+
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
 	
 	
 

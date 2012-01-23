@@ -41,12 +41,14 @@ public class CheckInController {
 	private RestaurantRepository restaurantRepo;
 	private CheckInRepository checkInRepo;
 	private SpotRepository barcodeRepo;
+	private NicknameGenerator nnGen;
 
 	@Inject
-	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo) {
+	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo, NicknameGenerator nnGen) {
 		this.restaurantRepo = r;
 		this.checkInRepo = checkInRepo;
 		this.barcodeRepo = barcodeRepo;
+		this.nnGen = nnGen;
 	}
 	
 	@Inject
@@ -72,7 +74,7 @@ public class CheckInController {
 			if (restaurant != null) {
 				logger.info("CheckIn attempt with barcode {}", barcode);
 				String tmpUserId = IdHelper.generateId();
-				String tmpNickName = NicknameGenerator.generateNickname();
+				String tmpNickName = nnGen.generateNickname();
 				
 				// set values for dto object
 				checkInDto.setRestaurantName(restaurant.getName());

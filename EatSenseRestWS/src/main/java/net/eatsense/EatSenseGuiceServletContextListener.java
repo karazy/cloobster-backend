@@ -7,6 +7,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
+import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.RestaurantResource;
 
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
@@ -34,6 +35,7 @@ public class EatSenseGuiceServletContextListener extends
 					@Override 					
 					protected void configureServlets() {
 						bind(RestaurantResource.class);
+						bind(NicknameResource.class);
 						bind(Spot.class);
 						bind(CheckIn.class);
 						bind(Menu.class);
@@ -50,7 +52,7 @@ public class EatSenseGuiceServletContextListener extends
 						// Route all requests through GuiceContainer
 						// "(.)*restaurant(.)*"
 						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
-						
+						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
 					}
 
 				}, new ValidationModule());

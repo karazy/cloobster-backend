@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
+import net.eatsense.domain.Nickname;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
@@ -41,6 +42,7 @@ public class GenericRepository<T> extends DAOBase{
 		ObjectifyService.register(Product.class);
 		ObjectifyService.register(CheckIn.class);
 		ObjectifyService.register(Choice.class);
+		ObjectifyService.register(Nickname.class);
 	}
 
 	protected ObjectifyService datastore;
