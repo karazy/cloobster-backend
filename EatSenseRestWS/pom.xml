@@ -207,7 +207,6 @@
 				<executions>
 					<execution>
 						<id />
-						<!-- <phase>validate</phase> -->
 						<phase>validate</phase>
 						<goals>
 							<goal>unpack</goal>
@@ -217,7 +216,7 @@
 								<jvmFlag>-Xdebug</jvmFlag>
 								<jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</jvmFlag>
 							</jvmFlags>
-							 <unpackVersion>${gae.version}</unpackVersion>
+							<unpackVersion>${gae.version}</unpackVersion>
 						</configuration>
 					</execution>
 				</executions>
@@ -252,26 +251,25 @@
 				<version>2.4.2</version>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
 							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 							<resources>
-								<!-- <resource>
-									<directory>src/main/resources</directory>
-
-								</resource>-->
-								
-
 								<resource>
 									<directory>src/main/webapp</directory>
 									<excludes>
 										<exclude>**/*.phone.*</exclude>
 									</excludes>
 								</resource>
-
+								<resource>
+									<directory>src/main/resources</directory>
+									<excludes>
+										<exclude>**/*.phone.*</exclude>
+									</excludes>
+								</resource>
 							</resources>
 						</configuration>
 					</execution>
@@ -350,13 +348,7 @@
 					<version>1.0.0</version>
 					<configuration>
 						<lifecycleMappingMetadata>
-
 							<pluginExecutions>
-								<!-- <pluginExecution> <pluginExecutionFilter> <groupId>org.codehaus.mojo</groupId> 
-									<artifactId>build-helper-maven-plugin</artifactId> <versionRange>1.7</versionRange> 
-									<goals> <goal>add-resource</goal> </goals> </pluginExecutionFilter> <action> 
-									<execute /> </action> </pluginExecution> -->
-
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>org.apache.maven.plugins</groupId>

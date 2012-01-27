@@ -6,26 +6,37 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 
-import net.eatsense.domain.Nickname;
-import net.eatsense.persistence.NicknameRepository;
+import net.eatsense.domain.NicknameAdjective;
+import net.eatsense.domain.NicknameNoun;
+import net.eatsense.persistence.NicknameAdjectiveRepository;
+import net.eatsense.persistence.NicknameNounRepository;
 
 import com.google.inject.Inject;
 
 @Path("/nickname")
 public class NicknameResource {
 	
-	private NicknameRepository nnRepo;
+	private NicknameAdjectiveRepository adjectiveRepo;
+	private NicknameNounRepository nounRepo;
 
 	@Inject
-	public NicknameResource(NicknameRepository repository) {
-		this.nnRepo = repository;
+	public NicknameResource(NicknameAdjectiveRepository repo1, NicknameNounRepository repo2) {
+		this.adjectiveRepo = repo1;
+		this.nounRepo = repo2;
 	}
 	
 	@PUT
-	@Path("/list")
+	@Path("/adjective/list")
 	@Consumes("application/json; charset=UTF-8")
-	public void addNicknames(List<Nickname> nicknames) {
-		nnRepo.ofy().put(nicknames);
+	public void addNicknameAdjectives(List<NicknameAdjective> adjectives) {
+		adjectiveRepo.ofy().put(adjectives);
+	}
+	
+	@PUT
+	@Path("/noun/list")
+	@Consumes("application/json; charset=UTF-8")
+	public void addNicknameNouns(List<NicknameNoun> nouns) {
+		nounRepo.ofy().put(nouns);
 	}
 
 }

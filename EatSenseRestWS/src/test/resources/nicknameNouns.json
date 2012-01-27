@@ -1,0 +1,62 @@
+[
+{
+        "gender": "M",
+        "fragment": "Molch",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "Tiger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "Giraffe",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "Löwe",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "Schwan",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "Bär",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "Schwein",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "Stier",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "Faultier",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "Pferd",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "Hund",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "Katze",
+        "lang" : "DE"
+    }
+ ]

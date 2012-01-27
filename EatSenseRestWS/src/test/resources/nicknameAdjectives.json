@@ -1,0 +1,104 @@
+[
+    {
+        "gender": "M",
+        "fragment": "lustiger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "lustige",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "langsame",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "langsamer",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "schneller",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "schnelle",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "schnelles",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "wilder",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "wilde",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "wildes",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "fieser",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "fiese",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "fieses",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "dicker",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "dicke",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "dickes",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "dünner",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "tollwütiger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "tollwütige",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "tollwütiges",
+        "lang" : "DE"
+    }
+    
+    
+]

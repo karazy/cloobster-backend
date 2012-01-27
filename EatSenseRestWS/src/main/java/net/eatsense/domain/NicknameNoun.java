@@ -3,22 +3,24 @@ package net.eatsense.domain;
 import javax.validation.constraints.NotNull;
 
 /**
- * Used to load nickname parts from database and combine them to a full
+ * Used to load nickname nouns from database and combine them to a full 
  * nickname.
  * 
  * @author Frederik Reifschneider
  * 
  */
-public class Nickname extends GenericEntity {
+public class NicknameNoun extends GenericEntity {
 
 	@NotNull
 	private String fragment;
 
 	@NotNull
-	private NicknameType type;
+	private String lang;
 	
 	@NotNull
 	private Gender gender;
+	
+	
 
 	public String getFragment() {
 		return fragment;
@@ -28,12 +30,12 @@ public class Nickname extends GenericEntity {
 		this.fragment = fragment;
 	}
 
-	public NicknameType getType() {
-		return type;
+	public String getLang() {
+		return lang;
 	}
 
-	public void setType(NicknameType type) {
-		this.type = type;
+	public void setLang(String lang) {
+		this.lang = lang;
 	}
 
 	public Gender getGender() {

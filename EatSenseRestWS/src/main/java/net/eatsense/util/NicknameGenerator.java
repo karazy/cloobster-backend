@@ -1,18 +1,23 @@
 package net.eatsense.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Nickname;
-import net.eatsense.persistence.NicknameRepository;
+import net.eatsense.domain.Gender;
+import net.eatsense.domain.NicknameAdjective;
+import net.eatsense.domain.NicknameNoun;
+import net.eatsense.persistence.NicknameAdjectiveRepository;
+import net.eatsense.persistence.NicknameNounRepository;
+import net.eatsense.restws.NicknameResource;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * This class generates Nicknames for a {@link CheckIn}. Inspired by
- * http://stackoverflow.com/questions/41107/how-to-generate-a-random-alpha-numeric-string-in-java
+ * Creates funny Nicknames used for checkin.
+ * A Nickname consists of an adjective plus a noun.
  * 
  * @author Frederik Reifschneider
  * 
@@ -20,57 +25,83 @@ import com.google.inject.Singleton;
 @Singleton
 public class NicknameGenerator {
 
-	private List<Nickname> verbs;
-	private List<Nickname> nouns;	
-	private NicknameRepository nnRepo;
-	
-//	private static final char[] symbols = new char[36];
-//	private final char[] buf;
-	private Random random;
-//	private final int NICKNAME_LENGTH = 4;
+	/**
+	 * Holds adjectives.
+	 * {@link NicknameAdjective}
+	 */
+	private List<NicknameAdjective> adjectives;
+	// Gender specific hashmap
+	/**
+	 * Holds adjectives sorted by {@link Gender}.
+	 * {@link NicknameAdjective}
+	 */
+	private HashMap<Gender, List<NicknameAdjective>> adjectivesByGender;
 
-//	static {
-//		for (int idx = 0; idx < 10; ++idx)
-//			symbols[idx] = (char) ('0' + idx);
-//		for (int idx = 10; idx < 36; ++idx)
-//			symbols[idx] = (char) ('a' + idx - 10);
-//	}
+	/**
+	 * Holds nouns.
+	 * {@link NicknameNoun}
+	 */
+	private List<NicknameNoun> nouns;
+	
+	/**
+	 * Repository to access adjectives.
+	 */
+	private NicknameAdjectiveRepository adjectiveRepo;
+	
+	/**
+	 * Repository to access nouns.
+	 */
+	private NicknameNounRepository nounRepo;
+
+	/**
+	 * Used to randomly access adjective and noun lists.
+	 */
+	private Random random;
 
 	@Inject
-	public NicknameGenerator(NicknameRepository repository) {
-		this.nnRepo = repository;
+	public NicknameGenerator(NicknameAdjectiveRepository adjectiveRepo, NicknameNounRepository nounRepo) {
+		this.adjectiveRepo = adjectiveRepo;
+		this.nounRepo = nounRepo;
 		random = new Random();
-		verbs = nnRepo.getListByProperty("type", "VERB");
-		nouns = nnRepo.getListByProperty("type", "NOUN");
+		adjectivesByGender = new HashMap<Gender, List<NicknameAdjective>>();
+		adjectivesByGender.put(Gender.M, new ArrayList<NicknameAdjective>());
+		adjectivesByGender.put(Gender.F, new ArrayList<NicknameAdjective>());
+		adjectivesByGender.put(Gender.C, new ArrayList<NicknameAdjective>());
+		adjectivesByGender.put(Gender.N, new ArrayList<NicknameAdjective>());
 		
-//		buf = new char[NICKNAME_LENGTH];
+		adjectives = new ArrayList<NicknameAdjective>(this.adjectiveRepo.getAll());
+		for (NicknameAdjective adj : adjectives) {
+			adjectivesByGender.get(adj.getGender()).add(adj);
+		}
+		
+		nouns = new ArrayList<NicknameNoun>(this.nounRepo.getAll());
+
 	}
 
 	/**
-	 * Generates a random Nickname
+	 * Generates a random Nickname.
 	 * 
 	 * @return
 	 */
 	public String generateNickname() {
-		
-		if(verbs.size() < 1 || nouns.size() <1) {
+		if (adjectives.size() < 1 || nouns.size() < 1) {
 			return "";
 		}
 		
 		StringBuilder nickname = new StringBuilder();
-		int i = random.nextInt(verbs.size()-1);
-		nickname.append(verbs.get(i).getFragment());
-		i = random.nextInt(nouns.size()-1);
-		nickname.append(" ");
-		nickname.append(nouns.get(i).getFragment());
+		NicknameNoun noun = null;
+		NicknameAdjective adjective = null;
+		int i = random.nextInt(nouns.size() - 1);
+		noun = nouns.get(i);
+		i = random.nextInt(adjectivesByGender.get(noun.getGender()).size() - 1);
+		adjective = adjectivesByGender.get(noun.getGender()).get(i);	
 		
+		nickname.append(adjective.getFragment());
+		
+		nickname.append(" ");
+		nickname.append(noun.getFragment());
+
 		return nickname.toString();
 	}
-
-//	private String nextString() {
-//		for (int idx = 0; idx < buf.length; ++idx)
-//			buf[idx] = symbols[random.nextInt(symbols.length)];
-//		return new String(buf);
-//	}
 
 }
