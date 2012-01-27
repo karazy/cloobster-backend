@@ -1,6 +1,8 @@
 package net.eatsense.controller;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -89,6 +91,7 @@ public class CheckInController {
 				checkIn.setSpot(spot.getKey());
 				checkIn.setUserId(tmpUserId);
 				checkIn.setStatus(CheckInStatus.INTENT);
+				checkIn.setCheckInTime(new Date());
 				
 				// validation 
 				Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn);

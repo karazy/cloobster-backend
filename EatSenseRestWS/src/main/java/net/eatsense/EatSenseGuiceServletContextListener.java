@@ -7,6 +7,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
+import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.RestaurantResource;
 
@@ -36,6 +37,7 @@ public class EatSenseGuiceServletContextListener extends
 					protected void configureServlets() {
 						bind(RestaurantResource.class);
 						bind(NicknameResource.class);
+						bind(CronResource.class);
 						bind(Spot.class);
 						bind(CheckIn.class);
 						bind(Menu.class);
@@ -53,6 +55,7 @@ public class EatSenseGuiceServletContextListener extends
 						// "(.)*restaurant(.)*"
 						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
 						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
+						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
 					}
 
 				}, new ValidationModule());

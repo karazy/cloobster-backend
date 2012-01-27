@@ -1,5 +1,7 @@
 package net.eatsense.domain;
 
+import java.util.Date;
+
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -45,6 +47,8 @@ public class CheckIn extends GenericEntity{
 	 * The other user can choose to pay for all users linked to him.
 	 */
 	private String linkedUserId;
+	
+	private Date checkInTime;
 	
 	/**
 	 * Restaurant this checkIn belongs to.
@@ -109,5 +113,13 @@ public class CheckIn extends GenericEntity{
 
 	public void setLinkedUserId(String linkedUserId) {
 		this.linkedUserId = linkedUserId;
+	}
+
+	public Date getCheckInTime() {
+		return checkInTime;
+	}
+
+	public void setCheckInTime(Date checkInTime) {
+		this.checkInTime = checkInTime;
 	}
 }
