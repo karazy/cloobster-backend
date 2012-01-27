@@ -169,6 +169,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		var checkInDialog = this.getCheckinconfirmation(), main = this.getMain();
 		this.getNickname().setValue(options.model.data.nickname);
 		this.models.activeCheckIn = options.model;
+		main.switchAnim('left');
 		main.setActiveItem(checkInDialog);	     
    },
    /**
@@ -219,7 +220,8 @@ Ext.define('EatSense.controller.CheckIn', {
    cancelCheckIn: function(options) {
 	   console.log("CheckIn Controller -> cancelCheckIn");
 	   var dashboardView = this.getDashboard(), main = this.getMain();
-	   this.models.activeCheckIn.destroy();	   
+	   this.models.activeCheckIn.destroy();
+	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
    },
    /**
@@ -250,6 +252,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	  	     console.log(records);
 	  	     }
 	  	     });
+	  	main.switchAnim('left');
 	  	main.setActiveItem(checkinwithothersDlg);
    },
    /**
@@ -302,6 +305,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			     callback: function(records, operation, success) {
 			    	 if(success) {
 			    	 that.getController('Menu').models.menudata = records;		
+			    	 main.switchAnim('left');
 			    	 main.setActiveItem(menu);			    	 
 			    	 }
 			     }

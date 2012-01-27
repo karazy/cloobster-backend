@@ -3,6 +3,7 @@
  */
 Ext.define('EatSense.view.Main', {
 	extend : 'Ext.Container',
+	itemId : 'globalContainer',
 	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers' ],
 	config : {
 		fullscreen : true,
@@ -12,6 +13,14 @@ Ext.define('EatSense.view.Main', {
 	            type: 'slide',
 	            direction: 'left'
 	        }			
+		},
+		animationForward : {
+			 type: 'slide',
+	         direction: 'left'
+		},
+		animationBack : {
+			 type: 'slide',
+	         direction: 'right'
 		},
 		activeItem : 0,
 		items : [ {
@@ -36,5 +45,16 @@ Ext.define('EatSense.view.Main', {
 			xtype: 'productdetail'
 		} 
 		]
+	},
+	/**
+	 * Change the direction of the slide animation.
+	 * @param direction
+	 * 			left or right
+	 */
+	switchAnim : function(direction){
+		this.getLayout().setAnimation({
+			 type: 'slide',
+	         direction: direction
+		});
 	}
 });

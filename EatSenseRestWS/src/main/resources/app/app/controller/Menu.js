@@ -103,6 +103,7 @@ Ext.define('EatSense.controller.Menu', {
     	this.getProductlist().setStore(prodStore);
     	this.getProductoverview().getComponent('toolbar').setTitle(record.data.title);
     	this.getMenulist().refresh();
+    	main.switchAnim('left');
     	main.setActiveItem(pov);
     },
     /**
@@ -112,8 +113,7 @@ Ext.define('EatSense.controller.Menu', {
 		console.log("Menu Controller -> showMenu");
 		 var menu = this.getMenuoverview(), main = this.getMain(), detail = this.getProductdetail();
 		 this.getMenulist().setClearSelectionOnDeactivate(true);		  
-//		 detail.floating = false;
-//		 detail.hide();
+		 main.switchAnim('right');
 		 main.setActiveItem(menu);			  	 
 	},
 	/**
@@ -127,10 +127,19 @@ Ext.define('EatSense.controller.Menu', {
 		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
 		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
-		 this.getProdDetailLabel().setHtml('<span style ="float:right;">'+record.data.longDesc+'</span><span style="font-size:2em; ">'+record.data.price+'</span>');
+		 this.getProdDetailLabel().setHtml(
+				 '<div class="prodDetailWrapper">'+
+				 	'<div style="position: relative;">'+
+				 		'<h2 style="float: left; width: 80%; margin: 0;">'+record.data.name+'</h2>'+
+				 		'<div style="position: absolute; right: 0; top: 50%; width: 20%; text-align: right; font-size:2em;">'+record.data.price+'</div>'+
+				 		'<div style="clear: both;">'+
+				 	'</div><p style="clear: both;">'+record.data.longDesc+'</p>'+
+				 '</div>');
 		 //dynamically add choices if present		 
 		 if(typeof record.choicesStore !== 'undefined') {
+			 var totalHeight = 0;
 			 for(var i =0; i < record.choicesStore.data.items.length; i++) {
+				 //this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanelTitle').setHtml(i18nPlugin.translate('choicesPanelTitle'));
 				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
 				 //.getComponent('choiceInfoPanel')
@@ -143,17 +152,22 @@ Ext.define('EatSense.controller.Menu', {
 				 else {//multiple choice
 					 optionType = 'Ext.field.Checkbox';					 
 				 }
+				
 				 Ext.each(choice.data.options, function(item) {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.data.id,
 						 value : item,
 						 label : item.name
 					 });
+				//	 checkbox.setHeight(50);
+					 totalHeight += 50;
 					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
-				 });
+				 });				 
 				 choicesPanel.add(optionsDetailPanel);
 			 }
+			 //choicesPanel.setHeight(totalHeight);
 		 }
+		 main.switchAnim('left');
 		 main.setActiveItem(detail);
 	},
 	/**
@@ -165,7 +179,8 @@ Ext.define('EatSense.controller.Menu', {
 		this.models.activeProduct = null;
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		var main = this.getMain(), pov = this.getProductoverview();
-		 main.setActiveItem(pov);
+		main.switchAnim('right');
+		main.setActiveItem(pov);
 	},
 	/**
 	 * Adds the current product to card.

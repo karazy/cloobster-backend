@@ -12,7 +12,7 @@ Ext.define('EatSense.view.ProductDetail', {
 //		styleHtmlContent : false,
 	},
 	config : {
-		scrollable : 'vertical',
+		//scrollable : 'vertical',
 		// styleHtmlContent : true,
 		items : [ {
 			docked : 'top',
@@ -28,15 +28,14 @@ Ext.define('EatSense.view.ProductDetail', {
 		}, {
 			xtype : 'panel',
 			docked : 'top',
-			style : 'background-color:#B88A00;border-bottom:5px;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px; padding: 10px',
+			style : 'background-image: -webkit-linear-gradient(bottom, rgb(53,127,184) 4%, rgb(26,214,214) 87%);border-bottom:5px;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px; padding: 10px',
 			layout : {
 				type : 'vbox',
-//				align : 'middle'
 			},
-			
 			items : [ {
 				xtype : 'label',
 				id : 'prodDetailLabel',
+				styleHtmlContent : true
 			}, {
 				xtype : 'panel',
 				layout : {
@@ -71,14 +70,22 @@ Ext.define('EatSense.view.ProductDetail', {
 		}, {
 			xtype : 'panel',
 			itemId : 'choicesWrapper',
+			layout : {
+				type: 'fit'
+			},
 			items : [
-				{
-					xtype : 'label',
-					html :  i18nPlugin.translate('choicesPanelTitle')
-				},
+//				{
+//					xtype : 'label',
+//					itemId : 'choicesPanelTitle',
+//					flex : 1
+//				},
 				{
 					xtype : 'panel',
-					itemId : 'choicesPanel'
+//					flex: 2,
+					itemId : 'choicesPanel',
+					scrollable : 'vertical',
+					//layout : 'fit'
+//					height: 200
 				}
 				
 			]

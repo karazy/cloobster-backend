@@ -1,5 +1,5 @@
 var translation = {
-	"de" : {
+	"DE" : {
 
 		// General translations
 		"ok" : "Ok",
