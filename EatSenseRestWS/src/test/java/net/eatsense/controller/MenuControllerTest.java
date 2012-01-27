@@ -1,27 +1,26 @@
 package net.eatsense.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.*;
+import static org.hamcrest.CoreMatchers.*;
+
 
 import java.util.Collection;
-import java.util.List;
-
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.CheckInStatus;
-import net.eatsense.domain.Menu;
+import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Restaurant;
-import net.eatsense.domain.Spot;
-import net.eatsense.domain.User;
-import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
-import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
@@ -32,7 +31,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.googlecode.objectify.Key;
 
 public class MenuControllerTest {
 	
@@ -44,9 +42,10 @@ public class MenuControllerTest {
 	    private RestaurantRepository rr;
 	    private MenuRepository mr;
 	    private ProductRepository pr;
-	    private CheckInRepository cr;
-	    
-	    private Key<Restaurant> kR;
+	    private ChoiceRepository cr;
+	    private DummyDataDumper ddd;
+
+		private SpotRepository br;
 
 	@Before
 	public void setUp() throws Exception {
@@ -56,35 +55,12 @@ public class MenuControllerTest {
 		rr = injector.getInstance(RestaurantRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
+		cr = injector.getInstance(ChoiceRepository.class);
+		br = injector.getInstance(SpotRepository.class);
 		
-		//create necessary data in datastore
-		Restaurant r = new Restaurant();
-		r.setName("Heidi und Paul");
-		r.setDescription("Geiles Bio Burger Restaurant.");
-		kR = rr.saveOrUpdate(r);
+		ddd= new DummyDataDumper(rr, br, mr, pr, cr);
 		
-		Menu m = new Menu();
-		m.setTitle("Burger");
-		m.setRestaurant(kR);
-		m.setDescription("geile Burger aus aller Welt.");
-		Key<Menu> kM = mr.saveOrUpdate(m);
-		
-		Product p = new Product();
-		p.setName("Classic Burger");
-		p.setShortDesc("Burger mit Rindfleischpatty und Salat");
-		p.setPrice(8.0f);
-		p.setMenu(kM);
-		
-		pr.saveOrUpdate(p);
-		
-		p = new Product();
-		p.setName("Veggie Burger");
-		p.setShortDesc("Vegetarischer Burger mit Gemüste Patty und Käse");
-		p.setPrice(8.0f);
-		p.setMenu(kM);
-		
-		pr.saveOrUpdate(p);
-		
+		ddd.generateDummyRestaurants();
 		
 	}
 
@@ -96,19 +72,58 @@ public class MenuControllerTest {
 	@Test
 	public void testGetMenus() {
 		// retrieve all menus saved for this restaurant
-		Collection<MenuDTO> menusdto = ctr.getMenus(kR.getId());
+		Restaurant restaurant = rr.getByProperty("name", "Sergio");
 		
-		// check if we have one menu
-		assertEquals(1 , menusdto.size() );
+		Collection<MenuDTO> menusdto = ctr.getMenus(restaurant.getId());
 		
-		Collection<ProductDTO> products = menusdto.iterator().next().getProducts();
-		// check if we have two products in this menu
-		assertEquals(2, products.size());
+		// check if we have three menus
+		assertEquals(3 , menusdto.size() );
 		
-		// check if the price is 8 for any product
-		assertEquals(8.0, (double)products.iterator().next().getPrice(), 0);
-		assertEquals(8.0, (double)products.iterator().next().getPrice(), 0);
-		
+		for(MenuDTO menu : menusdto )  {
+			// check if all expected menus are present
+			assertThat(menu.getTitle(), anyOf(is("Hauptgerichte"), is("Beilagen"), is("Getränke") ));
+			
+			// check "Hauptgerichte" menu contents
+			if(menu.getTitle().equals("Hauptgerichte") ) {
+				
+				assertThat(menu.getProducts().size(), is(1));
+				
+				for(ProductDTO p : menu.getProducts()) {
+					assertThat(p.getName(), is("Classic Burger") );
+					assertThat(p.getChoices().size(), is(2));
+					
+					for(ChoiceDTO c : p.getChoices())  {
+						assertThat(c.getText(), anyOf(is("Wählen sie einen Gargrad:"), is("Beilagen:")));
+						assertThat(c.getOverridePrice(), is(ChoiceOverridePrice.NONE));
+						
+						if(c.getText().equals("Wählen sie einen Gargrad:")) {
+							assertThat(c.getOptions().size(), is (3));
+							
+							for (ProductOption pO : c.getOptions()) {
+								assertThat(pO.getName(), anyOf(is("Roh"), is("Medium"), is("Brikett")));
+							}
+						}
+						
+						if(c.getText().equals("Beilagen")) {
+							assertThat(c.getOptions().size(), is (2) );
+							
+							for (ProductOption pO : c.getOptions()) {
+								assertThat(pO.getName(), anyOf(is("Pommes Frites"), is("Krautsalat")));
+							}
+						}
+						
+					}
+					
+				}
+			}
+			
+			// check "Getränke" menu contents
+			if(menu.getTitle().equals("Getränke") ) {
+				
+				assertThat(menu.getProducts().size(), is(2));
+			}
+				
+		}
 	}
 
 }
