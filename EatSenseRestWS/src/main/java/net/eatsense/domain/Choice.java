@@ -3,6 +3,7 @@ package net.eatsense.domain;
 import java.util.List;
 
 import javax.persistence.Embedded;
+import javax.persistence.Transient;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
@@ -92,6 +93,11 @@ public class Choice extends GenericEntity {
 
 	public void setIncludedChoices(int includedChoices) {
 		this.includedChoices = includedChoices;
+	}
+	
+	@Transient
+	public Key<Choice> getKey() {
+		return new Key<Choice>(getProduct(), Choice.class, super.getId());
 	}
 
 	/**

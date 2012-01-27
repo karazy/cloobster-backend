@@ -7,15 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Restaurant;
-import net.eatsense.domain.Menu;
-import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
-import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
@@ -51,8 +49,8 @@ public class MenuController {
 	 * @param restaurantId entity id of the restaurant
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenus(long restaurantId){
-		if(restaurantId == 0 )
+	public Collection<MenuDTO> getMenus(Long restaurantId){
+		if(restaurantId == null )
 			throw new IllegalArgumentException("Invalid restaurant key specified.");
 		
 		

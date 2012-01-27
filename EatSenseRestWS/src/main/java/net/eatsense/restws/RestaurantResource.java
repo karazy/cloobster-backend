@@ -18,12 +18,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
+import net.eatsense.representation.RestaurantDTO;
 import net.eatsense.util.DummyDataDumper;
  
 import com.google.appengine.repackaged.org.json.JSONException;
@@ -44,13 +46,15 @@ public class RestaurantResource{
 	private DummyDataDumper ddd;
 	private CheckInController checkInCtr;
 	private MenuController menuCtr;
+	private ImportController importCtr;
 
 	@Inject
-	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd, MenuController menuCtr) {
+	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr) {
 		this.restaurantrepo = repo;
 		this.checkInCtr = checkInCtr;
 		this.menuCtr = menuCtr;
 		this.ddd = ddd;
+		this.importCtr = importCtr;
 	}
 
 	/**
@@ -166,6 +170,13 @@ public class RestaurantResource{
 	@Path("dummies")
 	public void dummyData() {
 		ddd.generateDummyRestaurants();
+	}
+	
+	@PUT
+	@Path("import")
+	@Consumes("application/json; charset=UTF-8")
+	public void importNewRestaurant(RestaurantDTO newRestaurant ) {
+		importCtr.addRestaurant(newRestaurant);
 	}
 
 }
