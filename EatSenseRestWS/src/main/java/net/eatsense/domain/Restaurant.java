@@ -13,7 +13,7 @@ import com.googlecode.objectify.Key;
  *
  */
 public class Restaurant extends GenericEntity {
-
+ 
 	/**
 	 * Name of location.
 	 */ 

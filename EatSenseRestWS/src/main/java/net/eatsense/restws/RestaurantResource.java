@@ -178,5 +178,15 @@ public class RestaurantResource{
 	public void importNewRestaurant(RestaurantDTO newRestaurant ) {
 		importCtr.addRestaurant(newRestaurant);
 	}
+	
+	/**
+	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
+	 * {@link ImportController#deleteAllData()}
+	 */
+	@GET
+	@Path("deleteall")
+	public void deleteAllData() {
+		importCtr.deleteAllData();
+	}
 
 }

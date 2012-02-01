@@ -10,7 +10,14 @@ Ext.define('EatSense.view.CheckinWithOthers', {
         items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'CheckIn Confirmation'
+			title : 'CheckIn Confirmation',
+			items: [
+					{        		 
+					    xtype: 'label',
+					    docked: 'right',
+					    html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+					}
+			       ]
 		
 		}, {
 			xtype : 'panel',

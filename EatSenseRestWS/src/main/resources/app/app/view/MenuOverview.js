@@ -12,7 +12,14 @@ Ext.define('EatSense.view.MenuOverview', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : i18nPlugin.translate('menuTitle')
+			title : i18nPlugin.translate('menuTitle'),
+			items: [
+					{        		 
+					    xtype: 'label',
+					    docked: 'right',
+					    html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+					}
+			]
 		}, {
 			xtype : 'list',
 			id : 'menulist',

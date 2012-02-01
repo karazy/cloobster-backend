@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/webapp"/>
+	<classpathentry excluding="admin-dev/extjs/|admin-dev/resources/|admin-prod/extjs/|admin-prod/resources/|app/touch/" kind="src" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.WebProject">
 		<attributes>

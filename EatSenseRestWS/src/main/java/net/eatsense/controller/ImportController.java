@@ -15,6 +15,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Spot;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -45,17 +46,19 @@ public class ImportController {
 	private MenuRepository menuRepo;
 	private ProductRepository productRepo;
 	private ChoiceRepository choiceRepo;
+	private CheckInRepository checkinRepo;
 	
 	@Inject
     private Validator validator;
 
 	@Inject
-	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr) {
+	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr) {
 		this.restaurantRepo = r;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.choiceRepo = cr;
+		this.checkinRepo = chkr;
 	}
 	
     public void setValidator(Validator validator) {
@@ -195,4 +198,19 @@ public class ImportController {
 		logger.info("Created choice with id: "+kC.getId());
 		return kC;
 	}
+	
+	/**
+	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
+	 * Deletes all data from datastore except nicknames.
+	 * Deletes restaurants, spots, checkins, menus, products, choices and so on.
+	 */
+	public void deleteAllData() {
+		restaurantRepo.ofy().delete(restaurantRepo.getAll());
+		spotRepo.ofy().delete(spotRepo.getAll());
+		menuRepo.ofy().delete(menuRepo.getAll());
+		productRepo.ofy().delete(productRepo.getAll());
+		choiceRepo.ofy().delete(choiceRepo.getAll());
+		checkinRepo.ofy().delete(checkinRepo.getAll());
+		
+	};
 }

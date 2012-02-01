@@ -23,7 +23,13 @@ Ext.define('EatSense.view.ProductDetail', {
 				xtype : 'button',
 				id : 'prodDetailBackBt',
 				ui : 'back'
-			} ]
+			},
+			{        		 
+	            xtype: 'label',
+	            docked: 'right',
+	            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+    		}
+			]
 
 		}, {
 			xtype : 'panel',

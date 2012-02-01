@@ -15,7 +15,13 @@ Ext.define('EatSense.view.Dashboard', {
         	{
         	docked: 'top',
         	xtype: 'toolbar',
-        	title: 'EatSense'
+        	title: 'eatSense',
+        	items: [{        		 
+		            xtype: 'label',
+		            docked: 'right',
+		            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+        		}
+        	]
         	},
         	{        	
         	xtype:'panel',
