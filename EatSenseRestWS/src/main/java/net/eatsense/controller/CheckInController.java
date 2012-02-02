@@ -140,6 +140,7 @@ public class CheckInController {
 			logger.info("CheckIn with userId {}", userId);			
 						
 			chkinDatastore.setNickname(checkIn.getNickname());
+			chkinDatastore.setDeviceId(checkIn.getDeviceId());
 			
 			// validation 
 			Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(chkinDatastore, Default.class, CheckInStep2.class);

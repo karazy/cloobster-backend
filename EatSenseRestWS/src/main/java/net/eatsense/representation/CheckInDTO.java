@@ -33,13 +33,20 @@ public class CheckInDTO {
 	/**
 	 * The userId used to identify this user.
 	 */
-	private String userId;
+	private String userId;	
 	
 	/**
 	 * A users nickname used for this checkin.
 	 * E. g. Peter Pan or Funny Bee ;)
 	 */
 	private String nickname;
+	
+	/**
+	 * The unique Id of the phone. Primarily used to block users
+	 * who try to abuse the service by issuing orders they don't
+	 * pay or need.
+	 */
+	private String deviceId;
 	
 	private ErrorDTO error;
 	
@@ -91,6 +98,15 @@ public class CheckInDTO {
 
 	public void setRestaurantId(Long restaurantId) {
 		this.restaurantId = restaurantId;
+	}
+	
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
 	}
 
 	public ErrorDTO getError() {

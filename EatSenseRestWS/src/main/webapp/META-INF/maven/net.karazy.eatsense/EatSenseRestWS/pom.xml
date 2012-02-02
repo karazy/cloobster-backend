@@ -230,6 +230,10 @@
 					<artifactId>jaxb-api</artifactId>
 					<groupId>javax.xml.bind</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>jersey-ejb</artifactId>
+					<groupId>com.sun.jersey.server.impl.ejb</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<!-- Configure jersey through guice -->

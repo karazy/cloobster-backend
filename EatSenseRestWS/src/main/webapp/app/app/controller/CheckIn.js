@@ -101,7 +101,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	 //private functions
     	 
     	 //called by checkInIntent. 
-    	 this.doCheckInIntent = function(barcode, button) {
+    	 this.doCheckInIntent = function(barcode, button, deviceId) {
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
     	    		this.getDashboard().setMask(false);
@@ -113,7 +113,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	    	console.log("CheckInIntent Status: " + model.get('status'));
     	        	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	  
     	        	    	if(model.data.status == "INTENT") {
-    	        	    		that.checkInConfirm({model:model});
+    	        	    		that.checkInConfirm({model:model, deviceId : deviceId});
     	        	    	} else if(model.data.status == "BARCODE_ERROR") {
     	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	        	    	} else {
@@ -137,16 +137,18 @@ Ext.define('EatSense.controller.CheckIn', {
     	console.log('CheckIn Controller -> checkIn');
     	//disable button to prevent multiple checkins
     	button.disable();
-    	var barcode, that = this;
+    	var barcode, that = this, deviceId;
     	if(this.getProfile() == 'desktop' || !window.plugins.barcodeScanner) {
-    		barcode = Ext.String.trim(this.getSearchfield().getValue());    
+    		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
+    		deviceId = '_browser'; //just for testing
     		this.getDashboard().setMask(true);
-    		this.doCheckInIntent(barcode, button);
+    		this.doCheckInIntent(barcode, button, deviceId);
     	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
     			window.plugins.barcodeScanner.scan(function(result, barcode) {
     			barcode = result.text;
     			that.getDashboard().setMask(true);
-    			that.doCheckInIntent(barcode, button);
+    			deviceId = device.uuid;
+    			that.doCheckInIntent(barcode, button, deviceId);
     		}, function(error) {
     			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
     		});
@@ -168,7 +170,11 @@ Ext.define('EatSense.controller.CheckIn', {
 	   this.getCheckInDlg1Label1().setHtml(i18nPlugin.translate('checkInStep1Label1', options.model.data.spot, options.model.data.restaurantName));
 		var checkInDialog = this.getCheckinconfirmation(), main = this.getMain();
 		this.getNickname().setValue(options.model.data.nickname);
-		this.models.activeCheckIn = options.model;
+		if(options.deviceId) {
+			//store device uuid
+			options.model.data.deviceId = options.deviceId;
+		}			
+		this.models.activeCheckIn = options.model;		
 		main.switchAnim('left');
 		main.setActiveItem(checkInDialog);	     
    },

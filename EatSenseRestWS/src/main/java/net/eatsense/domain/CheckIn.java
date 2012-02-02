@@ -48,7 +48,17 @@ public class CheckIn extends GenericEntity{
 	 */
 	private String linkedUserId;
 	
+	/**
+	 * Time of checkin.
+	 */
 	private Date checkInTime;
+	
+	/**
+	 * The unique Id of the phone. Primarily used to block users
+	 * who try to abuse the service by issuing orders they don't
+	 * pay or need.
+	 */
+	private String deviceId;
 	
 	/**
 	 * Restaurant this checkIn belongs to.
@@ -122,4 +132,14 @@ public class CheckIn extends GenericEntity{
 	public void setCheckInTime(Date checkInTime) {
 		this.checkInTime = checkInTime;
 	}
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	
+	
 }
