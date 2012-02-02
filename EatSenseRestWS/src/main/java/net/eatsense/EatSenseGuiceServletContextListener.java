@@ -1,7 +1,7 @@
 package net.eatsense;
 
 
-import org.apache.bval.guice.ValidationModule;
+import java.util.HashMap;
 
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Menu;
@@ -11,7 +11,8 @@ import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.RestaurantResource;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
+import org.apache.bval.guice.ValidationModule;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
@@ -35,27 +36,18 @@ public class EatSenseGuiceServletContextListener extends
 				new JerseyServletModule() { 
 					@Override 					
 					protected void configureServlets() {
+						HashMap<String, String> parameters = new HashMap<String, String>();
+						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						bind(RestaurantResource.class);
 						bind(NicknameResource.class);
 						bind(CronResource.class);
 						bind(Spot.class);
 						bind(CheckIn.class);
 						bind(Menu.class);
-//						bind(RestaurantRepository.class);
 						bind(GenericRepository.class);
-//						bind(AreaRepository.class);
-//						bind(CheckInRepository.class);
-//						bind(BarcodeRepository.class);
-//						bind(new TypeLiteral<GenericRepository<Restaurant>>(){}).to(new TypeLiteral<RestaurantRepository>(){});
-//						bind(new TypeLiteral<GenericRepository<Area>>(){}).to(new TypeLiteral<AreaRepository>(){});
-//						bind(new TypeLiteral<GenericRepository<Barcode>>(){}).to(new TypeLiteral<BarcodeRepository>(){});
-//						bind(new TypeLiteral<GenericRepository<CheckIn>>(){}).to(new TypeLiteral<CheckInRepository>(){});
-						//bind(ObjectifyService.class);
-						// Route all requests through GuiceContainer
-						// "(.)*restaurant(.)*"
-						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
-						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
-						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, ImmutableMap.of(JSONConfiguration.FEATURE_POJO_MAPPING, "true"));
+						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
 
 				}, new ValidationModule());
