@@ -30,6 +30,7 @@ import net.eatsense.util.DummyDataDumper;
  
 import com.google.appengine.repackaged.org.json.JSONException;
 import com.google.appengine.repackaged.org.json.JSONObject;
+
 import com.google.inject.Inject;
 
 /**
@@ -145,7 +146,7 @@ public class RestaurantResource{
 	public String getSpreadsheetTest(@PathParam("spreadsheetKey") String spreadsheetKey) throws JSONException
 	{
 		String returnString = "";
-		try {
+		try { 
             URL url = new URL("https://spreadsheets.google.com/feeds/worksheets/"+ spreadsheetKey + "/public/basic?alt=json");
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             String line;
