@@ -9,7 +9,7 @@ Ext.Loader.setConfig({
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Error' ],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error' ],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OptionDetail' ],
 	stores : [ 'CheckIn', 'User', 'Menu' ],
 	init : function() {
