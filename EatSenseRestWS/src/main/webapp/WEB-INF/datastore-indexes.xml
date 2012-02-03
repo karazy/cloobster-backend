@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datastore-index kind="CheckIn" ancestor="false" source="manual">
+        <property name="status" direction="asc"/>
+        <property name="checkInTime" direction="asc"/>
+</datastore-index>
