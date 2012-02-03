@@ -67,10 +67,10 @@
 
     .x-container, .x-body {
         display: -webkit-box;
-        overflow: hidden;
     }
 
     .x-body {
+        overflow: hidden;
         -webkit-box-flex: 1;
         min-width: 100%;
         min-height: 100%;
@@ -237,6 +237,14 @@
         position: absolute;
         z-index: 1;
         opacity: 0.5;
+    }
+
+    .x-list-light,
+    .x-dataview-light {
+        .x-scroll-indicator {
+            background: #fff;
+            opacity: 1;
+        }
     }
 
     .x-scroll-indicator-x {

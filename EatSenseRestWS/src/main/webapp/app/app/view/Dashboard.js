@@ -7,10 +7,6 @@ Ext.define('EatSense.view.Dashboard', {
     xtype: 'dashboard',
     fullscreen: true,
     config: {
-    	mask : {
-    		message : i18nPlugin.translate('loadingMsg'),
-    		hidden : true
-    	},
         items: [
         	{
         	docked: 'top',
@@ -56,6 +52,17 @@ Ext.define('EatSense.view.Dashboard', {
             }
             ]
         }]
+    },
+    
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : i18nPlugin.translate('loadingMsg'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
     }
 });
 

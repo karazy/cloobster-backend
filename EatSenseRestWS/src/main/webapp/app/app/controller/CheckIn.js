@@ -7,75 +7,29 @@
 Ext.define('EatSense.controller.CheckIn', {
     extend: 'Ext.app.Controller',
     config: {
-        profile: Ext.os.deviceType.toLowerCase()
-    },
-    
-	views : [
-		'Main',
-		'Dashboard',		
-		'Checkinconfirmation',
-		'CheckinWithOthers',
-		'MenuOverview'
-	],
-	stores : [
-	'CheckIn',
-	'User',
-	'Menu'
-	],
-	refs: [
-        {
-            ref       : 'main',
-            selector  : 'mainview',
-            xtype     : 'mainview',
-            autoCreate: true
-        },
-        {
-        	ref: 'searchfield',
-        	selector : 'dashboard textfield'
-        	
-        },
-        {
-        	ref: 'checkinconfirmation',
-        	selector: 'checkinconfirmation'
-        },
-        {
-        	ref: 'nickname',
-        	selector : '#nicknameTf'
-        },
-        {
-        	ref: 'menuoverview',
-        	selector: 'menuoverview'
-        }, 
-        {
-        	ref: 'checkinwithothers',
-        	selector: 'checkinwithothers'
-        },
-        {
-        	ref: 'dashboard',
-        	selector: 'dashboard'
-        },
-        {
-        	ref: 'userlist',
-        	selector: '#checkinDlg2Userlist'
-        },
-        {
-        	ref: 'checkInDlg1Label1',
-        	selector: '#checkInDlg1Label1'
-        },    
-        {
-        	ref: 'cancelCheckInBt',
-        	selector: '#cancelCheckInBt'
-        },
-        {
-        	ref: 'menulist',
-        	selector: '#menulist'
-        }
+        profile: Ext.os.deviceType.toLowerCase(),
         
-    ],
+    	refs: 
+    	        {
+    	            main : 'mainview', 
+//    	            {
+//    	            	selector  : 'globalContainer',
+//        	            xtype     : 'mainview',
+//    	            },
+    	            searchfield : 'dashboard textfield',
+    	            checkinconfirmation : 'checkinconfirmation',
+    	        	nickname : '#nicknameTf',
+    	        	menuoverview: 'menuoverview',    	   
+    	        	checkinwithothers: 'checkinwithothers',
+    	        	dashboard: 'dashboard',
+    	        	userlist: '#checkinDlg2Userlist',
+    	        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
+    	        	cancelCheckInBt: '#cancelCheckInBt',    	       
+    	        	menulist: '#menulist'
+    	        }   
+    },
     init: function() {
     	console.log('initialized CheckInController');
-    	//ONLY CREATE ONCE!!!
-    	this.getMainView().create();
     	 this.control({
             '#checkInBtn': {
                 tap: this.checkInIntent
@@ -91,8 +45,10 @@ Ext.define('EatSense.controller.CheckIn', {
             },
             '#cancelCheckInBt': {
             	tap: this.cancelCheckIn
+            },
+            '#regenerateNicknameBt': {
+            	tap: this.regenerateNickname
             }
-            
         });
     	 
     	 var models = {};
@@ -104,7 +60,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	 this.doCheckInIntent = function(barcode, button, deviceId) {
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
-    	    		this.getDashboard().setMask(false);
+    	    		this.getDashboard().showLoadScreen(false);
     	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	    	} else {
     	        	var that = this;
@@ -121,7 +77,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	    	}    	        	    	
     	        	    },
     	        	    callback: function() {
-    	        	    	that.getDashboard().setMask(false);
+    	        	    	that.getDashboard().showLoadScreen(false);
     	        	    	button.enable();
     	        	    }
     	        	    
@@ -141,12 +97,12 @@ Ext.define('EatSense.controller.CheckIn', {
     	if(this.getProfile() == 'desktop' || !window.plugins.barcodeScanner) {
     		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
     		deviceId = '_browser'; //just for testing
-    		this.getDashboard().setMask(true);
+    		this.getDashboard().showLoadScreen(true);
     		this.doCheckInIntent(barcode, button, deviceId);
     	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
     			window.plugins.barcodeScanner.scan(function(result, barcode) {
     			barcode = result.text;
-    			that.getDashboard().setMask(true);
+    			that.getDashboard().showLoadScreen(true);
     			deviceId = device.uuid;
     			that.doCheckInIntent(barcode, button, deviceId);
     		}, function(error) {
@@ -192,9 +148,11 @@ Ext.define('EatSense.controller.CheckIn', {
 	   } else {
 		   this.models.activeCheckIn.data.nickname = nickname;
 			 //checkIn(String userId, String nickname)
-			   this.models.activeCheckIn.save(
+			   var test = this.models.activeCheckIn.save(
 					   {
 					   	    success: function(response) {
+				   	    	//TODO workaround
+				   	    	response = this;
 					   	     if(response.data.status == 'YOUARENOTALONE') {
 					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
 					   	    	 var userId = response.data.userId;
@@ -226,7 +184,23 @@ Ext.define('EatSense.controller.CheckIn', {
    cancelCheckIn: function(options) {
 	   console.log("CheckIn Controller -> cancelCheckIn");
 	   var dashboardView = this.getDashboard(), main = this.getMain();
-	   this.models.activeCheckIn.destroy();
+//	   this.models.activeCheckIn.destroy({
+//		    success: function() {
+//		        console.log('Canceled checkin.');
+//		    	}
+//			}
+//	   );
+	   //TODO Workaorund in B1 because delete is not working
+	   this.models.activeCheckIn = null;
+		Ext.Ajax.request({
+    	    url: globalConf.serviceUrl+'/restaurant/spot/'+this.models.activeCheckIn.userId,
+    	    method: 'DELETE',
+    	    scope: this,
+    	    success: function(response){
+    	    	console.log('Canceled checkin.');
+    	    }
+    	});
+	   
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
    },
@@ -317,6 +291,24 @@ Ext.define('EatSense.controller.CheckIn', {
 			     }
 			 });
 		 }
+	},
+	/**
+	 * 
+	 */
+	regenerateNickname : function() {
+		Ext.Ajax.request({
+    	    url: globalConf.serviceUrl+'/nickname',
+    	    method: 'GET',
+    	    scope: this,
+    	    params: {
+    	        random: ""
+    	    },
+    	    success: function(response){
+    	    	this.getNickname().setValue(response.responseText);
+    	    }
+    	});
+		
 	}
+	
 });
 

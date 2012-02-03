@@ -7,65 +7,19 @@
 Ext.define('EatSense.controller.Menu', {
     extend: 'Ext.app.Controller',
     config: {
-        profile: Ext.os.deviceType.toLowerCase()
+        profile: Ext.os.deviceType.toLowerCase(),
+		refs: {
+	        main : 'mainview', 
+        	menulist :'#menulist',        	
+        	productlist :'#productlist',        	
+        	productoverview :'productoverview' ,	     
+        	menuoverview :'menuoverview' ,	       
+        	productdetail :'productdetail' ,        		       
+        	backToMenu :'#productOvBackBt' ,	        
+        	prodDetailLabel :'#prodDetailLabel' ,	     
+        	prodDetailBackBt :'#prodDetailBackBt' ,	        
+		}
     },
-    
-	views : [
-		'Main',
-		'Dashboard',
-		'MenuOverview',
-		'ProductOverview',
-		'ProductDetail',
-		'OptionDetail'
-	],
-	stores : [
-	'Menu'
-	],
-	refs: [
-        {
-            ref       : 'main',
-            selector  : 'mainview',
-            xtype     : 'mainview',
-            autoCreate: true
-        },
-        {
-            ref       : 'main',
-            selector  : 'main',
-            xtype     : 'main'
-        },
-        {
-        	ref: 'menulist',
-        	selector : '#menulist'        	
-        },
-        {
-        	ref: 'productlist',
-        	selector : '#productlist'        	
-        }, 
-        {
-        	ref: 'productoverview',
-        	selector: 'productoverview'
-        },
-        {
-        	ref: 'menuoverview',
-        	selector: 'menuoverview'
-        }, 
-        {
-        	ref: 'productdetail',
-        	selector: 'productdetail'        	
-        },
-        {
-        	ref: 'backToMenu',
-        	selector: '#productOvBackBt'
-        },
-        {
-        	ref: 'prodDetailLabel',
-        	selector: '#prodDetailLabel'
-        },
-        {
-        	ref: 'prodDetailBackBt',
-        	selector: '#prodDetailBackBt'
-        }
-    ],
     init: function() {
     	console.log('initialized MenuController');
     	 this.control({

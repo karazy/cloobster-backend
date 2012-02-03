@@ -13,7 +13,7 @@ var translation = {
 		"checkInButton" : "CheckIn",
 		"settingsButton" : "Einstellungen",
 		// Checkin process
-		"checkInTitle" : "CheckIn Bestätigung",
+		"checkInTitle" : "CheckIn",
 		"checkInStep1Label1" : "Möchtest du bei <strong>{0} bei {1}</strong> einchecken?",
 		"checkInStep1Label2" : "Wähle einen Nickname oder nimm den Generierten.",
 		"checkInStep1Button" : "Los gehts!",

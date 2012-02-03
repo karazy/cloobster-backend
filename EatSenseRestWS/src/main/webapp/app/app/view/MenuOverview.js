@@ -28,18 +28,9 @@ Ext.define('EatSense.view.MenuOverview', {
 			itemTpl : '<div>{title}</div>',
 			listeners: {
 				itemtap: function(dv, ix, item, e) {
-					// Delay the selection clear
-					// so they get a nice blue flash for HCI's sake
-//					setTimeout(function(){dv.deselect(ix);},500);
-//					dv.deselect(ix);
-//					dv.deselect(item);
-//					dv.getSelected().clear();
-					console.log('MenuOverview -> listener itemtap');
-				},
-				deactivate: function(eOpts) {
-					console.log('MenuOverview -> listener deactivate');
-					}
+					dv.deselect(ix);
 				}
+			}
 			
 		} ]
 	}
