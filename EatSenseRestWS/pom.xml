@@ -124,6 +124,12 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+	        <groupId>com.jayway.restassured</groupId>
+	        <artifactId>rest-assured</artifactId>
+      		<version>1.5</version>
+      		<scope>test</scope>
+		</dependency>
 		<!-- Apache Bean Validation dependencies -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -283,11 +289,28 @@
 						<configuration>
 							<jvmFlags>
 								<jvmFlag>-Xdebug</jvmFlag>
-								<jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</jvmFlag>
+								<jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8888</jvmFlag>
 							</jvmFlags>
 							<unpackVersion>${gae.version}</unpackVersion>
 						</configuration>
+						
 					</execution>
+					<execution>
+            			<id>start-gae</id>
+            				<phase>pre-integration-test</phase>
+            			<goals>
+                			<goal>start</goal>
+            			</goals>
+            			<configuration>
+            			</configuration>
+        			</execution>
+        			<execution>
+            			<id>stop-gae</id>
+            				<phase>post-integration-test</phase>
+            			<goals>
+                			<goal>stop</goal>
+            			</goals>
+        			</execution>
 				</executions>
 			</plugin>
 
@@ -311,7 +334,27 @@
 							<value>-out ${project.build.directory}/${project.build.finalName}</value>
 						</property>
 					</systemProperties>
+					<excludes> 
+            			<exclude>**/*IntegrationTest.java</exclude>  
+        			</excludes> 
 				</configuration>
+			</plugin>
+			
+			<plugin>
+    			<artifactId>maven-failsafe-plugin</artifactId>
+    			<version>2.12</version>
+    			<configuration>
+        			<includes>
+            			<include>**/*IntegrationTest.java</include>
+        			</includes>
+    			</configuration>
+    			<executions>
+        			<execution>
+            			<goals>
+                			<goal>integration-test</goal>
+           				</goals>
+        			</execution>
+    			</executions>
 			</plugin>
 
 			<!-- Copy static web files before executing gwt:run -->
