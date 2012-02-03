@@ -1,7 +1,9 @@
 package net.eatsense.domain;
 
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
+import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
@@ -17,6 +19,8 @@ public class Restaurant extends GenericEntity {
 	/**
 	 * Name of location.
 	 */ 
+	@NotNull
+	@NotEmpty
 	private String name;
 
 	/**

@@ -142,8 +142,14 @@ public class RestaurantResource{
 	@PUT
 	@Path("import")
 	@Consumes("application/json; charset=UTF-8")
-	public void importNewRestaurant(RestaurantDTO newRestaurant ) {
-		importCtr.addRestaurant(newRestaurant);
+	@Produces("text/plain; charset=UTF-8")
+	public String importNewRestaurant(RestaurantDTO newRestaurant ) {
+		Long id =  importCtr.addRestaurant(newRestaurant);
+		
+		if(id == null)
+			return "Error:\n" + importCtr.getReturnMessage();
+		else
+		    return id.toString();
 	}
 	
 	/**

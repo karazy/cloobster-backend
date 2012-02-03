@@ -2,15 +2,27 @@ package net.eatsense.representation;
 
 import java.util.Collection;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 public class ProductDTO {
+	@NotNull
+	@NotEmpty
 	private String name;
 	private String shortDesc;
 	/**
 	 * Detailed description of this product.
 	 */
 	private String longDesc;
+	
+	@NotNull
+	@Min(0)
 	private Float price;
 	
+	@Valid
 	private Collection<ChoiceDTO> choices;
 	
 	public String getName() {
