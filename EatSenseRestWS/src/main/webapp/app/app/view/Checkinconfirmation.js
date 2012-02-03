@@ -47,13 +47,29 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				xtype : 'textfield',
 				id : 'nicknameTf',
 				label: 'Nickname',
+				labelAlign: 'top',
 				required: true,
 			}, {
-				xtype : 'button',
-				id : 'confirmCheckInBt',
-				text : i18nPlugin.translate('checkInStep1Button'),
-				ui : 'normal'
-			}
+				xtype: 'panel',
+				layout: {
+					type: 'hbox'
+				},
+				items: [
+			    	{
+						xtype: 'button',
+						id: 'regenerateNicknameBt',
+						iconCls: 'refresh',
+					    iconMask: true,
+					    style : 'margin-right:10px;'
+					},					
+					{
+						xtype : 'button',
+						id : 'confirmCheckInBt',
+						text : i18nPlugin.translate('checkInStep1Button'),
+						ui : 'normal'
+					}
+				]
+			}								
 			]
 		} ]
     }

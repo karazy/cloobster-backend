@@ -39,8 +39,8 @@ Ext.define('EatSense.view.ProductOverview', {
 					"<p style='clear: both;'>{shortDesc}</p>"+
 					"</div>",
 			listeners : {
-				itemtap : function(dv, ix, item, e) {
-					console.log('ProductOverview -> listener itemtap');
+				itemtap : function(dv, ix, item, e) {					
+					dv.deselect(ix);
 				}
 			}
 		} ]
