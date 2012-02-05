@@ -56,8 +56,8 @@ Ext.define('EatSense.view.ProductDetail', {
 					value : 1,
 					flex : 3,
 					// FIXME not working in PR 3
-					// minValue : '1',
-					// maxValue : '10',
+					 minValue : '1',
+					maxValue : '10',
 					cycle : true,
 
 				},
@@ -86,7 +86,7 @@ Ext.define('EatSense.view.ProductDetail', {
 //					flex : 1
 //				},
 				{
-					xtype : 'panel',
+					xtype : 'formpanel',
 //					flex: 2,
 					itemId : 'choicesPanel',
 					scrollable : 'vertical',

@@ -22,5 +22,13 @@ Ext.define('EatSense.model.Product', {
 			model : 'EatSense.model.Choice',
 			name : 'choices'
 		}
+	},
+	
+	validate: function() {
+		
+	},
+	
+	calculate: function() {
+		
 	}
 });

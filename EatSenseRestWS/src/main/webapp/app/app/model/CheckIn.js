@@ -38,7 +38,7 @@ Ext.define('EatSense.model.CheckIn', {
 			model : "EatSense.model.Error"
 		},
 		hasMany : {
-			model : 'Order',
+			model : 'EatSense.model.Order',
 			name : 'orders'
 		}
 	}

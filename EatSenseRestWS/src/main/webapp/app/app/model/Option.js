@@ -6,6 +6,7 @@ Ext.define('EatSense.model.Option', {
 		    {name: 'id', type: 'string'},
 			{name: 'name', type: 'string'},
 			{name: 'price', type: 'number'},
+			{name: 'selected', type: 'boolean'}
 		]
 	}
 });

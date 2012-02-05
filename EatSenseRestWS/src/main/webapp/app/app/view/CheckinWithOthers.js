@@ -10,7 +10,7 @@ Ext.define('EatSense.view.CheckinWithOthers', {
         items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : 'CheckIn Confirmation',
+			title : i18nPlugin.translate('checkInTitle'),
 			items: [
 					{        		 
 					    xtype: 'label',

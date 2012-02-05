@@ -17,7 +17,11 @@ Ext.define('EatSense.controller.Menu', {
         	productdetail :'productdetail' ,        		       
         	backToMenu :'#productOvBackBt' ,	        
         	prodDetailLabel :'#prodDetailLabel' ,	     
-        	prodDetailBackBt :'#prodDetailBackBt' ,	        
+        	prodDetailBackBt :'#prodDetailBackBt' ,	   
+        	//TODO improve selector
+        	amount : 'panel panel spinnerfield',
+        	cartview : 'cartview',
+        	cardBt : '#menuCartBt'      	
 		}
     },
     init: function() {
@@ -33,10 +37,16 @@ Ext.define('EatSense.controller.Menu', {
             	 tap: this.showMenu
              }, 
              '#prodDetailBackBt': {
-            	 tap: this.backToProductOverview
+            	 tap: this.prodDetailBackBtHandler
              },
              '#prodDetailCardBt' : {
-            	 tap: this.addProductToCard
+            	 tap: this.createOrder
+             },
+             '#menuCartBt' : {
+            	 tap: this.showCart
+             },
+             '#bottomTapToMenu' : {
+            	 tap: this.showMenu
              }
         });
     	 
@@ -77,7 +87,7 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
-		this.models.activeProduct = record.data;
+		this.models.activeProduct = record;
 		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
 		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
@@ -90,9 +100,9 @@ Ext.define('EatSense.controller.Menu', {
 				 	'</div><p style="clear: both;">'+record.data.longDesc+'</p>'+
 				 '</div>');
 		 //dynamically add choices if present		 
-		 if(typeof record.choicesStore !== 'undefined') {
-			 var totalHeight = 0;
-			 for(var i =0; i < record.choicesStore.data.items.length; i++) {
+		 if(typeof record.choices() !== 'undefined') {
+//			 var totalHeight = 0;
+			 for(var i =0; i < record.choices().data.items.length; i++) {
 				 //this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanelTitle').setHtml(i18nPlugin.translate('choicesPanelTitle'));
 				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
@@ -107,42 +117,126 @@ Ext.define('EatSense.controller.Menu', {
 					 optionType = 'Ext.field.Checkbox';					 
 				 }
 				
-				 Ext.each(choice.data.options, function(item) {
+				 choice.options().each(function(opt) {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.data.id,
-						 value : item,
-						 label : item.name
-					 });
-				//	 checkbox.setHeight(50);
-					 totalHeight += 50;
+						 value : opt,
+						 label : opt.get('name'),
+						 listeners : {
+							 check : function(cbox) {
+								 console.log('check');
+								 if(optionType == "Ext.field.Radio") {
+									 choice.options().each(function(innerOpt) {
+										 innerOpt.set('selected', false);
+									 });
+								 };
+								 opt.set('selected', true);
+							 },
+							 uncheck: function(cbox) {
+								 console.log('uncheck');
+								 if(optionType == 'Ext.field.Checkbox') {
+									 opt.set('selected', false);
+								 } else {
+									 //don't allow radio buttons to be deselected
+									 cbox.setChecked(true);
+								 }	
+								 
+							 }
+						 }
+						
+					 });					 
 					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
-				 });				 
+					 
+				 });	 
 				 choicesPanel.add(optionsDetailPanel);
 			 }
-			 //choicesPanel.setHeight(totalHeight);
 		 }
 		 main.switchAnim('left');
 		 main.setActiveItem(detail);
 	},
 	/**
-	 * Called when user navigates back from productdetail view to productoverview (the list of products)
+	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
+	 * withoug issuing an order.
 	 * @param button
 	 */
-	backToProductOverview: function(button) {
+	prodDetailBackBtHandler : function(button) {
+		this.backToProductOverview();
+	},
+	/**
+	 * Called when user navigates back from productdetail view to productoverview (the list of products)
+	 * @param message
+	 * 		A message to show after switching back to productoverview
+	 */
+	backToProductOverview: function(message) {
 		console.log("Menu Controller -> backToProductOverview");
 		this.models.activeProduct = null;
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		var main = this.getMain(), pov = this.getProductoverview();
 		main.switchAnim('right');
 		main.setActiveItem(pov);
+		if (message) {
+			Ext.Msg.show({
+				title : i18nPlugin.translate('orderPlaced'),
+				message : message,
+				buttons : []
+			});
+			//show short alert and then hide
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), globalConf.msgboxHideTimeout, this);
+		}
 	},
 	/**
 	 * Adds the current product to card.
 	 * @param button
 	 */
-	addProductToCard: function(button) {
+	createOrder: function(button) {
 		//get active product and set choice values
-		this.backToProductOverview();
+		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;
+		//validate choices or 
+		//validate each choice on tap?
+		productForCart.choices().each(function(choice) {
+			if(choice.validateChoice() !== true) {
+				//coice is not valid
+				productIsValid = false;
+				validationError += choice.get('text') + '<br/>';
+			};
+		});
+		
+		if(productIsValid === true) {
+			order = Ext.create('EatSense.model.Order');
+			order.set('amount', this.getAmount().getValue());
+			order.set('status','PLACED');
+			order.setProduct(productForCart);
+//			order.getProduct(function(prod, operation) {
+//			    alert(prod.get('name')); 
+//			}, this);
+			//comment field needed
+//			order.setComment();
+			//if valid create order and attach to checkin
+			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
+			this.getCardBt().setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
+			//temporarily persist data on phone 		
+			
+			this.backToProductOverview(i18nPlugin.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
+		} else {
+			//show validation error
+			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn);
+		}
+		
+	},
+	/**
+	 * Switches to card view.
+	 */
+	showCart: function(){
+		//only switch if cart is not empty
+		if(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length == 0) {
+			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
+		} else {
+			var main = this.getMain(), cartview = this.getCartview();
+			main.switchAnim('left');
+			main.setActiveItem(cartview);
+		}
 	}
      	
 });

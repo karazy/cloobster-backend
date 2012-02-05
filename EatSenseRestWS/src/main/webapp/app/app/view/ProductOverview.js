@@ -25,6 +25,28 @@ Ext.define('EatSense.view.ProductOverview', {
 			]
 
 		}, {
+			docked : 'bottom',
+			xtype : 'toolbar',
+			itemId : 'menuBottomBar',
+			layout: {
+				type: 'hbox',
+				pack : 'center'
+			},
+			items: [
+				{
+				    title: 'Menu',
+				    iconCls: 'compose',
+				    id: 'bottomTapToMenu',
+				    iconMask: true
+				},
+				{
+				    title: 'Card',
+				    iconCls: 'organize',
+				    id: 'menuCartBt',
+				    iconMask: true,
+				}
+			        ]
+		}, {
 			xtype : 'list',
 			layout : {
 				align : 'center'
@@ -46,16 +68,3 @@ Ext.define('EatSense.view.ProductOverview', {
 		} ]
 	}
 });
-
-
-/*
-
- '<div class="prodDetailWrapper">'+
-				 	'<div style="position: relative;">'+
-				 		'<h2 style="float: left; width: 80%; margin: 0;">'+record.data.name+'</h2>'+
-				 		'<div style="position: absolute; right: 0; top: 50%; width: 20%; text-align: right; font-size:2em;">'+record.data.price+'</div>'+
-				 		'<div style="clear: both;">'+
-				 	'</div><p style="clear: both;">'+record.data.longDesc+'</p>'+
-				 '</div>')
-
-*/

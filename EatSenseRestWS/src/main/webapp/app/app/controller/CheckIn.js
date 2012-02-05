@@ -11,11 +11,7 @@ Ext.define('EatSense.controller.CheckIn', {
         
     	refs: 
     	        {
-    	            main : 'mainview', 
-//    	            {
-//    	            	selector  : 'globalContainer',
-//        	            xtype     : 'mainview',
-//    	            },
+    	            main : 'mainview',
     	            searchfield : 'dashboard textfield',
     	            checkinconfirmation : 'checkinconfirmation',
     	        	nickname : '#nicknameTf',
@@ -25,7 +21,8 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	userlist: '#checkinDlg2Userlist',
     	        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
     	        	cancelCheckInBt: '#cancelCheckInBt',    	       
-    	        	menulist: '#menulist'
+    	        	menulist: '#menulist',
+    	        	menuview: 'menu'
     	        }   
     },
     init: function() {
@@ -162,7 +159,7 @@ Ext.define('EatSense.controller.CheckIn', {
 					   			   that.showMenu();
 					   		   }
 					   		   else if(response.data.status == 'VALIDATION_ERROR') {
-					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.raw.error.errorKey,response.raw.error.substitutions), Ext.emptyFn);
+					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.data.error.errorKey,response.data.error.substitutions), Ext.emptyFn);
 					   		   }
 					   		   else {
 					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
@@ -190,8 +187,7 @@ Ext.define('EatSense.controller.CheckIn', {
 //		    	}
 //			}
 //	   );
-	   //TODO Workaorund in B1 because delete is not working
-	   this.models.activeCheckIn = null;
+	   //TODO Workaorund in B1 because delete is not working	   
 		Ext.Ajax.request({
     	    url: globalConf.serviceUrl+'/restaurant/spot/'+this.models.activeCheckIn.userId,
     	    method: 'DELETE',
@@ -200,7 +196,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	    	console.log('Canceled checkin.');
     	    }
     	});
-	   
+		this.models.activeCheckIn = null;
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
    },
@@ -266,7 +262,8 @@ Ext.define('EatSense.controller.CheckIn', {
     */
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
-		 var menu = this.getMenuoverview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this;
+		//this.getMenuoverview()
+		 var menu = this.getMenuview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this; 
 		 if(restaurantId.toString().length != 0) {
 			 //load menudata and store it in MenuController
 			 var menuListStore = Ext.create('Ext.data.Store', {

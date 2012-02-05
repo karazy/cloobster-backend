@@ -23,13 +23,13 @@ Ext.define('EatSense.model.Order', {
 			type : 'hasOne',
 			model : 'EatSense.model.Product'
 		},
-		proxy : {
-			type : 'rest',
-			url : globalConf.serviceUrl + '/restaurant/order/',
-			reader : {
-				type : 'json',
-			}
-		}
+//		proxy : {
+//			type : 'rest',
+//			url : globalConf.serviceUrl + '/restaurant/order/',
+//			reader : {
+//				type : 'json',
+//			}
+//		}
 	}
 
 });

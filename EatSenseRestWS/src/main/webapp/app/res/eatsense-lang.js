@@ -9,6 +9,7 @@ var translation = {
 		"errorTitle" : "Fehler",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"loadingMsg" : "Laden ...",
+		"hint" : "Hinweis",
 		// main menu
 		"checkInButton" : "CheckIn",
 		"settingsButton" : "Einstellungen",
@@ -26,7 +27,14 @@ var translation = {
 
 		// Menu
 		"menuTitle" : "Menü",
-		"choicesPanelTitle" : "Optionen"
+		"choicesPanelTitle" : "Optionen",
+		//Order
+		"orderInvalid" : "Bitte überprüfe deine Auswahl",
+		"orderPlacer" : "Bestellung im Warenkorb",
+		"cartEmpty" : "Du hast noch keine Bestellung getätigt.",
+		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
+		//Cart
+		"cartviewTitle" : "Bestellung"
 
 	}
 

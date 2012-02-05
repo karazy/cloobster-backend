@@ -20,6 +20,28 @@ Ext.define('EatSense.view.MenuOverview', {
 					    html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
 					}
 			]
+		},  {
+			docked : 'bottom',
+			xtype : 'toolbar',
+			itemId : 'menuBottomBar',
+			layout: {
+				type: 'hbox',
+				pack : 'center'
+			},
+			items: [
+				{
+				    title: 'Menu',
+				    iconCls: 'compose',
+				    id: 'bottomTapToMenu',
+				    iconMask: true
+				},
+				{
+				    title: 'Card',
+				    iconCls: 'organize',
+				    id: 'menuCartBt',
+				    iconMask: true,
+				}
+			        ]
 		}, {
 			xtype : 'list',
 			id : 'menulist',
