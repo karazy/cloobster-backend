@@ -33,8 +33,10 @@ var translation = {
 		"orderPlacer" : "Bestellung im Warenkorb",
 		"cartEmpty" : "Du hast noch keine Bestellung getätigt.",
 		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
+		"orderRemoved" : "Bestellung entfernt",
 		//Cart
-		"cartviewTitle" : "Bestellung"
+		"cartviewTitle" : "Bestellung",
+		"dumpCart" : "Warenkorb leeren?"
 
 	}
 

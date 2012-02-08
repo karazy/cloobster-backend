@@ -12,7 +12,7 @@ Ext.define('EatSense.view.Cart', {
 			title : i18nPlugin.translate('cartviewTitle'),
 			items : [ {
 				xtype : 'button',
-				itemId : 'cartBackBt',
+				id : 'cartBackBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			} ]
@@ -48,20 +48,24 @@ Ext.define('EatSense.view.Cart', {
 				xtype: 'list',
 				type : 'fit',
 				itemId: 'orderlist',
-				itemTpl:  "<div class='orderInCart'>" +
-				"<div>" +
-				"Menge {amount}" +
-				"</div>" +
+				styleHtmlContent: true,
+				itemTpl:  new Ext.XTemplate(
+				"<div class='orderInCart''>" +
+					"<h2>" +
+						"{product.data.name} - {amount} - {[values.product.calculate(values.amount)]}€" +
+					"</h2>" +
 //				"<div class='choicesInCart>'" +
-//				"<tpl for='product.choices'>" +
-//				"<tpl for='options'>" +
-//				"<tpl if='selected == true>'" +
-//				"{name}" +
-//				"</tpl>" +
-//				"</tpl>" +
-//				"</tpl>" +
+				"<tpl for='product.data.choices'>" +
+				"<h3>{text}</h3>" +
+				"<ul><tpl for='options'>" +
+				"<tpl if='selected === true'>" +
+				"<li>{name}</li>" +
+				"</tpl>" +
+				"</tpl></ul>" +
+				"</tpl>" +
 //				"</div>" +
 				"</div>"
+				)
 			}
 			        
 			        ]

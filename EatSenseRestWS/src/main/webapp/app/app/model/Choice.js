@@ -34,7 +34,7 @@ Ext.define('EatSense.model.Choice', {
 				counter ++;
 			}
 		});
-		if(this.get('minOccurence') == 1 && this.get('maxOccurence') == 1 && counter != 1) {
+		if(this.get('minOccurence') <= 1 && this.get('maxOccurence') == 1 && counter != 1) {
 			//radio button mandatory field
 			validationError += "Bitte triff eine Wahl für "+this.get('text')+ "<br/>";
 		}
@@ -49,7 +49,52 @@ Ext.define('EatSense.model.Choice', {
 	 * Caluclates the price for this choice.
 	 */
 	calculate: function() {
+		var calculationFunction;
+		switch (this.get('overridePrice')) {
+		case 'NONE':
+			return this.calcNormal(); 
+			break;
+		case 'OVERRIDE_SINGLE_PRICE':
+			return this.calcOverrideSinglePrice();
+			break;
+		case 'OVERRIDE_FIXED_SUM':
+			return this.calcOverrideFixedSum();
+			break;
+
+		default: 
+			return 0;
+			break;
+		}
+	},
+	
+	calcNormal : function() {
+		var  _total = 0, _included = this.get('included'), _count = 0;
+		this.options().each(function(option, index) {
+			if(option.get('selected') === true) {
+				_count++;				
+				if(_count > _included) {
+					_total += parseFloat(option.data.price);
+				}
+			}
+		});
 		
+		return _total;
+	},
+	calcOverrideSinglePrice : function() {
+		var _price = this.get('price'), _total = 0, _included = this.get('included'), _count = 0;
+		this.options().each(function(option, index) {
+			if(option.get('selected') === true) {
+				_count++;
+				if(_count > _included) {
+					_total += parseFloat(_price);
+				}				
+			}
+		});
+		
+		return _total;
+	},
+	calcOverrideFixedSum: function() {		
+		return this.get('price');
 	}
 
 });

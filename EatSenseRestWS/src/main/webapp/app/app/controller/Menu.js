@@ -55,6 +55,9 @@ Ext.define('EatSense.controller.Menu', {
             			 this.menuBackBtContext();
             		 }
             	 }
+             },
+             '#bottomTapUndo' : {
+            	 tap: this.undoOrder
              }
         });
     	 
@@ -68,13 +71,13 @@ Ext.define('EatSense.controller.Menu', {
      */
     showProductlist: function(dataview, record) {
     	console.log("Menu Controller -> showProductlist");
-    	var mov = this.getMenuoverview(), pov = this.getProductoverview(),
+    	var pov = this.getProductoverview(),
     	prodStore = record.productsStore;
     	this.models.activeMenu = record;
     	this.getProductlist().setStore(prodStore);
     	this.getMenulist().refresh();
     	this.menuBackBtContext = this.showMenu;
-    	this.switchView(pov,record.data.title, i18nPlugin.translate('back'), 'left');
+    	this.switchView(pov, Karazy.util.shorten(record.data.title,10,true), i18nPlugin.translate('back'), 'left');
     },
     /**
      * Shows the menu. At this point the store is already filled with data.
@@ -93,16 +96,8 @@ Ext.define('EatSense.controller.Menu', {
 		console.log("Menu Controller -> showProductDetail");
 		this.models.activeProduct = record;
 		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
-//		 this.getProdDetailLabel().setHtml(
-//				 '<div class="prodDetailWrapper" style="font-size:1em, margin-bottom: 10px">'+
-//				 	'<div style="position: relative;">'+
-//				 		'<h2 style="float: left; width: 80%; margin: 0, font-size:1.5em;">'+record.data.name+'</h2>'+
-//				 		//right: 0 , top : 50%
-//				 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right; font-size:1.5em;">'+record.data.price+'</div>'+
-//				 		'<div style="clear: both;">'+
-//				 	'</div><p>'+record.data.longDesc+'</p>'+
-//				 '</div>');
-		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, record.data);
+		record.set('priceCalculated', record.get('price'));
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, record);
 		 //dynamically add choices if present		 
 		 if(typeof record.choices() !== 'undefined') {
 			 for(var i =0; i < record.choices().data.items.length; i++) {
@@ -112,7 +107,7 @@ Ext.define('EatSense.controller.Menu', {
 				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
 				 //single choice. Create Radio buttons
 				 var optionType = '';
-				 if(choice.data.minOccurence == 1 && choice.data.maxOccurence == 1) {
+				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
 					 optionType = 'Ext.field.Radio';
 				 	} 
 				 else {//multiple choice
@@ -123,38 +118,60 @@ Ext.define('EatSense.controller.Menu', {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.data.id,
 						 value : opt,
+						 type: optionType,
 						 label : opt.get('name'),
-						 listeners : {
-							 check : function(cbox) {
-								 console.log('check');
-								 if(optionType == "Ext.field.Radio") {
-									 choice.options().each(function(innerOpt) {
-										 innerOpt.set('selected', false);
-									 });
-								 };
-								 opt.set('selected', true);
-							 },
-							 uncheck: function(cbox) {
-								 console.log('uncheck');
-								 if(optionType == 'Ext.field.Checkbox') {
-									 opt.set('selected', false);
-								 } else {
-									 //don't allow radio buttons to be deselected
-									 cbox.setChecked(true);
-								 }	
-								 
-							 }
-						 }
+//						 listeners : {
+//							 check : function(cbox) {
+//								 console.log('check');
+//								 if(optionType == "Ext.field.Radio") {
+//									 choice.options().each(function(innerOpt) {
+//										 innerOpt.set('selected', false);
+//									 });
+//								 };
+//								 opt.set('selected', true);
+//								 this.recalculate(this.record);
+//							 },
+//							 uncheck: function(cbox) {
+//								 console.log('uncheck');
+//								 if(optionType == 'Ext.field.Checkbox') {
+//									 opt.set('selected', false);
+//								 } else {
+//									 //don't allow radio buttons to be deselected
+//									 cbox.setChecked(true);
+//								 }
+//								 this.recalculate(this.record);								 
+//							 }
+//						 }
 						
-					 });					 
+					 }, this);		
+					 checkbox.addListener('check',function(cbox) {
+						 console.log('check');
+						 if(cbox.type == "Ext.field.Radio") {
+							 choice.options().each(function(innerOpt) {
+								 innerOpt.set('selected', false);
+							 });
+						 };
+						 opt.set('selected', true);
+						 this.recalculate(this.models.activeProduct);
+					 },this);
+					 checkbox.addListener('uncheck',function(cbox) {
+						 console.log('uncheck');
+						 if(cbox.type == 'Ext.field.Checkbox') {
+							 opt.set('selected', false);
+						 } else {
+							 //don't allow radio buttons to be deselected
+							 cbox.setChecked(true);
+						 }
+						 this.recalculate(this.models.activeProduct);								 
+					 },this);
 					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
 					 
-				 });	 
+				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 }
 		 }
 		 this.menuBackBtContext = this.backToProductOverview;
-		 this.switchView(detail,record.data.name, this.models.activeMenu.data.title, 'left');
+		 this.switchView(detail,record.data.name, Karazy.util.shorten(this.models.activeMenu.data.title,10,true), 'left');
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
@@ -194,9 +211,8 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	createOrder: function(button) {
 		//get active product and set choice values
-		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;		
-		//validate choices or 
-		//validate each choice on tap?
+		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;	
+		//validate choices 
 		productForCart.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
 				//coice is not valid
@@ -209,16 +225,18 @@ Ext.define('EatSense.controller.Menu', {
 			order = Ext.create('EatSense.model.Order');
 			order.set('amount', this.getAmount().getValue());
 			order.set('status','PLACED');
-			order.setProduct(productForCart);
-			order.getProduct(function(prod, operation) {
-			    alert(prod.get('name')); 
-			});
+			//TODO workaround because hasOne not working
+			order.data.product = productForCart;
+//			order.setProduct(productForCart);
+//			order.getProduct(function(prod, operation) {
+//			    alert(prod.get('name')); 
+//			});
 			//comment field needed
 //			order.setComment();
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
 			this.getCardBt().setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
-			//temporarily persist data on phone 		
+			//TODO temporarily persist data on phone 		
 			
 			this.backToProductOverview(i18nPlugin.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
 		} else {
@@ -235,11 +253,50 @@ Ext.define('EatSense.controller.Menu', {
 	},
 	
 	//Menu navigation functions
+	
+	/**
+	 * @param view
+	 * @param title
+	 * @param labelBackBt
+	 * @param direction
+	 */
 	switchView: function(view, title, labelBackBt, direction) {
 		var menu = this.getMenuview();
     	menu.getComponent('menuTopBar').setTitle(title);
     	(labelBackBt == null || labelBackBt.length == 0) ? menu.hideBackButton() : menu.showBackButton(labelBackBt);
     	menu.switchMenuview(view,direction);
+	},
+	/**
+	 * Removes the last order, if orders exist.
+	 */
+	undoOrder: function() {
+		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(), badgeText,
+		removedOrder;
+		
+		if(orders.data.length > 0) {
+			removedOrder = orders.getAt(orders.data.length-1).data.product.data.name;
+			orders.removeAt(orders.data.length - 1);
+			badgeText = (orders.data.length > 0) ? orders.data.length : "";
+			this.getCardBt().setBadgeText(badgeText);
+			Ext.Msg.show({
+				title : i18nPlugin.translate('orderRemoved'),
+				message : removedOrder,
+				buttons : []
+			});
+			//show short alert and then hide
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), globalConf.msgboxHideTimeout, this);			
+		} else {
+			
+		}
+	},
+	/**
+	 * Recalculates the total price for the active product.
+	 */
+	recalculate: function(product) {
+		//product.calculate();
+		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, product);
 	},
 	
 	/**

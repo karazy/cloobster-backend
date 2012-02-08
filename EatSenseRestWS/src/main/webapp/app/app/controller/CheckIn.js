@@ -58,6 +58,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
     	    		this.getDashboard().showLoadScreen(false);
+    	    		button.enable();
     	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	    	} else {
     	        	var that = this;

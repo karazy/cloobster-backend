@@ -20,12 +20,15 @@ Ext.define('EatSense.model.Order', {
 		}, {
 			name: 'product_id',
 			type: 'string'
-		} ],
-
-		associations : {
-			type : 'hasOne',
-			model : 'EatSense.model.Product'
 		},
+		{
+			name: 'product'
+		}],
+
+//		associations : {
+//			type : 'hasOne',
+//			model : 'EatSense.model.Product'
+//		},
 //		hasOne: {
 //			model : 'EatSense.model.Product',
 //			name: 'product'
@@ -37,6 +40,12 @@ Ext.define('EatSense.model.Order', {
 				type : 'json',
 			}
 		}
+	},
+	
+	calculate: function() {
+		var _amount = parseFloat(this.get('amount')), _basePrice = this.get('product').calculate();
+		return Math.round(_basePrice*_amount*100)/100;
 	}
+	
 
 });

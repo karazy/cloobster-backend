@@ -28,12 +28,12 @@ Ext.define('EatSense.view.Menu', {
 				pack : 'center'
 			},
 			items: [
-//				{
-//				    title: 'Menu',
-//				    iconCls: 'compose',
-//				    id: 'bottomTapToMenu',
-//				    iconMask: true
-//				},
+				{
+				    title: 'Menu',
+				    iconCls: 'reply',
+				    id: 'bottomTapUndo',
+				    iconMask: true
+				},
 				{
 				    title: 'Card',
 				    iconCls: 'organize',
@@ -79,9 +79,17 @@ Ext.define('EatSense.view.Menu', {
 		});
 		_menucard.setActiveItem(view);
 	},
+	/**
+	 * Hides the back button in top toolbar.
+	 */
 	hideBackButton: function() {
 		this.getComponent('menuTopBar').getComponent('menuBackBt').hide();
 	},
+	/**
+	 * Shows the back button in top toolbar.
+	 * @param text
+	 * 		Label to display on button.
+	 */
 	showBackButton: function(text) {
 		this.getComponent('menuTopBar').getComponent('menuBackBt').setText(text);
 		this.getComponent('menuTopBar').getComponent('menuBackBt').show();

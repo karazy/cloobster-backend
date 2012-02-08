@@ -46,11 +46,11 @@ Ext.define('EatSense.view.ProductDetail', {
 				tpl: 
 					 '<div class="prodDetailWrapper" style="font-size:1em, margin-bottom: 10px">'+
 					 	'<div style="position: relative;">'+
-					 		'<h2 style="float: left; width: 80%; margin: 0, font-size:1.5em;">{name}</h2>'+
+					 		'<h2 style="float: left; width: 80%; margin: 0, font-size:1.5em;">{data.name}</h2>'+
 					 		//right: 0 , top : 50%
-					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right; font-size:1.5em;">{price}</div>'+
+					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right; font-size:1.5em;">{[values.calculate()]}</div>'+
 					 		'<div style="clear: both;">'+
-					 	'</div><p>{longDesc}</p>'+
+					 	'</div><p>{data.longDesc}</p>'+
 					 '</div>'
 				
 			}, {

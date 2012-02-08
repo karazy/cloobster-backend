@@ -16,7 +16,10 @@ Ext.define('EatSense.model.Product', {
 			type : 'string'
 		}, {
 			name : 'price',
-			type : 'string'
+			type : 'number'
+		}, {
+			name : 'priceCalculated',
+			type : 'number'
 		} ],
 		hasMany : {
 			model : 'EatSense.model.Choice',
@@ -27,8 +30,20 @@ Ext.define('EatSense.model.Product', {
 	validate: function() {
 		
 	},
-	
-	calculate: function() {
-		
+	/**
+	 * Calculates total cost of this product including choices, returns it and
+	 * stores it in priceCalculated.
+	 */
+	calculate: function(amount) {
+		var _total = this.get('price'), _amount = 1;
+		this.choices().each(function(choice, index) {
+			_total += choice.calculate();
+		});
+		if(amount) {
+			_amount = amount;
+		}
+		_total = Math.round(_total*_amount*100)/100;
+		this.set('priceCalculated', _total);
+		return _total;
 	}
 });
