@@ -17,19 +17,26 @@ Ext.define('EatSense.model.Order', {
 		}, {
 			name : 'orderTime',
 			type : 'date'
+		}, {
+			name: 'product_id',
+			type: 'string'
 		} ],
 
 		associations : {
 			type : 'hasOne',
 			model : 'EatSense.model.Product'
 		},
-//		proxy : {
-//			type : 'rest',
-//			url : globalConf.serviceUrl + '/restaurant/order/',
-//			reader : {
-//				type : 'json',
-//			}
-//		}
+//		hasOne: {
+//			model : 'EatSense.model.Product',
+//			name: 'product'
+//		},
+		proxy : {
+			type : 'rest',
+			url : globalConf.serviceUrl + '/restaurant/order/',
+			reader : {
+				type : 'json',
+			}
+		}
 	}
 
 });

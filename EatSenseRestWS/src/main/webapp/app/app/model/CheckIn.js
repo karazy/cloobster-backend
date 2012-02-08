@@ -32,7 +32,7 @@ Ext.define('EatSense.model.CheckIn', {
 				type : 'json',
 			}
 		},
-		// BUG (Sencha) doesn't work currently
+		// BUG (Sencha) doesn't work currently. Retest
 		associations : {
 			type : "hasOne",
 			model : "EatSense.model.Error"

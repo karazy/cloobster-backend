@@ -181,21 +181,16 @@ Ext.define('EatSense.controller.CheckIn', {
    cancelCheckIn: function(options) {
 	   console.log("CheckIn Controller -> cancelCheckIn");
 	   var dashboardView = this.getDashboard(), main = this.getMain();
-//	   this.models.activeCheckIn.destroy({
-//		    success: function() {
-//		        console.log('Canceled checkin.');
-//		    	}
-//			}
-//	   );
+	   this.models.activeCheckIn.erase();
 	   //TODO Workaorund in B1 because delete is not working	   
-		Ext.Ajax.request({
-    	    url: globalConf.serviceUrl+'/restaurant/spot/'+this.models.activeCheckIn.userId,
-    	    method: 'DELETE',
-    	    scope: this,
-    	    success: function(response){
-    	    	console.log('Canceled checkin.');
-    	    }
-    	});
+//		Ext.Ajax.request({
+//    	    url: globalConf.serviceUrl+'/restaurant/spot/'+this.models.activeCheckIn.userId,
+//    	    method: 'DELETE',
+//    	    scope: this,
+//    	    success: function(response){
+//    	    	console.log('Canceled checkin.');
+//    	    }
+//    	});
 		this.models.activeCheckIn = null;
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
@@ -282,6 +277,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			     callback: function(records, operation, success) {
 			    	 if(success) {
 			    	 that.getController('Menu').models.menudata = records;		
+			    	 menu.hideBackButton();
 			    	 main.switchAnim('left');
 			    	 main.setActiveItem(menu);			    	 
 			    	 }

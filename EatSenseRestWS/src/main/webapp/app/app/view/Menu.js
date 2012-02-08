@@ -5,11 +5,11 @@ Ext.define('EatSense.view.Menu', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			itemId: 'toolbar',
+			itemId: 'menuTopBar',
 			title : i18nPlugin.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',
-				id : 'menuBack',
+				id : 'menuBackBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			},
@@ -43,22 +43,47 @@ Ext.define('EatSense.view.Menu', {
 			        ]
 		}, {
 			xtype: 'panel',
+			itemId: 'menuCard',
 			layout: {
 				type: 'card'
 			},
+			activeItem : 0,
 			items: [
 			        {
-			        	xtype: 'menuoverview'
+			        	xtype: 'menuoverview',
+			        	layout: 'fit'
 			        },
 			        {
-			        	xtype: 'productoverview'
+			        	xtype: 'productoverview',
+			        	layout: 'fit'
 			        }, 
 			        {
-			        	xtype: 'productdetail'
+			        	xtype: 'productdetail',
+			        	layout: 'fit'
 			        }
 			]
 			
 		}
 		]
+	},
+	/**
+	 * Change the direction of the slide animation.
+	 * @param direction
+	 * 			left or right
+	 */
+	switchMenuview : function(view, direction){
+		var _menucard = this.getComponent('menuCard');
+		_menucard.getLayout().setAnimation({
+			 type: 'slide',
+	         direction: direction
+		});
+		_menucard.setActiveItem(view);
+	},
+	hideBackButton: function() {
+		this.getComponent('menuTopBar').getComponent('menuBackBt').hide();
+	},
+	showBackButton: function(text) {
+		this.getComponent('menuTopBar').getComponent('menuBackBt').setText(text);
+		this.getComponent('menuTopBar').getComponent('menuBackBt').show();
 	}
 });

@@ -21,7 +21,8 @@ Ext.define('EatSense.controller.Menu', {
         	//TODO improve selector
         	amount : 'panel panel spinnerfield',
         	cartview : 'cartview',
-        	cardBt : '#menuCartBt'      	
+        	cardBt : '#menuCartBt',
+        	menuview: 'menu'      	
 		}
     },
     init: function() {
@@ -47,13 +48,19 @@ Ext.define('EatSense.controller.Menu', {
              },
              '#bottomTapToMenu' : {
             	 tap: this.showMenu
+             },
+             '#menuBackBt' : {
+            	 tap: function() {
+            		 if(this.menuBackBtContext != null) {
+            			 this.menuBackBtContext();
+            		 }
+            	 }
              }
         });
     	 
     	 //store retrieved models
     	 var models = {};
     	 this.models = models;
-    	 //models.menudata holds all menu related data
     },
     /**
      * Shows the products of a menuitem
@@ -61,24 +68,21 @@ Ext.define('EatSense.controller.Menu', {
      */
     showProductlist: function(dataview, record) {
     	console.log("Menu Controller -> showProductlist");
-    	var main = this.getMain(), pov = this.getProductoverview(),
+    	var mov = this.getMenuoverview(), pov = this.getProductoverview(),
     	prodStore = record.productsStore;
     	this.models.activeMenu = record;
     	this.getProductlist().setStore(prodStore);
-    	this.getProductoverview().getComponent('toolbar').setTitle(record.data.title);
     	this.getMenulist().refresh();
-    	main.switchAnim('left');
-    	main.setActiveItem(pov);
+    	this.menuBackBtContext = this.showMenu;
+    	this.switchView(pov,record.data.title, i18nPlugin.translate('back'), 'left');
     },
     /**
      * Shows the menu. At this point the store is already filled with data.
      */
 	showMenu : function() {				
 		console.log("Menu Controller -> showMenu");
-		 var menu = this.getMenuoverview(), main = this.getMain(), detail = this.getProductdetail();
-		 this.getMenulist().setClearSelectionOnDeactivate(true);		  
-		 main.switchAnim('right');
-		 main.setActiveItem(menu);			  	 
+		 this.menuBackBtContext = null;
+		 this.switchView(this.getMenuoverview(), i18nPlugin.translate('menuTitle'), null, 'right');
 	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
@@ -88,22 +92,20 @@ Ext.define('EatSense.controller.Menu', {
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
 		this.models.activeProduct = record;
-		 var detail = this.getProductdetail(), main = this.getMain(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
-		 this.getProdDetailBackBt().setText(this.models.activeMenu.data.title);
-		 this.getProductdetail().getComponent('toolbar').setTitle(record.data.name);
-		 this.getProdDetailLabel().setHtml(
-				 '<div class="prodDetailWrapper">'+
-				 	'<div style="position: relative;">'+
-				 		'<h2 style="float: left; width: 80%; margin: 0;">'+record.data.name+'</h2>'+
-				 		'<div style="position: absolute; right: 0; top: 50%; width: 20%; text-align: right; font-size:2em;">'+record.data.price+'</div>'+
-				 		'<div style="clear: both;">'+
-				 	'</div><p style="clear: both;">'+record.data.longDesc+'</p>'+
-				 '</div>');
+		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
+//		 this.getProdDetailLabel().setHtml(
+//				 '<div class="prodDetailWrapper" style="font-size:1em, margin-bottom: 10px">'+
+//				 	'<div style="position: relative;">'+
+//				 		'<h2 style="float: left; width: 80%; margin: 0, font-size:1.5em;">'+record.data.name+'</h2>'+
+//				 		//right: 0 , top : 50%
+//				 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right; font-size:1.5em;">'+record.data.price+'</div>'+
+//				 		'<div style="clear: both;">'+
+//				 	'</div><p>'+record.data.longDesc+'</p>'+
+//				 '</div>');
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, record.data);
 		 //dynamically add choices if present		 
 		 if(typeof record.choices() !== 'undefined') {
-//			 var totalHeight = 0;
 			 for(var i =0; i < record.choices().data.items.length; i++) {
-				 //this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanelTitle').setHtml(i18nPlugin.translate('choicesPanelTitle'));
 				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
 				 //.getComponent('choiceInfoPanel')
@@ -151,12 +153,12 @@ Ext.define('EatSense.controller.Menu', {
 				 choicesPanel.add(optionsDetailPanel);
 			 }
 		 }
-		 main.switchAnim('left');
-		 main.setActiveItem(detail);
+		 this.menuBackBtContext = this.backToProductOverview;
+		 this.switchView(detail,record.data.name, this.models.activeMenu.data.title, 'left');
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
-	 * withoug issuing an order.
+	 * without issuing an order.
 	 * @param button
 	 */
 	prodDetailBackBtHandler : function(button) {
@@ -171,9 +173,9 @@ Ext.define('EatSense.controller.Menu', {
 		console.log("Menu Controller -> backToProductOverview");
 		this.models.activeProduct = null;
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
-		var main = this.getMain(), pov = this.getProductoverview();
-		main.switchAnim('right');
-		main.setActiveItem(pov);
+		var pov = this.getProductoverview();	
+		this.menuBackBtContext = this.showMenu;
+		this.switchView(pov, this.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
 		if (message) {
 			Ext.Msg.show({
 				title : i18nPlugin.translate('orderPlaced'),
@@ -192,7 +194,7 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	createOrder: function(button) {
 		//get active product and set choice values
-		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;
+		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;		
 		//validate choices or 
 		//validate each choice on tap?
 		productForCart.choices().each(function(choice) {
@@ -208,9 +210,9 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('amount', this.getAmount().getValue());
 			order.set('status','PLACED');
 			order.setProduct(productForCart);
-//			order.getProduct(function(prod, operation) {
-//			    alert(prod.get('name')); 
-//			}, this);
+			order.getProduct(function(prod, operation) {
+			    alert(prod.get('name')); 
+			});
 			//comment field needed
 //			order.setComment();
 			//if valid create order and attach to checkin
@@ -229,15 +231,22 @@ Ext.define('EatSense.controller.Menu', {
 	 * Switches to card view.
 	 */
 	showCart: function(){
-		//only switch if cart is not empty
-		if(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length == 0) {
-			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
-		} else {
-			var main = this.getMain(), cartview = this.getCartview();
-			main.switchAnim('left');
-			main.setActiveItem(cartview);
-		}
-	}
+		this.getApplication().getController('Cart').showCart();
+	},
+	
+	//Menu navigation functions
+	switchView: function(view, title, labelBackBt, direction) {
+		var menu = this.getMenuview();
+    	menu.getComponent('menuTopBar').setTitle(title);
+    	(labelBackBt == null || labelBackBt.length == 0) ? menu.hideBackButton() : menu.showBackButton(labelBackBt);
+    	menu.switchMenuview(view,direction);
+	},
+	
+	/**
+	 * Holds the function executed when menu back button is tapped.
+	 * The executed function depends on the current context.
+	 */
+	menuBackBtContext: null
      	
 });
 
