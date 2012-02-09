@@ -49,7 +49,7 @@
 		<profile>
 			<id>dev</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<plugins>
@@ -380,7 +380,7 @@
 					<replacements>
 						<replacement>
 							<token>(serviceUrl :) .*</token>
-							<value>$1 ''</value>
+							<value>$1 '',</value>
 						</replacement>
 					</replacements>
 				</configuration>

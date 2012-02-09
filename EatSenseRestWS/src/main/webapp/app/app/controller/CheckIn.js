@@ -146,7 +146,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   } else {
 		   this.models.activeCheckIn.data.nickname = nickname;
 			 //checkIn(String userId, String nickname)
-			   var test = this.models.activeCheckIn.save(
+			this.models.activeCheckIn.save(
 					   {
 					   	    success: function(response) {
 				   	    	//TODO workaround

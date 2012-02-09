@@ -19,6 +19,9 @@ Ext.define('EatSense.controller.Cart', {
 			 }, 
 			 '#bottomTapOrder': {
 				 tap: this.disposeOrders
+			 },
+			 '#orderlist' : {
+				 itemtap: this.alterOrder
 			 }
 		 });
 		
@@ -69,9 +72,24 @@ Ext.define('EatSense.controller.Cart', {
 			}
 		});				
 	},
-	
+	/**
+	 * Submits orders to server.
+	 */
 	disposeOrders: function() {
 		Ext.Msg.alert(i18nPlugin.translate('hint'),'Noch nicht funktionsfähig', Ext.emptyFn);
+	},
+	/**
+	 * Alter an order. Switches to product detail view of this particular order.
+	 */
+	alterOrder: function(dv, ix, item, model) {
+		var menu = this.getMenuview();
+		//TODO implement
+		dv.deselect(ix);
+		//attach product to item
+//		this.showMenu();
+//		this.getApplication().getController('Menu').showProductDetail(null, model.data.product);
+//		this.showMenu();
+		//Ext.Msg.alert(i18nPlugin.translate('hint'),'Noch nicht funktionsfähig', Ext.emptyFn);
 	}
 	
 	

@@ -47,24 +47,32 @@ Ext.define('EatSense.view.Cart', {
 			items: [ {
 				xtype: 'list',
 				type : 'fit',
-				itemId: 'orderlist',
+				id: 'orderlist',
 				styleHtmlContent: true,
+				allowDeselect: true,
+				onItemDisclosure: this.removeItem,
 				itemTpl:  new Ext.XTemplate(
 				"<div class='orderInCart''>" +
 					"<h2>" +
 						"{product.data.name} - {amount} - {[values.product.calculate(values.amount)]}€" +
 					"</h2>" +
-				"<tpl for='product.data.choices'>" +
-				"<h3>{text}</h3>" +
-				"<ul><tpl for='options'>" +
-				"<tpl if='selected === true'>" +
-				"<li>{name}</li>" +
-				"</tpl>" +
-				"</tpl></ul>" +
-				"</tpl>" +
-//				"<tpl if='comment!=\'\''>" +
-				"<p>{comment}</p>" +
-//				"</tpl>" +
+					"<tpl for='product.data.choices'>" +
+//						"{% if (!hasSelections()) continue; %}"+
+//						"<tpl if='{[this.]}'>" +
+							"<h3>{text}</h3>" +
+							"<ul>" +
+								"<tpl for='options'>" +
+									"<tpl if='selected === true'>" +
+										"<li>{name}</li>" +
+									"</tpl>" +
+								"</tpl>" +
+							"</ul>" +
+//						"</tpl>" +
+					"</tpl>" +
+					"<tpl if='comment!=\"\"'>" +
+					"<p>Kommentar:</p>" +
+					"<p>{comment}</p>" +
+					"</tpl>" +
 				"</div>"
 				)
 			}
@@ -78,6 +86,10 @@ Ext.define('EatSense.view.Cart', {
 				
 			
 		} ]
+	},
+	
+	removeItem: function() {
+		console.log('disclosure');
 	}
 
 });

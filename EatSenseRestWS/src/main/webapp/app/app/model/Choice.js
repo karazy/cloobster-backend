@@ -95,6 +95,16 @@ Ext.define('EatSense.model.Choice', {
 	},
 	calcOverrideFixedSum: function() {		
 		return this.get('price');
+	},
+	/**
+	 * Returns true if any option of this particular choice is selected.
+	 */
+	hasSelections: function() {
+		this.options().each(function(option) {
+			if(option.get('selected') === true) {
+				return true;
+			}
+		});
 	}
 
 });

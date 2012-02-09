@@ -153,11 +153,12 @@ Ext.define('EatSense.controller.Menu', {
 			 }
 		 }
 		 //insert comment field after options have been added so it is positioned correctly
-		 choicesPanel.insertLast({
+		 choicesPanel.add({
 			xtype: 'textfield',
 			label: i18nPlugin.translate('orderComment'),
 			labelAlign: 'top',
-			itemId: 'productComment'
+			itemId: 'productComment',
+			value: ''
 			}
 		);
 		 this.menuBackBtContext = this.backToProductOverview;
@@ -222,7 +223,7 @@ Ext.define('EatSense.controller.Menu', {
 //			    alert(prod.get('name')); 
 //			});
 			//comment field needed
-			order.set('comment', this.getProductcomment().getValue());
+			order.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
 			this.getCardBt().setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
@@ -293,7 +294,13 @@ Ext.define('EatSense.controller.Menu', {
 		//product.calculate();
 		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmount().getValue()});
 	},
-	
+	/**
+	 * Called when the product spinner value changes. 
+	 * Recalculates the price.
+	 * @param spinner
+	 * @param value
+	 * @param direction
+	 */
 	amountChanged: function(spinner, value, direction) {
 		console.log('MenuController > amountChanged (value:'+value+')');
 		this.recalculate(this.models.activeProduct);

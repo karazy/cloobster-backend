@@ -17,7 +17,7 @@ import net.eatsense.util.NicknameGenerator;
 
 import com.google.inject.Inject;
 
-@Path("/nickname")
+@Path("/nicknames")
 public class NicknameResource {
 	
 	private NicknameAdjectiveRepository adjectiveRepo;
