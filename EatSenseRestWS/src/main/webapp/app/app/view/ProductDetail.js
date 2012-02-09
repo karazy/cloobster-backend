@@ -1,5 +1,5 @@
 /**
- * Displays details and options/extras of a product.
+ * Displays details and options of a product.
  */
 Ext.define('EatSense.view.ProductDetail', {
 	extend : 'Ext.Panel',
@@ -8,31 +8,8 @@ Ext.define('EatSense.view.ProductDetail', {
 		type : 'vbox',
 		align : 'middle'
 	},
-	defaults : {
-//		styleHtmlContent : false,
-	},
 	config : {
-		//scrollable : 'vertical',
-		// styleHtmlContent : true,
 		items : [
-//		         {
-//			docked : 'top',
-//			xtype : 'toolbar',
-//			itemId : 'toolbar',
-//			title : i18nPlugin.translate('menuTitle'),
-//			items : [ {
-//				xtype : 'button',
-//				id : 'prodDetailBackBt',
-//				ui : 'back'
-//			},
-//			{        		 
-//	            xtype: 'label',
-//	            docked: 'right',
-//	            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
-//    		}
-//			]
-//
-//		},
 		{
 			xtype : 'panel',
 			docked : 'top',
@@ -44,13 +21,13 @@ Ext.define('EatSense.view.ProductDetail', {
 				xtype : 'label',
 				id : 'prodDetailLabel',
 				tpl: 
-					 '<div class="prodDetailWrapper" style="font-size:1em, margin-bottom: 10px">'+
+					 '<div class="prodDetailWrapper" style="font-size:1em; margin-bottom: 10px;">'+
 					 	'<div style="position: relative;">'+
-					 		'<h2 style="float: left; width: 80%; margin: 0, font-size:1.5em;">{data.name}</h2>'+
+					 		'<h2 style="float: left; width: 80%; margin: 0;">{product.data.name}</h2>'+
 					 		//right: 0 , top : 50%
-					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right; font-size:1.5em;">{[values.calculate()]}</div>'+
+					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right;">{[values.product.calculate(values.amount)]}</div>'+
 					 		'<div style="clear: both;">'+
-					 	'</div><p>{data.longDesc}</p>'+
+					 	'</div><p style="font-size:0.8em;">{product.data.longDesc}</p>'+
 					 '</div>'
 				
 			}, {
@@ -59,15 +36,19 @@ Ext.define('EatSense.view.ProductDetail', {
 					type : 'hbox',
 					align : 'stretch'
 				},
+				defaults: {
+					//height: '30px'
+				},
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
-					itemdId : 'productSpinner',
+					id : 'productAmountSpinner',
 					style : 'background-color:white;',
 					value : 1,
 					flex : 3,
-					// FIXME not working in PR 3
-					 minValue : '1',
+					//TODO Bug?
+					maxHeight: '30px',
+					minValue : '1',
 					maxValue : '10',
 					cycle : true,
 
@@ -91,21 +72,13 @@ Ext.define('EatSense.view.ProductDetail', {
 				type: 'fit'
 			},
 			items : [
-//				{
-//					xtype : 'label',
-//					itemId : 'choicesPanelTitle',
-//					flex : 1
-//				},
 				{
 					xtype : 'formpanel',
-//					flex: 2,
 					itemId : 'choicesPanel',
-					scrollable : 'vertical',
-					//layout : 'fit'
-//					height: 200
-				}
-				
+					scrollable : 'vertical'
+				}				
 			]
-		} ]
+		}
+		]
 	}
 });

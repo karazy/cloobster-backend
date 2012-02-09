@@ -17,14 +17,11 @@ Ext.define('EatSense.model.Product', {
 		}, {
 			name : 'price',
 			type : 'number'
-		}, {
-			name : 'priceCalculated',
-			type : 'number'
-		} ],
+		}],
 		hasMany : {
 			model : 'EatSense.model.Choice',
 			name : 'choices'
-		}
+		}		 
 	},
 	
 	validate: function() {

@@ -34,6 +34,7 @@ var translation = {
 		"cartEmpty" : "Du hast noch keine Bestellung getätigt.",
 		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
 		"orderRemoved" : "Bestellung entfernt",
+		"orderComment" : "Optionaler Kommentar",
 		//Cart
 		"cartviewTitle" : "Bestellung",
 		"dumpCart" : "Warenkorb leeren?"

@@ -23,7 +23,8 @@ Ext.define('EatSense.model.Order', {
 		},
 		{
 			name: 'product'
-		}],
+		}
+		],
 
 //		associations : {
 //			type : 'hasOne',

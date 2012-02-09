@@ -54,7 +54,6 @@ Ext.define('EatSense.view.Cart', {
 					"<h2>" +
 						"{product.data.name} - {amount} - {[values.product.calculate(values.amount)]}€" +
 					"</h2>" +
-//				"<div class='choicesInCart>'" +
 				"<tpl for='product.data.choices'>" +
 				"<h3>{text}</h3>" +
 				"<ul><tpl for='options'>" +
@@ -63,7 +62,9 @@ Ext.define('EatSense.view.Cart', {
 				"</tpl>" +
 				"</tpl></ul>" +
 				"</tpl>" +
-//				"</div>" +
+//				"<tpl if='comment!=\'\''>" +
+				"<p>{comment}</p>" +
+//				"</tpl>" +
 				"</div>"
 				)
 			}

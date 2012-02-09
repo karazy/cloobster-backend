@@ -22,7 +22,8 @@ Ext.define('EatSense.controller.Menu', {
         	amount : 'panel panel spinnerfield',
         	cartview : 'cartview',
         	cardBt : '#menuCartBt',
-        	menuview: 'menu'      	
+        	menuview: 'menu',
+        	productcomment: '#productComment'
 		}
     },
     init: function() {
@@ -58,6 +59,9 @@ Ext.define('EatSense.controller.Menu', {
              },
              '#bottomTapUndo' : {
             	 tap: this.undoOrder
+             },
+             '#productAmountSpinner' : {
+            	 spin: this.amountChanged
              }
         });
     	 
@@ -95,9 +99,10 @@ Ext.define('EatSense.controller.Menu', {
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
 		this.models.activeProduct = record;
-		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
-		record.set('priceCalculated', record.get('price'));
-		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, record);
+		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
+		 //reset produc spinner
+		 this.getAmount().setValue(1);
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmount().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof record.choices() !== 'undefined') {
 			 for(var i =0; i < record.choices().data.items.length; i++) {
@@ -119,30 +124,8 @@ Ext.define('EatSense.controller.Menu', {
 						 name : choice.data.id,
 						 value : opt,
 						 type: optionType,
+						 labelWidth: '80%',
 						 label : opt.get('name'),
-//						 listeners : {
-//							 check : function(cbox) {
-//								 console.log('check');
-//								 if(optionType == "Ext.field.Radio") {
-//									 choice.options().each(function(innerOpt) {
-//										 innerOpt.set('selected', false);
-//									 });
-//								 };
-//								 opt.set('selected', true);
-//								 this.recalculate(this.record);
-//							 },
-//							 uncheck: function(cbox) {
-//								 console.log('uncheck');
-//								 if(optionType == 'Ext.field.Checkbox') {
-//									 opt.set('selected', false);
-//								 } else {
-//									 //don't allow radio buttons to be deselected
-//									 cbox.setChecked(true);
-//								 }
-//								 this.recalculate(this.record);								 
-//							 }
-//						 }
-						
 					 }, this);		
 					 checkbox.addListener('check',function(cbox) {
 						 console.log('check');
@@ -164,12 +147,19 @@ Ext.define('EatSense.controller.Menu', {
 						 }
 						 this.recalculate(this.models.activeProduct);								 
 					 },this);
-					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);
-					 
+					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 }
 		 }
+		 //insert comment field after options have been added so it is positioned correctly
+		 choicesPanel.insertLast({
+			xtype: 'textfield',
+			label: i18nPlugin.translate('orderComment'),
+			labelAlign: 'top',
+			itemId: 'productComment'
+			}
+		);
 		 this.menuBackBtContext = this.backToProductOverview;
 		 this.switchView(detail,record.data.name, Karazy.util.shorten(this.models.activeMenu.data.title,10,true), 'left');
 	},
@@ -232,7 +222,7 @@ Ext.define('EatSense.controller.Menu', {
 //			    alert(prod.get('name')); 
 //			});
 			//comment field needed
-//			order.setComment();
+			order.set('comment', this.getProductcomment().getValue());
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
 			this.getCardBt().setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
@@ -255,10 +245,15 @@ Ext.define('EatSense.controller.Menu', {
 	//Menu navigation functions
 	
 	/**
+	 * Switches to another view
 	 * @param view
+	 * 		new view
 	 * @param title
+	 * 			Toolbar title
 	 * @param labelBackBt
+	 * 			label of back button. If <code>null</code> back button will be hidden.
 	 * @param direction
+	 * 			Direction for switch animation.
 	 */
 	switchView: function(view, title, labelBackBt, direction) {
 		var menu = this.getMenuview();
@@ -296,7 +291,12 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	recalculate: function(product) {
 		//product.calculate();
-		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, product);
+		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmount().getValue()});
+	},
+	
+	amountChanged: function(spinner, value, direction) {
+		console.log('MenuController > amountChanged (value:'+value+')');
+		this.recalculate(this.models.activeProduct);
 	},
 	
 	/**
