@@ -68,6 +68,19 @@ public class MenuControllerTest {
 	public void tearDown() throws Exception {
 		helper.tearDown();
 	}
+	@Test
+	public void testGetProduct() {
+		Restaurant restaurant = rr.getByProperty("name", "Sergio");
+		Product product = pr.getByProperty("name", "Classic Burger");
+		
+		ProductDTO productDto = ctr.getProduct(restaurant.getId(), product.getId());
+		
+		assertThat(productDto.getName(), is(product.getName()));
+		assertThat(productDto.getChoices().size(), is(product.getChoices().size()));
+		
+		productDto = ctr.getProduct(restaurant.getId(), new Long(123456));
+		assertThat(productDto, equalTo(null));
+	}
 	
 	@Test
 	public void testGetMenus() {

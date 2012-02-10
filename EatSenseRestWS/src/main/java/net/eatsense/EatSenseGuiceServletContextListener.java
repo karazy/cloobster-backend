@@ -45,7 +45,8 @@ public class EatSenseGuiceServletContextListener extends
 						bind(CheckIn.class);
 						bind(Menu.class);
 						bind(GenericRepository.class);
-						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, parameters);
+						//serve("*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*restaurants(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}

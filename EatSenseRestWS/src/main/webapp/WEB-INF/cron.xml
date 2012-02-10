@@ -3,6 +3,6 @@
   <cron>
     <url>/cron/cleanintents</url>
     <description>Delete old checkin entries.</description>
-    <schedule>every 10 minutes</schedule>
+    <schedule>every 60 minutes</schedule>
   </cron>
 </cronentries>

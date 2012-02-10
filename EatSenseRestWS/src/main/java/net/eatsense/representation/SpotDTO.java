@@ -1,5 +1,9 @@
 package net.eatsense.representation;
 
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 
 
 /**
@@ -14,12 +18,16 @@ public class SpotDTO {
 	/**
 	 * Barcode identifying this spot.
 	 */
+	@NotNull
+	@NotEmpty
 	private String barcode;
 	
 	/**
 	 * A human readable identifier for the spot where the barcode is located.
 	 * E.g. Table no. 4, Lounge etc.
 	 */
+	@NotNull
+	@NotEmpty
 	private String name;
 	
 	/**

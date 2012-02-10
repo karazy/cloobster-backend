@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.persistence.Embedded;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
@@ -21,6 +24,8 @@ public class Choice extends GenericEntity {
 	 * Description of the choice to show on the product page.
 	 */
 	@Unindexed
+	@NotNull
+	@NotEmpty
 	String text;
 	
 	public String getText() {
@@ -31,11 +36,11 @@ public class Choice extends GenericEntity {
 		this.text = text;
 	}
 
-	public float getPrice() {
+	public Float getPrice() {
 		return price;
 	}
 
-	public void setPrice(float price) {
+	public void setPrice(Float price) {
 		this.price = price;
 	}
 
@@ -103,7 +108,7 @@ public class Choice extends GenericEntity {
 	/**
 	 * Only used if overridePrice is different to NONE.
 	 */
-	float price;
+	Float price;
 	
 	/**
 	 * Determines how to calculate the price of the options.

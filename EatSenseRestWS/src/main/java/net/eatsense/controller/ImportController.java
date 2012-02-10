@@ -1,10 +1,14 @@
 package net.eatsense.controller;
 
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
@@ -48,6 +52,12 @@ public class ImportController {
 	private ChoiceRepository choiceRepo;
 	private CheckInRepository checkinRepo;
 	
+	private String returnMessage;
+	
+	public String getReturnMessage() {
+		return returnMessage;
+	}
+
 	@Inject
     private Validator validator;
 
@@ -66,6 +76,11 @@ public class ImportController {
     }
 
 	public Long addRestaurant(RestaurantDTO restaurantData) {
+		if (!isValidRestaurantData(restaurantData)) {
+			logger.info("Invalid restaurant data, import aborted.");
+			logger.info(returnMessage);
+			return null;
+		}
 		
 		logger.info("New import request recieved for restaurant: " + restaurantData.getName() );
 		
@@ -86,7 +101,7 @@ public class ImportController {
 			if(kM != null) {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
-					Product newProduct = createProduct(kM, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc());
+					Product newProduct = createProduct(kM,kR, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
@@ -129,14 +144,14 @@ public class ImportController {
 		r.setName(name);
 		r.setDescription(desc);
 		
-		validator.validate(r, Default.class);
-		
 		Key<Restaurant> kR = restaurantRepo.saveOrUpdate(r);
 		logger.info("Created new restaurant with id: " + kR.getId());
 		return kR;
 	}
 	
 	private Key<Spot> createAndSaveSpot(Key<Restaurant> restaurantKey, String name, String barcode, String groupTag) {
+		if(restaurantKey == null)
+			throw new NullPointerException("restaurantKey was not set");
 		logger.info("Creating new spot for restaurant ("+ restaurantKey.getId() + ") with name: " + name );
 		
 		Spot s = new Spot();
@@ -151,6 +166,8 @@ public class ImportController {
 	}
 	
 	private Key<Menu> createAndSaveMenu (Key<Restaurant> restaurantKey, String title, String description) {
+		if(restaurantKey == null)
+			throw new NullPointerException("restaurantKey was not set");
 		logger.info("Creating new menu for restaurant ("+ restaurantKey.getId() + ") with title: " + title );
 		
 		Menu menu = new Menu();
@@ -163,11 +180,14 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, String name, Float price, String shortDesc, String longDesc)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Restaurant> restaurant, String name, Float price, String shortDesc, String longDesc)	{
+		if(menuKey == null)
+			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
 		
 		Product product = new Product();
 		product.setMenu(menuKey);
+		product.setRestaurant(restaurant);
 		product.setName(name);
 		product.setPrice(price);
 		product.setShortDesc(shortDesc);
@@ -177,6 +197,8 @@ public class ImportController {
 	}
 	
 	private Key<Choice> createAndSaveChoice(Key<Product> productKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions, Collection<Key<Product>> availableProducts) {
+		if(productKey == null)
+			throw new NullPointerException("productKey was not set");
 		logger.info("Creating new choice for product ("+ productKey.getId() + ") with text: " +text);
 		
 		Choice choice = new Choice();
@@ -197,6 +219,31 @@ public class ImportController {
 		Key<Choice> kC = choiceRepo.saveOrUpdate(choice);
 		logger.info("Created choice with id: "+kC.getId());
 		return kC;
+	}
+	
+	private boolean isValidRestaurantData(RestaurantDTO restaurant) throws IllegalArgumentException,NullPointerException {
+		StringBuilder messageBuilder = new StringBuilder();
+		boolean isValid = true;
+		if( restaurant != null ) {
+			Set<ConstraintViolation<RestaurantDTO>> violation = validator.validate(restaurant);
+			
+			if(violation.isEmpty()) {
+				isValid = true;
+			}
+			else {
+				isValid = false;
+				messageBuilder.append("restaurant data not valid:\n");
+				for (ConstraintViolation<RestaurantDTO> constraintViolation : violation) {
+					messageBuilder.append("\n").append(constraintViolation.getPropertyPath()).append(" ").append(constraintViolation.getMessage());
+				}
+			}
+		}
+		else {
+			returnMessage = "restaurant object was null";
+			return false;
+		}
+		returnMessage = messageBuilder.toString();
+		return isValid;
 	}
 	
 	/**

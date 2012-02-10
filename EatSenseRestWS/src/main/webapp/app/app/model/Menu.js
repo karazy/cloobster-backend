@@ -1,6 +1,6 @@
 Ext.define('EatSense.model.Menu', {
 	extend: 'Ext.data.Model',
-	requires: ['EatSense.model.Product','EatSense.model.Choice','EatSense.model.Option'],
+	requires: ['EatSense.model.Product','EatSense.model.Choice','EatSense.model.Option','EatSense.data.proxy.CustomRestProxy'],
 	config : {
 		idProperty: 'id',
 		fields: [
@@ -9,7 +9,7 @@ Ext.define('EatSense.model.Menu', {
 		],
 		proxy: {
 			type: 'rest',
-			url: globalConf.serviceUrl+'/restaurants/menu/', 
+			url: globalConf.serviceUrl+'/restaurants/{restaurantId}/menu/', 
 			reader: {
 				type: 'json',
 			},			

@@ -2,6 +2,11 @@ package net.eatsense.representation;
 
 import java.util.Collection;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 /**
  * A POJO which represents a collection of products with a title.
  * 
@@ -13,6 +18,8 @@ public class MenuDTO {
 	/**
 	 * Title of the menu entry.
 	 */
+	@NotNull
+	@NotEmpty
 	private String title;
 	
 	private String description;
@@ -21,6 +28,9 @@ public class MenuDTO {
 	/**
 	 * All products that are listed under this menu entry.
 	 */
+	@NotNull
+	@NotEmpty
+	@Valid
 	private Collection<ProductDTO> products;
 	
 	public String getTitle() {

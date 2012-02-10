@@ -1,20 +1,39 @@
 package net.eatsense.representation;
 
 import java.util.Collection;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.ProductOption;
 
 public class ChoiceDTO {
 	Long id;
-	String text;
-	int minOccurence;
-	int maxOccurence;
-	float price;
-	int included;
-	ChoiceOverridePrice overridePrice;
-	Collection<ProductOption> options; 
-	Collection<ProductOption> selected;
 	
+	@NotNull
+	@NotEmpty
+	String text;
+	
+	int minOccurence;
+	
+	int maxOccurence;
+	@Min(0)
+	float price;
+	
+	int included;
+	
+	ChoiceOverridePrice overridePrice;
+	
+	@NotNull
+	@NotEmpty
+	@Valid
+	Collection<ProductOption> options; 
+	
+	Collection<ProductOption> selected;
 	
 	public Long getId() {
 		return id;

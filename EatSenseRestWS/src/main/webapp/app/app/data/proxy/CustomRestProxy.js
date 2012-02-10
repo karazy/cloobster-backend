@@ -1,12 +1,6 @@
-Ext.define('EatSense.data.proxy.Rest', {
-	extend: 'Ext.data.proxy.Rest',
-//	require: 'Ext.data.proxy.Rest',
-//	 constructor: function (config) {
-//         this.callParent(arguments); // calls Ext.tip.ToolTip's constructor
-//         //...
-//     },
+Ext.define('EatSense.data.proxy.CustomRestProxy', {
+	override: 'Ext.data.proxy.Rest',
 	  buildUrl: function(request) {
-		  alert('test');
 	        var me        = this,
 	            operation = request.getOperation(),
 	            records   = operation.getRecords() || [],
@@ -14,7 +8,8 @@ Ext.define('EatSense.data.proxy.Rest', {
 	            format    = me.getFormat(),
 	            url       = me.getUrl(request),
 	            params    = request.getParams() || {},
-	            id        = (record && !record.phantom) ? record.getId() : params.id;
+	            id        = (record && !record.phantom) ? record.getId() : params.id,
+	            _serviceUrl = globalConf.serviceUrl;
 
 	        if (me.getAppendId() && id) {
 	            if (!url.match(/\/$/)) {

@@ -20,8 +20,10 @@ public class Product extends GenericEntity {
 	/**
 	 * The menu listing this product belongs to.
 	 */
-	@Parent
 	private Key<Menu> menu;
+	
+	@Parent
+	private Key<Restaurant> restaurant;
 	
 	@Unindexed
 	private List<Key<Choice>> choices;
@@ -89,6 +91,16 @@ public class Product extends GenericEntity {
 
 	public void setChoices(List<Key<Choice>> choices) {
 		this.choices = choices;
+	}
+
+
+	public Key<Restaurant> getRestaurant() {
+		return restaurant;
+	}
+
+
+	public void setRestaurant(Key<Restaurant> restaurant) {
+		this.restaurant = restaurant;
 	}
 	
 }

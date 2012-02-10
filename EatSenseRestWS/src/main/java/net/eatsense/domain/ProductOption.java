@@ -1,6 +1,9 @@
 package net.eatsense.domain;
 
+import org.apache.bval.constraints.NotEmpty;
+
 public class ProductOption {
+	@NotEmpty
 	String name;
 	float price;
 	
