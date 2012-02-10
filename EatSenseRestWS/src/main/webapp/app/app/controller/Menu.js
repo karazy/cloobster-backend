@@ -100,7 +100,7 @@ Ext.define('EatSense.controller.Menu', {
 		console.log("Menu Controller -> showProductDetail");
 		this.models.activeProduct = record;
 		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
-		 //reset produc spinner
+		 //reset product spinner
 		 this.getAmount().setValue(1);
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmount().getValue()});
 		 //dynamically add choices if present		 
@@ -179,6 +179,9 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	backToProductOverview: function(message) {
 		console.log("Menu Controller -> backToProductOverview");
+		this.models.activeProduct.choices().each(function(choice) {
+//			choice.resetOptions();
+		});
 		this.models.activeProduct = null;
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		var pov = this.getProductoverview();	
@@ -217,7 +220,7 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('amount', this.getAmount().getValue());
 			order.set('status','PLACED');
 			//TODO workaround because hasOne not working
-			order.data.product = productForCart;
+			order.data.product = productForCart.deepCopy();
 //			order.setProduct(productForCart);
 //			order.getProduct(function(prod, operation) {
 //			    alert(prod.get('name')); 

@@ -105,6 +105,14 @@ Ext.define('EatSense.model.Choice', {
 				return true;
 			}
 		});
+	},
+	/**
+	 * Sets selected status of all options back to false.
+	 */
+	resetOptions: function() {
+		this.options().each(function(option) {
+			option.set('selected', false);
+		});
 	}
 
 });

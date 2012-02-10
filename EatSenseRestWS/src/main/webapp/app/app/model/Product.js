@@ -21,7 +21,14 @@ Ext.define('EatSense.model.Product', {
 		hasMany : {
 			model : 'EatSense.model.Choice',
 			name : 'choices'
-		}		 
+		},
+		proxy: {
+			type: 'rest',
+			url: globalConf.serviceUrl+'/restaurants/products/', 
+			reader: {
+				type: 'json',
+			} 
+		}
 	},
 	
 	validate: function() {
@@ -40,7 +47,44 @@ Ext.define('EatSense.model.Product', {
 			_amount = amount;
 		}
 		_total = Math.round(_total*_amount*100)/100;
-		this.set('priceCalculated', _total);
 		return _total;
+	},
+	/**
+	 * Returns a deep copy of this product containing only data.
+	 */
+	deepCopy: function() {
+		var _productCopy, _choiceCopy;
+		_productCopy = Ext.create('EatSense.model.Product', {
+			id: this.get('id'),
+			name: this.get('name'),
+			shortDesc: this.get('shortDesc'),
+			longDesc: this.get('longDesc'),
+			price: this.get('price')
+		});
+//		_productCopy.choices().removeAll();
+//		_productCopy.data.choices = new Array();
+		/*
+		 * 	    {name: 'id', type: 'string'},
+			{name: 'text', type: 'string'},
+			{name: 'minOccurence', type: 'number'},
+			{name: 'maxOccurence', type: 'number'},
+			{name: 'price', type: 'number'},
+			{name: 'included', type: 'number'},
+			{name: 'overridePrice', type: 'string'},
+		 */
+		this.choices().each(function(choice) {
+			_choiceCopy = Ext.create('EatSense.model.Choice', {
+				text: choice.get('text'),
+				price: choice.get('price'),
+				overridePrice: choice.get('overridePrice')
+			});
+//			_choiceCopy.options().removeAll();
+//			_choiceCopy.data.options = new Array();
+			choice.options().each(function(option) {
+				_choiceCopy.options().add(option.copy());
+			});
+			_productCopy.choices().add(_choiceCopy);
+		});
+		return _productCopy;
 	}
 });

@@ -27,7 +27,7 @@ Ext.define('EatSense.model.CheckIn', {
 		} ],
 		proxy : {
 			type : 'rest',
-			url : globalConf.serviceUrl + '/restaurant/spot/',
+			url : globalConf.serviceUrl + '/restaurants/spot/',
 			reader : {
 				type : 'json',
 			}
