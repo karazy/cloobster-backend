@@ -56,20 +56,20 @@ public class DummyDataDumper {
 
 		//Getränke
 		Key<Menu> kM = createMenu(kR, "Getränke", "Alkoholische, nicht-Alkoholische, heisse und kalte Getränke.");
-		createAndSaveProduct(kM, "kalte Milch", 1.5f, "lecker Milch", "Frische Bio-Milch von glücklichen Kühen direkt aus dem Schloss Bauernhof");
-		createAndSaveProduct(kM, "Weizen", 3.0f, "helles Hefeweizen vom Fass 0,5l",
+		createAndSaveProduct(kM,kR, "kalte Milch", 1.5f, "lecker Milch", "Frische Bio-Milch von glücklichen Kühen direkt aus dem Schloss Bauernhof");
+		createAndSaveProduct(kM,kR, "Weizen", 3.0f, "helles Hefeweizen vom Fass 0,5l",
 				"Helles Hefeweizen vom Fass aus der Darmstädter Hofbrauerei im 0.5l Glas, 4.9% vol. Alkohol.");
 		
 		kM = createMenu(kR, "Hauptgerichte", "Schwein, Rind und vegetarische Speisen");
-		Product burger = createProduct(kM, "Classic Burger", 8.5f, "Burger mit Salat, Tomate, Zwiebel und Käse.",
+		Product burger = createProduct(kM,kR, "Classic Burger", 8.5f, "Burger mit Salat, Tomate, Zwiebel und Käse.",
 				"Dies ist eine lange Beschreibung eines Burgers der Herstellung, seiner Zutaten und den Inhaltstoffen.");
 		
 		Key<Product> kP = pr.saveOrUpdate(burger);
 		
 		kM = createMenu(kR, "Beilagen", "Kartoffelprodukte und sonstiges");
-		Product fries = createProduct(kM, "Pommes Frites", 1.5f, "Pommes Frites",
+		Product fries = createProduct(kM,kR, "Pommes Frites", 1.5f, "Pommes Frites",
 				"Super geile Pommes Frites.");
-		Product kraut = createProduct(kM, "Krautsalat", 1f, "Weisskraut Salat mit Karotten (Coleslaw)",
+		Product kraut = createProduct(kM,kR, "Krautsalat", 1f, "Weisskraut Salat mit Karotten (Coleslaw)",
 				"");
 		
 		
@@ -89,7 +89,7 @@ public class DummyDataDumper {
 		one.setMaxOccurence(1);
 		one.setMinOccurence(1);
 		one.setProduct(kP);
-		one.setPrice(0);
+		one.setPrice(0f);
 		
 		Key<Choice> oneKey = cr.saveOrUpdate(one);
 		
@@ -148,10 +148,11 @@ public class DummyDataDumper {
 		return mr.saveOrUpdate(menu);
 	}
 
-	private Product createProduct(Key<Menu> menu, String name, Float price, String shortDesc, String longDesc)	{
+	private Product createProduct(Key<Menu> menu, Key<Restaurant> restaurant, String name, Float price, String shortDesc, String longDesc)	{
 		Product product = new Product();
 		
 		product.setMenu(menu);
+		product.setRestaurant(restaurant);
 		product.setName(name);
 		product.setPrice(price);
 		product.setShortDesc(shortDesc);
@@ -160,8 +161,8 @@ public class DummyDataDumper {
 		return product;
 	}
 	
-	private Key<Product> createAndSaveProduct(Key<Menu> menu, String name, Float price, String shortDesc, String longDesc)	{
+	private Key<Product> createAndSaveProduct(Key<Menu> menu,Key<Restaurant> restaurant , String name, Float price, String shortDesc, String longDesc)	{
 	
-		return pr.saveOrUpdate(createProduct(menu,name,price,shortDesc,longDesc));
+		return pr.saveOrUpdate(createProduct(menu,restaurant,name,price,shortDesc,longDesc));
 	}
 }

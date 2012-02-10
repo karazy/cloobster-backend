@@ -103,7 +103,7 @@ Ext.application({
 										text : 'Upload data',
 										handler : function() {
 											Ext.Ajax.request({
-												url : '/restaurant/import',
+												url : '/restaurants/import',
 												// 'file://Users/fred/karazy/Dropbox/karazy_entwicklung/import_Sergio.json',
 												method : 'PUT',
 												scope : this,

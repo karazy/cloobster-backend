@@ -101,7 +101,7 @@ public class ImportController {
 			if(kM != null) {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
-					Product newProduct = createProduct(kM, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc());
+					Product newProduct = createProduct(kM,kR, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
@@ -180,13 +180,14 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, String name, Float price, String shortDesc, String longDesc)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Restaurant> restaurant, String name, Float price, String shortDesc, String longDesc)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
 		
 		Product product = new Product();
 		product.setMenu(menuKey);
+		product.setRestaurant(restaurant);
 		product.setName(name);
 		product.setPrice(price);
 		product.setShortDesc(shortDesc);

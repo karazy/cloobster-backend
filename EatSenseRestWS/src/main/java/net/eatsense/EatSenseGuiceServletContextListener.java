@@ -9,6 +9,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NicknameResource;
+import net.eatsense.restws.ProductsResource;
 import net.eatsense.restws.RestaurantResource;
 
 import org.apache.bval.guice.ValidationModule;
@@ -39,13 +40,15 @@ public class EatSenseGuiceServletContextListener extends
 						HashMap<String, String> parameters = new HashMap<String, String>();
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						bind(RestaurantResource.class);
+						bind(ProductsResource.class);
 						bind(NicknameResource.class);
 						bind(CronResource.class);
 						bind(Spot.class);
 						bind(CheckIn.class);
 						bind(Menu.class);
 						bind(GenericRepository.class);
-						serveRegex("(.)*restaurant(.)*").with(GuiceContainer.class, parameters);
+						//serve("*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*restaurants(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}

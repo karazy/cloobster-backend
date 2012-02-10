@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 /**
  * Controller for displaying Menu and Product listings, as well as options and extras for food products.
@@ -63,19 +64,9 @@ public class MenuController {
 		for ( Menu menu : menus) {
 			 MenuDTO menuDTO = new MenuDTO();
 			 // Query for a list of all products associated with this menu
-			 List<Product> products = menuRepo.getChildren(Product.class, menu.getKey() );
-			 List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
-			 for( Product p : products)	 {
-				 ProductDTO dto = new ProductDTO();
-				 dto.setName( p.getName() );
-				 dto.setLongDesc( p.getLongDesc() );
-				 dto.setShortDesc( p.getShortDesc() );
-				 dto.setPrice( p.getPrice() );
-				 
-				 dto.setChoices(retrieveChoicesForProduct(p));
-				 
-				 productDTOs.add(dto);
-			 }
+			 List<Product> products = productRepo.getListByProperty("menu", menu.getKey() );
+			 
+			 List<ProductDTO> productDTOs = transformtoDto(products);
 			 menuDTO.setTitle(menu.getTitle());
 			 menuDTO.setProducts(productDTOs);
 			 
@@ -83,6 +74,52 @@ public class MenuController {
 		}
 		
 		return menuDTOs;
+	}
+
+	private List<ProductDTO> transformtoDto(List<Product> products) {
+		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
+		 for( Product p : products)	 {
+			 ProductDTO dto = transformtoDto(p);
+			 
+			 productDTOs.add(dto);
+		 }
+		return productDTOs;
+	}
+
+	private ProductDTO transformtoDto(Product product) {
+		if(product == null)
+			return null;
+		ProductDTO dto = new ProductDTO();
+		 dto.setName( product.getName() );
+		 dto.setLongDesc( product.getLongDesc() );
+		 dto.setShortDesc( product.getShortDesc() );
+		 dto.setPrice( product.getPrice() );
+		 
+		 dto.setChoices(retrieveChoicesForProduct(product));
+		return dto;
+	}
+	
+	public Collection<ProductDTO> getAllProducts(Long restaurantId) {
+		
+		return transformtoDto(restaurantRepo.getChildren(Product.class, new Key<Restaurant>(Restaurant.class, restaurantId)) );
+	}
+	
+	public ProductDTO getProduct(Long restaurantId, Long id) {
+		logger.info("Trying to get product id : " + id + " for restaurant : id");
+		ProductDTO productDto = new ProductDTO(); 
+		
+		try {
+			productDto = transformtoDto(productRepo.getByKey(new Key<Restaurant>(Restaurant.class ,restaurantId), id) );
+			
+		} catch (NotFoundException e) {
+			logger.error("Product not found with id "+id, e);
+			return null;
+		}
+		
+		
+		
+				
+		return productDto;
 	}
 	
 	private Collection<ChoiceDTO> retrieveChoicesForProduct(Product p)
@@ -105,7 +142,8 @@ public class MenuController {
 				dto.setMaxOccurence(choice.getMaxOccurence());
 				dto.setMinOccurence(choice.getMinOccurence());
 				dto.setOverridePrice(choice.getOverridePrice());
-				dto.setPrice(choice.getPrice());
+				
+				dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
 				dto.setText(choice.getText());
 				
 				if( choice.getAvailableChoices() != null && !choice.getAvailableChoices().isEmpty() ) {

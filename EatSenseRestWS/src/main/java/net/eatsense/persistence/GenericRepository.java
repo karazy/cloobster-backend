@@ -7,6 +7,8 @@ import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
+import net.eatsense.domain.Order;
+import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
@@ -43,8 +45,11 @@ public class GenericRepository<T> extends DAOBase{
 		ObjectifyService.register(Product.class);
 		ObjectifyService.register(CheckIn.class);
 		ObjectifyService.register(Choice.class);
+		ObjectifyService.register(Order.class);
+		ObjectifyService.register(OrderChoice.class);
 		ObjectifyService.register(NicknameAdjective.class);
 		ObjectifyService.register(NicknameNoun.class);
+		
 	}
 
 	protected ObjectifyService datastore;

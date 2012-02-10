@@ -21,6 +21,7 @@ import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
+import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.RestaurantDTO;
 import net.eatsense.util.DummyDataDumper;
 
@@ -33,7 +34,7 @@ import com.google.inject.Inject;
  * @author Frederik Reifschneider
  * 
  */
-@Path("/restaurant")
+@Path("/restaurants")
 public class RestaurantResource{
 
 	private RestaurantRepository restaurantrepo;
@@ -94,7 +95,6 @@ public class RestaurantResource{
 	/**
 	 * Loads other users checkedIn at this spot.
 	 * @param userId
-	 * @return
 	 */
 	@POST
 	@Path("spot/users/")
@@ -132,6 +132,22 @@ public class RestaurantResource{
 	{
 		return menuCtr.getMenus(restaurantId);
 	}
+	
+
+	@GET
+	@Path("{restaurantId}/products")
+	@Produces("application/json; charset=UTF-8")
+	public Collection<ProductDTO> getAll(@PathParam("restaurantId")Long restaurantId) {
+		return menuCtr.getAllProducts(restaurantId);
+	}
+	
+	@GET
+	@Path("{restaurantId}/products/{productId}")
+	@Produces("application/json; charset=UTF-8")
+	public ProductDTO getProduct(@PathParam("restaurantId")Long restaurantId, @PathParam("productId") Long productId) {
+	    return menuCtr.getProduct(restaurantId, productId);
+	}
+
 	
 	@PUT
 	@Path("dummies")
