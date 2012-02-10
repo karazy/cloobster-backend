@@ -98,7 +98,27 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
-		this.models.activeProduct = record;
+		//WORKAROUND
+		 var singleProductStore = Ext.create('Ext.data.Store', {
+			   model: 'EatSense.model.Product',
+			   proxy: {
+				   type: 'rest',
+				   url : globalConf.serviceUrl+'/restaurants/'+restaurantId+'/products/'+record.get('id'),
+				   reader: {
+					   type: 'json'
+			   		}
+			   }
+		 });
+		 singleProductStore.load({
+			 scope   : this,
+		     callback: function(record, operation, success) {
+		    	 if(success) {
+		    		 that.models.activeProduct = record;			    	 
+		    	 }
+		     }
+		 });
+		//WORKAROUND _ END
+//		this.models.activeProduct = record;
 		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 		 //reset product spinner
 		 this.getAmount().setValue(1);
@@ -179,9 +199,9 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	backToProductOverview: function(message) {
 		console.log("Menu Controller -> backToProductOverview");
-		this.models.activeProduct.choices().each(function(choice) {
+//		this.models.activeProduct.choices().each(function(choice) {
 //			choice.resetOptions();
-		});
+//		});
 		this.models.activeProduct = null;
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		var pov = this.getProductoverview();	
@@ -220,7 +240,7 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('amount', this.getAmount().getValue());
 			order.set('status','PLACED');
 			//TODO workaround because hasOne not working
-			order.data.product = productForCart.deepCopy();
+			order.data.product = productForCart; //.deepCopy();
 //			order.setProduct(productForCart);
 //			order.getProduct(function(prod, operation) {
 //			    alert(prod.get('name')); 
