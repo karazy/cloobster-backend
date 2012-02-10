@@ -26,6 +26,7 @@ import net.eatsense.representation.RestaurantDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 /**
  * Provides a restful interface to access restaurants. That could be optaining
@@ -145,7 +146,12 @@ public class RestaurantResource{
 	@Path("{restaurantId}/products/{productId}")
 	@Produces("application/json; charset=UTF-8")
 	public ProductDTO getProduct(@PathParam("restaurantId")Long restaurantId, @PathParam("productId") Long productId) {
-	    return menuCtr.getProduct(restaurantId, productId);
+		
+		ProductDTO product = menuCtr.getProduct(restaurantId, productId);
+		
+		if(product == null)
+			throw new NotFoundException(productId + " id not found.");
+		else return product;
 	}
 
 	
