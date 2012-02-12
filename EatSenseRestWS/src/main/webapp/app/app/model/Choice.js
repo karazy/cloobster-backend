@@ -100,11 +100,13 @@ Ext.define('EatSense.model.Choice', {
 	 * Returns true if any option of this particular choice is selected.
 	 */
 	hasSelections: function() {
+		var _result = false;
 		this.options().each(function(option) {
 			if(option.get('selected') === true) {
-				return true;
+				_result = true;
 			}
 		});
+		return _result;
 	},
 	/**
 	 * Sets selected status of all options back to false.

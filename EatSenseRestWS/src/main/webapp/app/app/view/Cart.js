@@ -57,8 +57,7 @@ Ext.define('EatSense.view.Cart', {
 						"{product.data.name} - {amount} - {[values.product.calculate(values.amount)]}€" +
 					"</h2>" +
 					"<tpl for='product.data.choices'>" +
-//						"{% if (!hasSelections()) continue; %}"+
-//						"<tpl if='{[this.]}'>" +
+						"<tpl if='this.checkSelections(parent, xindex)'>" +
 							"<h3>{text}</h3>" +
 							"<ul>" +
 								"<tpl for='options'>" +
@@ -67,13 +66,21 @@ Ext.define('EatSense.view.Cart', {
 									"</tpl>" +
 								"</tpl>" +
 							"</ul>" +
-//						"</tpl>" +
+						"</tpl>" +
 					"</tpl>" +
 					"<tpl if='comment!=\"\"'>" +
-					"<p>Kommentar:</p>" +
+					"<h3>Kommentar:</h3>" +
 					"<p>{comment}</p>" +
 					"</tpl>" +
 				"</div>"
+					, {
+					//checks if the current choice has selections. If not it will not be shown.
+					//we need to pass the product as the choices object in this context is raw data
+					checkSelections: function(parent, index) {
+						var _hasSelections = parent.product.choices().getAt(index-1).hasSelections(); 
+						return _hasSelections;
+					}
+				}
 				)
 			}
 			        
