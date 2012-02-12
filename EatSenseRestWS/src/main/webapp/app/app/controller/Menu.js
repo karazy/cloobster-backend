@@ -215,7 +215,8 @@ Ext.define('EatSense.controller.Menu', {
 			}
 		);
 		 this.menuBackBtContext = this.backToProductOverview;
-		 this.switchView(detail,Karazy.util.shorten(record.data.name, 15, true), i18nPlugin.translate('back'), 'left');
+
+		 this.switchView(detail, Karazy.util.shorten(record.data.name, 15, true), i18nPlugin.translate('back'), 'left');
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview

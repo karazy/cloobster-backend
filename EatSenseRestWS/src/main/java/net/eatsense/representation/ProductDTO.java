@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 import org.apache.bval.constraints.NotEmpty;
 
 public class ProductDTO {
-	@NotNull
-	@NotEmpty
+//	@NotNull
+//	@NotEmpty
 	private Long id;
 	@NotNull
 	@NotEmpty

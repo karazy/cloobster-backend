@@ -9,9 +9,6 @@ Ext.define('EatSense.view.ProductOverview', {
 		items : [ 
 		{
 			xtype : 'list',
-			layout : {
-				align : 'center'
-			},
 			id : 'productlist',
 			type : 'fit',
 			allowDeselect : true,

@@ -24,6 +24,8 @@ Karazy.util = (function() {
 			var _textLength = text.trim().length;
 			if(_textLength > length) {
 				return text.substring(0, length) + ((appendDots === true) ? "..." : "");
+			} else {
+				return text;
 			}			
 		}
 		

@@ -317,7 +317,7 @@ Ext.define('EatSense.controller.CheckIn', {
 				 scope   : this,
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-			    	 that.getController('Menu').models.menudata = records;		
+			    	 that.getApplication().getController('Menu').models.menudata = records;		
 			    	 menu.hideBackButton();
 			    	 main.switchAnim('left');
 			    	 main.setActiveItem(menu);			    	 
