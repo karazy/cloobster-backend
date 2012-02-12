@@ -65,7 +65,6 @@ Ext.define('EatSense.view.Menu', {
 			
 		}
 		],
-		//store: 'menuStore'
 	},
 	/**
 	 * Change the direction of the slide animation.

@@ -231,7 +231,7 @@ public class ImportController {
 				isValid = true;
 			}
 			else {
-				isValid = false;
+			//	isValid = false;
 				messageBuilder.append("restaurant data not valid:\n");
 				for (ConstraintViolation<RestaurantDTO> constraintViolation : violation) {
 					messageBuilder.append("\n").append(constraintViolation.getPropertyPath()).append(" ").append(constraintViolation.getMessage());

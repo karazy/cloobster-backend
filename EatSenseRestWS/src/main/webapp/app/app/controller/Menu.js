@@ -33,7 +33,7 @@ Ext.define('EatSense.controller.Menu', {
              	select: this.showProductlist
              },
              '#productlist' : {
-            	select: this.showProductDetail 
+            	select: this.loadProductDetail 
              },
              '#productOvBackBt': {
             	 tap: this.showMenu
@@ -91,6 +91,33 @@ Ext.define('EatSense.controller.Menu', {
 		 this.menuBackBtContext = null;
 		 this.switchView(this.getMenuoverview(), i18nPlugin.translate('menuTitle'), null, 'right');
 	},
+	
+	loadProductDetail: function(dataview, record) {
+//		this.models.activeProduct = record;
+//		this.showProductDetail(null, this.models.activeProduct);
+		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
+//		
+//		Ext.Ajax.request({
+//		    url: '/restaurants/'+_rId+'/products/'+_id,
+////		    params: {
+////		        id: 1
+////		    },
+//		    scope: this,
+//		    success: function(response){
+//		    	var _raw = Ext.JSON.decode(response.responseText);
+//		    	this.models.activeProduct = new EatSense.model.Product(_raw);
+//		    	this.showProductDetail(null, this.models.activeProduct);
+//		    }
+//		});
+		
+		EatSense.model.Product.load(_id, {
+			scope: this,
+			success: function(product, operation) {
+				this.models.activeProduct = product;
+				this.showProductDetail(null, this.models.activeProduct);
+			}
+		});
+	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
 	 * @param dataview
@@ -99,32 +126,32 @@ Ext.define('EatSense.controller.Menu', {
 	showProductDetail: function(dataview, record) {
 		console.log("Menu Controller -> showProductDetail");
 		//WORKAROUND
-		 var singleProductStore = Ext.create('Ext.data.Store', {
-			   model: 'EatSense.model.Product',
-			   proxy: {
-				   type: 'rest',
-				   url : globalConf.serviceUrl+'/restaurants/'+restaurantId+'/products/'+record.get('id'),
-				   reader: {
-					   type: 'json'
-			   		}
-			   }
-		 });
-		 singleProductStore.load({
-			 scope   : this,
-		     callback: function(record, operation, success) {
-		    	 if(success) {
-		    		 that.models.activeProduct = record;			    	 
-		    	 }
-		     }
-		 });
+//		 var singleProductStore = Ext.create('Ext.data.Store', {
+//			   model: 'EatSense.model.Product',
+//			   proxy: {
+//				   type: 'rest',
+//				   url : globalConf.serviceUrl+'/restaurants/'+restaurantId+'/products/'+record.get('id'),
+//				   reader: {
+//					   type: 'json'
+//			   		}
+//			   }
+//		 });
+//		 singleProductStore.load({
+//			 scope   : this,
+//		     callback: function(record, operation, success) {
+//		    	 if(success) {
+//		    		 that.models.activeProduct = record;			    	 
+//		    	 }
+//		     }
+//		 });
 		//WORKAROUND _ END
-//		this.models.activeProduct = record;
+		
 		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 		 //reset product spinner
 		 this.getAmount().setValue(1);
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmount().getValue()});
 		 //dynamically add choices if present		 
-		 if(typeof record.choices() !== 'undefined') {
+		 if(typeof record.choices() !== 'undefined' && record.choices().getCount() > 0) {
 			 for(var i =0; i < record.choices().data.items.length; i++) {
 				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
@@ -171,7 +198,13 @@ Ext.define('EatSense.controller.Menu', {
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 }
+			 
+			 choicesPanel.add( {
+				 html: '<hr/>'
+			 });
 		 }
+		 
+		 
 		 //insert comment field after options have been added so it is positioned correctly
 		 choicesPanel.add({
 			xtype: 'textfield',
@@ -182,7 +215,7 @@ Ext.define('EatSense.controller.Menu', {
 			}
 		);
 		 this.menuBackBtContext = this.backToProductOverview;
-		 this.switchView(detail,record.data.name, Karazy.util.shorten(this.models.activeMenu.data.title,10,true), 'left');
+		 this.switchView(detail,Karazy.util.shorten(record.data.name, 15, true), i18nPlugin.translate('back'), 'left');
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
@@ -240,7 +273,7 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('amount', this.getAmount().getValue());
 			order.set('status','PLACED');
 			//TODO workaround because hasOne not working
-			order.data.product = productForCart; //.deepCopy();
+			order.data.product = productForCart;//.deepCopy();
 //			order.setProduct(productForCart);
 //			order.getProduct(function(prod, operation) {
 //			    alert(prod.get('name')); 

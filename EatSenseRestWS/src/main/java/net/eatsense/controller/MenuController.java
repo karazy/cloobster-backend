@@ -66,7 +66,7 @@ public class MenuController {
 			 // Query for a list of all products associated with this menu
 			 List<Product> products = productRepo.getListByProperty("menu", menu.getKey() );
 			 
-			 List<ProductDTO> productDTOs = transformtoDto(products);
+			 List<ProductDTO> productDTOs = transformtoDto(products, true);
 			 menuDTO.setTitle(menu.getTitle());
 			 menuDTO.setProducts(productDTOs);
 			 
@@ -76,32 +76,35 @@ public class MenuController {
 		return menuDTOs;
 	}
 
-	private List<ProductDTO> transformtoDto(List<Product> products) {
+	private List<ProductDTO> transformtoDto(List<Product> products, boolean skipId) {
 		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
 		 for( Product p : products)	 {
-			 ProductDTO dto = transformtoDto(p);
+			 ProductDTO dto = transformtoDto(p, skipId);
 			 
 			 productDTOs.add(dto);
 		 }
 		return productDTOs;
 	}
 
-	private ProductDTO transformtoDto(Product product) {
+	private ProductDTO transformtoDto(Product product, boolean skipId) {
 		if(product == null)
 			return null;
 		ProductDTO dto = new ProductDTO();
+		 
+		 dto.setId(product.getId());		 
 		 dto.setName( product.getName() );
 		 dto.setLongDesc( product.getLongDesc() );
 		 dto.setShortDesc( product.getShortDesc() );
 		 dto.setPrice( product.getPrice() );
 		 
-		 dto.setChoices(retrieveChoicesForProduct(product));
+			 dto.setChoices(retrieveChoicesForProduct(product, skipId));
+		 
 		return dto;
 	}
 	
 	public Collection<ProductDTO> getAllProducts(Long restaurantId) {
 		
-		return transformtoDto(restaurantRepo.getChildren(Product.class, new Key<Restaurant>(Restaurant.class, restaurantId)) );
+		return transformtoDto(restaurantRepo.getChildren(Product.class, new Key<Restaurant>(Restaurant.class, restaurantId)), true );
 	}
 	
 	public ProductDTO getProduct(Long restaurantId, Long id) {
@@ -109,7 +112,7 @@ public class MenuController {
 		ProductDTO productDto = new ProductDTO(); 
 		
 		try {
-			productDto = transformtoDto(productRepo.getByKey(new Key<Restaurant>(Restaurant.class ,restaurantId), id) );
+			productDto = transformtoDto(productRepo.getByKey(new Key<Restaurant>(Restaurant.class ,restaurantId), id), false );
 			
 		} catch (NotFoundException e) {
 			logger.error("Product not found with id "+id, e);
@@ -122,7 +125,7 @@ public class MenuController {
 		return productDto;
 	}
 	
-	private Collection<ChoiceDTO> retrieveChoicesForProduct(Product p)
+	private Collection<ChoiceDTO> retrieveChoicesForProduct(Product p, boolean skipId)
 	{
 		ArrayList<ChoiceDTO> choices = null;
 		
@@ -137,7 +140,9 @@ public class MenuController {
 			for (Choice choice : result.values())  {
 				ChoiceDTO dto = new ChoiceDTO();
 				
-				dto.setId(choice.getId());
+				if(!skipId) {
+					dto.setId(choice.getId());
+				}
 				dto.setIncluded(choice.getIncludedChoices());
 				dto.setMaxOccurence(choice.getMaxOccurence());
 				dto.setMinOccurence(choice.getMinOccurence());
@@ -147,7 +152,13 @@ public class MenuController {
 				dto.setText(choice.getText());
 				
 				if( choice.getAvailableChoices() != null && !choice.getAvailableChoices().isEmpty() ) {
-					dto.setOptions(choice.getAvailableChoices());
+					List<ProductOption> list = choice.getAvailableChoices();
+					if(skipId) {
+						for (ProductOption productOption : list) {
+							productOption.setId(null);
+						}
+					}
+					dto.setOptions(list);					
 					
 				}
 				else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {

@@ -129,7 +129,7 @@ Ext.application({
 												fn: function(btn) {
 													if (btn == 'yes'){
 														Ext.Ajax.request({
-															url : '/restaurant/deleteall', 
+															url : '/restaurants/deleteall', 
 															method : 'GET',
 															success : function(response) {
 																Ext.Msg.alert('Success', "All data deleted. I'm sure you know what you did!");

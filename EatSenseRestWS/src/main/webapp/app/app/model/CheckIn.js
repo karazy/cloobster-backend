@@ -27,14 +27,11 @@ Ext.define('EatSense.model.CheckIn', {
 		} ],
 		proxy : {
 			type : 'rest',
-			extraParams: {ownerId: this.ownerId},
-			url : globalConf.serviceUrl + '/restaurant/spot/',
+			url : '/restaurants/spot/',
 			reader : {
 				type : 'json',
 			}
-		},
-		ownerId : 'test',
-		
+		},		
 		// BUG (Sencha) doesn't work currently. Retest
 		associations : {
 			type : "hasOne",

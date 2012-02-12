@@ -82,6 +82,33 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	});
     	    	}
     	 };
+    	 
+    	 this.createStores = function(restaurantId) {
+    		 var _menuListStore =	 Ext.create('Ext.data.Store', {
+	 			   model: 'EatSense.model.Menu',
+	 			   storeId: 'menuStore',
+	 			   proxy: {
+	 				   type: 'rest',
+	 				   url : '/restaurants/'+restaurantId+'/menus',
+	 				   reader: {
+	 					   type: 'json'
+	 			   		}
+	 			   }
+	 		 });
+    		 
+    		 this.getMenulist().setStore(_menuListStore);
+    		 
+    		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
+ 				   type: 'rest',
+ 				   url : '/restaurants/'+restaurantId+'/products',
+ 				   reader: {
+ 					   type: 'json'
+ 			   		}
+	 		 });
+    		 
+    		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
+    		 ProductType.setProxy(_productProxy);
+    	 };
     },
     /**
      * CheckIn Process
@@ -141,6 +168,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   var that = this;
 	   //get CheckIn Object and save it. 
 	   var nickname = Ext.String.trim(this.getNickname().getValue());
+	   this.createStores(this.models.activeCheckIn.get('restaurantId'));
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {
@@ -209,7 +237,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   			   model: 'EatSense.model.User',
 	   			   proxy: {
 	   				   type: 'rest',
-	   				   url : globalConf.serviceUrl+'/restaurant/spot/users?userId='+options.userId,
+	   				   url : globalConf.serviceUrl+'/restaurants/spot/users?userId='+options.userId,
 	   				   reader: {
 	   					   type: 'json'
 	   			   		}
@@ -237,7 +265,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   console.log("CheckIn Controller -> linkToUser");
 	   
     	Ext.Ajax.request({
-    	    url: globalConf.serviceUrl+'/restaurant/spot/users',
+    	    url: globalConf.serviceUrl+'/restaurants/spot/users',
     	    method: 'POST',
     	    scope: this,
     	    params: {
@@ -262,18 +290,18 @@ Ext.define('EatSense.controller.CheckIn', {
 		 var menu = this.getMenuview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this; 
 		 if(restaurantId.toString().length != 0) {
 			 //load menudata and store it in MenuController. UGLY
-			 var menuListStore = Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.Menu',
-	 			   proxy: {
-	 				   type: 'rest',
-	 				   url : globalConf.serviceUrl+'/restaurant/'+restaurantId+'/menu',
-	 				   reader: {
-	 					   type: 'json'
-	 			   		}
-	 			   }
-	 		 });
+//			 var menuListStore = Ext.create('Ext.data.Store', {
+//	 			   model: 'EatSense.model.Menu',
+//	 			   proxy: {
+//	 				   type: 'rest',
+//	 				   url : globalConf.serviceUrl+'/restaurant/'+restaurantId+'/menu',
+//	 				   reader: {
+//	 					   type: 'json'
+//	 			   		}
+//	 			   }
+//	 		 });
 			 
-			 var menu = Ext.ModelManager.get('EatSense.model.Menu');
+//			 var menu = Ext.ModelManager.get('EatSense.model.Menu');
 //			 menu.load('id', {
 //				urlParams : [ {
 //					restaurantId : this.models.activeCheckIn.data.restaurantId
@@ -284,7 +312,7 @@ Ext.define('EatSense.controller.CheckIn', {
 //				} 
 //			 });
 			 
-			 this.getMenulist().setStore(menuListStore);
+//			 this.getMenulist().setStore(menuListStore);
 			 this.getMenulist().getStore().load({
 				 scope   : this,
 			     callback: function(records, operation, success) {
@@ -303,7 +331,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 */
 	regenerateNickname : function() {
 		Ext.Ajax.request({
-    	    url: globalConf.serviceUrl+'/nickname',
+    	    url: '/nicknames',
     	    method: 'GET',
     	    scope: this,
     	    params: {

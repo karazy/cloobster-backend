@@ -22,13 +22,13 @@ Ext.define('EatSense.model.Product', {
 			model : 'EatSense.model.Choice',
 			name : 'choices'
 		},
-		proxy: {
-			type: 'rest',
-			url: globalConf.serviceUrl+'/restaurants/products/', 
-			reader: {
-				type: 'json',
-			} 
-		}
+//		proxy: {
+//			type: 'rest',
+//			url: globalConf.serviceUrl+'/restaurants/products/', 
+//			reader: {
+//				type: 'json',
+//			} 
+//		}
 	},
 	
 	validate: function() {
@@ -55,7 +55,7 @@ Ext.define('EatSense.model.Product', {
 	deepCopy: function() {
 		var _productCopy, _choiceCopy;
 		_productCopy = Ext.create('EatSense.model.Product', {
-			id: this.get('id'),
+//			id: this.get('id'),
 			name: this.get('name'),
 			shortDesc: this.get('shortDesc'),
 			longDesc: this.get('longDesc'),

@@ -11,6 +11,9 @@ import org.apache.bval.constraints.NotEmpty;
 public class ProductDTO {
 	@NotNull
 	@NotEmpty
+	private Long id;
+	@NotNull
+	@NotEmpty
 	private String name;
 	private String shortDesc;
 	/**
@@ -62,6 +65,17 @@ public class ProductDTO {
 
 	public void setPrice(Float price) {
 		this.price = price;
+	}
+
+	
+
+	public Long getId() {
+		return id;
+	}
+
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 

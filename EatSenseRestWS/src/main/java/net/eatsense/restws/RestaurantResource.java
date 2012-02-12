@@ -127,7 +127,7 @@ public class RestaurantResource{
 	}
 	
 	@GET
-	@Path("{restaurantId}/menu")
+	@Path("{restaurantId}/menus")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<MenuDTO> getMenus(@PathParam("restaurantId") Long restaurantId)
 	{
