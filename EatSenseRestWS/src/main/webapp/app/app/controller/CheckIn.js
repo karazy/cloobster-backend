@@ -98,16 +98,28 @@ Ext.define('EatSense.controller.CheckIn', {
     		 
     		 this.getMenulist().setStore(_menuListStore);
     		 
-    		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
- 				   type: 'rest',
- 				   url : '/restaurants/'+restaurantId+'/products',
- 				   reader: {
- 					   type: 'json'
- 			   		}
+    		 var _productListStore =	 Ext.create('Ext.data.Store', {
+	 			   model: 'EatSense.model.Product',
+	 			   storeId: 'productStore',
+	 			   proxy: {
+	 				   type: 'rest',
+	 				   url : '/restaurants/'+restaurantId+'/products',
+	 				   reader: {
+	 					   type: 'json'
+	 			   		}
+	 			   }
 	 		 });
     		 
+//    		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
+// 				   type: 'rest',
+// 				   url : '/restaurants/'+restaurantId+'/products',
+// 				   reader: {
+// 					   type: 'json'
+// 			   		}
+//	 		 });
+//    		 
     		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
-    		 ProductType.setProxy(_productProxy);
+    		 ProductType.setProxy(_productListStore.getProxy());
     	 };
     },
     /**
@@ -167,8 +179,7 @@ Ext.define('EatSense.controller.CheckIn', {
    checkIn: function(){
 	   var that = this;
 	   //get CheckIn Object and save it. 
-	   var nickname = Ext.String.trim(this.getNickname().getValue());
-	   this.createStores(this.models.activeCheckIn.get('restaurantId'));
+	   var nickname = Ext.String.trim(this.getNickname().getValue());	   
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {
@@ -286,7 +297,9 @@ Ext.define('EatSense.controller.CheckIn', {
     */
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
-		//this.getMenuoverview()
+		
+		this.createStores(this.models.activeCheckIn.get('restaurantId'));
+		
 		 var menu = this.getMenuview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this; 
 		 if(restaurantId.toString().length != 0) {
 			 //load menudata and store it in MenuController. UGLY

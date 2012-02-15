@@ -21,7 +21,7 @@ Ext.define('EatSense.controller.Cart', {
 				 tap: this.disposeOrders
 			 },
 			 '#orderlist' : {
-				 itemtap: this.alterOrder
+				 select: this.alterOrder
 			 }
 		 });
 		
@@ -81,15 +81,38 @@ Ext.define('EatSense.controller.Cart', {
 	/**
 	 * Alter an order. Switches to product detail view of this particular order.
 	 */
-	alterOrder: function(dv, ix, item, model) {
-		var menu = this.getMenuview();
+	alterOrder: function(dv, model, item, x) {
+		var menu = this.getMenuview(), main = this.getMain();
+		dv.deselect(model);
+		controller = this.getApplication().getController('Menu');
+		controller.models.activeProduct = model;
+//		var _menucard = menu.getComponent('menuCard');
+//		_menucard.setActiveItem(controller.getProductdetail());
+		
+		
+		controller.showProductDetail(null, model.data.product);
+		main.switchAnim('right');
+		main.setActiveItem(menu);
+//		controller.switchView(controller.getProductdetail(), controller.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
+		
 		//TODO implement
-		dv.deselect(ix);
+		
 		//attach product to item
 //		this.showMenu();
 //		this.getApplication().getController('Menu').showProductDetail(null, model.data.product);
 //		this.showMenu();
 		//Ext.Msg.alert(i18nPlugin.translate('hint'),'Noch nicht funktionsfähig', Ext.emptyFn);
+//		var _iconPanel = Ext.create('Ext.Panel', {
+//			layout: 'fit',
+//			height: 30,
+//			width:100,
+//			right: 200,
+//			top: 200,
+//			html: 'Test'
+//		});
+//		
+//		main.add(_iconPanel);
+		
 	}
 	
 	

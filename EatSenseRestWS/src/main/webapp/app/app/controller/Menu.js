@@ -110,7 +110,7 @@ Ext.define('EatSense.controller.Menu', {
 //		    }
 //		});
 		
-		EatSense.model.Product.load(_id, {
+		Ext.ModelManager.getModel('EatSense.model.Product').load(_id, {
 			scope: this,
 			success: function(product, operation) {
 				this.models.activeProduct = product;
@@ -147,13 +147,17 @@ Ext.define('EatSense.controller.Menu', {
 		//WORKAROUND _ END
 		
 		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
+
+		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		 //reset product spinner
 		 this.getAmount().setValue(1);
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmount().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof record.choices() !== 'undefined' && record.choices().getCount() > 0) {
-			 for(var i =0; i < record.choices().data.items.length; i++) {
-				 var choice = record.choicesStore.data.items[i];
+			 record.choices().each(function(_choice) {
+				 var choice = _choice;				 			 
+//			 for(var i =0; i < record.choices().data.items.length; i++) {
+//				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
 				 //.getComponent('choiceInfoPanel')
 				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
@@ -173,7 +177,9 @@ Ext.define('EatSense.controller.Menu', {
 						 type: optionType,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
+						 checked: opt.get('selected')
 					 }, this);		
+					 
 					 checkbox.addListener('check',function(cbox) {
 						 console.log('check');
 						 if(cbox.type == "Ext.field.Radio") {
@@ -197,8 +203,8 @@ Ext.define('EatSense.controller.Menu', {
 					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
-			 }
-			 
+//			 }
+			 },this);
 			 choicesPanel.add( {
 				 html: '<hr/>'
 			 });

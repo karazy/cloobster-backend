@@ -5,8 +5,12 @@
 Ext.define('EatSense.model.Choice', {
 	extend: 'Ext.data.Model',
 	config : {
-		idProperty: 'id',
+		idProperty: 'fakeId',
 		fields: [
+{
+	name : 'fakeId',
+	type : 'string'
+},
 		    {name: 'id', type: 'string'},
 			{name: 'text', type: 'string'},
 			{name: 'minOccurence', type: 'number'},

@@ -56,7 +56,7 @@ Ext.define('EatSense.view.Cart', {
 					"<h2>" +
 						"{product.data.name} - {amount} - {[values.product.calculate(values.amount)]}€" +
 					"</h2>" +
-					"<tpl for='product.data.choices'>" +
+					"<tpl for='product.choicesStore.data'>" +
 						"<tpl if='this.checkSelections(parent, xindex)'>" +
 							"<h3>{text}</h3>" +
 							"<ul>" +

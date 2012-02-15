@@ -140,9 +140,9 @@ public class MenuController {
 			for (Choice choice : result.values())  {
 				ChoiceDTO dto = new ChoiceDTO();
 				
-				if(!skipId) {
+//				if(!skipId) {
 					dto.setId(choice.getId());
-				}
+//				}
 				dto.setIncluded(choice.getIncludedChoices());
 				dto.setMaxOccurence(choice.getMaxOccurence());
 				dto.setMinOccurence(choice.getMinOccurence());
@@ -153,11 +153,11 @@ public class MenuController {
 				
 				if( choice.getAvailableChoices() != null && !choice.getAvailableChoices().isEmpty() ) {
 					List<ProductOption> list = choice.getAvailableChoices();
-					if(skipId) {
+//					if(skipId) {
 						for (ProductOption productOption : list) {
 							productOption.setId(null);
 						}
-					}
+//					}
 					dto.setOptions(list);					
 					
 				}
