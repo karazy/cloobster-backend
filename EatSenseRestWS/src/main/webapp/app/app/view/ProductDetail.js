@@ -19,8 +19,8 @@ Ext.define('EatSense.view.ProductDetail', {
 			},
 			items : [ {
 				xtype : 'label',
-				id : 'prodDetailLabel',
-				tpl: 
+				itemId : 'prodDetailLabel',
+				tpl: new Ext.XTemplate(
 					 '<div class="prodDetailWrapper" style="font-size:1em; margin-bottom: 10px;">'+
 					 	'<div style="position: relative;">'+
 					 		'<h2 style="float: left; width: 80%; margin: 0;">{product.data.name}</h2>'+
@@ -28,8 +28,8 @@ Ext.define('EatSense.view.ProductDetail', {
 					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right;">{[values.product.calculate(values.amount)]}</div>'+
 					 		'<div style="clear: both;">'+
 					 	'</div><p style="font-size:0.8em;">{product.data.longDesc}</p>'+
-					 '</div>'
-				
+					 '</div>'	
+					 )
 			}, {
 				xtype : 'panel',
 				layout : {
@@ -42,7 +42,7 @@ Ext.define('EatSense.view.ProductDetail', {
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
-					id : 'productAmountSpinner',
+					itemId : 'productAmountSpinner',
 					style : 'background-color:white;',
 					value : 1,
 					flex : 3,
@@ -59,7 +59,7 @@ Ext.define('EatSense.view.ProductDetail', {
 				},
 				{
 					xtype : 'button',
-					id : 'prodDetailCardBt',
+					itemId : 'prodDetailCardBt',
 					iconCls : 'compose',
 					iconMask : true,
 					flex : 2
@@ -79,6 +79,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				}				
 			]
 		}
-		]
+		]		
 	}
 });

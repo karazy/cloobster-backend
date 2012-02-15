@@ -6,7 +6,9 @@ var profile = Ext.os.deviceType.toLowerCase();
 Ext.Loader.setConfig({
 	enabled : true
 });
+
 Ext.Loader.setPath('EatSense', 'app');
+
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Cart' ],

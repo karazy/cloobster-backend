@@ -16,14 +16,16 @@ Ext.define('EatSense.controller.Menu', {
         	menuoverview :'menuoverview' ,	       
         	productdetail :'productdetail' ,        		       
         	backToMenu :'#productOvBackBt' ,	        
-        	prodDetailLabel :'#prodDetailLabel' ,	     
+        	prodDetailLabel :'menu panel #prodDetailLabel' ,	     
         	prodDetailBackBt :'#prodDetailBackBt' ,	   
-        	//TODO improve selector
-        	amount : 'panel panel spinnerfield',
+        	amountSpinner : 'menu panel panel #productAmountSpinner',
         	cartview : 'cartview',
         	cardBt : '#menuCartBt',
         	menuview: 'menu',
-        	productcomment: '#productComment'
+        	productcomment: '#productComment',
+        	createOrderBt: 'panel panel #prodDetailCardBt',
+        	backBt: 'menu #topBar #backBt',
+        	topToolbar: 'menu #topBar'
 		}
     },
     init: function() {
@@ -32,7 +34,7 @@ Ext.define('EatSense.controller.Menu', {
     		 '#menulist': {
              	select: this.showProductlist
              },
-             '#productlist' : {
+             productlist : {
             	select: this.loadProductDetail 
              },
              '#productOvBackBt': {
@@ -41,7 +43,7 @@ Ext.define('EatSense.controller.Menu', {
              '#prodDetailBackBt': {
             	 tap: this.prodDetailBackBtHandler
              },
-             '#prodDetailCardBt' : {
+             createOrderBt : {
             	 tap: this.createOrder
              },
              '#menuCartBt' : {
@@ -50,9 +52,10 @@ Ext.define('EatSense.controller.Menu', {
              '#bottomTapToMenu' : {
             	 tap: this.showMenu
              },
-             '#menuBackBt' : {
+             backBt : {
             	 tap: function() {
             		 if(this.menuBackBtContext != null) {
+            			 console.log('MenuController -> menuBackBtContext');
             			 this.menuBackBtContext();
             		 }
             	 }
@@ -60,7 +63,7 @@ Ext.define('EatSense.controller.Menu', {
              '#bottomTapUndo' : {
             	 tap: this.undoOrder
              },
-             '#productAmountSpinner' : {
+             amountSpinner : {
             	 spin: this.amountChanged
              }
         });
@@ -93,6 +96,7 @@ Ext.define('EatSense.controller.Menu', {
 	},
 	
 	loadProductDetail: function(dataview, record) {
+		console.log('Menu Controller -> loadProductDetail');
 //		this.models.activeProduct = record;
 //		this.showProductDetail(null, this.models.activeProduct);
 		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
@@ -150,8 +154,8 @@ Ext.define('EatSense.controller.Menu', {
 
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
 		 //reset product spinner
-		 this.getAmount().setValue(1);
-		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmount().getValue()});
+		 this.getAmountSpinner().setValue(1);
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmountSpinner().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof record.choices() !== 'undefined' && record.choices().getCount() > 0) {
 			 record.choices().each(function(_choice) {
@@ -264,6 +268,7 @@ Ext.define('EatSense.controller.Menu', {
 	 * @param button
 	 */
 	createOrder: function(button) {
+		console.log('Menu Controller -> createOrder');
 		//get active product and set choice values
 		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;	
 		//validate choices 
@@ -277,7 +282,7 @@ Ext.define('EatSense.controller.Menu', {
 		
 		if(productIsValid === true) {
 			order = Ext.create('EatSense.model.Order');
-			order.set('amount', this.getAmount().getValue());
+			order.set('amount', this.getAmountSpinner().getValue());
 			order.set('status','PLACED');
 			//TODO workaround because hasOne not working
 			order.data.product = productForCart;//.deepCopy();
@@ -320,8 +325,9 @@ Ext.define('EatSense.controller.Menu', {
 	 * 			Direction for switch animation.
 	 */
 	switchView: function(view, title, labelBackBt, direction) {
+		console.log('Menu Controller -> switchView');
 		var menu = this.getMenuview();
-    	menu.getComponent('menuTopBar').setTitle(title);
+    	this.getTopToolbar().setTitle(title);
     	(labelBackBt == null || labelBackBt.length == 0) ? menu.hideBackButton() : menu.showBackButton(labelBackBt);
     	menu.switchMenuview(view,direction);
 	},
@@ -329,6 +335,7 @@ Ext.define('EatSense.controller.Menu', {
 	 * Removes the last order, if orders exist.
 	 */
 	undoOrder: function() {
+		console.log('Menu Controller -> undoOrder');
 		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(), badgeText,
 		removedOrder;
 		
@@ -354,8 +361,8 @@ Ext.define('EatSense.controller.Menu', {
 	 * Recalculates the total price for the active product.
 	 */
 	recalculate: function(product) {
-		//product.calculate();
-		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmount().getValue()});
+		console.log('Menu Controller -> recalculate');
+		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
 	},
 	/**
 	 * Called when the product spinner value changes. 

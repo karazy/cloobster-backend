@@ -1,15 +1,17 @@
 Ext.define('EatSense.view.Menu', {
 	extend : 'Ext.Panel',
+//	extend : 'EatSense.SpecializedCardPanel',
+//	requires: ['EatSense.SpecializedCardPanel'],
 	xtype : 'menu',
 	config : {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			itemId: 'menuTopBar',
+			itemId: 'topBar',
 			title : i18nPlugin.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',
-				id : 'menuBackBt',
+				itemId : 'backBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			},
@@ -43,7 +45,7 @@ Ext.define('EatSense.view.Menu', {
 			        ]
 		}, {
 			xtype: 'panel',
-			itemId: 'menuCard',
+			itemId: 'cardPanel',
 			layout: {
 				type: 'card'
 			},
@@ -72,18 +74,18 @@ Ext.define('EatSense.view.Menu', {
 	 * 			left or right
 	 */
 	switchMenuview : function(view, direction){
-		var _menucard = this.getComponent('menuCard');
-		_menucard.getLayout().setAnimation({
+		var cardpanel = this.getComponent('cardPanel');
+		cardpanel.getLayout().setAnimation({
 			 type: 'slide',
 	         direction: direction
 		});
-		_menucard.setActiveItem(view);
+		cardpanel.setActiveItem(view);
 	},
 	/**
 	 * Hides the back button in top toolbar.
 	 */
 	hideBackButton: function() {
-		this.getComponent('menuTopBar').getComponent('menuBackBt').hide();
+		this.getComponent('topBar').getComponent('backBt').hide();
 	},
 	/**
 	 * Shows the back button in top toolbar.
@@ -91,7 +93,7 @@ Ext.define('EatSense.view.Menu', {
 	 * 		Label to display on button.
 	 */
 	showBackButton: function(text) {
-		this.getComponent('menuTopBar').getComponent('menuBackBt').setText(text);
-		this.getComponent('menuTopBar').getComponent('menuBackBt').show();
+		this.getComponent('topBar').getComponent('backBt').setText(text);
+		this.getComponent('topBar').getComponent('backBt').show();
 	}
 });

@@ -1,5 +1,7 @@
 Ext.define('EatSense.view.Cart', {
 	extend : 'Ext.Panel',
+//	extend : 'EatSense.SpecializedCardPanel',
+//	requires: ['EatSense.SpecializedCardPanel'],
 	xtype : 'cartview',
 	layout : {
 		type : 'vbox',
@@ -9,10 +11,11 @@ Ext.define('EatSense.view.Cart', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
+			itemId: 'topBar',
 			title : i18nPlugin.translate('cartviewTitle'),
 			items : [ {
 				xtype : 'button',
-				id : 'cartBackBt',
+				itemId : 'backBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			} ]
@@ -42,11 +45,10 @@ Ext.define('EatSense.view.Cart', {
 			xtype: 'panel',
 			itemId: 'cartPanel',
 			layout : {
-				type: 'fit'
+				type: 'card'
 			},
 			items: [ {
 				xtype: 'list',
-				type : 'fit',
 				id: 'orderlist',
 				styleHtmlContent: true,
 				allowDeselect: true,
@@ -80,17 +82,13 @@ Ext.define('EatSense.view.Cart', {
 						var _hasSelections = parent.product.choices().getAt(index-1).hasSelections(); 
 						return _hasSelections;
 					}
-				}
-				)
+				})
+			}, {
+				xtype: 'productdetail',
+				layout: 'fit'
 			}
 			        
-			        ]
-			/*
-			 * 
-			  
-			 */
-				
-				
+			]
 			
 		} ]
 	},

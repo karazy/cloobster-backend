@@ -37,7 +37,8 @@ var translation = {
 		"orderComment" : "Optionaler Kommentar",
 		//Cart
 		"cartviewTitle" : "Bestellung",
-		"dumpCart" : "Warenkorb leeren?"
+		"dumpCart" : "Warenkorb leeren?",
+		"dumpItem" : "{0} entfernen?"
 
 	}
 

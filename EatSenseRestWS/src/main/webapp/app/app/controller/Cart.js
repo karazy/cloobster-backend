@@ -5,13 +5,18 @@ Ext.define('EatSense.controller.Cart', {
 			main : 'mainview',
 			cartview : 'cartview',
 			menuview: 'menu',
-			orderlist : '#orderlist'
-		}
+			orderlist : '#orderlist',
+			backBt : 'cartview #topBar #backBt'
+		},
+		/**
+		 * Tooltip menu, shown when user taps an order
+		 */
+		tooltip : ''				
 	},
 	init: function() {
 		 
 		this.control({
-			 '#cartBackBt' : {
+			backBt : {
 				 tap: this.showMenu
 			 },
 			 '#bottomTapCancel' : {
@@ -21,16 +26,21 @@ Ext.define('EatSense.controller.Cart', {
 				 tap: this.disposeOrders
 			 },
 			 '#orderlist' : {
-				 select: this.alterOrder
+				 itemtap: this.cartItemContextMenu
 			 }
 		 });
 		
 		//store retrieved models
 		 var models = {};
     	 this.models = models;
+    	 
+    	 //create tooltip for reuse
+    	 var tooltip = Ext.create('EatSense.util.CartToolTip');
+    	 this.setTooltip(tooltip);
 	},
 	
 	showCart: function() {
+		console.log('Cart Controller -> showCart');
 		var main = this.getMain(), cartview = this.getCartview(), orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
 		//only switch if cart is not empty
@@ -47,18 +57,19 @@ Ext.define('EatSense.controller.Cart', {
 	},
 	
 	showMenu: function() {
+		console.log('Cart Controller -> showMenu');
 		var main = this.getMain(), menu = this.getMenuview();		
 		main.switchAnim('right');
 		main.setActiveItem(menu);
 	},
 	
 	dumpCart: function() {
+		console.log('Cart Controller -> dumpCart');
 		Ext.Msg.show({
 			title: i18nPlugin.translate('hint'),
 			message: i18nPlugin.translate('dumpCart'),
 			buttons: Ext.MessageBox.YESNO,
 			scope: this,
-//			modal: false,
 			fn: function(btnId, value, opt) {
 			if(btnId=='yes') {
 				//workaround, because view stays masked after switch to menu
@@ -79,41 +90,83 @@ Ext.define('EatSense.controller.Cart', {
 		Ext.Msg.alert(i18nPlugin.translate('hint'),'Noch nicht funktionsfähig', Ext.emptyFn);
 	},
 	/**
-	 * Alter an order. Switches to product detail view of this particular order.
+	 * Listener for itemTap event of orderlist.
+	 * Show a tooltip with buttons to edit, delete the selected item.
 	 */
-	alterOrder: function(dv, model, item, x) {
-		var menu = this.getMenuview(), main = this.getMain();
+	cartItemContextMenu: function(dv, number, dataitem, model, event, opts) {
+		console.log('Cart Controller -> cartItemContextMenu');
+		var menu = this.getMenuview(), 
+		main = this.getMain(),
+		x = event.pageX,
+		y = event.pageY,
+		tooltip = this.getTooltip(),
+		controller = this.getApplication().getController('Menu'),
+		orderlist = this.getOrderlist(),
+		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
+		badgeText;
+		
 		dv.deselect(model);
-		controller = this.getApplication().getController('Menu');
-		controller.models.activeProduct = model;
-//		var _menucard = menu.getComponent('menuCard');
-//		_menucard.setActiveItem(controller.getProductdetail());
+		//position tooltip where tap happened
+		tooltip.setTop(y - dataitem.getHeight()/2);
+		tooltip.setLeft(x);
+		//edit item
+		tooltip.getComponent('editCartItem').addListener('tap', function() {
+			tooltip.hide();
+			controller.models.activeProduct = model;							
+			main.switchAnim('right');
+			main.setActiveItem(menu);
+			controller.showProductDetail(null, model.data.product);
+		}, this);
+		//dump item
+		tooltip.getComponent('deleteCartItem').addListener('tap', function() {
+			tooltip.hide();
+			Ext.Msg.show({
+				title: i18nPlugin.translate('hint'),
+				message: i18nPlugin.translate('dumpItem', model.get('product').get('name')),
+				buttons: Ext.MessageBox.YESNO,
+				scope: this,
+				fn: function(btnId, value, opt) {
+				if(btnId=='yes') {
+					//workaround, because view stays masked after switch to menu
+					Ext.Msg.hide();
+					//delete item
+					orders.remove(model);
+					badgeText = (orders.data.length > 0) ? orders.data.length : "";
+					//reset badge text on cart button and switch back to menu
+					this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
+					//refresh list
+					orderlist.refresh();
+					}
+				}
+			});	
+		}, this);
 		
-		
-		controller.showProductDetail(null, model.data.product);
-		main.switchAnim('right');
-		main.setActiveItem(menu);
-//		controller.switchView(controller.getProductdetail(), controller.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
-		
-		//TODO implement
-		
-		//attach product to item
-//		this.showMenu();
-//		this.getApplication().getController('Menu').showProductDetail(null, model.data.product);
-//		this.showMenu();
-		//Ext.Msg.alert(i18nPlugin.translate('hint'),'Noch nicht funktionsfähig', Ext.emptyFn);
-//		var _iconPanel = Ext.create('Ext.Panel', {
-//			layout: 'fit',
-//			height: 30,
-//			width:100,
-//			right: 200,
-//			top: 200,
-//			html: 'Test'
-//		});
-//		
-//		main.add(_iconPanel);
-		
+		tooltip.show();
 	}
-	
-	
+});
+
+Ext.define('EatSense.util.CartToolTip', {
+	extend: 'Ext.Panel',
+	xtype: 'cartToolTip',
+	config: {
+		layout:'hbox',
+		centered: true,
+		width: 120,
+		height:50,
+		modal: true,
+		hideOnMaskTap: true,
+		items: [ {
+			xtype: 'button',
+			itemId: 'editCartItem',
+			iconCls : 'compose',
+			iconMask : true,
+			flex: 1	
+		},{
+			xtype: 'button',
+			itemId: 'deleteCartItem',
+			iconCls : 'trash',
+			iconMask : true,
+			flex: 1				
+		}]
+	}	
 });
