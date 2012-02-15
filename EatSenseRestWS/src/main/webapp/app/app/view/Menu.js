@@ -1,17 +1,15 @@
 Ext.define('EatSense.view.Menu', {
 	extend : 'Ext.Panel',
-//	extend : 'EatSense.SpecializedCardPanel',
-//	requires: ['EatSense.SpecializedCardPanel'],
 	xtype : 'menu',
 	config : {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			itemId: 'topBar',
+			itemId: 'menuTopBar',
 			title : i18nPlugin.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',
-				itemId : 'backBt',
+				itemId : 'menuBackBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			},
@@ -33,19 +31,19 @@ Ext.define('EatSense.view.Menu', {
 				{
 				    title: 'Menu',
 				    iconCls: 'reply',
-				    id: 'bottomTapUndo',
+				    itemId: 'bottomTapUndo',
 				    iconMask: true
 				},
 				{
 				    title: 'Card',
 				    iconCls: 'organize',
-				    id: 'menuCartBt',
+				    itemId: 'menuCartBt',
 				    iconMask: true,
 				}
 			        ]
 		}, {
 			xtype: 'panel',
-			itemId: 'cardPanel',
+			itemId: 'menuCardPanel',
 			layout: {
 				type: 'card'
 			},
@@ -61,6 +59,7 @@ Ext.define('EatSense.view.Menu', {
 			        }, 
 			        {
 			        	xtype: 'productdetail',
+			        	itemId: 'menuProductDetail',
 			        	layout: 'fit'
 			        }
 			]
@@ -74,7 +73,7 @@ Ext.define('EatSense.view.Menu', {
 	 * 			left or right
 	 */
 	switchMenuview : function(view, direction){
-		var cardpanel = this.getComponent('cardPanel');
+		var cardpanel = this.getComponent('menuCardPanel');
 		cardpanel.getLayout().setAnimation({
 			 type: 'slide',
 	         direction: direction
@@ -85,7 +84,7 @@ Ext.define('EatSense.view.Menu', {
 	 * Hides the back button in top toolbar.
 	 */
 	hideBackButton: function() {
-		this.getComponent('topBar').getComponent('backBt').hide();
+		this.getComponent('menuTopBar').getComponent('menuBackBt').hide();
 	},
 	/**
 	 * Shows the back button in top toolbar.
@@ -93,7 +92,7 @@ Ext.define('EatSense.view.Menu', {
 	 * 		Label to display on button.
 	 */
 	showBackButton: function(text) {
-		this.getComponent('topBar').getComponent('backBt').setText(text);
-		this.getComponent('topBar').getComponent('backBt').show();
+		this.getComponent('menuTopBar').getComponent('menuBackBt').setText(text);
+		this.getComponent('menuTopBar').getComponent('menuBackBt').show();
 	}
 });

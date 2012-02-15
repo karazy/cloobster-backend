@@ -9,7 +9,7 @@ Ext.define('EatSense.view.ProductOverview', {
 		items : [ 
 		{
 			xtype : 'list',
-			id : 'productlist',
+			itemId : 'productlist',
 			type : 'fit',
 			allowDeselect : true,
 			itemTpl : "<div class='productListItem'>" +

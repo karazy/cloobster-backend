@@ -11,45 +11,47 @@ Ext.define('EatSense.controller.Menu', {
 		refs: {
 	        main : 'mainview', 
         	menulist :'#menulist',        	
-        	productlist :'#productlist',        	
+        	productlist :'#menuCardPanel #productlist',        	
         	productoverview :'productoverview' ,	     
         	menuoverview :'menuoverview' ,	       
-        	productdetail :'productdetail' ,        		       
+        	productdetail :'#menuCardPanel #menuProductDetail' ,        		       
         	backToMenu :'#productOvBackBt' ,	        
-        	prodDetailLabel :'menu panel #prodDetailLabel' ,	     
+        	prodDetailLabel :'#menuCardPanel #menuProductDetail #prodDetailLabel' ,	     
         	prodDetailBackBt :'#prodDetailBackBt' ,	   
         	amountSpinner : 'menu panel panel #productAmountSpinner',
         	cartview : 'cartview',
-        	cardBt : '#menuCartBt',
+        	cardBt : '#menuBottomBar #menuCartBt',
         	menuview: 'menu',
         	productcomment: '#productComment',
-        	createOrderBt: 'panel panel #prodDetailCardBt',
-        	backBt: 'menu #topBar #backBt',
-        	topToolbar: 'menu #topBar'
+        	createOrderBt: '#menuCardPanel #menuProductDetail #prodDetailCardBt',
+        	backBt: 'menu #menuTopBar #menuBackBt',
+        	topToolbar: 'menu #menuTopBar',
+        	bottomTapToMenu : '#menuBottomBar #bottomTapToMenu',
+        	bottomTapUndo : '#menuBottomBar #bottomTapUndo'
 		}
     },
     init: function() {
     	console.log('initialized MenuController');
     	 this.control({
-    		 '#menulist': {
+    		 menulist: {
              	select: this.showProductlist
              },
              productlist : {
             	select: this.loadProductDetail 
              },
-             '#productOvBackBt': {
+             backToMenu: {
             	 tap: this.showMenu
              }, 
-             '#prodDetailBackBt': {
+             prodDetailBackBt: {
             	 tap: this.prodDetailBackBtHandler
              },
              createOrderBt : {
             	 tap: this.createOrder
              },
-             '#menuCartBt' : {
+             cardBt : {
             	 tap: this.showCart
              },
-             '#bottomTapToMenu' : {
+             bottomTapToMenu : {
             	 tap: this.showMenu
              },
              backBt : {
@@ -60,7 +62,7 @@ Ext.define('EatSense.controller.Menu', {
             		 }
             	 }
              },
-             '#bottomTapUndo' : {
+             bottomTapUndo : {
             	 tap: this.undoOrder
              },
              amountSpinner : {

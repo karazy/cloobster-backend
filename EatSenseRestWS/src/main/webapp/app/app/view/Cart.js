@@ -11,11 +11,11 @@ Ext.define('EatSense.view.Cart', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			itemId: 'topBar',
+			itemId: 'cartTopBar',
 			title : i18nPlugin.translate('cartviewTitle'),
 			items : [ {
 				xtype : 'button',
-				itemId : 'backBt',
+				itemId : 'cartBackBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
 			} ]
@@ -31,25 +31,25 @@ Ext.define('EatSense.view.Cart', {
 				{
 				    title: 'Cancel',
 				    iconCls: 'trash',
-				    id: 'bottomTapCancel',
+				    itemId: 'bottomTapCancel',
 				    iconMask: true
 				},
 				{
 				    title: 'Send',
 				    iconCls: 'action',
-				    id: 'bottomTapOrder',
+				    itemId: 'bottomTapOrder',
 				    iconMask: true
 				}
 			        ]
 		}, {
 			xtype: 'panel',
-			itemId: 'cartPanel',
+			itemId: 'cartCardPanel',
 			layout : {
 				type: 'card'
 			},
 			items: [ {
 				xtype: 'list',
-				id: 'orderlist',
+				itemId: 'orderlist',
 				styleHtmlContent: true,
 				allowDeselect: true,
 				onItemDisclosure: this.removeItem,
@@ -83,11 +83,12 @@ Ext.define('EatSense.view.Cart', {
 						return _hasSelections;
 					}
 				})
-			}, {
+			}, 
+			{
 				xtype: 'productdetail',
+				itemId : 'productdetail',
 				layout: 'fit'
-			}
-			        
+			}			        
 			]
 			
 		} ]
@@ -95,6 +96,35 @@ Ext.define('EatSense.view.Cart', {
 	
 	removeItem: function() {
 		console.log('disclosure');
+	},
+	
+	/**
+	 * Change the direction of the slide animation.
+	 * @param direction
+	 * 			left or right
+	 */
+	switchView : function(view, direction){
+		var cardpanel = this.getComponent('cartCardPanel');
+		cardpanel.getLayout().setAnimation({
+			 type: 'slide',
+	         direction: direction
+		});
+		cardpanel.setActiveItem(view);
+	},
+	/**
+	 * Hides the back button in top toolbar.
+	 */
+	hideBackButton: function() {
+		this.getComponent('cartTopBar').getComponent('cartBackBt').hide();
+	},
+	/**
+	 * Shows the back button in top toolbar.
+	 * @param text
+	 * 		Label to display on button.
+	 */
+	showBackButton: function(text) {
+		this.getComponent('cartTopBar').getComponent('cartBackBt').setText(text);
+		this.getComponent('cartTopBar').getComponent('cartBackBt').show();
 	}
 
 });
