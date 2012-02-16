@@ -110,14 +110,6 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   }
 	 		 });
     		 
-//    		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
-// 				   type: 'rest',
-// 				   url : '/restaurants/'+restaurantId+'/products',
-// 				   reader: {
-// 					   type: 'json'
-// 			   		}
-//	 		 });
-//    		 
     		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
     		 ProductType.setProxy(_productListStore.getProxy());
     	 };

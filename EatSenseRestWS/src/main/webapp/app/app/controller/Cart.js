@@ -3,7 +3,9 @@ Ext.define('EatSense.controller.Cart', {
 	config: {
 		refs: {
 			main : 'mainview',
-			cartview : 'cartview',
+			cartview : 'cart',
+			cartoverview: 'cartoverview',
+			cartoverviewTotal: 'cartoverview #carttotalpanel',
 			menuview: 'menu',
 			orderlist : '#cartCardPanel #orderlist',
 			backBt : '#cartTopBar #cartBackBt',
@@ -60,7 +62,8 @@ Ext.define('EatSense.controller.Cart', {
 	showCart: function() {
 		console.log('Cart Controller -> showCart');
 		var main = this.getMain(), cartview = this.getCartview(), orderlist = this.getOrderlist(),
-		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
+		total = 0;
 		//only switch if cart is not empty		
 		if(orders.data.length == 0) {
 			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
@@ -76,9 +79,14 @@ Ext.define('EatSense.controller.Cart', {
 				//allready in cart view
 				this.models.activeOrder = null;
 				orderlist.refresh();
-				this.switchView(orderlist, i18nPlugin.translate('cartviewTitle'), i18nPlugin.translate('back'), 'right');
+				this.switchView(this.getCartoverview(), i18nPlugin.translate('cartviewTitle'), i18nPlugin.translate('back'), 'right');
 			} 
-				
+			
+			orders.each(function(order) {
+				total += order.calculate();
+			});
+			
+			this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
 			
 		}				
 	},
@@ -298,6 +306,7 @@ Ext.define('EatSense.controller.Cart', {
 	 */
 	amountChanged: function(spinner, value, direction) {
 		console.log('Cart Controller > amountChanged (value:'+value+')');
+		this.models.activeOrder.set('amount', value);
 		this.recalculate(this.models.activeOrder);
 	},
 	/**

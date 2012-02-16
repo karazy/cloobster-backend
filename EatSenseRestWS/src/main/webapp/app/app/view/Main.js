@@ -28,11 +28,7 @@ Ext.define('EatSense.view.Main', {
 		items : [ {
 			layout : 'fit',
 			xtype : 'dashboard'
-		}, 
-//		{
-//			layout : 'fit',
-//			xtype : 'menuoverview'
-//		}
+		},
 		{
 			layout : 'fit',
 			xtype : 'checkinconfirmation'
@@ -41,17 +37,9 @@ Ext.define('EatSense.view.Main', {
 			layout: 'fit',
 			xtype: 'checkinwithothers'
 		},
-//		{
-//			layout: 'fit',
-//			xtype: 'productoverview'
-//		},
-//		{
-//			layout: 'fit',
-//			xtype: 'productdetail'
-//		},
 		{
 			layout: 'fit',
-			xtype: 'cartview'
+			xtype: 'cart'
 		},
 		{
 			layout: 'fit',
