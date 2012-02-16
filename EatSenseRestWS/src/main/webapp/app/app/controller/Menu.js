@@ -99,28 +99,16 @@ Ext.define('EatSense.controller.Menu', {
 	
 	loadProductDetail: function(dataview, record) {
 		console.log('Menu Controller -> loadProductDetail');
-		this.models.activeProduct = record.copy();
+		this.models.activeProduct = record;
 		this.showProductDetail(dataview, this.models.activeProduct);
-		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
-//		
-//		Ext.Ajax.request({
-//		    url: '/restaurants/'+_rId+'/products/'+_id,
-////		    params: {
-////		        id: 1
-////		    },
-//		    scope: this,
-//		    success: function(response){
-//		    	var _raw = Ext.JSON.decode(response.responseText);
-//		    	this.models.activeProduct = new EatSense.model.Product(_raw);
-//		    	this.showProductDetail(null, this.models.activeProduct);
-//		    }
-//		});
-		
+//		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
+
+		//BUG
 //		Ext.ModelManager.getModel('EatSense.model.Product').load(_id, {
 //			scope: this,
 //			success: function(product, operation) {
 //				this.models.activeProduct = product;
-//				this.showProductDetail(null, this.models.activeProduct);
+//				this.showProductDetail(dataview, this.models.activeProduct);
 //			}
 //		});
 	},
@@ -130,28 +118,7 @@ Ext.define('EatSense.controller.Menu', {
 	 * @param record
 	 */
 	showProductDetail: function(dataview, record) {
-		console.log("Menu Controller -> showProductDetail");
-		//WORKAROUND
-//		 var singleProductStore = Ext.create('Ext.data.Store', {
-//			   model: 'EatSense.model.Product',
-//			   proxy: {
-//				   type: 'rest',
-//				   url : globalConf.serviceUrl+'/restaurants/'+restaurantId+'/products/'+record.get('id'),
-//				   reader: {
-//					   type: 'json'
-//			   		}
-//			   }
-//		 });
-//		 singleProductStore.load({
-//			 scope   : this,
-//		     callback: function(record, operation, success) {
-//		    	 if(success) {
-//		    		 that.models.activeProduct = record;			    	 
-//		    	 }
-//		     }
-//		 });
-		//WORKAROUND _ END
-		
+		console.log("Menu Controller -> showProductDetail");		
 		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
 
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
@@ -178,7 +145,7 @@ Ext.define('EatSense.controller.Menu', {
 				
 				 choice.options().each(function(opt) {
 					 var checkbox = Ext.create(optionType, {
-						 name : choice.data.id,
+						 name : choice.get('id'),
 						 value : opt,
 						 type: optionType,
 						 labelWidth: '80%',
@@ -286,6 +253,14 @@ Ext.define('EatSense.controller.Menu', {
 			order = Ext.create('EatSense.model.Order');
 			order.set('amount', this.getAmountSpinner().getValue());
 			order.set('status','PLACED');
+			//WORKAROUND
+			//because options select doesn't get correctly set after copy of object
+			productForCart.choices().each(function(choice, cIndex) {
+				choice.options().each(function(option, oIndex) {
+					productForCart.data.choices[cIndex].options[oIndex].selected = option.get('selected');
+				});
+			});
+			//WORKAROUND _ END			
 			order.setProduct(productForCart);
 			//comment field needed
 			order.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());

@@ -17,23 +17,12 @@ Ext.define('EatSense.model.Order', {
 		}, {
 			name : 'orderTime',
 			type : 'date'
-		}, {
-			name : 'product_id',
-			type : 'string'
-		}
-		// {
-		// name : 'product'
-		// }
-		],
+		} ],
 
 		associations : {
 			type : 'hasOne',
 			model : 'EatSense.model.Product'
 		}
-	// hasOne: {
-	// model : 'EatSense.model.Product',
-	// name: 'product'
-	// },
 	},
 
 	calculate : function() {

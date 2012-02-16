@@ -296,6 +296,16 @@ Ext.define('EatSense.controller.Cart', {
 				validationError += choice.get('text') + '<br/>';
 			}
 		});
+		
+		//WORKAROUND
+		//because options select doesn't get correctly set after copy of object
+		product.choices().each(function(choice, cIndex) {
+			choice.options().each(function(option, oIndex) {
+				product.data.choices[cIndex].options[oIndex].selected = option.get('selected');
+			});
+		});
+		//WORKAROUND _ END	
+		
 		if(productIsValid) {
 			this.showCart();
 		} else {

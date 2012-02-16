@@ -1,7 +1,7 @@
 Ext.define('EatSense.model.Option', {
 	extend: 'Ext.data.Model',
 	config : {
-		idProperty: 'fakeId',
+		idProperty: 'id',
 		fields: [
 {
 	name : 'fakeId',

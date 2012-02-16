@@ -121,6 +121,10 @@ Ext.define('EatSense.controller.CheckIn', {
 	 				   url : '/restaurants/'+restaurantId+'/products',
 	 				   reader: {
 	 					   type: 'json'
+	 			   		},
+	 			   		writer: {
+	 			   			type: 'json',
+	 			   			writeAllFields: true
 	 			   		}
 	 			   }
 	 		 });
@@ -151,6 +155,10 @@ Ext.define('EatSense.controller.CheckIn', {
 	 				   url : '/restaurants/'+restaurantId+'/orders',
 	 				   reader: {
 	 					   type: 'json'
+	 			   		},
+		 			   	writer: {
+	 			   			type: 'json',
+	 			   			writeAllFields: true
 	 			   		}
 	 			   }
 	 		 });
