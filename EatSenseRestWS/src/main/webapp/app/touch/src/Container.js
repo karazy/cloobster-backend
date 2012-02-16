@@ -1,7 +1,4 @@
 /**
- * @class Ext.Container
- * @extend Ext.Component
- *
  * A Container has all of the abilities of {@link Ext.Component Component}, but lets you nest other Components inside
  * it. Applications are made up of lots of components, usually nested inside one another. Containers allow you to
  * render and arrange child Components inside them. Most apps have a single top-level Container called a Viewport,
@@ -25,7 +22,7 @@
  * the code samples above showed how to create a Panel with 2 child Panels already defined inside it but it's easy to
  * do this at run time too:
  *
- *     @example
+ *     @example miniphone
  *     //this is the Panel we'll be adding below
  *     var aboutPanel = Ext.create('Ext.Panel', {
  *         html: 'About this app'
@@ -152,7 +149,7 @@ Ext.define('Ext.Container', {
     config: {
         /**
          * @cfg {String/Object/Boolean} cardSwitchAnimation
-         * @deprecated 2.0.0 please use {@link Ext.layout.Card#animation}
+         * @removed 2.0.0 Please use {@link Ext.layout.Card#animation} instead
          */
 
         /**
@@ -328,7 +325,7 @@ Ext.define('Ext.Container', {
          * hide the modal mask and the Container when the mask is tapped on
          * @accessor
          */
-        hideOnMaskTap: true
+        hideOnMaskTap: null
     },
 
     isContainer: true,
@@ -338,11 +335,6 @@ Ext.define('Ext.Container', {
         centeredchange: 'onItemCenteredChange',
         dockedchange: 'onItemDockedChange',
         floatingchange: 'onItemFloatingChange'
-    },
-
-    paintListeners: {
-        painted: 'onPainted',
-        erased: 'onErased'
     },
 
     constructor: function(config) {
@@ -409,17 +401,22 @@ Ext.define('Ext.Container', {
     },
 
     updateModal: function(newModal, oldModal) {
+        var listeners = {
+            painted: 'refreshModalMask',
+            erased: 'destroyModalMask'
+        };
+
         if (newModal) {
-            this.on(this.paintListeners);
+            this.on(listeners);
             newModal.on('destroy', 'onModalDestroy', this);
 
             if (this.isPainted()) {
-                this.onPainted();
+                this.refreshModalMask();
             }
         }
         else if (oldModal) {
             oldModal.un('destroy', 'onModalDestroy', this);
-            this.un(this.paintListeners);
+            this.un(listeners);
         }
     },
 
@@ -427,29 +424,29 @@ Ext.define('Ext.Container', {
         this.setModal(null);
     },
 
-    onPainted: function() {
-        var modal = this.getModal(),
+    refreshModalMask: function() {
+        var mask = this.getModal(),
             container = this.getParent();
 
         if (!this.painted) {
             this.painted = true;
 
-            if (modal) {
-                container.insertBefore(modal, this);
-                modal.setZIndex(this.getZIndex() - 1);
+            if (mask) {
+                container.insertBefore(mask, this);
+                mask.setZIndex(this.getZIndex() - 1);
             }
         }
     },
 
-    onErased: function() {
-        var modal = this.getModal(),
+    destroyModalMask: function() {
+        var mask = this.getModal(),
             container = this.getParent();
 
         if (this.painted) {
             this.painted = false;
 
-            if (modal) {
-                container.remove(modal, false);
+            if (mask) {
+                container.remove(mask, false);
             }
         }
     },
@@ -521,28 +518,22 @@ Ext.define('Ext.Container', {
      * @private
      */
      applyControl: function(selectors) {
-         var dispatcher = this.getEventDispatcher(),
-             selector, eventName, listener, listeners;
+         var selector, key, listener, listeners;
 
          for (selector in selectors) {
-             if (selectors.hasOwnProperty(selector)) {
-                 listeners = selectors[selector];
+             listeners = selectors[selector];
 
-                 //add our own id to ensure we only get descendant Components of this Container
-                 if (selector[0] != '#') {
-                     selector = "#" + this.getId() + " " + selector;
-                 }
+             for (key in listeners) {
+                 listener = listeners[key];
 
-                 for (eventName in listeners) {
-                     listener = listeners[eventName];
-
-                     if (Ext.isString(listener)) {
-                         listener = this[listener];
-                     }
-
-                     dispatcher.addListener('component', selector, eventName, listener, this);
+                 if (Ext.isObject(listener)) {
+                     listener.delegate = selector;
                  }
              }
+
+             listeners.delegate = selector;
+
+             this.addListener(listeners);
          }
 
          return selectors;
@@ -666,7 +657,7 @@ Ext.define('Ext.Container', {
      */
     add: function(newItems) {
         var me = this,
-            i, ln, item;
+            i, ln, item, newActiveItem;
 
         newItems = Ext.Array.from(newItems);
 
@@ -674,8 +665,13 @@ Ext.define('Ext.Container', {
 
         for (i = 0; i < ln; i++) {
             item = me.factoryItem(newItems[i]);
-
             this.doAdd(item);
+            if (!newActiveItem && !this.getActiveItem() && this.innerItems.length > 0 && item.isInnerItem()) {
+                newActiveItem = item;
+            }
+        }
+        if (newActiveItem) {
+            this.setActiveItem(newActiveItem);
         }
 
         return item;
@@ -872,29 +868,40 @@ Ext.define('Ext.Container', {
      * @param index
      */
     insertInner: function(item, index) {
-        var me = this,
-            items = me.getItems().items,
-            innerItems = me.innerItems,
+        var items = this.getItems().items,
+            innerItems = this.innerItems,
+            currentInnerIndex = innerItems.indexOf(item),
+            newInnerIndex = -1,
             nextSibling;
+
+        if (currentInnerIndex !== -1) {
+            innerItems.splice(currentInnerIndex, 1);
+        }
 
         if (typeof index == 'number') {
             do {
                 nextSibling = items[++index];
             } while (nextSibling && !nextSibling.isInnerItem());
 
-            if (!nextSibling) {
-                innerItems.push(item);
+            if (nextSibling) {
+                newInnerIndex = innerItems.indexOf(nextSibling);
+                innerItems.splice(newInnerIndex, 0, item);
             }
-            else {
-                innerItems.splice(innerItems.indexOf(nextSibling), 0, item);
-            }
-        }
-        else {
-            innerItems.push(item);
         }
 
-        return me;
+        if (newInnerIndex === -1) {
+            innerItems.push(item);
+            newInnerIndex = innerItems.length - 1;
+        }
+
+        if (currentInnerIndex !== -1) {
+            this.onInnerItemMove(item, newInnerIndex, currentInnerIndex);
+        }
+
+        return this;
     },
+
+    onInnerItemMove: Ext.emptyFn,
 
     /**
      * @private
@@ -963,10 +970,6 @@ Ext.define('Ext.Container', {
             }
 
             items.removeAt(currentIndex);
-
-            if (isInnerItem) {
-                me.removeInner(item);
-            }
         }
         else {
             item.setParent(me);
@@ -1029,10 +1032,6 @@ Ext.define('Ext.Container', {
      */
     onItemAdd: function(item, index) {
         this.doItemLayoutAdd(item, index);
-
-        if (!this.isItemsInitializing && !this.getActiveItem() && item.isInnerItem()) {
-            this.setActiveItem(item);
-        }
 
         if (this.initialized) {
             this.fireEvent('add', this, item, index);
@@ -1204,7 +1203,7 @@ Ext.define('Ext.Container', {
     },
 
     /**
-     * Animates to the supplied activeItem with a specified animation.  Currently this only works
+     * Animates to the supplied activeItem with a specified animation. Currently this only works
      * with a Card layout.  This passed animation will override any default animations on the
      * container, for a single card switch. The animation will be destroyed when complete.
      * @param {Object/Number} activeItem The item or item index to make active

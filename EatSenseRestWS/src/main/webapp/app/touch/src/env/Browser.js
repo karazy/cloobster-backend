@@ -29,6 +29,7 @@ Ext.define('Ext.env.Browser', {
             dolfin: 'Dolfin',
             webosbrowser: 'webOSBrowser',
             chromeMobile: 'ChromeMobile',
+            silk: 'Silk',
             other: 'Other'
         },
         engineNames: {
@@ -52,7 +53,8 @@ Ext.define('Ext.env.Browser', {
             opera: 'Opera/',
             dolfin: 'Dolfin/',
             webosbrowser: 'wOSBrowser/',
-            chromeMobile: 'CrMo/'
+            chromeMobile: 'CrMo/',
+            silk: 'Silk/'
         }
     },
 
@@ -146,6 +148,10 @@ Ext.define('Ext.env.Browser', {
     },
 
     constructor: function(userAgent) {
+        /**
+         * @property {String}
+         * Browser User Agent string.
+         */
         this.userAgent = userAgent;
 
         is = this.is = function(name) {
@@ -226,8 +232,16 @@ Ext.define('Ext.env.Browser', {
         // Flag to check if it we are in the WebView
         this.setFlag('WebView', isWebView);
 
+        /**
+         * @property {Boolean}
+         * True if browser is using strict mode.
+         */
         this.isStrict = document.compatMode == "CSS1Compat";
 
+        /**
+         * @property {Boolean}
+         * True if page is running over SSL.
+         */
         this.isSecure = /^https/i.test(window.location.protocol);
 
         return this;
@@ -264,12 +278,14 @@ Ext.define('Ext.env.Browser', {
 
     for (name in flags) {
         if (flags.hasOwnProperty(name)) {
-            Ext.deprecatePropertyValue(Ext.is, name, flags[name], "Ext.is." + name + " is deprecated, please use Ext.browser.is." + name + " instead");
+            Ext.deprecatePropertyValue(Ext.is, name, flags[name], "Ext.is." + name + " is deprecated, " +
+                "please use Ext.browser.is." + name + " instead");
         }
     }
 
-    Ext.deprecatePropertyValue(Ext, 'isSecure', browserEnv.isSecure, "Ext.isSecure is deprecated, please use Ext.browser.isSecure instead");
-    Ext.deprecatePropertyValue(Ext, 'isStrict', browserEnv.isStrict, "Ext.isStrict is deprecated, please use Ext.browser.isStrict instead");
-    Ext.deprecatePropertyValue(Ext, 'userAgent', browserEnv.userAgent, "Ext.userAgent is deprecated, please use Ext.browser.userAgent instead");
+    Ext.deprecatePropertyValue(Ext, 'isStrict', browserEnv.isStrict, "Ext.isStrict is deprecated, " +
+        "please use Ext.browser.isStrict instead");
+    Ext.deprecatePropertyValue(Ext, 'userAgent', browserEnv.userAgent, "Ext.userAgent is deprecated, " +
+        "please use Ext.browser.userAgent instead");
     //</deprecated>
 });

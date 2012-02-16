@@ -88,7 +88,7 @@ Ext.define('Ext.MessageBox', {
         /**
          * @cfg {String} msg
          * The message to be displayed in the {@link Ext.MessageBox}.
-         * @deprecated 2.0.0 Please use {@link #message} instead.
+         * @removed 2.0.0 Please use {@link #message} instead.
          */
 
         /**
@@ -666,12 +666,12 @@ Ext.define('Ext.MessageBox', {
         /**
          * @cfg {String} icon
          * Sets CSS class for icon.
-         * @deprecated 2.0 Use #iconCls instead.
+         * @removed 2.0 Use #iconCls instead.
          */
 
         /**
          * Sets #icon.
-         * @deprecated 2.0 Use #setIconCls instead.
+         * @deprecated 2.0 Please use #setIconCls instead.
          * @param {String} icon A CSS classname or empty string to clear the icon
          * @return {Ext.MessageBox} this
          */
@@ -680,6 +680,18 @@ Ext.define('Ext.MessageBox', {
             Ext.Logger.deprecate("Ext.MessageBox#setIcon is deprecated, use setIconCls instead", 2);
             //</debug>
             this.setIconCls(iconCls);
+
+            return this;
+        },
+
+        /**
+         * @deprecated 2.0.0 Please use #setMessage instead.
+         */
+        updateText: function(text){
+            //<debug warn>
+            Ext.Logger.deprecate("Ext.MessageBox#updateText is deprecated, use setMessage instead", 2);
+            //</debug>
+            this.setMessage(text);
 
             return this;
         }

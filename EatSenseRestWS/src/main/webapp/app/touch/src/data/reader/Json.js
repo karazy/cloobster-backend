@@ -4,7 +4,9 @@
  *
  *     Ext.define('User', {
  *         extend: 'Ext.data.Model',
- *         fields: ['id', 'name', 'email']
+ *         config: {
+ *             fields: ['id', 'name', 'email']
+ *         }
  *     });
  *
  *     var store = Ext.create('Ext.data.Store', {
@@ -48,7 +50,7 @@
  * ## Reading other JSON formats
  *
  * If you already have your JSON format defined and it doesn't look quite like what we have above, you can usually pass
- * JsonReader a couple of configuration options to make it parse your format. For example, we can use the 
+ * JsonReader a couple of configuration options to make it parse your format. For example, we can use the
  * {@link #rootProperty} configuration to parse data that comes back like this:
  *
  *     {
@@ -213,21 +215,25 @@ Ext.define('Ext.data.reader.Json', {
         useSimpleAccessors: false
     },
 
+    objectRe: /[\[\.]/,
+
     //inherit docs
     getResponseData: function(response) {
+        var responseText = response;
+
         // Handle an XMLHttpRequest object
         if (response && response.responseText) {
-            response = response.responseText;
+            responseText = response.responseText;
         }
 
         // Handle the case where data has already been decoded
-        if (typeof response !== 'string') {
-            return response;
+        if (typeof responseText !== 'string') {
+            return responseText;
         }
 
         var data;
         try {
-            data = Ext.decode(response);
+            data = Ext.decode(responseText);
         }
         catch (ex) {
             /**
@@ -352,5 +358,37 @@ Ext.define('Ext.data.reader.Json', {
                 return obj[expr];
             };
         };
-    }()
+    }(),
+
+    /**
+     * @private
+     * Returns an accessor expression for the passed Field. Gives support for properties such as the following:
+     * 'someProperty'
+     * 'some.property'
+     * 'some["property"]'
+     * This is used by buildExtractors to create optimized on extractor function which converts raw data into model instances.
+     */
+    createFieldAccessExpression: function(field, fieldVarName, dataName) {
+        var me     = this,
+            re     = me.objectRe,
+            hasMap = (field.getMapping() !== null),
+            map    = hasMap ? field.getMapping() : field.getName(),
+            result, operatorSearch;
+
+        if (typeof map === 'function') {
+            result = fieldVarName + '.getMapping()(' + dataName + ', this)';
+        }
+        else if (me.getUseSimpleAccessors() === true || ((operatorSearch = String(map).search(re)) < 0)) {
+            if (!hasMap || isNaN(map)) {
+                // If we don't provide a mapping, we may have a field name that is numeric
+                map = '"' + map + '"';
+            }
+            result = dataName + "[" + map + "]";
+        }
+        else {
+            result = dataName + (operatorSearch > 0 ? '.' : '') + map;
+        }
+
+        return result;
+    }
 });

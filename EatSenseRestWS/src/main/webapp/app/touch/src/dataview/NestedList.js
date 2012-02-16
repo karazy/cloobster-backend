@@ -98,7 +98,7 @@ Ext.define('Ext.dataview.NestedList', {
 
         /**
          * @cfg {String/Object/Boolean} cardSwitchAnimation
-         * @deprecated 2.0.0 please use {@link Ext.layout.Card#animation}
+         * @removed 2.0.0 please use {@link Ext.layout.Card#animation}
          */
 
         /**
@@ -329,6 +329,18 @@ Ext.define('Ext.dataview.NestedList', {
      * @param {Ext.data.Operation} operation The associated operation
      */
 
+    constructor: function(config) {
+        if (Ext.isObject(config)) {
+            if (config.getTitleTextTpl) {
+                this.getTitleTextTpl = config.getTitleTextTpl;
+            }
+            if (config.getItemTextTpl) {
+                this.getItemTextTpl = config.getItemTextTpl;
+            }
+        }
+        this.callParent(arguments);
+    },
+
         //@private
     initialize: function() {
         var me = this;
@@ -393,10 +405,27 @@ Ext.define('Ext.dataview.NestedList', {
     },
 
     onStoreBeforeLoad: function() {
+        var loadingText = this.getLoadingText(),
+            scrollable = this.getScrollable();
+
+        if (loadingText) {
+            this.setMasked({
+                xtype: 'loadmask',
+                message: loadingText
+            });
+
+            //disable scorlling while it is masked
+            if (scrollable) {
+                scrollable.getScroller().setDisabled(true);
+            }
+        }
+
         this.fireEvent('beforeload', [this, Array.prototype.slice.call(arguments)]);
     },
 
     onStoreLoad: function() {
+        this.setMasked(false);
+
         this.fireEvent('load', [this, Array.prototype.slice.call(arguments)]);
     },
 
@@ -442,8 +471,15 @@ Ext.define('Ext.dataview.NestedList', {
         if (store) {
             store = Ext.data.StoreManager.lookup(store);
 
+            if (store && Ext.isObject(store) && store.isStore) {
+                store.on({
+                    scope: this,
+                    load: 'onStoreLoad',
+                    beforeload: 'onStoreBeforeLoad'
+                });
+            }
             //<debug warn>
-            if (!store)  {
+            else if (!store)  {
                 Ext.Logger.warn("The specified Store cannot be found", this);
             }
             //</debug>
@@ -744,4 +780,23 @@ Ext.define('Ext.dataview.NestedList', {
             itemTpl: '<span<tpl if="leaf == true"> class="x-list-item-leaf"</tpl>>' + me.getItemTextTpl(node) + '</span>'
         }, this.getListConfig());
     }
+
+}, function() {
+    //<deprecated product=touch since=2.0>
+
+    /**
+     * @member Ext.dataview.NestedList
+     * @method getSubList
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'getSubList', null, "Ext.dataview.NestedList.getSubList() has been removed");
+
+    /**
+     * @member Ext.dataview.NestedList
+     * @cfg {Number} clearSelectionDelay
+     * @removed 2.0.0
+     */
+    Ext.deprecateProperty(this, 'clearSelectionDelay', null, "Ext.dataview.NestedList.clearSelectionDelay has been removed");
+    //</deprecated>
 });
+

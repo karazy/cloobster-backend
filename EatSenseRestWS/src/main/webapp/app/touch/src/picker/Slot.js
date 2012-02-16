@@ -118,8 +118,14 @@ Ext.define('Ext.picker.Slot', {
          * @accessor
          */
         scrollable: {
-            direction : 'vertical',
-            indicators: false
+            direction: 'vertical',
+            indicators: false,
+            momentumEasing: {
+                minVelocity: 2
+            },
+            slotSnapEasing: {
+                duration: 100
+            }
         }
     },
 
@@ -280,7 +286,8 @@ Ext.define('Ext.picker.Slot', {
             title = this.getTitle(),
             scrollable = this.getScrollable(),
             scroller = scrollable.getScroller(),
-            barY, elY, barHeight, padding, titleHeight, paddingBottom;
+            titleHeight = 0,
+            barY, elY, barHeight, padding, paddingBottom;
 
         barY = bar.getY();
         elY = element.getY();
@@ -289,21 +296,21 @@ Ext.define('Ext.picker.Slot', {
             elY += title.element.getHeight();
         }
 
-        padding = paddingBottom = Math.abs(elY - barY);
-        this.slotPadding = padding;
+        barHeight = bar.getHeight();
 
         if (showTitle && title) {
             titleHeight = title.element.getHeight();
-            paddingBottom += titleHeight;
         }
 
+        padding = Math.ceil((element.getHeight() - titleHeight - barHeight) / 2);
+        this.slotPadding = padding;
+
         innerElement.setStyle({
-            padding: padding + 'px 0 ' + paddingBottom + 'px'
+            padding: padding + 'px 0 ' + (padding) + 'px'
         });
 
-        barHeight = bar.getHeight();
         scroller.refresh();
-        scroller.setSnap(barHeight);
+        scroller.setSlotSnapSize(barHeight);
 
         this.setValue(value);
     },
@@ -329,17 +336,14 @@ Ext.define('Ext.picker.Slot', {
             difference;
 
         difference = y - parentY;
-        if (animated) {
-            scroller.scrollToAnimated(0, difference);
-        } else {
-            scroller.scrollTo(0, difference);
-        }
+
+        scroller.scrollTo(0, difference, animated);
     },
 
     // @private
-    onScrollEnd: function(scroller, position) {
+    onScrollEnd: function(scroller, x, y) {
         var me = this,
-            index = Math.round(position.y / me.picker.bar.getHeight()),
+            index = Math.round(y / me.picker.bar.getHeight()),
             viewItems = me.getViewItems(),
             item = viewItems[index];
 
@@ -376,7 +380,7 @@ Ext.define('Ext.picker.Slot', {
      * @private
      */
     setValue: function(value) {
-        if (!Ext.isDefined(value)){
+        if (!Ext.isDefined(value)) {
             return;
         }
 
@@ -427,7 +431,9 @@ Ext.define('Ext.picker.Slot', {
             item = Ext.get(viewItems[index]);
 
             this.selectedIndex = index;
-            this.scrollToItem(item, true);
+            this.scrollToItem(item, {
+                duration: 100
+            });
 
             this._value = value;
         }

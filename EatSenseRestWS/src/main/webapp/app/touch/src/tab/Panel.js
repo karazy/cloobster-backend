@@ -7,7 +7,7 @@
  * to toggle between code mode and live preview mode (you can also edit the code and see your changes in the live
  * preview):
  *
- *     @example preview
+ *     @example miniphone preview
  *     Ext.create('Ext.TabPanel', {
  *         fullscreen: true,
  *         tabBarPosition: 'bottom',
@@ -33,7 +33,7 @@
  * the title and icon defined on the item configuration, and switches to that item when tapped on. We can also position
  * the tab bar at the top, which makes our Tab Panel look like this:
  *
- *     @example preview
+ *     @example miniphone preview
  *     Ext.create('Ext.TabPanel', {
  *         fullscreen: true,
  *
@@ -113,11 +113,20 @@ Ext.define('Ext.tab.Panel', {
          */
     },
 
+    delegateListeners: {
+        delegate: '> component',
+        centeredchange: 'onItemCenteredChange',
+        dockedchange: 'onItemDockedChange',
+        floatingchange: 'onItemFloatingChange',
+        disabledchange: 'onItemDisabledChange'
+    },
+
     initialize: function() {
         this.callParent();
 
         this.on({
-            tabchange: 'doTabChange',
+            order: 'before',
+            activetabchange: 'doTabChange',
             delegate: '> tabbar',
             scope   : this
         });
@@ -255,6 +264,7 @@ Ext.define('Ext.tab.Panel', {
             tabTitle           = initialConfig.title,
             tabIconCls         = initialConfig.iconCls,
             tabHidden          = initialConfig.hidden,
+            tabDisabled        = initialConfig.disabled,
             tabBadgeText       = initialConfig.badgeText,
             innerItems         = me.getInnerItems(),
             index              = innerItems.indexOf(card),
@@ -273,6 +283,10 @@ Ext.define('Ext.tab.Panel', {
 
         if (tabHidden && !tabConfig.hidden) {
             tabConfig.hidden = tabHidden;
+        }
+
+        if (tabDisabled && !tabConfig.disabled) {
+            tabConfig.disabled = tabDisabled;
         }
 
         if (tabBadgeText && !tabConfig.badgeText) {
@@ -298,10 +312,29 @@ Ext.define('Ext.tab.Panel', {
         me.callParent(arguments);
     },
 
+    /**
+     * If an item gets enabled/disabled and it has an tab, we should also enable/disable that tab
+     * @private
+     */
+    onItemDisabledChange: function(item, newDisabled) {
+        if (item && item.tab) {
+            item.tab.setDisabled(newDisabled);
+        }
+    },
+
     // @private
     onItemRemove: function(item, index) {
         this.getTabBar().remove(item.tab, this.getAutoDestroy());
 
         this.callParent(arguments);
     }
+}, function() {
+    //<deprecated product=touch since=2.0>
+    /**
+     * @member Ext.tab.Panel
+     * @cfg {Boolean} tabBarDock
+     * @deprecated 2.0.0 please use tabBarPosition
+     */
+    Ext.deprecateProperty(this, 'tabBarDock', 'tabBarPosition');
+    //</deprecated>
 });

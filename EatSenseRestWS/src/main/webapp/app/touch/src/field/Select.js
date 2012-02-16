@@ -177,6 +177,8 @@ Ext.define('Ext.field.Select', {
         return Boolean(usePicker);
     },
 
+    syncEmptyCls: Ext.emptyFn,
+
     /**
      * @private
      */
@@ -471,7 +473,6 @@ selectBox.setOptions(
 
         this.isFocused = true;
 
-        Ext.Viewport.hideKeyboard();
         this.showPicker();
     },
 

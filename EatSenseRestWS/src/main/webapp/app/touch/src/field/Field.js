@@ -159,21 +159,22 @@ Ext.define('Ext.field.Field', {
 
         return {
             reference: 'element',
-            className: 'x-container',
-            children: [
-                {
+            cls: 'x-container x-table-inner x-table-fixed',
+            children: [{
+                cls: 'x-table-row',
+                reference: 'fieldRow',
+                children: [{
                     reference: 'label',
                     cls: prefix + 'form-label',
                     children: [{
                         reference: 'labelspan',
                         tag: 'span'
                     }]
-                },
-                {
+                }, {
                     reference: 'innerElement',
-                    cls      : prefix + 'component-outer'
-                }
-            ]
+                    cls: prefix + 'component-outer'
+                }]
+            }]
         };
     },
 
@@ -183,7 +184,7 @@ Ext.define('Ext.field.Field', {
             prefix = Ext.baseCSSPrefix;
 
         if (newLabel) {
-            this.label.down('span').setHtml(newLabel);
+            this.labelspan.setHtml(newLabel);
             renderElement.addCls(prefix + 'field-labeled');
         } else {
             renderElement.removeCls(prefix + 'field-labeled');
@@ -193,15 +194,24 @@ Ext.define('Ext.field.Field', {
     // @private
     updateLabelAlign: function(newLabelAlign, oldLabelAlign) {
         var renderElement = this.renderElement,
-            prefix = Ext.baseCSSPrefix;
+            prefix = Ext.baseCSSPrefix,
+            label = this.label,
+            innerElement = this.innerElement;
 
         if (newLabelAlign) {
             renderElement.addCls(prefix + 'label-align-' + newLabelAlign);
 
             if (newLabelAlign == "top") {
-                this.label.setWidth('100%');
+                label.insertBefore(this.fieldRow);
             } else {
                 this.updateLabelWidth(this.getLabelWidth());
+
+                if (newLabelAlign == 'right') {
+                    label.insertAfter(innerElement);
+                }
+                else {
+                    label.insertBefore(innerElement);
+                }
             }
         }
 

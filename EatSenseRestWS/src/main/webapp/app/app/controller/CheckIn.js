@@ -85,7 +85,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	 };
     	 
     	 this.createStores = function(restaurantId) {
-    		 
+    		 console.log('create menu store');
     		 var menusStore =	 Ext.create('Ext.data.Store', {
 	 			   model: 'EatSense.model.Menu',
 	 			   storeId: 'menuStore',
@@ -100,17 +100,7 @@ Ext.define('EatSense.controller.CheckIn', {
     		 
     		 this.getMenulist().setStore(menusStore);
     		 
-       		 var _productListStore =	 Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.Product',
-	 			   storeId: 'productStore',
-	 			   proxy: {
-	 				   type: 'rest',
-	 				   url : '/restaurants/'+restaurantId+'/products',
-	 				   reader: {
-	 					   type: 'json'
-	 			   		}
-	 			   }
-	 		 });
+      
   		 
 //  		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
 //				   type: 'rest',
@@ -121,20 +111,26 @@ Ext.define('EatSense.controller.CheckIn', {
 //	 		 });
 //  		 
   		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
-  		 ProductType.setProxy(_productListStore.getProxy());
+  		 if(ProductType.getProxy() == null) {
+  			console.log('create product store');
+  	 		 var _productListStore =	 Ext.create('Ext.data.Store', {
+	 			   model: 'EatSense.model.Product',
+	 			   storeId: 'productStore',
+	 			   proxy: {
+	 				   type: 'rest',
+	 				   url : '/restaurants/'+restaurantId+'/products',
+	 				   reader: {
+	 					   type: 'json'
+	 			   		}
+	 			   }
+	 		 });
+  			 
+  			ProductType.setProxy(_productListStore.getProxy());
+  		 }
+  		 
   		 
    		 
-   		 var _orderListStore =	 Ext.create('Ext.data.Store', {
- 			   model: 'EatSense.model.Order',
- 			   storeId: 'orderStore',
- 			   proxy: {
- 				   type: 'rest',
- 				   url : '/restaurants/'+restaurantId+'/orders',
- 				   reader: {
- 					   type: 'json'
- 			   		}
- 			   }
- 		 });
+   	
 		 
 //		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
 //			   type: 'rest',
@@ -144,8 +140,23 @@ Ext.define('EatSense.controller.CheckIn', {
 //		   		}
 // 		 });
 //		 
-		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Order');
-		 ProductType.setProxy(_orderListStore.getProxy());
+		 var OrderType = Ext.ModelManager.getModel('EatSense.model.Order');
+		 if(OrderType.getProxy() == null) {
+			 console.log('create order store');
+			 var _orderListStore =	 Ext.create('Ext.data.Store', {
+	 			   model: 'EatSense.model.Order',
+	 			   storeId: 'orderStore',
+	 			   proxy: {
+	 				   type: 'rest',
+	 				   url : '/restaurants/'+restaurantId+'/orders',
+	 				   reader: {
+	 					   type: 'json'
+	 			   		}
+	 			   }
+	 		 });
+			 
+			 OrderType.setProxy(_orderListStore.getProxy());
+		 }
   	 
   			
 
@@ -218,8 +229,6 @@ Ext.define('EatSense.controller.CheckIn', {
 			this.models.activeCheckIn.save(
 					   {
 					   	    success: function(response) {
-				   	    	//TODO workaround
-				   	    	response = this;
 					   	     if(response.data.status == 'YOUARENOTALONE') {
 					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
 					   	    	 var userId = response.data.userId;

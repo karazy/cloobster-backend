@@ -215,6 +215,23 @@ Ext.define('Ext.env.Feature', {
 
         /**
          * @member Ext.feature.has
+         * @property {Boolean} Range
+         */
+        Range: function() {
+            return !!document.createRange;
+        },
+
+        /**
+         * @member Ext.feature.has
+         * @property {Boolean} CreateContextualFragment
+         */
+        CreateContextualFragment: function() {
+            var range = !!document.createRange ? document.createRange() : false;
+            return range && !!range.createContextualFragment;
+        },
+
+        /**
+         * @member Ext.feature.has
          * @property {Boolean} History
          */
         History: function() {
@@ -289,7 +306,7 @@ Ext.define('Ext.env.Feature', {
     //<deprecated product=touch since=2.0>
     /**
      * @class Ext.supports
-     * @deprecated
+     * @deprecated 2.0.0
      * Please use the {@link Ext.env.Browser}, {@link Ext.env.OS} and {@link Ext.feature.has} classes.
      */
 
@@ -332,15 +349,6 @@ Ext.define('Ext.env.Feature', {
      */
     Ext.deprecatePropertyValue(has, 'GeoLocation', has.Geolocation,
                           "Ext.supports.GeoLocation is deprecated, please use Ext.feature.has.Geolocation instead");
-
-    /**
-     * @member Ext.supports
-     * @property ClassList
-     * @deprecated 2.0.0 Please use {@link Ext.feature.has#ClassList} instead
-     */
-    Ext.deprecatePropertyValue(has, 'ClassList', has.ClassList,
-                          "Ext.supports.ClassList is deprecated, please use Ext.feature.has.ClassList instead");
-
     var name;
 
     if (!Ext.supports) {

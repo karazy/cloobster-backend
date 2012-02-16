@@ -1,7 +1,6 @@
 /**
  * @author Jacky Nguyen <jacky@sencha.com>
  * @class Ext.Base
- * @private
  *
  * The root of all classes created with {@link Ext#define}.
  *
@@ -461,7 +460,7 @@ var noArgs = [],
          * @return {Ext.Base} this class
          * @static
          * @inheritable
-         * @deprecated 4.1.0 Use {@link Ext#define Ext.define} instead
+         * @deprecated 4.1.0 Please use {@link Ext#define Ext.define} instead
          */
         override: function(members) {
             var me = this,
@@ -994,6 +993,8 @@ var noArgs = [],
                 this[nameMap.get] = this[nameMap.initGet];
             }
 
+            this.beforeInitConfig(config);
+
             for (i = 0,ln = initConfigList.length; i < ln; i++) {
                 name = initConfigList[i];
                 nameMap = configNameCache[name];
@@ -1008,6 +1009,8 @@ var noArgs = [],
             return this;
         },
 
+        beforeInitConfig: Ext.emptyFn,
+
         /**
          * @private
          */
@@ -1018,10 +1021,8 @@ var noArgs = [],
                 name, nameMap;
 
             for (name in defaultConfig) {
-                if (defaultConfig.hasOwnProperty(name)) {
-                    nameMap = configNameCache[name];
-                    config[name] = this[nameMap.get].call(this);
-                }
+                nameMap = configNameCache[name];
+                config[name] = this[nameMap.get].call(this);
             }
 
             return config;
@@ -1168,7 +1169,6 @@ var noArgs = [],
      * from the current method, for example: `this.callOverridden(arguments)`
      * @return {Object} Returns the result of calling the overridden method
      * @protected
-     * @deprecated as of 4.1. Use {@link #callParent} instead.
      */
     Base.prototype.callOverridden = Base.prototype.callParent;
 

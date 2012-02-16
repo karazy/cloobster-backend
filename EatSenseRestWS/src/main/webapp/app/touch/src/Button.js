@@ -54,9 +54,13 @@
  * Buttons can also have a badge on them, by using the {@link #badgeText} configuration:
  *
  *     @example
- *     var badgedButton = Ext.create('Ext.Button', {
- *         text: 'My Button',
- *         badgeText: '2'
+ *     Ext.create('Ext.Container', {
+ *         fullscreen: true,
+ *         items: {
+ *             xtype: 'button',
+ *             text: 'My Button',
+ *             badgeText: '2'
+ *         }
  *     });
  *
  * ## UI
@@ -730,7 +734,7 @@ Ext.define('Ext.Button', {
      * @param {String} text
      * @deprecated 2.0.0 Please use {@link #setBadgeText} instead.
      */
-    Ext.deprecateClassMethod(this, 'setBadge', this.prototype.setBadgeText, "'setBadge()' is deprecated, please use setBadgeText()");
+    Ext.deprecateClassMethod(this, 'setBadge', 'setBadgeText');
 
     /**
      * Updates the icon class
@@ -738,7 +742,7 @@ Ext.define('Ext.Button', {
      * @param {String} iconClass
      * @deprecated 2.0.0 Please use {@link #setIconCls} instead.
      */
-    Ext.deprecateClassMethod(this, 'setIconClass', this.prototype.setIconCls, "'setIconClass()' is deprecated, please use setIconCls()");
+    Ext.deprecateClassMethod(this, 'setIconClass', 'setIconCls');
 
     this.override({
         constructor: function(config) {

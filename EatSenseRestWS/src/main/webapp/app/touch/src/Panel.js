@@ -12,7 +12,7 @@
  *
  * ## Example:
  *
- *     @example preview
+ *     @example miniphone preview
  *     var panel = Ext.create('Ext.Panel', {
  *         fullscreen: true,
  *
@@ -55,7 +55,7 @@ Ext.define('Ext.Panel', {
          * @cfg {Number/Boolean/String} bodyPadding
          * A shortcut for setting a padding style on the body element. The value can either be
          * a number to be applied to all sides, or a normal css string describing padding.
-         * @deprecated 2.0 bodyPadding is deprecated and will be removed in a future version of Sencha Touch.
+         * @deprecated 2.0.0
          */
         bodyPadding: null,
 
@@ -63,7 +63,7 @@ Ext.define('Ext.Panel', {
          * @cfg {Number/Boolean/String} bodyMargin
          * A shortcut for setting a margin style on the body element. The value can either be
          * a number to be applied to all sides, or a normal css string describing margins.
-         * @deprecated 2.0 bodyMargin is deprecated and will be removed in a future version of Sencha Touch.
+         * @deprecated 2.0.0
          */
         bodyMargin: null,
 
@@ -71,7 +71,7 @@ Ext.define('Ext.Panel', {
          * @cfg {Number/Boolean/String} bodyBorder
          * A shortcut for setting a border style on the body element. The value can either be
          * a number to be applied to all sides, or a normal css string describing borders.
-         * @deprecated 2.0 bodyBorder is deprecated and will be removed in a future version of Sencha Touch.
+         * @deprecated 2.0.0
          */
         bodyBorder: null
     },

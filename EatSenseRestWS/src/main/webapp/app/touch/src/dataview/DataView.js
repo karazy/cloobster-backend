@@ -73,7 +73,7 @@
  *         age: 33
  *     });
  *
- *     touchTeam.getStore.getAt(0).set('age', 42);
+ *     touchTeam.getStore().getAt(0).set('age', 42);
  *
  * # Loading data from a server
  *
@@ -129,6 +129,11 @@ Ext.define('Ext.dataview.DataView', {
         'Ext.dataview.component.Container',
         'Ext.dataview.element.Container'
     ],
+
+    /**
+     * @event containertap
+     * @removed 2.0.0
+     */
 
     /**
      * @event itemtouchstart
@@ -491,7 +496,9 @@ Ext.define('Ext.dataview.DataView', {
         if (Ext.isElement(item)) {
             item = Ext.get(item);
         }
-        item.addCls(me.getPressedCls());
+        if (item) {
+            item.addCls(me.getPressedCls());
+        }
     },
 
     onItemTouchStart: function(container, target, index, e) {
@@ -522,7 +529,7 @@ Ext.define('Ext.dataview.DataView', {
             delete this.pressedTimeout;
         }
 
-        if (record) {
+        if (record && target) {
             target.removeCls(me.getPressedCls());
         }
 
@@ -539,7 +546,7 @@ Ext.define('Ext.dataview.DataView', {
             delete me.pressedTimeout;
         }
 
-        if (record) {
+        if (record && target) {
             target.removeCls(me.getPressedCls());
         }
         me.fireEvent('itemtouchmove', me, index, target, record, e);
@@ -594,8 +601,10 @@ Ext.define('Ext.dataview.DataView', {
             if (Ext.isElement(item)) {
                 item = Ext.get(item);
             }
-            item.removeCls(me.getPressedCls());
-            item.addCls(me.getSelectedCls());
+            if (item) {
+                item.removeCls(me.getPressedCls());
+                item.addCls(me.getSelectedCls());
+            }
         }
     },
 
@@ -720,7 +729,7 @@ Ext.define('Ext.dataview.DataView', {
         }
     },
 
-    onLoad: function() {
+    onLoad: function(store) {
         var scrollable = this.getScrollable();
 
         //remove any masks on the store
@@ -730,6 +739,9 @@ Ext.define('Ext.dataview.DataView', {
         //enable the scroller again
         if (scrollable) {
             scrollable.getScroller().setDisabled(false);
+        }
+        if (!store.getCount()) {
+            this.showEmptyText();
         }
     },
 
@@ -858,14 +870,141 @@ Ext.define('Ext.dataview.DataView', {
             container.updateListItem(record, container.getViewItems()[newIndex]);
         }
     }
-}, function() {
     //<deprecated product=touch since=2.0>
+}, function() {
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method collectData
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'collectData', null, "Ext.dataview.DataView.collectData() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method findItemByChild
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'findItemByChild', null, "Ext.dataview.DataView.findItemByChild() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method findTargetByEvent
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'findTargetByEvent', null, "Ext.dataview.DataView.findTargetByEvent() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method getNode
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'getNode', null, "Ext.dataview.DataView.getNode() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method getNodes
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'getNodes', null, "Ext.dataview.DataView.getNodes() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method getRecords
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'getRecords', null, "Ext.dataview.DataView.getRecords() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method getSelectedNodes
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'getSelectedNodes', null, "Ext.dataview.DataView.getSelectedNodes() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method getSelectedRecords
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'getSelectedRecords', null, "Ext.dataview.DataView.getSelectedRecords() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method indexOf
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'indexOf', null, "Ext.dataview.DataView.indexOf() has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @method refreshNode
+     * @removed 2.0.0
+     */
+    Ext.deprecateMethod(this, 'refreshNode', null, "Ext.dataview.DataView.refreshNode() has been removed");
 
     /**
      * Binds a new {@link Ext.data.Store Store} to this DataView.
      * @deprecated 2.0 please use {@link #setStore} instead
      * @method bindStore
      */
-    Ext.deprecateClassMethod(this, 'bindStore', this.prototype.setStore, "'bindStore()' is deprecated, please use 'setStore' instead");
+    Ext.deprecateClassMethod(this, 'bindStore', 'setStore');
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} blockRefresh
+     * @removed 2.0.0
+     */
+    Ext.deprecateProperty(this, 'blockRefresh', null, "Ext.dataview.DataView.blockRefresh has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} itemSelector
+     * @removed 2.0.0
+     */
+    Ext.deprecateProperty(this, 'itemSelector', null, "Ext.dataview.DataView.itemSelector has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} multiSelect
+     * @removed 2.0.0 multiSelect is deprecated. Please use {@link Ext.mixin.Selectable#mode mode} instead
+     */
+    Ext.deprecateProperty(this, 'multiSelect', null, "Ext.dataview.DataView.multiSelect has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} overItemCls
+     * @removed 2.0.0
+     */
+    Ext.deprecateProperty(this, 'overItemCls', null, "Ext.dataview.DataView.overItemCls has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} selectedItemCls
+     * @removed 2.0.0 Please use {@link #selectedCls selectedCls} instead
+     */
+    Ext.deprecateProperty(this, 'selectedItemCls', null, "Ext.dataview.DataView.selectedItemCls has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} simpleSelect
+     * @removed 2.0.0 Please use {@link Ext.mixin.Selectable#mode mode} instead
+     */
+    Ext.deprecateProperty(this, 'simpleSelect', null, "Ext.dataview.DataView.simpleSelect has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} singleSelect
+     * @removed 2.0.0 Please use {@link Ext.mixin.Selectable#mode mode} instead
+     */
+    Ext.deprecateProperty(this, 'singleSelect', null, "Ext.dataview.DataView.singleSelect has been removed");
+
+    /**
+     * @member Ext.dataview.DataView
+     * @cfg {Boolean} trackOver
+     * @removed 2.0.0
+     */
+    Ext.deprecateProperty(this, 'trackOver', null, "Ext.dataview.DataView.trackOver has been removed");
+
     //</deprecated>
 });

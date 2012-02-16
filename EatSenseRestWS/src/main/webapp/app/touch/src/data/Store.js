@@ -28,7 +28,7 @@
  *             url : '/users.json',
  *             reader: {
  *                 type: 'json',
- *                 root: 'users'
+ *                 rootProperty: 'users'
  *             }
  *         },
  *         autoLoad: true
@@ -74,7 +74,7 @@
  *             url : 'users.json',
  *             reader: {
  *                 type: 'json',
- *                 root: 'users'
+ *                 rootProperty: 'users'
  *             }
  *         }
  *     });
@@ -239,7 +239,7 @@ Ext.define('Ext.data.Store', {
     /**
      * @event update
      * @inheritdoc Ext.data.Store#updaterecord
-     * @deprecated 2.0 Listen to #updaterecord instead.
+     * @removed 2.0 Listen to #updaterecord instead.
      */
 
     /**
@@ -367,13 +367,19 @@ Ext.define('Ext.data.Store', {
         /**
          * @cfg {Boolean} remoteSort
          * True to defer any sorting operation to the server. If false, sorting is done locally on the client. Defaults to <tt>false</tt>.
+         *
+         * If this is set to `true`, you will have to manually call the {@link #method-load} method after you {@link #method-sort}, to retrieve the sorted
+         * data from the server.
          * @accessor
          */
         remoteSort: false,
 
         /**
          * @cfg {Boolean} remoteFilter
-         * True to defer any filtering operation to the server. If false, filtering is done locally on the client. Defaults to <tt>false</tt>.
+         * True to defer any filtering operation to the server. If false, filtering is done locally on the client. Defaults to `false`.
+         *
+         * If this is set to `true`, you will have to manually call the {@link #method-load} method after you {@link #method-filter} to retrieve the filtered
+         * data from the server.
          * @accessor
          */
         remoteFilter: false,
@@ -498,7 +504,7 @@ Ext.define('Ext.data.Store', {
         // <deprecated product=touch since=2.0>
         // <debug>
         if (config.hasOwnProperty('sortOnLoad')) {
-            console.warn(
+            Ext.Logger.deprecate(
                 '[Ext.data.Store] sortOnLoad is always activated in Sencha Touch 2 so your Store is always fully ' +
                 'sorted after loading. The only expection is if you are using remoteSort and change sorting after ' +
                 'the Store as loaded, in which case you need to call store.load() to fetch the sorted data from the server.'
@@ -506,7 +512,7 @@ Ext.define('Ext.data.Store', {
         }
 
         if (config.hasOwnProperty('filterOnLoad')) {
-            console.warn(
+            Ext.Logger.deprecate(
                 '[Ext.data.Store] filterOnLoad is always activated in Sencha Touch 2 so your Store is always fully ' +
                 'sorted after loading. The only expection is if you are using remoteFilter and change filtering after ' +
                 'the Store as loaded, in which case you need to call store.load() to fetch the filtered data from the server.'
@@ -514,7 +520,7 @@ Ext.define('Ext.data.Store', {
         }
 
         if (config.hasOwnProperty('sortOnFilter')) {
-            console.warn(
+            Ext.Logger.deprecate(
                 '[Ext.data.Store] sortOnFilter is deprecated and is always effectively true when sorting and filtering locally'
             );
         }
@@ -1831,10 +1837,12 @@ Ext.define('Ext.data.Store', {
                 me.fireEvent('clear', this);
             }
 
-            // Now lets add the records without firing an addrecords event
-            me.suspendEvents();
-            me.add(records);
-            me.resumeEvents();
+            if (records && records.length) {
+                // Now lets add the records without firing an addrecords event
+                me.suspendEvents();
+                me.add(records);
+                me.resumeEvents();
+            }
 
             // And finally fire a refresh event so any bound view can fully refresh itself
             me.fireEvent('refresh', this, this.data);
@@ -1976,8 +1984,8 @@ Ext.define('Ext.data.Store', {
                 config[key] = data[key];
                 delete data[key];
                 // <debug warn>
-                // See https://sencha.jira.com/browse/TOUCH-1499
-                console.warn(key + ' is deprecated as a property directly on the ' + this.$className + ' prototype. Please put it inside the config object.');
+                Ext.Logger.deprecate(key + ' is deprecated as a property directly on the ' + this.$className +
+                    ' prototype. Please put it inside the config object.');
                 // </debug>
             }
         }
@@ -1989,7 +1997,7 @@ Ext.define('Ext.data.Store', {
      * Loads an array of data straight into the Store
      * @param {Ext.data.Model[]/Object[]} data Array of data to load. Any non-model instances will be cast into model instances first
      * @param {Boolean} append True to add the records to the existing records in the store, false to remove the old ones first
-     * @deprecated 2.0 Use #add or #setData instead.
+     * @deprecated 2.0 Please use #add or #setData instead.
      * @method loadData
      */
     this.override({
@@ -2007,16 +2015,16 @@ Ext.define('Ext.data.Store', {
             // <debug>
             switch(name) {
                 case 'update':
-                    Ext.Logger.warn('The update event on Store has been deprecated. Please use the updaterecord event from now on.');
+                    Ext.Logger.warn('The update event on Store has been removed. Please use the updaterecord event from now on.');
                     return this;
                 case 'add':
-                    Ext.Logger.warn('The add event on Store has been deprecated. Please use the addrecords event from now on.');
+                    Ext.Logger.warn('The add event on Store has been removed. Please use the addrecords event from now on.');
                     return this;
                 case 'remove':
-                    Ext.Logger.warn('The remove event on Store has been deprecated. Please use the removerecords event from now on.');
+                    Ext.Logger.warn('The remove event on Store has been removed. Please use the removerecords event from now on.');
                     return this;
                 case 'datachanged':
-                    Ext.Logger.warn('The datachanged event on Store has been deprecated. Please use the refresh event from now on.');
+                    Ext.Logger.warn('The datachanged event on Store has been removed. Please use the refresh event from now on.');
                     return this;
                 break;
             }
@@ -2026,7 +2034,12 @@ Ext.define('Ext.data.Store', {
         }
     });
 
-    // @TODO: put back backwards compat version of the collect method, or just leave it out
+    /**
+     * @member Ext.data.Store
+     * @method loadRecords
+     * @deprecated 2.0.0 Please use {@link #add} instead.
+     */
+    Ext.deprecateMethod(this, 'loadRecords', 'add', "Ext.data.Store#loadRecords has been deprecated. Please use the add method.");
 
     // </deprecated>
 });

@@ -28,7 +28,7 @@
  *
  * [getting_started]: #!/guide/getting_started
  */
-Ext.setVersion('touch', '2.0.0.beta2');
+Ext.setVersion('touch', '2.0.0.beta3');
 
 Ext.apply(Ext, {
     /**
@@ -50,7 +50,7 @@ Ext.apply(Ext, {
             cls: Ext.baseCSSPrefix + 'mask ' + Ext.baseCSSPrefix + 'mask-transparent'
         });
         setTimeout(function() {
-            mask.remove();
+            mask.destroy();
         }, 0);
     },
 
@@ -176,20 +176,19 @@ Ext.apply(Ext, {
      * @param {Mixed...} args An {@link Ext.Element}, {@link Ext.Component}, or an Array of either of these to destroy
      */
     destroy: function() {
-        var ln = arguments.length,
-            i, arg;
+        var args = arguments,
+            ln = args.length,
+            i, item;
 
         for (i = 0; i < ln; i++) {
-            arg = arguments[i];
-            if (arg) {
-                if (Ext.isArray(arg)) {
-                    this.destroy.apply(this, arg);
+            item = args[i];
+
+            if (item) {
+                if (Ext.isArray(item)) {
+                    this.destroy.apply(this, item);
                 }
-                else if (Ext.isFunction(arg.destroy)) {
-                    arg.destroy();
-                }
-                else if (arg.dom) {
-                    arg.destroy();
+                else if (Ext.isFunction(item.destroy)) {
+                    item.destroy();
                 }
             }
         }
@@ -307,12 +306,6 @@ function(el){
             xclass: 'Ext.viewport.Viewport'
         }
     },
-
-    //<feature logger>
-    log: function(msg) {
-        return Ext.Logger.log(msg);
-    },
-    //</feature>
 
     /**
      * @private
@@ -540,15 +533,6 @@ function(el){
                         scope = viewport;
                     }
 
-                    //<deprecated product=touch since=2.0>
-                    Ext.getOrientation = function() {
-                        //<debug warn>
-                        Ext.Logger.deprecate("Ext.getOrientation() is deprecated, use Ext.Viewport.getOrientation() instead", 2);
-                        //</debug>
-                        return viewport.getOrientation();
-                    };
-                    //</deprecated>
-
                     Ext.require(requires, function() {
                         Ext.Viewport.on('ready', callback, null, {single: true});
                     });
@@ -563,7 +547,6 @@ function(el){
          * Note: previously we only added these icon meta tags to iOS devices but as Android 2.1+ reads the same tags
          * we now add them if they're defined
          */
-
         if (!document.body) {
             var phoneIcon = config.phoneIcon,
                 tabletIcon = config.tabletIcon,
@@ -571,6 +554,7 @@ function(el){
                 statusBarStyle = config.statusBarStyle,
                 phoneStartupScreen = config.phoneStartupScreen,
                 isIpad = Ext.os.is.iPad;
+
             // Inject meta viewport tag
             document.write(
                 '<meta id="extViewportMeta" ' +
@@ -872,7 +856,6 @@ function(el){
      * @private
      * @param config
      * @param classReference
-     * @param instance
      * @member Ext
      */
     factory: function(config, classReference, instance, aliasNamespace) {
@@ -895,7 +878,7 @@ function(el){
                 return manager.instantiateByAlias(aliasNamespace + '.' + config);
             }
             // Same if 'type' is given in config
-            else if ('type' in config) {
+            else if (Ext.isObject(config) && 'type' in config) {
                 return manager.instantiateByAlias(aliasNamespace + '.' + config.type, config);
             }
         }
@@ -972,24 +955,30 @@ function(el){
      */
     deprecateProperty: function(object, oldName, newName, message) {
         if (!message) {
-            message = "'" + oldName + "' is deprecated, please use '" + newName + "' instead";
+            message = "'" + oldName + "' is deprecated";
+        }
+        if (newName) {
+            message += ", please use '" + newName + "' instead";
         }
 
-        Ext.Object.defineProperty(object, oldName, {
-            get: function() {
-                //<debug warn>
-                Ext.Logger.deprecate(message, 1);
-                //</debug>
-                return this[newName];
-            },
-            set: function(value) {
-                //<debug warn>
-                Ext.Logger.deprecate(message, 1);
-                //</debug>
-                this[newName] = value;
-            },
-            configurable: true
-        });
+        if (newName) {
+            Ext.Object.defineProperty(object, oldName, {
+                get: function() {
+                    //<debug warn>
+                    Ext.Logger.deprecate(message, 1);
+                    //</debug>
+                    return this[newName];
+                },
+                set: function(value) {
+                    //<debug warn>
+                    Ext.Logger.deprecate(message, 1);
+                    //</debug>
+
+                    this[newName] = value;
+                },
+                configurable: true
+            });
+        }
     },
 
     /**
@@ -1017,7 +1006,9 @@ function(el){
             //<debug warn>
             Ext.Logger.deprecate(message, 2);
             //</debug>
-            return method.apply(this, arguments);
+            if (method) {
+                return method.apply(this, arguments);
+            }
         };
     },
 
@@ -1026,16 +1017,24 @@ function(el){
      * @member Ext
      */
     deprecateClassMethod: function(cls, name, method, message) {
+        if (typeof name != 'string') {
+            var from, to;
+
+            for (from in name) {
+                if (name.hasOwnProperty(from)) {
+                    to = name[from];
+                    Ext.deprecateClassMethod(cls, from, to);
+                }
+            }
+            return;
+        }
+
         var isLateBinding = typeof method == 'string',
             member;
 
         if (!message) {
-            if (isLateBinding) {
-                message = "'" + name + "()' is deprecated, please use '" + method + "()' instead";
-            }
-            else {
-                message = "'" + name + "()' is deprecated.";
-            }
+            message = "'" + name + "()' is deprecated, please use '" + (isLateBinding ? method : method.name) +
+                "()' instead";
         }
 
         if (isLateBinding) {
@@ -1064,113 +1063,11 @@ function(el){
                 configurable: true
             });
         }
+
         cls.addMember(name, member);
     },
 
     //<debug>
-    /**
-     * @private
-     * @param cls
-     * @member Ext
-     */
-    deprecateClassConfigDirectAccess: function(cls, data) {
-        var prototype = cls.prototype,
-            config = prototype.config;
-
-        if (config) {
-            Ext.Object.each(config, function(key) {
-                if (!(key in prototype)) {
-                    var capitalizedKey = Ext.String.capitalize(key),
-                        getterName = 'get' + capitalizedKey,
-                        setterName = 'set' + capitalizedKey;
-
-                    function getter() {
-                        //<debug warn>
-                        Ext.Logger.deprecate("Access to config '" + key + "' directly is deprecated, please use " + getterName + "() instead", 1);
-                        //</debug>
-
-                        var fn = this[getterName];
-
-                        //<debug error>
-                        if (fn === getter.caller) {
-                            throw new Error("Infinite recursion detected: accessing '" + key + "' config inside of " + getterName + "()");
-                        }
-                        //</debug>
-
-                        return fn.apply(this, arguments);
-                    }
-
-                    function setter() {
-                        //<debug warn>
-                        Ext.Logger.deprecate("Setting config '" + key + "' value directly is deprecated, please use " + setterName + "() instead", 1);
-                        //</debug>
-
-                        var fn = this[setterName];
-
-                        //<debug error>
-                        if (fn === setter.caller) {
-                            throw new Error("Infinite recursion detected: setting '" + key + "' config inside of " + setterName + "()");
-                        }
-                        //</debug>
-
-                        return fn.apply(this, arguments);
-                    }
-
-                    if ('defineProperty' in Object) {
-                        Object.defineProperty(object, oldName, {
-                            get: getter,
-                            set: setter
-                        });
-                    }
-                    else {
-                        object.__defineGetter__(oldName, getter);
-                        object.__defineSetter__(oldName, setter);
-                    }
-                    Object.defineProperty(prototype, key, {
-                        get: function getter() {
-                            //<debug warn>
-                            Ext.Logger.deprecate("Access to config '" + key + "' directly is deprecated, please use " + getterName + "() instead", 1);
-                            //</debug>
-
-                            var fn = this[getterName];
-
-                            //<debug error>
-                            if (fn === getter.caller) {
-                                throw new Error("Infinite recursion detected: accessing '" + key + "' config inside of " + getterName + "()");
-                            }
-                            //</debug>
-
-                            return fn.apply(this, arguments);
-                        },
-
-                        set: function setter() {
-                            //<debug warn>
-                            Ext.Logger.deprecate("Setting config '" + key + "' value directly is deprecated, please use " + setterName + "() instead", 1);
-                            //</debug>
-
-                            var fn = this[setterName];
-
-                            //<debug error>
-                            if (fn === setter.caller) {
-                                throw new Error("Infinite recursion detected: setting '" + key + "' config inside of " + setterName + "()");
-                            }
-                            //</debug>
-
-                            return fn.apply(this, arguments);
-                        }
-                    });
-
-                }
-
-                //<debug error>
-                if (data && key in data && key in config) {
-                    throw new Error("["+Ext.getClassName(cls)+"] Defining class property: '" + key + "' with an already existing config item with the same name. Move it inside the 'config' object instead.");
-                }
-                //</debug>
-            });
-        }
-    },
-
     /**
      * Useful snippet to show an exact, narrowed-down list of top-level Components that are not yet destroyed.
      * @private
@@ -1218,14 +1115,11 @@ function(el){
         if (!Ext.isReady) {
             Ext.isReady = true;
 
-            // See https://sencha.jira.com/browse/TOUCH-1481 for background on the defer function here
-//            Ext.Function.defer(function() {
-            for (i = 0, ln = listeners.length; i < ln; i++) {
+            for (i = 0,ln = listeners.length; i < ln; i++) {
                 listener = listeners[i];
                 listener.fn.call(listener.scope);
             }
             delete Ext.readyListeners;
-//            }, 1);
         }
     },
 
@@ -1285,11 +1179,19 @@ function(el){
 });
 
 //<deprecated product=touch since=2.0>
+Ext.deprecateMethod(Ext, 'getOrientation', function() {
+    return Ext.Viewport.getOrientation();
+}, "Ext.getOrientation() is deprecated, use Ext.Viewport.getOrientation() instead");
+
+Ext.deprecateMethod(Ext, 'log', function(message) {
+    return Ext.Logger.log(message);
+}, "Ext.log() is deprecated, please use Ext.Logger.log() instead");
+
 /**
  * @member Ext.Function
  * @method createDelegate
  * @deprecated 2.0.0
- * createDelegate is deprecated, please use {@link Ext.Function#bind bind} instead
+ * Please use {@link Ext.Function#bind bind} instead
  */
 Ext.deprecateMethod(Ext.Function, 'createDelegate', Ext.Function.bind, "Ext.createDelegate() is deprecated, please use Ext.Function.bind() instead");
 
@@ -1297,8 +1199,95 @@ Ext.deprecateMethod(Ext.Function, 'createDelegate', Ext.Function.bind, "Ext.crea
  * @member Ext
  * @method createInterceptor
  * @deprecated 2.0.0
- * createInterceptor is deprecated, please use {@link Ext.Function#createInterceptor createInterceptor} instead
+ * Please use {@link Ext.Function#createInterceptor createInterceptor} instead
  */
 Ext.deprecateMethod(Ext, 'createInterceptor', Ext.Function.createInterceptor, "Ext.createInterceptor() is deprecated, " +
     "please use Ext.Function.createInterceptor() instead");
+
+/**
+ * @member Ext
+ * @property {Boolean} SSL_SECURE_URL
+ * @removed 2.0.0
+ */
+Ext.deprecateProperty(Ext, 'SSL_SECURE_URL', null, "Ext.SSL_SECURE_URL has been removed");
+
+/**
+ * @member Ext
+ * @property {Boolean} enableGarbageCollector
+ * @removed 2.0.0
+ */
+Ext.deprecateProperty(Ext, 'enableGarbageCollector', null, "Ext.enableGarbageCollector has been removed");
+
+/**
+ * @member Ext
+ * @property {Boolean} enableListenerCollection
+ * @removed 2.0.0
+ */
+Ext.deprecateProperty(Ext, 'enableListenerCollection', null, "Ext.enableListenerCollection has been removed");
+
+/**
+ * @member Ext
+ * @property {Boolean} isSecure
+ * @removed 2.0.0 Please use {@link Ext.env.Browser#isSecure} instead
+ */
+Ext.deprecateProperty(Ext, 'isSecure', null, "Ext.enableListenerCollection has been removed, please use Ext.env.Browser.isSecure instead");
+
+/**
+ * @member Ext
+ * @method dispatch
+ * @removed 2.0.0 Please use {@link Ext.app.Application#dispatch} instead
+ */
+Ext.deprecateMethod(Ext, 'dispatch', null, "Ext.dispatch() is deprecated, please use Ext.app.Application.dispatch() instead");
+
+/**
+ * @member Ext
+ * @method getOrientation
+ * @removed 2.0.0
+ * Please use {@link Ext.Viewport#getOrientation getOrientation} instead
+ */
+Ext.deprecateMethod(Ext, 'getOrientation', null, "Ext.getOrientation() has been removed, " +
+    "please use Ext.Viewport.getOrientation() instead");
+
+/**
+ * @member Ext
+ * @method reg
+ * @removed 2.0.0
+ */
+Ext.deprecateMethod(Ext, 'reg', null, "Ext.reg() has been removed");
+
+/**
+ * @member Ext
+ * @method preg
+ * @removed 2.0.0
+ */
+Ext.deprecateMethod(Ext, 'preg', null, "Ext.preg() has been removed");
+
+/**
+ * @member Ext
+ * @method redirect
+ * @removed 2.0.0
+ */
+Ext.deprecateMethod(Ext, 'redirect', null, "Ext.redirect() has been removed");
+
+/**
+ * @member Ext
+ * @method regApplication
+ * @removed 2.0.0
+ */
+Ext.deprecateMethod(Ext, 'regApplication', null, "Ext.regApplication() has been removed");
+
+/**
+ * @member Ext
+ * @method regController
+ * @removed 2.0.0
+ */
+Ext.deprecateMethod(Ext, 'regController', null, "Ext.regController() has been removed");
+
+/**
+ * @member Ext
+ * @method regLayout
+ * @removed 2.0.0
+ */
+Ext.deprecateMethod(Ext, 'regLayout', null, "Ext.regLayout() has been removed");
+
 //</deprecated>

@@ -56,8 +56,9 @@ Ext.define('Ext.Map', {
         baseCls: Ext.baseCSSPrefix + 'map',
 
         /**
-         * @cfg {Boolean} useCurrentLocation
-         * Pass in true to center the map based on the geolocation coordinates.
+         * @cfg {Boolean/Ext.util.GeoLocation} useCurrentLocation
+         * Pass in true to center the map based on the geolocation coordinates or pass a
+         * {@link Ext.util.GeoLocation GeoLocation} config to have more control over your GeoLocation options
          * @accessor
          */
         useCurrentLocation: false,
@@ -70,7 +71,6 @@ Ext.define('Ext.Map', {
         map: null,
 
         /**
-         * @private
          * @cfg {Ext.util.GeoLocation} geo
          * @accessor
          */
@@ -100,6 +100,11 @@ Ext.define('Ext.Map', {
             painted: 'doResize',
             scope: this
         });
+        this.element.on('touchstart', 'onTouchStart', this);
+    },
+
+    onTouchStart: function(e) {
+        e.makeUnpreventable();
     },
 
     updateUseCurrentLocation: function(useCurrentLocation) {
@@ -215,6 +220,11 @@ Ext.define('Ext.Map', {
             gm = (window.google || {}).maps;
 
         if (gm) {
+            if (!me.isPainted()) {
+                me.un('painted', 'setMapCenter', this);
+                me.on('painted', 'setMapCenter', this, { single: true, args: [coordinates] });
+                return;
+            }
             coordinates = coordinates || new gm.LatLng(37.381592, -122.135672);
 
             if (coordinates && !(coordinates instanceof gm.LatLng) && 'longitude' in coordinates) {
@@ -300,13 +310,13 @@ Ext.define('Ext.Map', {
     /**
      * @cfg {Boolean} maskMap
      * Masks the map
-     * @deprecated 2.0.0 Please mask this components container instead.
+     * @removed 2.0.0 Please mask this components container instead.
      */
 
     /**
      * @cfg {String} maskMapCls
      * CSS class to add to the map when maskMap is set to true.
-     * @deprecated 2.0.0 Please mask this components container instead.
+     * @removed 2.0.0 Please mask this components container instead.
      */
 
     /**

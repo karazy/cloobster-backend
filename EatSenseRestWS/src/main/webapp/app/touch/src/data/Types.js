@@ -35,14 +35,16 @@ Ext.data.Types.VELATLONG = {
 </code></pre>
  * <p>Then, when declaring a Model, use <pre><code>
 var types = Ext.data.Types; // allow shorthand type access
-Ext.define('Unit',
+Ext.define('Unit', {
     extend: 'Ext.data.Model',
-    fields: [
-        { name: 'unitName', mapping: 'UnitName' },
-        { name: 'curSpeed', mapping: 'CurSpeed', type: types.INT },
-        { name: 'latitude', mapping: 'lat', type: types.FLOAT },
-        { name: 'position', type: types.VELATLONG }
-    ]
+    config: {
+        fields: [
+            { name: 'unitName', mapping: 'UnitName' },
+            { name: 'curSpeed', mapping: 'CurSpeed', type: types.INT },
+            { name: 'latitude', mapping: 'lat', type: types.FLOAT },
+            { name: 'position', type: types.VELATLONG }
+        ]
+    }
 });
 </code></pre>
  * @singleton

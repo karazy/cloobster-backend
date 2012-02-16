@@ -42,6 +42,7 @@ Ext.define('Ext.fx.runner.CssTransition', {
         }
 
         animation.fireEvent('animationbeforeend', animation, element, isInterrupted);
+        this.fireEvent('animationbeforeend', this, animation, element, isInterrupted);
 
         if (isReplaced || (!isInterrupted && !data.preserveEndState)) {
             toPropertyNames = data.toPropertyNames;
@@ -66,6 +67,7 @@ Ext.define('Ext.fx.runner.CssTransition', {
         }
 
         animation.fireEvent('animationend', animation, element, isInterrupted);
+        this.fireEvent('animationend', this, animation, element, isInterrupted);
     },
 
     onAllAnimationsEnd: function(element) {
@@ -82,6 +84,7 @@ Ext.define('Ext.fx.runner.CssTransition', {
         };
 
         this.applyStyles(endRules);
+        this.fireEvent('animationallend', this, element);
     },
 
     hasRunningAnimations: function(element) {
@@ -253,6 +256,7 @@ Ext.define('Ext.fx.runner.CssTransition', {
             if (animation.onBeforeStart) {
                 animation.onBeforeStart.call(animation.scope || this, element);
                 animation.fireEvent('animationstart', animation);
+                this.fireEvent('animationstart', this, animation);
             }
 
             data[elementId] = data;
@@ -352,6 +356,8 @@ Ext.define('Ext.fx.runner.CssTransition', {
             to['transition-duration'] = data.duration;
             to['transition-timing-function'] = data.easing;
             to['transition-delay'] = data.delay;
+
+            animation.startTime = Date.now();
         }
 
         message = this.$className;

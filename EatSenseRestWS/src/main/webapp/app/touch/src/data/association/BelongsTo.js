@@ -8,21 +8,25 @@
  *
  *     Ext.define('Category', {
  *         extend: 'Ext.data.Model',
- *         fields: [
- *             { name: 'id',   type: 'int' },
- *             { name: 'name', type: 'string' }
- *         ]
+ *         config: {
+ *             fields: [
+ *                 { name: 'id',   type: 'int' },
+ *                 { name: 'name', type: 'string' }
+ *             ]
+ *         }
  *     });
  *
  *     Ext.define('Product', {
  *         extend: 'Ext.data.Model',
- *         fields: [
- *             { name: 'id',          type: 'int' },
- *             { name: 'category_id', type: 'int' },
- *             { name: 'name',        type: 'string' }
- *         ],
- *         // we can use the belongsTo shortcut on the model to create a belongsTo association
- *         associations: { type: 'belongsTo', model: 'Category' }
+ *         config: {
+ *             fields: [
+ *                 { name: 'id',          type: 'int' },
+ *                 { name: 'category_id', type: 'int' },
+ *                 { name: 'name',        type: 'string' }
+ *             ],
+ *             // we can use the belongsTo shortcut on the model to create a belongsTo association
+ *             associations: { type: 'belongsTo', model: 'Category' }
+ *         }
  *     });
  *
  * In the example above we have created models for Products and Categories, and linked them together
@@ -102,11 +106,15 @@
  * {@link #primaryKey} and {@link #foreignKey}. These can alternatively be specified:
  *
  *     Ext.define('Product', {
- *         fields: [...],
- *
- *         associations: [
- *             { type: 'belongsTo', model: 'Category', primaryKey: 'unique_id', foreignKey: 'cat_id' }
- *         ]
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             fields: [ // ...
+ *             ],
+ * 
+ *             associations: [
+ *                 { type: 'belongsTo', model: 'Category', primaryKey: 'unique_id', foreignKey: 'cat_id' }
+ *             ]
+ *         }
  *     });
  *
  * Here we replaced the default primary key (defaults to 'id') and foreign key (calculated as 'category_id')

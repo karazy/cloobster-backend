@@ -401,7 +401,7 @@ Ext.define('Ext.app.Controller', {
     applyRefs: function(refs) {
         //<debug>
         if (Ext.isArray(refs)) {
-            console.warn("In Sencha Touch 2 the refs config accepts an object but you have passed it an array.");
+            Ext.Logger.deprecate("In Sencha Touch 2 the refs config accepts an object but you have passed it an array.");
         }
         //</debug>
 
@@ -417,14 +417,13 @@ Ext.define('Ext.app.Controller', {
     applyRoutes: function(routes) {
         var app    = this instanceof Ext.app.Application ? this : this.getApplication(),
             router = app.getRouter(),
-            parts  = this.$className.split('.'),
             route, url, config;
 
         for (url in routes) {
             route = routes[url];
 
             config = {
-                controller: parts[parts.length - 1]
+                controller: this.$className
             };
 
             if (Ext.isString(route)) {
@@ -544,8 +543,7 @@ Ext.define('Ext.app.Controller', {
 
                 delete members[key];
                 // <debug warn>
-                // See https://sencha.jira.com/browse/TOUCH-1499
-                console.warn(key + ' is deprecated as a property directly on the ' + this.$className + ' prototype. Please put it inside the config object.');
+                Ext.Logger.deprecate(key + ' is deprecated as a property directly on the ' + this.$className + ' prototype. Please put it inside the config object.');
                 // </debug>
             }
         }
@@ -554,8 +552,7 @@ Ext.define('Ext.app.Controller', {
             length = stores.length;
 
             // <debug warn>
-            // See https://sencha.jira.com/browse/TOUCH-1499
-            console.warn('\'stores\' is deprecated as a property directly on the ' + this.$className + ' prototype. Please move it ' +
+            Ext.Logger.deprecate('\'stores\' is deprecated as a property directly on the ' + this.$className + ' prototype. Please move it ' +
                 'to Ext.application({ stores: ... }) instead');
             // </debug>
 
@@ -574,8 +571,7 @@ Ext.define('Ext.app.Controller', {
             length = views.length;
 
             // <debug warn>
-            // See https://sencha.jira.com/browse/TOUCH-1499
-            console.warn('\'views\' is deprecated as a property directly on the ' + this.$className + ' prototype. Please move it ' +
+            Ext.Logger.deprecate('\'views\' is deprecated as a property directly on the ' + this.$className + ' prototype. Please move it ' +
                 'to Ext.application({ views: ... }) instead');
             // </debug>
 
@@ -594,8 +590,8 @@ Ext.define('Ext.app.Controller', {
     },
 
     /**
-     * @deprecated 2.0.0
-     * Returns a reference to a Model. Deprecated and considered bad practice - please just use the Model name instead
+     * Returns a reference to a Model. 
+     * @deprecated 2.0.0 Considered bad practice - please just use the Model name instead
      * (e.g. MyApp.model.User vs this.getModel('User')).
      */
     getModel: function(modelName) {
@@ -611,8 +607,8 @@ Ext.define('Ext.app.Controller', {
     },
 
     /**
-     * @deprecated 2.0.0
-     * Returns a reference to another Controller. Deprecated and considered bad practice - if you need to do this
+     * Returns a reference to another Controller. 
+     * @deprecated 2.0.0 Considered bad practice - if you need to do this
      * please use this.getApplication().getController() instead
      */
     getController: function(controllerName, profile) {
@@ -640,7 +636,7 @@ Ext.define('Ext.app.Controller', {
             extend: 'Ext.app.Controller'
         });
 
-        console.warn(
+        Ext.Logger.deprecate(
             '[Ext.app.Controller] Ext.regController is deprecated, please use Ext.define to define a Controller as ' +
             'with any other class. For more information see the Touch 1.x -> 2.x migration guide'
         );

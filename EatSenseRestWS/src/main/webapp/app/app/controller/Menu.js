@@ -99,8 +99,8 @@ Ext.define('EatSense.controller.Menu', {
 	
 	loadProductDetail: function(dataview, record) {
 		console.log('Menu Controller -> loadProductDetail');
-//		this.models.activeProduct = record;
-//		this.showProductDetail(null, this.models.activeProduct);
+		this.models.activeProduct = record.copy();
+		this.showProductDetail(dataview, this.models.activeProduct);
 		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
 //		
 //		Ext.Ajax.request({
@@ -116,13 +116,13 @@ Ext.define('EatSense.controller.Menu', {
 //		    }
 //		});
 		
-		Ext.ModelManager.getModel('EatSense.model.Product').load(_id, {
-			scope: this,
-			success: function(product, operation) {
-				this.models.activeProduct = product;
-				this.showProductDetail(null, this.models.activeProduct);
-			}
-		});
+//		Ext.ModelManager.getModel('EatSense.model.Product').load(_id, {
+//			scope: this,
+//			success: function(product, operation) {
+//				this.models.activeProduct = product;
+//				this.showProductDetail(null, this.models.activeProduct);
+//			}
+//		});
 	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
@@ -286,12 +286,7 @@ Ext.define('EatSense.controller.Menu', {
 			order = Ext.create('EatSense.model.Order');
 			order.set('amount', this.getAmountSpinner().getValue());
 			order.set('status','PLACED');
-			//TODO workaround because hasOne not working
-			order.data.product = productForCart;//.deepCopy();
-//			order.setProduct(productForCart);
-//			order.getProduct(function(prod, operation) {
-//			    alert(prod.get('name')); 
-//			});
+			order.setProduct(productForCart);
 			//comment field needed
 			order.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
@@ -342,7 +337,7 @@ Ext.define('EatSense.controller.Menu', {
 		removedOrder;
 		
 		if(orders.data.length > 0) {
-			removedOrder = orders.getAt(orders.data.length-1).data.product.data.name;
+			removedOrder = orders.getAt(orders.data.length-1).getProduct().get('name');
 			orders.removeAt(orders.data.length - 1);
 			badgeText = (orders.data.length > 0) ? orders.data.length : "";
 			this.getCardBt().setBadgeText(badgeText);

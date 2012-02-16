@@ -3,34 +3,40 @@ A date picker component which shows a Date Picker on the screen. This class exte
 and {@link Ext.Sheet} so it is a popup.
 
 This component has no required configurations.
+
 ## Examples
-    @example preview
+
+    @example miniphone preview
     var datePicker = Ext.create('Ext.picker.Date');
+    Ext.Viewport.add(datePicker);
     datePicker.show();
 
 You may want to adjust the {@link #yearFrom} and {@link #yearTo} properties:
 
-    @example preview
+    @example miniphone preview
     var datePicker = Ext.create('Ext.picker.Date', {
         yearFrom: 2000,
         yearTo  : 2015
     });
+    Ext.Viewport.add(datePicker);
     datePicker.show();
 
 You can set the value of the {@link Ext.picker.Date} to the current date using `new Date()`:
 
-    @example preview
+    @example miniphone preview
     var datePicker = Ext.create('Ext.picker.Date', {
         value: new Date()
     });
+    Ext.Viewport.add(datePicker);
     datePicker.show();
 
 And you can hide the titles from each of the slots by using the {@link #useTitles} configuration:
 
-    @example preview
+    @example miniphone preview
     var datePicker = Ext.create('Ext.picker.Date', {
         useTitles: false
     });
+    Ext.Viewport.add(datePicker);
     datePicker.show();
 
  */
@@ -116,7 +122,7 @@ Ext.define('Ext.picker.Date', {
 
     getValue: function() {
         var values = {},
-            daysInMonth, day,
+            daysInMonth, day, month, year,
             items = this.getItems().items,
             ln = items.length,
             item, i;
@@ -128,10 +134,16 @@ Ext.define('Ext.picker.Date', {
             }
         }
 
-        daysInMonth = this.getDaysInMonth(values.month, values.year);
-        day = Math.min(values.day, daysInMonth);
+        year = Ext.isNumber(values.year) ? values.year : 1;
+        month = Ext.isNumber(values.month) ? values.month : 1;
+        day = Ext.isNumber(values.day) ? values.day : 1;
 
-        return new Date(values.year, values.month - 1, day);
+        if (month && year && month && day) {
+            daysInMonth = this.getDaysInMonth(month, year);
+        }
+        day = (daysInMonth) ? Math.min(day, daysInMonth): day;
+
+        return new Date(year, month - 1, day);
     },
 
     /**
@@ -159,7 +171,7 @@ Ext.define('Ext.picker.Date', {
         var innerItems = this.getInnerItems,
             ln = innerItems.length,
             item, i;
-        
+
         //loop through each of the current items and set the title on the correct slice
         if (this.initialized) {
             for (i = 0; i < ln; i++) {

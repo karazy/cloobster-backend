@@ -150,8 +150,10 @@ Ext.define('Ext.Img', {
     detachListeners: function() {
         var dom = this.imageObject;
 
-        dom.removeEventListener('load', this.onLoad, false);
-        dom.removeEventListener('error', this.onError, false);
+        if (dom) {
+            dom.removeEventListener('load', this.onLoad, false);
+            dom.removeEventListener('error', this.onError, false);
+        }
     },
 
     onLoad : function(e) {
@@ -188,7 +190,7 @@ Ext.define('Ext.Img', {
     destroy: function() {
         this.detachListeners();
 
-        Ext.destroy(this.imageElement);
+        Ext.destroy(this.imageObject);
         delete this.imageObject;
 
         this.callParent();

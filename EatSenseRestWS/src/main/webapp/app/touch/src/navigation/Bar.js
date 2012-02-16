@@ -154,7 +154,7 @@ Ext.define('Ext.navigation.Bar', {
             //update the back button stack with the current inner items of the view
             innerItems = newView.getInnerItems();
             for (i = 0; i < innerItems.length; i++) {
-                this.backButtonStack.push(innerItems[i].config.title || this.getDefaultBackButtonText());
+                this.backButtonStack.push(innerItems[i].config.title || '&nbsp;');
             }
 
             this.titleComponent.setTitle(this.getTitleText());
@@ -175,15 +175,19 @@ Ext.define('Ext.navigation.Bar', {
 
         this.endAnimation();
 
-        this.backButtonStack.push(item.config.title || this.getDefaultBackButtonText());
+        this.backButtonStack.push(item.config.title || '&nbsp;');
 
         this.refreshNavigationBarProxy();
 
-        if (animation && animation.isAnimation) {
-            this.pushBackButtonAnimated(this.getBackButtonText());
+        if (animation && animation.isAnimation && view.isPainted()) {
+            if (this.backButtonStack.length > 1) {
+                this.pushBackButtonAnimated(this.getBackButtonText());
+            }
             this.pushTitleAnimated(this.getTitleText());
         } else {
-            this.pushBackButton(this.getBackButtonText());
+            if (this.backButtonStack.length > 1) {
+                this.pushBackButton(this.getBackButtonText());
+            }
             this.pushTitle(this.getTitleText());
         }
     },
@@ -200,7 +204,7 @@ Ext.define('Ext.navigation.Bar', {
 
         this.refreshNavigationBarProxy();
 
-        if (animation && animation.isAnimation) {
+        if (animation && animation.isAnimation && view.isPainted()) {
             this.popBackButtonAnimated(this.getBackButtonText());
             this.popTitleAnimated(this.getTitleText());
         } else {

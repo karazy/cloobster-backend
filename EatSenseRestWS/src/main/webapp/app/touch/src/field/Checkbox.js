@@ -5,7 +5,7 @@ choose one or more items from a set (for example choosing toppings for a pizza o
 
 ## Example
 
-    @example preview
+    @example miniphone preview
     var form = Ext.create('Ext.form.Panel', {
         fullscreen: true,
         items: [

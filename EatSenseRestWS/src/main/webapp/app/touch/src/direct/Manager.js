@@ -45,15 +45,15 @@
  * @alternateClassName Ext.Direct
  */
 Ext.define('Ext.direct.Manager', {
-
-    /* Begin Definitions */
     singleton: true,
 
     mixins: {
         observable: 'Ext.util.Observable'
     },
 
-    requires: ['Ext.util.MixedCollection'],
+    requires: ['Ext.util.Collection'],
+
+    alternateClassName: 'Ext.Direct',
 
     statics: {
         exceptions: {
@@ -64,76 +64,66 @@ Ext.define('Ext.direct.Manager', {
         }
     },
 
-    /* End Definitions */
+    /**
+     * @event event
+     * Fires after an event.
+     * @param {Ext.direct.Event} e The Ext.direct.Event type that occurred.
+     * @param {Ext.direct.Provider} provider The {@link Ext.direct.Provider Provider}.
+     */
 
-    constructor: function(){
+    /**
+     * @event exception
+     * Fires after an event exception.
+     * @param {Ext.direct.Event} e The event type that occurred.
+     */
+
+    constructor: function() {
         var me = this;
 
-        me.addEvents(
-            /**
-             * @event event
-             * Fires after an event.
-             * @param {Ext.direct.Event} e The Ext.direct.Event type that occurred.
-             * @param {Ext.direct.Provider} provider The {@link Ext.direct.Provider Provider}.
-             */
-            'event',
-            /**
-             * @event exception
-             * Fires after an event exception.
-             * @param {Ext.direct.Event} e The event type that occurred.
-             */
-            'exception'
-        );
-        me.transactions = Ext.create('Ext.util.MixedCollection');
-        me.providers = Ext.create('Ext.util.MixedCollection');
+        me.transactions = Ext.create('Ext.util.Collection', this.getKey);
+        me.providers = Ext.create('Ext.util.Collection', this.getKey);
+    },
 
-        me.mixins.observable.constructor.call(me);
+    getKey: function(item) {
+        return item.getId();
     },
 
     /**
      * Adds an Ext.Direct Provider and creates the proxy or stub methods to execute server-side methods. If the provider
      * is not already connected, it will auto-connect.
      *
-     *     var pollProv = new Ext.direct.PollingProvider({
-     *         url: 'php/poll2.php'
-     *     });
-     *
      *     Ext.direct.Manager.addProvider({
-     *         "type":"remoting",       // create a {@link Ext.direct.RemotingProvider}
-     *         "url":"php\/router.php", // url to connect to the Ext.Direct server-side router.
-     *         "actions":{              // each property within the actions object represents a Class
-     *             "TestAction":[       // array of methods within each server side Class
+     *         type: "remoting",       // create a {@link Ext.direct.RemotingProvider}
+     *         url: "php\/router.php", // url to connect to the Ext.Direct server-side router.
+     *         actions: {              // each property within the actions object represents a Class
+     *             TestAction: [       // array of methods within each server side Class
      *             {
-     *                 "name":"doEcho", // name of method
-     *                 "len":1
+     *                 name: "doEcho", // name of method
+     *                 len: 1
      *             },{
-     *                 "name":"multiply",
-     *                 "len":1
+     *                 name: "multiply",
+     *                 len: 1
      *             },{
-     *                 "name":"doForm",
-     *                 "formHandler":true, // handle form on server with Ext.Direct.Transaction
-     *                 "len":1
+     *                 name: "doForm",
+     *                 formHandler: true,  // handle form on server with Ext.Direct.Transaction
+     *                 len: 1
      *             }]
      *         },
-     *         "namespace":"myApplication",// namespace to create the Remoting Provider in
-     *     },{
-     *         type: 'polling', // create a {@link Ext.direct.PollingProvider}
-     *         url:  'php/poll.php'
-     *     }, pollProv); // reference to previously created instance
+     *         namespace: "myApplication", // namespace to create the Remoting Provider in
+     *     });
      *
      * @param {Ext.direct.Provider/Object...} provider
      * Accepts any number of Provider descriptions (an instance or config object for
      * a Provider). Each Provider description instructs Ext.Directhow to create
      * client-side stub methods.
      */
-    addProvider : function(provider){
+    addProvider : function(provider) {
         var me = this,
-            args = arguments,
-            i = 0,
-            len;
+            args = Ext.toArray(arguments),
+            i = 0, ln;
 
         if (args.length > 1) {
-            for (len = args.length; i < len; ++i) {
+            for (ln = args.length; i < ln; ++i) {
                 me.addProvider(args[i]);
             }
             return;
@@ -145,7 +135,6 @@ Ext.define('Ext.direct.Manager', {
         }
         me.providers.add(provider);
         provider.on('data', me.onProviderData, me);
-
 
         if (!provider.isConnected()) {
             provider.connect();
@@ -168,7 +157,7 @@ Ext.define('Ext.direct.Manager', {
      * @param {String/Ext.direct.Provider} provider The provider instance or the id of the provider.
      * @return {Ext.direct.Provider} The provider, null if not found.
      */
-    removeProvider : function(provider){
+    removeProvider : function(provider) {
         var me = this,
             providers = me.providers;
 
@@ -188,7 +177,7 @@ Ext.define('Ext.direct.Manager', {
      * @param {Ext.direct.Transaction} transaction The transaction to add
      * @return {Ext.direct.Transaction} transaction
      */
-    addTransaction: function(transaction){
+    addTransaction: function(transaction) {
         this.transactions.add(transaction);
         return transaction;
     },
@@ -199,7 +188,7 @@ Ext.define('Ext.direct.Manager', {
      * @param {String/Ext.direct.Transaction} transaction The transaction/id of transaction to remove
      * @return {Ext.direct.Transaction} transaction
      */
-    removeTransaction: function(transaction){
+    removeTransaction: function(transaction) {
         transaction = this.getTransaction(transaction);
         this.transactions.remove(transaction);
         return transaction;
@@ -211,29 +200,53 @@ Ext.define('Ext.direct.Manager', {
      * @param {String/Ext.direct.Transaction} transaction The transaction/id of transaction to get
      * @return {Ext.direct.Transaction}
      */
-    getTransaction: function(transaction){
-        return transaction.isTransaction ? transaction : this.transactions.get(transaction);
+    getTransaction: function(transaction) {
+        return Ext.isObject(transaction) ? transaction : this.transactions.get(transaction);
     },
 
-    onProviderData : function(provider, event){
+    onProviderData : function(provider, event) {
         var me = this,
-            i = 0,
-            len;
+            i = 0, ln,
+            name;
 
         if (Ext.isArray(event)) {
-            for (len = event.length; i < len; ++i) {
+            for (ln = event.length; i < ln; ++i) {
                 me.onProviderData(provider, event[i]);
             }
             return;
         }
-        if (event.name && event.name != 'event' && event.name != 'exception') {
-            me.fireEvent(event.name, event);
-        } else if (event.status === false) {
+
+        name = event.getName();
+
+        if (name && name != 'event' && name != 'exception') {
+            me.fireEvent(name, event);
+        } else if (event.getStatus() === false) {
             me.fireEvent('exception', event);
         }
+
         me.fireEvent('event', event, provider);
+    },
+
+    /**
+     * Parses a direct function. It may be passed in a string format, for example:
+     * "MyApp.Person.read".
+     * @protected
+     * @param {String/Function} fn The direct function
+     * @return {Function} The function to use in the direct call. Null if not found
+     */
+    parseMethod: function(fn) {
+        if (Ext.isString(fn)) {
+            var parts = fn.split('.'),
+                i = 0,
+                ln = parts.length,
+                current = window;
+
+            while (current && i < ln) {
+                current = current[parts[i]];
+                ++i;
+            }
+            fn = Ext.isFunction(current) ? current : null;
+        }
+        return fn || null;
     }
-}, function(){
-    // Backwards compatibility
-    Ext.Direct = Ext.direct.Manager;
 });

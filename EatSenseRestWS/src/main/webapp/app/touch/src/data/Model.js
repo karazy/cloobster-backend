@@ -357,7 +357,18 @@ Ext.define('Ext.data.Model', {
         },
 
         generateCacheId: function(record, id) {
-            return record.modelName.replace(/\./g, '-').toLowerCase() + '-' + (id !== undefined ? id : record.getId());
+            var modelName;
+
+            if (record && record.isModel) {
+                modelName = record.modelName;
+                if (id === undefined) {
+                    id = record.getId();
+                }
+            } else {
+                modelName = record;
+            }
+
+            return modelName.replace(/\./g, '-').toLowerCase() + '-' + id;
         }
     },
 
@@ -393,7 +404,13 @@ Ext.define('Ext.data.Model', {
          * @inheritable
          */
         load: function(id, config, scope) {
-            scope = config.scope || this;
+            var proxy = this.getProxy(),
+                idProperty = this.getIdProperty(),
+                record = null,
+                params = {},
+                callback, operation;
+
+            scope = scope || (config && config.scope) || this;
             if (Ext.isFunction(config)) {
                 config = {
                     callback: config,
@@ -401,19 +418,15 @@ Ext.define('Ext.data.Model', {
                 };
             }
 
+            params[idProperty] = id;
             config = Ext.apply({}, config);
             config = Ext.applyIf(config, {
                 action: 'read',
-                params: {
-                    id: id
-                },
+                params: params,
                 model: this
             });
 
-            var operation  = Ext.create('Ext.data.Operation', config),
-                proxy      = this.getProxy(),
-                record     = null,
-                callback;
+            operation  = Ext.create('Ext.data.Operation', config);
 
             if (!proxy) {
                 Ext.Logger.error('You are trying to load a model that doesn\'t have a Proxy specified');
@@ -474,13 +487,6 @@ Ext.define('Ext.data.Model', {
          */
         me.stores = [];
 
-        if (id || id === 0) {
-            cached = Ext.data.Model.cache.get(Ext.data.Model.generateCacheId(this, id));
-            if (cached) {
-                return cached.mergeData(convertedData || data || {});
-            }
-        }
-
         data = data || convertedData || {};
 
         // We begin by checking if an id is passed to the constructor. If this is the case we override
@@ -488,6 +494,14 @@ Ext.define('Ext.data.Model', {
         if (id || id === 0) {
             // Lets skip using set here since it's so much faster
             data[idProperty] = me.internalId = id;
+        }
+
+        id = me.data[idProperty];
+        if (id || id === 0) {
+            cached = Ext.data.Model.cache.get(Ext.data.Model.generateCacheId(this, id));
+            if (cached) {
+                return cached.mergeData(convertedData || data || {});
+            }
         }
 
         if (convertedData) {
@@ -603,14 +617,20 @@ Ext.define('Ext.data.Model', {
         return this;
     },
 
-    handleInlineAssociationData: function(rawData) {
+    handleInlineAssociationData: function(data) {
         var associations = this.associations.items,
             ln = associations.length,
-            i, association, associationData, reader, proxy;
+            rawData = this.raw,
+            i, association, associationData, reader, proxy, associationKey;
 
         for (i = 0; i < ln; i++) {
             association = associations[i];
-            associationData = rawData[association.getAssociationKey()];
+            associationKey = association.getAssociationKey();
+            associationData = data[associationKey];
+
+            if (!associationData) {
+                associationData = rawData[associationKey];
+            }
 
             if (associationData) {
                 reader = association.getReader();
@@ -900,7 +920,10 @@ Ext.define('Ext.data.Model', {
 
     /**
      * Saves the model instance using the configured proxy.
-     * @param {Object} options Options to pass to the proxy. Config object for {@link Ext.data.Operation}.
+     * @param {Object/Function} options Options to pass to the proxy. Config object for {@link Ext.data.Operation}.
+     * If you pass a function, this will automatically become the callback method.
+     * @param {Object} scope The scope to run your callback method in. This is only used if you passed a function
+     * as the first argument.
      * @return {Ext.data.Model} The Model instance
      */
     save: function(options, scope) {
@@ -1106,18 +1129,23 @@ Ext.define('Ext.data.Model', {
     /**
      * Creates a copy (clone) of this Model instance.
      *
-     * @param {String} id (optional) A new id, defaults to the id of the instance being copied.
+     * @param {String} id A new id. If you don't specify this a new id will be generated for you.
      * To generate a phantom instance with a new id use:
      *
-     *     var rec = record.copy(); // clone the record
-     *     Ext.data.Model.id(rec); // automatically generate a unique sequential id
+     *     var rec = record.copy(); // clone the record with a new id
      *
      * @return {Ext.data.Model}
      */
     copy: function(newId) {
-        var me = this;
+        var me = this,
+            idProperty = me.getIdProperty(),
+            raw = Ext.apply({}, me.raw),
+            data = Ext.apply({}, me.data);
 
-        return new me.self(null, newId, me.raw, Ext.apply({}, me.data));
+        delete raw[idProperty];
+        delete data[idProperty];
+
+        return new me.self(null, newId, raw, data);
     },
 
     getData: function(includeAssociated) {
@@ -1224,18 +1252,21 @@ Ext.define('Ext.data.Model', {
     },
 
     /**
-     * Tells this model instance that it has been added to a store.
+     * By joining this model to an instance of a class, this model will automatically try to
+     * call certain template methods on that instance (afterEdit, afterCommit, afterErase).
+     * For example, a Store calls join and unjoin whenever you add or remove a record to it's data collection.
+     * This way a Store can get notified of any changes made to this record.
+     * This functionality is usually only required when creating custom components.
      * @param {Ext.data.Store} store The store to which this model has been added.
-     * @private
      */
     join: function(store) {
         Ext.Array.include(this.stores, store);
     },
 
     /**
-     * Tells this model instance that it has been removed from the store.
+     * This unjoins this record from an instance of a class. Look at the documentation for {@link #join}
+     * for more information about joining records to class instances.
      * @param {Ext.data.Store} store The store from which this model has been removed.
-     * @private
      */
     unjoin: function(store) {
         Ext.Array.remove(this.stores, store);
@@ -1371,7 +1402,8 @@ Ext.define('Ext.data.Model', {
     addAssociations: function(associations, defaultType) {
         var ln, i, association,
             name = this.self.modelName,
-            associationsCollection = this.self.associations;
+            associationsCollection = this.self.associations,
+            onCreatedFn;
 
         associations = Ext.Array.from(associations);
 
@@ -1389,9 +1421,11 @@ Ext.define('Ext.data.Model', {
 
             delete association.model;
 
-            Ext.ClassManager.onCreated(function() {
-                associationsCollection.add(Ext.data.association.Association.create(association));
-            }, this, (typeof association.associatedModel === 'string') ? association.associatedModel : Ext.getClassName(association.associatedModel));
+            onCreatedFn = Ext.Function.bind(function(associationName) {
+                associationsCollection.add(Ext.data.association.Association.create(this));
+            }, association);
+
+            Ext.ClassManager.onCreated(onCreatedFn, this, (typeof association.associatedModel === 'string') ? association.associatedModel : Ext.getClassName(association.associatedModel));
         }
     },
 
@@ -1497,8 +1531,6 @@ Ext.define('Ext.data.Model', {
     },
 
     /**
-     * WARNING: Only Jacky Nguyen and Tommy Maintz (might) understand this.
-     * Please don't read this code. If you do, don't judge us.
      * @private
      */
     onClassExtended: function(cls, data, hooks) {
@@ -1516,7 +1548,8 @@ Ext.define('Ext.data.Model', {
         if (data.idgen || config.idgen) {
             config.identifier = data.idgen || config.idgen;
             // <debug warn>
-            console.warn('idgen is deprecated as a property. Please put it inside the config object under the new "identifier" configuration');
+            Ext.Logger.deprecate('idgen is deprecated as a property. Please put it inside the config object' +
+                ' under the new "identifier" configuration');
             // </debug>
         }
 
@@ -1525,7 +1558,8 @@ Ext.define('Ext.data.Model', {
                 config[key] = data[key];
                 delete data[key];
                 // <debug warn>
-                console.warn(key + ' is deprecated as a property directly on the Model prototype. Please put it inside the config object.');
+                Ext.Logger.deprecate(key + ' is deprecated as a property directly on the Model prototype. ' +
+                    'Please put it inside the config object.');
                 // </debug>
             }
         }

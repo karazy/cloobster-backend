@@ -14,7 +14,7 @@
  *     Ext.Viewport.add(container);
  *
  *     // Mask the container
- *     container.setMasked(true;)
+ *     container.setMasked(true);
  */
 Ext.define('Ext.Mask', {
     extend: 'Ext.Component',

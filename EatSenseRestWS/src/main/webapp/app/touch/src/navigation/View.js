@@ -270,7 +270,7 @@ Ext.define('Ext.navigation.View', {
      */
     getPreviousItem: function() {
         var innerItems = this.getInnerItems();
-        return innerItems[innerItems.length - 1];
+        return innerItems[innerItems.length - 2];
     },
 
     /**

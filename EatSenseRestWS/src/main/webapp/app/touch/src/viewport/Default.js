@@ -1,38 +1,7 @@
 /**
- * @class Ext.Viewport
- * @extends Ext.Container
- * @singleton
- *
- * Ext.Viewport is a instance created when you use {@link Ext#setup}. Because {@link Ext.Viewport} extends from
- * {@link Ext.Container}, it has as {@link #layout} (which defaults to {@link Ext.layout.Card}). This means you
- * can add items to it at any time, from anywhere in your code. The {@link Ext.Viewport} {@link #cfg-fullscreen}
- * configuration is `true` by default, so it will take up your whole screen.
- *
- *     Ext.setup({
- *         onReady: function() {
- *             Ext.Viewport.add({
- *                 xtype: 'container',
- *                 html: 'My new container!'
- *             });
- *         }
- *     });
- *
- * If you want to customize anything about this {@link Ext.Viewport} instance, you can do so by adding a property
- * called `viewport` into your {@link Ext#setup} object:
- *
- *     Ext.setup({
- *         viewport: {
- *             layout: 'vbox'
- *         },
- *         onReady: function() {
- *             //do something
- *         }
- *     });
- *
- * **Note** if you use {@link Ext#onReady}, this instance of {@link Ext.Viewport} will **not** be created. Though, in most cases,
- * you should **not** use {@link Ext#onReady}.
+ * @private
+ * Base class for iOS and Andorid viewports.
  */
-
 Ext.define('Ext.viewport.Default', {
     extend: 'Ext.Container',
 
@@ -91,6 +60,11 @@ Ext.define('Ext.viewport.Default', {
         autoMaximize: false,
 
         /**
+         * @private
+         */
+        autoBlurInput: true,
+
+        /**
          * @cfg {Boolean} preventPanning
          * Whether or not to always prevent default panning behavior of the
          * browser's viewport
@@ -99,15 +73,9 @@ Ext.define('Ext.viewport.Default', {
         preventPanning: true,
 
         /**
-         * @cfg {Boolean} preventZooming
-         * Whether or not to always prevent default zooming feature of the
-         * browser's viewport via finger gestures such as pinching and / or double-tapping.
-         *
-         * If this is set to `true`, `<a>` links will not work on any mobile devices. It also causes issues with the
-         * {@link Ext.Map} component. So please be aware when setting this to true.
-         * @accessor
+         * @hide
          */
-        preventZooming: false,
+        preventZooming: true,
 
         /**
          * @hide
@@ -168,7 +136,7 @@ Ext.define('Ext.viewport.Default', {
 
     id: 'ext-viewport',
 
-    isInputRegex: /^(input|textarea|select)$/i,
+    isInputRegex: /^(input|textarea|select|a)$/i,
 
     focusedElement: null,
 
@@ -180,11 +148,9 @@ Ext.define('Ext.viewport.Default', {
     constructor: function(config) {
         var bind = Ext.Function.bind;
 
-        this.activeShowByItems = {};
-        this.activeShowByItemsCount = 0;
-
         this.doPreventPanning = bind(this.doPreventPanning, this);
         this.doPreventZooming = bind(this.doPreventZooming, this);
+        this.doBlurInput = bind(this.doBlurInput, this);
 
         this.maximizeOnEvents = ['ready', 'orientationchange'];
 
@@ -220,6 +186,7 @@ Ext.define('Ext.viewport.Default', {
 
     onDomReady: function() {
         this.isReady = true;
+        this.updateSize();
         this.fireEvent('ready', this);
     },
 
@@ -244,6 +211,7 @@ Ext.define('Ext.viewport.Default', {
                 classList = [],
                 osEnv = Ext.os,
                 osName = osEnv.name.toLowerCase(),
+                browserName = Ext.browser.name.toLowerCase(),
                 osMajorVersion = osEnv.version.getMajor(),
                 orientation = this.getOrientation();
 
@@ -256,6 +224,7 @@ Ext.define('Ext.viewport.Default', {
             }
 
             classList.push(clsPrefix + osName);
+            classList.push(clsPrefix + browserName);
 
             if (osMajorVersion) {
                 classList.push(clsPrefix + osName + '-' + osMajorVersion);
@@ -273,6 +242,19 @@ Ext.define('Ext.viewport.Default', {
 
             body.addCls(classList);
         }
+    },
+
+    applyAutoBlurInput: function(autoBlurInput) {
+        var touchstart = (Ext.feature.has.Touch) ? 'touchstart' : 'mousedown';
+
+        if (autoBlurInput) {
+            this.addWindowListener(touchstart, this.doBlurInput, false);
+        }
+        else {
+            this.removeWindowListener(touchstart, this.doBlurInput, false);
+        }
+
+        return autoBlurInput;
     },
 
     applyAutoMaximize: function(autoMaximize) {
@@ -300,11 +282,13 @@ Ext.define('Ext.viewport.Default', {
     },
 
     applyPreventZooming: function(preventZooming) {
+        var touchstart = (Ext.feature.has.Touch) ? 'touchstart' : 'mousedown';
+
         if (preventZooming) {
-            this.addWindowListener('touchstart', this.doPreventZooming, false);
+            this.addWindowListener(touchstart, this.doPreventZooming, false);
         }
         else {
-            this.removeWindowListener('touchstart', this.doPreventZooming, false);
+            this.removeWindowListener(touchstart, this.doPreventZooming, false);
         }
 
         return preventZooming;
@@ -352,11 +336,26 @@ Ext.define('Ext.viewport.Default', {
         this.maximize();
     },
 
+    doBlurInput: function(e) {
+        var target = e.target,
+            focusedElement = this.focusedElement;
+
+        if (focusedElement && !this.isInputRegex.test(target.tagName)) {
+            delete this.focusedElement;
+            focusedElement.blur();
+        }
+    },
+
     doPreventPanning: function(e) {
         e.preventDefault();
     },
 
     doPreventZooming: function(e) {
+        // Don't prevent right mouse event
+        if ('button' in e && e.button !== 0) {
+            return;
+        }
+
         var target = e.target;
 
         if (target && target.nodeType === 1 && !this.isInputRegex.test(target.tagName)) {
@@ -574,37 +573,5 @@ Ext.define('Ext.viewport.Default', {
     onItemFullscreenChange: function(item) {
         item.addCls(this.fullscreenItemCls);
         this.add(item);
-    },
-
-    keyboardHideField: null,
-
-    /**
-     * Convience method to hide the keyboard on devices, if it is visible.
-     */
-    hideKeyboard: function() {
-        var me = this;
-
-        if (Ext.os.is.iOS) {
-            document.activeElement.blur();
-            if (this.getAutoMaximize() && !this.isFullscreen()) {
-                setTimeout(function() {
-                    Ext.Viewport.scrollToTop();
-                }, 50);
-            }
-        } else {
-            if (!me.keyboardHideField) {
-                me.keyboardHideField = document.createElement('input');
-                me.keyboardHideField.setAttribute('type', 'text');
-                me.keyboardHideField.setAttribute('style', 'position:absolute;top:-1000px');
-                document.body.appendChild(me.keyboardHideField);
-            }
-
-            setTimeout(function() {
-                me.keyboardHideField.focus();
-                setTimeout(function() {
-                    me.keyboardHideField.setAttribute('style', 'display:none;');
-                }, 50);
-            }, 50);
-        }
     }
 });

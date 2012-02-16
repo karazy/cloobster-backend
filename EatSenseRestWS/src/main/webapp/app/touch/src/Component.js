@@ -132,7 +132,7 @@
  *             {
  *                 xtype: 'toolbar',
  *                 title: 'So is the toolbar',
- *                 dock: 'top'
+ *                 docked: 'top'
  *             }
  *         ]
  *     });
@@ -314,6 +314,18 @@ Ext.define('Ext.Component', {
          * @accessor
          */
         cls: null,
+
+        /**
+         * @cfg {String} floatingCls The CSS class to add to this component when it is floatable.
+         * @accessor
+         */
+        floatingCls: null,
+
+        /**
+         * @cfg {String} hiddenCls The CSS class to add to the component when it is hidden
+         * @accessor
+         */
+        hiddenCls: clsPrefix + 'item-hidden',
 
         /**
          * @cfg {String} ui The ui to be used on this Component
@@ -558,16 +570,16 @@ Ext.define('Ext.Component', {
 
         /**
          * @cfg {String/Mixed} enterAnimation
-         * @deprecated
          * Animation effect to apply when the Component is being shown.
+         * @deprecated 2.0.0 Please use {@link #showAnimation} instead.
          * @accessor
          */
         enterAnimation: null,
 
         /**
          * @cfg {String/Mixed} exitAnimation
-         * @deprecated
          * Animation effect to apply when the Component is being hidden.
+         * @deprecated 2.0.0 Please use {@link #hideAnimation} instead.
          * @accessor
          */
         exitAnimation: null,
@@ -634,6 +646,14 @@ Ext.define('Ext.Component', {
          * @accessor
          */
         itemId: undefined,
+
+        /**
+         * @cfg {Ext.data.Model} record A model instance which updates the Component's html based on it's tpl. Similar to the data
+         * configuration, but tied to to a record to make allow dynamic updates.  This must be a model
+         * instance and not a configuration of one.
+         * @accessor
+         */
+        record: null,
 
         /**
          * @cfg {Object/Array} plugins
@@ -771,12 +791,12 @@ Ext.define('Ext.Component', {
 
     /**
      * @event beforeorientationchange
-     * @deprecated 2.0.0 This event is now only available onBefore the Viewport's {@link Ext.Viewport#orientationchange}
+     * @removed 2.0.0 This event is now only available onBefore the Viewport's {@link Ext.Viewport#orientationchange}
      */
 
     /**
      * @event orientationchange
-     * @deprecated 2.0.0 This event is now only available on the Viewport's {@link Ext.Viewport#orientationchange}
+     * @removed 2.0.0 This event is now only available on the Viewport's {@link Ext.Viewport#orientationchange}
      */
 
     /**
@@ -849,8 +869,6 @@ Ext.define('Ext.Component', {
 
         me.initElement();
 
-        me.beforeInitialize();
-
         me.initConfig(me.initialConfig);
 
         me.initialize();
@@ -866,6 +884,10 @@ Ext.define('Ext.Component', {
         }
 
         me.fireEvent('initialize', me);
+    },
+
+    beforeInitConfig: function(config) {
+        this.beforeInitialize.apply(this, arguments);
     },
 
     /**
@@ -1080,21 +1102,21 @@ Ext.define('Ext.Component', {
         suffix = suffix || '';
 
         if (typeof cls == "string") {
-            newCls.push(prefix + cls + suffix);
-        } else {
-            ln = cls.length;
+            cls = [cls];
+        }
 
-            //check if there is currently nothing in the array and we dont need to add a prefix or a suffix.
-            //if true, we can just set the newCls value to the cls property, because that is what the value will be
-            //if false, we need to loop through each and add them to the newCls array
-            if (!newCls.length && prefix === '' && suffix === '') {
-                newCls = cls;
-            } else {
-                for (i = 0; i < ln; i++) {
-                    cachedCls = prefix + cls[i] + suffix;
-                    if (newCls.indexOf(cachedCls) == -1) {
-                        newCls.push(cachedCls);
-                    }
+        ln = cls.length;
+
+        //check if there is currently nothing in the array and we dont need to add a prefix or a suffix.
+        //if true, we can just set the newCls value to the cls property, because that is what the value will be
+        //if false, we need to loop through each and add them to the newCls array
+        if (!newCls.length && prefix === '' && suffix === '') {
+            newCls = cls;
+        } else {
+            for (i = 0; i < ln; i++) {
+                cachedCls = prefix + cls[i] + suffix;
+                if (newCls.indexOf(cachedCls) == -1) {
+                    newCls.push(cachedCls);
                 }
             }
         }
@@ -1403,6 +1425,10 @@ Ext.define('Ext.Component', {
 
     doSetDocked: Ext.emptyFn,
 
+    /**
+     * Resets {@link #top}, {@link #right}, {@link #bottom} and {@link #left} configurations to `null`, which
+     * will unfloat this component.
+     */
     resetFloating: function() {
         this.setTop(null);
         this.setRight(null);
@@ -1411,7 +1437,8 @@ Ext.define('Ext.Component', {
     },
 
     updateFloating: function() {
-        var floating = true;
+        var floating = true,
+            floatingCls = this.getFloatingCls();
 
         if (this.getTop() === null && this.getBottom() === null && this.getRight() === null && this.getLeft() === null) {
             floating = false;
@@ -1426,10 +1453,26 @@ Ext.define('Ext.Component', {
                 if (this.isDocked()) {
                     this.setDocked(false);
                 }
+
+                if (floatingCls) {
+                    this.addCls(floatingCls);
+                }
+            } else if (floatingCls) {
+                this.removeCls(floatingCls);
             }
 
             this.floating = floating;
             this.fireEvent('floatingchange', this, floating);
+        }
+    },
+
+    /**
+     * Updates the floatingCls if the component is currently floating
+     * @private
+     */
+    updateFloatingCls: function(newFloatingCls, oldFloatingCls) {
+        if (this.isFloating()) {
+            this.replaceCls(oldFloatingCls, newFloatingCls);
         }
     },
 
@@ -1439,6 +1482,12 @@ Ext.define('Ext.Component', {
 
     doSetDisabled: function(disabled) {
         this.element[disabled ? 'addCls' : 'removeCls'](this.getDisabledCls());
+    },
+
+    updateDisabledCls: function(newDisabledCls, oldDisabledCls) {
+        if (this.isDisabled()) {
+            this.element.replaceCls(oldDisabledCls, newDisabledCls);
+        }
     },
 
     /**
@@ -1528,7 +1577,17 @@ Ext.define('Ext.Component', {
             element.show();
         }
 
+        if (this.element) {
+            this.element[hidden ? 'addCls' : 'removeCls'](this.getHiddenCls());
+        }
+
         this.fireEvent(hidden ? 'hide' : 'show', this);
+    },
+
+    updateHiddenCls: function(newHiddenCls, oldHiddenCls) {
+        if (this.isHidden()) {
+            this.element.replaceCls(oldHiddenCls, newHiddenCls);
+        }
     },
 
     /**
@@ -1544,10 +1603,10 @@ Ext.define('Ext.Component', {
      */
     hide: function(animation) {
         if (!this.getHidden()) {
-            if (animation === undefined) {
+            if (animation === undefined || (animation && animation.isComponent)) {
                 animation = this.getHideAnimation();
             }
-            if (animation && !animation.isComponent) {
+            if (animation) {
                 if (animation === true) {
                     animation = 'fadeOut';
                 }
@@ -1567,14 +1626,17 @@ Ext.define('Ext.Component', {
      * Shows this component
      */
     show: function(animation) {
-        if (this.getHidden()) {
-            if (animation === undefined) {
+        var hidden = this.getHidden();
+        if (hidden || hidden === null) {
+            if (animation === undefined || (animation && !animation.isComponent)) {
                 animation = this.getShowAnimation();
             }
-            if (animation && !animation.isComponent) {
+
+            if (animation) {
                 if (animation === true) {
                     animation = 'fadeIn';
                 }
+
                 this.onBefore({
                     hiddenchange: 'animateFn',
                     scope: this,
@@ -1582,21 +1644,27 @@ Ext.define('Ext.Component', {
                     args: [animation]
                 });
             }
+
             this.setHidden(false);
         }
+
         return this;
     },
 
     animateFn: function(animation, component, newState, oldState, options, controller) {
         if (animation) {
             var anim = new Ext.fx.Animation(animation);
+
             anim.setElement(component.element);
+
             if (newState) {
                 anim.setOnEnd(function() {
                     controller.resume();
                 });
+
                 controller.pause();
             }
+
             Ext.Animator.run(anim);
         }
     },
@@ -1658,6 +1726,39 @@ Ext.define('Ext.Component', {
              */
             this.fireEvent('updatedata', me, newData);
         }
+    },
+
+    applyRecord: function(config) {
+        if (config && Ext.isObject(config) && config.isModel) {
+            return config;
+        }
+        return  null;
+    },
+
+    updateRecord: function(newRecord, oldRecord) {
+        var me = this;
+
+        if (oldRecord) {
+            oldRecord.unjoin(me);
+        }
+
+        if (!newRecord) {
+            me.updateData('');
+        }
+        else {
+            newRecord.join(me);
+            me.updateData(newRecord.getData(true));
+        }
+    },
+
+    // @private Used to handle joining of a record to a tpl
+    afterEdit: function() {
+        this.updateRecord(this.getRecord());
+    },
+
+    // @private Used to handle joining of a record to a tpl
+    afterErase: function() {
+        this.setRecord(null);
     },
 
     applyItemId: function(itemId) {
@@ -1740,6 +1841,19 @@ alert(t.getXTypes());  // alerts 'component/field/textfield'
 
     getTranslatable: function() {
         return this.getTranslatableBehavior().getTranslatable();
+    },
+
+    translateAxis: function(axis, value, animation) {
+        var x, y;
+
+        if (axis === 'x') {
+            x = value;
+        }
+        else {
+            y = value;
+        }
+
+        return this.translate(x, y, animation);
     },
 
     translate: function() {
@@ -2077,6 +2191,8 @@ var owningTabPanel = grid.up('tabpanel');
             delete this[reference];
         }
 
+        this.setRecord(null);
+
         Ext.destroy(this.innerHtmlElement, this.getTranslatable());
         Ext.ComponentManager.unregister(this);
 
@@ -2085,19 +2201,19 @@ var owningTabPanel = grid.up('tabpanel');
 
     // Convert old properties in data into a config object
     // <deprecated product=touch since=2.0>
-    ,onClassExtended: function(cls, data, hooks) {
+    ,onClassExtended: function(cls, data) {
         var Component = this,
             defaultConfig = Component.prototype.config,
             config = data.config || {},
             key;
-
 
         for (key in defaultConfig) {
             if (key in data) {
                 config[key] = data[key];
                 delete data[key];
                 // <debug warn>
-                console.warn(key + ' is deprecated as a property directly on the Component prototype. Please put it inside the config object.');
+                Ext.Logger.deprecate(key + ' is deprecated as a property directly on the Component. ' +
+                    'Please put it inside the config object, and retrieve it using "this.config.' + key + '"');
                 // </debug>
             }
         }
@@ -2122,6 +2238,12 @@ var owningTabPanel = grid.up('tabpanel');
                     config.disabled = !config.enabled;
                 }
 
+                /**
+                 * @member Ext.Component
+                 * @cfg {Boolean/String/Object} scroll
+                 * This configuration has moved to {@link Ext.Container#scrollable Ext.Container}. You can no longer use it in a Ext.Component.
+                 * @removed 2.0.0 This method has been moved from {@link Ext.Component} to {@link Ext.Container#scrollable Ext.Container}
+                 */
                 if ((config.scroll || this.config.scroll || this.scrollable || this.config.scrollable) && !this.isContainer) {
                     //<debug warn>
                     Ext.Logger.deprecate("You are no longer able to scroll a component. Please use a Ext.Container instead.", this);
@@ -2130,6 +2252,52 @@ var owningTabPanel = grid.up('tabpanel');
                     delete config.scroll;
                 }
 
+                /**
+                 * @member Ext.Component
+                 * @cfg {Boolean} hideOnMaskTap
+                 * This configuration has moved to {@link Ext.Container#hideOnMaskTap Ext.Container}. You can no longer use it in a Ext.Component.
+                 * @removed 2.0.0 This method has been moved from {@link Ext.Component} to {@link Ext.Container#hideOnMaskTap Ext.Container}
+                 */
+                if ((config.hideOnMaskTap || this.config.hideOnMaskTap) && !this.isContainer) {
+                    //<debug warn>
+                    Ext.Logger.deprecate("You are no longer able use hideOnMaskTap on a component. Please use a Ext.Container instead.", this);
+                    //</debug>
+                    delete config.hideOnMaskTap;
+                }
+
+                /**
+                 * @member Ext.Component
+                 * @cfg {Boolean} modal
+                 * This configuration has moved to {@link Ext.Container#modal Ext.Container}. You can no longer use it in a Ext.Component.
+                 * @removed 2.0.0 This method has been moved from {@link Ext.Component} to {@link Ext.Container#modal Ext.Container}
+                 */
+                if ((config.modal || this.config.modal) && !this.isContainer) {
+                    //<debug warn>
+                    Ext.Logger.deprecate("You are no longer able use modal on a component. Please use a Ext.Container instead.", this);
+                    //</debug>
+                    delete config.modal;
+                }
+
+                /**
+                 * @cfg {String} dock
+                 * The dock position of this component in its container. Can be 'left', 'top', 'right' or 'bottom'.
+                 *
+                 * <b>Notes</b>
+                 *
+                 * You must use a HTML5 doctype for {@link #docked} `bottom` to work. To do this, simply add the following code to the HTML file:
+                 *
+                 *     <!doctype html>
+                 *
+                 * So your index.html file should look a little like this:
+                 *
+                 *     <!doctype html>
+                 *     <html>
+                 *         <head>
+                 *             <title>MY application title</title>
+                 *             ...
+                 *
+                 * @deprecated 2.0.0 This has been deprecated. Please use {@link #docked} instead.
+                 */
                 if (config.dock) {
                     //<debug warn>
                     Ext.Logger.deprecate("'dock' config for docked items is deprecated, please use 'docked' instead");
@@ -2168,8 +2336,17 @@ var owningTabPanel = grid.up('tabpanel');
 
                 /**
                  * @member Ext.Component
-                 * @cfg {String} floating Deprecated, please use {@link #left}, {@link #top}, {@link #right} or
-                 * {@link #bottom} instead
+                 * @cfg {Boolean} floating Deprecated, please use {@link #left}, {@link #top}, {@link #right} or
+                 * {@link #bottom} instead.
+                 *
+                 *     Ext.Viewport.add({
+                 *         top: 100,
+                 *         left: 100,
+                 *         width: 500,
+                 *         height: 200,
+                 *         html: 'Floating component!'
+                 *     });
+                 *
                  * @deprecated 2.0.0
                  */
                 if (config.floating) {
@@ -2186,18 +2363,40 @@ var owningTabPanel = grid.up('tabpanel');
                     }
                 }
 
+                /**
+                 * @member Ext.Component
+                 * @cfg {Boolean} layoutOnOrientationChange
+                 * @removed 2.0.0
+                 */
                 if (config.layoutOnOrientationChange) {
                     //<debug warn>
-                    Ext.Logger.deprecate("'layoutOnOrientationChange' is fully deprecated and no longer used");
+                    Ext.Logger.deprecate("'layoutOnOrientationChange' has been fully removed and no longer used");
                     //</debug>
                     delete config.layoutOnOrientationChange;
                 }
 
+                /**
+                 * @member Ext.Component
+                 * @cfg {Boolean} monitorOrientation
+                 * @removed 2.0.0
+                 */
                 if (config.monitorOrientation) {
                     //<debug warn>
-                    Ext.Logger.deprecate("'monitorOrientation' is deprecated. If you need to monitor the orientaiton, please use the 'resize' event.");
+                    Ext.Logger.deprecate("'monitorOrientation' has been removed. If you need to monitor the orientaiton, please use the 'resize' event.");
                     //</debug>
                     delete config.monitorOrientation;
+                }
+
+                /**
+                 * @member Ext.Component
+                 * @cfg {Boolean} stopMaskTapEvent
+                 * @removed 2.0.0
+                 */
+                if (config.stopMaskTapEvent) {
+                    //<debug warn>
+                    Ext.Logger.deprecate("'stopMaskTapEvent' has been removed.");
+                    //</debug>
+                    delete config.stopMaskTapEvent;
                 }
             }
 
@@ -2302,6 +2501,34 @@ var owningTabPanel = grid.up('tabpanel');
                 "the 'element' property instead", this);
             //</debug>
             return this.renderElement;
+        },
+
+        /**
+         * @member Ext.Component
+         * @method setFloating
+         * Used to update the floating state of this component.
+         * @param {Boolean} floating True if you want to float this component
+         * @deprecated 2.0.0 This has been deprecated. Please use {@link #setTop}, {@link #setRight}, {@link #setBottom} and {@link #setLeft} instead.
+         */
+        setFloating: function(floating) {
+            var isFloating = this.isFloating();
+            if (floating && !isFloating) {
+                this.setTop(0);
+            } else if (isFloating) {
+                this.resetFloating();
+            }
+        },
+
+        /**
+         * @member Ext.Component
+         * This method has moved to {@link Ext.Container#setScrollable Ext.Container}. You can no longer use it in a Ext.Component.
+         * @removed 2.0.0 This method has been moved from {@link Ext.Component} to {@link Ext.Container#setScrollable Ext.Container}
+         */
+        setScrollable: function() {
+            //<debug warn>
+            Ext.Logger.deprecate("Ext.Component cannot be scrollable. Please use Ext.Container#setScrollable on a Ext.Container.", this);
+            //</debug>
+            return false;
         }
     });
 

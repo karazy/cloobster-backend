@@ -7,24 +7,28 @@
  *
  *     Ext.define('Person', {
  *         extend: 'Ext.data.Model',
- *         fields: [
- *             { name: 'id', type: 'int' },
- *             { name: 'name', type: 'string' },
- *             { name: 'address_id', type: 'int'}
- *         ]
+ *         config: {
+ *             fields: [
+ *                 { name: 'id', type: 'int' },
+ *                 { name: 'name', type: 'string' },
+ *                 { name: 'address_id', type: 'int'}
+ *             ]
+ *         }
  *     });
  *
  *     Ext.define('Address', {
  *         extend: 'Ext.data.Model',
- *         fields: [
- *             { name: 'id', type: 'int' },
- *             { name: 'number', type: 'string' },
- *             { name: 'street', type: 'string' },
- *             { name: 'city', type: 'string' },
- *             { name: 'zip', type: 'string' },
- *         ],
- *         // we can use the hasOne shortcut on the model to create a hasOne association
- *         associations: { type: 'hasOne', model: 'Person' }
+ *         config: {
+ *             fields: [
+ *                 { name: 'id', type: 'int' },
+ *                 { name: 'number', type: 'string' },
+ *                 { name: 'street', type: 'string' },
+ *                 { name: 'city', type: 'string' },
+ *                 { name: 'zip', type: 'string' },
+ *             ],
+ *             // we can use the hasOne shortcut on the model to create a hasOne association
+ *             associations: { type: 'hasOne', model: 'Person' }
+ *         }
  *     });
  *
  * In the example above we have created models for People and Addresses, and linked them together
@@ -104,11 +108,15 @@
  * {@link #primaryKey} and {@link #foreignKey}. These can alternatively be specified:
  *
  *     Ext.define('Person', {
- *         fields: [...],
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             fields: [ // ...
+ *             ],
  *
- *         associations: [
- *             { type: 'hasOne', model: 'Address', primaryKey: 'unique_id', foreignKey: 'addr_id' }
- *         ]
+ *             associations: [
+ *                 { type: 'hasOne', model: 'Address', primaryKey: 'unique_id', foreignKey: 'addr_id' }
+ *             ]
+ *         }
  *     });
  *
  * Here we replaced the default primary key (defaults to 'id') and foreign key (calculated as 'address_id')
@@ -246,15 +254,25 @@ Ext.define('Ext.data.association.HasOne', {
      */
     createSetter: function() {
         var me              = this,
-            foreignKey      = me.getForeignKey();
+            foreignKey      = me.getForeignKey(),
+            instanceName    = me.getInstanceName(),
+            associatedModel = me.getAssociatedModel();
 
         //'this' refers to the Model instance inside this function
         return function(value, options, scope) {
+            var Model = Ext.data.Model,
+                record;
+
             if (value && value.isModel) {
                 value = value.getId();
             }
 
             this.set(foreignKey, value);
+
+            record = Model.cache.get(Model.generateCacheId(associatedModel.modelName, value));
+            if (record) {
+                this[instanceName] = record;
+            }
 
             if (Ext.isFunction(options)) {
                 options = {

@@ -72,7 +72,7 @@ Ext.define('Ext.fx.layout.card.Style', {
             outAnimation = this.getOutAnimation(),
             inElement, outElement, previousInElement, previousOutElement;
 
-        if (newItem && oldItem) {
+        if (newItem && oldItem && oldItem.isPainted()) {
             inElement = newItem.renderElement;
             outElement = oldItem.renderElement;
 

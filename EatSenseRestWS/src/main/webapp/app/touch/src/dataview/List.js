@@ -80,7 +80,7 @@ Ext.define('Ext.dataview.List', {
 
         /**
          * @cfg {Boolean} clearSelectionOnDeactivate
-         * @deprecated 2.0.0
+         * @removed 2.0.0
          */
 
         /**
@@ -121,6 +121,44 @@ Ext.define('Ext.dataview.List', {
          * @accessor
          */
         onItemDisclosure: null
+
+
+        /**
+         * @cfg {Boolean} useComponents
+         * Flag the use a component based DataView implementation.  This allows the full use of components in the
+         * DataView at the cost of some performance.
+         *
+         * Checkout the [DataView Guide](#!/guide/dataview) for more information on using this configuration.
+         * @accessor
+         * @private
+         */
+
+        /**
+         * @cfg {Object} itemConfig
+         * A configuration object that is passed to every item created by a component based DataView. Because each
+         * item that a DataView renders is a Component, we can pass configuration options to each component to
+         * easily customize how each child component behaves.
+         * Note this is only used when useComponents is true.
+         * @accessor
+         * @private
+         */
+
+        /**
+         * @cfg {Number} maxItemCache
+         * Maintains a cache of reusable components when using a component based DataView.  Improveing performance at
+         * the cost of memory.
+         * Note this is currently only used when useComponents is true.
+         * @accessor
+         * @private
+         */
+
+        /**
+         * @cfg {String} defaultType
+         * The xtype used for the component based DataView. Defaults to dataitem.
+         * Note this is only used when useComponents is true.
+         * @accessor
+         * @private
+         */
     },
 
     constructor: function() {

@@ -16,8 +16,7 @@
  *             },
  *             {
  *                 text   : 'Option 2',
- *                 pressed: true,
- *                 handler: tappedFn
+ *                 pressed: true
  *             },
  *             {
  *                 text: 'Option 3'
@@ -286,20 +285,16 @@ Ext.define('Ext.SegmentedButton', {
      * @param {Boolean} suppressEvents true to suppress toggle events during the action.
      * If allowMultiple is true, then setPressed will toggle the button state.
      * @method setPressed
-     * @deprecated 2.0.0
+     * @deprecated 2.0.0 Please use {@link #setPressedButtons} instead
      */
-    Ext.deprecateClassMethod(me, 'setPressed', me.prototype.setPressedButtons, '[Ext.SegmentedButton] setPressed is now deprecated, please use setPressedButtons instead');
+    Ext.deprecateClassMethod(me, 'setPressed', 'setPressedButtons');
 
     /**
      * Gets the currently pressed button(s).
      * @method getPressed
-     * @deprecated 2.0.0
+     * @deprecated 2.0.0 Please use {@link #getPressedButtons} instead
      */
-    Ext.deprecateClassMethod(me,
-        'getPressed',
-        me.prototype.getPressedButtons,
-        '[Ext.SegmentedButton] getPressed is now deprecated. Please use getPressedButtons instead.'
-    );
+    Ext.deprecateClassMethod(me, 'getPressed', 'getPressedButtons');
 
     //</deprecated>
 });

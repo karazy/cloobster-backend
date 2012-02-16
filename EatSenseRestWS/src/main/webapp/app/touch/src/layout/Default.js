@@ -116,6 +116,16 @@ Ext.define('Ext.layout.Default', {
 
     POSITION_END: 'end',
 
+    config: {
+        /**
+         * @cfg {Ext.fx.layout.Card} animation Layout animation configuration
+         * Controls how layout transitions are animated.  Currently only available for
+         * Card Layouts
+         * @accessor
+         */
+        animation: null
+    },
+
     constructor: function(container, config) {
         this.container = container;
 

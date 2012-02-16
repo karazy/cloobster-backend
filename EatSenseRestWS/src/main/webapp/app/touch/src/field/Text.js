@@ -202,21 +202,41 @@ Ext.define('Ext.field.Text', {
         // set the originalValue of the textfield, if one exists
         me.originalValue = me.originalValue || "";
         me.getComponent().originalValue = me.originalValue;
+
+        me.syncEmptyCls();
+    },
+
+    syncEmptyCls: function() {
+        var empty = (this._value) ? this._value.length : false,
+            cls = Ext.baseCSSPrefix + 'empty';
+
+        if (empty) {
+            this.removeCls(cls);
+        } else {
+            this.addCls(cls);
+        }
     },
 
     // @private
     updateValue: function(newValue) {
         var component = this.getComponent();
+
         if (component) {
             component.setValue(newValue);
         }
 
         this[newValue ? 'showClearIcon' : 'hideClearIcon']();
+
+        this.syncEmptyCls();
     },
 
     getValue: function() {
         var me = this;
+
         me._value = me.getComponent().getValue();
+
+        me.syncEmptyCls();
+
         return me._value;
     },
 
@@ -356,6 +376,9 @@ Ext.define('Ext.field.Text', {
     // @private
     doClearIconTap: function(me, e) {
         me.setValue('');
+
+        //sync with the input
+        me.getValue();
     },
 
     onChange: function(me, value, startValue) {
@@ -438,8 +461,8 @@ Ext.define('Ext.field.Text', {
 /**
  * @property startValue
  * @type String/Number
- * Deprecated, used to contain the previous value of the field before the edit
- * @deprecated 2.0.0
+ * Used to contain the previous value of the field before the edit
+ * @removed 2.0.0
  * @member Ext.field.Text
  */
 //</deprecated>

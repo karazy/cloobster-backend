@@ -12,9 +12,9 @@ Ext.define('EatSense.view.CartOverview', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderInCart''>" +
 				"<h2>" +
-					"{product.data.name} - {amount} - {[values.product.calculate(values.amount)]}€" +
+					"{Product.name} - {amount} " +
 				"</h2>" +
-				"<tpl for='product.choicesStore.data'>" +
+				"<tpl for='Product.choices'>" +
 					"<tpl if='this.checkSelections(parent, xindex)'>" +
 						"<h3>{text}</h3>" +
 						"<ul>" +

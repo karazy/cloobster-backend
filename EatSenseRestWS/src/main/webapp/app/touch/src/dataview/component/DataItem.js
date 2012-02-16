@@ -91,6 +91,10 @@ Ext.define('Ext.dataview.component.DataItem', {
      * @private
      */
     updateRecord: function(newRecord) {
+        if (!newRecord) {
+            return;
+        }
+
         var me = this,
             dataview = me.config.dataview,
             data = dataview.prepareData(newRecord.getData(true), dataview.getStore().indexOf(newRecord), newRecord),

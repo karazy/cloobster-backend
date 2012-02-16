@@ -42,7 +42,10 @@
  * to load a particular instance into our form:
  *
  *     Ext.define('MyApp.model.User', {
- *         fields: ['name', 'email', 'password']
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             fields: ['name', 'email', 'password']
+ *         }
  *     });
  *
  *     var ed = Ext.create('MyApp.model.User', {
@@ -192,7 +195,7 @@ Ext.define('Ext.form.Panel', {
 
         // @inherit
         scrollable: {
-            scrollMethod: 'scrollposition'
+            translationMethod: 'scrollposition'
         }
     },
 
@@ -671,7 +674,6 @@ Ext.define('Ext.form.Panel', {
     getFieldsFromItem: Ext.emptyFn,
 
     /**
-     * @deprecated 2.0.0 showMask is now deprecated. Please use {@link #setMasked} instead.
      * Shows a generic/custom mask over a designated Element.
      * @param {String/Object} cfg Either a string message or a configuration object supporting
      * the following options:
@@ -682,6 +684,7 @@ Ext.define('Ext.form.Panel', {
      *     }
      *
      * @return {Ext.form.Panel} This form
+     * @deprecated 2.0.0 Please use {@link #setMasked} instead.
      */
     showMask: function(cfg, target) {
         //<debug>
@@ -703,9 +706,9 @@ Ext.define('Ext.form.Panel', {
     },
 
     /**
-     * @deprecated 2.0.0 hideMask is now deprecated. Please use {@link #unmask} or {@link #setMasked} instead.
      * Hides a previously shown wait mask (See {@link #showMask})
      * @return {Ext.form.Panel} this
+     * @deprecated 2.0.0 Please use {@link #unmask} or {@link #setMasked} instead.
      */
     hideMask: function() {
         this.setMasked(false);
@@ -807,10 +810,30 @@ Ext.define('Ext.form.Panel', {
         return false;
     }
 }, function() {
+
+    /**
+     * @member Ext.form.Panel
+     * @method loadRecord
+     * @deprecated 2.0.0 please use #setRecord
+     */
+
+    /**
+     * @member Ext.form.Panel
+     * @method loadModel
+     * @deprecated 2.0.0 please use #setRecord
+     */
+
+    /**
+     * @member Ext.form.Panel
+     * @method load
+     * @deprecated 2.0.0 please use #setRecord
+     */
     //<deprecated product=touch since=2.0>
-    Ext.deprecateClassMethod(this, 'loadRecord', 'setRecord');
-    Ext.deprecateClassMethod(this, 'loadModel', 'setRecord');
-    Ext.deprecateClassMethod(this, 'load', 'setRecord');
+    Ext.deprecateClassMethod(this, {
+        loadRecord: 'setRecord',
+        loadModel: 'setRecord',
+        load: 'setRecord'
+    });
 
     this.override({
         constructor: function(config) {
@@ -819,13 +842,13 @@ Ext.define('Ext.form.Panel', {
              * The defined waitMsg template.  Used for precise control over the masking agent used
              * to mask the FormPanel (or other Element) during form Ajax/submission actions. For more options, see
              * {@link #showMask} method.
-             * @deprecated 2.0.0 waitTpl is now deprecated. Please use a custom {@link Ext.LoadMask} class and the {@link #masked} configuration
+             * @removed 2.0.0 Please use a custom {@link Ext.LoadMask} class and the {@link #masked} configuration
              * when {@link #method submitting} your form.
              */
 
             /**
              * @cfg {Ext.dom.Element} waitMsgTarget The target of any mask shown on this form.
-             * @deprecated 2.0.0 There is no need to set a mask target anymore. Please see the {@link #masked} configuration instead.
+             * @removed 2.0.0 There is no need to set a mask target anymore. Please see the {@link #masked} configuration instead.
              */
             if (config && config.hasOwnProperty('waitMsgTarget')) {
                 delete config.waitMsgTarget;

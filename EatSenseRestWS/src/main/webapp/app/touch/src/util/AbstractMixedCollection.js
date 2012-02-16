@@ -600,8 +600,8 @@ var middleAged = people.filter('age', 24);
 
             for (i = 0; i < length; i++) {
                 var filter = filters[i],
-                    fn     = filter.filterFn,
-                    scope  = filter.scope;
+                    fn     = filter.getFilterFn(),
+                    scope  = filter.getScope();
 
                 isMatch = isMatch && fn.call(scope, record);
             }

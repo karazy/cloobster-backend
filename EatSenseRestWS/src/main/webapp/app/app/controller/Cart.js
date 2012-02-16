@@ -127,7 +127,7 @@ Ext.define('EatSense.controller.Cart', {
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
 		
 		orders.each(function(order) {
-			console.log('save order' + order.get('product').get('name'));
+			console.log('save order' + order.getProduct().get('name'));
 			order.save({
 				params: {
 					checkinId: checkIn.get('userId')
@@ -210,7 +210,7 @@ Ext.define('EatSense.controller.Cart', {
 		console.log("Cart Controller -> showProductDetail");		
 		 var detail = this.getProductdetail(), 
 		 choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel'),
-		 product = order.get('product');
+		 product = order.getProduct();
 		 this.models.activeOrder = order;
 
 		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
@@ -287,7 +287,7 @@ Ext.define('EatSense.controller.Cart', {
 	},
 	
 	editOrder : function() {
-		var product = this.models.activeOrder.get('product'), validationError = "", productIsValid = true;
+		var product = this.models.activeOrder.getProduct(), validationError = "", productIsValid = true;
 		
 		product.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
@@ -340,7 +340,7 @@ Ext.define('EatSense.controller.Cart', {
 	 */
 	recalculate: function(order) {
 		console.log('Cart Controller -> recalculate');
-		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.get('product'), amount: order.get('amount')});
+		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
 	
 	calculateTotal : function() {

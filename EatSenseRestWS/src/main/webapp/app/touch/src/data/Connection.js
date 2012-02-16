@@ -103,6 +103,10 @@ Ext.define('Ext.data.Connection', {
         autoAbort: false
     },
 
+    textAreaRe: /textarea/i,
+    multiPartRe: /multipart\/form-data/i,
+    lineBreakRe: /\r\n/g,
+
     constructor : function(config) {
         this.initConfig(config);
 
@@ -402,7 +406,7 @@ Ext.define('Ext.data.Connection', {
             doc = frame.contentWindow.document || frame.contentDocument || window.frames[id].document;
             if (doc) {
                 if (doc.body) {
-                    if (/textarea/i.test((firstChild = doc.body.firstChild || {}).tagName)) { // json response wrapped in textarea
+                    if (this.textAreaRe.test((firstChild = doc.body.firstChild || {}).tagName)) { // json response wrapped in textarea
                         response.responseText = firstChild.value;
                     } else {
                         response.responseText = doc.body.innerHTML;
@@ -431,7 +435,7 @@ Ext.define('Ext.data.Connection', {
     isFormUpload: function(options) {
         var form = this.getForm(options);
         if (form) {
-            return (options.isUpload || (/multipart\/form-data/i).test(form.getAttribute('enctype')));
+            return (options.isUpload || (this.multiPartRe).test(form.getAttribute('enctype')));
         }
         return false;
     },
@@ -753,6 +757,10 @@ Ext.define('Ext.data.Connection', {
 
         try {
             result = me.parseStatus(request.xhr.status);
+            
+            if (request.timedout) {
+                result.success = false;
+            }
         } catch (e) {
             // in some browsers we can't access the status if the readyState is not 4, so the request has failed
             result = {
@@ -818,9 +826,18 @@ Ext.define('Ext.data.Connection', {
     createResponse : function(request) {
         var xhr = request.xhr,
             headers = {},
-            lines = xhr.getAllResponseHeaders().replace(/\r\n/g, '\n').split('\n'),
-            count = lines.length,
-            line, index, key, value, response;
+            lines, count, line, index, key, response;
+
+        //we need to make this check here because if a request times out an exception is thrown
+        //when calling getAllResponseHeaders() because the response never came back to populate it
+        if (request.timedout) {
+            request.success = false;
+            lines = [];
+        } else {
+            lines = xhr.getAllResponseHeaders().replace(this.lineBreakRe, '\n').split('\n');
+        }
+
+        count = lines.length;
 
         while (count--) {
             line = lines[count];

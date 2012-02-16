@@ -165,14 +165,17 @@ Ext.define('Ext.slider.Slider', {
     },
 
     /**
-     * @private
+     * Returns the Thumb instances bound to this Slider
+     * @return {Ext.slider.Thumb[]} The thumb instances
      */
     getThumbs: function() {
         return this.innerItems;
     },
 
     /**
-     * @private
+     * Returns the Thumb instance bound to this Slider
+     * @param {Number} [index=0] The index of Thumb to return.
+     * @return {Ext.slider.Thumb} The thumb instance
      */
     getThumb: function(index) {
         if (typeof index != 'number') {
@@ -228,9 +231,8 @@ Ext.define('Ext.slider.Slider', {
         this.fireEvent('dragstart', this, thumb, this.dragStartValue, e);
     },
 
-    onThumbDrag: function(thumb, e, offset) {
+    onThumbDrag: function(thumb, e, offsetX) {
         var index = this.getThumbIndex(thumb),
-            offsetX = offset.x,
             offsetValueRatio = this.offsetValueRatio,
             constrainedValue = this.constrainValue(offsetX / offsetValueRatio);
 
@@ -249,9 +251,7 @@ Ext.define('Ext.slider.Slider', {
             offsetValueRatio = this.offsetValueRatio,
             draggable = thumb.getDraggable();
 
-        draggable.setOffset({
-            x: value * offsetValueRatio
-        }, animation);
+        draggable.setOffset(value * offsetValueRatio, null, animation);
 
         values[index] = this.constrainValue(draggable.getOffset().x / offsetValueRatio);
     },
@@ -303,7 +303,7 @@ Ext.define('Ext.slider.Slider', {
         if (this.isDisabled()) {
             return;
         }
-            
+
         var targetElement = Ext.get(e.target);
 
         if (!targetElement || targetElement.hasCls('x-thumb')) {
@@ -388,7 +388,7 @@ Ext.define('Ext.slider.Slider', {
 
         for (i = 0; i < ln; i++) {
             thumbs[i].getDraggable().setExtraConstraint(null)
-                                    .setOffset({ x: newValue[i] * this.offsetValueRatio });
+                                    .setOffset(newValue[i] * this.offsetValueRatio);
         }
 
         for (i = 0; i < ln; i++) {
@@ -521,4 +521,14 @@ Ext.define('Ext.slider.Slider', {
             items[i].setDisabled(disabled);
         }
     }
+
+}, function() {
+    //<deprecated product=touch since=2.0>
+    /**
+     * @member Ext.slider.Slider
+     * @cfg {Boolean} animationDuration
+     * @deprecated 2.0.0 please use set the duration property on the animation config
+     */
+    Ext.deprecateProperty(this, 'animationDuration', null, "Ext.slider.Slider.animationDuration has been removed");
+    //</deprecated>
 });

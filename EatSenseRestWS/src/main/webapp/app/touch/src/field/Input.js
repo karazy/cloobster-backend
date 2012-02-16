@@ -681,9 +681,6 @@ Ext.define('Ext.field.Input', {
         var oldValue = this.getValue(),
             newValue;
 
-        //hide the clear icon
-        this.clearIcon.hide();
-
         this.fireEvent('clearicontap', this, e);
 
         newValue = this.getValue();

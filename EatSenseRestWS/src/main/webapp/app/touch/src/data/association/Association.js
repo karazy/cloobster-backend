@@ -1,36 +1,37 @@
 /**
  * @author Ed Spencer
- * @class Ext.data.association.Association
- * @extends Object
  *
- * <p>Associations enable you to express relationships between different {@link Ext.data.Model Models}. Let's say we're
+ * Associations enable you to express relationships between different {@link Ext.data.Model Models}. Let's say we're
  * writing an ecommerce system where Users can make Orders - there's a relationship between these Models that we can
- * express like this:</p>
+ * express like this:
  *
-<pre><code>
-Ext.define('User', {
-    extend: 'Ext.data.Model',
-    config: {
-        fields: ['id', 'name', 'email'],
-        hasMany: {model: 'Order', name: 'orders'}
-    }
-});
-
-Ext.define('Order', {
-    extend: 'Ext.data.Model',
-    config: {
-        fields: ['id', 'user_id', 'status', 'price'],
-        belongsTo: 'User'
-    }
-});
-</code></pre>
+ *     Ext.define('MyApp.model.User', {
+ *         extend: 'Ext.data.Model',
  *
- * <p>We've set up two models - User and Order - and told them about each other. You can set up as many associations on
+ *         config: {
+ *             fields: ['id', 'name', 'email'],
+ *             hasMany: {
+ *                 model: 'MyApp.model.Order',
+ *                 name: 'orders'
+ *             }
+ *         }
+ *     });
+ *
+ *     Ext.define('MyApp.model.Order', {
+ *         extend: 'Ext.data.Model',
+ *
+ *         config: {
+ *             fields: ['id', 'user_id', 'status', 'price'],
+ *             belongsTo: 'MyApp.model.User'
+ *         }
+ *     });
+ *
+ * We've set up two models - User and Order - and told them about each other. You can set up as many associations on
  * each Model as you need using the two default types - {@link Ext.data.association.HasMany hasMany} and
  * {@link Ext.data.association.BelongsTo belongsTo}. There's much more detail on the usage of each of those inside their
- * documentation pages. If you're not familiar with Models already, {@link Ext.data.Model there is plenty on those too}.</p>
+ * documentation pages. If you're not familiar with Models already, {@link Ext.data.Model there is plenty on those too}.
  *
- * <p><u>Further Reading</u></p>
+ * ## Further Reading
  *
  * <ul style="list-style-type: disc; padding-left: 20px;">
  *   <li>{@link Ext.data.association.HasMany hasMany associations}</li>
@@ -39,84 +40,81 @@ Ext.define('Order', {
  *   <li>{@link Ext.data.Model using Models}</li>
  * </ul>
  *
- * <b>Self association models</b>
- * <p>We can also have models that create parent/child associations between the same type. Below is an example, where
- * groups can be nested inside other groups:</p>
- * <pre><code>
-
-// Server Data
-{
-    "groups": {
-        "id": 10,
-        "parent_id": 100,
-        "name": "Main Group",
-        "parent_group": {
-            "id": 100,
-            "parent_id": null,
-            "name": "Parent Group"
-        },
-        "child_groups": [{
-            "id": 2,
-            "parent_id": 10,
-            "name": "Child Group 1"
-        },{
-            "id": 3,
-            "parent_id": 10,
-            "name": "Child Group 2"
-        },{
-            "id": 4,
-            "parent_id": 10,
-            "name": "Child Group 3"
-        }]
-    }
-}
-
-// Client code
-Ext.define('Group', {
-    extend: 'Ext.data.Model',
-    config: {
-        fields: ['id', 'parent_id', 'name'],
-        proxy: {
-            type: 'ajax',
-            url: 'data.json',
-            reader: {
-                type: 'json',
-                root: 'groups'
-            }
-        },
-        associations: [{
-            type: 'hasMany',
-            model: 'Group',
-            primaryKey: 'id',
-            foreignKey: 'parent_id',
-            autoLoad: true,
-            associationKey: 'child_groups' // read child data from child_groups
-        }, {
-            type: 'belongsTo',
-            model: 'Group',
-            primaryKey: 'id',
-            foreignKey: 'parent_id',
-            associationKey: 'parent_group' // read parent data from parent_group
-        }]
-    }
-});
-
-
-Ext.onReady(function(){
-
-    Group.load(10, {
-        success: function(group){
-            console.log(group.getGroup().get('name'));
-
-            group.groups().each(function(rec){
-                console.log(rec.get('name'));
-            });
-        }
-    });
-
-});
- * </code></pre>
+ * ### Self-associating Models
  *
+ * We can also have models that create parent/child associations between the same type. Below is an example, where
+ * groups can be nested inside other groups:
+ *
+ *     // Server Data
+ *     {
+ *         "groups": {
+ *             "id": 10,
+ *             "parent_id": 100,
+ *             "name": "Main Group",
+ *             "parent_group": {
+ *                 "id": 100,
+ *                 "parent_id": null,
+ *                 "name": "Parent Group"
+ *             },
+ *             "child_groups": [{
+ *                 "id": 2,
+ *                 "parent_id": 10,
+ *                 "name": "Child Group 1"
+ *             },{
+ *                 "id": 3,
+ *                 "parent_id": 10,
+ *                 "name": "Child Group 2"
+ *             },{
+ *                 "id": 4,
+ *                 "parent_id": 10,
+ *                 "name": "Child Group 3"
+ *             }]
+ *         }
+ *     }
+ *
+ *     // Client code
+ *     Ext.define('MyApp.model.Group', {
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             fields: ['id', 'parent_id', 'name'],
+ *             proxy: {
+ *                 type: 'ajax',
+ *                 url: 'data.json',
+ *                 reader: {
+ *                     type: 'json',
+ *                     root: 'groups'
+ *                 }
+ *             },
+ *             associations: [{
+ *                 type: 'hasMany',
+ *                 model: 'MyApp.model.Group',
+ *                 primaryKey: 'id',
+ *                 foreignKey: 'parent_id',
+ *                 autoLoad: true,
+ *                 associationKey: 'child_groups' // read child data from child_groups
+ *             }, {
+ *                 type: 'belongsTo',
+ *                 model: 'MyApp.model.Group',
+ *                 primaryKey: 'id',
+ *                 foreignKey: 'parent_id',
+ *                 associationKey: 'parent_group' // read parent data from parent_group
+ *             }]
+ *         }
+ *     });
+ *
+ *
+ *     Ext.onReady(function(){
+ *         MyApp.model.Group.load(10, {
+ *             success: function(group){
+ *                 console.log(group.getGroup().get('name'));
+ *
+ *                 group.groups().each(function(rec){
+ *                     console.log(rec.get('name'));
+ *                 });
+ *             }
+ *         });
+ *
+ *     });
  */
 Ext.define('Ext.data.association.Association', {
     alternateClassName: 'Ext.data.Association',
@@ -125,17 +123,30 @@ Ext.define('Ext.data.association.Association', {
 
     config: {
         /**
-         * @cfg {String} ownerModel The string name of the model that owns the association. Required
+         * @cfg {Ext.data.Model/String} ownerModel The full class name or reference to the class that owns this
+         * associations. This is a required configuration on every association.
+         * @accessor
          */
         ownerModel: null,
 
+        /*
+         * @cfg {String} ownerName The name for the owner model. This defaults to the last part
+         * of the class name of the {@link #ownerModel}.
+         */
         ownerName: undefined,
 
         /**
-         * @cfg {String} associatedModel The string name of the model that is being associated with. Required
+         * @cfg {String} associatedModel The full class name or reference to the class that the {@link #ownerModel}
+         * is being associated with. This is a required configuration on every association.
+         * @accessor
          */
         associatedModel: null,
 
+        /**
+         * @cfg {String} associatedName The name for the associated model. This defaults to the last part
+         * of the class name of the {@link #associatedModel}.
+         * @accessor
+         */
         associatedName: undefined,
 
 
@@ -289,7 +300,8 @@ Ext.define('Ext.data.association.Association', {
                 config[key] = data[key];
                 delete data[key];
                 // <debug warn>
-                console.warn(key + ' is deprecated as a property directly on the Association prototype. Please put it inside the config object.');
+                Ext.Logger.deprecate(key + ' is deprecated as a property directly on the Association prototype. ' +
+                    'Please put it inside the config object.');
                 // </debug>
             }
         }
