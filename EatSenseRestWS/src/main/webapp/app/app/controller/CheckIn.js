@@ -6,6 +6,7 @@
  */
 Ext.define('EatSense.controller.CheckIn', {
     extend: 'Ext.app.Controller',
+    requires: ['EatSense.data.proxy.CustomRestProxy'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
         
@@ -84,7 +85,8 @@ Ext.define('EatSense.controller.CheckIn', {
     	 };
     	 
     	 this.createStores = function(restaurantId) {
-    		 var _menuListStore =	 Ext.create('Ext.data.Store', {
+    		 
+    		 var menusStore =	 Ext.create('Ext.data.Store', {
 	 			   model: 'EatSense.model.Menu',
 	 			   storeId: 'menuStore',
 	 			   proxy: {
@@ -96,9 +98,9 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   }
 	 		 });
     		 
-    		 this.getMenulist().setStore(_menuListStore);
+    		 this.getMenulist().setStore(menusStore);
     		 
-    		 var _productListStore =	 Ext.create('Ext.data.Store', {
+       		 var _productListStore =	 Ext.create('Ext.data.Store', {
 	 			   model: 'EatSense.model.Product',
 	 			   storeId: 'productStore',
 	 			   proxy: {
@@ -109,9 +111,45 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   		}
 	 			   }
 	 		 });
-    		 
-    		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
-    		 ProductType.setProxy(_productListStore.getProxy());
+  		 
+//  		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
+//				   type: 'rest',
+//				   url : '/restaurants/'+restaurantId+'/products',
+//				   reader: {
+//					   type: 'json'
+//			   		}
+//	 		 });
+//  		 
+  		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
+  		 ProductType.setProxy(_productListStore.getProxy());
+  		 
+   		 
+   		 var _orderListStore =	 Ext.create('Ext.data.Store', {
+ 			   model: 'EatSense.model.Order',
+ 			   storeId: 'orderStore',
+ 			   proxy: {
+ 				   type: 'rest',
+ 				   url : '/restaurants/'+restaurantId+'/orders',
+ 				   reader: {
+ 					   type: 'json'
+ 			   		}
+ 			   }
+ 		 });
+		 
+//		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
+//			   type: 'rest',
+//			   url : '/restaurants/'+restaurantId+'/products',
+//			   reader: {
+//				   type: 'json'
+//		   		}
+// 		 });
+//		 
+		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Order');
+		 ProductType.setProxy(_orderListStore.getProxy());
+  	 
+  			
+
+  			
     	 };
     },
     /**

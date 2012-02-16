@@ -34,13 +34,6 @@ Ext.define('EatSense.model.Order', {
 //			model : 'EatSense.model.Product',
 //			name: 'product'
 //		},
-		proxy : {
-			type : 'rest',
-			url : globalConf.serviceUrl + '/restaurant/order/',
-			reader : {
-				type : 'json',
-			}
-		}
 	},
 	
 	calculate: function() {

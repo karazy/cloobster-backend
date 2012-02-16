@@ -14,7 +14,7 @@ Ext.application({
 	controllers : [ 'CheckIn', 'Menu', 'Cart' ],
 	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OptionDetail', 'Cart', 'Menu', 'CartOverview'], 
-	stores : [ 'CheckIn', 'User', 'Menu', 'Product' ],
+	stores : [ 'CheckIn', 'User'],
 	requires: ['EatSense.data.proxy.CustomRestProxy'],
 	init : function() {
 		console.log('init');

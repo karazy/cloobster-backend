@@ -26,13 +26,6 @@ Ext.define('EatSense.model.Product', {
 			model : 'EatSense.model.Choice',
 			name : 'choices'
 		},
-//		proxy: {
-//			type: 'rest',
-//			url: globalConf.serviceUrl+'/restaurants/products/', 
-//			reader: {
-//				type: 'json',
-//			} 
-//		}
 	},
 	
 	validate: function() {

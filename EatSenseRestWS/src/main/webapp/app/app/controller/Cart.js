@@ -10,7 +10,7 @@ Ext.define('EatSense.controller.Cart', {
 			orderlist : '#cartCardPanel #orderlist',
 			backBt : '#cartTopBar #cartBackBt',
 			cancelOrderBt : '#cartBottomBar #bottomTapCancel',
-			sendOrderBt : '#cartBottomBar #bottomTapOrder',
+			submitOrderBt : '#cartBottomBar #bottomTapOrder',
 			topToolbar : '#cartTopBar',
 			productdetail : '#cartCardPanel #productdetail',
 			editOrderBt : '#cartCardPanel #productdetail #prodDetailCardBt',
@@ -29,7 +29,7 @@ Ext.define('EatSense.controller.Cart', {
 				 tap: this.dumpCart
 			 }, 
 			 submitOrderBt : {
-				 tap: this.sendOrders
+				 tap: this.submitOrders
 			 },
 			 orderlist : {
 				 itemtap: this.cartItemContextMenu
@@ -122,7 +122,33 @@ Ext.define('EatSense.controller.Cart', {
 	 * Submits orders to server.
 	 */
 	submitOrders: function() {
-		Ext.Msg.alert(i18nPlugin.translate('hint'),'Noch nicht funktionsfähig', Ext.emptyFn);
+		console.log('Cart Controller -> submitOrders');
+		var checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn, 
+		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		
+		orders.each(function(order) {
+			console.log('save order' + order.get('product').get('name'));
+			order.save({
+				params: {
+					checkinId: checkIn.get('userId')
+				},
+				success: function(response) {
+					console.log('saved '+response);
+//					Ext.Msg.show({
+//						title : i18nPlugin.translate('hint'),
+//						message : 'test test',
+//						buttons : []
+//					});
+//					//show short alert and then hide
+//					Ext.defer((function() {
+//						Ext.Msg.hide();
+//					}), globalConf.msgboxHideTimeout, this);
+				}
+				
+			});
+		});
+		
+	//set orders to send and switch view
 	},
 	/**
 	 * Listener for itemTap event of orderlist.
