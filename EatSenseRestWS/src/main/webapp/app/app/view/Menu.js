@@ -75,7 +75,7 @@ Ext.define('EatSense.view.Menu', {
 	switchMenuview : function(view, direction){
 		var cardpanel = this.getComponent('menuCardPanel');
 		cardpanel.getLayout().setAnimation({
-			 type: 'slide',
+			 type: 'cube',
 	         direction: direction
 		});
 		cardpanel.setActiveItem(view);

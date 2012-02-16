@@ -34,10 +34,8 @@ Ext.define('EatSense.view.ProductDetail', {
 				xtype : 'panel',
 				layout : {
 					type : 'hbox',
-					align : 'stretch'
-				},
-				defaults: {
-					//height: '30px'
+					align : 'stretch',
+					pack: 'center'
 				},
 				items : [ {
 					xtype : 'spinnerfield',
@@ -45,24 +43,20 @@ Ext.define('EatSense.view.ProductDetail', {
 					itemId : 'productAmountSpinner',
 					style : 'background-color:white;',
 					value : 1,
-					flex : 3,
-					//TODO Bug?
-					maxHeight: '30px',
+					width: 200,
 					minValue : '1',
 					maxValue : '10',
 					cycle : true,
-
 				},
 				{
 					xtype: 'spacer',
-					flex: 1
+					width: 20
 				},
 				{
 					xtype : 'button',
 					itemId : 'prodDetailCardBt',
 					iconCls : 'compose',
 					iconMask : true,
-					flex : 2
 				} ]
 			} ]
 		}, {

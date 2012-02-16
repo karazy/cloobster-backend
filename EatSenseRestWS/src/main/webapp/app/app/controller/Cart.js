@@ -5,7 +5,7 @@ Ext.define('EatSense.controller.Cart', {
 			main : 'mainview',
 			cartview : 'cart',
 			cartoverview: 'cartoverview',
-			cartoverviewTotal: 'cartoverview #carttotalpanel',
+			cartoverviewTotal: 'cartoverview #carttotalpanel label',
 			menuview: 'menu',
 			orderlist : '#cartCardPanel #orderlist',
 			backBt : '#cartTopBar #cartBackBt',
@@ -84,6 +84,7 @@ Ext.define('EatSense.controller.Cart', {
 			
 			orders.each(function(order) {
 				total += order.calculate();
+				total = Math.round(total * 100) / 100;
 			});
 			
 			this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
@@ -110,10 +111,17 @@ Ext.define('EatSense.controller.Cart', {
 				//workaround, because view stays masked after switch to menu
 				Ext.Msg.hide();
 				//clear store
-				this.getApplication().getController('CheckIn').models.activeCheckIn.orders().removeAll();
+				var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+				orders.removeAll();
 				//reset badge text on cart button and switch back to menu
 				this.getApplication().getController('Menu').getCardBt().setBadgeText('');
-				this.showMenu();
+
+					if(orders.data.length > 0) {
+						this.showCart();
+					} else {
+						this.showMenu();
+					}
+				
 				}
 			}
 		});				
@@ -174,10 +182,11 @@ Ext.define('EatSense.controller.Cart', {
 		}, this);
 		//dump item
 		tooltip.getComponent('deleteCartItem').addListener('tap', function() {
-			tooltip.hide();
+//			tooltip.hide();
+			this.getMain().remove(tooltip);
 			Ext.Msg.show({
 				title: i18nPlugin.translate('hint'),
-				message: i18nPlugin.translate('dumpItem', model.get('product').get('name')),
+				message: i18nPlugin.translate('dumpItem', model.getProduct().get('name')),
 				buttons: Ext.MessageBox.YESNO,
 				scope: this,
 				fn: function(btnId, value, opt) {
@@ -200,6 +209,7 @@ Ext.define('EatSense.controller.Cart', {
 		}, this);
 		
 		tooltip.show();
+		this.getMain().add(tooltip);
 	},
 	/**
 	 * Displays detailed information for an existing order (e.g. Burger)
@@ -297,13 +307,15 @@ Ext.define('EatSense.controller.Cart', {
 			}
 		});
 		
+		this.models.activeOrder.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
+		
 		//WORKAROUND
 		//because options select doesn't get correctly set after copy of object
-		product.choices().each(function(choice, cIndex) {
-			choice.options().each(function(option, oIndex) {
-				product.data.choices[cIndex].options[oIndex].selected = option.get('selected');
-			});
-		});
+//		product.choices().each(function(choice, cIndex) {
+//			choice.options().each(function(option, oIndex) {
+//				product.data.choices[cIndex].options[oIndex].selected = option.get('selected');
+//			});
+//		});
 		//WORKAROUND _ END	
 		
 		if(productIsValid) {
@@ -362,7 +374,9 @@ Ext.define('EatSense.util.CartToolTip', {
 	extend: 'Ext.Panel',
 	xtype: 'cartToolTip',
 	config: {
-		layout:'hbox',
+		layout: {
+			type: 'hbox'
+		},
 		centered: true,
 		width: 120,
 		height:50,
@@ -374,7 +388,10 @@ Ext.define('EatSense.util.CartToolTip', {
 			iconCls : 'compose',
 			iconMask : true,
 			flex: 1	
-		},{
+		}, {
+			xtype: 'spacer',
+			width: 7
+		} ,{
 			xtype: 'button',
 			itemId: 'deleteCartItem',
 			iconCls : 'trash',

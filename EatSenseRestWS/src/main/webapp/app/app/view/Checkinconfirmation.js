@@ -47,6 +47,8 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				xtype : 'textfield',
 				id : 'nicknameTf',
 				label: 'Nickname',
+				width: 300,
+				labelWidth: 100,
 				labelAlign: 'top',
 				required: true,
 			}, {

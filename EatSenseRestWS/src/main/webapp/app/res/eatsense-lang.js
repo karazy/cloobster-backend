@@ -35,6 +35,7 @@ var translation = {
 		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
 		"orderRemoved" : "Bestellung entfernt",
 		"orderComment" : "Optionaler Kommentar",
+		"amount" : "Menge",
 		//Cart
 		"cartviewTitle" : "Bestellung",
 		"dumpCart" : "Warenkorb leeren?",

@@ -99,7 +99,8 @@ Ext.define('EatSense.controller.Menu', {
 	
 	loadProductDetail: function(dataview, record) {
 		console.log('Menu Controller -> loadProductDetail');
-		this.models.activeProduct = record;
+		this.models.activeProduct = record.copy();
+//		this.models.activeProduct = record.deepCopy();
 		this.showProductDetail(dataview, this.models.activeProduct);
 //		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
 
@@ -127,6 +128,7 @@ Ext.define('EatSense.controller.Menu', {
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmountSpinner().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof record.choices() !== 'undefined' && record.choices().getCount() > 0) {
+
 			 record.choices().each(function(_choice) {
 				 var choice = _choice;				 			 
 //			 for(var i =0; i < record.choices().data.items.length; i++) {
@@ -255,11 +257,11 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('status','PLACED');
 			//WORKAROUND
 			//because options select doesn't get correctly set after copy of object
-			productForCart.choices().each(function(choice, cIndex) {
-				choice.options().each(function(option, oIndex) {
-					productForCart.data.choices[cIndex].options[oIndex].selected = option.get('selected');
-				});
-			});
+//			productForCart.choices().each(function(choice, cIndex) {
+//				choice.options().each(function(option, oIndex) {
+//					productForCart.data.choices[cIndex].options[oIndex].selected = option.get('selected');
+//				});
+//			});
 			//WORKAROUND _ END			
 			order.setProduct(productForCart);
 			//comment field needed

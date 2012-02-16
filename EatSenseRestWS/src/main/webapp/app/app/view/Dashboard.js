@@ -24,12 +24,12 @@ Ext.define('EatSense.view.Dashboard', {
         	layout: {
             	type : 'vbox',
             	pack : 'center',
-            	align: 'center',            	
+            	align: 'middle',            	
         	},
         	defaults: {
                 //flex  : 1,
                 margin: 5,
-                type : 'fit'
+//                type : 'fit'
             },
          	items: [
             {
@@ -41,6 +41,9 @@ Ext.define('EatSense.view.Dashboard', {
             {
                 xtype: 'textfield',
                 label: i18nPlugin.translate('barcode'),
+//              labelAlign: 'top',
+                labelWidth: 100,
+                width: 300,                
                 name: 'barcodeTF',
                 hidden: (profile == 'phone' && window.plugins.barcodeScanner)? true : false
             },

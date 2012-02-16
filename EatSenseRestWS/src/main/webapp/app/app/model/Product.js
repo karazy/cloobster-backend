@@ -50,7 +50,8 @@ Ext.define('EatSense.model.Product', {
 	 * Returns a deep copy of this product containing only data.
 	 */
 	deepCopy: function() {
-		var _productCopy, _choiceCopy;
+		console.log('Product -> deepCopy')
+		var _productCopy, _choiceCopy, _optionCopy;
 		_productCopy = Ext.create('EatSense.model.Product', {
 //			id: this.get('id'),
 			name: this.get('name'),
@@ -58,26 +59,22 @@ Ext.define('EatSense.model.Product', {
 			longDesc: this.get('longDesc'),
 			price: this.get('price')
 		});
-//		_productCopy.choices().removeAll();
-//		_productCopy.data.choices = new Array();
-		/*
-		 * 	    {name: 'id', type: 'string'},
-			{name: 'text', type: 'string'},
-			{name: 'minOccurence', type: 'number'},
-			{name: 'maxOccurence', type: 'number'},
-			{name: 'price', type: 'number'},
-			{name: 'included', type: 'number'},
-			{name: 'overridePrice', type: 'string'},
-		 */
+
 		this.choices().each(function(choice) {
 			_choiceCopy = Ext.create('EatSense.model.Choice', {
 				text: choice.get('text'),
 				price: choice.get('price'),
+				minOccurence: choice.get('minOccurence'),
+				maxOccurence: choice.get('maxOccurence'),
+				included: choice.get('included'),
 				overridePrice: choice.get('overridePrice')
 			});
-//			_choiceCopy.options().removeAll();
-//			_choiceCopy.data.options = new Array();
 			choice.options().each(function(option) {
+				_optionCopy = Ext.create('EatSense.model.Option', {
+					name : option.get('name'),
+					price : option.get('price'),
+					selected : option.get('selected'),
+				});
 				_choiceCopy.options().add(option.copy());
 			});
 			_productCopy.choices().add(_choiceCopy);
