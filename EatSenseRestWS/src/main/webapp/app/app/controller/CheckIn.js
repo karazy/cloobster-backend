@@ -150,6 +150,9 @@ Ext.define('EatSense.controller.CheckIn', {
 			 var _orderListStore =	 Ext.create('Ext.data.Store', {
 	 			   model: 'EatSense.model.Order',
 	 			   storeId: 'orderStore',
+	 			   filters: [
+	 			             {property: "status", value: "CART"}
+	 			   ],
 	 			   proxy: {
 	 				   type: 'rest',
 	 				   url : '/restaurants/'+restaurantId+'/orders',

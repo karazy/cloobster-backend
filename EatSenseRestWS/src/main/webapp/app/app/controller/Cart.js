@@ -58,7 +58,9 @@ Ext.define('EatSense.controller.Cart', {
     	 var tooltip = Ext.create('EatSense.util.CartToolTip');
     	 this.setTooltip(tooltip);
 	},
-	
+	/**
+	 * Show cart with all orders.
+	 */
 	showCart: function() {
 		console.log('Cart Controller -> showCart');
 		var main = this.getMain(), cartview = this.getCartview(), orderlist = this.getOrderlist(),
@@ -68,11 +70,17 @@ Ext.define('EatSense.controller.Cart', {
 		if(orders.data.length == 0) {
 			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
 		} else {
-			this.menuBackBtContext = this.showMenu;			
+			this.menuBackBtContext = this.showMenu;
+			
+			//set filter
+	    	orders.filter([
+	    	               {property: "status", value: "CART"}   	               
+	    	]);
+			orderlist.setStore(orders);	
+			
 			//switch to cart coming from menu
 			if(main.getActiveItem() != cartview) {
-				//add all orders to cart list
-				orderlist.setStore(orders);				
+				//add all orders to cart list							
 				main.switchAnim('left');
 				main.setActiveItem(cartview);
 			} else {
@@ -98,7 +106,9 @@ Ext.define('EatSense.controller.Cart', {
 		main.switchAnim('right');
 		main.setActiveItem(menu);
 	},
-	
+	/**
+	 * Remove all orders from cart and switch back to menuview.
+	 */
 	dumpCart: function() {
 		console.log('Cart Controller -> dumpCart');
 		Ext.Msg.show({
@@ -135,7 +145,8 @@ Ext.define('EatSense.controller.Cart', {
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		checkInId = checkIn.get('userId'),
 		restaurantId = checkIn.get('restaurantId'),
-		errorIndicator = false;
+		errorIndicator = false,
+		orderlist = this.getOrderlist();
 		
 		orders.each(function(order) {
 			console.log('save order' + order.getProduct().get('name'));
@@ -152,14 +163,16 @@ Ext.define('EatSense.controller.Cart', {
 		    	    extraParams: {
 		    	    	'checkInId' : checkInId
 		    	    },
-		    	    params: data,
+		    	    params: {order : data},
 		    	    scope: this,
 		    	    success: function(response) {
 		    	    	console.log('Saved order checkin.');
 		    	    	//set generated id
 		    	    	order.set('id', reponse.responseText);
 		    	    	order.set('status','PLACED');
+		    	    	orderlist.refresh();
 		    	    	
+		    	    	this.showMenu();
 		    	    	//show success message and switch to next view
 		    			Ext.Msg.show({
 		    				title : i18nPlugin.translate('success'),
@@ -169,11 +182,16 @@ Ext.define('EatSense.controller.Cart', {
 		    			//show short alert and then hide
 		    			Ext.defer((function() {
 		    				Ext.Msg.hide();
-		    			}), globalConf.msgboxHideTimeout, this);
-		    	    	
+		    			}), globalConf.msgboxHideTimeout, this);		
+		    			
+		    			
 		    	    },
 		    	    failure: function(response) {
 		    	    	errorIndicator = true;
+		    	    	//TEST REMOVE
+//		    	    	order.set('status','PLACED');
+//		    	    	orderlist.refresh();
+		    	    	console.log('Filtered orders ' + orders.isFiltered());
 		    	    	Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
 		    	    }
 				});			
@@ -228,29 +246,7 @@ Ext.define('EatSense.controller.Cart', {
 			Ext.defer((function() {
 				Ext.Msg.hide();
 			}), globalConf.msgboxHideTimeout, this);
-			
-//			Ext.Msg.show({
-//				title: i18nPlugin.translate('hint'),
-//				message: i18nPlugin.translate('dumpItem', model.getProduct().get('name')),
-//				buttons: Ext.MessageBox.YESNO,
-//				scope: this,
-//				fn: function(btnId, value, opt) {
-//				if(btnId=='yes') {
-//						//workaround, because view stays masked after switch to menu
-//						Ext.Msg.hide();
-//						//delete item
-//						orders.remove(model);
-//						badgeText = (orders.data.length > 0) ? orders.data.length : "";
-//						//reset badge text on cart button and switch back to menu
-//						this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
-//						if(orders.data.length > 0) {
-//							orderlist.refresh();
-//						} else {
-//							this.showMenu();
-//						}
-//					}
-//				}
-//			});	
+
 		}, this);
 		
 		tooltip.show();
@@ -353,15 +349,6 @@ Ext.define('EatSense.controller.Cart', {
 		});
 		
 		this.models.activeOrder.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
-		
-		//WORKAROUND
-		//because options select doesn't get correctly set after copy of object
-//		product.choices().each(function(choice, cIndex) {
-//			choice.options().each(function(option, oIndex) {
-//				product.data.choices[cIndex].options[oIndex].selected = option.get('selected');
-//			});
-//		});
-		//WORKAROUND _ END	
 		
 		if(productIsValid) {
 			this.showCart();

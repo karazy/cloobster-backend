@@ -10,7 +10,6 @@ Ext.define('EatSense.view.CartOverview', {
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
 			itemTpl:  new Ext.XTemplate(
-			"<tpl if='status == \"CART\"'>" +
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				"<div style='position: absolute; right: 0; width: 20%; text-align: right; padding-right: 10px;'>"+i18nPlugin.translate('amount')+" {amount}</div>" +
@@ -32,8 +31,7 @@ Ext.define('EatSense.view.CartOverview', {
 					"<p>{comment}</p>" +
 					"</tpl>" +
 				"</div>" +
-			"</div>" +
-			"</tpl>"
+			"</div>"
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
 				//we need to pass the product as the choices object in this context is raw data
