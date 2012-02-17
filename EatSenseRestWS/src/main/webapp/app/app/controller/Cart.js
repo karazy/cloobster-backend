@@ -172,6 +172,8 @@ Ext.define('EatSense.controller.Cart', {
 		    	    	order.set('status','PLACED');
 		    	    	orderlist.refresh();
 		    	    	
+		    	    	//
+		    	    	
 		    	    	this.showMenu();
 		    	    	//show success message and switch to next view
 		    			Ext.Msg.show({

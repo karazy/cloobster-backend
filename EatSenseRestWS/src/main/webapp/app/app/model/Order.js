@@ -35,7 +35,7 @@ Ext.define('EatSense.model.Order', {
 		
 		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
 		rawJson.status = this.get('status');
-		rawJson.amount = this.get('comment');
+		rawJson.amount = this.get('amount');
 		rawJson.comment = this.get('comment');
 		rawJson.orderTime = this.get('orderTime');
 		
