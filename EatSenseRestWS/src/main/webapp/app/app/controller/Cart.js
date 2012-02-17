@@ -147,7 +147,8 @@ Ext.define('EatSense.controller.Cart', {
 		restaurantId = checkIn.get('restaurantId'),
 		errorIndicator = false,
 		orderlist = this.getOrderlist(),
-		orderStore = Ext.data.StoreManager.lookup('orderStore');
+		orderStore = Ext.data.StoreManager.lookup('orderStore'),
+		me = this;
 		
 		orders.each(function(order) {
 			console.log('save order' + order.getProduct().get('name'));
@@ -169,18 +170,19 @@ Ext.define('EatSense.controller.Cart', {
 		    	    success: function(response) {
 		    	    	console.log('Saved order checkin.');
 		    	    	//set generated id
-		    	    	order.set('id', reponse.responseText);
+		    	    	order.set('id', response.responseText);
 		    	    	order.set('status','PLACED');
 		    	    	orderlist.refresh();
 		    	    	
 		    	    	//TODO don't remove orders just filter them!
 		    	    	orders.each(function(order) {
 		    	    		orderStore.add(order);
-		    	    	});
+		    	    	});		    	    	
+		    	    	orders.removeAll();
 		    	    	
-		    	    	orders().removeAll();
+		    	    	me.getApplication().getController('Menu').getCardBt().setBadgeText('');
 		    	    	
-		    	    	this.showMenu();
+		    	    	me.showMenu();
 		    	    	//show success message and switch to next view
 		    			Ext.Msg.show({
 		    				title : i18nPlugin.translate('success'),
