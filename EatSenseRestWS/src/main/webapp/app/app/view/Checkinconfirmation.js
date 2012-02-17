@@ -39,11 +39,13 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				styleHtmlContent: true,
 				id: 'checkInDlg1Label1',
 				html :  i18nPlugin.translate('checkInStep1Label1')
-			}, {
-				xtype: 'label',
-				styleHtmlContent: true,
-				html: i18nPlugin.translate('checkInStep1Label2')
-			}, {
+			}, 
+//			{
+//				xtype: 'label',
+//				styleHtmlContent: true,
+//				html: i18nPlugin.translate('checkInStep1Label2')
+//			},
+			{
 				xtype : 'textfield',
 				id : 'nicknameTf',
 				label: 'Nickname',

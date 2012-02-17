@@ -23,7 +23,7 @@ var translation = {
 		"checkInStep2Label2" : "Willst du mit jemand Anderem einchecken?",
 		"checkInStep2OnMyOwnButton" : "Ich bin alleine hier",
 		"checkInErrorBarcode" : "Der Barcode ist nicht valide oder leer!",
-		"checkInErrorNickname" : "Dein Nickname darf nicht leer sein und muss zwischen {0} und {1} Zeichen lang sein.",
+		"checkInErrorNickname" : "Wähle einen Nickname oder nimm den Generierten.<br/>Der Nickname muss zwischen {0} und {1} Zeichen lang sein.",
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 
 		// Menu

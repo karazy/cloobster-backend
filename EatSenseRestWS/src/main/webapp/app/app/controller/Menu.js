@@ -157,15 +157,18 @@ Ext.define('EatSense.controller.Menu', {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.get('id'),
 						 value : opt,
-						 type: optionType,
+//						 fieldType: optionType,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
 						 checked: opt.get('selected')
-					 }, this);		
+					 }, this);
 					 
+					 //TODO new Bug? fieldType can't be set anymore in config
+//					 checkbox.fieldType = optionType;					 
+					
 					 checkbox.addListener('check',function(cbox) {
 						 console.log('check');
-						 if(cbox.type == "Ext.field.Radio") {
+						 if(cbox.isXType('radiofield',true)) {
 							 choice.options().each(function(innerOpt) {
 								 innerOpt.set('selected', false);
 							 });
@@ -175,8 +178,8 @@ Ext.define('EatSense.controller.Menu', {
 					 },this);
 					 checkbox.addListener('uncheck',function(cbox) {
 						 console.log('uncheck');
-						 if(cbox.type == 'Ext.field.Checkbox') {
-							 opt.set('selected', false);
+						 if(cbox.isXType('checkboxfield',true)) {
+							 cbox.getValue().set('selected', false);
 						 } else {
 							 //don't allow radio buttons to be deselected
 							 cbox.setChecked(true);

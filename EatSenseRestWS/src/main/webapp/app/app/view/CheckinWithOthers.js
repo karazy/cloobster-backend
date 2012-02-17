@@ -31,12 +31,14 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 				type: 'fit',
 				
 			},
-			items : [ {
-				xtype : 'label',
-				id : 'checkInDlg2Label1',
-				styleHtmlContent: true, 
-				html : i18nPlugin.translate('checkInStep2Label1')
-			}, {
+			items : [
+//			         {
+//				xtype : 'label',
+//				id : 'checkInDlg2Label1',
+//				styleHtmlContent: true, 
+//				html : i18nPlugin.translate('checkInStep2Label1')
+//			}, 
+			{
 				xtype: 'label',
 				id : 'checkInDlg2Label2',
 				styleHtmlContent: true,  

@@ -146,7 +146,8 @@ Ext.define('EatSense.controller.Cart', {
 		checkInId = checkIn.get('userId'),
 		restaurantId = checkIn.get('restaurantId'),
 		errorIndicator = false,
-		orderlist = this.getOrderlist();
+		orderlist = this.getOrderlist(),
+		orderStore = Ext.data.StoreManager.lookup('orderStore');
 		
 		orders.each(function(order) {
 			console.log('save order' + order.getProduct().get('name'));
@@ -172,7 +173,12 @@ Ext.define('EatSense.controller.Cart', {
 		    	    	order.set('status','PLACED');
 		    	    	orderlist.refresh();
 		    	    	
-		    	    	//
+		    	    	//TODO don't remove orders just filter them!
+		    	    	orders.each(function(order) {
+		    	    		orderStore.add(order);
+		    	    	});
+		    	    	
+		    	    	orders().removeAll();
 		    	    	
 		    	    	this.showMenu();
 		    	    	//show success message and switch to next view
@@ -289,15 +295,14 @@ Ext.define('EatSense.controller.Cart', {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.data.id,
 						 value : opt,
-						 type: optionType,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
 						 checked: opt.get('selected')
-					 }, this);		
+					 }, this);
 					 
 					 checkbox.addListener('check',function(cbox) {
 						 console.log('check');
-						 if(cbox.type == "Ext.field.Radio") {
+						 if(cbox.isXType('radiofield',true)) {
 							 choice.options().each(function(innerOpt) {
 								 innerOpt.set('selected', false);
 							 });
@@ -307,7 +312,7 @@ Ext.define('EatSense.controller.Cart', {
 					 },this);
 					 checkbox.addListener('uncheck',function(cbox) {
 						 console.log('uncheck');
-						 if(cbox.type == 'Ext.field.Checkbox') {
+						 if(cbox.isXType('checkboxfield',true)) {
 							 opt.set('selected', false);
 						 } else {
 							 //don't allow radio buttons to be deselected
@@ -412,16 +417,19 @@ Ext.define('EatSense.util.CartToolTip', {
 			type: 'hbox'
 		},
 		centered: true,
-		width: 120,
-		height:50,
+		width: 150,
+		height:70,
 		modal: true,
 		hideOnMaskTap: true,
+		defaults : {
+			margin: 5
+		},
 		items: [ {
 			xtype: 'button',
 			itemId: 'editCartItem',
 			iconCls : 'compose',
 			iconMask : true,
-			flex: 1	
+			flex: 1,
 		}, {
 			xtype: 'spacer',
 			width: 7
@@ -430,7 +438,7 @@ Ext.define('EatSense.util.CartToolTip', {
 			itemId: 'deleteCartItem',
 			iconCls : 'trash',
 			iconMask : true,
-			flex: 1				
+			flex: 1	,
 		}]
 	}	
 });
