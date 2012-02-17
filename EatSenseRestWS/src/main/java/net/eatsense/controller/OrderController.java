@@ -93,6 +93,7 @@ public class OrderController {
 		List<OrderChoice> choices = null;
 		if(order.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
+			
 			for (ChoiceDTO choiceDto : order.getProduct().getChoices()) {
 				OrderChoice choice = new OrderChoice();
 				
@@ -104,9 +105,21 @@ public class OrderController {
 					}
 					choice.setSelectedOptions(selected);
 				}
-				choice.setOriginalChoice(choiceRepo.getByKey(checkIn.getRestaurant(), choiceDto.getId()));
-				if(choice.getOriginalChoice() == null) {
+				Choice originalChoice = choiceRepo.getByKey(checkIn.getRestaurant(), choiceDto.getId());
+				if(originalChoice == null) {
 					logger.error("Order cannot be placed, unknown choice id="+choiceDto.getId());
+					return null;
+				}
+				choice.setOriginalChoice(originalChoice);
+				
+				// Validate choice selection
+				if(choice.getSelectedOptions().size() < originalChoice.getMinOccurence() ) {
+					logger.error("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+choice.getSelectedOptions().size());
+					return null;
+				}
+				
+				if(choice.getSelectedOptions().size() > originalChoice.getMaxOccurence() ) {
+					logger.error("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+choice.getSelectedOptions().size());
 					return null;
 				}
 					
