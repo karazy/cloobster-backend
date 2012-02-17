@@ -10,6 +10,7 @@ var translation = {
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
+		"success" : "Erfolg",
 		// main menu
 		"checkInButton" : "CheckIn",
 		"settingsButton" : "Einstellungen",
@@ -36,8 +37,9 @@ var translation = {
 		"orderRemoved" : "Bestellung entfernt",
 		"orderComment" : "Optionaler Kommentar",
 		"amount" : "Menge",
+		"orderSubmit" : "Bestellung abgeschickt ...<br/> Guten Appetit!",
 		//Cart
-		"cartviewTitle" : "Bestellung",
+		"cartviewTitle" : "Bestellungsübersicht",
 		"dumpCart" : "Warenkorb leeren?",
 		"dumpItem" : "{0} entfernen?"
 

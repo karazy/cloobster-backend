@@ -7,7 +7,7 @@ Ext.define('EatSense.model.Product', {
 			type : 'string'
 		},
 		{
-			name : 'fakeId',
+			name : 'genuineId',
 			type : 'string'
 		}, {
 			name : 'name',
@@ -80,5 +80,21 @@ Ext.define('EatSense.model.Product', {
 			_productCopy.choices().add(_choiceCopy);
 		});
 		return _productCopy;
+	},
+	
+	getRawJsonData: function() {
+		var rawJson = {};
+		
+		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
+		rawJson.name = this.get('name');
+		rawJson.shortDesc = this.get('shortDesc');
+		rawJson.longDesc = this.get('longDesc');
+		rawJson.price = this.get('price');
+		
+		rawJson.choices = new Array(this.choices().data.length);
+		for ( var int = 0; int < this.choices().data.length; int++) {
+			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
+		}		
+		return rawJson;
 	}
 });

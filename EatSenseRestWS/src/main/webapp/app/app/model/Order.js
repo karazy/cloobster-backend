@@ -28,6 +28,20 @@ Ext.define('EatSense.model.Order', {
 	calculate : function() {
 		var _amount = parseFloat(this.get('amount')), _basePrice = this.getProduct().calculate();
 		return Math.round(_basePrice * _amount * 100) / 100;
+	},
+	
+	getRawJsonData: function() {
+		var rawJson = {};
+		
+		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
+		rawJson.status = this.get('status');
+		rawJson.amount = this.get('comment');
+		rawJson.comment = this.get('comment');
+		rawJson.orderTime = this.get('orderTime');
+		
+		rawJson.product = this.getProduct().getRawJsonData();
+		
+		return rawJson;
 	}
 
 });

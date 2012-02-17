@@ -349,30 +349,6 @@ Ext.define('EatSense.controller.CheckIn', {
 		
 		 var menu = this.getMenuview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this; 
 		 if(restaurantId.toString().length != 0) {
-			 //load menudata and store it in MenuController. UGLY
-//			 var menuListStore = Ext.create('Ext.data.Store', {
-//	 			   model: 'EatSense.model.Menu',
-//	 			   proxy: {
-//	 				   type: 'rest',
-//	 				   url : globalConf.serviceUrl+'/restaurant/'+restaurantId+'/menu',
-//	 				   reader: {
-//	 					   type: 'json'
-//	 			   		}
-//	 			   }
-//	 		 });
-			 
-//			 var menu = Ext.ModelManager.get('EatSense.model.Menu');
-//			 menu.load('id', {
-//				urlParams : [ {
-//					restaurantId : this.models.activeCheckIn.data.restaurantId
-//				}
-//				],
-//				success: function(record, operation) {
-//					
-//				} 
-//			 });
-			 
-//			 this.getMenulist().setStore(menuListStore);
 			 this.getMenulist().getStore().load({
 				 scope   : this,
 			     callback: function(records, operation, success) {

@@ -99,6 +99,14 @@ Ext.define('EatSense.controller.Menu', {
 	
 	loadProductDetail: function(dataview, record) {
 		console.log('Menu Controller -> loadProductDetail');
+		//save original ids
+		record.set('genuineId', record.get('id'));
+		record.choices().each(function(choice) {
+			choice.set('genuineId', choice.get('id'));
+			choice.options().each(function(opt) {
+				opt.set('genuineId', opt.get('id'));
+			});
+		});
 		this.models.activeProduct = record.copy();
 //		this.models.activeProduct = record.deepCopy();
 		this.showProductDetail(dataview, this.models.activeProduct);
@@ -254,7 +262,7 @@ Ext.define('EatSense.controller.Menu', {
 		if(productIsValid === true) {
 			order = Ext.create('EatSense.model.Order');
 			order.set('amount', this.getAmountSpinner().getValue());
-			order.set('status','PLACED');
+			order.set('status','CART');
 			//WORKAROUND
 			//because options select doesn't get correctly set after copy of object
 //			productForCart.choices().each(function(choice, cIndex) {

@@ -132,31 +132,53 @@ Ext.define('EatSense.controller.Cart', {
 	submitOrders: function() {
 		console.log('Cart Controller -> submitOrders');
 		var checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn, 
-		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
+		checkInId = checkIn.get('userId'),
+		restaurantId = checkIn.get('restaurantId'),
+		errorIndicator = false;
 		
 		orders.each(function(order) {
 			console.log('save order' + order.getProduct().get('name'));
-			order.save({
-				params: {
-					checkinId: checkIn.get('userId')
-				},
-				success: function(response) {
-					console.log('saved '+response);
-//					Ext.Msg.show({
-//						title : i18nPlugin.translate('hint'),
-//						message : 'test test',
-//						buttons : []
-//					});
-//					//show short alert and then hide
-//					Ext.defer((function() {
-//						Ext.Msg.hide();
-//					}), globalConf.msgboxHideTimeout, this);
-				}
-				
-			});
+			
+			if(!errorIndicator) {
+			//get a clean self conrtucted json object
+			//sencha is a bit messy sending data.
+			//encode it as json string
+			var data = Ext.JSON.encode(order.getRawJsonData());
+			
+				Ext.Ajax.request({				
+		    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/?checkInId='+checkInId,
+		    	    method: 'POST',    	    
+		    	    extraParams: {
+		    	    	'checkInId' : checkInId
+		    	    },
+		    	    params: data,
+		    	    scope: this,
+		    	    success: function(response) {
+		    	    	console.log('Saved order checkin.');
+		    	    	//set generated id
+		    	    	order.set('id', reponse.responseText);
+		    	    	order.set('status','PLACED');
+		    	    	
+		    	    	//show success message and switch to next view
+		    			Ext.Msg.show({
+		    				title : i18nPlugin.translate('success'),
+		    				message : i18nPlugin.translate('orderSubmit'),
+		    				buttons : []
+		    			});
+		    			//show short alert and then hide
+		    			Ext.defer((function() {
+		    				Ext.Msg.hide();
+		    			}), globalConf.msgboxHideTimeout, this);
+		    	    	
+		    	    },
+		    	    failure: function(response) {
+		    	    	errorIndicator = true;
+		    	    	Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
+		    	    }
+				});			
+			}						
 		});
-		
-	//set orders to send and switch view
 	},
 	/**
 	 * Listener for itemTap event of orderlist.
@@ -169,7 +191,8 @@ Ext.define('EatSense.controller.Cart', {
 		tooltip = this.getTooltip(),
 		orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
-		badgeText;
+		badgeText,
+		removedProduct = model.getProduct().get('name');
 		
 		dv.deselect(model);
 		//position tooltip where tap happened
@@ -182,30 +205,52 @@ Ext.define('EatSense.controller.Cart', {
 		}, this);
 		//dump item
 		tooltip.getComponent('deleteCartItem').addListener('tap', function() {
-//			tooltip.hide();
-			this.getMain().remove(tooltip);
+			tooltip.hide();
+//			this.getMain().remove(tooltip);
+			//delete item
+			orders.remove(model);
+			badgeText = (orders.data.length > 0) ? orders.data.length : "";
+			//reset badge text on cart button and switch back to menu
+			this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
+			if(orders.data.length > 0) {
+				orderlist.refresh();
+			} else {
+				this.showMenu();
+			}
+			
+			//show success message and switch to next view
 			Ext.Msg.show({
-				title: i18nPlugin.translate('hint'),
-				message: i18nPlugin.translate('dumpItem', model.getProduct().get('name')),
-				buttons: Ext.MessageBox.YESNO,
-				scope: this,
-				fn: function(btnId, value, opt) {
-				if(btnId=='yes') {
-						//workaround, because view stays masked after switch to menu
-						Ext.Msg.hide();
-						//delete item
-						orders.remove(model);
-						badgeText = (orders.data.length > 0) ? orders.data.length : "";
-						//reset badge text on cart button and switch back to menu
-						this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
-						if(orders.data.length > 0) {
-							orderlist.refresh();
-						} else {
-							this.showMenu();
-						}
-					}
-				}
-			});	
+				title : i18nPlugin.translate('orderRemoved'),
+				message : removedProduct,
+				buttons : []
+			});
+			//show short alert and then hide
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), globalConf.msgboxHideTimeout, this);
+			
+//			Ext.Msg.show({
+//				title: i18nPlugin.translate('hint'),
+//				message: i18nPlugin.translate('dumpItem', model.getProduct().get('name')),
+//				buttons: Ext.MessageBox.YESNO,
+//				scope: this,
+//				fn: function(btnId, value, opt) {
+//				if(btnId=='yes') {
+//						//workaround, because view stays masked after switch to menu
+//						Ext.Msg.hide();
+//						//delete item
+//						orders.remove(model);
+//						badgeText = (orders.data.length > 0) ? orders.data.length : "";
+//						//reset badge text on cart button and switch back to menu
+//						this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
+//						if(orders.data.length > 0) {
+//							orderlist.refresh();
+//						} else {
+//							this.showMenu();
+//						}
+//					}
+//				}
+//			});	
 		}, this);
 		
 		tooltip.show();

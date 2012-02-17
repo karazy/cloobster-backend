@@ -7,10 +7,10 @@ Ext.define('EatSense.model.Choice', {
 	config : {
 		idProperty: 'id',
 		fields: [
-{
-	name : 'fakeId',
-	type : 'string'
-},
+			{
+				name : 'genuineId',
+				type : 'string'
+			},
 		    {name: 'id', type: 'string'},
 			{name: 'text', type: 'string'},
 			{name: 'minOccurence', type: 'number'},
@@ -53,7 +53,6 @@ Ext.define('EatSense.model.Choice', {
 	 * Caluclates the price for this choice.
 	 */
 	calculate: function() {
-		var calculationFunction;
 		switch (this.get('overridePrice')) {
 		case 'NONE':
 			return this.calcNormal(); 
@@ -119,6 +118,24 @@ Ext.define('EatSense.model.Choice', {
 		this.options().each(function(option) {
 			option.set('selected', false);
 		});
+	},
+	
+	getRawJsonData: function() {
+		var rawJson = {};		
+		
+		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
+		rawJson.text = this.get('text');
+		rawJson.maxOccurence = this.get('maxOccurence');
+		rawJson.minOccurence = this.get('minOccurence');
+		rawJson.price = this.get('price');
+		rawJson.included = this.get('included');
+		rawJson.overridePrice = this.get('overridePrice');
+		
+		rawJson.options = new Array(this.options().data.length);
+		for ( var int = 0; int < this.options().data.length; int++) {
+			rawJson.options[int] = this.options().getAt(int).getRawJsonData();
+		}		
+		return rawJson;
 	}
 
 });
