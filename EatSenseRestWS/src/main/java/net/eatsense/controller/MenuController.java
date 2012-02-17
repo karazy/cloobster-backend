@@ -86,7 +86,7 @@ public class MenuController {
 		return productDTOs;
 	}
 
-	private ProductDTO transformtoDto(Product product, boolean skipId) {
+	public ProductDTO transformtoDto(Product product, boolean skipId) {
 		if(product == null)
 			return null;
 		ProductDTO dto = new ProductDTO();
@@ -152,25 +152,20 @@ public class MenuController {
 				dto.setText(choice.getText());
 				
 				if( choice.getAvailableChoices() != null && !choice.getAvailableChoices().isEmpty() ) {
-					List<ProductOption> list = choice.getAvailableChoices();
-//					if(skipId) {
-						for (ProductOption productOption : list) {
-							productOption.setId(null);
-						}
+					
+					dto.setOptions(choice.getAvailableChoices());					
+					
+				}
+//				else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {
+//					ArrayList<ProductOption> options = new ArrayList<ProductOption>();
+//					Map<Key<Product>,Product> products =  productRepo.getOfy().get(choice.getAvailableProducts());
+//					
+//					for (Product choiceProduct : products.values() ) {
+//						options.add(new ProductOption(choiceProduct.getName(), choiceProduct.getPrice(), choiceProduct.getId()));
 //					}
-					dto.setOptions(list);					
-					
-				}
-				else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {
-					ArrayList<ProductOption> options = new ArrayList<ProductOption>();
-					Map<Key<Product>,Product> products =  productRepo.getOfy().get(choice.getAvailableProducts());
-					
-					for (Product choiceProduct : products.values() ) {
-						options.add(new ProductOption(choiceProduct.getName(), choiceProduct.getPrice(), choiceProduct.getId()));
-					}
-					
-					dto.setOptions(options);
-				}
+//					
+//					dto.setOptions(options);
+//				}
 				
 				choices.add( dto );
 				

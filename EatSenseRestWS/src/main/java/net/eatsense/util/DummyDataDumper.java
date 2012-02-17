@@ -81,14 +81,15 @@ public class DummyDataDumper {
 		
 		one.setText("Wählen sie einen Gargrad:");
 		ArrayList<ProductOption> options = new ArrayList<ProductOption>();
-		options.add(new ProductOption("Roh", 0, null));
-		options.add(new ProductOption("Medium", 0, null));
-		options.add(new ProductOption("Brikett", 0, null));
+		options.add(new ProductOption("Roh", 0));
+		options.add(new ProductOption("Medium", 0));
+		options.add(new ProductOption("Brikett", 0));
 		
 		one.setAvailableChoices(options);
 		one.setMaxOccurence(1);
 		one.setMinOccurence(1);
 		one.setProduct(kP);
+		one.setRestaurant(kR);
 		one.setPrice(0f);
 		
 		Key<Choice> oneKey = cr.saveOrUpdate(one);
@@ -103,7 +104,9 @@ public class DummyDataDumper {
 		two.setAvailableProducts(sideproduct);
 		two.setMinOccurence(0);
 		two.setMaxOccurence(0);
+		two.setRestaurant(kR);
 		two.setProduct(kP);
+		
 		two.setOverridePrice(ChoiceOverridePrice.NONE);
 			
 		Key<Choice> twoKey = cr.saveOrUpdate(two);

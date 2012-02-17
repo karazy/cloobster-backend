@@ -62,6 +62,7 @@ public class OrderChoice extends GenericEntity {
 	 */
 	@Unindexed
 	@Embedded
+	@Valid
 	List<ProductOption> selectedOptions;
 	
 }
