@@ -116,6 +116,17 @@ public class Choice extends GenericEntity {
 	ChoiceOverridePrice overridePrice = ChoiceOverridePrice.NONE;
 	
 	@Parent
+	@NotNull
+	Key<Restaurant> restaurant;
+	
+	public Key<Restaurant> getRestaurant() {
+		return restaurant;
+	}
+
+	public void setRestaurant(Key<Restaurant> restaurant) {
+		this.restaurant = restaurant;
+	}
+
 	Key<Product> product;
 		
 	/**

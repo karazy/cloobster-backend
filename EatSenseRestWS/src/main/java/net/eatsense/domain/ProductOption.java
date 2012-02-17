@@ -1,24 +1,28 @@
 package net.eatsense.domain;
 
-import org.apache.bval.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
+import org.apache.bval.constraints.NotEmpty;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductOption {
+	@NotNull
 	@NotEmpty
 	String name;
+	
 	float price;
 	
-	/**
-	 * Only set if this option represents an additional product. 
-	 */
-	Long id;
+	Boolean selected;
 	
-	public Long getId() {
-		return id;
+	public Boolean getSelected() {
+		return selected;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setSelected(Boolean selected) {
+		this.selected = selected;
 	}
+
 
 	public String getName() {
 		return name;
@@ -36,11 +40,10 @@ public class ProductOption {
 		this.price = price;
 	}
 	
-	public ProductOption(String name, float price, Long id) {
+	public ProductOption(String name, float price) {
 		super();
 		this.name = name;
 		this.price = price;
-		this.id = id;
 	}
 
 	public ProductOption() {

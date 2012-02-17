@@ -84,7 +84,7 @@ public class GenericRepository<T> extends DAOBase{
 	}
 
 	/**
-	 * Finds an object by id
+	 * Finds an object by id. ONLY WORKING WITH OBJECTS WITH NO PARENT ANNOTATION
 	 * @param id
 	 * 		Id of entity to find.
 	 * @return
@@ -92,12 +92,12 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public T findByKey(long id) {
 		logger.info("findByKey {} ", id);
-		Key<T> key = new Key<T>(clazz, id);
-		return ofy().find(key);
+		
+		return ofy().find(clazz, id);
 	}
 
 	/**
-	 * Gets entity by key.
+	 * Gets entity by key and owner. Use this for objects with @Parent annotation.
 	 * 
 	 * @param owner
 	 * 		parent of entity

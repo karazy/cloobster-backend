@@ -12,6 +12,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Menu;
@@ -108,7 +109,7 @@ public class ImportController {
 							List<Key<Choice>> choices = new ArrayList<Key<Choice>>();
 												
 							for(ChoiceDTO choiceData : productData.getChoices()) {
-								Key<Choice> kC = createAndSaveChoice(kP, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
+								Key<Choice> kC = createAndSaveChoice(kP,kR, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
 										choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions(), null);
 								if(kC == null) {
 									logger.info("Error while saving choice with text: " +choiceData.getText());
@@ -196,13 +197,14 @@ public class ImportController {
 		return product;
 	}
 	
-	private Key<Choice> createAndSaveChoice(Key<Product> productKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions, Collection<Key<Product>> availableProducts) {
+	private Key<Choice> createAndSaveChoice(Key<Product> productKey, Key<Restaurant> restaurantKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions, Collection<Key<Product>> availableProducts) {
 		if(productKey == null)
 			throw new NullPointerException("productKey was not set");
 		logger.info("Creating new choice for product ("+ productKey.getId() + ") with text: " +text);
 		
 		Choice choice = new Choice();
 		choice.setProduct(productKey);
+		choice.setRestaurant(restaurantKey);
 		choice.setText(text);
 		choice.setPrice(price);
 		choice.setOverridePrice(overridePrice);
@@ -260,4 +262,8 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.getAll());
 		
 	};
+	
+	public void deleteCheckIns() {
+		checkinRepo.ofy().delete(checkinRepo.ofy().query(CheckIn.class).fetchKeys());
+	}
 }

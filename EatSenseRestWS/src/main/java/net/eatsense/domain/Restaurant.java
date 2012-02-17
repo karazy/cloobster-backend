@@ -67,5 +67,10 @@ public class Restaurant extends GenericEntity {
 		
 		return new Key<Restaurant>(Restaurant.class, super.getId());
 	}
-
+	
+	public static Key<Restaurant> getKey(Long id) {
+		
+		return new Key<Restaurant>(Restaurant.class, id);
+	}
+	
 }

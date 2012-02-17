@@ -12,15 +12,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
+import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
+import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.RestaurantDTO;
 import net.eatsense.util.DummyDataDumper;
@@ -43,14 +46,16 @@ public class RestaurantResource{
 	private CheckInController checkInCtr;
 	private MenuController menuCtr;
 	private ImportController importCtr;
+	private OrderController orderCtr;
 
 	@Inject
-	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr) {
+	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr) {
 		this.restaurantrepo = repo;
 		this.checkInCtr = checkInCtr;
 		this.menuCtr = menuCtr;
 		this.ddd = ddd;
 		this.importCtr = importCtr;
+		this.orderCtr = orderCtr;
 	}
 
 	/**
@@ -153,7 +158,17 @@ public class RestaurantResource{
 			throw new NotFoundException(productId + " id not found.");
 		else return product;
 	}
-
+	
+	@POST
+	@Path("{restaurantId}/orders")
+	@Produces("text/plain; charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String placeOrder(@PathParam("restaurantId")Long restaurantId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
+		Long orderId = null;
+		orderId = orderCtr.placeOrder(restaurantId, checkInId, order);	
+		return orderId.toString();
+	}
+	
 	
 	@PUT
 	@Path("dummies")
