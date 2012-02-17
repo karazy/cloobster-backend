@@ -296,7 +296,7 @@ Ext.define('EatSense.controller.Cart', {
 				 choice.options().each(function(opt) {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.data.id,
-						 value : opt,
+//						 value : opt,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
 						 checked: opt.get('selected')
