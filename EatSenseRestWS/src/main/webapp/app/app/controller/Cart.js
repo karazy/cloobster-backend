@@ -156,14 +156,14 @@ Ext.define('EatSense.controller.Cart', {
 			//sencha is a bit messy sending data.
 			//encode it as json string
 			var data = Ext.JSON.encode(order.getRawJsonData());
-			
+		
 				Ext.Ajax.request({				
-		    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/?checkInId='+checkInId,
+		    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/',
 		    	    method: 'POST',    	    
-		    	    extraParams: {
-		    	    	'checkInId' : checkInId
+		    	    params: {
+		    	    	'checkInId' : checkInId,
 		    	    },
-		    	    params: {order : data},
+		    	    jsonData: order.getRawJsonData(),
 		    	    scope: this,
 		    	    success: function(response) {
 		    	    	console.log('Saved order checkin.');
