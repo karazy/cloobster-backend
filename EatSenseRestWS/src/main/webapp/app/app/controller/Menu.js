@@ -263,14 +263,7 @@ Ext.define('EatSense.controller.Menu', {
 			order = Ext.create('EatSense.model.Order');
 			order.set('amount', this.getAmountSpinner().getValue());
 			order.set('status','CART');
-			//WORKAROUND
-			//because options select doesn't get correctly set after copy of object
-//			productForCart.choices().each(function(choice, cIndex) {
-//				choice.options().each(function(option, oIndex) {
-//					productForCart.data.choices[cIndex].options[oIndex].selected = option.get('selected');
-//				});
-//			});
-			//WORKAROUND _ END			
+			productForCart.getData(true);
 			order.setProduct(productForCart);
 			//comment field needed
 			order.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());

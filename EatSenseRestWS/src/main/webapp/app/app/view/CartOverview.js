@@ -38,11 +38,13 @@ Ext.define('EatSense.view.CartOverview', {
 				checkSelections: function(values, xindex) {
 					console.log('Cart Overview -> checkSelections');				
 					var result = false;
-					values.options().each(function(option) {
-						if(option.get('selected') === true) {
+					Ext.each(values.options,
+							function(option) {
+						if(option.selected === true) {
 							result = true;
 						}
 					});
+					
 					return result;
 				}
 			})
