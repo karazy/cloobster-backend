@@ -12,7 +12,7 @@ Ext.define('EatSense.view.CartOverview', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 20%; text-align: right; padding-right: 10px;'>"+i18nPlugin.translate('amount')+" {amount}</div>" +
+				"<div style='position: absolute; right: 0; width: 20%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}</div>" +
 				"<div style='clear: both;'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +

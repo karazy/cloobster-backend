@@ -220,23 +220,25 @@ Ext.define('EatSense.controller.Cart', {
 		orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		badgeText,
-		removedProduct = model.getProduct().get('name');
+		productName = model.getProduct().get('name');
 		
-		dv.deselect(model);
+		tooltip.setSelectedProduct(model);
+		
+		dv.deselect(tooltip.getSelectedProduct());
 		//position tooltip where tap happened
 		tooltip.setTop(y - dataitem.getHeight()/2);
 		tooltip.setLeft(x);
 		//edit item
 		tooltip.getComponent('editCartItem').addListener('tap', function() {
 			tooltip.hide();
-			this.showOrderDetail(dv, model);
+			this.showOrderDetail(dv, tooltip.getSelectedProduct());
 		}, this);
 		//dump item
 		tooltip.getComponent('deleteCartItem').addListener('tap', function() {
 			tooltip.hide();
 //			this.getMain().remove(tooltip);
 			//delete item
-			orders.remove(model);
+			orders.remove(tooltip.getSelectedProduct());
 			badgeText = (orders.data.length > 0) ? orders.data.length : "";
 			//reset badge text on cart button and switch back to menu
 			this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
@@ -249,7 +251,7 @@ Ext.define('EatSense.controller.Cart', {
 			//show success message and switch to next view
 			Ext.Msg.show({
 				title : i18nPlugin.translate('orderRemoved'),
-				message : removedProduct,
+				message : productName,
 				buttons : []
 			});
 			//show short alert and then hide
@@ -422,6 +424,7 @@ Ext.define('EatSense.util.CartToolTip', {
 		width: 150,
 		height:70,
 		modal: true,
+		selectedProduct : null,
 		hideOnMaskTap: true,
 		defaults : {
 			margin: 5

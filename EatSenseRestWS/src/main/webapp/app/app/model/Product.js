@@ -21,6 +21,9 @@ Ext.define('EatSense.model.Product', {
 		}, {
 			name : 'price',
 			type : 'number'
+		}, { //dont change, gets set automatically
+			name: 'price_calculated',
+			type: 'number'
 		}],
 		hasMany : {
 			model : 'EatSense.model.Choice',
@@ -44,6 +47,7 @@ Ext.define('EatSense.model.Product', {
 			_amount = amount;
 		}
 		_total = Math.round(_total*_amount*100)/100;
+		this.set('price_calculated', _total);
 		return _total;
 	},
 	/**
