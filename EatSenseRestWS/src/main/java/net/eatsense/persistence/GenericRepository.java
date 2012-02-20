@@ -178,6 +178,29 @@ public class GenericRepository<T> extends DAOBase{
 	}
 	
 	/**
+	 * Convenience method to get all objects matching a single property.
+	 * orderby is the property to order the list f.e. "age" for ascending order by the "age" property 
+	 * 		"-age" for descending. 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @param orderBy name of a property by which to order.
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public List<T> getListByPropertyOrdered(String propName, Object propValue, String orderBy)
+	{
+		Query<T> q = ofy().query(clazz).filter(propName, propValue).order(orderBy);
+
+		return q.list();
+
+	}
+	
+	
+	
+	/**
 	 * Returns the {@link Objectify} object to directly query datastore. 
 	 * @return
 	 */

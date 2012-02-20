@@ -64,7 +64,7 @@ public class MenuController {
 		for ( Menu menu : menus) {
 			 MenuDTO menuDTO = new MenuDTO();
 			 // Query for a list of all products associated with this menu
-			 List<Product> products = productRepo.getListByProperty("menu", menu.getKey() );
+			 List<Product> products = productRepo.getListByPropertyOrdered("menu", menu.getKey(), "name");
 			 
 			 List<ProductDTO> productDTOs = transformtoDto(products, true);
 			 menuDTO.setTitle(menu.getTitle());
