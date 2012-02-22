@@ -1,7 +1,5 @@
 Ext.define('EatSense.view.Cart', {
 	extend : 'Ext.Panel',
-//	extend : 'EatSense.SpecializedCardPanel',
-//	requires: ['EatSense.SpecializedCardPanel'],
 	xtype : 'cart',
 	layout : {
 		type : 'vbox',

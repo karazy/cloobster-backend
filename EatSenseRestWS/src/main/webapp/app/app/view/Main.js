@@ -3,7 +3,7 @@
  */
 Ext.define('EatSense.view.Main', {
 	extend : 'Ext.Container',	
-	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers', 'EatSense.view.Cart', 'EatSense.view.Menu' ],
+	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers', 'EatSense.view.Cart', 'EatSense.view.Menu', 'EatSense.view.Lounge' ],
 	xtype: 'mainview',
 	config : {
 		itemId : 'globalContainer',
@@ -14,15 +14,6 @@ Ext.define('EatSense.view.Main', {
 	            type: 'slide',
 	            direction: 'left'
 	        }			
-		},
-		//DELETE
-		animationForward : {
-			 type: 'slide',
-	         direction: 'left'
-		},
-		animationBack : {
-			 type: 'slide',
-	         direction: 'right'
 		},
 		activeItem : 0,
 		items : [ {
@@ -44,6 +35,10 @@ Ext.define('EatSense.view.Main', {
 		{
 			layout: 'fit',
 			xtype: 'menu'
+		}, 
+		{
+//			No fit layout! Won't display correctly otherwise.
+			xtype: 'lounge'
 		}
 		]
 	},

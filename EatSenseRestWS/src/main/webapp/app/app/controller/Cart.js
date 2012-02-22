@@ -16,6 +16,9 @@ Ext.define('EatSense.controller.Cart', {
 			editOrderBt : '#cartCardPanel #productdetail #prodDetailCardBt',
 			amountSpinner: '#cartCardPanel #productdetail panel #productAmountSpinner',
 			prodDetailLabel :'#cartCardPanel #productdetail #prodDetailLabel' ,	
+			loungeview : 'lounge',
+			//the orderlist shown in lounge in myorders tab
+			myorderlist: 'lounge panel #myorderstab #myorderlist'
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
@@ -72,9 +75,9 @@ Ext.define('EatSense.controller.Cart', {
 		} else {
 			this.menuBackBtContext = this.showMenu;
 			
-			//set filter
+			//set filter TEST
 	    	orders.filter([
-	    	               {property: "status", value: "CART"}   	               
+	    	               {property: "status", value: "XYZ"}   	               
 	    	]);
 			orderlist.setStore(orders);	
 			
@@ -148,16 +151,15 @@ Ext.define('EatSense.controller.Cart', {
 		errorIndicator = false,
 		orderlist = this.getOrderlist(),
 		orderStore = Ext.data.StoreManager.lookup('orderStore'),
+		main = this.getMain(),
+		loungeview = this.getLoungeview(),
+		myorderlist = this.getMyorderlist(),
 		me = this;
 		
 		orders.each(function(order) {
 			console.log('save order' + order.getProduct().get('name'));
 			
 			if(!errorIndicator) {
-			//get a clean self conrtucted json object
-			//sencha is a bit messy sending data.
-			//encode it as json string
-			var data = Ext.JSON.encode(order.getRawJsonData());
 		
 				Ext.Ajax.request({				
 		    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/',
@@ -174,15 +176,20 @@ Ext.define('EatSense.controller.Cart', {
 		    	    	order.set('status','PLACED');
 		    	    	orderlist.refresh();
 		    	    	
-		    	    	//TODO don't remove orders just filter them!
+		    	    	//TODO remove orders or filter them just filter them!
 		    	    	orders.each(function(order) {
 		    	    		orderStore.add(order);
 		    	    	});		    	    	
-		    	    	orders.removeAll();
+//		    	    	orders.removeAll();
+		    	    	
+		    	    	myorderlist.setStore(orderStore);
+		    	    	myorderlist.refresh();
 		    	    	
 		    	    	me.getApplication().getController('Menu').getCardBt().setBadgeText('');
 		    	    	
-		    	    	me.showMenu();
+		    			main.switchAnim('left');
+		    			main.setActiveItem(loungeview);
+		    	    	
 		    	    	//show success message and switch to next view
 		    			Ext.Msg.show({
 		    				title : i18nPlugin.translate('success'),
@@ -201,7 +208,6 @@ Ext.define('EatSense.controller.Cart', {
 		    	    	//TEST REMOVE
 //		    	    	order.set('status','PLACED');
 //		    	    	orderlist.refresh();
-		    	    	console.log('Filtered orders ' + orders.isFiltered());
 		    	    	Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
 		    	    }
 				});			
@@ -407,10 +413,24 @@ Ext.define('EatSense.controller.Cart', {
 		console.log('Cart Controller -> recalculate');
 		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
-	
-	calculateTotal : function() {
+	/**
+	 * Loads orders already submited to server
+	 */
+	loadPlacedOrders: function() {
+		var store = Ext.data.StoreManager.lookup('orderStore');
+		
+		store.load({
+			params : {
+				checkInId : '',
+				callback: function() {
+					//refresh the order list
+				}
+			}
+		});
+		
 		
 	}
+	
 });
 
 Ext.define('EatSense.util.CartToolTip', {

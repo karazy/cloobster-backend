@@ -41,7 +41,13 @@ var translation = {
 		//Cart
 		"cartviewTitle" : "Bestellungsübersicht",
 		"dumpCart" : "Warenkorb leeren?",
-		"dumpItem" : "{0} entfernen?"
+		"dumpItem" : "{0} entfernen?",
+		//Lounge
+		"loungeviewTitle" : "Die Lounge",
+		//MyOrders
+		"myOrdersTitle" : "Bestellungen",
+		"myOrdersTabBt" : "Bestellungen"
+			
 
 	}
 
