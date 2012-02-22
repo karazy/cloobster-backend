@@ -241,15 +241,17 @@ Ext.define('EatSense.controller.Cart', {
 		tooltip = this.getTooltip(),
 		orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
-		badgeText,
-		productName = model.getProduct().get('name');
+		productName = model.getProduct().get('name'),
+		windowX = Ext.Viewport.getWindowWidth();;
 		
 		tooltip.setSelectedProduct(model);
 		
 		dv.deselect(tooltip.getSelectedProduct());
 		//position tooltip where tap happened
 		tooltip.setTop(y - dataitem.getHeight()/2);
-		tooltip.setLeft(x);
+		
+		tooltip.setLeft(((tooltip.getWidth()+x+5)<windowX)? x : windowX-tooltip.getWidth()-5 );
+		
 		//edit item
 		tooltip.getComponent('editCartItem').addListener('tap', function() {
 			tooltip.hide();
