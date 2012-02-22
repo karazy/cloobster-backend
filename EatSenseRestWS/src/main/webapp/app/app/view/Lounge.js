@@ -30,12 +30,6 @@ Ext.define('EatSense.view.Lounge', {
 			iconCls : 'compose',
 			html : 'TEST'
 		}
-		// {
-		// xtype: 'menu',
-		// itemdId: 'menutab',
-		// title: i18nPlugin.translate('menuTitle'),
-		// iconCls: 'compose',
-		// }
 		]
 	},
 	/**
