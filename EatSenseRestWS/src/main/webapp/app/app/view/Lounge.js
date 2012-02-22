@@ -1,36 +1,48 @@
 Ext.define('EatSense.view.Lounge', {
-	extend : 'Ext.TabPanel',
-	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu' ],
+	extend : 'Ext.tab.Panel',
+	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu', 'EatSense.view.MenuOverview' ],
 	xtype : 'lounge',
 	config : {
-		tabBarPosition : 'bottom',
-		activeItem : 0,
-		layout : {
-		// type : 'fit'
+		tabBar : {
+			itemId: 'loungeTabBar',
+			docked : 'bottom',
 		},
-		items : [ {
-			docked : 'top',
-			xtype : 'toolbar',
-			itemId : 'loungeTopBar',
-			title : i18nPlugin.translate('loungeviewTitle')
-		}, {
-			xtype : 'panel',
-			// layout : 'fit',
-			title : i18nPlugin.translate('myOrdersTabBt'),
-			iconCls : 'home',
+		activeItem : 0,
+		items : [ 
+		{
+			title : i18nPlugin.translate('menuTitle'),
+			itemId : 'menutab',
+			iconCls : 'compose',
+			layout : 'fit',
 			items : [ {
-				xtype : 'myorders',
-				itemId : 'myorderstab',
+				xtype : 'menu',
+				itemId : 'menu',
 				layout : 'fit'
 			} ]
-
 		}, {
-			xytpe : 'panel',
-			title : 'Menu',
-			iconCls : 'compose',
-			html : 'TEST'
+			layout : 'fit',
+			title : i18nPlugin.translate('myOrdersTabBt'),
+			iconCls : 'home',
+			itemId : 'myorderstab',
+			items : [ {
+				xtype : 'myorders',
+				itemId : 'myorders',
+				layout : 'fit'
+			} ]
+		}, {
+			title : i18nPlugin.translate('cartTabBt'),
+			itemId : 'carttab',
+			iconCls : 'organize',
+			layout : 'fit',
+			items : [ {
+				xtype : 'cart',
+				itemId : 'card',
+				layout : 'fit'
+			} ]
 		}
+
 		]
+
 	},
 	/**
 	 * Change the direction of the slide animation.
@@ -39,12 +51,13 @@ Ext.define('EatSense.view.Lounge', {
 	 *            left or right
 	 */
 	switchTab : function(view, direction) {
-		var cardpanel = this.getComponent('loungeCardPanel');
-		cardpanel.getLayout().setAnimation({
-			type : 'slide',
-			direction : direction
-		});
-		cardpanel.setActiveItem(view);
+//		var cardpanel = this.getComponent('loungeCardPanel');
+//		cardpanel.getLayout().setAnimation({
+//			type : 'slide',
+//			direction : direction
+//		});
+//		cardpanel.setActiveItem(view);
+		this.setActiveItem(view);
 	},
 	/**
 	 * Hides the back button in top toolbar.
@@ -59,8 +72,7 @@ Ext.define('EatSense.view.Lounge', {
 	 *            Label to display on button.
 	 */
 	showBackButton : function(text) {
-		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(
-				text);
+		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(text);
 		this.getComponent('loungeTopBar').getComponent('loungeBackBt').show();
 	}
 

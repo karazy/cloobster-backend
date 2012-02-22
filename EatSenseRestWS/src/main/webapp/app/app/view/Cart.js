@@ -19,7 +19,7 @@ Ext.define('EatSense.view.Cart', {
 			} ]
 		}, {
 			docked : 'bottom',
-			xtype : 'toolbar',
+			xtype : 'panel',
 			itemId : 'cartBottomBar',
 			layout: {
 				type: 'hbox',
@@ -27,12 +27,14 @@ Ext.define('EatSense.view.Cart', {
 			},
 			items: [
 				{
+					xtype: 'button',
 				    title: 'Cancel',
 				    iconCls: 'trash',
 				    itemId: 'bottomTapCancel',
 				    iconMask: true
 				},
 				{
+					xtype: 'button',
 				    title: 'Send',
 				    iconCls: 'action',
 				    itemId: 'bottomTapOrder',
@@ -52,7 +54,7 @@ Ext.define('EatSense.view.Cart', {
 			}, 
 			{
 				xtype: 'productdetail',
-				itemId : 'productdetail',
+				itemId : 'cartProductdetail',
 				layout: 'fit'
 			}			        
 			]

@@ -1,11 +1,27 @@
 Ext.define('EatSense.view.MyOrders', {
 	extend : 'Ext.Panel',
-	xtype: 'myorders',
+	xtype: 'myorders',	
+	layout: {
+		type: 'fit'
+	},
 	config: {
 		items: [
 		{
+			docked : 'top',
+			xtype : 'toolbar',
+			itemId: 'myOrdersTopBar',
+			title : i18nPlugin.translate('myOrdersTitle'),
+			items : [
+			{        		 
+		        xtype: 'label',
+		        docked: 'right',
+		        html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+			}
+			]
+		},
+		{
 			xtype: 'list',
-			itemId: 'myorderlist',
+			id: 'myorderlist',
 			styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
@@ -57,7 +73,7 @@ Ext.define('EatSense.view.MyOrders', {
 				tpl: '<div class="cartTotal" style="text-align:center; font-size: 1.5em;"><h1>Total {0}€</h1></div>'
 			}
 			]			
-		}
+		}		
 		]
 	}
 });

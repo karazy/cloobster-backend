@@ -54,7 +54,7 @@ Ext.define('EatSense.view.ProductDetail', {
 				},
 				{
 					xtype : 'button',
-					itemId : 'prodDetailCardBt',
+					itemId : 'prodDetailcartBt',
 					iconCls : 'compose',
 					iconMask : true,
 				} ]

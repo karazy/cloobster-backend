@@ -27,7 +27,7 @@ var translation = {
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 
 		// Menu
-		"menuTitle" : "Menü",
+		"menuTitle" : "Karte",
 		"choicesPanelTitle" : "Optionen",
 		//Order
 		"orderInvalid" : "Bitte überprüfe deine Auswahl",
@@ -39,14 +39,15 @@ var translation = {
 		"amount" : "Menge",
 		"orderSubmit" : "Bestellung abgeschickt ...<br/> Guten Appetit!",
 		//Cart
-		"cartviewTitle" : "Bestellungsübersicht",
+		"cartviewTitle" : "Warenkorb",
+		"cartTabBt" : "Warenkorb",
 		"dumpCart" : "Warenkorb leeren?",
 		"dumpItem" : "{0} entfernen?",
 		//Lounge
 		"loungeviewTitle" : "Die Lounge",
 		//MyOrders
-		"myOrdersTitle" : "Bestellungen",
-		"myOrdersTabBt" : "Bestellungen"
+		"myOrdersTitle" : "Bestellübersicht",
+		"myOrdersTabBt" : "Übersicht"
 			
 
 	}

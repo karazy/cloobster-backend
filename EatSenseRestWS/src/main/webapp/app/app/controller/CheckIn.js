@@ -22,8 +22,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	userlist: '#checkinDlg2Userlist',
     	        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
     	        	cancelCheckInBt: '#cancelCheckInBt',    	       
-    	        	menulist: '#menulist',
-    	        	menuview: 'menu'
+    	        	menulist: 'lounge #menulist',
+    	        	menuview: 'menu',
+    	        	loungeview : 'lounge'
     	        }   
     },
     init: function() {
@@ -350,16 +351,21 @@ Ext.define('EatSense.controller.CheckIn', {
 		
 		this.createStores(this.models.activeCheckIn.get('restaurantId'));
 		
-		 var menu = this.getMenuview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this; 
+		 var menu = this.getMenuview(), 
+		 lounge = this.getLoungeview(),
+		 main = this.getMain(), 
+		 restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), 
+		 me = this; 
+		 
 		 if(restaurantId.toString().length != 0) {
 			 this.getMenulist().getStore().load({
 				 scope   : this,
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-			    	 that.getApplication().getController('Menu').models.menudata = records;		
+			    	 me.getApplication().getController('Menu').models.menudata = records;		
 			    	 menu.hideBackButton();
 			    	 main.switchAnim('left');
-			    	 main.setActiveItem(menu);			    	 
+			    	 main.setActiveItem(lounge);			    	 
 			    	 }
 			     }
 			 });

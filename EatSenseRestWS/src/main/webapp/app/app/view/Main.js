@@ -28,14 +28,14 @@ Ext.define('EatSense.view.Main', {
 			layout: 'fit',
 			xtype: 'checkinwithothers'
 		},
-		{
-			layout: 'fit',
-			xtype: 'cart'
-		},
-		{
-			layout: 'fit',
-			xtype: 'menu'
-		}, 
+//		{
+//			layout: 'fit',
+//			xtype: 'cart'
+//		},
+//		{
+//			layout: 'fit',
+//			xtype: 'menu'
+//		}, 
 		{
 //			No fit layout! Won't display correctly otherwise.
 			xtype: 'lounge'
