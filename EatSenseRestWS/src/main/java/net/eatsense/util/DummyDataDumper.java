@@ -94,9 +94,32 @@ public class DummyDataDumper {
 		
 		Key<Choice> oneKey = cr.saveOrUpdate(one);
 		
+		Choice two = new Choice();
+		two.setText("Extras");
+		options = new ArrayList<ProductOption>();
+		options.add(new ProductOption("Extra Käse", 1f));
+		options.add(new ProductOption("Chili Sauce", 0.5f));
+		options.add(new ProductOption("Salatgurken", 0.5f));
+		options.add(new ProductOption("Ei", 1.0f));
+		
+		two.setOptions(options);
+		two.setMaxOccurence(0);
+		two.setMinOccurence(0);
+		two.setProduct(kP);
+		two.setRestaurant(kR);
+		two.setPrice(0f);
+		
+		Key<Choice> twoKey = cr.saveOrUpdate(two);
+		
+		
+		
+		
 	    List<Key<Choice>> choices = new ArrayList<Key<Choice>>();
 	    
+	    
+	    
 	    choices.add(oneKey);
+	    choices.add(twoKey);
 	    
 	    burger.setChoices(choices);
 	    
