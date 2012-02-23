@@ -278,12 +278,8 @@ Ext.define('EatSense.controller.Order', {
 		//dump item
 		tooltip.getComponent('deleteCartItem').addListener('tap', function() {
 			tooltip.hide();
-//			this.getMain().remove(tooltip);
 			//delete item
 			orders.remove(tooltip.getSelectedProduct());
-//			badgeText = (orders.data.length > 0) ? orders.data.length : "";
-			//reset badge text on cart button and switch back to menu
-//			this.getApplication().getController('Menu').getCardBt().setBadgeText(badgeText);
 
 			this.refreshCart();
 			
@@ -469,7 +465,8 @@ Ext.define('EatSense.controller.Order', {
 	refreshMyOrdersList: function() {
 		var myorderlist = this.getMyorderlist(),
 		orderStore = Ext.data.StoreManager.lookup('orderStore'),
-		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId');
+		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
+		me = this;
 		
 		orderStore.load({
 			params : {
@@ -481,9 +478,8 @@ Ext.define('EatSense.controller.Order', {
 					total = this.calculateOrdersTotal(orderStore);
 					myorderlist.refresh();
 					this.getMyordersTotal().getTpl().overwrite(this.getMyordersTotal().element, [total]);
-				}
-				
-				this.getMyordersview().showLoadScreen(false);
+				}				
+				me.getMyordersview().showLoadScreen(false);
 			}
 		});
 		

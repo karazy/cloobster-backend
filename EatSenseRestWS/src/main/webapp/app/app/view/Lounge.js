@@ -4,12 +4,11 @@ Ext.define('EatSense.view.Lounge', {
 	xtype : 'lounge',
 	config : {
 		tabBar : {
-			itemId: 'loungeTabBar',
+			itemId : 'loungeTabBar',
 			docked : 'bottom',
 		},
 		activeItem : 0,
-		items : [ 
-		{
+		items : [ {
 			title : i18nPlugin.translate('menuTitle'),
 			itemId : 'menutab',
 			iconCls : 'compose',
@@ -20,16 +19,6 @@ Ext.define('EatSense.view.Lounge', {
 				layout : 'fit'
 			} ]
 		}, {
-			title : i18nPlugin.translate('myOrdersTabBt'),
-			iconCls : 'home',
-			itemId : 'myorderstab',
-			layout : 'fit',
-			items : [ {
-				xtype : 'myorders',
-				itemId : 'myorders',
-				layout : 'fit'
-			} ]
-		}, {
 			title : i18nPlugin.translate('cartTabBt'),
 			itemId : 'carttab',
 			iconCls : 'organize',
@@ -37,6 +26,16 @@ Ext.define('EatSense.view.Lounge', {
 			items : [ {
 				xtype : 'cart',
 				itemId : 'cart',
+				layout : 'fit'
+			} ]
+		}, {
+			title : i18nPlugin.translate('myOrdersTabBt'),
+			iconCls : 'home',
+			itemId : 'myorderstab',
+			layout : 'fit',
+			items : [ {
+				xtype : 'myorders',
+				itemId : 'myorders',
 				layout : 'fit'
 			} ]
 		}

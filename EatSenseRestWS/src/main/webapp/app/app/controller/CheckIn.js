@@ -161,6 +161,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   ],
 	 			   proxy: {
 	 				   type: 'rest',
+	 				  enablePagingParams: false,
 	 				   url : '/restaurants/'+restaurantId+'/orders',
 	 				   reader: {
 	 					   type: 'json'
@@ -367,6 +368,9 @@ Ext.define('EatSense.controller.CheckIn', {
 		 if(restaurantId.toString().length != 0) {
 			 this.getMenulist().getStore().load({
 				 scope   : this,
+				 params: {
+					 includeProducts : true
+				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
 			    	 me.getApplication().getController('Menu').models.menudata = records;		
