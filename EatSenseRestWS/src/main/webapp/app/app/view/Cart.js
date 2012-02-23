@@ -124,6 +124,20 @@ Ext.define('EatSense.view.Cart', {
 		this.getComponent('cartTopBar').getComponent('bottomTapCancel').hide();
 		this.getComponent('cartTopBar').getComponent('topTabSpacer').hide();
 		this.getComponent('cartTopBar').getComponent('bottomTapOrder').hide();
-	}
+	},
+	/**
+	 * Show a loading screen
+	 * @param mask
+	 */
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : i18nPlugin.translate('submitOrderProcess'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
+    }
 
 });

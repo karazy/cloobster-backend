@@ -12,10 +12,14 @@ Ext.define('EatSense.view.MyOrders', {
 			itemId: 'myOrdersTopBar',
 			title : i18nPlugin.translate('myOrdersTitle'),
 			items : [
-			{        		 
-		        xtype: 'label',
-		        docked: 'right',
-		        html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+			{
+				xtype: 'spacer'
+			},
+			{
+				xtype: 'button',
+				text: i18nPlugin.translate('payRequestButton'),
+				itemId: 'payRequestBt',
+				ui: 'forward'
 			}
 			]
 		},
@@ -63,7 +67,14 @@ Ext.define('EatSense.view.MyOrders', {
 					
 					return result;
 				}
-			})
+			}),
+			listeners: {
+				itemtap: function(dv, ix, item, e) {
+					Ext.defer((function() {
+						dv.deselect(ix);
+	    			}), globalConf.msgboxHideTimeout, this);					
+				}
+			}
 		}, {
 			type: 'panel',
 			docked: 'bottom',
@@ -75,5 +86,19 @@ Ext.define('EatSense.view.MyOrders', {
 			]			
 		}		
 		]
-	}
+	},
+	/**
+	 * Show a loading screen
+	 * @param mask
+	 */
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : i18nPlugin.translate('loadingMsg'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
+    }
 });

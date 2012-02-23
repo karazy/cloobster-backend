@@ -45,18 +45,12 @@ Ext.define('EatSense.view.Lounge', {
 
 	},
 	/**
-	 * Change the direction of the slide animation.
+	 * Switch the tab.
 	 * 
 	 * @param direction
 	 *            left or right
 	 */
 	switchTab : function(view, direction) {
-//		var cardpanel = this.getComponent('loungeCardPanel');
-//		cardpanel.getLayout().setAnimation({
-//			type : 'slide',
-//			direction : direction
-//		});
-//		cardpanel.setActiveItem(view);
 		this.setActiveItem(view);
 	},
 	/**
@@ -74,6 +68,6 @@ Ext.define('EatSense.view.Lounge', {
 	showBackButton : function(text) {
 		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(text);
 		this.getComponent('loungeTopBar').getComponent('loungeBackBt').show();
-	}
+	},
 
 });

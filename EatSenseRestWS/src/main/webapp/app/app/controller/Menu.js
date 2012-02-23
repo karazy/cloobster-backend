@@ -30,7 +30,8 @@ Ext.define('EatSense.controller.Menu', {
         	topToolbar: 'menu #menuTopBar',
         	bottomTapToMenu : '#menuBottomBar #bottomTapToMenu',
         	loungeview: 'lounge',
-        	loungeTabBar: '#loungeTabBar'
+        	loungeTabBar: '#loungeTabBar',
+        	myordersview: '#myorderstab #myorders',
 //        	bottomTapUndo : '#menuBottomBar #bottomTapUndo'
 		}
     },
@@ -78,6 +79,9 @@ Ext.define('EatSense.controller.Menu', {
     				var status = true;
     				if(value.getItemId() === 'carttab') {
     					status = this.getApplication().getController('Order').refreshCart();
+    				} else if (value.getItemId() === 'myorderstab') {
+    					this.getMyordersview().showLoadScreen(true);
+    					this.getApplication().getController('Order').refreshMyOrdersList();
     				}
     				
     				if(status === false) {

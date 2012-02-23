@@ -24,7 +24,8 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	cancelCheckInBt: '#cancelCheckInBt',    	       
     	        	menulist: 'lounge #menulist',
     	        	menuview: 'menu',
-    	        	loungeview : 'lounge'
+    	        	loungeview : 'lounge',
+    	        	myorderlist: '#myorderlist'
     	        }   
     },
     init: function() {
@@ -85,6 +86,10 @@ Ext.define('EatSense.controller.CheckIn', {
     	    	}
     	 };
     	 
+    	 /*
+    	  * Sets up all necessary store which depend on the restaurant id.
+    	  * This method is called once after checkin was successful.
+    	  */
     	 this.createStores = function(restaurantId) {
     		 console.log('create menu store');
     		 var menusStore =	 Ext.create('Ext.data.Store', {
@@ -168,11 +173,13 @@ Ext.define('EatSense.controller.CheckIn', {
 	 		 });
 			 
 			 OrderType.setProxy(_orderListStore.getProxy());
-		 }
-  	 
-  			
-
-  			
+			 if(this.getMyorderlist() != null && this.getMyorderlist() !== 'undefined') {
+				 this.getMyorderlist().setStore(_orderListStore);
+			 } else {
+				 console.log('Could not access myorderlist.');
+			 }
+			 
+		 }  	    			
     	 };
     },
     /**

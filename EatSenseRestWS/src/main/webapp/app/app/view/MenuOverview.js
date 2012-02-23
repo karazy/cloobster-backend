@@ -13,7 +13,6 @@ Ext.define('EatSense.view.MenuOverview', {
 		   {
 			xtype : 'list',
 			id : 'menulist',
-		//	store: 'menuStore',
 			type : 'fit',
 			allowDeselect: true,
 			itemTpl : '<div>{title}</div>',

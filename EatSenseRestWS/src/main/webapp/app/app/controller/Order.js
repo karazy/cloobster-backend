@@ -3,10 +3,11 @@ Ext.define('EatSense.controller.Order', {
 	config: {
 		refs: {
 			main : 'mainview',
-			cartview : 'cart',
+			cartview : '#cart',
 			cartoverview: 'cartoverview',
 			cartoverviewTotal: 'cartoverview #carttotalpanel label',
-			menuview: '#menutab',
+			myordersTotal : 'myorders #myorderstotalpanel label',
+			menutab: '#menutab',
 			orderlist : '#cartCardPanel #orderlist',
 			backBt : '#cartTopBar #cartBackBt',
 			cancelOrderBt : '#cartTopBar #bottomTapCancel',
@@ -19,7 +20,8 @@ Ext.define('EatSense.controller.Order', {
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: '#myorderlist',
-			myordersview: '#myorderstab',
+			myordersview: '#myorderstab #myorders',
+			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar'
 		},
 		/**
@@ -70,46 +72,35 @@ Ext.define('EatSense.controller.Order', {
 	 */
 	refreshCart: function() {
 		console.log('Cart Controller -> showCart');
-		var main = this.getMain(), cartview = this.getCartview(), orderlist = this.getOrderlist(),
+		var cartview = this.getCartview(), orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		total = 0;
 		//only switch if cart is not empty		
-		if(orders.data.length == 0) {
-			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
-			return false;
-		} else {
+//		if(orders.data.length == 0) {
+//			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
+//			return false;
+//		} else {
 			cartview.hideBackButton();
-//			this.menuBackBtContext = this.showMenu;
 			
 			//set filter TEST
 	    	orders.filter([
 	    	               {property: "status", value: "XYZ"}   	               
 	    	]);
+	    	
 			orderlist.setStore(orders);	
+			this.models.activeOrder = null;
+			orderlist.refresh();
+
 			
-			//switch to cart coming from menu
-//			if(main.getActiveItem() != cartview) {
-				//add all orders to cart list							
-//				main.switchAnim('left');
-//				main.setActiveItem(cartview);
-//			} else {
-				//allready in cart view
-				this.models.activeOrder = null;
-				orderlist.refresh();
-//				this.switchView(this.getCartoverview(), i18nPlugin.translate('cartviewTitle'), i18nPlugin.translate('back'), 'right');
-//			} 
-			
-			orders.each(function(order) {
-				total += order.calculate();
-				total = Math.round(total * 100) / 100;
-			});
-			
+			total = this.calculateOrdersTotal(orders);			
 			this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
 			this.refreshCartBadgeText();
 			return true;
-		}				
+//		}				
 	},
-	
+	/**
+	 * Switch to cart. Method gets called when editing an order.
+	 */
 	showCart: function() {
 		var orderlist = this.getOrderlist();
 		
@@ -122,15 +113,16 @@ Ext.define('EatSense.controller.Order', {
 	 */
 	showMenu: function() {
 		console.log('Cart Controller -> showMenu');
-		var lounge = this.getLoungeview(), menu = this.getMenuview();		
-//		lounge.switchAnim('right');
+		var lounge = this.getLoungeview(), menu = this.getMenutab();		
 		lounge.setActiveItem(menu);
 	},
 	/**
-	 * Remove all orders from cart and switch back to menuview.
+	 * Remove all orders from cart and switch back to menu.
 	 */
 	dumpCart: function() {
 		console.log('Cart Controller -> dumpCart');
+		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		
 		Ext.Msg.show({
 			title: i18nPlugin.translate('hint'),
 			message: i18nPlugin.translate('dumpCart'),
@@ -140,14 +132,12 @@ Ext.define('EatSense.controller.Order', {
 			if(btnId=='yes') {
 				//workaround, because view stays masked after switch to menu
 				Ext.Msg.hide();
-				//clear store
-				var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+				//clear store				
 				orders.removeAll();
 				//reset badge text on cart button and switch back to menu
 				this.refreshCartBadgeText();
-//				this.getApplication().getController('Menu').getCardBt().setBadgeText('');
 
-				this.showMenu();
+//				this.showMenu();
 				
 				}
 			}
@@ -164,71 +154,99 @@ Ext.define('EatSense.controller.Order', {
 		restaurantId = checkIn.get('restaurantId'),
 		errorIndicator = false,
 		orderlist = this.getOrderlist(),
-		orderStore = Ext.data.StoreManager.lookup('orderStore'),
-		main = this.getMain(),
-		loungeview = this.getLoungeview(),
-		myorderlist = this.getMyorderlist(),
-		myordersview = this.getMyordersview(),
+//		orderStore = Ext.data.StoreManager.lookup('orderStore'),
+		cartview = this.getCartview(),
+		ajaxOrderCount = 0,
+		ordersCount = orders.getCount();
+//		loungeview = this.getLoungeview(),
+//		myordersview = this.getMyordersview(),
 		me = this;
 		
-		orders.each(function(order) {
-			console.log('save order' + order.getProduct().get('name'));
+		if(ordersCount > 0) {
+			Ext.Msg.show({
+				title: i18nPlugin.translate('hint'),
+				message: i18nPlugin.translate('submitOrdersQuestion'),
+				buttons: Ext.MessageBox.YESNO,
+				scope: this,
+				fn: function(btnId, value, opt) {
+				if(btnId=='yes') {
+					
+					cartview.showLoadScreen(true);
+					this.getSubmitOrderBt().disable();
+					this.getCancelOrderBt().disable();
+					
+					orders.each(function(order) {
+						console.log('save order' + order.getProduct().get('name'));
+						
+						if(!errorIndicator) {
+					
+							Ext.Ajax.request({				
+					    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/',
+					    	    method: 'POST',    	    
+					    	    params: {
+					    	    	'checkInId' : checkInId,
+					    	    },
+					    	    jsonData: order.getRawJsonData(),
+					    	    scope: this,
+					    	    success: function(response) {
+					    	    	console.log('Saved order checkin.');
+					    	    	ajaxOrderCount++;
+					    	    	//set generated id
+					    	    	order.set('id', response.responseText);
+					    	    	order.set('status','PLACED');
+					    	    	orders.remove(order);
+					    	    	
+					    	    	//TODO remove orders or filter them just filter them! load orders from server?
+//					    	    	orders.each(function(order) {
+//					    	    	orderStore.add(order);
+//					    	    	});	
+//					    	    	orderStore.add(order);		    	    		    	    			    	    			    	    			    	    
+					    	    	
+					    	    	if(ajaxOrderCount == ordersCount) {		    	    					    	    	
+						    	    	me.refreshCart();
+						    	    	cartview.showLoadScreen(false);
+						    	    	me.getSubmitOrderBt().enable();
+						    	    	me.getCancelOrderBt().enable();
+				//		    	    	loungeview.switchTab(myordersview);
+				//		    			loungeview.setActiveItem(myordersview);
+						    	    	
+						    	    	//show success message and switch to next view
+						    			Ext.Msg.show({
+						    				title : i18nPlugin.translate('success'),
+						    				message : i18nPlugin.translate('orderSubmit'),
+						    				buttons : []
+						    			});
+						    			//show short alert and then hide
+						    			Ext.defer((function() {
+						    				Ext.Msg.hide();
+						    			}), globalConf.msgboxHideTimeout, this);
+						    			
+						    			
+					    	    	}
+					    	    },
+					    	    failure: function(response) {
+					    	    	errorIndicator = true;
+					    	    	cartview.showLoadScreen(false);
+					    	    	me.getSubmitOrderBt().enable();
+					    	    	me.getCancelOrderBt().enable();
+					    	    	Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
+					    	    }
+							});			
+						}	else {
+							me.getSubmitOrderBt().enable();
+							me.getCancelOrderBt().enable();
+							cartview.showLoadScreen(false);
+							return false;
+						};					
+					});
+
+					}
+				}
+			});		
 			
-			if(!errorIndicator) {
-		
-				Ext.Ajax.request({				
-		    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/',
-		    	    method: 'POST',    	    
-		    	    params: {
-		    	    	'checkInId' : checkInId,
-		    	    },
-		    	    jsonData: order.getRawJsonData(),
-		    	    scope: this,
-		    	    success: function(response) {
-		    	    	console.log('Saved order checkin.');
-		    	    	//set generated id
-		    	    	order.set('id', response.responseText);
-		    	    	order.set('status','PLACED');
-		    	    	orderlist.refresh();
-		    	    	
-		    	    	//TODO remove orders or filter them just filter them! load orders from server?
-		    	    	orders.each(function(order) {
-		    	    		orderStore.add(order);
-		    	    	});		    	    	
-//		    	    	orders.removeAll();
-		    	    	
-		    	    	myorderlist.setStore(orderStore);
-		    	    	myorderlist.refresh();
-		    	    	
-		    	    	me.refreshCartBadgeText();
-		    	    	
-//		    			main.switchAnim('left');
-		    	    	loungeview.switchTab(myordersview);
-//		    			loungeview.setActiveItem(myordersview);
-		    	    	
-		    	    	//show success message and switch to next view
-		    			Ext.Msg.show({
-		    				title : i18nPlugin.translate('success'),
-		    				message : i18nPlugin.translate('orderSubmit'),
-		    				buttons : []
-		    			});
-		    			//show short alert and then hide
-		    			Ext.defer((function() {
-		    				Ext.Msg.hide();
-		    			}), globalConf.msgboxHideTimeout, this);		
-		    			
-		    			
-		    	    },
-		    	    failure: function(response) {
-		    	    	errorIndicator = true;
-		    	    	//TEST REMOVE
-//		    	    	order.set('status','PLACED');
-//		    	    	orderlist.refresh();
-		    	    	Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-		    	    }
-				});			
-			}						
-		});
+			
+
+	}
 	},
 	/**
 	 * Listener for itemTap event of orderlist.
@@ -242,7 +260,7 @@ Ext.define('EatSense.controller.Order', {
 		orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		productName = model.getProduct().get('name'),
-		windowX = Ext.Viewport.getWindowWidth();;
+		windowX = Ext.Viewport.getWindowWidth();
 		
 		tooltip.setSelectedProduct(model);
 		
@@ -446,21 +464,52 @@ Ext.define('EatSense.controller.Order', {
 		cartButton.setBadgeText(badgeText);
 	},
 	/**
-	 * Loads orders already submited to server
+	 * Refresh myorderlist and recalculate the total price.
 	 */
-	loadPlacedOrders: function() {
-		var store = Ext.data.StoreManager.lookup('orderStore');
+	refreshMyOrdersList: function() {
+		var myorderlist = this.getMyorderlist(),
+		orderStore = Ext.data.StoreManager.lookup('orderStore'),
+		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId');
 		
-		store.load({
+		orderStore.load({
 			params : {
-				checkInId : '',
-				callback: function() {
+				'checkInId' : checkInId,				
+			},
+			callback: function(records, operation, success) {
+				if(success == true) {
 					//refresh the order list
+					total = this.calculateOrdersTotal(orderStore);
+					myorderlist.refresh();
+					this.getMyordersTotal().getTpl().overwrite(this.getMyordersTotal().element, [total]);
 				}
+				
+				this.getMyordersview().showLoadScreen(false);
 			}
 		});
 		
 		
+		
+	},
+	/**
+	 * Calculates and returns the total price of all orders.
+	 * 
+	 * @param orderStore
+	 * 		An order store instance for which to calculate the total price.
+	 * 
+	 * @return
+	 * 		total price or 0 if an error occured or no orders exist.
+	 */
+	calculateOrdersTotal: function(orderStore) {
+		var total = 0;
+		
+		if(orderStore != null && orderStore !== 'undefined') {
+			orderStore.each(function(order) {
+				total += order.calculate();
+				total = Math.round(total * 100) / 100;
+			});
+		}
+			
+		return total;
 	}
 	
 });

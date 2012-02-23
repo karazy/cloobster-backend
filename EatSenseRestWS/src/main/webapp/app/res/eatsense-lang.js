@@ -44,11 +44,14 @@ var translation = {
 		"dumpCart" : "Warenkorb leeren?",
 		"dumpItem" : "{0} entfernen?",
 		"submitButton" : "Bestellen",
+		"submitOrderProcess" : "Sende Bestellung ...",
+		"submitOrdersQuestion" : "Bestellung absenden?",
 		//Lounge
 		"loungeviewTitle" : "Die Lounge",
 		//MyOrders
 		"myOrdersTitle" : "Bestellübersicht",
-		"myOrdersTabBt" : "Übersicht"
+		"myOrdersTabBt" : "Übersicht",
+		"payRequestButton" : "Bezahlen"
 			
 
 	}
