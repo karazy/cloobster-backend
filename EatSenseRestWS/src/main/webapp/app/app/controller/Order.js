@@ -126,7 +126,15 @@ Ext.define('EatSense.controller.Order', {
 		Ext.Msg.show({
 			title: i18nPlugin.translate('hint'),
 			message: i18nPlugin.translate('dumpCart'),
-			buttons: Ext.MessageBox.YESNO,
+			buttons: [{
+				text: 'Ja',
+				itemId: 'yes',
+				ui: 'action'
+			}, {
+				text: 'Nein',
+				itemId: 'no',
+				ui: 'action'
+			}],
 			scope: this,
 			fn: function(btnId, value, opt) {
 			if(btnId=='yes') {
@@ -163,7 +171,15 @@ Ext.define('EatSense.controller.Order', {
 			Ext.Msg.show({
 				title: i18nPlugin.translate('hint'),
 				message: i18nPlugin.translate('submitOrdersQuestion'),
-				buttons: Ext.MessageBox.YESNO,
+				buttons: [{
+					text: 'Ja',
+					itemId: 'yes',
+					ui: 'action'
+				}, {
+					text: 'Nein',
+					itemId: 'no',
+					ui: 'action'
+				}],
 				scope: this,
 				fn: function(btnId, value, opt) {
 				if(btnId=='yes') {

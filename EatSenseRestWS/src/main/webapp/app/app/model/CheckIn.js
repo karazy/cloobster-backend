@@ -1,6 +1,6 @@
 Ext.define('EatSense.model.CheckIn', {
 	extend : 'Ext.data.Model',
-	requires : [ 'EatSense.model.Error'],
+	requires : [ 'EatSense.model.Error' ],
 	config : {
 		idProperty : 'userId',
 		fields : [ {
@@ -16,9 +16,17 @@ Ext.define('EatSense.model.CheckIn', {
 			name : 'spot',
 			type : 'string'
 		}, {
-			name : 'userId',
+			name : 'spotId',
 			type : 'string'
 		}, {
+			name : 'userId',
+			type : 'string'
+		},
+		{
+			name : 'linkedCheckInId',
+			type : 'string'
+		},
+		{
 			name : 'nickname',
 			type : 'string'
 		}, {
@@ -27,11 +35,11 @@ Ext.define('EatSense.model.CheckIn', {
 		} ],
 		proxy : {
 			type : 'rest',
-			url : '/restaurants/spot/',
+			url : '/checkins/',
 			reader : {
 				type : 'json',
 			}
-		},		
+		},
 		// BUG (Sencha) doesn't work currently. Retest
 		associations : {
 			type : "hasOne",
