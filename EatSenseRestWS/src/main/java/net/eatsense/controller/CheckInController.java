@@ -21,6 +21,7 @@ import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
+import net.eatsense.representation.SpotDTO;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
 
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a
@@ -57,6 +59,25 @@ public class CheckInController {
 
     public void setValidator(Validator validator) {
         this.validator = validator;
+    }
+    
+    public SpotDTO getSpotInformation(String barcode) throws NotFoundException {
+    	if(barcode == null || barcode.isEmpty() )
+    		return null;
+    	SpotDTO spotDto = new SpotDTO();
+    	Spot spot = barcodeRepo.getByProperty("barcode", barcode);
+    	if(spot == null )
+    		throw new NotFoundException();
+    	
+    	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
+    	
+    	spotDto.setBarcode(barcode);
+    	spotDto.setName(spot.getName());
+    	spotDto.setRestaurant(restaurant.getName());
+    	spotDto.setRestaurantId(restaurant.getId());
+    	spotDto.setGroupTag(spot.getGroupTag());
+    	
+		return spotDto ;
     }
 
 	/**
@@ -114,6 +135,57 @@ public class CheckInController {
 		}
 		return checkInDto;
 	}
+	
+	public String createCheckIn(CheckInDTO checkInDto) {
+		// set values for domain object
+		Spot spot = barcodeRepo.getByProperty("barcode", checkInDto.getSpotId());
+		
+    	if(spot == null )
+    		throw new NotFoundException("barcode unknown");
+    	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
+    	
+    	CheckIn checkIn = new CheckIn();
+    	
+    	String checkInId = IdHelper.generateId();
+		checkIn.setRestaurant(restaurant.getKey());
+		checkIn.setSpot(spot.getKey());
+		checkIn.setUserId(checkInId);
+		checkIn.setStatus(CheckInStatus.CHECKEDIN);
+		checkIn.setCheckInTime(new Date());
+		checkIn.setDeviceId(checkInDto.getDeviceId());
+
+		// validation 
+		Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn, Default.class, CheckInStep2.class);
+		if( !constraintViolations.isEmpty() )  {
+			// constraint violations occurred setting status and logging error
+			logger.info("CheckIn validation failed. Message(s):");
+			for (ConstraintViolation<CheckIn> violation : constraintViolations) {
+				logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
+				throw new RuntimeException(violation.getPropertyPath().toString() + ": " + violation.getMessage());
+			}
+			
+			return null;
+		}			
+ 					
+		List<CheckIn> checkInsAtSpot = getOtherChekIns(checkIn);
+		Iterator<CheckIn> it = checkInsAtSpot.iterator();
+		while(it.hasNext()) {
+			CheckIn next = it.next();
+			
+			if(next.getNickname().equals(checkIn.getNickname() ) ) {
+				logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+				//abort checkin
+				throw new RuntimeException("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+			}
+			
+			
+		}
+
+		checkInRepo.saveOrUpdate(checkIn);
+
+		return checkInId;
+	}
+	
 
 	/**
 	 * Step 2 in CheckIn Process. An entry in checkIn database already exists
@@ -211,37 +283,75 @@ public class CheckInController {
 	 * Step 3 - I (optional) Shows a list of all checkedIn Users at the same
 	 * spot.
 	 * 
-	 * @param userId
+	 * @param checkInId
 	 * @return Map<String,String> - key is another users id - value is another
 	 *         users nickname If no other users at this spot exist
 	 *         <code>null</code>.
 	 */
-	public List<User> getUsersAtSpot(String userId) {
+	public List<User> getUsersAtSpot(String spotId, String checkInId) {
 		List<User> usersAtSpot = null;
-		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
 		
-		if (chkin.getStatus() == CheckInStatus.CHECKEDIN) {
+		Spot spot = barcodeRepo.getByProperty("barcode", spotId);
+		
+    	if(spot == null )
+    		throw new NotFoundException("barcode unknown");
+		
+		List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", spot.getKey());
+		
+		if (checkInsAtSpot != null && !checkInsAtSpot.isEmpty()) {
+			usersAtSpot = new ArrayList<User>();
 			
-			List<CheckIn> checkInsAtSpot = getOtherChekIns(chkin);
-			
-			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
-				usersAtSpot = new ArrayList<User>();
+			// Other users at this spot exist.
+			for (CheckIn checkIn : checkInsAtSpot) {
 				
-				// Other users at this table exist.
-				for (CheckIn checkIn : checkInsAtSpot) {
+				if(!checkIn.getUserId().equals(checkInId) && isPaymentLinkPossible(checkIn)) {
+					User user = new User();
 					
-					if(!checkIn.getUserId().equals(userId) && isPaymentLinkPossible(checkIn)) {
-						User user = new User();
-						
-						user.setUserId(checkIn.getUserId());
-						user.setNickname(checkIn.getNickname());
-						
-						usersAtSpot.add(user);
-					}
+					user.setUserId(checkIn.getUserId());
+					user.setNickname(checkIn.getNickname());
+					
+					usersAtSpot.add(user);
 				}
 			}
 		}
+
 		return usersAtSpot;
+	}
+	
+	/**
+	 * Update existing checkIn
+	 * 
+	 * @param checkInId
+	 * @param checkInDto
+	 * @return
+	 */
+	public String updateCheckIn(String checkInId, CheckInDTO checkInDto) {
+		CheckIn checkInUser = checkInRepo.getByProperty("userId", checkInId);
+		boolean save = false;
+		if(checkInUser == null )
+			throw new NotFoundException("Unknown checkInId");
+		
+		if(checkInUser.getLinkedUserId() != checkInDto.getLinkedCheckInId()) {
+			CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", checkInDto.getLinkedCheckInId());
+			if(checkInLinkedUser == null )
+				throw new RuntimeException("linkedCheckInId unknown");
+			
+			if(checkInUser != null && checkInLinkedUser != null) {
+				if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && isPaymentLinkPossible(checkInLinkedUser)) {
+					checkInUser.setLinkedUserId(checkInLinkedUser.getUserId());
+					save = true;
+				}
+				else
+					return "Can't link to this user";
+			}
+		}
+		//TODO: allow updating of other fields, like nickname
+
+		if(save) {
+			checkInRepo.saveOrUpdate(checkInUser);
+		}
+			
+		return "OK";
 	}
 
 	/**

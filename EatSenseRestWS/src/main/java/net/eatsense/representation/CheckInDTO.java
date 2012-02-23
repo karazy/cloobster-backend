@@ -29,11 +29,23 @@ public class CheckInDTO {
 	 * Name of location inside the restaurant
 	 */
 	private String spot;
+	
+	private String spotId;
+
+	public String getSpotId() {
+		return spotId;
+	}
+
+	public void setSpotId(String spotId) {
+		this.spotId = spotId;
+	}
 
 	/**
 	 * The userId used to identify this user.
 	 */
-	private String userId;	
+	private String userId;
+	
+	private String linkedCheckInId;
 	
 	/**
 	 * A users nickname used for this checkin.
@@ -115,5 +127,13 @@ public class CheckInDTO {
 
 	public void setError(ErrorDTO error) {
 		this.error = error;
+	}
+
+	public String getLinkedCheckInId() {
+		return linkedCheckInId;
+	}
+
+	public void setLinkedCheckInId(String linkedCheckInId) {
+		this.linkedCheckInId = linkedCheckInId;
 	}
 }

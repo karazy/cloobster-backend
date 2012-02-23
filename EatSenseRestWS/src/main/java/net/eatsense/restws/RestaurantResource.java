@@ -89,18 +89,6 @@ public class RestaurantResource{
 	/**
 	 * Loads other users checkedIn at this spot.
 	 * @param userId
-	 * @return collection of checkedIn users
-	 */
-	@GET
-	@Path("spot/users/")
-	@Produces("application/json; charset=UTF-8")
-	public Collection<User> getUsersAtSpot(@QueryParam("userId") String userId) { 
-		return checkInCtr.getUsersAtSpot(userId);
-	}
-
-	/**
-	 * Loads other users checkedIn at this spot.
-	 * @param userId
 	 */
 	@POST
 	@Path("spot/users/")
