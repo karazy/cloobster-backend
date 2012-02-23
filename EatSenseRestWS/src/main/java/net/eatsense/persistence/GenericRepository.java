@@ -161,6 +161,17 @@ public class GenericRepository<T> extends DAOBase{
 		Collection<T> list = ofy().query(clazz).list();
 		return list;
 	}
+	
+	/**
+	 * Gets all key of entities of type T.
+	 * @return
+	 * 		Collection of keys of type T
+	 */
+	public Collection<Key<T>> getAllKeys() {
+		logger.info("getAllKeys of type {} ", clazz);
+		Collection<Key<T>> list = ofy().query(clazz).listKeys();
+		return list;
+	}
 
 	/**
 	 * Convenience method to get all objects matching a single property

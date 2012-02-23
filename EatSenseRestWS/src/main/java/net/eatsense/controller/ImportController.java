@@ -20,6 +20,8 @@ import net.eatsense.domain.Spot;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
+import net.eatsense.persistence.OrderChoiceRepository;
+import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -49,6 +51,7 @@ public class ImportController {
 	private ProductRepository productRepo;
 	private ChoiceRepository choiceRepo;
 	private CheckInRepository checkinRepo;
+	private OrderRepository orderRepo;
 	
 	private String returnMessage;
 	
@@ -58,15 +61,19 @@ public class ImportController {
 
 	@Inject
     private Validator validator;
+	private OrderChoiceRepository orderChoiceRepo;
+	
 
 	@Inject
-	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr) {
+	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr) {
 		this.restaurantRepo = r;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.choiceRepo = cr;
 		this.checkinRepo = chkr;
+		this.orderRepo = or;
+		this.orderChoiceRepo = ocr;
 	}
 	
     public void setValidator(Validator validator) {
@@ -248,13 +255,14 @@ public class ImportController {
 	 * Deletes restaurants, spots, checkins, menus, products, choices and so on.
 	 */
 	public void deleteAllData() {
-		restaurantRepo.ofy().delete(restaurantRepo.getAll());
-		spotRepo.ofy().delete(spotRepo.getAll());
-		menuRepo.ofy().delete(menuRepo.getAll());
-		productRepo.ofy().delete(productRepo.getAll());
-		choiceRepo.ofy().delete(choiceRepo.getAll());
-		checkinRepo.ofy().delete(checkinRepo.getAll());
-		
+		restaurantRepo.ofy().delete(restaurantRepo.getAllKeys());
+		spotRepo.ofy().delete(spotRepo.getAllKeys());
+		menuRepo.ofy().delete(menuRepo.getAllKeys());
+		productRepo.ofy().delete(productRepo.getAllKeys());
+		choiceRepo.ofy().delete(choiceRepo.getAllKeys());
+		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
+		orderRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
 	};
 	
 	public void deleteCheckIns() {
