@@ -1,50 +1,56 @@
 Ext.define('EatSense.view.Lounge', {
-	extend : 'Ext.TabPanel',
-	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu' ],
+	extend : 'Ext.tab.Panel',
+	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu', 'EatSense.view.MenuOverview' ],
 	xtype : 'lounge',
 	config : {
-		tabBarPosition : 'bottom',
-		activeItem : 0,
-		layout : {
-		// type : 'fit'
+		tabBar : {
+			itemId : 'loungeTabBar',
+			docked : 'bottom',
 		},
+		activeItem : 0,
 		items : [ {
-			docked : 'top',
-			xtype : 'toolbar',
-			itemId : 'loungeTopBar',
-			title : i18nPlugin.translate('loungeviewTitle')
-		}, {
-			xtype : 'panel',
-			// layout : 'fit',
-			title : i18nPlugin.translate('myOrdersTabBt'),
-			iconCls : 'home',
+			title : i18nPlugin.translate('menuTitle'),
+			itemId : 'menutab',
+			iconCls : 'compose',
+			layout : 'fit',
 			items : [ {
-				xtype : 'myorders',
-				itemId : 'myorderstab',
+				xtype : 'menu',
+				itemId : 'menu',
 				layout : 'fit'
 			} ]
-
 		}, {
-			xytpe : 'panel',
-			title : 'Menu',
-			iconCls : 'compose',
-			html : 'TEST'
+			title : i18nPlugin.translate('cartTabBt'),
+			itemId : 'carttab',
+			iconCls : 'organize',
+			layout : 'fit',
+			items : [ {
+				xtype : 'cart',
+				itemId : 'cart',
+				layout : 'fit'
+			} ]
+		}, {
+			title : i18nPlugin.translate('myOrdersTabBt'),
+			iconCls : 'home',
+			itemId : 'myorderstab',
+			layout : 'fit',
+			items : [ {
+				xtype : 'myorders',
+				itemId : 'myorders',
+				layout : 'fit'
+			} ]
 		}
+
 		]
+
 	},
 	/**
-	 * Change the direction of the slide animation.
+	 * Switch the tab.
 	 * 
 	 * @param direction
 	 *            left or right
 	 */
 	switchTab : function(view, direction) {
-		var cardpanel = this.getComponent('loungeCardPanel');
-		cardpanel.getLayout().setAnimation({
-			type : 'slide',
-			direction : direction
-		});
-		cardpanel.setActiveItem(view);
+		this.setActiveItem(view);
 	},
 	/**
 	 * Hides the back button in top toolbar.
@@ -59,9 +65,8 @@ Ext.define('EatSense.view.Lounge', {
 	 *            Label to display on button.
 	 */
 	showBackButton : function(text) {
-		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(
-				text);
+		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(text);
 		this.getComponent('loungeTopBar').getComponent('loungeBackBt').show();
-	}
+	},
 
 });

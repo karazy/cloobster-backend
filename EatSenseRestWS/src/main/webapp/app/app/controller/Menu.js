@@ -20,14 +20,19 @@ Ext.define('EatSense.controller.Menu', {
         	prodDetailBackBt :'#prodDetailBackBt' ,	   
         	amountSpinner : 'menu panel panel #productAmountSpinner',
         	cartview : 'cartview',
-        	cardBt : '#menuBottomBar #menuCartBt',
+//        	cartBt : '#menuBottomBar #menuCartBt',
+//        	cartBt : '#carttab',
         	menuview: 'menu',
         	productcomment: '#productComment',
-        	createOrderBt: '#menuCardPanel #menuProductDetail #prodDetailCardBt',
+        	//#menutap #menu
+        	createOrderBt :'menu #menuCardPanel #menuProductDetail #prodDetailcartBt',
         	backBt: 'menu #menuTopBar #menuBackBt',
         	topToolbar: 'menu #menuTopBar',
         	bottomTapToMenu : '#menuBottomBar #bottomTapToMenu',
-        	bottomTapUndo : '#menuBottomBar #bottomTapUndo'
+        	loungeview: 'lounge',
+        	loungeTabBar: '#loungeTabBar',
+        	myordersview: '#myorderstab #myorders',
+//        	bottomTapUndo : '#menuBottomBar #bottomTapUndo'
 		}
     },
     init: function() {
@@ -48,9 +53,9 @@ Ext.define('EatSense.controller.Menu', {
              createOrderBt : {
             	 tap: this.createOrder
              },
-             cardBt : {
-            	 tap: this.showCart
-             },
+//             cartBt : {
+//            	 tap: this.showCart
+//             },
              bottomTapToMenu : {
             	 tap: this.showMenu
              },
@@ -62,12 +67,30 @@ Ext.define('EatSense.controller.Menu', {
             		 }
             	 }
              },
-             bottomTapUndo : {
-            	 tap: this.undoOrder
-             },
+//             bottomTapUndo : {
+//            	 tap: this.undoOrder
+//             },
              amountSpinner : {
             	 spin: this.amountChanged
-             }
+             },
+             loungeview : {
+     			activeitemchange : function(container, value, oldValue, opts) {
+    				console.log('tab change');
+    				var status = true;
+    				if(value.getItemId() === 'carttab') {
+    					status = this.getApplication().getController('Order').refreshCart();
+    				} else if (value.getItemId() === 'myorderstab') {
+    					this.getMyordersview().showLoadScreen(true);
+    					this.getApplication().getController('Order').refreshMyOrdersList();
+    				}
+    				
+    				if(status === false) {
+    					    this.getLoungeview().setActiveItem(oldValue);					
+    				}
+    				
+    				return status;
+    			}
+    		},
         });
     	 
     	 //store retrieved models
@@ -249,7 +272,11 @@ Ext.define('EatSense.controller.Menu', {
 	createOrder: function(button) {
 		console.log('Menu Controller -> createOrder');
 		//get active product and set choice values
-		var productForCart = this.models.activeProduct, order, validationError = "", productIsValid = true;	
+		var productForCart = this.models.activeProduct,
+		order,
+		validationError = "",
+		cartButton = this.getLoungeTabBar().getAt(2),
+		productIsValid = true;	
 		//validate choices 
 		productForCart.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
@@ -269,8 +296,8 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
-			this.getCardBt().setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
-			//TODO temporarily persist data on phone 		
+			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
+			//TODO temporarily persist data on phone or send to server	
 			
 			this.backToProductOverview(i18nPlugin.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
 		} else {
@@ -283,7 +310,7 @@ Ext.define('EatSense.controller.Menu', {
 	 * Switches to card view.
 	 */
 	showCart: function(){
-		this.getApplication().getController('Cart').showCart();
+		this.getApplication().getController('Order').showCart();
 	},
 	
 	//Menu navigation functions
@@ -311,14 +338,16 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	undoOrder: function() {
 		console.log('Menu Controller -> undoOrder');
-		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(), badgeText,
-		removedOrder;
+		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(), 
+		badgeText,
+		removedOrder,
+		cartButton = this.getLoungeTabBar().getAt(2);
 		
 		if(orders.data.length > 0) {
 			removedOrder = orders.getAt(orders.data.length-1).getProduct().get('name');
 			orders.removeAt(orders.data.length - 1);
 			badgeText = (orders.data.length > 0) ? orders.data.length : "";
-			this.getCardBt().setBadgeText(badgeText);
+			cartButton.setBadgeText(badgeText);
 			Ext.Msg.show({
 				title : i18nPlugin.translate('orderRemoved'),
 				message : removedOrder,

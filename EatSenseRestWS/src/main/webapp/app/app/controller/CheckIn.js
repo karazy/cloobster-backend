@@ -22,8 +22,10 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	userlist: '#checkinDlg2Userlist',
     	        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
     	        	cancelCheckInBt: '#cancelCheckInBt',    	       
-    	        	menulist: '#menulist',
-    	        	menuview: 'menu'
+    	        	menulist: 'lounge #menulist',
+    	        	menuview: 'menu',
+    	        	loungeview : 'lounge',
+    	        	myorderlist: '#myorderlist'
     	        }   
     },
     init: function() {
@@ -84,6 +86,10 @@ Ext.define('EatSense.controller.CheckIn', {
     	    	}
     	 };
     	 
+    	 /*
+    	  * Sets up all necessary store which depend on the restaurant id.
+    	  * This method is called once after checkin was successful.
+    	  */
     	 this.createStores = function(restaurantId) {
     		 console.log('create menu store');
     		 var menusStore =	 Ext.create('Ext.data.Store', {
@@ -151,10 +157,11 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   model: 'EatSense.model.Order',
 	 			   storeId: 'orderStore',
 	 			   filters: [
-	 			             {property: "status", value: "CART"}
+	 			             {property: "status", value: "PLACED"}
 	 			   ],
 	 			   proxy: {
 	 				   type: 'rest',
+	 				  enablePagingParams: false,
 	 				   url : '/restaurants/'+restaurantId+'/orders',
 	 				   reader: {
 	 					   type: 'json'
@@ -167,11 +174,13 @@ Ext.define('EatSense.controller.CheckIn', {
 	 		 });
 			 
 			 OrderType.setProxy(_orderListStore.getProxy());
-		 }
-  	 
-  			
-
-  			
+			 if(this.getMyorderlist() != null && this.getMyorderlist() !== 'undefined') {
+				 this.getMyorderlist().setStore(_orderListStore);
+			 } else {
+				 console.log('Could not access myorderlist.');
+			 }
+			 
+		 }  	    			
     	 };
     },
     /**
@@ -350,16 +359,24 @@ Ext.define('EatSense.controller.CheckIn', {
 		
 		this.createStores(this.models.activeCheckIn.get('restaurantId'));
 		
-		 var menu = this.getMenuview(), main = this.getMain(), restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), that = this; 
+		 var menu = this.getMenuview(), 
+		 lounge = this.getLoungeview(),
+		 main = this.getMain(), 
+		 restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), 
+		 me = this; 
+		 
 		 if(restaurantId.toString().length != 0) {
 			 this.getMenulist().getStore().load({
 				 scope   : this,
+				 params: {
+					 includeProducts : true
+				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-			    	 that.getApplication().getController('Menu').models.menudata = records;		
+			    	 me.getApplication().getController('Menu').models.menudata = records;		
 			    	 menu.hideBackButton();
 			    	 main.switchAnim('left');
-			    	 main.setActiveItem(menu);			    	 
+			    	 main.setActiveItem(lounge);			    	 
 			    	 }
 			     }
 			 });

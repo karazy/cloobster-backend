@@ -1,11 +1,31 @@
 Ext.define('EatSense.view.MyOrders', {
 	extend : 'Ext.Panel',
-	xtype: 'myorders',
+	xtype: 'myorders',	
+	layout: {
+		type: 'fit'
+	},
 	config: {
 		items: [
 		{
+			docked : 'top',
+			xtype : 'toolbar',
+			itemId: 'myOrdersTopBar',
+			title : i18nPlugin.translate('myOrdersTitle'),
+			items : [
+			{
+				xtype: 'spacer'
+			},
+			{
+				xtype: 'button',
+				text: i18nPlugin.translate('payRequestButton'),
+				itemId: 'payRequestBt',
+				ui: 'forward'
+			}
+			]
+		},
+		{
 			xtype: 'list',
-			itemId: 'myorderlist',
+			id: 'myorderlist',
 			styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
@@ -47,7 +67,14 @@ Ext.define('EatSense.view.MyOrders', {
 					
 					return result;
 				}
-			})
+			}),
+			listeners: {
+				itemtap: function(dv, ix, item, e) {
+					Ext.defer((function() {
+						dv.deselect(ix);
+	    			}), globalConf.msgboxHideTimeout, this);					
+				}
+			}
 		}, {
 			type: 'panel',
 			docked: 'bottom',
@@ -57,7 +84,21 @@ Ext.define('EatSense.view.MyOrders', {
 				tpl: '<div class="cartTotal" style="text-align:center; font-size: 1.5em;"><h1>Total {0}€</h1></div>'
 			}
 			]			
-		}
+		}		
 		]
-	}
+	},
+	/**
+	 * Show a loading screen
+	 * @param mask
+	 */
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : i18nPlugin.translate('loadingMsg'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
+    }
 });

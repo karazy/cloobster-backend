@@ -37,6 +37,9 @@ Ext.define('EatSense.model.Product', {
 	/**
 	 * Calculates total cost of this product including choices, returns it and
 	 * stores it in priceCalculated.
+	 * @param amount
+	 * 		How often this product is ordered.
+	 * 
 	 */
 	calculate: function(amount) {
 		var _total = this.get('price'), _amount = 1;
