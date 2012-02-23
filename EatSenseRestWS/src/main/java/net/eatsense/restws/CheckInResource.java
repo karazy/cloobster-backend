@@ -40,7 +40,7 @@ public class CheckInResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("text/plain; charset=UTF-8")
 	public String updateCheckIn(@PathParam("checkInId")String checkInId, CheckInDTO checkIn) {
-		return checkInCtr.updateCheckIn(checkIn);
+		return checkInCtr.updateCheckIn(checkInId, checkIn);
 	}
 	
 	@GET

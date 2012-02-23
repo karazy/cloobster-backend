@@ -15,6 +15,7 @@ import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.SpotDTO;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
@@ -65,12 +66,15 @@ public class CheckInControllerTest {
 	}
 	
 	@Test
-	public void testCheckInProcessStandardCheckIn() {		
-		CheckInDTO data = ctr.checkInIntent("b4rc0de");
-		assertEquals("Heidi und Paul", data.getRestaurantName());
-		assertNotNull(data.getUserId());
-		assertNotNull(data.getNickname());
-		assertNotNull(data.getRestaurantId());
+	public void testCheckInProcessStandardCheckIn() {	
+		SpotDTO spot = ctr.getSpotInformation("b4rc0de");
+		CheckInDTO checkIn = new CheckInDTO()
+		checkIn.setSpotId("b4rc0de");
+		
+		assertEquals("Heidi und Paul", spot.getRestaurant());
+		assertNotNull(spot.getBarcode());
+		assertNotNull(spot.getName());
+		assertNotNull(spot.getRestaurantId());
 		data.setNickname("FakeNik");
 		ctr.checkIn(data.getUserId(), data);
 		CheckIn chkin = cr.getByProperty("userId", data.getUserId());

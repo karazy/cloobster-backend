@@ -59,55 +59,6 @@ public class RestaurantResource{
 	}
 
 	/**
-	 * Intent to check in a restaurant.
-	 * 
-	 * @param code
-	 *            barcode
-	 * @return {@link CheckInDTO} information providing status etc.
-	 */
-	@GET
-	@Produces("application/json; charset=UTF-8")
-	@Path("spot/{code}")
-	public CheckInDTO checkInIntent(@PathParam("code") String code) {
-		return checkInCtr.checkInIntent(code);
-	}
-
-	/**
-	 * A real check in after user confirmed his wish to check in.
-	 * 
-	 * @param code
-	 */
-	@PUT
-	@Path("spot/{userId}")
-	@Produces("application/json; charset=UTF-8")
-	@Consumes("application/json; charset=UTF-8")
-	public CheckInDTO checkIn(@PathParam("userId") String userId, CheckInDTO checkIn) { 
-		
-		return checkInCtr.checkIn(userId, checkIn);
-	}
-	
-	/**
-	 * Loads other users checkedIn at this spot.
-	 * @param userId
-	 */
-	@POST
-	@Path("spot/users/")
-	public void linkToUser(@FormParam(value = "userId") String userId,@FormParam(value = "linkedUserId") String linkedUserId) { 
-		checkInCtr.linkToUser(userId, linkedUserId);
-	}
-
-	
-	/**
-	 * Called if user cancels checkIn
-	 * @param userId
-	 */
-	@DELETE
-	@Path("spot/{userId}")
-	public void cancelCheckIn(@PathParam("userId") String userId) {
-		checkInCtr.cancelCheckIn(userId);
-	}
-
-	/**
 	 * Returns a list of all restaurants
 	 * 
 	 * @return all restaurants

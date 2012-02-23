@@ -80,68 +80,15 @@ public class CheckInController {
 		return spotDto ;
     }
 
-	/**
-	 * Step 1 in checkIn process. User scanned barcode and and it is checked if
-	 * a restaurant with this barcode exists.
-	 * 
-	 * @param barcode
-	 * @return
-	 */
-	public CheckInDTO checkInIntent(String barcode) {
-		CheckIn checkIn = new CheckIn();
-		CheckInDTO checkInDto = new CheckInDTO();
-		if (barcode != null && barcode.trim().length() > 0) {
-			Restaurant restaurant = restaurantRepo.findByBarcode(barcode);
-			Spot spot = barcodeRepo.getByProperty("barcode", barcode);
-			if (restaurant != null) {
-				logger.info("CheckIn attempt with barcode {}", barcode);
-				String tmpUserId = IdHelper.generateId();
-				String tmpNickName = nnGen.generateNickname();
-				
-				// set values for dto object
-				checkInDto.setRestaurantName(restaurant.getName());
-				checkInDto.setRestaurantId(restaurant.getId());
-				checkInDto.setStatus(CheckInStatus.INTENT.toString());
-				checkInDto.setUserId(tmpUserId);
-				checkInDto.setSpot(spot.getName());
-				checkInDto.setNickname(tmpNickName);
-				
-				// set values for domain object
-				checkIn.setRestaurant(restaurant.getKey());
-				checkIn.setSpot(spot.getKey());
-				checkIn.setUserId(tmpUserId);
-				checkIn.setStatus(CheckInStatus.INTENT);
-				checkIn.setCheckInTime(new Date());
-				
-				// validation 
-				Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn);
-				if( constraintViolations.isEmpty() )  {
-					checkInRepo.saveOrUpdate(checkIn);
-				}
-				else {
-					logger.info("checkInIntent(): CheckIn object validation failed. Message(s):");
-					for (ConstraintViolation<CheckIn> violation : constraintViolations) {
-						logger.info( violation.getMessage() );
-					}
-					checkInDto.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
-				}
-			} else {
-				logger.info("CheckIn attempt failed! Reason: " + barcode + " is not a valid code.");
-				checkInDto.setStatus(CheckInStatus.BARCODE_ERROR.toString());
-			}
-		} else {
-			logger.info("CheckIn attempt failed! Reason: no barcode provided.");
-			checkInDto.setStatus(CheckInStatus.BARCODE_ERROR.toString());
-		}
-		return checkInDto;
-	}
-	
 	public String createCheckIn(CheckInDTO checkInDto) {
+		if(checkInDto == null || checkInDto.getStatus() != CheckInStatus.INTENT.toString())
+			return null;
 		// set values for domain object
 		Spot spot = barcodeRepo.getByProperty("barcode", checkInDto.getSpotId());
 		
     	if(spot == null )
     		throw new NotFoundException("barcode unknown");
+    	
     	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
     	
     	CheckIn checkIn = new CheckIn();
@@ -153,6 +100,7 @@ public class CheckInController {
 		checkIn.setStatus(CheckInStatus.CHECKEDIN);
 		checkIn.setCheckInTime(new Date());
 		checkIn.setDeviceId(checkInDto.getDeviceId());
+		checkIn.setNickname(checkInDto.getNickname());
 
 		// validation 
 		Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn, Default.class, CheckInStep2.class);
@@ -168,115 +116,25 @@ public class CheckInController {
 		}			
  					
 		List<CheckIn> checkInsAtSpot = getOtherChekIns(checkIn);
-		Iterator<CheckIn> it = checkInsAtSpot.iterator();
-		while(it.hasNext()) {
-			CheckIn next = it.next();
-			
-			if(next.getNickname().equals(checkIn.getNickname() ) ) {
-				logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
-				//abort checkin
-				throw new RuntimeException("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+		
+		if(checkInsAtSpot != null) {
+			Iterator<CheckIn> it = checkInsAtSpot.iterator();
+			while(it.hasNext()) {
+				CheckIn next = it.next();
+				
+				if(next.getNickname().equals(checkIn.getNickname() ) ) {
+					logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+					//abort checkin
+					throw new RuntimeException("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+				}
+				
+				
 			}
-			
-			
 		}
 
 		checkInRepo.saveOrUpdate(checkIn);
 
 		return checkInId;
-	}
-	
-
-	/**
-	 * Step 2 in CheckIn Process. An entry in checkIn database already exists
-	 * with status {@link CheckInStatus#INTENT}.
-	 * 
-	 * @param userId
-	 *            Id of user who tries to check in
-	 * @param nickname
-	 *            Either the pregenerated or a custom user nickname.
-	 */
-	public CheckInDTO checkIn(String userId, CheckInDTO checkIn) {
-		if(userId == null || userId.isEmpty()) {
-			logger.info("Error: userId is null or empty");
-			checkIn.setStatus(CheckInStatus.ERROR.toString());
-			
-			return checkIn; 
-		}
-			
-		logger.info("Searching for CheckIn with userId {}", userId);
-		CheckIn chkinDatastore = checkInRepo.getByProperty("userId", userId);
-		
-		if (chkinDatastore != null && chkinDatastore.getStatus() == CheckInStatus.INTENT) {
-			logger.info("CheckIn with userId {}", userId);			
-						
-			chkinDatastore.setNickname(checkIn.getNickname());
-			chkinDatastore.setDeviceId(checkIn.getDeviceId());
-			
-			// validation 
-			Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(chkinDatastore, Default.class, CheckInStep2.class);
-			if( !constraintViolations.isEmpty() )  {
-				// constraint violations occurred setting status and logging error
-				logger.info("CheckIn validation failed. Message(s):");
-				for (ConstraintViolation<CheckIn> violation : constraintViolations) {
-					logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
-					if( violation.getPropertyPath().toString().equals("nickname") ) {
-						
-						checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
-						
-						checkIn.setError( new ErrorDTO("checkInErrorNickname", "3", "25") ) ;
-					}
-					else {
-						checkIn.setStatus(CheckInStatus.ERROR.toString() );
-						return checkIn;
-					}
-				}
-				
-				return checkIn;
-			}			
-     					
-			List<CheckIn> checkInsAtSpot = getOtherChekIns(chkinDatastore);
-			Iterator<CheckIn> it = checkInsAtSpot.iterator();
-			while(it.hasNext()) {
-				CheckIn next = it.next();
-				
-				if(next.getNickname().equals(chkinDatastore.getNickname() ) ) {
-					logger.info("Error: checkin with duplicate nickname tried: "+ chkinDatastore.getNickname());
-					checkIn.setStatus(CheckInStatus.VALIDATION_ERROR.toString());
-					checkIn.setError( new ErrorDTO("checkInErrorNicknameExists") ) ;
-					//abort checkin
-					return checkIn;
-				}
-				
-				
-			}
-			
-			while(it.hasNext()) {
-				CheckIn next = it.next();
-				
-				if(next.getUserId().equals(userId) || !isPaymentLinkPossible(next)) {
-					// filter this checkin because user is not available for linking
-					it.remove();
-				}
-			}
-			
-			if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
-				checkIn.setStatus(CheckInStatus.YOUARENOTALONE.toString());
-			} else {
-				checkIn.setStatus(CheckInStatus.CHECKEDIN.toString());
-			}
-			
-			// save the checkin
-			chkinDatastore.setStatus(CheckInStatus.CHECKEDIN);
-			checkInRepo.saveOrUpdate(chkinDatastore);
-			
-		}
-		else  {
-			logger.info("Error: checkIn not found in datastore or status is not INTENT");
-			checkIn.setStatus(CheckInStatus.ERROR.toString());
-		}
-		
-		return checkIn;
 	}
 
 	/**
@@ -289,6 +147,9 @@ public class CheckInController {
 	 *         <code>null</code>.
 	 */
 	public List<User> getUsersAtSpot(String spotId, String checkInId) {
+		if(spotId == null || spotId.isEmpty()) 
+			return null;
+		
 		List<User> usersAtSpot = null;
 		
 		Spot spot = barcodeRepo.getByProperty("barcode", spotId);
@@ -352,26 +213,6 @@ public class CheckInController {
 		}
 			
 		return "OK";
-	}
-
-	/**
-	 * Step 3 - II (optional) If other users checkedIn at this table. User can
-	 * choose if he wants to be linked with one of them. This is relevant for
-	 * payment process.
-	 * 
-	 * @param userId
-	 * @param linkedUserId
-	 */
-	public void linkToUser(String userId, String linkedUserId) {
-		CheckIn checkInUser = checkInRepo.getByProperty("userId", userId);
-		CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", linkedUserId);
-		
-		if(checkInUser != null && checkInLinkedUser != null) {
-			if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && isPaymentLinkPossible(checkInLinkedUser)) {
-				checkInUser.setLinkedUserId(linkedUserId);
-				checkInRepo.saveOrUpdate(checkInUser);
-			}
-		}
 	}
 
 	/**
