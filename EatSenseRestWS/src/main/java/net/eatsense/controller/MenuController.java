@@ -4,19 +4,17 @@ package net.eatsense.controller;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
-import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.representation.Transformer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +34,14 @@ public class MenuController {
 	private RestaurantRepository restaurantRepo;
 	private MenuRepository menuRepo;
 	private ProductRepository productRepo;
+	private Transformer transform;
 
 	@Inject
-	public MenuController(RestaurantRepository r, MenuRepository mr, ProductRepository pr) {
+	public MenuController(RestaurantRepository r, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans) {
 		this.restaurantRepo = r;
 		this.menuRepo = mr;
 		this.productRepo = pr;
+		this.transform = trans;
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class MenuController {
 		logger.info("Returning menus of restaurant id: " + restaurantId);
 		Key<Restaurant> restaurant = new Key<Restaurant>(Restaurant.class, restaurantId);
 		
-		List<Menu> menus = restaurantRepo.getChildren(Menu.class, restaurant);
+		List<Menu> menus = menuRepo.getByParent( restaurant);
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		
 		for ( Menu menu : menus) {
@@ -66,7 +66,7 @@ public class MenuController {
 			 // Query for a list of all products associated with this menu
 			 List<Product> products = productRepo.getListByPropertyOrdered("menu", menu.getKey(), "name");
 			 
-			 List<ProductDTO> productDTOs = transformtoDto(products, true);
+			 List<ProductDTO> productDTOs = transform.productsToDto(products);
 			 menuDTO.setTitle(menu.getTitle());
 			 menuDTO.setProducts(productDTOs);
 			 
@@ -76,35 +76,9 @@ public class MenuController {
 		return menuDTOs;
 	}
 
-	private List<ProductDTO> transformtoDto(List<Product> products, boolean skipId) {
-		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
-		 for( Product p : products)	 {
-			 ProductDTO dto = transformtoDto(p, skipId);
-			 
-			 productDTOs.add(dto);
-		 }
-		return productDTOs;
-	}
-
-	public ProductDTO transformtoDto(Product product, boolean skipId) {
-		if(product == null)
-			return null;
-		ProductDTO dto = new ProductDTO();
-		 
-		 dto.setId(product.getId());		 
-		 dto.setName( product.getName() );
-		 dto.setLongDesc( product.getLongDesc() );
-		 dto.setShortDesc( product.getShortDesc() );
-		 dto.setPrice( product.getPrice() );
-		 
-			 dto.setChoices(retrieveChoicesForProduct(product, skipId));
-		 
-		return dto;
-	}
-	
 	public Collection<ProductDTO> getAllProducts(Long restaurantId) {
 		
-		return transformtoDto(restaurantRepo.getChildren(Product.class, new Key<Restaurant>(Restaurant.class, restaurantId)), true );
+		return transform.productsToDto(productRepo.getByParent( new Key<Restaurant>(Restaurant.class, restaurantId)));
 	}
 	
 	public ProductDTO getProduct(Long restaurantId, Long id) {
@@ -112,7 +86,7 @@ public class MenuController {
 		ProductDTO productDto = new ProductDTO(); 
 		
 		try {
-			productDto = transformtoDto(productRepo.getByKey(new Key<Restaurant>(Restaurant.class ,restaurantId), id), false );
+			productDto = transform.productToDto(productRepo.getById(new Key<Restaurant>(Restaurant.class ,restaurantId), id));
 			
 		} catch (NotFoundException e) {
 			logger.error("Product not found with id "+id, e);
@@ -124,55 +98,5 @@ public class MenuController {
 				
 		return productDto;
 	}
-	
-	private Collection<ChoiceDTO> retrieveChoicesForProduct(Product p, boolean skipId)
-	{
-		ArrayList<ChoiceDTO> choices = null;
-		
-		Map<Key<Choice>,Choice> result = null;
-		
-		if(p != null && p.getChoices() != null && !p.getChoices().isEmpty()) 
-		  result = productRepo.getOfy().get(p.getChoices());
-		
-		if(result != null && !result.isEmpty())  {
-			choices = new ArrayList<ChoiceDTO>();
-			
-			for (Choice choice : result.values())  {
-				ChoiceDTO dto = new ChoiceDTO();
-				
-//				if(!skipId) {
-					dto.setId(choice.getId());
-//				}
-				dto.setIncluded(choice.getIncludedChoices());
-				dto.setMaxOccurence(choice.getMaxOccurence());
-				dto.setMinOccurence(choice.getMinOccurence());
-				dto.setOverridePrice(choice.getOverridePrice());
-				
-				dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
-				dto.setText(choice.getText());
-				
-				if( choice.getAvailableChoices() != null && !choice.getAvailableChoices().isEmpty() ) {
-					
-					dto.setOptions(choice.getAvailableChoices());					
-					
-				}
-//				else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {
-//					ArrayList<ProductOption> options = new ArrayList<ProductOption>();
-//					Map<Key<Product>,Product> products =  productRepo.getOfy().get(choice.getAvailableProducts());
-//					
-//					for (Product choiceProduct : products.values() ) {
-//						options.add(new ProductOption(choiceProduct.getName(), choiceProduct.getPrice(), choiceProduct.getId()));
-//					}
-//					
-//					dto.setOptions(options);
-//				}
-				
-				choices.add( dto );
-				
-			}
-		}
-		
-		return choices; 		
-	}
-	
+
 }

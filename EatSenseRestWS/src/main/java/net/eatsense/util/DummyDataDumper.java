@@ -85,7 +85,7 @@ public class DummyDataDumper {
 		options.add(new ProductOption("Medium", 0));
 		options.add(new ProductOption("Brikett", 0));
 		
-		one.setAvailableChoices(options);
+		one.setOptions(options);
 		one.setMaxOccurence(1);
 		one.setMinOccurence(1);
 		one.setProduct(kP);
@@ -94,27 +94,9 @@ public class DummyDataDumper {
 		
 		Key<Choice> oneKey = cr.saveOrUpdate(one);
 		
-		Choice two = new Choice();
-		
-		ArrayList<Key<Product>> sideproduct = new ArrayList<Key<Product>>();
-		sideproduct.add(friesKey);
-		sideproduct.add(krautKey);
-		
-		two.setText("Beilagen:");
-		two.setAvailableProducts(sideproduct);
-		two.setMinOccurence(0);
-		two.setMaxOccurence(0);
-		two.setRestaurant(kR);
-		two.setProduct(kP);
-		
-		two.setOverridePrice(ChoiceOverridePrice.NONE);
-			
-		Key<Choice> twoKey = cr.saveOrUpdate(two);
-		
 	    List<Key<Choice>> choices = new ArrayList<Key<Choice>>();
 	    
 	    choices.add(oneKey);
-	    choices.add(twoKey);
 	    
 	    burger.setChoices(choices);
 	    

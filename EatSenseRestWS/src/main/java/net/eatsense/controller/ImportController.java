@@ -1,16 +1,13 @@
 package net.eatsense.controller;
 
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.validation.groups.Default;
 
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
@@ -110,7 +107,7 @@ public class ImportController {
 												
 							for(ChoiceDTO choiceData : productData.getChoices()) {
 								Key<Choice> kC = createAndSaveChoice(kP,kR, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
-										choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions(), null);
+										choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions());
 								if(kC == null) {
 									logger.info("Error while saving choice with text: " +choiceData.getText());
 								}
@@ -197,7 +194,7 @@ public class ImportController {
 		return product;
 	}
 	
-	private Key<Choice> createAndSaveChoice(Key<Product> productKey, Key<Restaurant> restaurantKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions, Collection<Key<Product>> availableProducts) {
+	private Key<Choice> createAndSaveChoice(Key<Product> productKey, Key<Restaurant> restaurantKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions) {
 		if(productKey == null)
 			throw new NullPointerException("productKey was not set");
 		logger.info("Creating new choice for product ("+ productKey.getId() + ") with text: " +text);
@@ -213,11 +210,8 @@ public class ImportController {
 		choice.setIncludedChoices(includedChoices);
 	
 		if(availableOptions != null)
-			choice.setAvailableChoices(new ArrayList<ProductOption>(availableOptions));
-		else if(availableProducts != null)
-			choice.setAvailableProducts(new ArrayList<Key<Product>>(availableProducts));
-		
-		
+			choice.setOptions(new ArrayList<ProductOption>(availableOptions));
+	
 		Key<Choice> kC = choiceRepo.saveOrUpdate(choice);
 		logger.info("Created choice with id: "+kC.getId());
 		return kC;

@@ -162,12 +162,33 @@ public class RestaurantResource{
 	@POST
 	@Path("{restaurantId}/orders")
 	@Produces("text/plain; charset=UTF-8")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Consumes("application/json; charset=UTF-8")
 	public String placeOrder(@PathParam("restaurantId")Long restaurantId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
 		Long orderId = null;
 		orderId = orderCtr.placeOrder(restaurantId, checkInId, order);	
 		return orderId.toString();
 	}
+	
+	@GET
+	@Path("{restaurantId}/orders")
+	@Produces("application/json; charset=UTF-8")
+	public Collection<OrderDTO> getOrder(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId) {
+		Collection<OrderDTO> orders = orderCtr.getOrdersForCheckIn(restaurantId, checkInId);
+		return orders;
+	}
+	
+	
+	@GET
+	@Path("{restaurantId}/orders/{orderId}")
+	@Produces("application/json; charset=UTF-8")
+	public OrderDTO getOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId) {
+		OrderDTO order = orderCtr.getOrder(restaurantId, orderId);
+		if(order== null)
+			throw new NotFoundException();
+		return order;
+	}
+	
+	
 	
 	
 	@PUT

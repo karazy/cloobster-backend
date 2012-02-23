@@ -1,7 +1,5 @@
 package net.eatsense.domain;
 
-import java.util.List;
-
 import javax.persistence.Embedded;
 import javax.persistence.Transient;
 import javax.validation.Valid;
@@ -9,7 +7,6 @@ import javax.validation.constraints.NotNull;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindexed;
 
 /**
  * Represents a multiple or single choice attached to an order, like toppings for a salad or sauce for a burger.
@@ -31,7 +28,7 @@ public class OrderChoice extends GenericEntity {
 	@Embedded
 	@NotNull
 	@Valid
-	Choice originalChoice;
+	Choice choice;
 		
 	public Key<Order> getOrder() {
 		return order;
@@ -41,28 +38,11 @@ public class OrderChoice extends GenericEntity {
 		this.order = order;
 	}
 
-	public Choice getOriginalChoice() {
-		return originalChoice;
+	public Choice getChoice() {
+		return choice;
 	}
 
-	public void setOriginalChoice(Choice originalChoice) {
-		this.originalChoice = originalChoice;
+	public void setChoice(Choice originalChoice) {
+		this.choice = originalChoice;
 	}
-
-	public List<ProductOption> getSelectedOptions() {
-		return selectedOptions;
-	}
-
-	public void setSelectedOptions(List<ProductOption> selectedOptions) {
-		this.selectedOptions = selectedOptions;
-	}
-
-	/**
-	 * Options the customer selected for this product order.
-	 */
-	@Unindexed
-	@Embedded
-	@Valid
-	List<ProductOption> selectedOptions;
-	
 }
