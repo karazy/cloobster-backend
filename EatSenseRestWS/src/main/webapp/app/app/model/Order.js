@@ -16,7 +16,7 @@ Ext.define('EatSense.model.Order', {
 			type : 'string'
 		}, {
 			name : 'orderTime',
-			type : 'date'
+			type : 'string'
 		} ],
 
 		associations : {
@@ -26,8 +26,8 @@ Ext.define('EatSense.model.Order', {
 	},
 
 	calculate : function() {
-		var _amount = parseFloat(this.get('amount')), _basePrice = this.getProduct().calculate();
-		return Math.round(_basePrice * _amount * 100) / 100;
+		var _amount = parseFloat(this.get('amount'));
+		return this.getProduct().calculate(_amount);
 	},
 	
 	getRawJsonData: function() {

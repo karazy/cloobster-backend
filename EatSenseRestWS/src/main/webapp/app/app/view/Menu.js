@@ -19,29 +19,31 @@ Ext.define('EatSense.view.Menu', {
 	            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
     		}
 			]
-		}, {
-			docked : 'bottom',
-			xtype : 'toolbar',
-			itemId : 'menuBottomBar',
-			layout: {
-				type: 'hbox',
-				pack : 'center'
-			},
-			items: [
-				{
-				    title: 'Menu',
-				    iconCls: 'reply',
-				    itemId: 'bottomTapUndo',
-				    iconMask: true
-				},
-				{
-				    title: 'Card',
-				    iconCls: 'organize',
-				    itemId: 'menuCartBt',
-				    iconMask: true,
-				}
-			        ]
-		}, {
+		},
+//		{
+//			docked : 'bottom',
+//			xtype : 'toolbar',
+//			itemId : 'menuBottomBar',
+//			layout: {
+//				type: 'hbox',
+//				pack : 'center'
+//			},
+//			items: [
+//				{
+//				    title: 'Menu',
+//				    iconCls: 'reply',
+//				    itemId: 'bottomTapUndo',
+//				    iconMask: true
+//				},
+//				{
+//				    title: 'Card',
+//				    iconCls: 'organize',
+//				    itemId: 'menuCartBt',
+//				    iconMask: true,
+//				}
+//			        ]
+//		}, 
+		{
 			xtype: 'panel',
 			itemId: 'menuCardPanel',
 			layout: {

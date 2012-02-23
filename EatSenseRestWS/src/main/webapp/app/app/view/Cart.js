@@ -1,14 +1,13 @@
 Ext.define('EatSense.view.Cart', {
 	extend : 'Ext.Panel',
-//	extend : 'EatSense.SpecializedCardPanel',
-//	requires: ['EatSense.SpecializedCardPanel'],
 	xtype : 'cart',
 	layout : {
 		type : 'vbox',
 		align : 'middle'
 	},
 	config : {
-		items : [ {
+		items : [ 
+		          {
 			docked : 'top',
 			xtype : 'toolbar',
 			itemId: 'cartTopBar',
@@ -18,30 +17,54 @@ Ext.define('EatSense.view.Cart', {
 				itemId : 'cartBackBt',
 				text : i18nPlugin.translate('back'),
 				ui : 'back'
-			} ]
-		}, {
-			docked : 'bottom',
-			xtype : 'toolbar',
-			itemId : 'cartBottomBar',
-			layout: {
-				type: 'hbox',
-				pack : 'center'
 			},
-			items: [
-				{
-				    title: 'Cancel',
-				    iconCls: 'trash',
-				    itemId: 'bottomTapCancel',
-				    iconMask: true
-				},
-				{
-				    title: 'Send',
-				    iconCls: 'action',
-				    itemId: 'bottomTapOrder',
-				    iconMask: true
-				}
-			        ]
-		}, {
+			{
+				xtype: 'button',
+			    title: 'Cancel',
+			    iconCls: 'trash',
+			    itemId: 'bottomTapCancel',
+			    iconMask: true
+			},
+			{
+				xtype: 'spacer',
+				itemId: 'topTabSpacer'
+			},
+			{
+				xtype: 'button',
+			    title: 'Send',
+			    text: i18nPlugin.translate('submitButton'),
+//			    iconCls: 'action',
+			    itemId: 'bottomTapOrder',
+//			    iconMask: true,
+			    ui: 'forward'
+			}]
+		}, 
+//		{
+//			docked : 'bottom',
+//			xtype : 'panel',
+//			itemId : 'cartBottomBar',
+//			layout: {
+//				type: 'hbox',
+//				pack : 'center'
+//			},
+//			items: [
+//				{
+//					xtype: 'button',
+//				    title: 'Cancel',
+//				    iconCls: 'trash',
+//				    itemId: 'bottomTapCancel',
+//				    iconMask: true
+//				},
+//				{
+//					xtype: 'button',
+//				    title: 'Send',
+//				    iconCls: 'action',
+//				    itemId: 'bottomTapOrder',
+//				    iconMask: true
+//				}
+//			        ]
+//		},
+		{
 			xtype: 'panel',
 			itemId: 'cartCardPanel',
 			layout : {
@@ -54,7 +77,7 @@ Ext.define('EatSense.view.Cart', {
 			}, 
 			{
 				xtype: 'productdetail',
-				itemId : 'productdetail',
+				itemId : 'cartProductdetail',
 				layout: 'fit'
 			}			        
 			]
@@ -84,6 +107,10 @@ Ext.define('EatSense.view.Cart', {
 	 */
 	hideBackButton: function() {
 		this.getComponent('cartTopBar').getComponent('cartBackBt').hide();
+		
+		this.getComponent('cartTopBar').getComponent('bottomTapCancel').show();
+		this.getComponent('cartTopBar').getComponent('topTabSpacer').show();
+		this.getComponent('cartTopBar').getComponent('bottomTapOrder').show();
 	},
 	/**
 	 * Shows the back button in top toolbar.
@@ -93,6 +120,24 @@ Ext.define('EatSense.view.Cart', {
 	showBackButton: function(text) {
 		this.getComponent('cartTopBar').getComponent('cartBackBt').setText(text);
 		this.getComponent('cartTopBar').getComponent('cartBackBt').show();
-	}
+		
+		this.getComponent('cartTopBar').getComponent('bottomTapCancel').hide();
+		this.getComponent('cartTopBar').getComponent('topTabSpacer').hide();
+		this.getComponent('cartTopBar').getComponent('bottomTapOrder').hide();
+	},
+	/**
+	 * Show a loading screen
+	 * @param mask
+	 */
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : i18nPlugin.translate('submitOrderProcess'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
+    }
 
 });
