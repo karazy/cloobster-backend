@@ -470,8 +470,10 @@ Ext.define('EatSense.controller.Order', {
 		
 		//TODO investigate if this is a bug
 		orderStore.removeAll();
+		myorderlist.getStore().removeAll()
 		
-		orderStore.load({
+		myorderlist.getStore().load({
+			scope   : this,
 			params : {
 				'checkInId' : checkInId,				
 			},

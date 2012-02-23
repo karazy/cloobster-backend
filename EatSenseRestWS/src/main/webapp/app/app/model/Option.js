@@ -15,7 +15,8 @@ Ext.define('EatSense.model.Option', {
 			type : 'number'
 		}, {
 			name : 'selected',
-			type : 'boolean'
+			type : 'boolean',
+			defaultValue: false
 		} ]
 	},
 

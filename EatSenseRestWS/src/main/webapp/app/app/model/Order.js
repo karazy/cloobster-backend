@@ -16,7 +16,8 @@ Ext.define('EatSense.model.Order', {
 			type : 'string'
 		}, {
 			name : 'orderTime',
-			type : 'string'
+			type : 'date',
+			dateFormat: 'time'
 		} ],
 
 		associations : {

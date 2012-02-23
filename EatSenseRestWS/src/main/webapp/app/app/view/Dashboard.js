@@ -12,15 +12,17 @@ Ext.define('EatSense.view.Dashboard', {
         	docked: 'top',
         	xtype: 'toolbar',
         	title: 'eatSense',
-        	items: [{        		 
-		            xtype: 'label',
-		            docked: 'right',
-		            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
-        		}
+        	items: [
+//        	        {        		 
+//		            xtype: 'label',
+//		            docked: 'right',
+//		            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
+//        		}
         	]
         	},
         	{        	
-        	xtype:'panel',
+        	xtype:'panel',    
+        	style: 'background-image: url(../app/res/images/eatSenseLogo_big.png); background-repeat:no-repeat; background-position:center center;',
         	layout: {
             	type : 'vbox',
             	pack : 'center',

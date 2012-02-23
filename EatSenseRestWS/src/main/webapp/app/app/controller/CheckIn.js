@@ -165,11 +165,12 @@ Ext.define('EatSense.controller.CheckIn', {
 	 				   url : '/restaurants/'+restaurantId+'/orders',
 	 				   reader: {
 	 					   type: 'json'
-	 			   		},
-		 			   	writer: {
-	 			   			type: 'json',
-	 			   			writeAllFields: true
 	 			   		}
+//			 ,
+//		 			   	writer: {
+//	 			   			type: 'json',
+//	 			   			writeAllFields: true
+//	 			   		}
 	 			   }
 	 		 });
 			 
@@ -373,10 +374,10 @@ Ext.define('EatSense.controller.CheckIn', {
 				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-			    	 me.getApplication().getController('Menu').models.menudata = records;		
-			    	 menu.hideBackButton();
-			    	 main.switchAnim('left');
-			    	 main.setActiveItem(lounge);			    	 
+				    	 me.getApplication().getController('Menu').models.menudata = records;		
+				    	 menu.hideBackButton();
+				    	 main.switchAnim('left');
+				    	 main.setActiveItem(lounge);			    	 
 			    	 }
 			     }
 			 });

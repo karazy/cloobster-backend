@@ -15,9 +15,9 @@ Ext.define('EatSense.view.Main', {
 	            direction: 'left'
 	        }			
 		},
-		activeItem : 0,
+		activeItem : 0,		
 		items : [ {
-			layout : 'fit',
+			layout : 'fit',			
 			xtype : 'dashboard'
 		},
 		{
