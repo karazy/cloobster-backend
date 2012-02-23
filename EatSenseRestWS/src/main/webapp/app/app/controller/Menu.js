@@ -275,7 +275,7 @@ Ext.define('EatSense.controller.Menu', {
 		var productForCart = this.models.activeProduct,
 		order,
 		validationError = "",
-		cartButton = this.getLoungeTabBar().getAt(2),
+		cartButton = this.getLoungeTabBar().getAt(1),
 		productIsValid = true;	
 		//validate choices 
 		productForCart.choices().each(function(choice) {

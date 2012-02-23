@@ -135,10 +135,7 @@ Ext.define('EatSense.controller.Order', {
 				//clear store				
 				orders.removeAll();
 				//reset badge text on cart button and switch back to menu
-				this.refreshCartBadgeText();
-
-//				this.showMenu();
-				
+				this.refreshCart();
 				}
 			}
 		});				
@@ -449,9 +446,12 @@ Ext.define('EatSense.controller.Order', {
 		console.log('Cart Controller -> recalculate');
 		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
-	
+	/**
+	 * Refreshes the badge text on cart tab icon.
+	 * Displays the number of orders.
+	 */
 	refreshCartBadgeText: function() {
-		var cartButton = this.getLoungeTabBar().getAt(2),
+		var cartButton = this.getLoungeTabBar().getAt(1),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		badgeText;
 		
@@ -468,22 +468,28 @@ Ext.define('EatSense.controller.Order', {
 		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
 		me = this;
 		
+		//TODO investigate if this is a bug
+		orderStore.removeAll();
+		
 		orderStore.load({
 			params : {
 				'checkInId' : checkInId,				
 			},
 			callback: function(records, operation, success) {
-				if(success == true) {
-					//refresh the order list
-					total = this.calculateOrdersTotal(orderStore);
-					myorderlist.refresh();
-					this.getMyordersTotal().getTpl().overwrite(this.getMyordersTotal().element, [total]);
-				}				
+				try {
+					if(success == true) {
+						//refresh the order list
+						total = me.calculateOrdersTotal(orderStore);
+						myorderlist.refresh();
+						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, [total]);
+					}	
+				} catch(e) {
+					
+				}
+				
 				me.getMyordersview().showLoadScreen(false);
 			}
 		});
-		
-		
 		
 	},
 	/**
