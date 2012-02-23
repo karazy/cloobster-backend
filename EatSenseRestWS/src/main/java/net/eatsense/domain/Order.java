@@ -4,17 +4,13 @@
 package net.eatsense.domain;
 
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.Embedded;
 import javax.persistence.Transient;
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindexed;
 
 /**
  * @author Nils Weiher
@@ -33,6 +29,20 @@ public class Order extends GenericEntity {
 	int amount;
 	
 	String comment;
+	
+	@NotNull
+	OrderStatus status;
+	
+
+
+	public OrderStatus getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(OrderStatus status) {
+		this.status = status;
+	}
 
 
 	@Parent

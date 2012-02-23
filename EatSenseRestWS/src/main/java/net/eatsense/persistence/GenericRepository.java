@@ -97,7 +97,7 @@ public class GenericRepository<T> extends DAOBase{
 	}
 
 	/**
-	 * Gets entity by key and owner. Use this for objects with @Parent annotation.
+	 * Gets entity by id and owner. Use this for objects with @Parent annotation.
 	 * 
 	 * @param owner
 	 * 		parent of entity
@@ -106,25 +106,49 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 * 		Found entity
 	 */
-	public <V> T getByKey(Key<V> owner, long id) {
+	public <V> T getById(Key<V> owner, long id) {
 		logger.info("getByKey {} ", id); 
 		return ofy().get(new Key<T>(owner, clazz, id));
 	}
+	
+	/**
+	 * Gets entity by it's key.
+	 * 
+	 * @param key
+	 * 		Key object of entity to load
+	 * @return
+	 * 		Found entity
+	 */
+	public <V> T getByKey(Key<T> key) {
+		logger.info("getByKey {} ", key); 
+		return ofy().get(key);
+	}
+	
+	/**
+	 * Gets a list of entities by a list of keys.
+	 * 
+	 * @param id
+	 * 		List of ids of entities to load
+	 * @return
+	 * 		Found entity
+	 */
+	public Collection<T> getByKeys(List<Key<T>> keys) {
+		
+		return ofy().get(keys).values();
+	}
 
 	/**
-	 * Returns children of an entity.
+	 * Returns children of a parent entity.
 	 * Performs an ancestor query.
 	 * 
-	 * @param childClazz
-	 * 			Type of children to return.
 	 * @param parentKey
 	 * 			Key of parent. Doesn't have to be the direct parent.
 	 * @return
-	 * 		List with children of type V
+	 * 		List with children of given parent
 	 */
-	public <V> List<V> getChildren(Class<V> childClazz, Key<T> parentKey) {
+	public <V> List<T> getByParent( Key<V> parentKey) {
 		logger.info("getChildren for {} ", parentKey);
-		return ofy().query(childClazz).ancestor(parentKey).list();
+		return ofy().query(clazz).ancestor(parentKey).list();
 	}
 
 	/**

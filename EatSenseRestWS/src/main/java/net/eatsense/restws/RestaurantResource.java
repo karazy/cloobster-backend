@@ -162,7 +162,7 @@ public class RestaurantResource{
 	@POST
 	@Path("{restaurantId}/orders")
 	@Produces("text/plain; charset=UTF-8")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Consumes("application/json; charset=UTF-8")
 	public String placeOrder(@PathParam("restaurantId")Long restaurantId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
 		Long orderId = null;
 		orderId = orderCtr.placeOrder(restaurantId, checkInId, order);	

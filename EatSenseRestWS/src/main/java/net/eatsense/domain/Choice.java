@@ -76,20 +76,12 @@ public class Choice extends GenericEntity {
 		this.minOccurence = minOccurence;
 	}
 
-	public List<ProductOption> getAvailableChoices() {
-		return availableChoices;
+	public List<ProductOption> getOptions() {
+		return options;
 	}
 
-	public void setAvailableChoices(List<ProductOption> availableChoices) {
-		this.availableChoices = availableChoices;
-	}
-
-	public List<Key<Product>> getAvailableProducts() {
-		return availableProducts;
-	}
-
-	public void setAvailableProducts(List<Key<Product>> availableProducts) {
-		this.availableProducts = availableProducts;
+	public void setOptions(List<ProductOption> availableChoices) {
+		this.options = availableChoices;
 	}
 
 	public int getIncludedChoices() {
@@ -145,14 +137,7 @@ public class Choice extends GenericEntity {
 	 */
 	@Unindexed
 	@Embedded
-	List<ProductOption> availableChoices;
-	
-	/**
-	 * Contains additional product options to order with the original product to order.
-	 * ONLY this list OR avaibleChoices are set.
-	 */
-	@Unindexed
-	List<Key<Product>> availableProducts;
+	List<ProductOption> options;
 	
 	/**
 	 * Number of options that are free with choice. 

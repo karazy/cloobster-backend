@@ -1,18 +1,16 @@
 package net.eatsense.controller;
 
-import java.util.List;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collection;
 
 import net.eatsense.EatSenseDomainModule;
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.*;
-
 import net.eatsense.domain.CheckInStatus;
-import net.eatsense.domain.Order;
-import net.eatsense.domain.OrderChoice;
+import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
-import net.eatsense.domain.Restaurant;
-import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -24,6 +22,7 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
@@ -35,7 +34,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.googlecode.objectify.Key;
 
 public class OrderControllerTest {
 	
@@ -54,7 +52,7 @@ public class OrderControllerTest {
 
 		private SpotRepository br;
 
-		private MenuController menuCtrl;
+		private Transformer transform;
 
 		private OrderChoiceRepository ocr;
 
@@ -64,7 +62,6 @@ public class OrderControllerTest {
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
-		menuCtrl = injector.getInstance(MenuController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
@@ -72,7 +69,7 @@ public class OrderControllerTest {
 		br = injector.getInstance(SpotRepository.class);
 		or = injector.getInstance(OrderRepository.class);
 		ocr = injector.getInstance(OrderChoiceRepository.class);
-		
+		transform = new Transformer(cr,pr,ocr);
 		
 		
 		
@@ -101,23 +98,24 @@ public class OrderControllerTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(menuCtrl.transformtoDto(frites, false));
+		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
 		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		Order order = or.getByKey(Restaurant.getKey(checkIn.getRestaurantId()), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrder(checkIn.getRestaurantId(), orderId);
 		
-		assertThat(order.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(order.getOrderTime(), notNullValue());
-		assertThat(order.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(order.getProduct(), equalTo(frites.getKey()));
+		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrder.getOrderTime(), notNullValue());
+		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
 		
 		
 		//#2 Place an order with choices
 		Product burger = pr.getByProperty("name", "Classic Burger");
-		ProductDTO burgerDto = menuCtrl.transformtoDto(burger, false);
+		ProductDTO burgerDto = transform.productToDto(burger);
 		
 		ProductOption selected = burgerDto.getChoices().iterator().next().getOptions().iterator().next();
 		selected.setSelected(true);
@@ -130,20 +128,28 @@ public class OrderControllerTest {
 		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		order = or.getByKey(Restaurant.getKey(checkIn.getRestaurantId()), orderId);
+		placedOrder = orderCtrl.getOrder(checkIn.getRestaurantId(), orderId);
 		
-		assertThat(order.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(order.getOrderTime(), notNullValue());
-		assertThat(order.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(order.getProduct(), equalTo(burger.getKey()));
-		List<OrderChoice> orderchoices = or.getChildren(OrderChoice.class, order.getKey());
-		assertThat(orderchoices, notNullValue());
-		for (OrderChoice orderChoice : orderchoices) {
-			if(orderChoice.getSelectedOptions()!= null) {
-				assertThat(orderChoice.getSelectedOptions().get(0).getSelected(), equalTo(true));
-				assertThat(orderChoice.getSelectedOptions().get(0).getName(), equalTo(selected.getName()));
+		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrder.getOrderTime(), notNullValue());
+		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+			for (ProductOption option : orderChoice.getOptions()) {
+				if(option.getName() == selected.getName() )
+					assertThat(option.getSelected(), equalTo(true));
 			}
-		}				
+		}
+		
+		//#3 Check "getOrders"
+		
+		Collection<OrderDTO> orders = orderCtrl.getOrdersForCheckIn(checkIn.getRestaurantId(), checkIn.getUserId());
+		assertThat(orders, notNullValue());
+		assertThat(orders.size(), equalTo(2));
+		for (OrderDTO dto : orders) {
+			assertThat(dto.getStatus(), equalTo(OrderStatus.PLACED));
+		}
 	}
 	
 }
