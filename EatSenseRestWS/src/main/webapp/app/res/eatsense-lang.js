@@ -43,6 +43,7 @@ var translation = {
 		"cartTabBt" : "Warenkorb",
 		"dumpCart" : "Warenkorb leeren?",
 		"dumpItem" : "{0} entfernen?",
+		"submitButton" : "Bestellen",
 		//Lounge
 		"loungeviewTitle" : "Die Lounge",
 		//MyOrders

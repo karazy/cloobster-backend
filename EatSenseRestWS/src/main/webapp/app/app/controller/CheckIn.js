@@ -152,7 +152,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   model: 'EatSense.model.Order',
 	 			   storeId: 'orderStore',
 	 			   filters: [
-	 			             {property: "status", value: "CART"}
+	 			             {property: "status", value: "PLACED"}
 	 			   ],
 	 			   proxy: {
 	 				   type: 'rest',

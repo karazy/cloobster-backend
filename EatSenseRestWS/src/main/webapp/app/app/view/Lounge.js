@@ -20,10 +20,10 @@ Ext.define('EatSense.view.Lounge', {
 				layout : 'fit'
 			} ]
 		}, {
-			layout : 'fit',
 			title : i18nPlugin.translate('myOrdersTabBt'),
 			iconCls : 'home',
 			itemId : 'myorderstab',
+			layout : 'fit',
 			items : [ {
 				xtype : 'myorders',
 				itemId : 'myorders',
@@ -36,7 +36,7 @@ Ext.define('EatSense.view.Lounge', {
 			layout : 'fit',
 			items : [ {
 				xtype : 'cart',
-				itemId : 'card',
+				itemId : 'cart',
 				layout : 'fit'
 			} ]
 		}

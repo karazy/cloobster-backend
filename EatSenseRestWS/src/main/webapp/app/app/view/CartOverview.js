@@ -3,6 +3,13 @@ Ext.define('EatSense.view.CartOverview', {
 	xtype: 'cartoverview',
 	config: {
 		items: [
+//		        {
+//					docked : 'top',
+//					xtype : 'toolbar',
+//					itemId: 'cartTopBar',
+//					title : i18nPlugin.translate('cartviewTitle'),
+//					items : []
+//				},
 		{
 			xtype: 'list',
 			itemId: 'orderlist',

@@ -77,7 +77,7 @@ Ext.define('EatSense.controller.Menu', {
     				console.log('tab change');
     				var status = true;
     				if(value.getItemId() === 'carttab') {
-    					status = this.getApplication().getController('Cart').refreshCart();
+    					status = this.getApplication().getController('Order').refreshCart();
     				}
     				
     				if(status === false) {
@@ -306,7 +306,7 @@ Ext.define('EatSense.controller.Menu', {
 	 * Switches to card view.
 	 */
 	showCart: function(){
-		this.getApplication().getController('Cart').showCart();
+		this.getApplication().getController('Order').showCart();
 	},
 	
 	//Menu navigation functions

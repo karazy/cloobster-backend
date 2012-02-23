@@ -27,7 +27,7 @@ Ext.define('EatSense.view.ProductDetail', {
 					 		//right: 0 , top : 50%
 					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right;">{[values.product.calculate(values.amount)]}</div>'+
 					 		'<div style="clear: both;">'+
-					 	'</div><p style="font-size:0.8em;">{product.data.longDesc}</p>'+
+					 	'</div><p style="font-size:0.7em;">{product.data.longDesc}</p>'+
 					 '</div>'	
 					 )
 			}, {
@@ -46,8 +46,25 @@ Ext.define('EatSense.view.ProductDetail', {
 					width: 200,
 					minValue : '1',
 					maxValue : '10',
+					height: '25px',
 					cycle : true,
 				},
+//				{
+//					xtype: 'picker',
+//					cancelButton: false,
+//					slots: [
+//					        {
+//					        	title: 'amount',
+//					        	name: 'amount',
+//					            data : [
+//					                {text: '1', value: 1},
+//					                {text: '2', value: 2},
+//					                {text: '3', value: 3},
+//					                {text: '4', value: 4}
+//					            ]
+//					        }
+//					],					
+//				},
 				{
 					xtype: 'spacer',
 					width: 20
