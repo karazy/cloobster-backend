@@ -30,6 +30,26 @@ public class SpotDTO {
 	@NotEmpty
 	private String name;
 	
+	private String restaurant;
+	
+	private Long restaurantId;
+	
+	public String getRestaurant() {
+		return restaurant;
+	}
+
+	public void setRestaurant(String restaurant) {
+		this.restaurant = restaurant;
+	}
+
+	public Long getRestaurantId() {
+		return restaurantId;
+	}
+
+	public void setRestaurantId(Long restaurantId) {
+		this.restaurantId = restaurantId;
+	}
+
 	/**
 	 * A tag which can be used to group spots for easier organisation.
 	 * E. g. Outside, Upper floor
