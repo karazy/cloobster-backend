@@ -105,7 +105,7 @@ public class MenuControllerTest {
 					assertThat(p.getChoices().size(), is(2));
 					
 					for(ChoiceDTO c : p.getChoices())  {
-						assertThat(c.getText(), anyOf(is("Wählen sie einen Gargrad:"), is("Beilagen:")));
+						assertThat(c.getText(), anyOf(is("Wählen sie einen Gargrad:"), is("Extras")));
 						assertThat(c.getOverridePrice(), is(ChoiceOverridePrice.NONE));
 						
 						if(c.getText().equals("Wählen sie einen Gargrad:")) {
@@ -116,11 +116,11 @@ public class MenuControllerTest {
 							}
 						}
 						
-						if(c.getText().equals("Beilagen")) {
-							assertThat(c.getOptions().size(), is (2) );
+						if(c.getText().equals("Extras")) {
+							assertThat(c.getOptions().size(), is (4) );
 							
 							for (ProductOption pO : c.getOptions()) {
-								assertThat(pO.getName(), anyOf(is("Pommes Frites"), is("Krautsalat")));
+								assertThat(pO.getName(), anyOf(is("Extra Käse"), is("Chili Sauce"),is("Salatgurken") , is("Ei")));
 							}
 						}
 						
