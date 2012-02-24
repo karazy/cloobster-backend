@@ -92,7 +92,7 @@ public class OrderControllerTest {
 		checkIn.setNickname("PlaceOrderTest");
 		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn) );
+		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
 		checkIn.setRestaurantId(spotDto.getRestaurantId());
 		
 		

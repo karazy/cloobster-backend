@@ -29,17 +29,20 @@ public class CheckInResource {
 	
 	@POST
 	@Consumes("application/json; charset=UTF-8")
-	@Produces("text/plain; charset=UTF-8")
-	public String createCheckIn(CheckInDTO checkIn) {
-		String userId = checkInCtr.createCheckIn(checkIn);
+//	@Produces("text/plain; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public CheckInDTO createCheckIn(CheckInDTO checkIn) {
+//		String userId = checkInCtr.createCheckIn(checkIn);
+		CheckInDTO userId = checkInCtr.createCheckIn(checkIn);
 		return userId;
 	}
 	
 	@PUT
 	@Path("{checkInId}")
 	@Consumes("application/json; charset=UTF-8")
-	@Produces("text/plain; charset=UTF-8")
-	public String updateCheckIn(@PathParam("checkInId")String checkInId, CheckInDTO checkIn) {
+//	@Produces("text/plain; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public CheckInDTO updateCheckIn(@PathParam("checkInId")String checkInId, CheckInDTO checkIn) {
 		return checkInCtr.updateCheckIn(checkInId, checkIn);
 	}
 	

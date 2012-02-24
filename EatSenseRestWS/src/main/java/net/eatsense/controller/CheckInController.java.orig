@@ -92,12 +92,18 @@ public class CheckInController {
 		return spotDto ;
     }
 
-	public CheckInDTO createCheckIn(CheckInDTO checkInDto) {
+<<<<<<< HEAD
+	public String createCheckIn(CheckInDTO checkInDto)  {
 		if(checkInDto == null ) {
 			throw new RuntimeException("checkin data is empty");
 		}
 		if( checkInDto.getStatus()==null || checkInDto.getStatus() != CheckInStatus.INTENT ) {
 			throw new RuntimeException("checkin status should be INTENT but is " + checkInDto.getStatus());
+=======
+	public CheckInDTO createCheckIn(CheckInDTO checkInDto) {
+		if(checkInDto == null || !checkInDto.getStatus().equals(CheckInStatus.INTENT.toString())) {
+			return null;
+>>>>>>> 2d3ed98f38346d576406945ac38e3d229eb5e0e4
 		}
 			
 		// set values for domain object
