@@ -1,16 +1,20 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.CheckInStatus;
+import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderStatus;
+import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
+import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -18,6 +22,7 @@ import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
@@ -27,6 +32,7 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
+import org.hamcrest.core.IsNot;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +42,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-public class OrderControllerTest {
+public class BillControllerTest {
 	
 	private final LocalServiceTestHelper helper =
 	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -51,11 +57,15 @@ public class OrderControllerTest {
 	    private OrderRepository or;
 	    private DummyDataDumper ddd;
 
-		private SpotRepository br;
+		private SpotRepository sr;
 
 		private Transformer transform;
 
 		private OrderChoiceRepository ocr;
+
+		private BillController billCtrl;
+
+		private BillRepository br;
 
 	@Before
 	public void setUp() throws Exception {
@@ -63,18 +73,22 @@ public class OrderControllerTest {
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
+		billCtrl = injector.getInstance(BillController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
-		br = injector.getInstance(SpotRepository.class);
+		sr = injector.getInstance(SpotRepository.class);
+		br = injector.getInstance(BillRepository.class);
+		
 		or = injector.getInstance(OrderRepository.class);
 		ocr = injector.getInstance(OrderChoiceRepository.class);
+		
 		transform = new Transformer(cr,pr,ocr);
 		
 		
 		
-		ddd= new DummyDataDumper(rr, br, mr, pr, cr);
+		ddd= new DummyDataDumper(rr, sr, mr, pr, cr);
 		
 		ddd.generateDummyRestaurants();
 		
@@ -85,7 +99,7 @@ public class OrderControllerTest {
 		helper.tearDown();
 	}
 	@Test
-	public void testPlaceOrder() {
+	public void testCreateBill() {
 		// Do a checkin ...
 		CheckInDTO checkIn = new CheckInDTO();
 		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
@@ -129,6 +143,16 @@ public class OrderControllerTest {
 		ProductOption selected = burgerDto.getChoices().iterator().next().getOptions().iterator().next();
 		selected.setSelected(true);
 		
+		for (ChoiceDTO choice : burgerDto.getChoices()) {
+			if( choice.getText().equals("Extras") )
+				for (ProductOption option : choice.getOptions()) {
+					if(option.getName().equals("Ei"))
+						option.setSelected(true);
+					if(option.getName().equals("Salatgurken"))
+						option.setSelected(true);
+				}
+		} 
+		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
 		orderDto.setProduct(burgerDto);
@@ -151,13 +175,45 @@ public class OrderControllerTest {
 			}
 		}
 		
-		//#3 Check "getOrders"
+		//#3 Check calculateTotalPrice
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(checkIn.getRestaurantId(), checkIn.getUserId());
+		List<Order> orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId());
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
-		for (OrderDTO dto : orders) {
-			assertThat(dto.getStatus(), equalTo(OrderStatus.PLACED));
+		for (Order order : orders) {
+			assertThat(order.getStatus(), equalTo(OrderStatus.PLACED));
+			if(order.getProduct().getId() == frites.getId()) {
+				assertThat(billCtrl.calculateTotalPrice(order), is( 1.5f));
+			}
+			if(order.getProduct().getId() == burger.getId()) {
+				assertThat(billCtrl.calculateTotalPrice(order), is( 10f));
+			}
+		}
+		
+		//#4 Test createBill
+		BillDTO billData = new BillDTO();
+		// select any payment method
+		PaymentMethod paymentMethod = spotDto.getPayments().iterator().next();
+		billData.setPaymentMethod(paymentMethod);
+		
+		billData = billCtrl.createBill(checkIn.getRestaurantId(), checkIn.getUserId(), billData);
+		assertThat(billData.getId(), notNullValue());
+		
+		Collection<Bill> bills = br.getAll();
+		
+		assertThat( bills.size(), is(1));
+		
+		for (Bill bill : bills) {
+			assertThat(bill.getId(), is(billData.getId()));
+			assertThat(bill.getCreationTime(), notNullValue());
+			assertThat(bill.getPaymentMethod().getName(), is(paymentMethod.getName()));
+			assertThat(bill.getTotal(), is(11.5f));
+		}
+		// Check orders again to see if they are linked ...
+		orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId());
+		
+		for (Order order : orders) {
+			assertThat(order.getBill().getId(), is(billData.getId()));
 		}
 	}
 	

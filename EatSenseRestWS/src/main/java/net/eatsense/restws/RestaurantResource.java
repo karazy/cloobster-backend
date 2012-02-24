@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import net.eatsense.controller.BillController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
@@ -21,6 +22,7 @@ import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
@@ -41,21 +43,21 @@ import com.sun.jersey.api.NotFoundException;
 @Path("/restaurants")
 public class RestaurantResource{
 
-	private RestaurantRepository restaurantrepo;
+	private RestaurantRepository restaurantRepo;
 	private DummyDataDumper ddd;
-	private CheckInController checkInCtr;
-	private MenuController menuCtr;
-	private ImportController importCtr;
-	private OrderController orderCtr;
+	private MenuController menuCtrl;
+	private ImportController importCtrl;
+	private OrderController orderCtrl;
+	private BillController billCtrl;
 
 	@Inject
-	public RestaurantResource(RestaurantRepository repo, CheckInController checkInCtr, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr) {
-		this.restaurantrepo = repo;
-		this.checkInCtr = checkInCtr;
-		this.menuCtr = menuCtr;
+	public RestaurantResource(RestaurantRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
+		this.restaurantRepo = repo;
+		this.menuCtrl = menuCtr;
 		this.ddd = ddd;
-		this.importCtr = importCtr;
-		this.orderCtr = orderCtr;
+		this.importCtrl = importCtr;
+		this.orderCtrl = orderCtr;
+		this.billCtrl = billCtr;
 	}
 
 	/**
@@ -66,7 +68,7 @@ public class RestaurantResource{
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public Collection<Restaurant> listAll() {
-		Collection<Restaurant> list =  restaurantrepo.getAll();
+		Collection<Restaurant> list =  restaurantRepo.getAll();
 		return list;
 	}
 	
@@ -75,7 +77,7 @@ public class RestaurantResource{
 	@Produces("application/json; charset=UTF-8")
 	public Collection<MenuDTO> getMenus(@PathParam("restaurantId") Long restaurantId)
 	{
-		return menuCtr.getMenus(restaurantId);
+		return menuCtrl.getMenus(restaurantId);
 	}
 	
 
@@ -83,7 +85,7 @@ public class RestaurantResource{
 	@Path("{restaurantId}/products")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<ProductDTO> getAll(@PathParam("restaurantId")Long restaurantId) {
-		return menuCtr.getAllProducts(restaurantId);
+		return menuCtrl.getAllProducts(restaurantId);
 	}
 	
 	@GET
@@ -91,7 +93,7 @@ public class RestaurantResource{
 	@Produces("application/json; charset=UTF-8")
 	public ProductDTO getProduct(@PathParam("restaurantId")Long restaurantId, @PathParam("productId") Long productId) {
 		
-		ProductDTO product = menuCtr.getProduct(restaurantId, productId);
+		ProductDTO product = menuCtrl.getProduct(restaurantId, productId);
 		
 		if(product == null)
 			throw new NotFoundException(productId + " id not found.");
@@ -104,7 +106,7 @@ public class RestaurantResource{
 	@Consumes("application/json; charset=UTF-8")
 	public String placeOrder(@PathParam("restaurantId")Long restaurantId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
 		Long orderId = null;
-		orderId = orderCtr.placeOrder(restaurantId, checkInId, order);	
+		orderId = orderCtrl.placeOrder(restaurantId, checkInId, order);	
 		return orderId.toString();
 	}
 	
@@ -112,7 +114,7 @@ public class RestaurantResource{
 	@Path("{restaurantId}/orders")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<OrderDTO> getOrder(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId) {
-		Collection<OrderDTO> orders = orderCtr.getOrdersForCheckIn(restaurantId, checkInId);
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(restaurantId, checkInId);
 		return orders;
 	}
 	
@@ -121,13 +123,20 @@ public class RestaurantResource{
 	@Path("{restaurantId}/orders/{orderId}")
 	@Produces("application/json; charset=UTF-8")
 	public OrderDTO getOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId) {
-		OrderDTO order = orderCtr.getOrder(restaurantId, orderId);
+		OrderDTO order = orderCtrl.getOrder(restaurantId, orderId);
 		if(order== null)
 			throw new NotFoundException();
 		return order;
 	}
 	
 	
+	@POST
+	@Path("{restaurantId}/bills")
+	@Produces("application/json; charset=UTF-8")
+	@Consumes("application/json; charset=UTF-8")
+	public BillDTO createBill(@PathParam("restaurantId")Long restaurantId, BillDTO bill, @QueryParam("checkInId") String checkInId) {
+		return billCtrl.createBill(restaurantId, checkInId, bill);
+	}
 	
 	
 	@PUT
@@ -141,10 +150,10 @@ public class RestaurantResource{
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("text/plain; charset=UTF-8")
 	public String importNewRestaurant(RestaurantDTO newRestaurant ) {
-		Long id =  importCtr.addRestaurant(newRestaurant);
+		Long id =  importCtrl.addRestaurant(newRestaurant);
 		
 		if(id == null)
-			return "Error:\n" + importCtr.getReturnMessage();
+			return "Error:\n" + importCtrl.getReturnMessage();
 		else
 		    return id.toString();
 	}
@@ -156,7 +165,7 @@ public class RestaurantResource{
 	@GET
 	@Path("deleteall")
 	public void deleteAllData() {
-		importCtr.deleteAllData();
+		importCtrl.deleteAllData();
 	}
 
 }

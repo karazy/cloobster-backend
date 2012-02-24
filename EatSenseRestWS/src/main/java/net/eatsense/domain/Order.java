@@ -25,6 +25,18 @@ public class Order extends GenericEntity {
 	@NotNull
 	Key<Product> product;
 	
+	Key<Bill> bill;
+	
+	public Key<Bill> getBill() {
+		return bill;
+	}
+
+
+	public void setBill(Key<Bill> bill) {
+		this.bill = bill;
+	}
+
+
 	@Min(1)
 	int amount;
 	
@@ -33,7 +45,7 @@ public class Order extends GenericEntity {
 	@NotNull
 	OrderStatus status;
 	
-
+	
 
 	public OrderStatus getStatus() {
 		return status;

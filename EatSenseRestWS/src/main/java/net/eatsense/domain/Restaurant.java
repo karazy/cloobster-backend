@@ -1,12 +1,17 @@
 package net.eatsense.domain;
 
+import java.util.List;
+
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Unindexed;
 
 /**
  * Represents a location where you can check in and order food/drinks what ever.
@@ -33,6 +38,10 @@ public class Restaurant extends GenericEntity {
 	 */
 	private byte[] logo;
 
+	@Embedded
+	@Valid
+	@Unindexed
+	private List<PaymentMethod> paymentMethods;
 
 	public Restaurant() {
 	}
@@ -71,6 +80,14 @@ public class Restaurant extends GenericEntity {
 	public static Key<Restaurant> getKey(Long id) {
 		
 		return new Key<Restaurant>(Restaurant.class, id);
+	}
+
+	public List<PaymentMethod> getPaymentMethods() {
+		return paymentMethods;
+	}
+
+	public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
+		this.paymentMethods = paymentMethods;
 	}
 	
 }

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -89,7 +90,11 @@ public class OrderController {
 		return orderDto;
 	}
 	
-	public Collection<OrderDTO> getOrdersForCheckIn(Long restaurantId, String checkInId) {
+	public Collection<OrderDTO> getOrdersAsDTO(Long restaurantId, String checkInId) {
+		return transform.ordersToDto(getOrders( restaurantId, checkInId));
+	}
+	
+	public List<Order> getOrders(Long restaurantId, String checkInId) {
 		// Check if the restaurant exists.
 		Restaurant restaurant = restaurantRepo.findByKey(restaurantId);
 		if(restaurant == null) {
@@ -106,7 +111,7 @@ public class OrderController {
 		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(restaurant).filter("checkIn", checkIn.getKey()).list();
 		
-		return transform.ordersToDto(orders);
+		return orders;
 	}
 	
 	public Long placeOrder(Long restaurantId, String checkInId, OrderDTO order) {
@@ -117,6 +122,11 @@ public class OrderController {
 			logger.error("Order cannot be placed, checkin not found!");
 			return null;
 		}
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN) {
+			logger.error("Order cannot be placed, payment already requested or not checked in");
+			return null;
+		}
+		
 		if( order.getStatus() != OrderStatus.CART ) {
 			logger.error("Order cannot be placed, unexpected order status: "+order.getStatus());
 			return null;
@@ -164,7 +174,7 @@ public class OrderController {
 						return null;
 					}
 					
-					if(selected > originalChoice.getMaxOccurence() ) {
+					if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
 						logger.error("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
 						return null;
 					}

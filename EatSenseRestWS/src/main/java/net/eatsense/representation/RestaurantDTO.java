@@ -6,6 +6,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import net.eatsense.domain.PaymentMethod;
+
 import org.apache.bval.constraints.NotEmpty;
 
 /**
@@ -44,6 +46,15 @@ public class RestaurantDTO {
 	@NotEmpty
 	@Valid
 	private Collection<SpotDTO> spots;
+	
+	/**
+	 * All payment methods the restaurant accepts.
+	 */
+	@NotNull
+	@NotEmpty
+	@Valid
+	private Collection<PaymentMethod> payments;
+	
 
 	public RestaurantDTO() {
 	}
@@ -79,5 +90,13 @@ public class RestaurantDTO {
 
 	public void setSpots(Collection<SpotDTO> spots) {
 		this.spots = spots;
+	}
+
+	public Collection<PaymentMethod> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(Collection<PaymentMethod> payments) {
+		this.payments = payments;
 	}
 }
