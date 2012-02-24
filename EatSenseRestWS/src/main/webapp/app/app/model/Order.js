@@ -4,7 +4,7 @@ Ext.define('EatSense.model.Order', {
 		idProperty : 'id',
 		fields : [ {
 			name : 'id',
-			type : 'number'
+			type : 'string'
 		}, {
 			name : 'status',
 			type : 'string'
@@ -22,7 +22,7 @@ Ext.define('EatSense.model.Order', {
 
 		associations : {
 			type : 'hasOne',
-			model : 'EatSense.model.Product'
+			model : 'EatSense.model.Product',
 		}
 	},
 
