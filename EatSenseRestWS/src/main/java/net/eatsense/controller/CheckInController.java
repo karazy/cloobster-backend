@@ -80,7 +80,7 @@ public class CheckInController {
 		return spotDto ;
     }
 
-	public String createCheckIn(CheckInDTO checkInDto) {
+	public CheckInDTO createCheckIn(CheckInDTO checkInDto) {
 		if(checkInDto == null || !checkInDto.getStatus().equals(CheckInStatus.INTENT.toString())) {
 			return null;
 		}
@@ -135,8 +135,9 @@ public class CheckInController {
 		}
 
 		checkInRepo.saveOrUpdate(checkIn);
+		checkInDto.setUserId(checkInId);
 
-		return checkInId;
+		return checkInDto;
 	}
 
 	/**
@@ -188,7 +189,7 @@ public class CheckInController {
 	 * @param checkInDto
 	 * @return
 	 */
-	public String updateCheckIn(String checkInId, CheckInDTO checkInDto) {
+	public CheckInDTO updateCheckIn(String checkInId, CheckInDTO checkInDto) {
 		CheckIn checkInUser = checkInRepo.getByProperty("userId", checkInId);
 		boolean save = false;
 		if(checkInUser == null )
@@ -205,7 +206,8 @@ public class CheckInController {
 					save = true;
 				}
 				else
-					return "Can't link to this user";
+//					return "Can't link to this user";
+				return null;
 			}
 		}
 		//TODO: allow updating of other fields, like nickname
@@ -214,7 +216,8 @@ public class CheckInController {
 			checkInRepo.saveOrUpdate(checkInUser);
 		}
 			
-		return "OK";
+//		return "OK";
+		return checkInDto;
 	}
 
 	/**
