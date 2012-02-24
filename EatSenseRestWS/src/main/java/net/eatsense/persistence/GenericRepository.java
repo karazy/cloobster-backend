@@ -181,7 +181,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 
 	 * @param propValue
 	 * 
-	 * @return T matching Object
+	 * @return T matching Object or NULL if no match found
 	 */
 	public T getByProperty(String propName, Object propValue)
 	{

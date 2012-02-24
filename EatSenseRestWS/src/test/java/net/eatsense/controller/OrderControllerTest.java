@@ -90,7 +90,7 @@ public class OrderControllerTest {
 		CheckInDTO checkIn = new CheckInDTO();
 		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
 		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT.toString());
+		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn.setSpotId("serg2011");
 		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn) );
 		checkIn.setRestaurantId(spotDto.getRestaurantId());

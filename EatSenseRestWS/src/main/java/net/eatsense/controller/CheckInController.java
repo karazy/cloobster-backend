@@ -1,5 +1,6 @@
 package net.eatsense.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -25,6 +26,9 @@ import net.eatsense.representation.SpotDTO;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +59,14 @@ public class CheckInController {
 	}
 	
 	@Inject
+	private ObjectMapper mapper;
+	
+	
+	public void setMapper(ObjectMapper mapper) {
+		this.mapper = mapper;
+	}
+
+	@Inject
     private Validator validator;
 
     public void setValidator(Validator validator) {
@@ -67,7 +79,7 @@ public class CheckInController {
     	SpotDTO spotDto = new SpotDTO();
     	Spot spot = barcodeRepo.getByProperty("barcode", barcode);
     	if(spot == null )
-    		throw new NotFoundException();
+    		throw new NotFoundException("barcode unknown");
     	
     	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
     	
@@ -80,9 +92,12 @@ public class CheckInController {
 		return spotDto ;
     }
 
-	public String createCheckIn(CheckInDTO checkInDto) {
-		if(checkInDto == null || !checkInDto.getStatus().equals(CheckInStatus.INTENT.toString())) {
-			return null;
+	public String createCheckIn(CheckInDTO checkInDto)  {
+		if(checkInDto == null ) {
+			throw new RuntimeException("checkin data is empty");
+		}
+		if( checkInDto.getStatus()==null || checkInDto.getStatus() != CheckInStatus.INTENT ) {
+			throw new RuntimeException("checkin status should be INTENT but is " + checkInDto.getStatus());
 		}
 			
 		// set values for domain object
@@ -110,13 +125,47 @@ public class CheckInController {
 			// constraint violations occurred setting status and logging error
 			logger.info("CheckIn validation failed. Message(s):");
 			for (ConstraintViolation<CheckIn> violation : constraintViolations) {
+				String message = null;
 				logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
-				throw new RuntimeException(violation.getPropertyPath().toString() + ": " + violation.getMessage());
+				if(violation.getPropertyPath().toString().equals("nickname")) {
+					
+					try {
+						message = mapper.writeValueAsString(new ErrorDTO("checkInErrorNickname", "3","20"));
+						logger.info("Writing json message:" + message);
+					} catch (JsonGenerationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					throw new RuntimeException(message);
+				}
+				else {
+					try {
+						message = mapper.writeValueAsString(new ErrorDTO("checkInError", violation.getPropertyPath().toString() + " " + violation.getMessage()));
+						logger.info("Writing json message:" + message);
+					} catch (JsonGenerationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					throw new RuntimeException(message);
+				}
+					
 			}
 			
 			return null;
 		}			
- 					
+ 		
 		List<CheckIn> checkInsAtSpot = getOtherChekIns(checkIn);
 		
 		if(checkInsAtSpot != null) {

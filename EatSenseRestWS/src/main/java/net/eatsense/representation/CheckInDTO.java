@@ -1,5 +1,7 @@
 package net.eatsense.representation;
 
+import net.eatsense.domain.CheckInStatus;
+
 /**
  * Represents information transferred after submitting a barcode for checkIn.
  * This class is intended only for representation and will NOT BE persisted.
@@ -13,7 +15,7 @@ public class CheckInDTO {
 	/**
 	 * Status indicating for example if a restaurant with this code was found.
 	 */
-	private String status;
+	private CheckInStatus status;
 
 	/**
 	 * Restaurants name
@@ -63,11 +65,11 @@ public class CheckInDTO {
 	private ErrorDTO error;
 	
 
-	public String getStatus() {
+	public CheckInStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(CheckInStatus status) {
 		this.status = status;
 	}
 

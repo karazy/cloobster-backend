@@ -52,7 +52,7 @@ public class EatSenseGuiceServletContextListener extends
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*restaurants(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*checkin(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*checkins(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}

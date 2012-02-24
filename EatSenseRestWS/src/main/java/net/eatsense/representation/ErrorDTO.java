@@ -4,6 +4,11 @@ public class ErrorDTO {
 	private String errorKey;
 	private String[] substitutions;
 	
+	
+	public ErrorDTO() {
+		super();
+	}
+
 	public ErrorDTO(String errorKey, String... substitutions)	{
 		this.errorKey = errorKey;
 		this.substitutions = substitutions;
