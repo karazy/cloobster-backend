@@ -93,6 +93,8 @@ public class CheckInController {
     }
 
 	public CheckInDTO createCheckIn(CheckInDTO checkInDto) {
+		String message = null;
+		
 		if(checkInDto == null ) {
 			throw new RuntimeException("checkin data is empty");
 		}
@@ -125,7 +127,7 @@ public class CheckInController {
 			// constraint violations occurred setting status and logging error
 			logger.info("CheckIn validation failed. Message(s):");
 			for (ConstraintViolation<CheckIn> violation : constraintViolations) {
-				String message = null;
+				
 				logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
 				if(violation.getPropertyPath().toString().equals("nickname")) {
 					
@@ -175,8 +177,17 @@ public class CheckInController {
 				
 				if(next.getNickname().equals(checkIn.getNickname() ) ) {
 					logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+					try {
+						message = mapper.writeValueAsString(new ErrorDTO("checkInErrorNicknameExists", ""));
+					} catch (JsonGenerationException e) {
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					//abort checkin
-					throw new RuntimeException("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
+					throw new RuntimeException(message);
 				}
 				
 				

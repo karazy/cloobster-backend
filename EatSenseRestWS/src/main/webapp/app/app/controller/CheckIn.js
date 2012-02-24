@@ -310,7 +310,7 @@ Ext.define('EatSense.controller.CheckIn', {
 					   	    failure: function(response, operation) {
 					   	    	console.log('checkIn failure');
 				    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
-				    	    		var error = Ext.JSON.decode(response.statusText);
+				    	    		var error = Ext.JSON.decode(operation.getError().statusText);
 				    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(error.errorKey,error.substitutions), Ext.emptyFn);
 				    	    	} else {
 				    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
