@@ -6,6 +6,7 @@ import java.util.List;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Menu;
+import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Spot;
@@ -132,6 +133,10 @@ public class DummyDataDumper {
 		Restaurant r = new Restaurant();
 		r.setName(name);
 		r.setDescription(desc);
+		ArrayList<PaymentMethod> methods = new ArrayList<PaymentMethod>();
+		methods.add(new PaymentMethod("EC"));
+		methods.add(new PaymentMethod("Bar"));
+		r.setPaymentMethods(methods);
 		Key<Restaurant> kR = rr.saveOrUpdate(r);
 
 		Spot spot = new Spot();
@@ -139,6 +144,8 @@ public class DummyDataDumper {
 		spot.setBarcode(barcode);
 		spot.setRestaurant(kR);
 		spot.setName(areaName);
+		
+		
 		
 		Key<Spot> kB = br.saveOrUpdate(spot);
 		

@@ -13,10 +13,12 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Menu;
+import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Spot;
+import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -62,10 +64,11 @@ public class ImportController {
 	@Inject
     private Validator validator;
 	private OrderChoiceRepository orderChoiceRepo;
+	private BillRepository billRepo;
 	
 
 	@Inject
-	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr) {
+	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br) {
 		this.restaurantRepo = r;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -73,6 +76,7 @@ public class ImportController {
 		this.choiceRepo = cr;
 		this.checkinRepo = chkr;
 		this.orderRepo = or;
+		this.billRepo = br;
 		this.orderChoiceRepo = ocr;
 	}
 	
@@ -89,7 +93,7 @@ public class ImportController {
 		
 		logger.info("New import request recieved for restaurant: " + restaurantData.getName() );
 		
-		Key<Restaurant> kR = createAndSaveRestaurant(restaurantData.getName(), restaurantData.getDescription() );
+		Key<Restaurant> kR = createAndSaveRestaurant(restaurantData.getName(), restaurantData.getDescription(), restaurantData.getPayments() );
 		if(kR == null) {
 			logger.info("Creation of restaurant in datastore failed, import aborted.");
 			return null;
@@ -142,12 +146,13 @@ public class ImportController {
 		return kR.getId();
 	}
 	
-	private Key<Restaurant> createAndSaveRestaurant(String name, String desc) {
+	private Key<Restaurant> createAndSaveRestaurant(String name, String desc, Collection<PaymentMethod> paymentMethods) {
 		logger.info("Creating new restaurant with data: " + name + ", " + desc );
 		
 		Restaurant r = new Restaurant();
 		r.setName(name);
 		r.setDescription(desc);
+		r.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
 		Key<Restaurant> kR = restaurantRepo.saveOrUpdate(r);
 		logger.info("Created new restaurant with id: " + kR.getId());
@@ -263,6 +268,7 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
 		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		billRepo.ofy().delete(billRepo.getAllKeys());
 	};
 	
 	public void deleteCheckIns() {

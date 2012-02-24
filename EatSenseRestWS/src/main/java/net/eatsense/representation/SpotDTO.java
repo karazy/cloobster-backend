@@ -1,6 +1,10 @@
 package net.eatsense.representation;
 
+import java.util.Collection;
+
 import javax.validation.constraints.NotNull;
+
+import net.eatsense.domain.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -33,6 +37,8 @@ public class SpotDTO {
 	private String restaurant;
 	
 	private Long restaurantId;
+	
+	private Collection<PaymentMethod> payments;
 	
 	public String getRestaurant() {
 		return restaurant;
@@ -79,6 +85,14 @@ public class SpotDTO {
 
 	public void setGroupTag(String groupTag) {
 		this.groupTag = groupTag;
+	}
+
+	public Collection<PaymentMethod> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(Collection<PaymentMethod> payments) {
+		this.payments = payments;
 	}
 	
 }

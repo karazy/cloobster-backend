@@ -83,10 +83,12 @@ public class CheckInController {
     	
     	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
     	
+    	    	
     	spotDto.setBarcode(barcode);
     	spotDto.setName(spot.getName());
     	spotDto.setRestaurant(restaurant.getName());
     	spotDto.setRestaurantId(restaurant.getId());
+    	spotDto.setPayments(restaurant.getPaymentMethods());
     	spotDto.setGroupTag(spot.getGroupTag());
     	
 		return spotDto ;

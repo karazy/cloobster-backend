@@ -2,7 +2,9 @@ package net.eatsense.persistence;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.NicknameAdjective;
@@ -46,6 +48,7 @@ public class GenericRepository<T> extends DAOBase{
 		ObjectifyService.register(CheckIn.class);
 		ObjectifyService.register(Choice.class);
 		ObjectifyService.register(Order.class);
+		ObjectifyService.register(Bill.class);
 		ObjectifyService.register(OrderChoice.class);
 		ObjectifyService.register(NicknameAdjective.class);
 		ObjectifyService.register(NicknameNoun.class);
@@ -70,6 +73,20 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public Key<T> saveOrUpdate(T obj) {
 		logger.info("saveOrUpdate {} ", obj);
+		
+		return ofy().put(obj);
+	}
+	
+	/**
+	 * Saves or update given object.
+	 * @param obj
+	 * 		List containing objects to save.
+	 * @return
+	 * 		Map of generated/existing keys and entities
+	 */
+	public Map<Key<T>, T> saveOrUpdate(Iterable<T> obj) {
+		logger.info("saveOrUpdate {} ", obj);
+		
 		return ofy().put(obj);
 	}
 
