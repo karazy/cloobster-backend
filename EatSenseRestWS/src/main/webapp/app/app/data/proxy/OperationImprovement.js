@@ -2,11 +2,18 @@ Ext.define('EatSense.data.proxy.OperationImprovement', {
     override: 'Ext.data.Operation',
 
     processCreate: function(resultSet) {
-    	console.log('OperationImprovement called');
+    	console.log('Ext.ux.OperationImprovement');
+    	
         var updatedRecords = resultSet.getRecords(),
             currentRecords = this.getRecords(),
             ln = updatedRecords.length,
             i, currentRecord, updatedRecord;
+        
+        // <debug>
+        if (ln==0) {
+                Ext.Logger.warn('Unable to find any record to match in the result set that came back from the server.');
+        }
+        // </debug>
 
         for (i = 0; i < ln; i++) {
             updatedRecord = updatedRecords[i];

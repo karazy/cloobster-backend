@@ -296,11 +296,11 @@ Ext.define('EatSense.controller.Order', {
 
 			this.refreshCart();
 			
-			if(orders.data.length > 0) {
-				orderlist.refresh();
-			} else {
-				this.showMenu();
-			}
+//			if(orders.data.length > 0) {
+//				orderlist.refresh();
+//			} else {
+//				this.showMenu();
+//			}
 			
 			//show success message and switch to next view
 			Ext.Msg.show({
