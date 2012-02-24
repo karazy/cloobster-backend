@@ -89,9 +89,10 @@ public class CheckInControllerTest {
 		
 		checkIn.setNickname("FakeNik");
 		checkIn.setStatus(CheckInStatus.INTENT);
-		String checkInId = ctr.createCheckIn( checkIn);
-		assertThat(checkInId, notNullValue());
-		checkIn.setUserId(checkInId);
+		checkIn = ctr.createCheckIn( checkIn);
+		assertThat(checkIn, notNullValue());
+		assertThat(checkIn.getUserId(), notNullValue());
+		
 		CheckIn chkin = cr.getByProperty("userId", checkIn.getUserId());
 		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());
 		assertEquals("FakeNik", chkin.getNickname());
@@ -112,9 +113,9 @@ public class CheckInControllerTest {
 		
 		//Part1: set nickname too short for this test
 		checkInData.setNickname("Fa");
-		String checkInId = null;
+
 		try {
-			checkInId =  ctr.createCheckIn( checkInData);
+			checkInData =  ctr.createCheckIn( checkInData);
 		} catch (RuntimeException e) {
 			ErrorDTO error = mapper.readValue(e.getMessage(), ErrorDTO.class);
 			
@@ -131,9 +132,9 @@ public class CheckInControllerTest {
 		checkInData.setNickname("Fa123456789012345678901234567890");
 
 		// validation error should happen
-		checkInId = null;
+
 		try {
-			checkInId =  ctr.createCheckIn( checkInData);
+			checkInData =  ctr.createCheckIn( checkInData);
 		} catch (RuntimeException e) {
 			ErrorDTO error = mapper.readValue(e.getMessage(), ErrorDTO.class);
 			assertThat(error.getErrorKey(), is("checkInErrorNickname"));
@@ -147,10 +148,11 @@ public class CheckInControllerTest {
 		
 		// Part3: set nickname right now
 		checkInData.setNickname("FakeNik");
-		checkInId = ctr.createCheckIn(checkInData);
-		assertThat(checkInId, notNullValue());
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData = ctr.createCheckIn(checkInData);
+		assertThat(checkInData.getUserId(), notNullValue());
 		
-		checkIn = cr.getByProperty("userId", checkInId);
+		checkIn = cr.getByProperty("userId", checkInData.getUserId());
 		assertThat(checkIn, notNullValue());
 		assertThat(checkIn.getStatus(), is(CheckInStatus.CHECKEDIN));
 		assertThat(checkIn.getNickname(), is(checkInData.getNickname()));
@@ -171,18 +173,19 @@ public class CheckInControllerTest {
 		assertNotNull(spot.getName());
 		assertNotNull(spot.getRestaurantId());
 		
-		String checkInId = ctr.createCheckIn(checkInData);
-		assertThat(checkInId, notNullValue());
-		checkInData.setUserId(checkInId);
+		checkInData = ctr.createCheckIn(checkInData);
+		assertThat(checkInData, notNullValue());
+		assertThat(checkInData.getUserId(), notNullValue());
 		
 		CheckInDTO checkInData2 = new CheckInDTO();
 		checkInData2.setSpotId("b4rc0de");
 		checkInData2.setStatus(CheckInStatus.INTENT);
 		checkInData2.setNickname("Papa Schlumpf");
 		
-		String checkInId2 = ctr.createCheckIn(checkInData2);
-		assertThat(checkInId2, notNullValue());
-		checkInData2.setUserId(checkInId2);
+		checkInData2 = ctr.createCheckIn(checkInData2);
+		assertThat(checkInData2, notNullValue());
+		assertThat(checkInData2.getUserId(), notNullValue());
+		
 		//load users at same spot
 		List<User> users = ctr.getUsersAtSpot(checkInData.getSpotId(), checkInData.getUserId());
 		
@@ -190,13 +193,13 @@ public class CheckInControllerTest {
 		//the second checked in user should be Papa Schlumpf
 		assertThat(users.get( 0 ).getNickname(), is(checkInData2.getNickname()) );
 		//link user
-		checkInData.setLinkedCheckInId(checkInId2);
-		String result = ctr.updateCheckIn(checkInId, checkInData);
-		assertThat(result, is("OK"));
+		checkInData.setLinkedCheckInId(checkInData2.getUserId());
+		CheckInDTO result = ctr.updateCheckIn(checkInData.getUserId(), checkInData);
+		assertThat(result, notNullValue());
 		
 		//check if user is linked
 		CheckIn checkIn = cr.getByProperty("userId", checkInData.getUserId());
-		assertThat(checkIn.getLinkedUserId(), is(checkInId2));
+		assertThat(checkIn.getLinkedUserId(), is(checkInData2.getUserId()));
 	}
 
 }

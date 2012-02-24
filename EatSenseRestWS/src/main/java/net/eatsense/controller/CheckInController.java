@@ -185,6 +185,7 @@ public class CheckInController {
 
 		checkInRepo.saveOrUpdate(checkIn);
 		checkInDto.setUserId(checkInId);
+		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 
 		return checkInDto;
 	}
