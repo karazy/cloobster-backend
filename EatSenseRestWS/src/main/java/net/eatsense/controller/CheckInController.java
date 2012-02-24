@@ -81,8 +81,10 @@ public class CheckInController {
     }
 
 	public String createCheckIn(CheckInDTO checkInDto) {
-		if(checkInDto == null || checkInDto.getStatus() != CheckInStatus.INTENT.toString())
+		if(checkInDto == null || !checkInDto.getStatus().equals(CheckInStatus.INTENT.toString())) {
 			return null;
+		}
+			
 		// set values for domain object
 		Spot spot = barcodeRepo.getByProperty("barcode", checkInDto.getSpotId());
 		

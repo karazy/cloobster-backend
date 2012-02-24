@@ -250,7 +250,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		this.generateNickname();
 		
 		checkIn.set('spotId', options.model.get('barcode'));
-		checkIn.set('restaurant', options.model.get('restaurant'));
+		checkIn.set('restaurantName', options.model.get('restaurant'));
 		checkIn.set('restaurantId', options.model.get('restaurantId'));
 		checkIn.set('spot', options.model.get('name'));
 		checkIn.set('status','INTENT');
@@ -279,38 +279,60 @@ Ext.define('EatSense.controller.CheckIn', {
 	   } else {
 		   this.models.activeCheckIn.set('nickname',nickname);
 			 //checkIn(String userId, String nickname)
-			this.models.activeCheckIn.save(
-					   {
-						   scope: this,
-					   	    success: function(response) {
-					   	     
-					   	     this.models.activeCheckIn.set('userId', response.responseText);
-					   	     that.showCheckinWithOthers();
-//					   	     if(response.data.status == 'YOUARENOTALONE') {
-//					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
-//					   	    	 var userId = response.data.userId;
-//					   	    	 that.showCheckinWithOthers({userId : userId});
-//					   		   }
-//					   		   else if(response.data.status == 'CHECKEDIN') {
-//					   			   that.showMenu();
-//					   		   }
-//					   		   else if(response.data.status == 'VALIDATION_ERROR') {
+		   
+		   //TODO Sencha Bug in model.save?
+		   Ext.Ajax.request({				
+	    	    url: globalConf.serviceUrl+'/checkins/',
+	    	    method: 'POST',    
+	    	    jsonData: this.models.activeCheckIn.getData(),
+	    	    scope: this,
+	    	    success: function(response) {
+	    	    	this.models.activeCheckIn.setId(response.responseText);
+	    	    	//workaround to prevent a post on update
+	    	    	this.models.activeCheckIn.phantom = false;
+			   	    that.showCheckinWithOthers();
+	    	    },
+	    	    failure: function() {
+	    	    	
+	    	    }
+		   });
+		   
+//			this.models.activeCheckIn.save(
+//					   {
+//						   scope: this,
+//					   	    success: function(response) {
+//					   	    console.log("CheckIn Controller -> checkIn success");
+//					   	     this.models.activeCheckIn.set('userId', response);
+//					   	     that.showCheckinWithOthers();
+//					   	     
+////					   	     if(response.data.status == 'YOUARENOTALONE') {
+////					   			 //others are checked in at the same spot, present a list and ask if user wants to check in with another user
+////					   	    	 var userId = response.data.userId;
+////					   	    	 that.showCheckinWithOthers({userId : userId});
+////					   		   }
+////					   		   else if(response.data.status == 'CHECKEDIN') {
+////					   			   that.showMenu();
+////					   		   }
+////					   		   else if(response.data.status == 'VALIDATION_ERROR') {
+////					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.data.error.errorKey,response.data.error.substitutions), Ext.emptyFn);
+////					   		   }
+////					   		   else {
+////					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
+////					   		   }
+//					   	    },
+//					   	    failure: function(response) {
+//					   	     if(response.data.status == 'VALIDATION_ERROR') {
 //					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.data.error.errorKey,response.data.error.substitutions), Ext.emptyFn);
 //					   		   }
 //					   		   else {
 //					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
 //					   		   }
-					   	    },
-					   	    failure: function(response) {
-					   	     if(response.data.status == 'VALIDATION_ERROR') {
-					   			 Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(response.data.error.errorKey,response.data.error.substitutions), Ext.emptyFn);
-					   		   }
-					   		   else {
-					   			Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-					   		   }
-					   	    }
-					   }	   
-			   );
+//					   	    },
+//					   	    callback: function() {
+//					   	     console.log("CheckIn Controller -> checkIn callback");
+//					   	    }
+//					   }	   
+//			   );
 	   }
 
 	  
@@ -365,18 +387,15 @@ Ext.define('EatSense.controller.CheckIn', {
 	  	 this.getUserlist().setStore(userListStore); 
 	  	 this.getUserlist().getStore().load({
 	  	     scope   : this,
-	  	     callback: function(records, operation, success) {
-	  	     //the operation object contains all of the details of the load operation
-	  	     console.log(records);
+	  	     callback: function(records, operation, success) {	  	    	 
+			  	   main.switchAnim('left');
+				  	if(records.length > 0) {
+				  		main.setActiveItem(checkinwithothersDlg);
+				  	} else {
+				  		this.showMenu();
+				  	}
 	  	     }
-	  	     });
-	  	main.switchAnim('left');
-	  	if(userListStore.getCount() > 0) {
-	  		main.setActiveItem(checkinwithothersDlg);
-	  	} else {
-	  		this.showMenu();
-	  	}
-	  	
+	  	 });	  		  	
    },
    /**
     * CheckIn Process

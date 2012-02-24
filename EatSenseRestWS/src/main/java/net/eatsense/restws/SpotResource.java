@@ -1,13 +1,14 @@
 package net.eatsense.restws;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.google.inject.Inject;
-
 import net.eatsense.controller.CheckInController;
 import net.eatsense.representation.SpotDTO;
+
+import com.google.inject.Inject;
 
 /**
  * Resource to retrieve spot information by a unique barcode.
@@ -31,6 +32,7 @@ public class SpotResource {
 	 * @param barcode
 	 * @return Spot as JsonObject 
 	 */
+	@GET
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
 	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
