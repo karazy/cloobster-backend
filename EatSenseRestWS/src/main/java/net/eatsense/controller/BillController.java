@@ -107,6 +107,11 @@ public class BillController {
 			billData.setId(bill.getId());
 			billData.setTime(bill.getCreationTime());
 			billData.setTotal(bill.getTotal());
+			
+			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
+			if(checkInRepo.saveOrUpdate(checkIn) == null )
+				throw new RuntimeException("CheckIn status could not be updated for id: " + checkIn.getId());
+			
 		}
 		return billData;
 	}
