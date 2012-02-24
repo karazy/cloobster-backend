@@ -3,13 +3,6 @@ Ext.define('EatSense.view.CartOverview', {
 	xtype: 'cartoverview',
 	config: {
 		items: [
-//		        {
-//					docked : 'top',
-//					xtype : 'toolbar',
-//					itemId: 'cartTopBar',
-//					title : i18nPlugin.translate('cartviewTitle'),
-//					items : []
-//				},
 		{
 			xtype: 'list',
 			itemId: 'orderlist',
@@ -19,7 +12,7 @@ Ext.define('EatSense.view.CartOverview', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 20%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}</div>" +
+				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}€</div>" +
 				"<div style='clear: both;'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
@@ -34,8 +27,7 @@ Ext.define('EatSense.view.CartOverview', {
 						"</tpl>" +
 					"</tpl>" +
 					"<tpl if='comment!=\"\"'>" +
-					"<p>Kommentar:</p>" +
-					"<p>{comment}</p>" +
+					"<p>Kommentar: {comment}</p>" +
 					"</tpl>" +
 				"</div>" +
 			"</div>"
@@ -68,7 +60,3 @@ Ext.define('EatSense.view.CartOverview', {
 		]
 	}
 });
-
-//backup from checkSelections
-//var _hasSelections = parent.product.choices().getAt(index-1).hasSelections(); 
-//return _hasSelections;	

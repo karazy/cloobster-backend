@@ -162,10 +162,7 @@ Ext.define('EatSense.controller.Menu', {
 
 			 record.choices().each(function(_choice) {
 				 var choice = _choice;				 			 
-//			 for(var i =0; i < record.choices().data.items.length; i++) {
-//				 var choice = record.choicesStore.data.items[i];
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 //.getComponent('choiceInfoPanel')
 				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
 				 //single choice. Create Radio buttons
 				 var optionType = '';
@@ -179,8 +176,6 @@ Ext.define('EatSense.controller.Menu', {
 				 choice.options().each(function(opt) {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.get('id'),
-//						 value : opt,
-//						 fieldType: optionType,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
 						 checked: opt.get('selected')
@@ -209,7 +204,6 @@ Ext.define('EatSense.controller.Menu', {
 					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
-//			 }
 			 },this);
 			 choicesPanel.add( {
 				 html: '<hr/>'
@@ -228,7 +222,7 @@ Ext.define('EatSense.controller.Menu', {
 		);
 		 this.menuBackBtContext = this.backToProductOverview;
 
-		 this.switchView(detail, Karazy.util.shorten(record.data.name, 15, true), i18nPlugin.translate('back'), 'left');
+		 this.switchView(detail, Karazy.util.shorten(record.data.name, 10, true), i18nPlugin.translate('back'), 'left');
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview

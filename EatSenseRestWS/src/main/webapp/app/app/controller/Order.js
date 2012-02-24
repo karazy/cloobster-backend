@@ -57,9 +57,13 @@ Ext.define('EatSense.controller.Order', {
             	 spin: this.amountChanged
              },
              paymentButton: {
-            	 tap: this.choosePaymentMethod
+            	 tap: this.choosePaymentMethod,            	 
+            	 'myOrdersLoaded': function() {
+            		 console.log('custom EVENT');
+            	 }
              }
 		 });
+		
 		
 		//store retrieved models
 		 var models = {};
@@ -79,28 +83,22 @@ Ext.define('EatSense.controller.Order', {
 		var cartview = this.getCartview(), orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		total = 0;
-		//only switch if cart is not empty		
-//		if(orders.data.length == 0) {
-//			Ext.Msg.alert(i18nPlugin.translate('hint'),i18nPlugin.translate('cartEmpty'), Ext.emptyFn);
-//			return false;
-//		} else {
-			cartview.hideBackButton();
-			
-			//set filter TEST
-	    	orders.filter([
-	    	               {property: "status", value: "XYZ"}   	               
-	    	]);
-	    	
-			orderlist.setStore(orders);	
-			this.models.activeOrder = null;
-			orderlist.refresh();
+		cartview.hideBackButton();
+		
+		//set filter TEST
+    	orders.filter([
+    	               {property: "status", value: "XYZ"}   	               
+    	]);
+    	
+		orderlist.setStore(orders);	
+		this.models.activeOrder = null;
+		orderlist.refresh();
 
-			
-			total = this.calculateOrdersTotal(orders);			
-			this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
-			this.refreshCartBadgeText();
-			return true;
-//		}				
+		
+		total = this.calculateOrdersTotal(orders);			
+		this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
+		this.refreshCartBadgeText();
+		return true;
 	},
 	/**
 	 * Switch to cart. Method gets called when editing an order.
@@ -490,7 +488,7 @@ Ext.define('EatSense.controller.Order', {
 		
 		//TODO investigate if this is a bug
 		orderStore.removeAll();
-		myorderlist.getStore().removeAll()
+//		myorderlist.getStore().removeAll();
 		
 		myorderlist.getStore().load({
 			scope   : this,
@@ -541,48 +539,48 @@ Ext.define('EatSense.controller.Order', {
 	choosePaymentMethod: function() {
 		console.log('Order Controller -> choosePaymentMethod');
 		var availableMethods = this.getApplication().getController('CheckIn').models.activeSpot.payments(),
+		orderCount = this.getMyorderlist().getStore().getCount(),
 		picker,
 		choosenMethod,
 		me = this,
 		dummyStore = Ext.data.StoreManager.lookup('paymentMethodStore');
 		
-		//create picker
-		picker = Ext.create('Ext.Picker', {
-			doneButton: {
-				text: i18nPlugin.translate('ok'),
-				listeners: {
-					tap: function() {
-						choosenMethod = picker.getValue()['null'];
-						picker.hide();						
-						me.paymentRequest(choosenMethod);
+		if(orderCount>0) {
+			//create picker
+			picker = Ext.create('Ext.Picker', {
+				doneButton: {
+					text: i18nPlugin.translate('ok'),
+					listeners: {
+						tap: function() {
+							//TODO investigate if bug
+							choosenMethod = picker.getValue()['null'];
+							picker.hide();						
+							me.paymentRequest(choosenMethod);
+						}
 					}
-				}
-			},
-			cancelButton: {
-				text: i18nPlugin.translate('cancel'),
-				listeners: {
-					tap: function() {
-						picker.hide();					
+				},
+				cancelButton: {
+					text: i18nPlugin.translate('cancel'),
+					listeners: {
+						tap: function() {
+							picker.hide();					
+						}
 					}
-				}
-			},
-		    slots: [
-		        {
-		        	align: 'center',
-		        	 valueField: 'name',
-		             displayField: 'name',
-		            title: i18nPlugin.translate('paymentPickerTitle'),
-		            store: dummyStore
-		        }
-		    ]
-		});
-		
-		
-		
-		Ext.Viewport.add(picker);
-		picker.show();
-		
-//		this.paymentRequest(paymentMethod);
+				},
+			    slots: [
+			        {
+			        	align: 'center',
+			        	 valueField: 'name',
+			             displayField: 'name',
+			            title: i18nPlugin.translate('paymentPickerTitle'),
+			            store: dummyStore
+			        }
+			    ]
+			});
+									
+			Ext.Viewport.add(picker);
+			picker.show();
+		}
 	},
 	
 	/**

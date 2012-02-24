@@ -189,6 +189,10 @@ Ext.define('EatSense.controller.CheckIn', {
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}
+	 			   },
+	 			   listeners: {
+	 				   load: this.loadOrdersEvent
+	 				   
 	 			   }
 	 		 });
 			 
@@ -478,7 +482,16 @@ Ext.define('EatSense.controller.CheckIn', {
     	    }
     	});
 		
-	}
+	},
+	
+	loadOrdersEvent: function(store, records, successful, operation, opts) {
+		   console.log('fire myordersloaded event');
+		  this.fireEvent('myOrdersLoaded');
+		   if(store.getCount() > 0) {
+			   //enable payment button
+			   
+		   }
+	   }
 	
 });
 

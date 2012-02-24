@@ -19,7 +19,12 @@ Ext.define('EatSense.view.MyOrders', {
 				xtype: 'button',
 				text: i18nPlugin.translate('payRequestButton'),
 				itemId: 'payRequestBt',
-				ui: 'forward'
+				ui: 'forward',
+				listeners: {
+					myOrdersLoaded: function() {
+	            		 console.log('custom EVENT');
+	            	 }					
+				}
 			}
 			]
 		},
@@ -32,7 +37,7 @@ Ext.define('EatSense.view.MyOrders', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 20%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}</div>" +
+				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}€</div>" +
 				"<div style='clear: both;'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
@@ -47,8 +52,7 @@ Ext.define('EatSense.view.MyOrders', {
 						"</tpl>" +
 					"</tpl>" +
 					"<tpl if='comment!=\"\"'>" +
-					"<p>Kommentar:</p>" +
-					"<p>{comment}</p>" +
+					"<p>Kommentar: {comment}</p>" +
 					"</tpl>" +
 				"</div>" +
 			"</div>"

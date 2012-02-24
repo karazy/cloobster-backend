@@ -25,7 +25,7 @@ Ext.define('EatSense.view.ProductDetail', {
 					 	'<div style="position: relative;">'+
 					 		'<h2 style="float: left; width: 80%; margin: 0;">{product.data.name}</h2>'+
 					 		//right: 0 , top : 50%
-					 		'<div style="position: absolute; right: 0; top: 10; width: 20%; text-align: right;">{[values.product.calculate(values.amount)]}</div>'+
+					 		'<div style="position: absolute; right: 0; top: 10; width: 30%; text-align: right;">{[values.product.calculate(values.amount)]}</div>'+
 					 		'<div style="clear: both;">'+
 					 	'</div><p style="font-size:0.7em;">{product.data.longDesc}</p>'+
 					 '</div>'	
