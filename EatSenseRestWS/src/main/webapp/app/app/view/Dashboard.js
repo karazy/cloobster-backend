@@ -29,9 +29,7 @@ Ext.define('EatSense.view.Dashboard', {
             	align: 'middle',            	
         	},
         	defaults: {
-                //flex  : 1,
                 margin: 5,
-//                type : 'fit'
             },
          	items: [
             {
@@ -43,7 +41,6 @@ Ext.define('EatSense.view.Dashboard', {
             {
                 xtype: 'textfield',
                 label: i18nPlugin.translate('barcode'),
-//              labelAlign: 'top',
                 labelWidth: 100,
                 width: 300,                
                 name: 'barcodeTF',

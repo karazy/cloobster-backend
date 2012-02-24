@@ -22,7 +22,8 @@ Ext.define('EatSense.controller.Order', {
 			myorderlist: '#myorderlist',
 			myordersview: '#myorderstab #myorders',
 			myorderstab: '#myorderstab',
-			loungeTabBar: '#loungeTabBar'
+			loungeTabBar: '#loungeTabBar',
+			paymentButton: '#myorderstab #myorders #myOrdersTopBar #payRequestBt'
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
@@ -54,6 +55,9 @@ Ext.define('EatSense.controller.Order', {
              },
              amountSpinner : {
             	 spin: this.amountChanged
+             },
+             paymentButton: {
+            	 tap: this.choosePaymentMethod
              }
 		 });
 		
@@ -530,6 +534,90 @@ Ext.define('EatSense.controller.Order', {
 		}
 			
 		return total;
+	},
+	/**
+	 * Choose a payment method to issue the paymentRequest.
+	 */
+	choosePaymentMethod: function() {
+		console.log('Order Controller -> choosePaymentMethod');
+		var availableMethods = this.getApplication().getController('CheckIn').models.activeSpot.payments(),
+		picker,
+		choosenMethod,
+		me = this,
+		dummyStore = Ext.data.StoreManager.lookup('paymentMethodStore');
+		
+		//create picker
+		picker = Ext.create('Ext.Picker', {
+			doneButton: {
+				text: i18nPlugin.translate('ok'),
+				listeners: {
+					tap: function() {
+						choosenMethod = picker.getValue()['null'];
+						picker.hide();						
+						me.paymentRequest(choosenMethod);
+					}
+				}
+			},
+			cancelButton: {
+				text: i18nPlugin.translate('cancel'),
+				listeners: {
+					tap: function() {
+						picker.hide();					
+					}
+				}
+			},
+		    slots: [
+		        {
+		        	align: 'center',
+		        	 valueField: 'name',
+		             displayField: 'name',
+		            title: i18nPlugin.translate('paymentPickerTitle'),
+		            store: dummyStore
+		        }
+		    ]
+		});
+		
+		
+		
+		Ext.Viewport.add(picker);
+		picker.show();
+		
+//		this.paymentRequest(paymentMethod);
+	},
+	
+	/**
+	 * Request the payment.
+	 * Creates a new bill object and sends via POST to the server. 
+	 * CheckIn gets the status PAYMENT_REQUEST and no more orders can be issued.
+	 * 
+	 * @param paymentMethod
+	 * 			The chose payment method.
+	 * 
+	 */
+	paymentRequest: function(paymentMethod) {
+		var bill = Ext.create('EatSense.model.Bill'),
+		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn;		
+		bill.set('paymentMethod', paymentMethod);
+		
+		//TODO show load mask to prevent users from issuing orders?!
+		
+		bill.save({
+			scope: this,
+			params: {
+				'checkInId' : checkIn.getId()
+			},
+			success: function(record, operation) {				
+				checkIn.set('status', 'PAYMENT_REQUEST');
+			},
+			failure: function(record, operation) {
+				if(operation.getError() != null && operation.getError().status == 404) {
+					Ext.Msg.alert(i18nPlugin.translate('errorTitle'), operation.getError().statusText, Ext.emptyFn);
+				}
+				
+			}
+		});
+		
+		
 	}
 	
 });

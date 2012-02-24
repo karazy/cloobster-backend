@@ -12,9 +12,9 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error', 'Spot'],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error', 'Spot', 'Bill', 'PaymentMethod'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OptionDetail', 'Cart', 'Menu', 'CartOverview', 'Lounge'], 
-	stores : [ 'CheckIn', 'User'],
+	stores : [ 'CheckIn', 'User', 'PaymentMethod'],
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
 	init : function() {
 		console.log('init');

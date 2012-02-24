@@ -1,7 +1,7 @@
 Ext.define('EatSense.model.Spot', {
 	extend : 'Ext.data.Model',
 	config : {
-		idProperty : 'brcode',
+		idProperty : 'barcode',
 		fields : [ {
 			name : 'barcode',
 			type : 'string'
@@ -15,6 +15,10 @@ Ext.define('EatSense.model.Spot', {
 			name : 'name',
 			type : 'string'
 		} ],
+		hasMany : {
+			model : 'EatSense.model.PaymentMethod',
+			name : 'payments'
+		},
 		proxy : {
 			type : 'rest',
 			url : '/spots/',

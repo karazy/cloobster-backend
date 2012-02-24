@@ -72,7 +72,8 @@ Ext.define('EatSense.controller.CheckIn', {
     	    	} else {
     	        	var me = this;
     	        	EatSense.model.Spot.load(barcode, {
-    	        		 success: function(record, operation) {	  
+    	        		 success: function(record, operation) {
+    	        			 me.models.activeSpot = record;
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
      	        	    failure: function(record, operation) {
@@ -139,12 +140,13 @@ Ext.define('EatSense.controller.CheckIn', {
 //			   		}
 //	 		 });
 //  		 
+        //setup store for products	 
   		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
   		 if(ProductType.getProxy() == null) {
   			console.log('create product store');
   	 		 var _productListStore =	 Ext.create('Ext.data.Store', {
 	 			   model: 'EatSense.model.Product',
-	 			   storeId: 'productStore',
+	 			   storeId: 'productStore',	 			   
 	 			   proxy: {
 	 				   type: 'rest',
 	 				   url : '/restaurants/'+restaurantId+'/products',
@@ -159,10 +161,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 		 });
   			 
   			ProductType.setProxy(_productListStore.getProxy());
-  		 }
-  		 
-  		 
-   		 
+  		 }  		 
    	
 		 
 //		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
@@ -173,6 +172,7 @@ Ext.define('EatSense.controller.CheckIn', {
 //		   		}
 // 		 });
 //		 
+  		//setup store for orders
 		 var OrderType = Ext.ModelManager.getModel('EatSense.model.Order');
 		 if(OrderType.getProxy() == null) {
 			 console.log('create order store');
@@ -197,9 +197,28 @@ Ext.define('EatSense.controller.CheckIn', {
 				 this.getMyorderlist().setStore(_orderListStore);
 			 } else {
 				 console.log('Could not access myorderlist.');
-			 }
-			 
-		 }  	    			
+			 }			 
+		 }
+		 
+		 //setup store for bills
+		 var BillType = Ext.ModelManager.getModel('EatSense.model.Bill');
+		 if(BillType.getProxy() == null) {
+			 console.log('create bill store');
+			 var billStore =	 Ext.create('Ext.data.Store', {
+	 			   model: 'EatSense.model.Bill',
+	 			   storeId: 'billStore',
+	 			   proxy: {
+	 				   type: 'rest',
+	 				  enablePagingParams: false,
+	 				   url : '/restaurants/'+restaurantId+'/bills',
+	 				   reader: {
+	 					   type: 'json'
+	 			   		}
+	 			   }
+	 		 });
+			 BillType.setProxy(billStore.getProxy());	 
+		 }
+		 
     	 };
     },
     /**

@@ -41,10 +41,10 @@ Ext.define('EatSense.model.CheckIn', {
 			}
 		},
 		// BUG (Sencha) doesn't work currently. Retest
-		associations : {
-			type : "hasOne",
-			model : "EatSense.model.Error"
-		},
+//		associations : {
+//			type : "hasOne",
+//			model : "EatSense.model.Error"
+//		},
 		hasMany : {
 			model : 'EatSense.model.Order',
 			name : 'orders'

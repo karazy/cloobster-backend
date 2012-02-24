@@ -51,8 +51,9 @@ var translation = {
 		//MyOrders
 		"myOrdersTitle" : "Bestellübersicht",
 		"myOrdersTabBt" : "Übersicht",
-		"payRequestButton" : "Bezahlen"
-			
+		"payRequestButton" : "Bezahlen",
+		//Payment Request
+		"paymentPickerTitle" : "Bezahlmethode"
 
 	}
 
