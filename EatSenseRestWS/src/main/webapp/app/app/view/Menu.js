@@ -4,45 +4,34 @@ Ext.define('EatSense.view.Menu', {
 	config : {
 		items : [ {
 			docked : 'top',
-			xtype : 'toolbar',
+			xtype : 'titlebar',
 			itemId: 'menuTopBar',
 			title : i18nPlugin.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',
 				itemId : 'menuBackBt',
+				action: 'back',
 				text : i18nPlugin.translate('back'),
-				ui : 'back'
+				ui : 'back',
+				align: 'left'
 			},
-			{        		 
-	            xtype: 'label',
-	            docked: 'right',
-	            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
-    		}
+//			{
+//				xtype: 'spacer'
+//			},
+			{
+				xtype: 'button',
+//				text: i18nPlugin.translate('productCartBt'),
+				itemId : 'productCartBt',
+				ui: 'confirm',
+//				height: '40px',
+//				width: '40px',
+				icon: '../app/res/images/into_cart.png',
+				iconAlign: 'centered',
+				hidden: true,
+				align: 'right'
+			},
 			]
 		},
-//		{
-//			docked : 'bottom',
-//			xtype : 'toolbar',
-//			itemId : 'menuBottomBar',
-//			layout: {
-//				type: 'hbox',
-//				pack : 'center'
-//			},
-//			items: [
-//				{
-//				    title: 'Menu',
-//				    iconCls: 'reply',
-//				    itemId: 'bottomTapUndo',
-//				    iconMask: true
-//				},
-//				{
-//				    title: 'Card',
-//				    iconCls: 'organize',
-//				    itemId: 'menuCartBt',
-//				    iconMask: true,
-//				}
-//			        ]
-//		}, 
 		{
 			xtype: 'panel',
 			itemId: 'menuCardPanel',
@@ -62,7 +51,7 @@ Ext.define('EatSense.view.Menu', {
 			        {
 			        	xtype: 'productdetail',
 			        	itemId: 'menuProductDetail',
-			        	layout: 'fit'
+			        	layout: 'vbox',
 			        }
 			]
 			
@@ -83,10 +72,18 @@ Ext.define('EatSense.view.Menu', {
 		cardpanel.setActiveItem(view);
 	},
 	/**
+	 * Shows or hides the product cart button.
+	 * @param show
+	 * 		<code>true</code> to show, <code>false</code> to hide
+	 */
+	toggleProductCartButton: function(show) {		
+		this.query('#menuTopBar #productCartBt')[0].setHidden(!show);
+	},
+	/**
 	 * Hides the back button in top toolbar.
 	 */
 	hideBackButton: function() {
-		this.getComponent('menuTopBar').getComponent('menuBackBt').hide();
+		this.query('#menuBackBt')[0].hide();
 	},
 	/**
 	 * Shows the back button in top toolbar.
@@ -94,7 +91,7 @@ Ext.define('EatSense.view.Menu', {
 	 * 		Label to display on button.
 	 */
 	showBackButton: function(text) {
-		this.getComponent('menuTopBar').getComponent('menuBackBt').setText(text);
-		this.getComponent('menuTopBar').getComponent('menuBackBt').show();
+		this.query('#menuBackBt')[0].setText(text);
+		this.query('#menuBackBt')[0].show();
 	}
 });

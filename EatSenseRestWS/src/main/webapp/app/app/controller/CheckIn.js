@@ -9,7 +9,6 @@ Ext.define('EatSense.controller.CheckIn', {
     requires: ['EatSense.data.proxy.CustomRestProxy'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
-        
     	refs: 
     	        {
     	            main : 'mainview',
@@ -32,7 +31,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
     	        	cancelCheckInBt : '#cancelCheckInBt',
     	        	regenerateNicknameBt : '#regenerateNicknameBt'
-    	        }   
+    	        }    	
     },
     init: function() {
     	console.log('initialized CheckInController');
@@ -54,11 +53,13 @@ Ext.define('EatSense.controller.CheckIn', {
             },
             regenerateNicknameBt: {
             	tap: this.generateNickname
-            }
+            }           
         });
     	 
     	 var models = {};
     	 this.models = models;
+    	 
+    	 this.on('statusChanged', this.handleStatusChange, this);
     	 
     	 //private functions
     	 
@@ -130,16 +131,7 @@ Ext.define('EatSense.controller.CheckIn', {
     		 
     		 this.getMenulist().setStore(menusStore);
     		 
-      
-  		 
-//  		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
-//				   type: 'rest',
-//				   url : '/restaurants/'+restaurantId+'/products',
-//				   reader: {
-//					   type: 'json'
-//			   		}
-//	 		 });
-//  		 
+ 
         //setup store for products	 
   		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
   		 if(ProductType.getProxy() == null) {
@@ -164,14 +156,6 @@ Ext.define('EatSense.controller.CheckIn', {
   		 }  		 
    	
 		 
-//		 var _productProxy = Ext.create('Ext.data.proxy.Rest', {
-//			   type: 'rest',
-//			   url : '/restaurants/'+restaurantId+'/products',
-//			   reader: {
-//				   type: 'json'
-//		   		}
-// 		 });
-//		 
   		//setup store for orders
 		 var OrderType = Ext.ModelManager.getModel('EatSense.model.Order');
 		 if(OrderType.getProxy() == null) {
@@ -189,10 +173,6 @@ Ext.define('EatSense.controller.CheckIn', {
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}
-	 			   },
-	 			   listeners: {
-	 				   load: this.loadOrdersEvent
-	 				   
 	 			   }
 	 		 });
 			 
@@ -262,7 +242,6 @@ Ext.define('EatSense.controller.CheckIn', {
    checkInConfirm: function(options) {
 	   console.log("CheckIn Controller -> checkInConfirm");
 	  
-	   //'Do you want to check in at <strong>'+options.model.data.spot+' at '+options.model.data.restaurantName+'</strong>'	   
 	   this.getCheckInDlg1Label1().setHtml(i18nPlugin.translate('checkInStep1Label1', options.model.get('name'), options.model.get('restaurant')));
 		var checkInDialog = this.getCheckinconfirmation(), 
 		main = this.getMain(),
@@ -279,7 +258,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			//store device uuid
 			checkIn.set('deviceId',options.deviceId);
 		}			
-//		this.models.activeCheckIn = options.model;
+
 		this.models.activeCheckIn = checkIn;
 		main.switchAnim('left');
 		main.setActiveItem(checkInDialog);	     
@@ -297,32 +276,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {
 		   this.models.activeCheckIn.set('nickname',nickname);
-			 //checkIn(String userId, String nickname)
-		   
-		   //TODO Sencha Bug in model.save?
-//		   Ext.Ajax.request({				
-//	    	    url: globalConf.serviceUrl+'/checkins/',
-//	    	    method: 'POST',    
-//	    	    jsonData: this.models.activeCheckIn.getData(),
-//	    	    scope: this,
-//	    	    success: function(response, opts) {
-//	    	    	console.log('checkIn success');
-//	    	    	this.models.activeCheckIn.setId(response.responseText);
-//	    	    	//workaround to prevent a post on update
-//	    	    	this.models.activeCheckIn.phantom = false;
-//			   	    that.showCheckinWithOthers();
-//	    	    },
-//	    	    failure: function(response, opts) {
-//	    	    	console.log('checkIn failure');
-//	    	    	if(response.status == 500) {
-//	    	    		var error = Ext.JSON.decode(response.statusText);
-//	    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(error.errorKey,error.substitutions), Ext.emptyFn);
-//	    	    	} else {
-//	    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-//	    	    	}
-//	    	    }
-//		   });
-		   
+	   
 			this.models.activeCheckIn.save(
 					   {
 						   scope: this,
@@ -484,14 +438,9 @@ Ext.define('EatSense.controller.CheckIn', {
 		
 	},
 	
-	loadOrdersEvent: function(store, records, successful, operation, opts) {
-		   console.log('fire myordersloaded event');
-		  this.fireEvent('myOrdersLoaded');
-		   if(store.getCount() > 0) {
-			   //enable payment button
-			   
-		   }
-	   }
-	
+	handleStatusChange: function(status) {
+		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
+	}
+
 });
 

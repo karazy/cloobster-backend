@@ -25,10 +25,14 @@ Ext.define('EatSense.model.Product', {
 			name: 'price_calculated',
 			type: 'number'
 		}],
-		hasMany : {
-			model : 'EatSense.model.Choice',
-			name : 'choices'
-		},
+		 associations: [{
+	            type: 'hasMany',
+	            model: 'EatSense.model.Choice',
+	            primaryKey: 'id',
+	            name: 'choices',
+	            autoLoad: true,
+	            associationKey: 'choices' // read child data from child_groups
+	        }],
 	},
 	
 	validate: function() {

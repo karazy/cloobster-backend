@@ -1,11 +1,16 @@
 package net.eatsense.restws;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Spot;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
@@ -38,5 +43,27 @@ public class SpotResource {
 	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
 		
 		return checkInCtr.getSpotInformation(barcode);
+	}
+	
+	
+	//TESTING PURPOSE
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	public Collection<SpotDTO> getAllSpots() {
+		
+		SpotRepository sr = new SpotRepository();
+		SpotDTO spotDto = new SpotDTO();
+		Collection<Spot> spots = sr.getAll();
+		Collection<SpotDTO> dtos = new ArrayList<SpotDTO>();
+		
+		for (Spot s : spots) {
+			
+			dtos.add(checkInCtr.getSpotInformation(s.getBarcode()));
+			
+		}
+		
+	
+		return dtos;
+		
 	}
 }

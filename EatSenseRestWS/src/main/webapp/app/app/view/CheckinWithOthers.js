@@ -12,11 +12,7 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 			xtype : 'toolbar',
 			title : i18nPlugin.translate('checkInTitle'),
 			items: [
-					{        		 
-					    xtype: 'label',
-					    docked: 'right',
-					    html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
-					}
+
 			       ]
 		
 		}, {

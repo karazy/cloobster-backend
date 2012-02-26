@@ -2,6 +2,8 @@ package net.eatsense.representation;
 
 import java.util.Date;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import net.eatsense.domain.PaymentMethod;
 
 public class BillDTO {
@@ -9,6 +11,9 @@ public class BillDTO {
 	private PaymentMethod paymentMethod;
 	private Date time;
 	private Float total;
+	@JsonIgnore
+	private String billnumber;
+	
 	public Long getId() {
 		return id;
 	}
@@ -33,4 +38,13 @@ public class BillDTO {
 	public void setTotal(Float total) {
 		this.total = total;
 	}
+	
+	public String getBillnumber() {
+		return billnumber;
+	}
+	public void setBillnumber(String billnumber) {
+		this.billnumber = billnumber;
+	}
+	
+	
 }

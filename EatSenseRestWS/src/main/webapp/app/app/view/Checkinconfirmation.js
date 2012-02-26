@@ -18,11 +18,6 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 					text : i18nPlugin.translate('cancel'),
 					ui : 'back'
 				} ,
-				{        		 
-		            xtype: 'label',
-		            docked: 'right',
-		            html: '<img src="../app/res/images/eatSenseLogo.png" width="50" height="50"></img>',  	        
-        		}
 			]
 		}, {
 			xtype : 'panel',

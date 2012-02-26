@@ -20,19 +20,17 @@ Ext.define('EatSense.controller.Menu', {
         	prodDetailBackBt :'#prodDetailBackBt' ,	   
         	amountSpinner : 'menu panel panel #productAmountSpinner',
         	cartview : 'cartview',
-//        	cartBt : '#menuBottomBar #menuCartBt',
-//        	cartBt : '#carttab',
         	menuview: 'menu',
         	productcomment: '#productComment',
         	//#menutap #menu
-        	createOrderBt :'menu #menuCardPanel #menuProductDetail #prodDetailcartBt',
-        	backBt: 'menu #menuTopBar #menuBackBt',
+//        	createOrderBt :'menu #menuCardPanel #menuProductDetail #prodDetailcartBt',
+        	createOrderBt :'menu #menuTopBar #productCartBt',
+        	backBt: 'menu button[action=back]',
         	topToolbar: 'menu #menuTopBar',
         	bottomTapToMenu : '#menuBottomBar #bottomTapToMenu',
         	loungeview: 'lounge',
         	loungeTabBar: '#loungeTabBar',
         	myordersview: '#myorderstab #myorders',
-//        	bottomTapUndo : '#menuBottomBar #bottomTapUndo'
 		}
     },
     init: function() {
@@ -53,9 +51,6 @@ Ext.define('EatSense.controller.Menu', {
              createOrderBt : {
             	 tap: this.createOrder
              },
-//             cartBt : {
-//            	 tap: this.showCart
-//             },
              bottomTapToMenu : {
             	 tap: this.showMenu
              },
@@ -67,12 +62,10 @@ Ext.define('EatSense.controller.Menu', {
             		 }
             	 }
              },
-//             bottomTapUndo : {
-//            	 tap: this.undoOrder
-//             },
              amountSpinner : {
             	 spin: this.amountChanged
              },
+             //TODO refactor general loungeview control into another controller?!
              loungeview : {
      			activeitemchange : function(container, value, oldValue, opts) {
     				console.log('tab change');
@@ -80,17 +73,26 @@ Ext.define('EatSense.controller.Menu', {
     				if(value.getItemId() === 'carttab') {
     					status = this.getApplication().getController('Order').refreshCart();
     				} else if (value.getItemId() === 'myorderstab') {
-    					this.getMyordersview().showLoadScreen(true);
+//    					this.getMyordersview().showLoadScreen(true);
     					this.getApplication().getController('Order').refreshMyOrdersList();
     				}
     				
-    				if(status === false) {
+    				if(status === false) { //TODO not used currently, status always true
     					    this.getLoungeview().setActiveItem(oldValue);					
     				}
     				
     				return status;
     			}
     		},
+    		
+    		productdetail: {
+    			show: function() {
+    				this.getCreateOrderBt().show();
+    			},
+    			hide: function() {
+    				this.getCreateOrderBt().hide();
+    			}
+    		}
         });
     	 
     	 //store retrieved models
@@ -105,17 +107,19 @@ Ext.define('EatSense.controller.Menu', {
     	console.log("Menu Controller -> showProductlist");
     	var pov = this.getProductoverview(),
     	prodStore = record.productsStore;
+    	
     	this.models.activeMenu = record;
     	this.getProductlist().setStore(prodStore);
     	this.getMenulist().refresh();
     	this.menuBackBtContext = this.showMenu;
-    	this.switchView(pov, Karazy.util.shorten(record.data.title,10,true), i18nPlugin.translate('back'), 'left');
+    	this.switchView(pov, record.data.title, i18nPlugin.translate('back'), 'left');
     },
     /**
      * Shows the menu. At this point the store is already filled with data.
      */
 	showMenu : function() {				
 		console.log("Menu Controller -> showMenu");
+	
 		 this.menuBackBtContext = null;
 		 this.switchView(this.getMenuoverview(), i18nPlugin.translate('menuTitle'), null, 'right');
 	},
@@ -150,10 +154,13 @@ Ext.define('EatSense.controller.Menu', {
 	 * @param record
 	 */
 	showProductDetail: function(dataview, record) {
-		console.log("Menu Controller -> showProductDetail");		
-		 var detail = this.getProductdetail(), main = this.getMain(), menu = this.getMenuview(), choicesWrapper = this.getProductdetail().getComponent('choicesWrapper'), choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel');
+		console.log("Menu Controller -> showProductDetail");		//.getComponent('choicesWrapper')
+		 var detail = this.getProductdetail(), 
+		 main = this.getMain(), 
+		 menu = this.getMenuview(), 
+		 choicesPanel =  this.getProductdetail().getComponent('choicesPanel');		 
 
-		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
+		 choicesPanel.removeAll(false);
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(1);
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmountSpinner().getValue()});
@@ -220,9 +227,10 @@ Ext.define('EatSense.controller.Menu', {
 			value: ''
 			}
 		);
+		 
 		 this.menuBackBtContext = this.backToProductOverview;
-
-		 this.switchView(detail, Karazy.util.shorten(record.data.name, 10, true), i18nPlugin.translate('back'), 'left');
+//Karazy.util.shorten(
+		 this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
@@ -239,12 +247,12 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	backToProductOverview: function(message) {
 		console.log("Menu Controller -> backToProductOverview");
-//		this.models.activeProduct.choices().each(function(choice) {
-//			choice.resetOptions();
-//		});
+		var pov = this.getProductoverview();
+
 		this.models.activeProduct = null;
-		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
-		var pov = this.getProductoverview();	
+
+		this.getProductdetail().getComponent('choicesPanel').removeAll(false);
+			
 		this.menuBackBtContext = this.showMenu;
 		this.switchView(pov, this.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
 		if (message) {
@@ -286,8 +294,8 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('status','CART');
 			productForCart.getData(true);
 			order.setProduct(productForCart);
-			//comment field needed
-			order.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
+			//comment field needed //.getComponent('choicesWrapper')
+			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
 			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);

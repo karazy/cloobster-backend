@@ -78,7 +78,7 @@ Ext.define('EatSense.view.Cart', {
 			{
 				xtype: 'productdetail',
 				itemId : 'cartProductdetail',
-				layout: 'fit'
+				layout: 'vbox'
 			}			        
 			]
 			

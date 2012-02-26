@@ -13,7 +13,8 @@ Ext.define('EatSense.controller.Order', {
 			cancelOrderBt : '#cartTopBar #bottomTapCancel',
 			submitOrderBt : '#cartTopBar #bottomTapOrder',
 			topToolbar : '#cartTopBar',
-			productdetail : '#cartCardPanel #cartProductdetail',						
+			productdetail : '#cartCardPanel #cartProductdetail',	
+			choicespanel : '#cartCardPanel #cartProductdetail #choicesPanel',
 			editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
 			amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
 			prodDetailLabel :'#cartCardPanel #cartProductdetail #prodDetailLabel' ,	
@@ -57,10 +58,7 @@ Ext.define('EatSense.controller.Order', {
             	 spin: this.amountChanged
              },
              paymentButton: {
-            	 tap: this.choosePaymentMethod,            	 
-            	 'myOrdersLoaded': function() {
-            		 console.log('custom EVENT');
-            	 }
+            	 tap: this.choosePaymentMethod,            	             	 
              }
 		 });
 		
@@ -328,11 +326,11 @@ Ext.define('EatSense.controller.Order', {
 	showOrderDetail: function(dataview, order) {
 		console.log("Cart Controller -> showProductDetail");		
 		 var detail = this.getProductdetail(), 
-		 choicesPanel =  this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel'),
+		 choicesPanel =  this.getChoicespanel(),
 		 product = order.getProduct();
 		 this.models.activeOrder = order;
 
-		this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').removeAll(false);
+		 choicesPanel.removeAll(false);
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(order.get('amount'));
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
@@ -415,7 +413,7 @@ Ext.define('EatSense.controller.Order', {
 			}
 		});
 		
-		this.models.activeOrder.set('comment', this.getProductdetail().getComponent('choicesWrapper').getComponent('choicesPanel').getComponent('productComment').getValue());
+		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());
 		
 		if(productIsValid) {
 			this.refreshCart();
@@ -484,13 +482,14 @@ Ext.define('EatSense.controller.Order', {
 		var myorderlist = this.getMyorderlist(),
 		orderStore = Ext.data.StoreManager.lookup('orderStore'),
 		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
+		payButton = this.getPaymentButton();
 		me = this;
 		
 		//TODO investigate if this is a bug
 		orderStore.removeAll();
 //		myorderlist.getStore().removeAll();
 		
-		myorderlist.getStore().load({
+		orderStore.load({
 			scope   : this,
 			params : {
 				'checkInId' : checkInId,				
@@ -498,10 +497,19 @@ Ext.define('EatSense.controller.Order', {
 			callback: function(records, operation, success) {
 				try {
 					if(success == true) {
+						(records.length > 0) ? payButton.enable() : payButton.disable();
+						
+						//WORKAROUND to make sure all data is available in data property
+						//otherwise nested choices won't be shown
+						Ext.each(records, function(order) {
+							order.getProduct().getData(true);
+						});
 						//refresh the order list
 						total = me.calculateOrdersTotal(orderStore);
 						myorderlist.refresh();
 						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, [total]);
+					} else {
+						payButton.disable();
 					}	
 				} catch(e) {
 					
@@ -540,12 +548,12 @@ Ext.define('EatSense.controller.Order', {
 		console.log('Order Controller -> choosePaymentMethod');
 		var availableMethods = this.getApplication().getController('CheckIn').models.activeSpot.payments(),
 		orderCount = this.getMyorderlist().getStore().getCount(),
+		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
 		picker,
 		choosenMethod,
-		me = this,
-		dummyStore = Ext.data.StoreManager.lookup('paymentMethodStore');
+		me = this;
 		
-		if(orderCount>0) {
+		if(orderCount>0 && checkIn.get('status') !== 'PAYMENT_REQUEST' && checkIn.get('status') !== 'COMPLETE') {
 			//create picker
 			picker = Ext.create('Ext.Picker', {
 				doneButton: {
@@ -573,7 +581,7 @@ Ext.define('EatSense.controller.Order', {
 			        	 valueField: 'name',
 			             displayField: 'name',
 			            title: i18nPlugin.translate('paymentPickerTitle'),
-			            store: dummyStore
+			            store: availableMethods
 			        }
 			    ]
 			});
@@ -594,9 +602,11 @@ Ext.define('EatSense.controller.Order', {
 	 */
 	paymentRequest: function(paymentMethod) {
 		var bill = Ext.create('EatSense.model.Bill'),
+		checkInCtr = this.getApplication().getController('CheckIn'),
 		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn;		
 		bill.set('paymentMethod', paymentMethod);
-		
+		//workaround
+		bill.setId('');
 		//TODO show load mask to prevent users from issuing orders?!
 		
 		bill.save({
@@ -606,9 +616,12 @@ Ext.define('EatSense.controller.Order', {
 			},
 			success: function(record, operation) {				
 				checkIn.set('status', 'PAYMENT_REQUEST');
+				checkInCtr.fireEvent('statusChanged', 'PAYMENT_REQUEST');
 			},
 			failure: function(record, operation) {
 				if(operation.getError() != null && operation.getError().status == 404) {
+					Ext.Msg.alert(i18nPlugin.translate('errorTitle'), operation.getError().statusText, Ext.emptyFn);
+				} else if(operation.getError() != null && operation.getError().status == 500) {
 					Ext.Msg.alert(i18nPlugin.translate('errorTitle'), operation.getError().statusText, Ext.emptyFn);
 				}
 				

@@ -6,13 +6,14 @@ Ext.define('EatSense.view.ProductDetail', {
 	xtype : 'productdetail',	
 	layout : {
 		type : 'vbox',
-		align : 'middle'
+		align : 'stretch'
 	},
 	config : {
+    	scrollable : 'vertical',
 		items : [
 		{
 			xtype : 'panel',
-			docked : 'top',
+//			docked : 'top',
 			style : 'background-image: -webkit-linear-gradient(bottom, rgb(53,127,184) 4%, rgb(26,214,214) 87%);border-bottom:5px;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px; padding: 10px',
 			layout : {
 				type : 'vbox',
@@ -50,45 +51,34 @@ Ext.define('EatSense.view.ProductDetail', {
 					cycle : true,
 				},
 //				{
-//					xtype: 'picker',
-//					cancelButton: false,
-//					slots: [
-//					        {
-//					        	title: 'amount',
-//					        	name: 'amount',
-//					            data : [
-//					                {text: '1', value: 1},
-//					                {text: '2', value: 2},
-//					                {text: '3', value: 3},
-//					                {text: '4', value: 4}
-//					            ]
-//					        }
-//					],					
+//					xtype: 'spacer',
+//					width: 20
 //				},
-				{
-					xtype: 'spacer',
-					width: 20
-				},
-				{
-					xtype : 'button',
-					itemId : 'prodDetailcartBt',
-					iconCls : 'compose',
-					iconMask : true,
-				} ]
+//				{
+//					xtype : 'button',
+//					itemId : 'prodDetailcartBt',
+//					iconCls : 'compose',
+//					iconMask : true,
+//				} 
+				]
 			} ]
-		}, {
-			xtype : 'panel',
-			itemId : 'choicesWrapper',
-			layout : {
-				type: 'fit'
-			},
-			items : [
-				{
+		}, 
+		{
+//			xtype : 'panel',
+//			itemId : 'choicesWrapper',
+//			height: '200px',
+//			layout : {
+//				type: 'fit'
+//			},
+//			items : [
+//				{
 					xtype : 'formpanel',
 					itemId : 'choicesPanel',
-					scrollable : 'vertical'
-				}				
-			]
+					layout: 'vbox',
+					minHeight: '200px',
+					scrollable : false,
+//				}				
+//			]
 		}
 		]		
 	}

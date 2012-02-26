@@ -38,6 +38,7 @@ var translation = {
 		"orderComment" : "Optionaler Kommentar",
 		"amount" : "Menge",
 		"orderSubmit" : "Bestellung abgeschickt ...<br/> Guten Appetit!",
+		"productCartBt" : "In den Warenkorb",
 		//Cart
 		"cartviewTitle" : "Warenkorb",
 		"cartTabBt" : "Warenkorb",
@@ -50,7 +51,7 @@ var translation = {
 		"loungeviewTitle" : "Die Lounge",
 		//MyOrders
 		"myOrdersTitle" : "Bestellübersicht",
-		"myOrdersTabBt" : "Übersicht",
+		"myOrdersTabBt" : "Kasse",
 		"payRequestButton" : "Bezahlen",
 		//Payment Request
 		"paymentPickerTitle" : "Bezahlmethode"

@@ -16,10 +16,14 @@ Ext.define('EatSense.model.Spot', {
 			name : 'name',
 			type : 'string'
 		} ],
-		hasMany : {
-			model : 'EatSense.model.PaymentMethod',
-			name : 'payments'
-		},
+		 associations: [{
+	            type: 'hasMany',
+	            model: 'EatSense.model.PaymentMethod',
+	            primaryKey: 'id',
+	            name: 'payments',
+	            //autoLoad: true,
+	            associationKey: 'payments' // read child data from child_groups
+	        }],
 		proxy : {
 			type : 'rest',
 			url : '/spots/',

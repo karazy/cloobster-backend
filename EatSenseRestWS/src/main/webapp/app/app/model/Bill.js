@@ -1,6 +1,5 @@
 /**
  * A bill.
- * Gets 
  */
 Ext.define('EatSense.model.Bill', {
 	extend : 'Ext.data.Model',
@@ -16,8 +15,13 @@ Ext.define('EatSense.model.Bill', {
 			name : 'paymentMethod',
 			type : 'string'
 		}, {
-			name : 'totalPrice,',
-			type : 'number'
+			name : 'total',
+			type : 'number',
+			defaultValue: 0
+		}, {
+			name : 'time',
+			type : 'date',
+			dateFormat : 'time'
 		} ]
 	}
 });

@@ -113,7 +113,7 @@ public class RestaurantResource{
 	@GET
 	@Path("{restaurantId}/orders")
 	@Produces("application/json; charset=UTF-8")
-	public Collection<OrderDTO> getOrder(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId) {
+	public Collection<OrderDTO> getOrders(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId) {
 		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(restaurantId, checkInId);
 		return orders;
 	}

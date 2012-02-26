@@ -19,12 +19,7 @@ Ext.define('EatSense.view.MyOrders', {
 				xtype: 'button',
 				text: i18nPlugin.translate('payRequestButton'),
 				itemId: 'payRequestBt',
-				ui: 'forward',
-				listeners: {
-					myOrdersLoaded: function() {
-	            		 console.log('custom EVENT');
-	            	 }					
-				}
+				ui: 'forward'
 			}
 			]
 		},
