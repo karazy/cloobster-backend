@@ -21,8 +21,7 @@ Ext.define('EatSense.view.Lounge', {
 		}, {
 			title : i18nPlugin.translate('cartTabBt'),
 			itemId : 'carttab',
-			iconCls : 'organize',
-//			icon: '../app/res/images/cart.png',
+			iconCls : 'cart',
 			layout : 'fit',
 			items : [ {
 				xtype : 'cart',
