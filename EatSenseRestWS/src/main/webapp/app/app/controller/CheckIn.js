@@ -30,7 +30,10 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	checkinDlg2Userlist: '#checkinDlg2Userlist',
     	        	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
     	        	cancelCheckInBt : '#cancelCheckInBt',
-    	        	regenerateNicknameBt : '#regenerateNicknameBt'
+    	        	regenerateNicknameBt : '#regenerateNicknameBt',
+    	        	menuTab: '#menutab',
+    	        	cartTab: '#carttab'
+    	        		
     	        }    	
     },
     init: function() {
@@ -440,6 +443,16 @@ Ext.define('EatSense.controller.CheckIn', {
 	
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
+		//TODO check status transsions
+		
+		
+		if(status == Karazy.constants.PAYMENT_REQUEST) {
+			this.getMenuTab().disable();
+			this.getCartTab().disable();
+		}
+		
+		this.models.activeCheckIn.set('status', status);		
+		
 	}
 
 });

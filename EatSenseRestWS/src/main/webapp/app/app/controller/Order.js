@@ -605,7 +605,7 @@ Ext.define('EatSense.controller.Order', {
 		checkInCtr = this.getApplication().getController('CheckIn'),
 		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn;		
 		bill.set('paymentMethod', paymentMethod);
-		//workaround
+		//workaround to prevent sencha from sending phantom id
 		bill.setId('');
 		//TODO show load mask to prevent users from issuing orders?!
 		
@@ -614,9 +614,9 @@ Ext.define('EatSense.controller.Order', {
 			params: {
 				'checkInId' : checkIn.getId()
 			},
-			success: function(record, operation) {				
-				checkIn.set('status', 'PAYMENT_REQUEST');
-				checkInCtr.fireEvent('statusChanged', 'PAYMENT_REQUEST');
+			success: function(record, operation) {
+					this.models.activeBill = record;
+					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);				
 			},
 			failure: function(record, operation) {
 				if(operation.getError() != null && operation.getError().status == 404) {
