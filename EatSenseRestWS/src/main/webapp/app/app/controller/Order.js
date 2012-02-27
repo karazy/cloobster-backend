@@ -9,9 +9,9 @@ Ext.define('EatSense.controller.Order', {
 			myordersTotal : 'myorders #myorderstotalpanel label',
 			menutab: '#menutab',
 			orderlist : '#cartCardPanel #orderlist',
-			backBt : '#cartTopBar #cartBackBt',
-			cancelOrderBt : '#cartTopBar #bottomTapCancel',
-			submitOrderBt : '#cartTopBar #bottomTapOrder',
+			backBt : '#cartTopBar button[action="back"]',
+			cancelOrderBt : '#cartTopBar button[action="trash"]',
+			submitOrderBt : '#cartTopBar button[action="order"]',
 			topToolbar : '#cartTopBar',
 			productdetail : '#cartCardPanel #cartProductdetail',	
 			choicespanel : '#cartCardPanel #cartProductdetail #choicesPanel',
@@ -603,7 +603,8 @@ Ext.define('EatSense.controller.Order', {
 	paymentRequest: function(paymentMethod) {
 		var bill = Ext.create('EatSense.model.Bill'),
 		checkInCtr = this.getApplication().getController('CheckIn'),
-		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn;		
+		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+		me = this;		
 		bill.set('paymentMethod', paymentMethod);
 		//workaround to prevent sencha from sending phantom id
 		bill.setId('');
@@ -615,7 +616,7 @@ Ext.define('EatSense.controller.Order', {
 				'checkInId' : checkIn.getId()
 			},
 			success: function(record, operation) {
-					this.models.activeBill = record;
+					me.models.activeBill = record;
 					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);				
 			},
 			failure: function(record, operation) {

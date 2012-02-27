@@ -6,6 +6,7 @@ Ext.define('EatSense.view.CartOverview', {
 		{
 			xtype: 'list',
 			itemId: 'orderlist',
+			ui: 'round',
 			styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,

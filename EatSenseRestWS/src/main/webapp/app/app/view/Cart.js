@@ -9,61 +9,32 @@ Ext.define('EatSense.view.Cart', {
 		items : [ 
 		          {
 			docked : 'top',
-			xtype : 'toolbar',
+			xtype : 'titlebar',
 			itemId: 'cartTopBar',
 			title : i18nPlugin.translate('cartviewTitle'),
 			items : [ {
 				xtype : 'button',
 				itemId : 'cartBackBt',
 				text : i18nPlugin.translate('back'),
-				ui : 'back'
+				action : 'back',
+				ui : 'back',
+				align: 'left'
 			},
 			{
 				xtype: 'button',
-			    title: 'Cancel',
+				action: 'trash',
 			    iconCls: 'trash',
-			    itemId: 'bottomTapCancel',
-			    iconMask: true
-			},
-			{
-				xtype: 'spacer',
-				itemId: 'topTabSpacer'
+			    iconMask: true,
+			    align: 'left'
 			},
 			{
 				xtype: 'button',
-			    title: 'Send',
+				action: 'order',
 			    text: i18nPlugin.translate('submitButton'),
-//			    iconCls: 'action',
-			    itemId: 'bottomTapOrder',
-//			    iconMask: true,
-			    ui: 'forward'
+			    ui: 'forward',
+			    align: 'right'
 			}]
 		}, 
-//		{
-//			docked : 'bottom',
-//			xtype : 'panel',
-//			itemId : 'cartBottomBar',
-//			layout: {
-//				type: 'hbox',
-//				pack : 'center'
-//			},
-//			items: [
-//				{
-//					xtype: 'button',
-//				    title: 'Cancel',
-//				    iconCls: 'trash',
-//				    itemId: 'bottomTapCancel',
-//				    iconMask: true
-//				},
-//				{
-//					xtype: 'button',
-//				    title: 'Send',
-//				    iconCls: 'action',
-//				    itemId: 'bottomTapOrder',
-//				    iconMask: true
-//				}
-//			        ]
-//		},
 		{
 			xtype: 'panel',
 			itemId: 'cartCardPanel',
@@ -106,11 +77,13 @@ Ext.define('EatSense.view.Cart', {
 	 * Hides the back button in top toolbar.
 	 */
 	hideBackButton: function() {
-		this.getComponent('cartTopBar').getComponent('cartBackBt').hide();
+		var backBt = this.down('#cartTopBar button[action="back"]'),
+		trashBt = this.down('#cartTopBar button[action="trash"]'),
+		orderBt = this.down('#cartTopBar button[action="order"]');
 		
-		this.getComponent('cartTopBar').getComponent('bottomTapCancel').show();
-		this.getComponent('cartTopBar').getComponent('topTabSpacer').show();
-		this.getComponent('cartTopBar').getComponent('bottomTapOrder').show();
+		backBt.hide();
+		trashBt.show();
+		orderBt.show();
 	},
 	/**
 	 * Shows the back button in top toolbar.
@@ -118,12 +91,14 @@ Ext.define('EatSense.view.Cart', {
 	 * 		Label to display on button.
 	 */
 	showBackButton: function(text) {
-		this.getComponent('cartTopBar').getComponent('cartBackBt').setText(text);
-		this.getComponent('cartTopBar').getComponent('cartBackBt').show();
+		var backBt = this.down('#cartTopBar button[action="back"]'),
+		trashBt = this.down('#cartTopBar button[action="trash"]'),
+		orderBt = this.down('#cartTopBar button[action="order"]');
 		
-		this.getComponent('cartTopBar').getComponent('bottomTapCancel').hide();
-		this.getComponent('cartTopBar').getComponent('topTabSpacer').hide();
-		this.getComponent('cartTopBar').getComponent('bottomTapOrder').hide();
+		backBt.setText(text);
+		backBt.show();
+		trashBt.hide();
+		orderBt.hide();
 	},
 	/**
 	 * Show a loading screen

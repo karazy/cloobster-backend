@@ -23,8 +23,6 @@ Ext.define('EatSense.view.Menu', {
 //				text: i18nPlugin.translate('productCartBt'),
 				itemId : 'productCartBt',
 				ui: 'confirm',
-//				height: '40px',
-//				width: '40px',
 				icon: '../app/res/images/into_cart.png',
 				iconAlign: 'centered',
 				hidden: true,

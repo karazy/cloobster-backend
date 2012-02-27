@@ -41,11 +41,12 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 				html: i18nPlugin.translate('checkInStep2Label2')
 			}, 
 			{
-				xtype : 'list',
+				xtype : 'list',				
 				id : 'checkinDlg2Userlist',
 				flex: 6,
 				type: 'fit',
-				width: '100%',				
+				width: '100%',	
+				ui: 'round',
 				itemTpl: '<div><strong>{nickname}</strong></div>'
 				
 			}, {

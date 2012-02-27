@@ -135,18 +135,7 @@ Ext.define('EatSense.controller.Menu', {
 			});
 		});
 		this.models.activeProduct = record.copy();
-//		this.models.activeProduct = record.deepCopy();
 		this.showProductDetail(dataview, this.models.activeProduct);
-//		var _id = record.get('id'), _rId = this.getApplication().getController('CheckIn').models.activeCheckIn.data.restaurantId;
-
-		//BUG
-//		Ext.ModelManager.getModel('EatSense.model.Product').load(_id, {
-//			scope: this,
-//			success: function(product, operation) {
-//				this.models.activeProduct = product;
-//				this.showProductDetail(dataview, this.models.activeProduct);
-//			}
-//		});
 	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
@@ -229,7 +218,6 @@ Ext.define('EatSense.controller.Menu', {
 		);
 		 
 		 this.menuBackBtContext = this.backToProductOverview;
-//Karazy.util.shorten(
 		 this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
 	},
 	/**

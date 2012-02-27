@@ -26,6 +26,7 @@ Ext.define('EatSense.view.MyOrders', {
 		{
 			xtype: 'list',
 			id: 'myorderlist',
+			ui: 'round',
 			styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
