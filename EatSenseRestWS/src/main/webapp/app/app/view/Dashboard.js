@@ -36,7 +36,9 @@ Ext.define('EatSense.view.Dashboard', {
             xtype: 'button',
            	id: 'checkInBtn',
             text: i18nPlugin.translate('checkInButton'),
-            ui: 'normal'
+            ui: 'action',
+            height: '100px',
+            width: '100px'
             },
             {
                 xtype: 'textfield',
@@ -46,12 +48,16 @@ Ext.define('EatSense.view.Dashboard', {
                 name: 'barcodeTF',
                 hidden: (profile == 'phone' && window.plugins.barcodeScanner)? true : false
             },
-            {
-            xtype: 'button',
-           	itemId: 'settingsBtn',
-            text: i18nPlugin.translate('settingsButton'),
-            ui: 'normal',
-            }
+//            {
+//            xtype: 'button',
+//           	itemId: 'settingsBtn',
+//            text: i18nPlugin.translate('settingsButton'),
+//           	iconCls: 'settings',
+//           	iconMask: true,
+//            ui: 'normal',
+//            height: '100px',
+//            width: '100px'
+//            }
             ]
         }]
     },

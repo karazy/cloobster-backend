@@ -28,12 +28,6 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 				
 			},
 			items : [
-//			         {
-//				xtype : 'label',
-//				id : 'checkInDlg2Label1',
-//				styleHtmlContent: true, 
-//				html : i18nPlugin.translate('checkInStep2Label1')
-//			}, 
 			{
 				xtype: 'label',
 				id : 'checkInDlg2Label2',
@@ -47,13 +41,20 @@ Ext.define('EatSense.view.CheckinWithOthers', {
 				type: 'fit',
 				width: '100%',	
 				ui: 'round',
-				itemTpl: '<div><strong>{nickname}</strong></div>'
+				itemTpl: '<div><strong>{nickname}</strong></div>',
+				listeners : {
+					select : function(dv, index, target, record, e, eOpts) {					
+						Ext.defer((function() {
+							dv.deselectAll();
+						}), 100, this);					
+					}
+				}
 				
 			}, {
 				xtype : 'button',
 				id : 'checkinDlg2CancelBt',
 				text : i18nPlugin.translate('checkInStep2OnMyOwnButton'),
-				ui : 'normal'
+				ui : 'action'
 			}]
 		} ]
     }

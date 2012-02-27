@@ -8,18 +8,17 @@ Ext.define('EatSense.view.MyOrders', {
 		items: [
 		{
 			docked : 'top',
-			xtype : 'toolbar',
+			xtype : 'titlebar',
 			itemId: 'myOrdersTopBar',
 			title : i18nPlugin.translate('myOrdersTitle'),
 			items : [
 			{
-				xtype: 'spacer'
-			},
-			{
 				xtype: 'button',
 				text: i18nPlugin.translate('payRequestButton'),
 				itemId: 'payRequestBt',
-				ui: 'forward'
+				ui: 'forward',
+				action: 'pay',
+				align: 'right'
 			}
 			]
 		},
@@ -69,10 +68,10 @@ Ext.define('EatSense.view.MyOrders', {
 				}
 			}),
 			listeners: {
-				itemtap: function(dv, ix, item, e) {
+				select: function(dv, ix, item, e) {
 					Ext.defer((function() {
 						dv.deselect(ix);
-	    			}), globalConf.msgboxHideTimeout, this);					
+	    			}), 100, this);					
 				}
 			}
 		}, {

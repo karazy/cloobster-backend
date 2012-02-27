@@ -47,7 +47,14 @@ Ext.define('EatSense.view.CartOverview', {
 					
 					return result;
 				}
-			})
+			}),
+			listeners : {
+				select : function(dv, index, target, record, e, eOpts) {					
+					Ext.defer((function() {
+						dv.deselectAll();
+					}), 100, this);					
+				}
+			}
 		}, {
 			type: 'panel',
 			docked: 'bottom',

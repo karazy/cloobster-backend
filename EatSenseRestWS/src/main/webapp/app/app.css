@@ -1,5 +1,27 @@
 @CHARSET "UTF-8";
 
+.productListItem h2{
+	float: left; 
+	width: 70%; 
+	margin: 0;
+}
+
+.productListItem div.price {
+	position: absolute; 
+	right: 0; 
+	top: 50%; 
+	width: 30%; 
+	text-align: right; 
+	padding-right: 10px;
+	font-size: 1em;	
+}
+
+.productListItem div p {
+	font-size: 0.6em;
+	clear: both;
+}
+
+
 .x-tab .x-button-icon.cart{
     -webkit-mask-image: url('res/images/cart.png');
 }  

@@ -14,14 +14,16 @@ Ext.define('EatSense.view.ProductOverview', {
 			type : 'fit',
 			allowDeselect : true,
 			itemTpl : "<div class='productListItem'>" +
-					"<h2 style='float: left; width: 80%; margin: 0;'>{name}</h2>  " +
-					"<div style='position: absolute; right: 0; top: 50%; width: 20%; text-align: right; padding-right: 10px;'>{price}€</div>" +
+					"<h2>{name}</h2>  " +
+					"<div class='price'>{price}€</div>" +
 					"<div style='clear: both;'></div>"+
-					"<p style='clear: both;'>{shortDesc}</p>"+
+					"<p>{shortDesc}</p>"+
 					"</div>",
 			listeners : {
-				itemtap : function(dv, ix, item, e) {					
-					dv.deselect(ix);
+				select : function(dv, index, target, record, e, eOpts) {					
+					Ext.defer((function() {
+						dv.deselectAll();
+					}), 100, this);					
 				}
 			}
 		} ]

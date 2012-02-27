@@ -18,8 +18,10 @@ Ext.define('EatSense.view.MenuOverview', {
 			allowDeselect: true,
 			itemTpl : '<div>{title}</div>',
 			listeners: {
-				itemtap: function(dv, ix, item, e) {
-					dv.deselect(ix);
+				select : function(dv, index, target, record, e, eOpts) {					
+					Ext.defer((function() {
+						dv.deselectAll();
+					}), 100, this);					
 				}
 			}
 			

@@ -24,7 +24,8 @@ Ext.define('EatSense.controller.Order', {
 			myordersview: '#myorderstab #myorders',
 			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar',
-			paymentButton: '#myorderstab #myorders #myOrdersTopBar #payRequestBt'
+			//#myorders #myOrdersTopBar 
+			paymentButton: '#myorderstab button[action="pay"]'
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order

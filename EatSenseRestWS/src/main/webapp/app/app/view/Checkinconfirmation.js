@@ -59,13 +59,15 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 						id: 'regenerateNicknameBt',
 						iconCls: 'refresh',
 					    iconMask: true,
-					    style : 'margin-right:10px;'
+					    style : 'margin-right:10px;',
+					    ui: 'action'
 					},					
 					{
 						xtype : 'button',
 						id : 'confirmCheckInBt',
 						text : i18nPlugin.translate('checkInStep1Button'),
-						ui : 'normal'
+						ui : 'normal',
+						 ui: 'action'
 					}
 				]
 			}								
