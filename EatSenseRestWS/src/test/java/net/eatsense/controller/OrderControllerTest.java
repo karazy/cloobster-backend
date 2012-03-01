@@ -200,4 +200,79 @@ public class OrderControllerTest {
 		assertThat(orders.isEmpty(), is(true));
 	}
 	
+	@Test public void testGetOrdersWithStatus() {
+		// Do a checkin ...
+		CheckInDTO checkIn = new CheckInDTO();
+		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
+		checkIn.setNickname("PlaceOrderTest");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn.setSpotId("serg2011");
+		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
+		checkIn.setRestaurantId(spotDto.getRestaurantId());
+		
+		
+		assertThat(checkIn.getUserId(), notNullValue());
+		
+				
+		// Should be checked in
+		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
+		
+		// Get a product from the store.
+		Product frites = pr.getByProperty("name", "Pommes Frites");
+		OrderDTO orderDto = new OrderDTO();
+		orderDto.setAmount(1);
+		orderDto.setComment("I like fries!");
+		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setStatus(OrderStatus.CART);
+		
+		//#1 Place a simple order without choices...
+		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		assertThat(orderId, notNullValue());
+		
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		
+		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrder.getOrderTime(), notNullValue());
+		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
+		
+		
+		//#2 Place an order with choices
+		Product burger = pr.getByProperty("name", "Classic Burger");
+		ProductDTO burgerDto = transform.productToDto(burger);
+		
+		ProductOption selected = burgerDto.getChoices().iterator().next().getOptions().iterator().next();
+		selected.setSelected(true);
+		
+		orderDto.setId(null);
+		orderDto.setAmount(2);
+		orderDto.setProduct(burgerDto);
+		orderDto.setComment("I like my burger " + selected.getName());
+		
+		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		assertThat(orderId, notNullValue());
+		
+		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		
+		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrder.getOrderTime(), notNullValue());
+		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+			for (ProductOption option : orderChoice.getOptions()) {
+				if(option.getName() == selected.getName() )
+					assertThat(option.getSelected(), equalTo(true));
+			}
+		}
+		//#3 Check "getOrders"
+		
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(checkIn.getRestaurantId(), checkIn.getUserId(), "CART");
+		assertThat(orders, notNullValue());
+		assertThat(orders.size(), equalTo(2));
+		for (OrderDTO dto : orders) {
+			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
+		}
+	}
+	
 }
