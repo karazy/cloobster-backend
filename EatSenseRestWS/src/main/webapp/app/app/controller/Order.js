@@ -193,7 +193,8 @@ Ext.define('EatSense.controller.Order', {
 						console.log('save order' + order.getProduct().get('name'));
 						
 						if(!errorIndicator) {
-					
+							order.set('status',Karazy.constants.Order.PLACED);
+							
 							Ext.Ajax.request({				
 					    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/'+order.getId(),
 					    	    method: 'PUT',    	    
@@ -204,10 +205,7 @@ Ext.define('EatSense.controller.Order', {
 					    	    scope: this,
 					    	    success: function(response) {
 					    	    	console.log('Saved order checkin.');
-					    	    	ajaxOrderCount++;
-					    	    	//set generated id
-					    	    	order.set('id', response.responseText);
-					    	    	order.set('status','PLACED');
+					    	    	ajaxOrderCount++;					    	    	
 					    	    	orders.remove(order);
 					    	    	
 					    	    	//TODO remove orders or filter them just filter them! load orders from server?
@@ -414,7 +412,7 @@ Ext.define('EatSense.controller.Order', {
 		var order = this.models.activeOrder,
 		product = this.models.activeOrder.getProduct(), 
 		validationError = "", 
-		productIsValid = true.
+		productIsValid = true,
 		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;
 		
 		product.choices().each(function(choice) {
@@ -428,7 +426,7 @@ Ext.define('EatSense.controller.Order', {
 		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
 		
 		Ext.Ajax.request({				
-    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/'+order.getId(),
+    	    url: globalConf.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/'+order.getId(),
     	    method: 'PUT',
     	    params: {
     	    	'checkInId' : activeCheckIn.get('userId'),

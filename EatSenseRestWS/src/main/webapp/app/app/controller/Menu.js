@@ -292,11 +292,14 @@ Ext.define('EatSense.controller.Menu', {
 			
 			Ext.Ajax.request({				
 	    	    url: globalConf.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/',
-	    	    method: 'PUT',    	    
+	    	    method: 'POST',    	    
 	    	    params: {
 	    	    	'checkInId' : activeCheckIn.get('userId'),
 	    	    },
-	    	    jsonData: order.getRawJsonData()
+	    	    jsonData: order.getRawJsonData(),
+	    	    success: function(response, operation) {
+	    	    	order.setId(response.responseText);
+	    	    }
 	    	});
 			
 			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);

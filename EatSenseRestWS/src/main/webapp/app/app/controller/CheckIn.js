@@ -467,22 +467,35 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * 		Restored checkin
 	 */
 	restoreState: function(checkIn) {
-		var main = this.getMain();
+		var main = this.getMain(),
+		orderCtr = this.getApplication().getController('Order');
 		
 		this.models.activeCheckIn = checkIn;
 		
-		this.getAppState().cartOrders().each(function(order) {
-			this.models.activeCheckIn.orders().add(order);
-		}, this);
+	
 		
 		//load active spot
 		EatSense.model.Spot.load(checkIn.get('spotId'), {
 		scope: this,
    		 success: function(record, operation) {
-   			 this.models.activeSpot = record;
-   			 
+   			 this.models.activeSpot = record;   			 
    			 this.showMenu();
+   			    			
    			Ext.Viewport.add(main);
+   			
+   			this.models.activeCheckIn.orders().removeAll();
+   			this.models.activeCheckIn.orders().load({
+   				scope: this,
+   				params: {
+   					'status': Karazy.constants.Order.CART,
+   					'checkInId': this.models.activeCheckIn.getId()
+   				},
+   				callback: function(records, operation, success) {
+   					if(success == true) {
+   						orderCtr.refreshCart();
+   					}
+   				}						
+   			});
     	    },
     	    failure: function(record, operation) {
     	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 404) {
@@ -494,7 +507,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	    callback: function() {
     	    	
     	    }
-		});			
+		});		
+		
+		
 	},	
 	
 //	showDashboard: function() {		
