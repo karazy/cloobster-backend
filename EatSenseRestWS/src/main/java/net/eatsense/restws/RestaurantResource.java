@@ -110,11 +110,12 @@ public class RestaurantResource{
 		return orderId.toString();
 	}
 	
+	
 	@GET
 	@Path("{restaurantId}/orders")
 	@Produces("application/json; charset=UTF-8")
-	public Collection<OrderDTO> getOrders(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId) {
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(restaurantId, checkInId);
+	public Collection<OrderDTO> getOrders(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId, @QueryParam("status") String status) {
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(restaurantId, checkInId, status);
 		return orders;
 	}
 	
@@ -123,10 +124,18 @@ public class RestaurantResource{
 	@Path("{restaurantId}/orders/{orderId}")
 	@Produces("application/json; charset=UTF-8")
 	public OrderDTO getOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId) {
-		OrderDTO order = orderCtrl.getOrder(restaurantId, orderId);
+		OrderDTO order = orderCtrl.getOrderAsDTO(restaurantId, orderId);
 		if(order== null)
 			throw new NotFoundException();
 		return order;
+	}
+	
+	@PUT
+	@Path("{restaurantId}/orders/{orderId}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public OrderDTO updateOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId, OrderDTO order) {
+		return orderCtrl.updateOrder(restaurantId, orderId, order);
 	}
 	
 	

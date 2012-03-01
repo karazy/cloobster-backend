@@ -128,7 +128,7 @@ public class BillControllerTest {
 		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrder(checkIn.getRestaurantId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -161,7 +161,7 @@ public class BillControllerTest {
 		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrder(checkIn.getRestaurantId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -177,7 +177,7 @@ public class BillControllerTest {
 		
 		//#3 Check calculateTotalPrice
 		
-		List<Order> orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId());
+		List<Order> orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId(), null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (Order order : orders) {
@@ -210,7 +210,7 @@ public class BillControllerTest {
 			assertThat(bill.getTotal(), is(11.5f));
 		}
 		// Check orders again to see if they are linked ...
-		orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId());
+		orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId(), null);
 		
 		for (Order order : orders) {
 			assertThat(order.getBill().getId(), is(billData.getId()));
