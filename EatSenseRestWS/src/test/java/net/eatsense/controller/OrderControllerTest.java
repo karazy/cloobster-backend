@@ -114,7 +114,7 @@ public class OrderControllerTest {
 		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrder(checkIn.getRestaurantId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -137,7 +137,7 @@ public class OrderControllerTest {
 		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrder(checkIn.getRestaurantId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -153,7 +153,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(checkIn.getRestaurantId(), checkIn.getUserId());
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(checkIn.getRestaurantId(), checkIn.getUserId(), null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
