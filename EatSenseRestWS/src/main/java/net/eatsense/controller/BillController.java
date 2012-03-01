@@ -32,6 +32,12 @@ import net.eatsense.representation.Transformer;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
+/**
+ * Handles creation of bills and price calculations.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class BillController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private OrderRepository orderRepo;
