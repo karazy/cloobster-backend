@@ -157,7 +157,7 @@ public class OrderControllerTest {
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
-			assertThat(dto.getStatus(), equalTo(OrderStatus.PLACED));
+			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
 		}
 	}
 	

@@ -181,7 +181,7 @@ public class BillControllerTest {
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (Order order : orders) {
-			assertThat(order.getStatus(), equalTo(OrderStatus.PLACED));
+			assertThat(order.getStatus(), equalTo(OrderStatus.CART));
 			if(order.getProduct().getId() == frites.getId()) {
 				assertThat(billCtrl.calculateTotalPrice(order), is( 1.5f));
 			}
