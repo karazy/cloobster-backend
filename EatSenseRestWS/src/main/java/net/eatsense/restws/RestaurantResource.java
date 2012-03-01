@@ -140,7 +140,6 @@ public class RestaurantResource{
 	
 	@DELETE
 	@Path("{restaurantId}/orders/{orderId}")
-	@Consumes("application/json; charset=UTF-8")
 	public void deleteOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId) {
 		orderCtrl.deleteOrder(restaurantId, orderId);
 	}

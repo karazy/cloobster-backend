@@ -1,13 +1,14 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.CheckInStatus;
+import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
@@ -159,6 +160,44 @@ public class OrderControllerTest {
 		for (OrderDTO dto : orders) {
 			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
 		}
+	}
+	
+	@Test
+	public void testDeleteOrder() {
+		// Do a checkin ...
+		CheckInDTO checkIn = new CheckInDTO();
+		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
+		checkIn.setNickname("PlaceOrderTest");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn.setSpotId("serg2011");
+		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
+		checkIn.setRestaurantId(spotDto.getRestaurantId());
+		
+		
+		assertThat(checkIn.getUserId(), notNullValue());
+		
+				
+		// Should be checked in
+		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
+		
+		// Get a product from the store.
+		Product frites = pr.getByProperty("name", "Pommes Frites");
+		OrderDTO orderDto = new OrderDTO();
+		orderDto.setAmount(1);
+		orderDto.setComment("I like fries!");
+		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setStatus(OrderStatus.CART);
+		
+		//#1 Place a simple order without choices...
+		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		assertThat(orderId, notNullValue());
+		
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		
+		orderCtrl.deleteOrder(checkIn.getRestaurantId(), placedOrder.getId());
+		
+		List<Order> orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId(), null);
+		assertThat(orders.isEmpty(), is(true));
 	}
 	
 }
