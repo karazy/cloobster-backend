@@ -70,7 +70,7 @@ public class OrderControllerTest {
 		br = injector.getInstance(SpotRepository.class);
 		or = injector.getInstance(OrderRepository.class);
 		ocr = injector.getInstance(OrderChoiceRepository.class);
-		transform = new Transformer(cr,pr,ocr);
+		transform = injector.getInstance(Transformer.class);
 		
 		
 		

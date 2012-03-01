@@ -323,6 +323,8 @@ public class CheckInController {
 	 */
 	public CheckInDTO getCheckIn(String checkInId) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);		
+		if(checkIn == null)
+			throw new NotFoundException("unknown id");
 		return transform.checkInToDto(checkIn);
 	}
 	

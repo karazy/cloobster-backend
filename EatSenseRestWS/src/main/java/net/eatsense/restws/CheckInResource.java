@@ -56,8 +56,7 @@ public class CheckInResource {
 	@Path("{checkInId}")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO getCheckIn(@PathParam("checkInId") String checkInId) {
-		
-		return null;
+		return checkInCtr.getCheckIn(checkInId);
 	}
 	
 }

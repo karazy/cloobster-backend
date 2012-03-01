@@ -201,5 +201,29 @@ public class CheckInControllerTest {
 		CheckIn checkIn = cr.getByProperty("userId", checkInData.getUserId());
 		assertThat(checkIn.getLinkedUserId(), is(checkInData2.getUserId()));
 	}
+	
+	@Test
+	public void testGetCheckIn() {
+		SpotDTO spot = ctr.getSpotInformation("b4rc0de");
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId("b4rc0de");
+		
+		assertEquals("Heidi und Paul", spot.getRestaurant());
+		assertNotNull(spot.getBarcode());
+		assertNotNull(spot.getName());
+		assertNotNull(spot.getRestaurantId());
+		
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn = ctr.createCheckIn( checkIn);
+		assertThat(checkIn, notNullValue());
+		assertThat(checkIn.getUserId(), notNullValue());
+		
+		CheckInDTO test = ctr.getCheckIn(checkIn.getUserId());
+		assertThat(checkIn, notNullValue());
+		assertThat(checkIn.getNickname(), is(test.getNickname()));
+		assertThat(checkIn.getUserId(), is(test.getUserId()));
+
+	}
 
 }

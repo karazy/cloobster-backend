@@ -13,11 +13,17 @@ import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
+import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Spot;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.SpotRepository;
 
 import com.google.inject.Inject;
+import com.googlecode.objectify.NotFoundException;
+import com.sun.jersey.api.container.MappableContainerException;
 
 /**
  * Class for transforming from/to Data Transfer Objects (DTOs)
@@ -30,14 +36,18 @@ public class Transformer {
 	private ChoiceRepository choiceRepo;
 	private ProductRepository productRepo;
 	private OrderChoiceRepository orderChoiceRepo;
+	private RestaurantRepository restaurantRepo;
+	private SpotRepository spotRepo;
 	
 	
 	@Inject
-	public Transformer(ChoiceRepository choiceRepo, ProductRepository productRepo, OrderChoiceRepository orderChoiceRepo) {
+	public Transformer(SpotRepository spotRepo, ChoiceRepository choiceRepo, ProductRepository productRepo, OrderChoiceRepository orderChoiceRepo, RestaurantRepository restaurantRepo) {
 		super();
 		this.choiceRepo = choiceRepo;
 		this.productRepo = productRepo;
 		this.orderChoiceRepo = orderChoiceRepo;
+		this.restaurantRepo = restaurantRepo;
+		this.spotRepo = spotRepo;
 	}
 	
 	public List<OrderDTO> ordersToDto(List<Order> orders ) {
@@ -185,7 +195,18 @@ public class Transformer {
 	
 	public CheckInDTO checkInToDto(CheckIn checkIn) {
 		CheckInDTO dto = new CheckInDTO();
-//		dto.set
+		dto.setDeviceId(checkIn.getDeviceId());
+		dto.setLinkedCheckInId(checkIn.getLinkedUserId());
+		dto.setNickname(checkIn.getNickname());
+		dto.setUserId(checkIn.getUserId());
+		Restaurant restaurant;
+		restaurant = restaurantRepo.getByKey(checkIn.getRestaurant());
+		dto.setRestaurantId(restaurant.getId());
+		dto.setRestaurantName(restaurant.getName());
+		dto.setStatus(checkIn.getStatus());
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		dto.setSpot(spot.getName());
+		dto.setSpotId(spot.getBarcode());
 		
 		return dto;
 	}
