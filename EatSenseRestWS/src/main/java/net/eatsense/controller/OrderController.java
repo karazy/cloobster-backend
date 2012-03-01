@@ -153,8 +153,9 @@ public class OrderController {
 		
 		
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(restaurant).filter("checkIn", checkIn.getKey());
-		if(status != null && !status.isEmpty())
-			query = query.filter("status", status);
+		if(status != null && !status.isEmpty()) {
+			query = query.filter("status", status.toUpperCase());
+		}
 		List<Order> orders = query.list();
 		
 		return orders;
