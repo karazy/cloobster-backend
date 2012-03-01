@@ -18,6 +18,10 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	menuoverview: 'menuoverview',    	   
     	        	checkinwithothers: 'checkinwithothers',
     	        	dashboard: 'dashboard',
+    	        	settingsBt: 'dashboard button[action=settings]',
+    	        	settingsBackBt: 'settings button[action=back]',
+    	        	nicknameSettingsField: 'settings #nicknameSetting',
+    	        	settingsview: 'settings',
     	        	userlist: '#checkinDlg2Userlist',
     	        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
     	        	cancelCheckInBt: '#cancelCheckInBt',    	       
@@ -32,9 +36,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	cancelCheckInBt : '#cancelCheckInBt',
     	        	regenerateNicknameBt : '#regenerateNicknameBt',
     	        	menuTab: '#menutab',
-    	        	cartTab: '#carttab'
-    	        		
-    	        }    	
+    	        	cartTab: '#carttab'    	        		
+    	        },
+    	 appState : Ext.create('EatSense.model.AppState', {id: '1'})
     },
     init: function() {
     	console.log('initialized CheckInController');
@@ -52,11 +56,20 @@ Ext.define('EatSense.controller.CheckIn', {
             	tap: this.showMenu
             },
             cancelCheckInBt: {
-            	tap: this.cancelCheckIn
+            	tap: this.showDashboard
             },
             regenerateNicknameBt: {
             	tap: this.generateNickname
-            }           
+            },
+            settingsBt: {
+            	tap: this.showSettings
+            },
+            settingsBackBt: {
+            	tap: this.showDashboard            	
+            },
+            nicknameSettingsField: {            	
+            	change: this.saveNickname
+            }
         });
     	 
     	 var models = {};
@@ -64,10 +77,30 @@ Ext.define('EatSense.controller.CheckIn', {
     	 
     	 this.on('statusChanged', this.handleStatusChange, this);
     	 
+    	//try to restore application state
+	   	 var appStateStore = Ext.data.StoreManager.lookup('appStateStore');
+	     appStateStore.load();
+	   	 if(appStateStore.getCount() == 1) {
+	   		 console.log('app state found');
+	   		 this.setAppState(appStateStore.getAt(0));
+	   		 
+	   		 if(this.getAppState().get('checkInId') != null && this.getAppState().get('checkInId') != '') {
+	   			 //reload old state
+	   		 }
+	   		 
+	   	 } else if (appStateStore.getCount() > 1){
+	   		 console.log('Too many appStates!');
+	   	 }  	   	 
+	   	 else {
+	   		 console.log('no app state found');
+	   		 appStateStore.add(this.getAppState());
+	   	 }
+    	 
+    	 
     	 //private functions
     	 
     	 //called by checkInIntent. 
-    	 this.doCheckInIntent = function(barcode, button, deviceId) {
+    	 this.doCheckInIntent = function(barcode, button, deviceId) {    		 
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
     	    		this.getDashboard().showLoadScreen(false);
@@ -92,25 +125,6 @@ Ext.define('EatSense.controller.CheckIn', {
      	        	    	button.enable();
      	        	    }
     	        	});
-    	        	
-//    	        	Ext.ModelManager.getModel('EatSense.model.CheckIn').load(barcode, {
-//    	        	    success: function(model) {
-//    	        	    	console.log("CheckInIntent Status: " + model.get('status'));
-//    	        	    	console.log("checkInIntent Restaurant: " + model.get('restaurantName'));    	  
-//    	        	    	if(model.data.status == "INTENT") {
-//    	        	    		me.checkInConfirm({model:model, deviceId : deviceId});
-//    	        	    	} else if(model.data.status == "BARCODE_ERROR") {
-//    	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-//    	        	    	} else {
-//    	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-//    	        	    	}    	        	    	
-//    	        	    },
-//    	        	    callback: function() {
-//    	        	    	me.getDashboard().showLoadScreen(false);
-//    	        	    	button.enable();
-//    	        	    }
-//    	        	    
-//    	        	});
     	    	}
     	 };
     	 
@@ -249,7 +263,12 @@ Ext.define('EatSense.controller.CheckIn', {
 		var checkInDialog = this.getCheckinconfirmation(), 
 		main = this.getMain(),
 		checkIn = Ext.create('EatSense.model.CheckIn');
-		this.generateNickname();
+			
+	   	 if(this.getAppState().get('nickname') != '') {
+	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
+	   	 } else {
+	   		this.generateNickname();
+	   	 }
 		
 		checkIn.set('spotId', options.model.get('barcode'));
 		checkIn.set('restaurantName', options.model.get('restaurant'));
@@ -261,10 +280,10 @@ Ext.define('EatSense.controller.CheckIn', {
 			//store device uuid
 			checkIn.set('deviceId',options.deviceId);
 		}			
-
 		this.models.activeCheckIn = checkIn;
+		
 		main.switchAnim('left');
-		main.setActiveItem(checkInDialog);	     
+		main.setActiveItem(checkInDialog);	  			
    },
    /**
     * CheckIn Process
@@ -272,20 +291,20 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    checkIn: function(){
-	   var that = this;
+	   var me = this;
 	   //get CheckIn Object and save it. 
 	   var nickname = Ext.String.trim(this.getNickname().getValue());	   
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {
 		   this.models.activeCheckIn.set('nickname',nickname);
-	   
 			this.models.activeCheckIn.save(
 					   {
 						   scope: this,
 					   	    success: function(response) {
-					   	    console.log("CheckIn Controller -> checkIn success");
-					   	     that.showCheckinWithOthers();
+					   	    console.log("CheckIn Controller -> checkIn success");														
+					   	     me.showCheckinWithOthers();
+					   	     me.getAppState().set('checkInId', response.get('userId'));
 					   	    },
 					   	    failure: function(response, operation) {
 					   	    	console.log('checkIn failure');
@@ -304,9 +323,10 @@ Ext.define('EatSense.controller.CheckIn', {
     * CheckIn Process
     * Step 2 alt: cancel process
     */
-   cancelCheckIn: function(options) {
-	   console.log("CheckIn Controller -> cancelCheckIn");
-	   var dashboardView = this.getDashboard(), main = this.getMain();
+   showDashboard: function(options) {
+	   console.log("CheckIn Controller -> settings");
+	   var dashboardView = this.getDashboard(),
+	   main = this.getMain();
 	   this.models.activeCheckIn = null;
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
@@ -420,12 +440,32 @@ Ext.define('EatSense.controller.CheckIn', {
 		 }
 	},
 	/**
-	 * Makes an ajax call to the server and retrieves a random nickname.
-	 * Automatically sets the nickname field.
+	 * Show settings screen.
+	 * 
+	 */
+	showSettings: function() {
+		console.log('CheckIn Controller -> showSettings');
+		var main = this.getMain(),
+		settings = this.getSettingsview();
+		
+		this.getNicknameSettingsField().setValue(this.getAppState().get('nickname'));
+		
+		main.switchAnim('left');
+   	 	main.setActiveItem(settings);
+	},
+	
+	saveNickname: function(component, newData, oldValue, eOpts) {
+		console.log('CheckIn Controller -> saveNickname '+newData);
+		this.getAppState().set('nickname', newData);
+	},
+	/**
+	 * Makes an ajax call to the server, retrieves a random nickname
+	 * and sets the nickname field.
+	 * 
 	 * ®return
 	 * 		the nickname
 	 */
-	generateNickname : function() {
+	generateNickname : function(callback) {
 		Ext.Ajax.request({
     	    url: '/nicknames',
     	    method: 'GET',
@@ -435,12 +475,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	    },
     	    success: function(response){
     	    	this.getNickname().setValue(response.responseText);
-    	    	return response.responseText;
     	    }
-    	});
-		
+    	});		
 	},
-	
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
 		//TODO check status transsions

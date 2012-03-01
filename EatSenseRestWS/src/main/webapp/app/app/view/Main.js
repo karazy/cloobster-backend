@@ -3,7 +3,7 @@
  */
 Ext.define('EatSense.view.Main', {
 	extend : 'Ext.Container',	
-	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers', 'EatSense.view.Cart', 'EatSense.view.Menu', 'EatSense.view.Lounge' ],
+	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation','EatSense.view.ProductOverview','EatSense.view.CheckinWithOthers', 'EatSense.view.Cart', 'EatSense.view.Menu', 'EatSense.view.Lounge', 'EatSense.view.Settings' ],
 	xtype: 'mainview',
 	config : {
 		itemId : 'globalContainer',
@@ -27,18 +27,14 @@ Ext.define('EatSense.view.Main', {
 		{
 			layout: 'fit',
 			xtype: 'checkinwithothers'
-		},
-//		{
-//			layout: 'fit',
-//			xtype: 'cart'
-//		},
-//		{
-//			layout: 'fit',
-//			xtype: 'menu'
-//		}, 
+		},		
 		{
 //			No fit layout! Won't display correctly otherwise.
 			xtype: 'lounge'
+		},
+		{
+			layout: 'fit',
+			xtype: 'settings'
 		}
 		]
 	},

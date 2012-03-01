@@ -54,7 +54,10 @@ var translation = {
 		"myOrdersTabBt" : "Kasse",
 		"payRequestButton" : "Bezahlen",
 		//Payment Request
-		"paymentPickerTitle" : "Bezahlmethode"
+		"paymentPickerTitle" : "Bezahlmethode",
+		//Settings
+		"settingsTitle" : "Einstellungen",
+		"nickname" : "Spitzname"			
 
 	}
 

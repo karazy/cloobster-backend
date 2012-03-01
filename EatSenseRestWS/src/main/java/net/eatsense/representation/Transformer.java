@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -180,5 +181,12 @@ public class Transformer {
 		}
 		
 		return choiceDtos; 		
+	}
+	
+	public CheckInDTO checkInToDto(CheckIn checkIn) {
+		CheckInDTO dto = new CheckInDTO();
+//		dto.set
+		
+		return dto;
 	}
 }

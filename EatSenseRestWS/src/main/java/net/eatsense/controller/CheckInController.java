@@ -23,6 +23,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
+import net.eatsense.representation.Transformer;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
 
@@ -49,13 +50,15 @@ public class CheckInController {
 	private CheckInRepository checkInRepo;
 	private SpotRepository barcodeRepo;
 	private NicknameGenerator nnGen;
+	private Transformer transform;
 
 	@Inject
-	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo, NicknameGenerator nnGen) {
+	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo, NicknameGenerator nnGen, Transformer trans) {
 		this.restaurantRepo = r;
 		this.checkInRepo = checkInRepo;
 		this.barcodeRepo = barcodeRepo;
 		this.nnGen = nnGen;
+		this.transform = trans;
 	}
 	
 	@Inject
@@ -309,6 +312,18 @@ public class CheckInController {
 			logger.info("Error: Recieved cancel for CheckIn with userId {}, but status was not INTENT.", userId);
 			
 		}
+	}
+	
+	/**
+	 * Load checkin.
+	 * @param checkInId
+	 * 			Id of CheckIn to load	
+	 * @return
+	 * 		found checkin otherwise <code>null</code>
+	 */
+	public CheckInDTO getCheckIn(String checkInId) {
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);		
+		return transform.checkInToDto(checkIn);
 	}
 	
 	/**
