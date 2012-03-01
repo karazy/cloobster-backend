@@ -72,6 +72,11 @@ public class OrderController {
         this.validator = validator;
     }
 	
+
+	public void deleteOrder(Long restaurantId, Long orderId) {
+		orderRepo.ofy().delete(new Key<Order>(new Key<Restaurant>(Restaurant.class, restaurantId), Order.class, orderId));
+	}
+	
 	public OrderDTO updateOrder(Long restaurantId, Long orderId, OrderDTO orderData) {
 		Order order = getOrder(restaurantId, orderId);
 		
@@ -308,4 +313,5 @@ public class OrderController {
 		
 		return orderKey;
 	}
+
 }
