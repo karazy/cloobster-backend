@@ -77,26 +77,6 @@ Ext.define('EatSense.controller.CheckIn', {
     	 
     	 this.on('statusChanged', this.handleStatusChange, this);
     	 
-    	//try to restore application state
-	   	 var appStateStore = Ext.data.StoreManager.lookup('appStateStore');
-	     appStateStore.load();
-	   	 if(appStateStore.getCount() == 1) {
-	   		 console.log('app state found');
-	   		 this.setAppState(appStateStore.getAt(0));
-	   		 
-	   		 if(this.getAppState().get('checkInId') != null && this.getAppState().get('checkInId') != '') {
-	   			 //reload old state
-	   		 }
-	   		 
-	   	 } else if (appStateStore.getCount() > 1){
-	   		 console.log('Too many appStates!');
-	   	 }  	   	 
-	   	 else {
-	   		 console.log('no app state found');
-	   		 appStateStore.add(this.getAppState());
-	   	 }
-    	 
-    	 
     	 //private functions
     	 
     	 //called by checkInIntent. 
@@ -264,7 +244,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		main = this.getMain(),
 		checkIn = Ext.create('EatSense.model.CheckIn');
 			
-	   	 if(this.getAppState().get('nickname') != '') {
+	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
 	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
 	   	 } else {
 	   		this.generateNickname();
@@ -291,9 +271,10 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    checkIn: function(){
-	   var me = this;
-	   //get CheckIn Object and save it. 
-	   var nickname = Ext.String.trim(this.getNickname().getValue());	   
+	   var me = this,
+	   nickname = Ext.String.trim(this.getNickname().getValue());
+	    
+	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {
@@ -330,16 +311,11 @@ Ext.define('EatSense.controller.CheckIn', {
 	   this.models.activeCheckIn = null;
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
-	   //this.models.activeCheckIn.erase();
-	   //TODO Workaorund because delete is not working	   
-//		Ext.Ajax.request({
-//    	    url: globalConf.serviceUrl+'/restaurant/spot/'+this.models.activeCheckIn.userId,
-//    	    method: 'DELETE',
-//    	    scope: this,
-//    	    success: function(response){
-//    	    	console.log('Canceled checkin.');
-//    	    }
-//    	});
+		
+	   //ensure that main is only added once to viewport
+	   if(main.getParent() !== Ext.Viewport) {
+		   Ext.Viewport.add(main);
+	   }
    },
    /**
     * CheckIn Process
@@ -453,7 +429,9 @@ Ext.define('EatSense.controller.CheckIn', {
 		main.switchAnim('left');
    	 	main.setActiveItem(settings);
 	},
-	
+	/**
+	 * Saves the application state in local store.
+	 */
 	saveNickname: function(component, newData, oldValue, eOpts) {
 		console.log('CheckIn Controller -> saveNickname '+newData);
 		this.getAppState().set('nickname', newData);
@@ -478,6 +456,60 @@ Ext.define('EatSense.controller.CheckIn', {
     	    }
     	});		
 	},
+	/**
+	 * This method is called from launch function during application start 
+	 * when an existing checkin was found. This could happen when a user exits
+	 * the application during a checkin and restarts.
+	 * The method makes sure that all relevant information is restored like products in cart,
+	 * or the active spot.
+	 * 
+	 * @param checkin
+	 * 		Restored checkin
+	 */
+	restoreState: function(checkIn) {
+		var main = this.getMain();
+		
+		this.models.activeCheckIn = checkIn;
+		
+		this.getAppState().cartOrders().each(function(order) {
+			this.models.activeCheckIn.orders().add(order);
+		}, this);
+		
+		//load active spot
+		EatSense.model.Spot.load(checkIn.get('spotId'), {
+		scope: this,
+   		 success: function(record, operation) {
+   			 this.models.activeSpot = record;
+   			 
+   			 this.showMenu();
+   			Ext.Viewport.add(main);
+    	    },
+    	    failure: function(record, operation) {
+    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 404) {
+    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
+    	    	} else {
+    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
+    	    	}     	        	    	
+    	    },
+    	    callback: function() {
+    	    	
+    	    }
+		});			
+	},	
+	
+//	showDashboard: function() {		
+//		var main = this.getMain();
+//		
+//  		 main.setActiveItem(0);
+//  		 Ext.Viewport.add(main);
+//	},
+	/**
+	 * This method handle status changes. It checks if valid transsions are made.
+	 * E. g. You cannot directly switch from PAYMENT_REQUEST to INTENT.
+	 * It enables or disbales certain functionalities depending on the status.
+	 * Always use this method to change the application status. 
+	 * @param status
+	 */
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
 		//TODO check status transsions

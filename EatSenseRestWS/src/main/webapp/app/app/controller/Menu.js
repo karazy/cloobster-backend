@@ -266,7 +266,10 @@ Ext.define('EatSense.controller.Menu', {
 		order,
 		validationError = "",
 		cartButton = this.getLoungeTabBar().getAt(1),
-		productIsValid = true;	
+		productIsValid = true,
+		appState = this.getApplication().getController('CheckIn').getAppState(),
+		appStateStore = Ext.StoreManager.lookup('appStateStore'),
+		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;	
 		//validate choices 
 		productForCart.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
@@ -286,8 +289,25 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
+			
+			Ext.Ajax.request({				
+	    	    url: globalConf.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/',
+	    	    method: 'PUT',    	    
+	    	    params: {
+	    	    	'checkInId' : activeCheckIn.get('userId'),
+	    	    },
+	    	    jsonData: order.getRawJsonData()
+	    	});
+			
 			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
 			//TODO temporarily persist data on phone or send to server	
+//			try {
+//				appState.cartOrders().add(order.getRawJsonData());
+//				appState.save();
+//				appStateStore.sync();
+//			} catch (e) {
+//				console.log('could not persist order to resume state');
+//			}
 			
 			this.backToProductOverview(i18nPlugin.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
 		} else {

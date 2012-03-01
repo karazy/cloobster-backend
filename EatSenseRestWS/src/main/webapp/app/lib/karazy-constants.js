@@ -9,7 +9,12 @@ Karazy.constants = (function() {
 		INTENT : 'INTENT',
 		CHECKEDIN : 'CHECKEDIN',
 		PAYMENT_REQUEST : 'PAYMENT_REQUEST',
-		COMPLETE : 'COMPLETE'
+		COMPLETE : 'COMPLETE',
+		Order : {
+			CART : 'CART',
+			PLACED : 'PLACED',
+			CANCELED : 'CANCELED'
+		}
 
 	};
 

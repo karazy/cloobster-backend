@@ -24,7 +24,6 @@ Ext.define('EatSense.controller.Order', {
 			myordersview: '#myorderstab #myorders',
 			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar',
-			//#myorders #myOrdersTopBar 
 			paymentButton: '#myorderstab button[action="pay"]'
 		},
 		/**
@@ -83,11 +82,6 @@ Ext.define('EatSense.controller.Order', {
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		total = 0;
 		cartview.hideBackButton();
-		
-		//set filter TEST
-    	orders.filter([
-    	               {property: "status", value: "XYZ"}   	               
-    	]);
     	
 		orderlist.setStore(orders);	
 		this.models.activeOrder = null;
@@ -100,7 +94,7 @@ Ext.define('EatSense.controller.Order', {
 		return true;
 	},
 	/**
-	 * Switch to cart. Method gets called when editing an order.
+	 * Switch to cart. Method gets called after editing an order.
 	 */
 	showCart: function() {
 		var orderlist = this.getOrderlist();
@@ -122,7 +116,7 @@ Ext.define('EatSense.controller.Order', {
 	 */
 	dumpCart: function() {
 		console.log('Cart Controller -> dumpCart');
-		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		var activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;
 		
 		Ext.Msg.show({
 			title: i18nPlugin.translate('hint'),
@@ -141,8 +135,18 @@ Ext.define('EatSense.controller.Order', {
 			if(btnId=='yes') {
 				//workaround, because view stays masked after switch to menu
 				Ext.Msg.hide();
+				activeCheckIn.orders().each(function(order) {
+					Ext.Ajax.request({				
+			    	    url: globalConf.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/'+order.getId(),
+			    	    method: 'DELETE',    	    
+			    	    params: {
+			    	    	'checkInId' : activeCheckIn.get('userId'),
+			    	    }
+			    	});
+				});
+				
 				//clear store				
-				orders.removeAll();
+				activeCheckIn.orders().removeAll();
 				//reset badge text on cart button and switch back to menu
 				this.refreshCart();
 				}
@@ -159,13 +163,9 @@ Ext.define('EatSense.controller.Order', {
 		checkInId = checkIn.get('userId'),
 		restaurantId = checkIn.get('restaurantId'),
 		errorIndicator = false,
-		orderlist = this.getOrderlist(),
-//		orderStore = Ext.data.StoreManager.lookup('orderStore'),
 		cartview = this.getCartview(),
 		ajaxOrderCount = 0,
 		ordersCount = orders.getCount();
-//		loungeview = this.getLoungeview(),
-//		myordersview = this.getMyordersview(),
 		me = this;
 		
 		if(ordersCount > 0) {
@@ -195,8 +195,8 @@ Ext.define('EatSense.controller.Order', {
 						if(!errorIndicator) {
 					
 							Ext.Ajax.request({				
-					    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/',
-					    	    method: 'POST',    	    
+					    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/'+order.getId(),
+					    	    method: 'PUT',    	    
 					    	    params: {
 					    	    	'checkInId' : checkInId,
 					    	    },
@@ -221,16 +221,14 @@ Ext.define('EatSense.controller.Order', {
 						    	    	cartview.showLoadScreen(false);
 						    	    	me.getSubmitOrderBt().enable();
 						    	    	me.getCancelOrderBt().enable();
-				//		    	    	loungeview.switchTab(myordersview);
-				//		    			loungeview.setActiveItem(myordersview);
 						    	    	
-						    	    	//show success message and switch to next view
+						    	    	//show success message
 						    			Ext.Msg.show({
 						    				title : i18nPlugin.translate('success'),
 						    				message : i18nPlugin.translate('orderSubmit'),
 						    				buttons : []
 						    			});
-						    			//show short alert and then hide
+						    			
 						    			Ext.defer((function() {
 						    				Ext.Msg.hide();
 						    			}), globalConf.msgboxHideTimeout, this);
@@ -271,7 +269,7 @@ Ext.define('EatSense.controller.Order', {
 		var x = event.pageX,
 		y = event.pageY,
 		tooltip = this.getTooltip(),
-		orderlist = this.getOrderlist(),
+		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		productName = model.getProduct().get('name'),
 		windowX = Ext.Viewport.getWindowWidth();
@@ -294,7 +292,15 @@ Ext.define('EatSense.controller.Order', {
 			tooltip.hide();
 			//delete item
 			orders.remove(tooltip.getSelectedProduct());
-
+			
+			Ext.Ajax.request({				
+	    	    url: globalConf.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/'+tooltip.getSelectedProduct().getId(),
+	    	    method: 'DELETE',    	    
+	    	    params: {
+	    	    	'checkInId' : activeCheckIn.get('userId'),
+	    	    }
+	    	});
+			
 			this.refreshCart();
 			
 //			if(orders.data.length > 0) {
@@ -353,7 +359,6 @@ Ext.define('EatSense.controller.Order', {
 				 choice.options().each(function(opt) {
 					 var checkbox = Ext.create(optionType, {
 						 name : choice.data.id,
-//						 value : opt,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
 						 checked: opt.get('selected')
@@ -402,9 +407,15 @@ Ext.define('EatSense.controller.Order', {
 
 		 this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
 	},
-	
+	/**
+	 * Edit an existing order.
+	 */
 	editOrder : function() {
-		var product = this.models.activeOrder.getProduct(), validationError = "", productIsValid = true;
+		var order = this.models.activeOrder,
+		product = this.models.activeOrder.getProduct(), 
+		validationError = "", 
+		productIsValid = true.
+		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;
 		
 		product.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
@@ -414,7 +425,16 @@ Ext.define('EatSense.controller.Order', {
 			}
 		});
 		
-		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());
+		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
+		
+		Ext.Ajax.request({				
+    	    url: globalConf.serviceUrl+'/restaurants/'+restaurantId+'/orders/'+order.getId(),
+    	    method: 'PUT',
+    	    params: {
+    	    	'checkInId' : activeCheckIn.get('userId'),
+    	    },
+    	    jsonData: order.getRawJsonData()
+		});
 		
 		if(productIsValid) {
 			this.refreshCart();
@@ -493,7 +513,8 @@ Ext.define('EatSense.controller.Order', {
 		orderStore.load({
 			scope   : this,
 			params : {
-				'checkInId' : checkInId,				
+				'checkInId' : checkInId,
+				'status' : Karazy.constants.Order.PLACED
 			},
 			callback: function(records, operation, success) {
 				try {
