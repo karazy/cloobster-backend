@@ -33,21 +33,21 @@ Ext.define('EatSense.view.Dashboard', {
 				items : [ {
 					xtype : 'button',
 					// text : i18nPlugin.translate('settingsButton'),
-					iconCls : 'home',
-					iconMask : true,
+//					iconCls : 'home',
+//					iconMask : true,
+					cls: 'newRestaurantsButton',
 					ui : 'action',
-					width : '90px',
-					height : '70px'
+//					width : '90px',
+//					height : '70px'
 				}, {
 					xtype : 'button',
-					itemId : 'settingsBtn',
-					action : 'settings',
 					// text : i18nPlugin.translate('settingsButton'),
-					iconCls : 'settings',
-					iconMask : true,
-					ui : 'action',
-					width : '90px',
-					height : '70px'
+//					iconCls : 'settings',
+//					iconMask : true,
+					cls: 'currentDealsButton',
+					baseCls: 'abc',
+//					width : '90px',
+//					height : '70px'
 				} ]
 			}, {
 				xtype : 'panel',
@@ -57,7 +57,7 @@ Ext.define('EatSense.view.Dashboard', {
 				},
 				items : [ {
 					xtype : 'label',
-					html : 'Du hast <br/>800<br/>Punkte!'
+					html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
 				}, {
 					xtype : 'button',
 					id : 'checkInBtn',
@@ -74,10 +74,29 @@ Ext.define('EatSense.view.Dashboard', {
 					label : i18nPlugin.translate('barcode'),
 					labelAlign : 'top',
 //					labelWidth : 100,
-					width : 200,
+					width : 100,
 					name : 'barcodeTF',
 					hidden : (profile == 'phone' && window.plugins.barcodeScanner) ? true : false
 				} ]
+			} ]
+		},
+		{
+			xtype: 'toolbar',
+			docked: 'bottom',
+			layout: {
+				type:'hbox',
+				pack: 'center'
+			},
+			items: [{
+				xtype : 'button',
+				itemId : 'settingsBtn',
+				action : 'settings',
+				// text : i18nPlugin.translate('settingsButton'),
+				iconCls : 'settings',
+				iconMask : true,
+//				ui : 'action',
+//				width : '90px',
+//				height : '70px'
 			} ]
 		}
 

@@ -24,16 +24,46 @@ $base-color: black;
 }
 
 
-
+/*
+* Dashboard
+*/ 
 .checkInButton {
  
  width: 90px !important;
  height: 110px !important;
  border: 1px !important;
  border-color: black !important;
- background-image: url('res/images/checkIn_icon.png') !important;
- //-webkit-mask-size: 87px 105px;
- //-webkit-mask-repeat: no-repeat;
+ background-image: url('res/images/landing.JPG') !important;
+ -webkit-mask-size: 87px 105px;
+ -webkit-mask-repeat: no-repeat;
+ background-repeat: no-repeat;
+ background-position: center;
+
+
+}
+
+.currentDealsButton {
+ 
+ width: 90px !important;
+ height: 80px !important;
+ margin: 10px;
+ border: 1px solid !important;
+ border-color: black !important;
+ background-image: url('res/images/club1.JPG') !important;
+ background-repeat: no-repeat;
+ background-position: center;
+
+
+}
+
+.newRestaurantsButton {
+ 
+ width: 90px !important;
+ height: 80px !important;
+ margin: 10px;
+ border: 1px solid !important;
+ border-color: black !important;
+ background-image: url('res/images/club4.JPG') !important;
  background-repeat: no-repeat;
  background-position: center;
 
