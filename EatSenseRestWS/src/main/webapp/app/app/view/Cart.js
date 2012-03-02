@@ -85,6 +85,10 @@ Ext.define('EatSense.view.Cart', {
 		trashBt.show();
 		orderBt.show();
 	},
+	
+	hideCartButtons: function() {
+		
+	},
 	/**
 	 * Shows the back button in top toolbar.
 	 * @param text

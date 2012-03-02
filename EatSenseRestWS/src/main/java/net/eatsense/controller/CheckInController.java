@@ -347,7 +347,7 @@ public class CheckInController {
 			// Other users at this table exist.
 			for (CheckIn checkIn : checkInsAtSpot) {
 				
-				if(!checkIn.getUserId().equals(chkin.getUserId()) && checkIn.getStatus() != CheckInStatus.INTENT ) {
+				if(!checkIn.getUserId().equals(chkin.getUserId()) && checkIn.getStatus() == CheckInStatus.CHECKEDIN ) {
 					otherCheckIns.add(checkIn);
 				}
 			}

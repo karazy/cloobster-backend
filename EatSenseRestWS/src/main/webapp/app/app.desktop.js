@@ -27,14 +27,23 @@ Ext.application({
     	//try to restore application state
 	   	 var appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
 	   	 checkInCtr = this.getController('CheckIn'),
-	   	 main = Ext.create('EatSense.view.Main');	   	 
-	     appStateStore.load();
+	   	 main = Ext.create('EatSense.view.Main'),
+	   	 restoredCheckInId;	 
+	   	 
+	   	 try {
+	   		appStateStore.load();
+	   	 } catch (e) {
+	   		appStateStore.removeAll();
+	   	 }
+	     
 	     
 	   	 if(appStateStore.getCount() == 1) {
 	   		 console.log('app state found');	   		 
-	   		checkInCtr.setAppState(appStateStore.getAt(0));
-	   		 var restoredCheckInId = checkInCtr.getAppState().get('checkInId');
-	   		 if(restoredCheckInId != null && restoredCheckInId != '') {
+		   		checkInCtr.setAppState(appStateStore.getAt(0));
+	   		restoredCheckInId = checkInCtr.getAppState().get('checkInId');
+	   	 }
+	   		
+	   	 if(restoredCheckInId) {
 	   			 //reload old state
 	   			 EatSense.model.CheckIn.load(restoredCheckInId, {
 	   				scope: this,
@@ -58,13 +67,12 @@ Ext.application({
 	   					
 	   				}
 	   			 });	   			 
-	   		 }	   		 
-	   	 }	   	 
+	   	}	   		 	   	 	   	 
 	   	 else {	   		 
 	   		if (appStateStore.getCount() > 1){
-		   		 console.log('Too many appStates!');
+		   		 console.log('Too many appStates! clear cache. this should never happen.');
 		   	 } else {
-		   		console.log('no app state found. clear cache. this should never happen.');
+		   		console.log('no app state found.');
 		   		appStateStore.removeAll();
 		   	 } 	
 	   		 

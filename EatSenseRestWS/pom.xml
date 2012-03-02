@@ -16,7 +16,7 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.6.2</gae.version>
+		<gae.version>1.6.3</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
 
@@ -35,7 +35,7 @@
 		<!-- logging -->
 		<slf4j.version>1.6.4</slf4j.version>
 		<!-- objectify -->
-		<objectify.version>3.0</objectify.version>
+		<objectify.version>3.1</objectify.version>
 
 		<!-- apache bean validation -->
 		<bval.version>0.3-incubating</bval.version>

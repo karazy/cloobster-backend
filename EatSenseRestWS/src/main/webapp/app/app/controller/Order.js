@@ -637,7 +637,8 @@ Ext.define('EatSense.controller.Order', {
 			},
 			success: function(record, operation) {
 					me.models.activeBill = record;
-					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);				
+					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
+					checkInCtr.getAppState().set('checkInId', null);
 			},
 			failure: function(record, operation) {
 				if(operation.getError() != null && operation.getError().status == 404) {

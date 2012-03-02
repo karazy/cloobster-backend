@@ -1,19 +1,21 @@
 @CHARSET "UTF-8";
 
-.productListItem h2{
-	float: left; 
-	width: 70%; 
+$base-color: black;
+
+.productListItem h2 {
+	float: left;
+	width: 70%;
 	margin: 0;
 }
 
 .productListItem div.price {
-	position: absolute; 
-	right: 0; 
-	top: 50%; 
-	width: 30%; 
-	text-align: right; 
+	position: absolute;
+	right: 0;
+	top: 50%;
+	width: 30%;
+	text-align: right;
 	padding-right: 10px;
-	font-size: 1em;	
+	font-size: 1em;
 }
 
 .productListItem div p {
@@ -22,6 +24,33 @@
 }
 
 
-.x-tab .x-button-icon.cart{
-    -webkit-mask-image: url('res/images/cart.png');
-}  
+
+.checkInButton {
+ 
+ width: 90px !important;
+ height: 110px !important;
+ border: 1px !important;
+ border-color: black !important;
+ background-image: url('res/images/checkIn_icon.png') !important;
+ //-webkit-mask-size: 87px 105px;
+ //-webkit-mask-repeat: no-repeat;
+ background-repeat: no-repeat;
+ background-position: center;
+
+
+}
+
+.checkInButton-normal {
+	border: 1px;
+	border-color: black;
+}
+
+.checkInButtonIcon {
+	 background: url('res/images/checkIn_icon.png') !important;
+	height: 105 !important;
+	widht: 87 !important;
+}
+
+.x-tab .x-button-icon.cart {
+	-webkit-mask-image: url('res/images/cart.png');
+}

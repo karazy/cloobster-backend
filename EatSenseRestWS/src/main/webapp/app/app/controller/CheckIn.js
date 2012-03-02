@@ -38,6 +38,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	menuTab: '#menutab',
     	        	cartTab: '#carttab'    	        		
     	        },
+    	        /**
+    	    	  * Contains information to resume application state after the app was closed.
+    	    	  */
     	 appState : Ext.create('EatSense.model.AppState', {id: '1'})
     },
     init: function() {
@@ -93,7 +96,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	        			 me.models.activeSpot = record;
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
-     	        	    failure: function(record, operation) {
+     	        	    failure: function(record, operation) {     	        	    	
      	        	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 404) {
      	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
      	        	    	} else {
@@ -272,7 +275,8 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    checkIn: function(){
 	   var me = this,
-	   nickname = Ext.String.trim(this.getNickname().getValue());
+	   nickname = Ext.String.trim(this.getNickname().getValue()),
+	   error;
 	    
 	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
@@ -288,10 +292,16 @@ Ext.define('EatSense.controller.CheckIn', {
 					   	     me.getAppState().set('checkInId', response.get('userId'));
 					   	    },
 					   	    failure: function(response, operation) {
-					   	    	console.log('checkIn failure');
+					   	    	console.log('checkIn failure');					   	    	
 				    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
-				    	    		var error = Ext.JSON.decode(operation.getError().statusText);
-				    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(error.errorKey,error.substitutions), Ext.emptyFn);
+				    	    		try {
+				    	    			//TODO Bug in error message handling in some browsers
+										error = Ext.JSON.decode(operation.getError().statusText);
+										Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(error.errorKey,error.substitutions), Ext.emptyFn);
+									} catch (e) {
+										Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNicknameExists'), Ext.emptyFn);
+									}
+				    	    		
 				    	    	} else {
 				    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
 				    	    	}
@@ -483,7 +493,8 @@ Ext.define('EatSense.controller.CheckIn', {
    			    			
    			Ext.Viewport.add(main);
    			
-   			this.models.activeCheckIn.orders().removeAll();
+   			//after spot information is restored and stores are initialized load orders
+   			
    			this.models.activeCheckIn.orders().load({
    				scope: this,
    				params: {
@@ -498,6 +509,7 @@ Ext.define('EatSense.controller.CheckIn', {
    			});
     	    },
     	    failure: function(record, operation) {
+    	    	//TODO show error message that  restoring data failed
     	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 404) {
     	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
     	    	} else {
@@ -511,13 +523,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		
 		
 	},	
-	
-//	showDashboard: function() {		
-//		var main = this.getMain();
-//		
-//  		 main.setActiveItem(0);
-//  		 Ext.Viewport.add(main);
-//	},
+
 	/**
 	 * This method handle status changes. It checks if valid transsions are made.
 	 * E. g. You cannot directly switch from PAYMENT_REQUEST to INTENT.
@@ -528,8 +534,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
 		//TODO check status transsions
-		
-		
+				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
 			this.getMenuTab().disable();
 			this.getCartTab().disable();

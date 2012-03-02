@@ -22,7 +22,7 @@ Ext.define('EatSense.view.Main', {
 //			style: 'background-image: url(../app/res/images/startup.png); background-repeat:no-repeat; background-position:center center;',
 //		}, 
 		{
-			layout : 'fit',
+//			layout : 'fit',
 			xtype : 'dashboard'
 		}, {
 			layout : 'fit',
