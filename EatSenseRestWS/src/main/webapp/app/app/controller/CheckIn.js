@@ -20,6 +20,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	dashboard: 'dashboard',
     	        	settingsBt: 'dashboard button[action=settings]',
     	        	settingsBackBt: 'settings button[action=back]',
+    	        	nicknameTogglefield: 'checkinconfirmation togglefield[name=nicknameToggle]',
     	        	nicknameSettingsField: 'settings #nicknameSetting',
     	        	settingsview: 'settings',
     	        	userlist: '#checkinDlg2Userlist',
@@ -241,11 +242,12 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    checkInConfirm: function(options) {
 	   console.log("CheckIn Controller -> checkInConfirm");
-	  
-	   this.getCheckInDlg1Label1().setHtml(i18nPlugin.translate('checkInStep1Label1', options.model.get('name'), options.model.get('restaurant')));
-		var checkInDialog = this.getCheckinconfirmation(), 
+	   var checkInDialog = this.getCheckinconfirmation(), 
 		main = this.getMain(),
 		checkIn = Ext.create('EatSense.model.CheckIn');
+	   
+	   //this.getCheckInDlg1Label1().setHtml(i18nPlugin.translate('checkInStep1Label1', options.model.get('name'), options.model.get('restaurant')));
+		
 			
 	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
 	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
@@ -276,20 +278,28 @@ Ext.define('EatSense.controller.CheckIn', {
    checkIn: function(){
 	   var me = this,
 	   nickname = Ext.String.trim(this.getNickname().getValue()),
-	   error;
+	   error,
+	   nicknameToggle = this.getNicknameTogglefield();
 	    
 	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
-	   } else {
-		   this.models.activeCheckIn.set('nickname',nickname);
+	   } else {		   
+		   this.models.activeCheckIn.set('nickname',nickname);		  	   
 			this.models.activeCheckIn.save(
 					   {
-						   scope: this,
 					   	    success: function(response) {
-					   	    console.log("CheckIn Controller -> checkIn success");														
-					   	     me.showCheckinWithOthers();
+					   	    console.log("CheckIn Controller -> checkIn success");
+					   	    //currently disabled, will be enabled when linking to users actually makes sense
+//					   	     me.showCheckinWithOthers();					   	    
+					   	     me.showMenu();
 					   	     me.getAppState().set('checkInId', response.get('userId'));
+					   	     
+					   	     //save nickname in settings
+							   if(nicknameToggle.getValue() == 1) {
+								   me.getAppState().set('nickname', nickname);
+								   nicknameToggle.reset();
+							   }						   	     	
 					   	    },
 					   	    failure: function(response, operation) {
 					   	    	console.log('checkIn failure');					   	    	
@@ -315,12 +325,16 @@ Ext.define('EatSense.controller.CheckIn', {
     * Step 2 alt: cancel process
     */
    showDashboard: function(options) {
-	   console.log("CheckIn Controller -> settings");
+	   console.log("CheckIn Controller -> showDashboard");
 	   var dashboardView = this.getDashboard(),
-	   main = this.getMain();
+	   main = this.getMain(),
+	   nicknameToggle = this.getNicknameTogglefield();
+	   
 	   this.models.activeCheckIn = null;
+	   	   
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
+	   nicknameToggle.reset();
 		
 	   //ensure that main is only added once to viewport
 	   if(main.getParent() !== Ext.Viewport) {
@@ -538,9 +552,17 @@ Ext.define('EatSense.controller.CheckIn', {
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
 			this.getMenuTab().disable();
 			this.getCartTab().disable();
+			
+			this.models.activeCheckIn.set('status', status);
+		} else if (status == Karazy.constants.COMPLETE) {
+			this.getMenuTab().enable();
+			this.getCartTab().enable();
+			this.getAppState().set('checkInId', null);
+			
+			this.showDashboard();			
 		}
 		
-		this.models.activeCheckIn.set('status', status);		
+				
 		
 	}
 

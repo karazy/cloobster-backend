@@ -13,7 +13,8 @@ Karazy.constants = (function() {
 		Order : {
 			CART : 'CART',
 			PLACED : 'PLACED',
-			CANCELED : 'CANCELED'
+			CANCELED : 'CANCELED',
+			COMPLETE : 'COMPLETE'
 		}
 
 	};

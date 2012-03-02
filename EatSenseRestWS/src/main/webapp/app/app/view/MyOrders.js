@@ -81,6 +81,20 @@ Ext.define('EatSense.view.MyOrders', {
 			items: [{
 				xtype: 'label',				
 				tpl: '<div class="cartTotal" style="text-align:center; font-size: 1.5em;"><h1>Total {0}€</h1></div>'
+			},
+			{
+				type: 'panel',
+				docked: 'bottom',
+				itemId: 'myorderscompletepanel',
+				hidden: true,
+				items: [{
+					xtype: 'button',
+					text: 'Ok',
+					ui: 'confirm',
+					action: 'complete',
+					height: '50px'
+				}
+				]
 			}
 			]			
 		}		

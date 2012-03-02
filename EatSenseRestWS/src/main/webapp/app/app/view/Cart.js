@@ -74,37 +74,6 @@ Ext.define('EatSense.view.Cart', {
 		cardpanel.setActiveItem(view);
 	},
 	/**
-	 * Hides the back button in top toolbar.
-	 */
-	hideBackButton: function() {
-		var backBt = this.down('#cartTopBar button[action="back"]'),
-		trashBt = this.down('#cartTopBar button[action="trash"]'),
-		orderBt = this.down('#cartTopBar button[action="order"]');
-		
-		backBt.hide();
-		trashBt.show();
-		orderBt.show();
-	},
-	
-	hideCartButtons: function() {
-		
-	},
-	/**
-	 * Shows the back button in top toolbar.
-	 * @param text
-	 * 		Label to display on button.
-	 */
-	showBackButton: function(text) {
-		var backBt = this.down('#cartTopBar button[action="back"]'),
-		trashBt = this.down('#cartTopBar button[action="trash"]'),
-		orderBt = this.down('#cartTopBar button[action="order"]');
-		
-		backBt.setText(text);
-		backBt.show();
-		trashBt.hide();
-		orderBt.hide();
-	},
-	/**
 	 * Show a loading screen
 	 * @param mask
 	 */

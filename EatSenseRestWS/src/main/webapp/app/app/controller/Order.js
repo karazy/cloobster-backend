@@ -1,4 +1,4 @@
-Ext.define('EatSense.controller.Order', {
+	Ext.define('EatSense.controller.Order', {
 	extend: 'Ext.app.Controller',
 	config: {
 		refs: {
@@ -7,6 +7,8 @@ Ext.define('EatSense.controller.Order', {
 			cartoverview: 'cartoverview',
 			cartoverviewTotal: 'cartoverview #carttotalpanel label',
 			myordersTotal : 'myorders #myorderstotalpanel label',
+			myordersComplete: 'myorders #myorderscompletepanel',
+			myordersCompleteButton: 'myorders button[action=complete]',
 			menutab: '#menutab',
 			orderlist : '#cartCardPanel #orderlist',
 			backBt : '#cartTopBar button[action="back"]',
@@ -59,6 +61,9 @@ Ext.define('EatSense.controller.Order', {
              },
              paymentButton: {
             	 tap: this.choosePaymentMethod,            	             	 
+             },
+             myordersCompleteButton : {
+            	 tap: this.completePayment
              }
 		 });
 		
@@ -81,7 +86,7 @@ Ext.define('EatSense.controller.Order', {
 		var cartview = this.getCartview(), orderlist = this.getOrderlist(),
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		total = 0;
-		cartview.hideBackButton();
+		this.hideBackButton();
     	
 		orderlist.setStore(orders);	
 		this.models.activeOrder = null;
@@ -91,6 +96,7 @@ Ext.define('EatSense.controller.Order', {
 		total = this.calculateOrdersTotal(orders);			
 		this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
 		this.refreshCartBadgeText();
+		this.toggleCartButtons();
 		return true;
 	},
 	/**
@@ -458,7 +464,7 @@ Ext.define('EatSense.controller.Order', {
 		console.log('Cart Controller -> switchView');
 		var panel = this.getCartview();
     	this.getTopToolbar().setTitle(title);
-    	(labelBackBt == null || labelBackBt.length == 0) ? panel.hideBackButton() : panel.showBackButton(labelBackBt);
+    	(labelBackBt == null || labelBackBt.length == 0) ? this.hideBackButton() : this.showBackButton(labelBackBt);
     	panel.switchView(view,direction);
 	},
 	
@@ -499,16 +505,16 @@ Ext.define('EatSense.controller.Order', {
 	 */
 	refreshMyOrdersList: function() {
 		var myorderlist = this.getMyorderlist(),
-		orderStore = Ext.data.StoreManager.lookup('orderStore'),
+		myordersStore = Ext.data.StoreManager.lookup('orderStore'),
 		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
 		payButton = this.getPaymentButton();
 		me = this;
 		
 		//TODO investigate if this is a bug
-		orderStore.removeAll();
+		myordersStore.removeAll();
 //		myorderlist.getStore().removeAll();
 		
-		orderStore.load({
+		myordersStore.load({
 			scope   : this,
 			params : {
 				'checkInId' : checkInId,
@@ -517,7 +523,7 @@ Ext.define('EatSense.controller.Order', {
 			callback: function(records, operation, success) {
 				try {
 					if(success == true) {
-						(records.length > 0) ? payButton.enable() : payButton.disable();
+						(records.length > 0) ? payButton.show() : payButton.hide();
 						
 						//WORKAROUND to make sure all data is available in data property
 						//otherwise nested choices won't be shown
@@ -525,7 +531,7 @@ Ext.define('EatSense.controller.Order', {
 							order.getProduct().getData(true);
 						});
 						//refresh the order list
-						total = me.calculateOrdersTotal(orderStore);
+						total = me.calculateOrdersTotal(myordersStore);
 						myorderlist.refresh();
 						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, [total]);
 					} else {
@@ -573,7 +579,7 @@ Ext.define('EatSense.controller.Order', {
 		choosenMethod,
 		me = this;
 		
-		if(orderCount>0 && checkIn.get('status') !== 'PAYMENT_REQUEST' && checkIn.get('status') !== 'COMPLETE') {
+		if(orderCount>0 && checkIn.get('status') !== Karazy.constants.PAYMENT_REQUEST && checkIn.get('status') !== Karazy.constants.COMPLETE) {
 			//create picker
 			picker = Ext.create('Ext.Picker', {
 				doneButton: {
@@ -624,6 +630,8 @@ Ext.define('EatSense.controller.Order', {
 		var bill = Ext.create('EatSense.model.Bill'),
 		checkInCtr = this.getApplication().getController('CheckIn'),
 		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+		myordersComplete = this.getMyordersComplete(),
+		payButton = this.getPaymentButton(),
 		me = this;		
 		bill.set('paymentMethod', paymentMethod);
 		//workaround to prevent sencha from sending phantom id
@@ -638,7 +646,8 @@ Ext.define('EatSense.controller.Order', {
 			success: function(record, operation) {
 					me.models.activeBill = record;
 					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
-					checkInCtr.getAppState().set('checkInId', null);
+					payButton.hide();
+					myordersComplete.show();					
 			},
 			failure: function(record, operation) {
 				if(operation.getError() != null && operation.getError().status == 404) {
@@ -648,11 +657,96 @@ Ext.define('EatSense.controller.Order', {
 				}
 				
 			}
-		});
+		});			
+	},
+	/**
+	 * Marks the process as complete and returns to home menu
+	 */
+	completePayment: function() {
+		this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
+	},	
+	//UI Actions
+	/**
+	 * Hides the back button in top toolbar.
+	 */
+	hideBackButton: function() {
+		var  cartview = this.getCartview(),
+		backBt = cartview.down('#cartTopBar button[action="back"]');
 		
+		backBt.hide();
 		
-	}
+		this.toggleCartButtons();
+	},
+	/**
+	 * Shows (cart is not empty) or hides (cart is empty) cart buttons (trash, order).
+	 */
+	toggleCartButtons: function() {
+		var cartview = this.getCartview(),
+			trashBt = cartview.down('#cartTopBar button[action="trash"]'),	
+			orderBt = cartview.down('#cartTopBar button[action="order"]'),
+			hidden = (this.cartCount() > 0) ? false : true;
+		
+		trashBt.setHidden(hidden);
+		orderBt.setHidden(hidden);
+	},
+	/**
+	 * Shows (issued orders are not empty) or hides (issued orders are empty) myorders buttons (pay).
+	 */
+	toggleMyordersButtons: function() {
+		var payButton = this.getPayButton();
+		
+	},
+	/**
+	 * Shows the back button in top toolbar.
+	 * @param text
+	 * 		Label to display on button.
+	 */
+	showBackButton: function(text) {
+		var cartview = this.getCartview(), 
+		backBt = cartview.down('#cartTopBar button[action="back"]'),
+		trashBt = cartview.down('#cartTopBar button[action="trash"]'),
+		orderBt = cartview.down('#cartTopBar button[action="order"]');
+		
+		backBt.setText(text);
+		backBt.show();
+		trashBt.hide();
+		orderBt.hide();
+	},
+	/**
+	 * 
+	 */
+	showCompletePanel: function() {
+		
+	},
 	
+	//Utility methods
+	/**
+	 * Returns number of orders in cart.
+	 */
+	cartCount: function() {
+		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		
+		if(orders == null) {
+			return 0;
+		}
+		
+		return orders.getCount();		
+	},
+	/**
+	 * Returns number of issued orders.
+	 * May not always reflect the current state!!
+	 * 
+	 * @returns
+	 */
+	myordersCount: function() {
+		var myordersStore = Ext.data.StoreManager.lookup('orderStore');
+		
+		if(myordersStore == null) {
+			return 0;
+		}
+		
+		return myordersStore.getCount();		
+	}
 });
 
 Ext.define('EatSense.util.CartToolTip', {
