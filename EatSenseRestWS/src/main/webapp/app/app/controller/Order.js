@@ -663,6 +663,9 @@
 	 * Marks the process as complete and returns to home menu
 	 */
 	completePayment: function() {
+		var myordersComplete = this.getMyordersComplete();
+		
+		myordersComplete.hide();
 		this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
 	},	
 	//UI Actions

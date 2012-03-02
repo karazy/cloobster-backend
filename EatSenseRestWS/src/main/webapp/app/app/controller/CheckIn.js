@@ -558,8 +558,11 @@ Ext.define('EatSense.controller.CheckIn', {
 			this.getMenuTab().enable();
 			this.getCartTab().enable();
 			this.getAppState().set('checkInId', null);
+			//TODO get reference to menu tab
+			this.getLoungeview().setActiveItem(0);
 			
-			this.showDashboard();			
+			this.showDashboard();
+			
 		}
 		
 				
