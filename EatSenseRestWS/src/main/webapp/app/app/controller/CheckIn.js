@@ -15,7 +15,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	            searchfield : 'dashboard textfield',
     	            checkinconfirmation : 'checkinconfirmation',
     	        	nickname : '#nicknameTf',
-    	        	menuoverview: 'menuoverview',    	   
+    	        	menuoverview: 'menuoverview',   
     	        	checkinwithothers: 'checkinwithothers',
     	        	dashboard: 'dashboard',
     	        	settingsBt: 'dashboard button[action=settings]',
@@ -558,8 +558,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			this.getMenuTab().enable();
 			this.getCartTab().enable();
 			this.getAppState().set('checkInId', null);
-			//TODO get reference to menu tab
-			this.getLoungeview().setActiveItem(0);
+			this.getLoungeview().setActiveItem(this.getMenuTab());
 			
 			this.showDashboard();
 			

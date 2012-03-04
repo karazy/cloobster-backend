@@ -28,26 +28,16 @@ Ext.define('EatSense.view.Dashboard', {
 					align : 'middle'
 				},
 				defaults: {
-					margin: 10
+					xtype : 'dashboardbutton',
 				},
 				items : [ {
-					xtype : 'button',
-					// text : i18nPlugin.translate('settingsButton'),
-//					iconCls : 'home',
-//					iconMask : true,
 					cls: 'newRestaurantsButton',
-					ui : 'action',
-//					width : '90px',
-//					height : '70px'
+					text: i18nPlugin.translate('newRestaurantsButton'),
+					badgeText: '6',					
+
 				}, {
-					xtype : 'button',
-					// text : i18nPlugin.translate('settingsButton'),
-//					iconCls : 'settings',
-//					iconMask : true,
-					cls: 'currentDealsButton',
-					baseCls: 'abc',
-//					width : '90px',
-//					height : '70px'
+					cls: 'currentDealsButton',	
+					text: i18nPlugin.translate('currentDealsButton')
 				} ]
 			}, {
 				xtype : 'panel',
@@ -57,14 +47,17 @@ Ext.define('EatSense.view.Dashboard', {
 				},
 				items : [ {
 					xtype : 'label',
+					height: '75px',
 					html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
 				}, {
-					xtype : 'button',
+					xtype : 'dashboardbutton',
 					id : 'checkInBtn',
-					// text : i18nPlugin.translate('checkInButton'),
+					 text : i18nPlugin.translate('checkInButton'),
 					// icon: 'res/images/checkIn_icon.png',
-					// iconCls: 'checkInButtonIcon',
+//					 iconCls: 'checkInButtonIcon',
 					cls : 'checkInButton',
+					labelCls: 'checkInButton-label'
+					
 				// baseCls: 'checkInButton',
 				// ui : 'action',
 				// height: '105px',

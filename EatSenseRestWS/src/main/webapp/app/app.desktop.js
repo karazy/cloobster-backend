@@ -17,7 +17,7 @@ Ext.application({
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
-	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
+	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement', 'EatSense.view.fragment.DashboardButton'],
 	init : function() {
 		console.log('init');
 	},

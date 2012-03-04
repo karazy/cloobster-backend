@@ -13,6 +13,8 @@ var translation = {
 		"success" : "Erfolg",
 		// main menu
 		"checkInButton" : "CheckIn",
+		"currentDealsButton" : "Deals",
+		"newRestaurantsButton" : "Neue Restaurants",
 		"settingsButton" : "Einstellungen",
 		// Checkin process
 		"checkInTitle" : "CheckIn",
