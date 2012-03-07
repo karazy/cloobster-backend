@@ -1,8 +1,8 @@
 package net.karazy.test.eatsense;
 
-import android.os.Bundle;
+import org.apache.cordova.DroidGap;
 
-import com.phonegap.DroidGap;
+import android.os.Bundle;
 
 public class EatSenseTestApp extends DroidGap {
 	/** Called when the activity is first created. */
