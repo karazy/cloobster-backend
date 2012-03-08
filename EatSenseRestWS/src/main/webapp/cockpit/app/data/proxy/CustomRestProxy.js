@@ -26,7 +26,27 @@ Ext.define('EatSense.data.proxy.CustomRestProxy', {
 //
 //	            url += format;
 //	        }
-	        var  me = this, _serviceUrl = globalConf.serviceUrl, url = me.getUrl(request);
+			//------TEST
+	        // var  me = this, _serviceUrl = globalConf.serviceUrl, 
+	        // 	url = me.getUrl(request),
+	        // 	params = request.getParams() || {};
+
+	        // if(params.loginname && params.password) {
+
+	        // 	request.setHeaders({
+	        // 		'loginname' : params.loginname,
+	        // 		'password' : params.password
+	        // 	});
+
+	        // 	delete params.loginname;
+	        // 	delete params.password
+	        // };
+	        	
+	        // request.setUrl(_serviceUrl + url);
+			//------TEST END
+
+			
+	         var  me = this, _serviceUrl = globalConf.serviceUrl, url = me.getUrl(request);
 	        request.setUrl(_serviceUrl + url);
 
 	        return me.callParent([request]);

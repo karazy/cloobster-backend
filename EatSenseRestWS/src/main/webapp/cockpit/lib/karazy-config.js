@@ -8,7 +8,7 @@ Karazy.config = (function() {
 	
 	return {
 		
-		serviceUrl : '#SERVICE_URL',
+		serviceUrl : '',
 		msgboxHideTimeout : 1000
 		
 	};

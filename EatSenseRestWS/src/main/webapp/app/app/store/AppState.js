@@ -7,7 +7,6 @@ Ext.define('EatSense.store.AppState', {
 		autoSync : true,
 		proxy : {
 			type : 'localstorage',
-			url : '/users.json'
 		},
 		//we make sure that only one appState instance is used
 		filters : [ {

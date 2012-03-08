@@ -6,11 +6,14 @@ var translation = {
 		"cancel" : "Abbrechen",
 		"back" : "zurück",
 		"barcode" : "Barcode",
-		"errorTitle" : "Fehler",
+		"error" : "Fehler",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
+		//login
+		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
+		"wrongCredentials" : "Benutzername und/oder Passwort falsch."
 	}
 
 };
