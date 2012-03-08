@@ -88,7 +88,7 @@ public class BillControllerTest {
 		
 		
 		
-		ddd= new DummyDataDumper(rr, sr, mr, pr, cr);
+		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyRestaurants();
 		

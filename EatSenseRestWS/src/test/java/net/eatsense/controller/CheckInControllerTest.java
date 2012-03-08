@@ -219,7 +219,7 @@ public class CheckInControllerTest {
 		assertThat(checkIn, notNullValue());
 		assertThat(checkIn.getUserId(), notNullValue());
 		
-		CheckInDTO test = ctr.getCheckIn(checkIn.getUserId());
+		CheckInDTO test = ctr.getCheckInAsDTO(checkIn.getUserId());
 		assertThat(checkIn, notNullValue());
 		assertThat(checkIn.getNickname(), is(test.getNickname()));
 		assertThat(checkIn.getUserId(), is(test.getUserId()));

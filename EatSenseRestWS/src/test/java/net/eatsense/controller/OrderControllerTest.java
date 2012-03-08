@@ -75,7 +75,7 @@ public class OrderControllerTest {
 		
 		
 		
-		ddd= new DummyDataDumper(rr, br, mr, pr, cr);
+		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyRestaurants();
 		

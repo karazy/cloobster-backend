@@ -319,13 +319,24 @@ public class CheckInController {
 	 * @param checkInId
 	 * 			Id of CheckIn to load	
 	 * @return
+	 * 		found checkin data otherwise <code>null</code>
+	 */
+	public CheckInDTO getCheckInAsDTO(String checkInId) {
+		return transform.checkInToDto(getCheckIn(checkInId));
+	}
+	
+	/**
+	 * Load checkin.
+	 * @param checkInId
+	 * 			Id of CheckIn to load	
+	 * @return
 	 * 		found checkin otherwise <code>null</code>
 	 */
-	public CheckInDTO getCheckIn(String checkInId) {
+	public CheckIn getCheckIn(String checkInId) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);		
 		if(checkIn == null)
 			throw new NotFoundException("unknown id");
-		return transform.checkInToDto(checkIn);
+		return checkIn;
 	}
 	
 	/**

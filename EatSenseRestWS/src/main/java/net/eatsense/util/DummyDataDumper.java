@@ -11,6 +11,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -35,14 +36,22 @@ public class DummyDataDumper {
 	private ProductRepository pr;
 	private ChoiceRepository cr;
 
+	private AccountRepository ar;
+
 	@Inject
-	public DummyDataDumper(RestaurantRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr) {
+	public DummyDataDumper(RestaurantRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar) {
+		this.ar = ar;
 		this.rr = rr;
 		this.br = br;
 		this.mr = mr;
 		this.pr = pr;
 		this.cr = cr;
 	}
+	
+	public void generateDummyUsers() {
+		//generate admin user for restaurants
+		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "restaurantadmin");
+	}	
 
 	public void generateDummyRestaurants() {
 		logger.info("Generate Dummy Restaurants.");

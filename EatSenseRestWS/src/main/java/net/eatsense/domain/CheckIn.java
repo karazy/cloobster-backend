@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 import net.eatsense.domain.validation.CheckInStep2;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 
 /**
  * Represents a user checked in on a certain spot in a restaurant.
@@ -18,6 +19,7 @@ import com.googlecode.objectify.Key;
  * @author Frederik Reifschneider
  *
  */
+@Cached
 public class CheckIn extends GenericEntity{
 		
 	/**
