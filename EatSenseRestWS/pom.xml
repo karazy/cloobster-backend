@@ -300,22 +300,22 @@
 						</configuration>
 						
 					</execution>
-					<execution>
-            			<id>start-gae</id>
-            				<phase>pre-integration-test</phase>
-            			<goals>
-                			<goal>start</goal>
-            			</goals>
-            			<configuration>
-            			</configuration>
-        			</execution>
-        			<execution>
-            			<id>stop-gae</id>
-            				<phase>post-integration-test</phase>
-            			<goals>
-                			<goal>stop</goal>
-            			</goals>
-        			</execution>
+<!-- 					<execution> -->
+<!--             			<id>start-gae</id> -->
+<!--             				<phase>pre-integration-test</phase> -->
+<!--             			<goals> -->
+<!--                 			<goal>start</goal> -->
+<!--             			</goals> -->
+<!--             			<configuration> -->
+<!--             			</configuration> -->
+<!--         			</execution> -->
+<!--         			<execution> -->
+<!--             			<id>stop-gae</id> -->
+<!--             				<phase>post-integration-test</phase> -->
+<!--             			<goals> -->
+<!--                 			<goal>stop</goal> -->
+<!--             			</goals> -->
+<!--         			</execution> -->
 				</executions>
 			</plugin>
 

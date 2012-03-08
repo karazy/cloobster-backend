@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.Responses;
 
@@ -15,6 +16,7 @@ import net.eatsense.representation.AccountDTO;
 public class AccountController {
 	private AccountRepository accountRepo;
 	
+	@Inject
 	public AccountController(AccountRepository accountRepo) {
 		super();
 		this.accountRepo = accountRepo;
