@@ -33,6 +33,19 @@ public class AccountController {
 		}
 			
 	}
+	public Account createAndSaveAccount(String login, String password, String email, String role) {
+		Account account = new Account();
+		account.setLogin(login);
+		account.setEmail(email);
+		account.setRole(role);
+		
+		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+		
+		if(accountRepo.saveOrUpdate(account) == null)
+			return null;
+		
+		return account;
+	}
 	
 	public AccountDTO getAccount(String login, String password) {
 		Account account = authenticate(login, password);
