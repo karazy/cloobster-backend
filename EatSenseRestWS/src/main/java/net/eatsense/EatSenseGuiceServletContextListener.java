@@ -7,6 +7,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
+import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.CheckInResource;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NicknameResource;
@@ -45,6 +46,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(SpotResource.class);
 						bind(CheckInResource.class);
 						bind(CronResource.class);
+						bind(AccountResource.class);
 						bind(Spot.class);
 						bind(CheckIn.class);
 						bind(Menu.class);
@@ -54,6 +56,7 @@ public class EatSenseGuiceServletContextListener extends
 						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*checkins(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*accounts(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
 

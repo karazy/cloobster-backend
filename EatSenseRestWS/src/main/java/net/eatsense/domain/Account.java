@@ -10,7 +10,7 @@ import com.googlecode.objectify.annotation.Cached;
 @Cached
 public class Account extends GenericEntity {
 	String login;
-	String securedPassword;
+	String hashedPassword;
 	String email;
 	String role;
 	
@@ -22,12 +22,12 @@ public class Account extends GenericEntity {
 		this.login = login;
 	}
 
-	public String getSecuredPassword() {
-		return securedPassword;
+	public String getHashedPassword() {
+		return hashedPassword;
 	}
 
-	public void setSecuredPassword(String securedPassword) {
-		this.securedPassword = securedPassword;
+	public void setHashedPassword(String hashedPassword) {
+		this.hashedPassword = hashedPassword;
 	}
 
 	public String getEmail() {
