@@ -1,5 +1,6 @@
 package net.eatsense.restws;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -23,6 +24,7 @@ public class AccountResource {
 	@GET
 	@Path("{login}")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"restaurantadmin"})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
 		return accountCtr.getAccount(login, password);
 	}

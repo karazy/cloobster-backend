@@ -57,7 +57,7 @@ public class MenuControllerTest {
 		cr = injector.getInstance(ChoiceRepository.class);
 		br = injector.getInstance(SpotRepository.class);
 		
-		ddd= new DummyDataDumper(rr, br, mr, pr, cr);
+		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyRestaurants();
 		

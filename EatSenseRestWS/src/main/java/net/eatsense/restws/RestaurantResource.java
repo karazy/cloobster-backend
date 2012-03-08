@@ -160,6 +160,13 @@ public class RestaurantResource{
 	}
 	
 	@PUT
+	@Path("dummieusers")
+	public void dummyUsers() {
+		ddd.generateDummyUsers();
+	}
+	
+	
+	@PUT
 	@Path("import")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("text/plain; charset=UTF-8")

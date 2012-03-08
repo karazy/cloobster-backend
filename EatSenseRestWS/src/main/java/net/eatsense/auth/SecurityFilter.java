@@ -15,7 +15,9 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.eatsense.controller.AccountController;
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.persistence.CheckInRepository;
 
@@ -34,7 +36,14 @@ public class SecurityFilter implements ContainerRequestFilter {
 	@Inject
 	private CheckInController checkInCtrl;
 	
-    /**
+	@Inject
+	private AccountController accountCtrl;
+	
+    public void setAccountCtrl(AccountController accountCtrl) {
+		this.accountCtrl = accountCtrl;
+	}
+
+	/**
      * <p>The URI information for this request.</p>
      */
     @Context
@@ -50,13 +59,44 @@ public class SecurityFilter implements ContainerRequestFilter {
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
 		String checkInId = request.getQueryParameters(true).getFirst("checkInId");
-		
-		if(checkInId != null ) {
+		String login = request.getHeaderValue("login");
+		String password = request.getHeaderValue("password");
+		String passwordHash = request.getHeaderValue("passwordHash");
+
+		if(checkInId != null && !checkInId.isEmpty()) {
 			 Authorizer auth = authenticateCheckIn(checkInId);
 			 if(auth != null) {
 				 
 				 request.setSecurityContext(auth);
+				 return request;
 			 }
+		}
+		
+		
+		if(login != null && !login.isEmpty()) {
+			logger.info("recieved login request from user: " +login);
+			Account account = null;
+			if(password != null && !password.isEmpty()) {
+				
+				account = accountCtrl.authenticate(login, password);
+				
+				if(account != null) {
+					request.setSecurityContext(new Authorizer(account));
+					logger.info("authentication success for user: "+login);
+					return request;
+				}	
+			}
+			if(passwordHash != null && !passwordHash.isEmpty()) {
+				account = accountCtrl.authenticateHashed(login, passwordHash);
+				
+				if(account != null) {
+					request.setSecurityContext(new Authorizer(account));
+					logger.info("authentication success for user: "+login);
+					return request;
+				}	
+			}
+			
+			
 		}
 		return request;
 	}
@@ -79,12 +119,22 @@ public class SecurityFilter implements ContainerRequestFilter {
     public class Authorizer implements SecurityContext {
     	
     	private CheckIn checkIn;
+		private Account account;
 
         public Authorizer(final CheckIn checkIn) {
         	this.checkIn = checkIn;
             this.principal = new Principal() {
                 public String getName() {
                 		return checkIn.getUserId();
+                }
+            };
+        }
+        
+        public Authorizer(final Account account) {
+        	this.account = account;
+            this.principal = new Principal() {
+                public String getName() {
+                		return account.getLogin();
                 }
             };
         }
@@ -103,6 +153,8 @@ public class SecurityFilter implements ContainerRequestFilter {
          */
         public boolean isUserInRole(String role) {
         	if( role.equals("user") && checkIn != null && checkIn.getUserId() != null)
+        		return true;
+        	if(account != null && role.equals(account.getRole()))
         		return true;
         	//TODO add role check for restaurant admins		
             return false;

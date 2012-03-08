@@ -22,35 +22,41 @@ public class AccountController {
 		this.accountRepo = accountRepo;
 	}
 	
+	public Account authenticateHashed(String login, String hashedPassword) {	
+		Account account = accountRepo.getByProperty("login", login);
+		if(account == null)
+			return null;
+		
+		if( account.getHashedPassword().equals(hashedPassword) ) {
+			return account;
+		}			
+		else {
+			return null;
+		}
+			
+	}
+	
 	public Account authenticate(String login, String password) {	
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
-			throw new NotFoundException("invalid login data");
+			return null;
 		
 		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
 			return account;
 		}			
 		else {
-			throw new NotFoundException("invalid login data");
+			return null;
 		}
 			
 	}
 	public Account createAndSaveAccount(String login, String password, String email, String role) {
-		Account account = new Account();
-		account.setLogin(login);
-		account.setEmail(email);
-		account.setRole(role);
-		
-		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-		
-		if(accountRepo.saveOrUpdate(account) == null)
-			return null;
-		
-		return account;
+		return accountRepo.createAndSaveAccount(login, password, email, role);
 	}
 	
 	public AccountDTO getAccount(String login, String password) {
 		Account account = authenticate(login, password);
+		if(account == null)
+			return null;
 		AccountDTO accountData = new AccountDTO();
 		accountData.setLogin(account.getLogin());
 		accountData.setRole(account.getRole());

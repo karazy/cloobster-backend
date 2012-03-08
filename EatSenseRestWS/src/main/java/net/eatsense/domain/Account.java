@@ -1,7 +1,10 @@
 package net.eatsense.domain;
 
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
+import org.apache.bval.constraints.Email;
+import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
@@ -9,9 +12,15 @@ import com.googlecode.objectify.annotation.Cached;
 
 @Cached
 public class Account extends GenericEntity {
+	@NotNull
+	@NotEmpty
 	String login;
 	String hashedPassword;
+	@Email
 	String email;
+	
+	@NotNull
+	@NotEmpty
 	String role;
 	
 	public String getLogin() {
