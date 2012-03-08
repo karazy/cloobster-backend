@@ -1,12 +1,12 @@
 Ext.define('EatSense.view.Main', {
-	extend: 'Ext.tab.Panel',
+	extend: 'Ext.TabPanel',
 	xtype: 'main',
 	requires: ['EatSense.view.Spot'],
 	config: {
 		fullscreen: true,
 		items: [
 		{
-			xtype: 'spot'
+			xtype: 'spotcard'
 		}]
 	}
 });

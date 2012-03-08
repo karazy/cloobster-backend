@@ -11,10 +11,10 @@ Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
 	name : 'EatSense',
-	controllers : [ ],
-	models : [],
+	controllers : ['Spot'],
+	models : ['Spot'],
 	views : [ 'Main'], 
-	stores : [ ],
+	stores : ['Spot' ],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
 	requires: ['EatSense.data.proxy.CustomRestProxy',],
@@ -25,6 +25,8 @@ Ext.application({
 		console.log('launch');
 		Ext.create('EatSense.view.Main');
 		
+		//TESTING
+		this.getController('Spot').loadSpots();
 		
 	}
 });

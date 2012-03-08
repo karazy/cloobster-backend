@@ -78,6 +78,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	 
     	 var models = {};
     	 this.models = models;
+
     	 
     	 this.on('statusChanged', this.handleStatusChange, this);
     	 
