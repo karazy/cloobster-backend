@@ -7,6 +7,19 @@ Ext.define('EatSense.view.Main', {
 		items: [
 		{
 			xtype: 'spotcard'
+		}, {
+			xtype: 'toolbar',
+			docked: 'bottom',
+			items: [
+			{
+				xtype: 'spacer'
+			},
+			{
+				xtype: 'button',
+				iconCls: 'delete',
+    			iconMask: true,
+    			action: 'logout'
+			}]
 		}]
 	}
 });

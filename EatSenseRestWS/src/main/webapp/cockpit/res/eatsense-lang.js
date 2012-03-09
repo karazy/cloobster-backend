@@ -11,10 +11,13 @@ var translation = {
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
+		"yes" : "Ja",
+		"no" : "Nein",
 		//login
 		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
-		"savePasswordToggle" : "Automatisch einloggen?"
+		"savePasswordToggle" : "Automatisch<br/>einloggen?",
+		"logoutQuestion" : "Wirklich ausloggen?"
 	}
 
 };

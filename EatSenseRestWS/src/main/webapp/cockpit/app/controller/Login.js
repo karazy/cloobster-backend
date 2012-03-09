@@ -1,6 +1,5 @@
 /*
-* The login controller handles login, as well as 
-* registering a new account ...
+* The login controller handles login, registering a new account ...
 */
 Ext.define('EatSense.controller.Login', {
 	extend: 'Ext.app.Controller',
@@ -8,10 +7,14 @@ Ext.define('EatSense.controller.Login', {
 		control: {
 			loginButton: {
 				tap: 'login'
+			},
+			logoutButton: {
+				tap: 'logout'
 			}
 		},		
 		refs: {
 			loginButton: 'login button[action=login]',
+			logoutButton: 'button[action=logout]',
 			loginField: 'textfield[name=login]',
 			passwordField: 'passwordfield[name=password]',
 			savePassword: 'togglefield[name=savePasswordToggle]'
@@ -32,7 +35,9 @@ Ext.define('EatSense.controller.Login', {
 	},
 
 	/**
-	* 	
+	* 	Restores saved credentials from local webstorage.
+	* 	@return
+	*		true if restore was successful, false otherwise
 	*/
 	restoreCredentials: function() {
 		Ext.Logger.info('restoreCredentials');
@@ -54,7 +59,7 @@ Ext.define('EatSense.controller.Login', {
 
 	   	 if(accountLocalStore.getCount() == 1) {
 	   		 console.log('app state found');
-	   		 account = accountLocalStore.getAt(0);
+	   		 account = accountLocalStore.first();
 	   		 this.setAccount(account);
 
 	   		 //Set default headers so that always credentials are send
@@ -69,7 +74,13 @@ Ext.define('EatSense.controller.Login', {
 	   	 	return false;
 	   	 }
 	},
-
+ 	/**
+ 	*	Action called from login button.
+ 	*	Reads login fields and makes an login attempt. If request is successfull,
+ 	* 	main application screen is shown.
+ 	*	If user sets automatic login then credentials will be saved in localstorage.
+ 	*
+ 	*/
 	login: function() {
 		Ext.Logger.info('login');
 		console.log('login');
@@ -96,10 +107,6 @@ Ext.define('EatSense.controller.Login', {
 			success: function(record, operation){
 				console.log('success');
 				me.setAccount(record);
-				// me.getAccount().set('login', record.get('login'));
-				// me.getAccount().set('email', record.get('email'));
-				// me.getAccount().set('role', record.get('role'));
-				// me.getAccount().set('passwordHash', record.get('passwordHash'));
 
 				//Set default headers so that always credentials are send
 				Ext.Ajax.setDefaultHeaders({
@@ -127,6 +134,45 @@ Ext.define('EatSense.controller.Login', {
 			}
 		});
 	},
+	/**
+	*	Logout signed in user and show login screen.
+	*	Removes credentials.
+	*	
+	*/
+	logout: function() {
+		console.log('logout');
+		var accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
+
+			Ext.Msg.show({
+				title: i18nPlugin.translate('hint'),
+				message: i18nPlugin.translate('logoutQuestion'),
+				buttons: [{
+					text: i18nPlugin.translate('yes'),
+					itemId: 'yes',
+					ui: 'action'
+				}, {
+					text:  i18nPlugin.translate('no'),
+					itemId: 'no',
+					ui: 'action'
+				}],
+				scope: this,
+				fn: function(btnId, value, opt) {
+					if(btnId=='yes') {
+						//remove all stored credentials
+						accountLocalStore.removeAll();
+						accountLocalStore.sync();
+
+						Ext.Ajax.setDefaultHeaders({});	
+
+						//TODO remove in a more reliable way!
+						//remove login view				
+						Ext.Viewport.remove(Ext.Viewport.down('main'));
+						//show main view				
+						Ext.create('EatSense.view.Login');		
+					};
+				}
+		});
+	}
 
 
 });
