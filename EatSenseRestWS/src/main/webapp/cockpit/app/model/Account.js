@@ -1,20 +1,16 @@
 Ext.define('EatSense.model.Account', {
 	extend: 'Ext.data.Model',
 	config: {
-		idProperty: 'login',
+		// idProperty: 'login',
 		fields: [{
-			name: 'login',
-			type: 'string'
+			name: 'login'
 		}, {
-			name: 'email',
-			type: 'string'
+			name: 'email'
 		},
 		{
-			name: 'passwordHash',
-			type: 'string'
+			name: 'passwordHash'
 		}, {
-			name: 'role',
-			type: 'string'
+			name: 'role'
 		}		
 		],
 		proxy : {

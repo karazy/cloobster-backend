@@ -14,7 +14,7 @@ Ext.application({
 	controllers : ['Login','Spot'],
 	models : ['Account','Spot'],
 	views : ['Login', 'Main'], 
-	stores : ['Account',  'Spot' ],
+	stores : ['Account', 'AppState',  'Spot' ],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
@@ -29,6 +29,8 @@ Ext.application({
 
 
 		if(loginCtr.restoreCredentials() === true) {
+			EatSense.model.Account.load('admin', {});
+
 			Ext.create('EatSense.view.Main');
 		} else {
 			Ext.create('EatSense.view.Login');

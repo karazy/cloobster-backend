@@ -13,7 +13,8 @@ var translation = {
 		"success" : "Erfolg",
 		//login
 		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
-		"wrongCredentials" : "Benutzername und/oder Passwort falsch."
+		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
+		"savePasswordToggle" : "Automatisch einloggen?"
 	}
 
 };

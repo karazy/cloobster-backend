@@ -5,7 +5,7 @@ Ext.define('EatSense.view.Login', {
 		fullscreen: true,
 		centered: true,
 		width: 500,
-		height:200,
+		// height:200,
 		floatingCls: 'loginbox',
 		// cls: 'loginbox',
 		layout: {
@@ -28,7 +28,16 @@ Ext.define('EatSense.view.Login', {
 			width: '90%',
 			name: 'password',
 			cls: 'loginbox-field'
-		}, {
+		}, 
+		{
+				xtype : 'togglefield',
+				name : 'savePasswordToggle',
+				labelAlign: 'top',
+				value : 0,
+				width: '90%',
+				label : i18nPlugin.translate('savePasswordToggle'),
+		},
+		{
 			xtype: 'button',
 			text: 'Login',
 			action: 'login'

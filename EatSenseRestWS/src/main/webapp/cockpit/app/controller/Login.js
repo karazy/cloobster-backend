@@ -13,7 +13,8 @@ Ext.define('EatSense.controller.Login', {
 		refs: {
 			loginButton: 'login button[action=login]',
 			loginField: 'textfield[name=login]',
-			passwordField: 'passwordfield[name=password]'
+			passwordField: 'passwordfield[name=password]',
+			savePassword: 'togglefield[name=savePasswordToggle]'
 		},		
 
 		account : Ext.create('EatSense.model.Account')
@@ -36,7 +37,7 @@ Ext.define('EatSense.controller.Login', {
 	restoreCredentials: function() {
 		Ext.Logger.info('restoreCredentials');
 		console.log('restoreCredentials');
-		var accountLocalStore = Ext.data.StoreManager.lookup('appStateStore'),
+		var accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
 		account;
 
 		if(!accountLocalStore) {
@@ -46,7 +47,8 @@ Ext.define('EatSense.controller.Login', {
 	   	 try {
 	   		accountLocalStore.load();
 	   	 } catch (e) {
-	   		accountLocalStore.removeAll();
+	   	 	console.log('Failed restoring cockpit state.');
+	   		accountLocalStore.removeAll();	   		
 	   		return false;
 	   	 }
 
@@ -57,8 +59,8 @@ Ext.define('EatSense.controller.Login', {
 
 	   		 //Set default headers so that always credentials are send
 			Ext.Ajax.setDefaultHeaders({
-				'login': login,
-				'passwordHash': record.get('passwordHash')
+				'login': account.get('login'),
+				'passwordHash': account.get('passwordHash')
 			});
 
 	   		 return true;	   		 	   		
@@ -75,6 +77,7 @@ Ext.define('EatSense.controller.Login', {
 		var account, 
 		login = this.getLoginField().getValue(),
 		password = this.getPasswordField().getValue(),
+		accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
 		me = this;
 
 		if(Ext.String.trim(login).length == 0 || Ext.String.trim(password).length == 0) {
@@ -93,6 +96,10 @@ Ext.define('EatSense.controller.Login', {
 			success: function(record, operation){
 				console.log('success');
 				me.setAccount(record);
+				// me.getAccount().set('login', record.get('login'));
+				// me.getAccount().set('email', record.get('email'));
+				// me.getAccount().set('role', record.get('role'));
+				// me.getAccount().set('passwordHash', record.get('passwordHash'));
 
 				//Set default headers so that always credentials are send
 				Ext.Ajax.setDefaultHeaders({
@@ -100,8 +107,17 @@ Ext.define('EatSense.controller.Login', {
 					'passwordHash': record.get('passwordHash')
 				});				
 
-				me.this.resetAccountProxyHeaders();
+				me.resetAccountProxyHeaders();
 
+				if(me.getSavePassword().getValue() === 1) {
+					me.getAccount().setDirty();
+					accountLocalStore.add(me.getAccount());
+					accountLocalStore.sync();
+				}
+
+				//TODO remove in a more reliable way!
+				//remove login view				
+				Ext.Viewport.remove(Ext.Viewport.down('login'));
 				//show main view				
 				Ext.create('EatSense.view.Main');
 			},

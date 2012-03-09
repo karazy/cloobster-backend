@@ -2,11 +2,11 @@ Ext.define('EatSense.store.AppState', {
 	extend : 'Ext.data.Store',
 	requires : [ 'EatSense.model.Account' ],
 	config : {
-		storeId : 'appStateStore',
+		storeId : 'cockpitStateStore',
 		model : 'EatSense.model.Account',
-		autoSync: true,
 		proxy : {
 			type : 'localstorage',
+			id: 'eatSense_cockpit_store'
 		}
 	}
 });
