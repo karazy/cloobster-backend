@@ -18,7 +18,30 @@ Ext.define('EatSense.controller.Spot', {
 		 });
 		
 	},
+	/**
+	*	Loads all businesses this user account is assigned to.
+	*
+	*/
+	loadBusinesses: function() {
+		console.log('loadBusinesses');
+		var businessStore = Ext.StoreManager.lookup('businessStore'),
+		loginCtr = this.getApplication().getController('Login');
 
+		businessStore.load({
+			params: {
+				pathId: loginCtr.getAccount().get('login')
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) {			 		
+			 	}				
+			 },
+			 scope: this
+		});
+	},
+	/**
+	*
+	*
+	*/
 	loadSpots: function() {
 		console.log('loadSpots');
 		var loginCtr = this.getApplication().getController('Login'),
@@ -26,7 +49,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		this.getSpotsview().getStore().load({
 			 params: {
-			 	restaurantIdx : 1,
+			 	pathId : 1,
 			 },
 			 callback: function(records, operation, success) {
 			 	if(success) {

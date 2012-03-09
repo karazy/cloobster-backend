@@ -1,8 +1,8 @@
-Ext.define('EatSense.model.Business', {
+Ext.define('EatSense.store.Business', {
 	extend: 'Ext.data.Store',
 	requires : [ 'EatSense.model.Business' ],
 	config : {
-		storeId : 'myBusinessStore',
+		storeId : 'businessStore',
 		model : 'EatSense.model.Business'
 	}
 });

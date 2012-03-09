@@ -27,7 +27,7 @@ Ext.define('EatSense.model.Spot', {
 		}],
 		proxy : {
 			type : 'rest',
-			url : '/spots/'
+			url : '/restaurants/{pathId}/spots/'
 		}
 	}
 });
