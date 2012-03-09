@@ -17,10 +17,6 @@ public enum CheckInStatus {
 	 */
 	BARCODE_ERROR,
 	/**
-	 * Returned after check in and indicating that others are checked in at the same spot.
-	 */
-	YOUARENOTALONE,
-	/**
 	 * User checked in.
 	 */
 	CHECKEDIN, 
@@ -30,10 +26,6 @@ public enum CheckInStatus {
 	ORDER_PLACED,
 	/**
 	 * User is in an idle state. At least on order was served.
-	 */
-	ORDER_PROCESSED,
-	/**
-	 * User wants to pay.
 	 */
 	PAYMENT_REQUEST,	
 	/**

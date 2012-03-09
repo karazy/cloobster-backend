@@ -18,13 +18,17 @@ import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
+import net.eatsense.domain.Request;
+import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
@@ -55,12 +59,14 @@ public class BillController {
 	private ChoiceRepository choiceRepo;
 
 	private Transformer transform;
+	private RequestRepository requestRepo;
 	
 	
 	@Inject
-	public BillController(OrderRepository orderRepo,
+	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, Transformer trans, BillRepository billRepo) {
 		super();
+		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
 		this.orderChoiceRepo = orderChoiceRepo;
@@ -76,7 +82,7 @@ public class BillController {
 		if(checkIn == null) {
 			throw new IllegalArgumentException("Bill cannot be created, checkin not found!");
 		}
-		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN) {
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new IllegalArgumentException("Bill cannot be created, payment already requested or not checked in");
 		}
 		
@@ -113,6 +119,18 @@ public class BillController {
 			billData.setId(bill.getId());
 			billData.setTime(bill.getCreationTime());
 			billData.setTotal(bill.getTotal());
+			
+			Request request = new Request();
+			request.setRestaurant(restaurant.getKey());
+			request.setCheckIn(checkIn.getKey());
+			request.setSpot(checkIn.getSpot());
+			request.setType(RequestType.BILL);
+			request.setReceivedTime(new Date());
+			request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
+			request.setObjectId(bill.getId());
+			
+			requestRepo.saveOrUpdate(request);
+			
 			
 			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 			if(checkInRepo.saveOrUpdate(checkIn) == null )

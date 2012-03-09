@@ -2,6 +2,7 @@ package net.eatsense.restws;
 
 import java.util.Collection;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -19,6 +20,7 @@ import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.controller.RestaurantController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
@@ -28,6 +30,8 @@ import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.RestaurantDTO;
+import net.eatsense.representation.SpotDTO;
+import net.eatsense.representation.cockpit.SpotCockpitDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
@@ -49,10 +53,12 @@ public class RestaurantResource{
 	private ImportController importCtrl;
 	private OrderController orderCtrl;
 	private BillController billCtrl;
+	private RestaurantController restaurantCtrl;
 
 	@Inject
-	public RestaurantResource(RestaurantRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
+	public RestaurantResource(RestaurantController restaurantCtr, RestaurantRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
 		this.restaurantRepo = repo;
+		this.restaurantCtrl = restaurantCtr;
 		this.menuCtrl = menuCtr;
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
@@ -70,6 +76,14 @@ public class RestaurantResource{
 	public Collection<Restaurant> listAll() {
 		Collection<Restaurant> list =  restaurantRepo.getAll();
 		return list;
+	}
+	
+	@GET
+	@Path("{restaurantId}/spots")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"restaurantadmin"})
+	public Collection<SpotCockpitDTO> getSpotCockpitInformation(@PathParam("restaurantId") Long restaurantId) {
+		return restaurantCtrl.getSpotDtos(restaurantId);
 	}
 	
 	@GET
@@ -119,7 +133,6 @@ public class RestaurantResource{
 		return orders;
 	}
 	
-	
 	@GET
 	@Path("{restaurantId}/orders/{orderId}")
 	@Produces("application/json; charset=UTF-8")
@@ -135,7 +148,7 @@ public class RestaurantResource{
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public OrderDTO updateOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId, OrderDTO order) {
-		return orderCtrl.updateOrder(restaurantId, orderId, order);
+		return orderCtrl.updateOrder(restaurantId, orderId, order, checkInId);
 	}
 	
 	@DELETE

@@ -13,6 +13,7 @@ import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Restaurant;
@@ -42,6 +43,7 @@ public class GenericRepository<T> extends DAOBase{
 
 	static {
 		//Register classes with Objectify
+		ObjectifyService.register(Request.class);
 		ObjectifyService.register(Account.class);
 		ObjectifyService.register(Restaurant.class);
 		ObjectifyService.register(Spot.class);
@@ -228,6 +230,26 @@ public class GenericRepository<T> extends DAOBase{
 		q.filter(propName, propValue);
 
 		return q.list();
+
+	}
+	
+	/**
+	 * Convenience method to get all object keys matching a single property
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public List<Key<T>> getKeysByProperty(String propName, Object propValue)
+	{
+		Query<T> q = ofy().query(clazz);
+
+		q.filter(propName, propValue);
+
+		return q.listKeys();
 
 	}
 	

@@ -20,17 +20,21 @@ import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
+import net.eatsense.domain.Request;
 import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Request.RequestType;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
 
+import com.google.appengine.api.taskqueue.TaskQueuePb.TaskQueueAddRequest.RequestMethod;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
@@ -53,12 +57,15 @@ public class OrderController {
 	private ChoiceRepository choiceRepo;
 
 	private Transformer transform;
+
+	private RequestRepository requestRepo;
 	
 	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, Transformer trans) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans) {
 		super();
+		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
 		this.orderChoiceRepo = orderChoiceRepo;
@@ -77,9 +84,19 @@ public class OrderController {
 		orderRepo.ofy().delete(new Key<Order>(new Key<Restaurant>(Restaurant.class, restaurantId), Order.class, orderId));
 	}
 	
-	public OrderDTO updateOrder(Long restaurantId, Long orderId, OrderDTO orderData) {
+	public OrderDTO updateOrder(Long restaurantId, Long orderId, OrderDTO orderData, String checkInId) {
 		Order order = getOrder(restaurantId, orderId);
 		
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+		if(checkIn == null) {
+			logger.error("Order cannot be placed, checkin not found!");
+			return null;
+		}
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN) {
+			logger.error("Order cannot be placed, payment already requested or not checked in");
+			return null;
+		}
+
 		
 		order.setStatus(orderData.getStatus());
 		order.setComment(orderData.getComment());
@@ -89,6 +106,19 @@ public class OrderController {
 			// save order
 			if( orderRepo.saveOrUpdate(order) == null )
 				throw new RuntimeException("order could not be updated, id: " + orderId);
+
+			checkIn.setStatus(CheckInStatus.ORDER_PLACED);
+			checkInRepo.saveOrUpdate(checkIn);
+			Request request = new Request();
+			request.setCheckIn(checkIn.getKey());
+			request.setRestaurant(Restaurant.getKey(restaurantId));
+			request.setObjectId(orderId);
+			request.setType(RequestType.ORDER);
+			request.setReceivedTime(new Date());
+			request.setSpot(checkIn.getSpot());
+			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
+
+			requestRepo.saveOrUpdate(request);
 		}
 		else {
 			// build validation error messages
@@ -98,7 +128,10 @@ public class OrderController {
 				
 			}
 			throw new RuntimeException("Validation errors:\n"+message);
-		}		
+		}
+		
+		
+		
 		
 		return transform.orderToDto( order );
 	}
@@ -243,6 +276,7 @@ public class OrderController {
 			// order successfully saved
 			orderId = orderKey.getId();
 		}
+		
 		
 		return orderId;
 	}

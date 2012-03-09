@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
 /**
@@ -14,6 +15,7 @@ import com.googlecode.objectify.annotation.Parent;
  * @author Nils Weiher
  *
  */
+@Cached
 public class OrderChoice extends GenericEntity {
 	
 	@Transient
