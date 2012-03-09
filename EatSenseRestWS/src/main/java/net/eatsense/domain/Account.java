@@ -1,5 +1,7 @@
 package net.eatsense.domain;
 
+import java.util.Date;
+
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
@@ -23,6 +25,25 @@ public class Account extends GenericEntity {
 	@NotEmpty
 	String role;
 	
+	Date lastFailedLogin;
+	int failedLoginAttempts;
+	
+	public Date getLastFailedLogin() {
+		return lastFailedLogin;
+	}
+
+	public void setLastFailedLogin(Date lastFailedLogin) {
+		this.lastFailedLogin = lastFailedLogin;
+	}
+
+	public int getFailedLoginAttempts() {
+		return failedLoginAttempts;
+	}
+
+	public void setFailedLoginAttempts(int failedLoginAttempts) {
+		this.failedLoginAttempts = failedLoginAttempts;
+	}
+
 	public String getLogin() {
 		return login;
 	}
