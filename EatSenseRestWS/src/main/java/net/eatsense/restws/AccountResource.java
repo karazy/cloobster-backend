@@ -1,5 +1,7 @@
 package net.eatsense.restws;
 
+import java.util.Collection;
+
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.BusinessDTO;
 
 import com.google.inject.Inject;
 
@@ -43,5 +46,14 @@ public class AccountResource {
 			throw new WebApplicationException(401);
 		logger.info("Authenticated request from user :" + ((Account)servletRequest.getAttribute("net.eatsense.domain.Account")).getLogin());
 		return accountCtr.toDto(account);
-	}	
+	}
+	
+	@GET
+	@Path("{login}")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"restaurantadmin"})
+	public Collection<BusinessDTO> getBusinessesForAccount(@PathParam("login") String login) {
+		return accountCtr.getBusinessDtos(login);
+	}
+	
 }

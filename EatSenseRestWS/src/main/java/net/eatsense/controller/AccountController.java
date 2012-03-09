@@ -1,10 +1,17 @@
 package net.eatsense.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.GenericRepository;
+import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.BusinessDTO;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -18,10 +25,12 @@ import com.google.inject.Inject;
  */
 public class AccountController {
 	private AccountRepository accountRepo;
+	private RestaurantRepository restaurantRepo;
 	
 	@Inject
-	public AccountController(AccountRepository accountRepo) {
+	public AccountController(AccountRepository accountRepo, RestaurantRepository rr) {
 		super();
+		this.restaurantRepo = rr;
 		this.accountRepo = accountRepo;
 	}
 	
@@ -113,5 +122,22 @@ public class AccountController {
 	
 	public AccountDTO getAccount(String login, String password) {
 		return toDto(authenticate(login, password));
+	}
+
+
+	public List<BusinessDTO> getBusinessDtos(String login) {
+		Account account = accountRepo.getByProperty("login", login);
+		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
+		if(account != null && account.getRole().equals("restaurantadmin")) {
+			for (Restaurant restaurant :restaurantRepo.getAll()) {
+				BusinessDTO businessData = new BusinessDTO();
+				businessData.setId(restaurant.getId());
+				businessData.setName(restaurant.getName());
+				businessData.setDescription(restaurant.getDescription());
+				businessDtos.add(businessData);
+			}
+		}
+			
+		return businessDtos;
 	}
 }
