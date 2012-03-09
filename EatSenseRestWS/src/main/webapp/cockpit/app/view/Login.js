@@ -8,40 +8,51 @@ Ext.define('EatSense.view.Login', {
 		// height:200,
 		floatingCls: 'loginbox',
 		// cls: 'loginbox',
-		layout: {
-			type: 'vbox',
-			align: 'middle',
-			pack: 'center'
-		},
+		// layout: {
+		// 	type: 'fit'
+		// },
 		items: [
 		{
-			xtype: 'textfield',
-			label: 'Benutzername',
-			labelWidth: '30%',
-			width: '90%',
-			name: 'login',
-			cls: 'loginbox-field'
-		}, {
-			xtype: 'passwordfield',
-			label: 'Passwort',
-			labelWidth: '30%',
-			width: '90%',
-			name: 'password',
-			cls: 'loginbox-field'
-		}, 
-		{
-				xtype : 'togglefield',
-				name : 'savePasswordToggle',
-				labelAlign: 'top',
-				value : 0,
-				width: '90%',
-				label : i18nPlugin.translate('savePasswordToggle'),
-		},
-		{
-			xtype: 'button',
-			text: 'Login',
-			action: 'login'
+			xtype: 'panel',
+			padding: '15',
+			layout: {
+				type: 'vbox',
+				align: 'middle',
+				pack: 'center'
+			},
+			items: [
+					{
+					xtype: 'textfield',
+					label: 'Benutzername',
+					labelWidth: '40%',
+					width: '100%',
+					name: 'login',
+					cls: 'loginbox-field'
+				}, {
+					xtype: 'passwordfield',
+					label: 'Passwort',
+					labelWidth: '40%',
+					width: '100%',
+					name: 'password',
+					cls: 'loginbox-field'
+				}, 
+				{
+					xtype : 'togglefield',
+					name : 'savePasswordToggle',
+					// labelAlign: 'top',
+					value : 0,
+					labelWidth: '40%',
+					width: '100%',
+					label : i18nPlugin.translate('savePasswordToggle'),
+				},
+				{
+					xtype: 'button',
+					text: 'Login',
+					action: 'login'
+				}
+			]
 		}
+
 
 		]
 	}
