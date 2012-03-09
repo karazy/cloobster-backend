@@ -12,27 +12,23 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : ['Login','Spot'],
-	models : ['Account','Spot'],
+	models : ['Account','Spot', 'Business'],
 	views : ['Login', 'Main'], 
-	stores : ['Account', 'AppState',  'Spot' ],
-	phoneStartupScreen: 'res/images/startup.png',
-	tabletStartupScreen: 'res/images/startup.png',
+	stores : ['Account', 'AppState',  'Spot', 'Business' ],
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
 	init : function() {
 		console.log('init');
 	},
 	launch : function() {
-		console.log('launch');
+		console.log('launch cockpit ...');
 
-		//try to restore application state
-	   	var loginCtr = this.getController('Login');
-
+	   	var loginCtr = this.getController('Login'),
+	   		spotCtr = this.getController('Spot');
 
 		if(loginCtr.restoreCredentials() === true) {
-			EatSense.model.Account.load('admin', {});
-
 			Ext.create('EatSense.view.Main');
-		} else {
+			spotCtr.loadSpots();
+		} else {			
 			Ext.create('EatSense.view.Login');
 		}		
 		

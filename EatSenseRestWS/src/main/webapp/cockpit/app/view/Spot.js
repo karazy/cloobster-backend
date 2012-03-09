@@ -10,7 +10,7 @@ Ext.define('EatSense.view.Spot', {
 		items: [		
 				{
 					xtype: 'dataview',
-					itemId: 'spotlist',
+					itemId: 'spotsview',
 					store: 'spotStore',
 					// itemTpl: '<div><h2>{name}</h2><p>Check in: {checkInTime}</p><p>Value: {currentTotal}</p></div>',
 					baseCls: 'dv-baseCls',
@@ -18,7 +18,7 @@ Ext.define('EatSense.view.Spot', {
 					// pressedCls: 'spotPressed',
 					// selectedCls: 'spotSelected',
 					// allowSelect: false,
-					 useComponents: true,
+					useComponents: true,
     				defaultType: 'spotitem',
     				// listeners: {
     				// 	itemtab: function(dv, index, target, record) {},

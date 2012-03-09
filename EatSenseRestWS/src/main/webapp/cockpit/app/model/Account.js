@@ -1,10 +1,11 @@
 Ext.define('EatSense.model.Account', {
 	extend: 'Ext.data.Model',
 	config: {
-		// idProperty: 'login',
-		fields: [{
+		fields: [
+		{
 			name: 'login'
-		}, {
+		}, 
+		{
 			name: 'email'
 		},
 		{

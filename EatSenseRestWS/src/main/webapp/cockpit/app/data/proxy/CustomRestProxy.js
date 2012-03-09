@@ -27,27 +27,21 @@ Ext.define('EatSense.data.proxy.CustomRestProxy', {
 //	            url += format;
 //	        }
 			//------TEST
-	        // var  me = this, _serviceUrl = globalConf.serviceUrl, 
-	        // 	url = me.getUrl(request),
-	        // 	params = request.getParams() || {};
+	        var  me = this, _serviceUrl = globalConf.serviceUrl, 
+	        	url = me.getUrl(request),
+	        	params = request.getParams() || {};
 
-	        // if(params.loginname && params.password) {
-
-	        // 	request.setHeaders({
-	        // 		'loginname' : params.loginname,
-	        // 		'password' : params.password
-	        // 	});
-
-	        // 	delete params.loginname;
-	        // 	delete params.password
-	        // };
+	        if(params.restaurantId) {
+	        	url = '/restaurants/'+params.restaurantId+url;
+	        	delete params.restaurantId;
+	        };
 	        	
-	        // request.setUrl(_serviceUrl + url);
+	        request.setUrl(_serviceUrl + url);
 			//------TEST END
 
 			
-	         var  me = this, _serviceUrl = globalConf.serviceUrl, url = me.getUrl(request);
-	        request.setUrl(_serviceUrl + url);
+	        //  var  me = this, _serviceUrl = globalConf.serviceUrl, url = me.getUrl(request);
+	        // request.setUrl(_serviceUrl + url);
 
 	        return me.callParent([request]);
 	    }

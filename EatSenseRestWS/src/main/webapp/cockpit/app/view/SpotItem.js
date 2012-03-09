@@ -30,7 +30,7 @@ Ext.define('EatSense.view.SpotItem', {
 
 	applySpot: function(config) {
 		// Ext.Logger.log('applySpot');
-		var panel = Ext.factory(config, Ext.Panel, this.getSpot());
+		var panel = Ext.factory(config, Ext.Button, this.getSpot());
 		panel.getTpl().overwrite(panel.element, this.getRecord().getData());
 
 		if(this.getRecord().get('status') == 'PLACED') {

@@ -15,7 +15,7 @@ Ext.define('EatSense.model.Spot', {
 		}, {
 			name : 'name',
 			type : 'string'
-		}, { //shows status of orders
+		}, { //shows 
 			name: 'status',
 			type: 'string'
 		}, { //time when first person checked in
@@ -25,20 +25,9 @@ Ext.define('EatSense.model.Spot', {
 			name: 'currentTotal',
 			type: 'number'
 		}],
-		 // associations: [{
-	  //           type: 'hasMany',
-	  //           model: 'EatSense.model.PaymentMethod',
-	  //           primaryKey: 'id',
-	  //           name: 'payments',
-	  //           //autoLoad: true,
-	  //           associationKey: 'payments' // read child data from child_groups
-	  //       }],
 		proxy : {
 			type : 'rest',
-			url : '/spots/',
-			reader : {
-				type : 'json',
-			}
+			url : '/spots/'
 		}
 	}
 });

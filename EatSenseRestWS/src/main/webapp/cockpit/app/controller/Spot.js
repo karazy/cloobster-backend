@@ -1,8 +1,10 @@
 Ext.define('EatSense.controller.Spot', {
 	extend: 'Ext.app.Controller',
+	requires: ['EatSense.view.Main'],
 	config: {
 		refs: {
-			spotitem: '#spotcard dataview spotitem'
+			spotitem: 'spotitem button',
+			spotsview: '#spotsview'
 		}
 	},
 
@@ -11,23 +13,29 @@ Ext.define('EatSense.controller.Spot', {
 		console.log('initializing Spot Controller');
 		 this.control({
 		 	spotitem: {
-		 		tab: function() {
-		 			alert('tab');
-		 		},
-		 		itemtab: function() {
-		 			alert('itemtab');
-		 		},
-		 		select: function() {
-		 			alert('select');
-		 		}
+		 		tap:  this.showSpotDetails
 		 	}
-
 		 });
 		
 	},
 
 	loadSpots: function() {
 		console.log('loadSpots');
+		var loginCtr = this.getApplication().getController('Login'),
+		account = loginCtr.getAccount();
+
+		this.getSpotsview().getStore().load({
+			 params: {
+			 	restaurantIdx : 1,
+			 },
+			 callback: function(records, operation, success) {
+			 	if(success) {
+			 		this.getSpotsview().refresh();	 		
+			 	}				
+			 },
+			 scope: this
+		});
+		
 
 		//just for dev purpose!
 		// //create a store loading all available HUP Spots. 
@@ -53,6 +61,14 @@ Ext.define('EatSense.controller.Spot', {
 
 		// this.getSpotlist().setStore(spotStore);
 		// this.getSpotlist().refresh();
+	},
+	/**
+	*	Gets called when user taps on a spot. Shows whats going on at a particular spot.
+	*   Like orders, payment requests ...
+	*
+	*/
+	showSpotDetails: function(button, eventObj, eOpts) {
+		console.log('showSpotDetails for ');
 	}
 
 })
