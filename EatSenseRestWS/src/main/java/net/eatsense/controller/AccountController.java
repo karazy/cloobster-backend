@@ -1,5 +1,7 @@
 package net.eatsense.controller;
 
+import java.util.Date;
+
 import net.eatsense.domain.Account;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.representation.AccountDTO;
@@ -37,9 +39,16 @@ public class AccountController {
 			return null;
 		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
+			// Reset failed attempts counter
+			account.setFailedLoginAttempts(0);
+			accountRepo.saveOrUpdate(account);
 			return account;
 		}			
 		else {
+			// Increment failed login attempts and set last failed login time
+			account.setFailedLoginAttempts(account.getFailedLoginAttempts()+1);
+			account.setLastFailedLogin(new Date());
+			accountRepo.saveOrUpdate(account);
 			return null;
 		}
 			
@@ -58,12 +67,24 @@ public class AccountController {
 			return null;
 		
 		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
+			// Reset failed attempts counter
+			account.setFailedLoginAttempts(0);
+			accountRepo.saveOrUpdate(account);
 			return account;
 		}			
 		else {
+			// Increment failed login attempts and set last failed login time
+			account.setFailedLoginAttempts(account.getFailedLoginAttempts()+1);
+			account.setLastFailedLogin(new Date());
+			accountRepo.saveOrUpdate(account);
 			return null;
 		}
 			
+	}
+	
+	public AccountDTO updateAccount(AccountDTO accountData) {
+		//TODO Validate and save new data for the given account
+		return null;
 	}
 	
 	/**
