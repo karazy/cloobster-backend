@@ -29,6 +29,7 @@ import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.RestaurantDTO;
 import net.eatsense.representation.SpotDTO;
+import net.eatsense.representation.cockpit.SpotCockpitDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
@@ -123,7 +124,7 @@ public class RestaurantResource{
 	@GET
 	@Path("{restaurantId}/spots")
 	@Produces("application/json; charset=UTF-8")
-	public Collection<SpotDTO> getSpots(@PathParam("restaurantId")Long restaurantId) {
+	public Collection<SpotCockpitDTO> getSpots(@PathParam("restaurantId")Long restaurantId) {
 		return null;
 	}
 	
@@ -142,7 +143,7 @@ public class RestaurantResource{
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public OrderDTO updateOrder(@PathParam("restaurantId")Long restaurantId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId, OrderDTO order) {
-		return orderCtrl.updateOrder(restaurantId, orderId, order);
+		return orderCtrl.updateOrder(restaurantId, orderId, order, checkInId);
 	}
 	
 	@DELETE
