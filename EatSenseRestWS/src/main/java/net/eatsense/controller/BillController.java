@@ -82,7 +82,7 @@ public class BillController {
 		if(checkIn == null) {
 			throw new IllegalArgumentException("Bill cannot be created, checkin not found!");
 		}
-		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN) {
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new IllegalArgumentException("Bill cannot be created, payment already requested or not checked in");
 		}
 		

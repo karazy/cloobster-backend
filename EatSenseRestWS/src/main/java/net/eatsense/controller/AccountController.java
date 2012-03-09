@@ -49,8 +49,10 @@ public class AccountController {
 		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
 			// Reset failed attempts counter
-			account.setFailedLoginAttempts(0);
-			accountRepo.saveOrUpdate(account);
+			if(account.getFailedLoginAttempts() > 0) {
+				account.setFailedLoginAttempts(0);
+				accountRepo.saveOrUpdate(account);
+			}
 			return account;
 		}			
 		else {
@@ -77,8 +79,10 @@ public class AccountController {
 		
 		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
 			// Reset failed attempts counter
-			account.setFailedLoginAttempts(0);
-			accountRepo.saveOrUpdate(account);
+			if(account.getFailedLoginAttempts() > 0) {
+				account.setFailedLoginAttempts(0);
+				accountRepo.saveOrUpdate(account);
+			}
 			return account;
 		}			
 		else {

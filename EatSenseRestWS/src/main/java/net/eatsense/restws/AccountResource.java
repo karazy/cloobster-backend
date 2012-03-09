@@ -49,7 +49,7 @@ public class AccountResource {
 	}
 	
 	@GET
-	@Path("{login}")
+	@Path("{login}/businesses")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public Collection<BusinessDTO> getBusinessesForAccount(@PathParam("login") String login) {

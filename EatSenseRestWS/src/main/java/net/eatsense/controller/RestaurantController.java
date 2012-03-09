@@ -49,7 +49,7 @@ public class RestaurantController {
 		this.productRepo = pr;
 	}
 	
-	List<SpotCockpitDTO>getSpotDtos(Long restaurantId) {
+	public List<SpotCockpitDTO> getSpotDtos(Long restaurantId) {
 		List<Spot> allSpots = spotRepo.getByParent(Restaurant.getKey(restaurantId));
 		List<SpotCockpitDTO> spotDtos = new ArrayList<SpotCockpitDTO>();
 		for (Spot spot : allSpots) {
