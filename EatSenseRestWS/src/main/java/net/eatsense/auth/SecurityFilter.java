@@ -5,6 +5,7 @@ package net.eatsense.auth;
 
 import java.security.Principal;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -48,6 +49,9 @@ public class SecurityFilter implements ContainerRequestFilter {
      */
     @Context
     UriInfo uriInfo;
+    
+    @Context
+    HttpServletRequest servletRequest;
 	
 	public void setCheckInCtr(CheckInController checkInCtr) {
 		this.checkInCtrl = checkInCtr;
@@ -77,20 +81,27 @@ public class SecurityFilter implements ContainerRequestFilter {
 			logger.info("recieved login request from user: " +login);
 			Account account = null;
 			if(password != null && !password.isEmpty()) {
-				
+				// Authenticate with the clear password, should usually been doing only once during a session.
 				account = accountCtrl.authenticate(login, password);
 				
 				if(account != null) {
 					request.setSecurityContext(new Authorizer(account));
+					servletRequest.setAttribute("net.eatsense.domain.Account", account);
 					logger.info("authentication success for user: "+login);
 					return request;
-				}	
+				}
+				else {
+					logger.info("Failed login for user: "+login);
+				}
+					
 			}
 			if(passwordHash != null && !passwordHash.isEmpty()) {
+				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticateHashed(login, passwordHash);
 				
 				if(account != null) {
 					request.setSecurityContext(new Authorizer(account));
+					servletRequest.setAttribute("net.eatsense.domain.Account", account);
 					logger.info("authentication success for user: "+login);
 					return request;
 				}	
@@ -152,11 +163,13 @@ public class SecurityFilter implements ContainerRequestFilter {
          * @param role Role to be checked
          */
         public boolean isUserInRole(String role) {
-        	if( role.equals("user") && checkIn != null && checkIn.getUserId() != null)
+        	if( role.equals("guest") && checkIn != null && checkIn.getUserId() != null)
         		return true;
+        	
+
         	if(account != null && role.equals(account.getRole()))
         		return true;
-        	//TODO add role check for restaurant admins		
+		
             return false;
         }
 
