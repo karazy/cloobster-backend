@@ -28,6 +28,7 @@ import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.RestaurantDTO;
+import net.eatsense.representation.SpotDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
@@ -119,6 +120,12 @@ public class RestaurantResource{
 		return orders;
 	}
 	
+	@GET
+	@Path("{restaurantId}/spots")
+	@Produces("application/json; charset=UTF-8")
+	public Collection<SpotDTO> getSpots(@PathParam("restaurantId")Long restaurantId) {
+		return null;
+	}
 	
 	@GET
 	@Path("{restaurantId}/orders/{orderId}")

@@ -10,12 +10,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
 /**
  * @author Nils Weiher
  *
  */
+@Cached
 public class Order extends GenericEntity {
 	@NotNull
 	Date orderTime;

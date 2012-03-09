@@ -242,7 +242,10 @@ public class OrderController {
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();
+			checkIn.setStatus(CheckInStatus.ORDER_PLACED);
+			checkInRepo.saveOrUpdate(checkIn);
 		}
+		
 		
 		return orderId;
 	}
