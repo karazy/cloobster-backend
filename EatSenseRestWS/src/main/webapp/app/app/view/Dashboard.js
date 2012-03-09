@@ -69,7 +69,7 @@ Ext.define('EatSense.view.Dashboard', {
 //					labelWidth : 100,
 					width : 100,
 					name : 'barcodeTF',
-					hidden : (profile == 'phone' && window.plugins.barcodeScanner) ? true : false
+					hidden : (profile == 'phone' && window.plugins && window.plugins.barcodeScanner) ? true : false
 				} ]
 			} ]
 		},

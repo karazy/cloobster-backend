@@ -56,3 +56,11 @@
 .spot-pay {
 
 }
+
+.loginbox {
+	background-color: rgb(100,100,200);	
+}
+
+.loginbox-field {
+	margin-bottom: 10px;
+}
