@@ -15,6 +15,8 @@ import net.eatsense.representation.BusinessDTO;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
 
 /**
@@ -47,12 +49,20 @@ public class AccountController {
 		if(account == null)
 			return null;
 		
+		ChannelService channelService = ChannelServiceFactory.getChannelService();	
+		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
 			// Reset failed attempts counter
 			if(account.getFailedLoginAttempts() > 0) {
 				account.setFailedLoginAttempts(0);
 				accountRepo.saveOrUpdate(account);
 			}
+			
+			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
+				String token = channelService.createChannel(account.getLogin());
+				account.setChannelToken(token);
+			}
+			
 			return account;
 		}			
 		else {
@@ -77,12 +87,21 @@ public class AccountController {
 		if(account == null)
 			return null;
 		
+		ChannelService channelService = ChannelServiceFactory.getChannelService();		
+		
 		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
 			// Reset failed attempts counter
 			if(account.getFailedLoginAttempts() > 0) {
 				account.setFailedLoginAttempts(0);
 				accountRepo.saveOrUpdate(account);
 			}
+			
+			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
+				String token = channelService.createChannel(account.getLogin());
+				account.setChannelToken(token);
+			}
+			
+			
 			return account;
 		}			
 		else {
@@ -121,6 +140,7 @@ public class AccountController {
 		accountData.setRole(account.getRole());
 		accountData.setEmail(account.getEmail());
 		accountData.setPasswordHash(account.getHashedPassword());
+		accountData.setToken(account.getChannelToken());
 		return accountData;
 	}
 	

@@ -12,6 +12,8 @@ Ext.define('EatSense.model.Account', {
 			name: 'passwordHash'
 		}, {
 			name: 'role'
+		}, {
+			name: 'token'
 		}		
 		],
 		proxy : {

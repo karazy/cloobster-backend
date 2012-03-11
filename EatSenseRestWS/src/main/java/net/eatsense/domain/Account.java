@@ -21,6 +21,12 @@ public class Account extends GenericEntity {
 	@Email
 	String email;
 	
+	/**
+	 * The token used created by channel API.
+	 * Needed to enable push communication.
+	 */
+	String channelToken;
+	
 	@NotNull
 	@NotEmpty
 	String role;
@@ -74,6 +80,15 @@ public class Account extends GenericEntity {
 
 	public void setRole(String role) {
 		this.role = role;
+	}
+		
+
+	public String getChannelToken() {
+		return channelToken;
+	}
+
+	public void setChannelToken(String channelToken) {
+		this.channelToken = channelToken;
 	}
 
 	@JsonIgnore

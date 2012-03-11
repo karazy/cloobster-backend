@@ -20,7 +20,7 @@ Ext.define('EatSense.controller.Login', {
 			savePassword: 'togglefield[name=savePasswordToggle]'
 		},		
 
-		account : Ext.create('EatSense.model.Account')
+		account : Ext.create('EatSense.model.Account'),
 	},
 
 	init: function() {
@@ -67,6 +67,15 @@ Ext.define('EatSense.controller.Login', {
 				'login': account.get('login'),
 				'passwordHash': account.get('passwordHash')
 			});
+
+			//TODO request a new channel token?
+
+			channel = new goog.appengine.Channel(this.getAccount().get('token'));
+		    socket = channel.open();
+		    // socket.onopen = onOpened;
+		    socket.onmessage = this.onMessage;
+		    // socket.onerror = onError;
+		    // socket.onclose = onClose;
 
 	   		 return true;	   		 	   		
 	   	 } else {
@@ -123,6 +132,15 @@ Ext.define('EatSense.controller.Login', {
 					accountLocalStore.sync();
 				}
 
+				//TODO open channel by using the channel token
+
+				channel = new goog.appengine.Channel(me.getAccount().get('token'));
+			    socket = channel.open();
+			    // socket.onopen = onOpened;
+			    socket.onmessage = this.onMessage;
+			    // socket.onerror = onError;
+			    // socket.onclose = onClose;
+
 				//TODO remove in a more reliable way!
 				//remove login view				
 				Ext.Viewport.remove(Ext.Viewport.down('login'));
@@ -174,6 +192,10 @@ Ext.define('EatSense.controller.Login', {
 					};
 				}
 		});
+	},
+
+	onMessage: function(data) {
+		console.log('received a channel message '+data);
 	}
 
 

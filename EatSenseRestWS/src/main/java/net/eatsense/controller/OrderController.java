@@ -34,6 +34,9 @@ import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
 
+import com.google.appengine.api.channel.ChannelMessage;
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.appengine.api.taskqueue.TaskQueuePb.TaskQueueAddRequest.RequestMethod;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -277,6 +280,9 @@ public class OrderController {
 			orderId = orderKey.getId();
 		}
 		
+		//TODO just a test case
+		ChannelService channelService = ChannelServiceFactory.getChannelService();
+		channelService.sendMessage(new ChannelMessage("admin", "{'status': 'ORDER_PLACED'}"));
 		
 		return orderId;
 	}
