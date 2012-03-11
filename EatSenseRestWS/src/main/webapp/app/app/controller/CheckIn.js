@@ -216,7 +216,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	//disable button to prevent multiple checkins
     	button.disable();
     	var barcode, that = this, deviceId;
-    	if(this.getProfile() == 'desktop' || !window.plugins.barcodeScanner) {
+    	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
     		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
     		deviceId = '_browser'; //just for testing
     		this.getDashboard().showLoadScreen(true);

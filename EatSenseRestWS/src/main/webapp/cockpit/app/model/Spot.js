@@ -3,7 +3,11 @@ Ext.define('EatSense.model.Spot', {
 	// requires: ['EatSense.model.PaymentMethod'],
 	config : {
 		idProperty : 'barcode',
-		fields : [ {
+		fields : [ 
+		{
+			name: 'id'
+		},
+		{
 			name : 'barcode',
 			type : 'string'
 		}, {
@@ -19,8 +23,8 @@ Ext.define('EatSense.model.Spot', {
 			name: 'status',
 			type: 'string'
 		}, { //time when first person checked in
-			name: 'checkInTime',
-			type: 'date'			
+			name: 'checkInCount',
+			type: 'number'			
 		}, { //value of all orders
 			name: 'currentTotal',
 			type: 'number'

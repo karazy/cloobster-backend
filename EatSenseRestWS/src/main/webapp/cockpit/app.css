@@ -7,12 +7,7 @@
 	margin: 10px;
 }
 
-.spot-panel {
-	/*float: left;*/
-	/*width: 30%;*/
-	
-	/*margin: 10px;	*/
-
+.spotitem {
 	height: 100px;
 	border: solid 1px;
 	border-color: black;
@@ -35,8 +30,8 @@
 
 }
 
-.spotPressed {
-	background-color: rgb(0,0,100);
+.spotitem-pressed {
+	background-color: rgb(100,100,100) !important;
 }
 
 .spotSelected {
@@ -45,15 +40,15 @@
 
 
 
-.spot-checkedin {
-	background-color: rgb(200,200,100);
+.spotitem-checkedin {
+	background-color: rgb(100,255,100);
 }
 
-.spot-placed {
+.spotitem-placed {
 	background-color: rgb(200,100,100);
 }
 
-.spot-pay {
+.spotitem-pay {
 
 }
 

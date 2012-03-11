@@ -4,8 +4,10 @@ Ext.define('EatSense.view.SpotItem', {
 	config: {
 
 		spot : {
-			tpl: '<div><h2>{name}</h2><p>Check in: {checkInTime}</p><p>Value: {currentTotal}</p></div>',
-			cls: 'spot-panel'
+			tpl: '<div><h2>{name}</h2><p>Check in: {checkInCount}</p></div>',
+			cls: 'spot-panel',
+			baseCls: 'spotitem',
+			pressedCls: 'spotitem-pressed'
 			// name: '',
 			// status: '',
 			// checkInTime: '',
@@ -33,10 +35,12 @@ Ext.define('EatSense.view.SpotItem', {
 		var panel = Ext.factory(config, Ext.Button, this.getSpot());
 		panel.getTpl().overwrite(panel.element, this.getRecord().getData());
 
-		if(this.getRecord().get('status') == 'PLACED') {
-			panel.addCls('spot-placed');
-		} else if(this.getRecord().get('status') == 'CHECKEDIN') {
-			panel.addCls('spot-checkedin');
+		if(this.getRecord().get('status') == 'ORDER_PLACED') {
+			panel.addCls('spotitem-placed');
+			// panel.setLabelCls('spot-placed');
+		} else if(this.getRecord().get('checkInCount') >  0) {
+			panel.addCls('spotitem-checkedin');
+			// panel.setLabelCls('spot-checkedin');
 		}
 
 		return panel;

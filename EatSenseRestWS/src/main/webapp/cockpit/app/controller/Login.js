@@ -89,6 +89,7 @@ Ext.define('EatSense.controller.Login', {
 		login = this.getLoginField().getValue(),
 		password = this.getPasswordField().getValue(),
 		accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+		spotCtr = this.getApplication().getController('Spot'),
 		me = this;
 
 		if(Ext.String.trim(login).length == 0 || Ext.String.trim(password).length == 0) {
@@ -127,6 +128,7 @@ Ext.define('EatSense.controller.Login', {
 				Ext.Viewport.remove(Ext.Viewport.down('login'));
 				//show main view				
 				Ext.create('EatSense.view.Main');
+				spotCtr.loadSpots();
 			},
 			failure: function(record, operation){
 				console.log('failure');

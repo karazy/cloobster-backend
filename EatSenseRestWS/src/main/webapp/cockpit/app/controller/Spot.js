@@ -49,7 +49,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		this.getSpotsview().getStore().load({
 			 params: {
-			 	pathId : 1,
+			 	pathId : 62001,
 			 },
 			 callback: function(records, operation, success) {
 			 	if(success) {
