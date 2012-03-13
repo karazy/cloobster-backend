@@ -33,6 +33,9 @@ import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
 
+import com.google.appengine.api.channel.ChannelMessage;
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -133,8 +136,15 @@ public class BillController {
 			
 			
 			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
-			if(checkInRepo.saveOrUpdate(checkIn) == null )
+			
+			if(checkInRepo.saveOrUpdate(checkIn) == null ) {
 				throw new RuntimeException("CheckIn status could not be updated for id: " + checkIn.getId());
+			}		
+			
+			ChannelService channelService = ChannelServiceFactory.getChannelService();
+			ChannelMessage cm = new ChannelMessage("admin", "ORDER_PLACED");
+			logger.debug("send channel message "+cm);
+			channelService.sendMessage(cm);
 			
 		}
 		return billData;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Restaurant;
@@ -57,7 +58,7 @@ public class RestaurantController {
 			spotDto.setId(spot.getId());
 			spotDto.setName(spot.getName());
 			spotDto.setGroupTag(spot.getGroupTag());
-			spotDto.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", spot.getKey()).count());
+			spotDto.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", spot.getKey()).filter("status !=", CheckInStatus.PAYMENT_REQUEST).count());
 			Request request = requestRepo.ofy().query(Request.class).filter("spot",spot.getKey()).order("receivedTime").get();
 			
 			if(request != null) {

@@ -9,6 +9,8 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +97,7 @@ public class OrderController {
 			logger.error("Order cannot be placed, checkin not found!");
 			return null;
 		}
-		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN) {
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			logger.error("Order cannot be placed, payment already requested or not checked in");
 			return null;
 		}
@@ -122,6 +124,19 @@ public class OrderController {
 			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 
 			requestRepo.saveOrUpdate(request);
+			
+			//TODO just a test case
+			
+			ChannelService channelService = ChannelServiceFactory.getChannelService();
+			JSONObject json = new JSONObject();
+			try {
+				json.put("status",CheckInStatus.ORDER_PLACED.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			ChannelMessage cm = new ChannelMessage("admin", "ORDER_PLACED");
+			logger.debug("send channel message "+cm);
+			channelService.sendMessage(cm);
 		}
 		else {
 			// build validation error messages
@@ -205,7 +220,7 @@ public class OrderController {
 			logger.error("Order cannot be placed, checkin not found!");
 			return null;
 		}
-		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN) {
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			logger.error("Order cannot be placed, payment already requested or not checked in");
 			return null;
 		}
@@ -279,10 +294,6 @@ public class OrderController {
 			// order successfully saved
 			orderId = orderKey.getId();
 		}
-		
-		//TODO just a test case
-		ChannelService channelService = ChannelServiceFactory.getChannelService();
-		channelService.sendMessage(new ChannelMessage("admin", "{'status': 'ORDER_PLACED'}"));
 		
 		return orderId;
 	}

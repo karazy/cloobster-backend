@@ -14,6 +14,8 @@ import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
@@ -26,6 +28,8 @@ import com.google.inject.Inject;
  *
  */
 public class AccountController {
+	
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private AccountRepository accountRepo;
 	private RestaurantRepository restaurantRepo;
 	
@@ -58,10 +62,12 @@ public class AccountController {
 				accountRepo.saveOrUpdate(account);
 			}
 			
-			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
+//			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
+				
 				String token = channelService.createChannel(account.getLogin());
+				logger.debug("created channel token "+token);
 				account.setChannelToken(token);
-			}
+//			}
 			
 			return account;
 		}			
@@ -96,10 +102,11 @@ public class AccountController {
 				accountRepo.saveOrUpdate(account);
 			}
 			
-			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
+//			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
 				String token = channelService.createChannel(account.getLogin());
+				logger.debug("created channel token "+token);
 				account.setChannelToken(token);
-			}
+//			}
 			
 			
 			return account;

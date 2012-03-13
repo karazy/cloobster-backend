@@ -46,7 +46,8 @@ Ext.define('EatSense.controller.Spot', {
 		console.log('loadSpots');
 		var loginCtr = this.getApplication().getController('Login'),
 		account = loginCtr.getAccount();
-
+		//TODO workaround
+		this.getSpotsview().getStore().removeAll();
 		this.getSpotsview().getStore().load({
 			 params: {
 			 	pathId : 1,

@@ -5,7 +5,7 @@ Ext.define('EatSense.view.SpotItem', {
 
 		spot : {
 			tpl: '<div><h2>{name}</h2><p>Check in: {checkInCount}</p></div>',
-			cls: 'spot-panel',
+			cls: 'spot-button',
 			baseCls: 'spotitem',
 			pressedCls: 'spotitem-pressed'
 			// name: '',
@@ -25,28 +25,36 @@ Ext.define('EatSense.view.SpotItem', {
 		 cls: 'di-cls',
 		 baseCls: 'di-baseCls',
 		 listeners: {
-		 	tab: function(){alert('tab')}
+		 	updatedata: function(di, newdata, eOpts){
+		 		console.log('updatedata');
+		 		//TODO remove
+		 	}
 		 }
 
 	},
 
 	applySpot: function(config) {
 		// Ext.Logger.log('applySpot');
-		var panel = Ext.factory(config, Ext.Button, this.getSpot());
-		panel.getTpl().overwrite(panel.element, this.getRecord().getData());
+		console.log('applySpot');
+		var button = Ext.factory(config, Ext.Button, this.getSpot());
+		button.getTpl().overwrite(button.element, this.getRecord().getData());
 
 		if(this.getRecord().get('status') == 'ORDER_PLACED') {
-			panel.addCls('spotitem-placed');
-			// panel.setLabelCls('spot-placed');
+			button.addCls('spotitem-placed');
+			// button.setLabelCls('spot-placed');
 		} else if(this.getRecord().get('checkInCount') >  0) {
-			panel.addCls('spotitem-checkedin');
-			// panel.setLabelCls('spot-checkedin');
+			button.addCls('spotitem-checkedin');
+			// button.setLabelCls('spot-checkedin');
+		} else {
+			button.removeCls('spotitem-checkedin');
+			button.removeCls('spotitem-placed');
 		}
 
-		return panel;
+		return button;
 	},
 
 	updateSpot: function(newSpot, oldSpot) {
+		console.log('updateSpot');
 		// Ext.Logger.log('updateSpot newSpot' + newSpot + ' oldSpot '+oldSpot);
 		if(newSpot) {
 			this.add(newSpot);
@@ -55,5 +63,26 @@ Ext.define('EatSense.view.SpotItem', {
 		if(oldSpot) {
 			this.remove(oldSpot);
 		}
+	},
+
+	updateRecord: function(newRecord) {
+		console.log('updateRecord');
+		var button = this.getSpot();
+			if(this.getSpot()) {
+					
+			if(newRecord.get('status') == 'ORDER_PLACED') {
+				button.addCls('spotitem-placed');
+			} else if(newRecord.get('checkInCount') >  0) {
+				button.addCls('spotitem-checkedin');
+			}  else {
+				button.removeCls('spotitem-checkedin');
+				button.removeCls('spotitem-placed');
+			}
+			
+			button.getTpl().overwrite(this.getSpot().element, newRecord.getData());
+
+		}		
 	}
+
+
 })

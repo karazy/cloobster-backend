@@ -72,10 +72,18 @@ Ext.define('EatSense.controller.Login', {
 
 			channel = new goog.appengine.Channel(this.getAccount().get('token'));
 		    socket = channel.open();
-		    // socket.onopen = onOpened;
-		    socket.onmessage = this.onMessage;
-		    // socket.onerror = onError;
-		    // socket.onclose = onClose;
+		   	socket.onopen = function() {
+			 		alert('onopen');
+			 	};
+			    socket.onmessage = function(data) {
+			    	alert('onmessage '+data);
+				};
+			    socket.onerror = function(error) {
+			    	alert('onerror ' +  error);
+			    };
+			    socket.onclose = function() {
+			    	alert('onclose');
+			    };
 
 	   		 return true;	   		 	   		
 	   	 } else {
@@ -136,10 +144,23 @@ Ext.define('EatSense.controller.Login', {
 
 				channel = new goog.appengine.Channel(me.getAccount().get('token'));
 			    socket = channel.open();
-			    // socket.onopen = onOpened;
-			    socket.onmessage = this.onMessage;
-			    // socket.onerror = onError;
-			    // socket.onclose = onClose;
+			 	socket.onopen = function() {
+			 		console.log('open channel');
+			 	};
+			    socket.onmessage = function(data) {
+			    	// var status = Ext.decode(data);
+			    	// if(status == 'ORDER_PLACED') {
+			    		spotCtr.loadSpots();
+			    	// }			    	
+				};
+			    socket.onerror = function(error) {
+			    	console.log('error in channel');
+			    	//TODO request new token
+			    };
+			    socket.onclose = function() {
+			    	console.log('close channel');
+			    	//TODO request new token
+			    };
 
 				//TODO remove in a more reliable way!
 				//remove login view				

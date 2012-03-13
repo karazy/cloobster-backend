@@ -17,7 +17,7 @@ Ext.application({
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
-	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement', 'EatSense.view.fragment.DashboardButton'],
+	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement', 'EatSense.view.fragment.DashboardButton', 'EatSense.override.RadioOverride'],
 	init : function() {
 		console.log('init');
 	},
@@ -49,7 +49,7 @@ Ext.application({
 	   				scope: this,
 	   				success : function(record, operation) {
 	   					console.log('found existing checkin '+record);					
-	   					if(record.get('status') == Karazy.constants.CHECKEDIN) {	   						
+	   					if(record.get('status') == Karazy.constants.CHECKEDIN || record.get('status') == Karazy.constants.ORDER_PLACED) {	   						
 		   					checkInCtr.restoreState(record);
 	   					} else {
 	   						appStateStore.add(checkInCtr.getAppState());
