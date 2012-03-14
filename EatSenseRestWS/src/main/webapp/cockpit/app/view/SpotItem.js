@@ -66,6 +66,10 @@ Ext.define('EatSense.view.SpotItem', {
 	},
 
 	updateRecord: function(newRecord) {
+		if(!newRecord) {
+			return;
+		};
+		
 		console.log('updateRecord');
 		var button = this.getSpot();
 			if(this.getSpot()) {

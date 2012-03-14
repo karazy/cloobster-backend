@@ -43,6 +43,7 @@ Ext.define('EatSense.controller.Login', {
 		Ext.Logger.info('restoreCredentials');
 		console.log('restoreCredentials');
 		var accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+		spotCtr = this.getApplication().getController('Spot'),
 		account;
 
 		if(!accountLocalStore) {
@@ -68,24 +69,13 @@ Ext.define('EatSense.controller.Login', {
 				'passwordHash': account.get('passwordHash')
 			});
 
-			//TODO request a new channel token?
+			Karazy.channel.createChannel( {
+				token: account.get('token'), 
+				messageHandler: spotCtr.loadSpots,
+				scope: spotCtr
+			});
 
-			channel = new goog.appengine.Channel(this.getAccount().get('token'));
-		    socket = channel.open();
-		   	socket.onopen = function() {
-			 		alert('onopen');
-			 	};
-			    socket.onmessage = function(data) {
-			    	alert('onmessage '+data);
-				};
-			    socket.onerror = function(error) {
-			    	alert('onerror ' +  error);
-			    };
-			    socket.onclose = function() {
-			    	alert('onclose');
-			    };
-
-	   		 return true;	   		 	   		
+	   		return true;	   		 	   		
 	   	 } else {
 	   	 	accountLocalStore.removeAll();	
 	   	 	return false;
@@ -140,27 +130,32 @@ Ext.define('EatSense.controller.Login', {
 					accountLocalStore.sync();
 				}
 
-				//TODO open channel by using the channel token
+				Karazy.channel.createChannel( {
+					token: account.get('token'), 
+					messageHandler: spotCtr.loadSpots,
+					scope: spotCtr
+				});
 
-				channel = new goog.appengine.Channel(me.getAccount().get('token'));
-			    socket = channel.open();
-			 	socket.onopen = function() {
-			 		console.log('open channel');
-			 	};
-			    socket.onmessage = function(data) {
-			    	// var status = Ext.decode(data);
-			    	// if(status == 'ORDER_PLACED') {
-			    		spotCtr.loadSpots();
-			    	// }			    	
-				};
-			    socket.onerror = function(error) {
-			    	console.log('error in channel');
-			    	//TODO request new token
-			    };
-			    socket.onclose = function() {
-			    	console.log('close channel');
-			    	//TODO request new token
-			    };
+				// channel = new goog.appengine.Channel(me.getAccount().get('token'));
+			 //    socket = channel.open();
+			 // 	socket.onopen = function() {
+			 // 		console.log('open channel');
+			 // 		//Do something?
+			 // 	};
+			 //    socket.onmessage = function(data) {
+			 //    	// var status = Ext.decode(data);
+			 //    	// if(status == 'ORDER_PLACED') {
+			 //    		spotCtr.loadSpots();
+			 //    	// }			    	
+				// };
+			 //    socket.onerror = function(error) {
+			 //    	console.log('error in channel');
+			 //    	//TODO request new token
+			 //    };
+			 //    socket.onclose = function() {
+			 //    	console.log('close channel');
+			 //    	//TODO request new token
+			 //    };
 
 				//TODO remove in a more reliable way!
 				//remove login view				
@@ -199,9 +194,10 @@ Ext.define('EatSense.controller.Login', {
 				scope: this,
 				fn: function(btnId, value, opt) {
 					if(btnId=='yes') {
+						Karazy.channel.closeChannel();
 						//remove all stored credentials
 						accountLocalStore.removeAll();
-						accountLocalStore.sync();
+						//accountLocalStore.sync();
 
 						Ext.Ajax.setDefaultHeaders({});	
 

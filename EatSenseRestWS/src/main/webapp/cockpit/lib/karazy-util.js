@@ -27,6 +27,14 @@ Karazy.util = (function() {
 			} else {
 				return text;
 			}			
+		},
+		/**
+		*	Checks if the given argument is of type function.
+		*
+		*/
+		isFunction: function(functionToCheck) {
+		 	var getType = {};
+		 	return functionToCheck && getType.toString.call(functionToCheck) == '[object Function]';
 		}
 		
 	};
