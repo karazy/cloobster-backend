@@ -4,8 +4,13 @@ var globalConf = Karazy.config;
 var profile = Ext.os.deviceType.toLowerCase();
 
 Ext.Loader.setConfig({
-	enabled : true
+	enabled : true,
+	//WORKAORUND related to Android 3x Bug and Webview URL handling
+	disableCaching: false 
 }); 
+//WORKAORUND related to Android 3x Bug and Webview URL handling
+//Ext.Ajax.setDisableCaching(false); 
+
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order' ],
@@ -14,7 +19,7 @@ Ext.application({
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
-	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement', 'EatSense.view.fragment.DashboardButton'],
+	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement', 'EatSense.view.fragment.DashboardButton', 'EatSense.override.RadioOverride'],
 	launch : function() {
     	this.launched = true;
         this.mainLaunch();
