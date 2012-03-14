@@ -5,19 +5,20 @@ Ext.define('EatSense.controller.Spot', {
 		refs: {
 			spotitem: 'spotitem button',
 			spotsview: '#spotsview'
+		},
+
+		control : {
+			spotitem: {
+		 		tap:  'showSpotDetails'
+		 	}
 		}
 	},
 
 	init: function() {
 		Ext.Logger.info('initializing Spot Controller');
 		console.log('initializing Spot Controller');
-		 this.control({
-		 	spotitem: {
-		 		tap:  this.showSpotDetails
-		 	}
-		 });
-		
 	},
+
 	/**
 	*	Loads all businesses this user account is assigned to.
 	*
@@ -46,15 +47,17 @@ Ext.define('EatSense.controller.Spot', {
 		console.log('loadSpots');
 		var loginCtr = this.getApplication().getController('Login'),
 		account = loginCtr.getAccount();
-		//TODO workaround
-		//this.getSpotsview().getStore().removeAll();
+
 		this.getSpotsview().getStore().load({
 			 params: {
-			 	pathId : 1,
+			 	//TODO retrieve correct ID
+			 	pathId : 500,
 			 },
 			 callback: function(records, operation, success) {
 			 	if(success) {
 			 		this.getSpotsview().refresh();	 		
+			 	} else {
+			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
 			 	}				
 			 },
 			 scope: this

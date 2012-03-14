@@ -22,7 +22,7 @@ public class Account extends GenericEntity {
 	String email;
 	
 	/**
-	 * The token used created by channel API.
+	 * The token created by channel API.
 	 * Needed to enable push communication.
 	 */
 	String channelToken;

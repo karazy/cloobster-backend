@@ -6,19 +6,20 @@ import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -55,5 +56,13 @@ public class AccountResource {
 	public Collection<BusinessDTO> getBusinessesForAccount(@PathParam("login") String login) {
 		return accountCtr.getBusinessDtos(login);
 	}
+	
+	@POST
+	@Path("{login}/tokens")
+	@Produces("text/plain; charset=UTF-8")
+	@RolesAllowed({"restaurantadmin"})
+	public String requestToken(@PathParam("login") String login) {
+		return accountCtr.requestToken(login);
+	};
 	
 }

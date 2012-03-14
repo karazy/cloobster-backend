@@ -17,7 +17,9 @@ var translation = {
 		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
 		"savePasswordToggle" : "Automatisch<br/>einloggen?",
-		"logoutQuestion" : "Wirklich ausloggen?"
+		"logoutQuestion" : "Wirklich ausloggen?",
+		//spot
+		"errorSpotLoading" : "Laden der Daten fehlgeschlagen."
 	}
 
 };

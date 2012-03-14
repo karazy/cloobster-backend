@@ -18,8 +18,10 @@ Karazy.channel = (function() {
 	var messageHandlerFunction;
 	//function called to request a new token when an error occurs or channel is closed
 	var requestTokenHandlerFunction;
-	//scope in which to execute functions
-	var currentScope;
+	//scope in which to execute messageHandler function
+	var scopeMessageHandler;
+	//scope in which to execute tokenRequestHandler function
+	var scopeTokenRequestHandler;
 	//indicates if the client forced a close and won't try to request a new token.
 	var forcedClose;
 
@@ -29,21 +31,31 @@ Karazy.channel = (function() {
 
 	function onMessage() {
 		console.log('channel message received');
-		messageHandlerFunction.call(currentScope);
+		messageHandlerFunction.call(scopeMessageHandler);
 	};
 
-	function onError() {
-		console.log('channel error: request a new token');
-		if(!forcedClose && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			requestTokenHandlerFunction.call(currentScope);
+	function onError(error) {
+		console.log('channel error ' + error);
+		if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
+			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
 		}		
 	};
 
 	function onClose(dontRequestToken) {
-		console.log('channel closed: request a new token');
-		if(!forcedClose && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			requestTokenHandlerFunction.call(currentScope);	
+		console.log('channel closed');
+		if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
+			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
+			// setupChannel(newToken);
 		}
+	};
+
+	function setupChannel(token) {
+			channel = new goog.appengine.Channel(token);
+			socket = channel.open();
+			socket.onopen = onOpened;
+		    socket.onmessage = onMessage;
+		    socket.onerror = onError;
+		    socket.onclose = onClose;
 	};
 
 
@@ -54,7 +66,9 @@ Karazy.channel = (function() {
 		*	Creates a new channel, based on the given token.
 		*
 		*/
-		createChannel: function(options) {
+		createChannel: function(options) {			
+			console.log('createChannel');
+
 			if(!options.token) {
 				throw "No token provided";
 			};
@@ -63,28 +77,32 @@ Karazy.channel = (function() {
 				throw "No messageHandler provided";
 			};		
 
-			(options.scope) ? currentScope = options.scope : this;
-
+			(options.messageHandlerScope) ? scopeMessageHandler = options.messageHandlerScope : this;			
 			messageHandlerFunction = options.messageHandler;
 
 			if(options.requestTokenHandler) {
-				this.requestTokenHandlerFunction = options.requestTokenHandler;
+				requestTokenHandlerFunction = options.requestTokenHandler;
+				(options.requestTokenHandlerScope) ? scopeTokenRequestHandler = options.requestTokenHandlerScope : this;
 			};
 
 			forcedClose = false;
 
-			channel = new goog.appengine.Channel(options.token);
-
-			socket = channel.open();
-			socket.onopen = onOpened;
-		    socket.onmessage = onMessage;
-		    socket.onerror = onError;
-		    socket.onclose = onClose;
+			setupChannel(options.token);
 		},
-
-		assignMessageHandler: function(messageHandler) {
+		/**
+		*	Assigns a ne handler that gets called when a message arrives.
+		*
+		*/
+		assignMessageHandler: function(options) {
 			console.log('channel: assign a new messageHandler');
-			this.messageHandlerFunction = messageHandler;
+
+			if(!Karazy.util.isFunction(options.messageHandler)) {
+				throw "No messageHandler provided";
+			};
+
+			(options.scope) ? scopeMessageHandler = options.scope : this;
+
+			messageHandlerFunction = options.messageHandler;
 		},
 
 		/**

@@ -68,11 +68,13 @@ Ext.define('EatSense.controller.Login', {
 				'login': account.get('login'),
 				'passwordHash': account.get('passwordHash')
 			});
-
+			//open channel for server side push messagens
 			Karazy.channel.createChannel( {
 				token: account.get('token'), 
 				messageHandler: spotCtr.loadSpots,
-				scope: spotCtr
+				requestTokenHandler: this.requestNewToken,
+				messageHandlerScope: spotCtr,
+				requestTokenHandlerScope: this
 			});
 
 	   		return true;	   		 	   		
@@ -130,32 +132,15 @@ Ext.define('EatSense.controller.Login', {
 					accountLocalStore.sync();
 				}
 
+				//open channel for server side push messagens
 				Karazy.channel.createChannel( {
-					token: account.get('token'), 
+					token: record.get('token'), 
 					messageHandler: spotCtr.loadSpots,
-					scope: spotCtr
-				});
+					requestTokenHandler: me.requestNewToken,
+					messageHandlerScope: spotCtr,
+					requestTokenHandlerScope: me
 
-				// channel = new goog.appengine.Channel(me.getAccount().get('token'));
-			 //    socket = channel.open();
-			 // 	socket.onopen = function() {
-			 // 		console.log('open channel');
-			 // 		//Do something?
-			 // 	};
-			 //    socket.onmessage = function(data) {
-			 //    	// var status = Ext.decode(data);
-			 //    	// if(status == 'ORDER_PLACED') {
-			 //    		spotCtr.loadSpots();
-			 //    	// }			    	
-				// };
-			 //    socket.onerror = function(error) {
-			 //    	console.log('error in channel');
-			 //    	//TODO request new token
-			 //    };
-			 //    socket.onclose = function() {
-			 //    	console.log('close channel');
-			 //    	//TODO request new token
-			 //    };
+				});
 
 				//TODO remove in a more reliable way!
 				//remove login view				
@@ -166,7 +151,7 @@ Ext.define('EatSense.controller.Login', {
 			},
 			failure: function(record, operation){
 				console.log('failure');
-					Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('wrongCredentials')); 
+				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('wrongCredentials')); 
 			}
 		});
 	},
@@ -197,7 +182,7 @@ Ext.define('EatSense.controller.Login', {
 						Karazy.channel.closeChannel();
 						//remove all stored credentials
 						accountLocalStore.removeAll();
-						//accountLocalStore.sync();
+						accountLocalStore.sync();
 
 						Ext.Ajax.setDefaultHeaders({});	
 
@@ -210,9 +195,28 @@ Ext.define('EatSense.controller.Login', {
 				}
 		});
 	},
+	/**
+	*	Requests a new token from server and executes the given callback with new token as parameter.
+	*	@param callback
+	*		callback function to invoke on success
+	*/
+	requestNewToken: function(callback) {		
+		console.log('request new token');
 
-	onMessage: function(data) {
-		console.log('received a channel message '+data);
+		var login = this.getAccount().get('login'),
+		token;		
+
+		Ext.Ajax.request({
+		    url: 'accounts/'+login+'/tokens',
+		    method: 'POST',
+		    success: function(response){
+		       	token = response.responseText;
+		       	callback(token);
+		    }, 
+		    failure: function(response) {
+		    	
+		    }
+		});
 	}
 
 

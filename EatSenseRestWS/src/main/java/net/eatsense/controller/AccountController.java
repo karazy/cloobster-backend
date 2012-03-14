@@ -63,8 +63,8 @@ public class AccountController {
 			}
 			
 //			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
-				
-				String token = channelService.createChannel(account.getLogin());
+			//TODO remove 1 minute timeout
+				String token = channelService.createChannel(account.getLogin(), 1);
 				logger.debug("created channel token "+token);
 				account.setChannelToken(token);
 //			}
@@ -103,7 +103,8 @@ public class AccountController {
 			}
 			
 //			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
-				String token = channelService.createChannel(account.getLogin());
+				//TODO remove 1 minute timeout
+				String token = channelService.createChannel(account.getLogin(), 1);
 				logger.debug("created channel token "+token);
 				account.setChannelToken(token);
 //			}
@@ -138,6 +139,7 @@ public class AccountController {
 	public Account createAndSaveAccount(String login, String password, String email, String role) {
 		return accountRepo.createAndSaveAccount(login, password, email, role);
 	}
+	
 	public AccountDTO toDto(Account account) {
 		if(account == null) {
 			return null;
@@ -170,5 +172,18 @@ public class AccountController {
 		}
 			
 		return businessDtos;
+	}
+	
+	/**
+	 * Generates and returns a new channel token.
+	 * @param login
+	 * 		login name for which to create the token
+	 * @return
+	 * 		the token
+	 */
+	public String requestToken (String login) {
+		logger.debug("new token requested for "+login);
+		ChannelService channelService = ChannelServiceFactory.getChannelService();			
+		return channelService.createChannel(login); 
 	}
 }
