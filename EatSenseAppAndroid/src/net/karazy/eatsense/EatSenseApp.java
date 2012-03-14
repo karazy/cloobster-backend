@@ -1,10 +1,10 @@
-package net.karazy.test.eatsense;
+package net.karazy.eatsense;
 
 import org.apache.cordova.DroidGap;
 
 import android.os.Bundle;
 
-public class EatSenseTestApp extends DroidGap {
+public class EatSenseApp extends DroidGap {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
