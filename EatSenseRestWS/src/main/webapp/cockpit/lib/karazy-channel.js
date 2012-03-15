@@ -29,9 +29,9 @@ Karazy.channel = (function() {
 		console.log('channel opened');
 	};
 
-	function onMessage() {
+	function onMessage(data) {
 		console.log('channel message received');
-		messageHandlerFunction.call(scopeMessageHandler);
+		messageHandlerFunction.apply(scopeMessageHandler, [data]);
 	};
 
 	function onError(error) {
@@ -110,7 +110,9 @@ Karazy.channel = (function() {
 		*/
 		closeChannel: function() {
 			forcedClose = true;
-			socket.close();
+			if(socket) {
+				socket.close();
+			};			
 		}	
 
 

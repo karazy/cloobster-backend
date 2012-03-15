@@ -70,7 +70,7 @@ public class AccountController {
 	public Account authenticateHashed(String login, String hashedPassword) {	
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
-			return null;
+			return null;   
 		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
 			// Reset failed attempts counter

@@ -18,29 +18,8 @@ Ext.define('EatSense.controller.Spot', {
 		Ext.Logger.info('initializing Spot Controller');
 		console.log('initializing Spot Controller');
 	},
-
 	/**
-	*	Loads all businesses this user account is assigned to.
-	*
-	*/
-	loadBusinesses: function() {
-		console.log('loadBusinesses');
-		var businessStore = Ext.StoreManager.lookup('businessStore'),
-		loginCtr = this.getApplication().getController('Login');
-
-		businessStore.load({
-			params: {
-				pathId: loginCtr.getAccount().get('login')
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) {			 		
-			 	}				
-			 },
-			 scope: this
-		});
-	},
-	/**
-	*
+	*	Loads all spots and refreshes spot view.
 	*
 	*/
 	loadSpots: function() {
@@ -50,8 +29,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		this.getSpotsview().getStore().load({
 			 params: {
-			 	//TODO retrieve correct ID
-			 	pathId : 500,
+			 	pathId : account.get('businessId'),
 			 },
 			 callback: function(records, operation, success) {
 			 	if(success) {
@@ -64,12 +42,41 @@ Ext.define('EatSense.controller.Spot', {
 		});	
 	},
 	/**
+	*	Takes a spot and refreshes the associated item in view.
+	*	
+	*	@param updatedSpot
+	*		A spot where only updated fields are set
+	*/
+	updateSpotIncremental: function(updatedSpot) {
+		console.log('updateSpotIncremental');
+		//load corresponding spot
+		var dirtySpot, index, spotStore = this.getSpotsview().getStore();
+		
+		//TODO decode spot?
+
+		index = spotStore.findExact('id', updatedSpot.get('id'));
+
+		if(index > -1) {
+			dirtySpot = spotStore.getAt(index);			
+			//update fields
+			for(prop in updatedSpot) {
+				if(prop) {
+					dirtySpot.set(prop, updatedSpot[prop]);					
+				}
+			}
+			//test alternative
+			// dirtySpot.mergeData(updatedSpot);
+			// dirtySpot.setData(updatedSpot);
+		}
+
+	},
+	/**
 	*	Gets called when user taps on a spot. Shows whats going on at a particular spot.
 	*   Like orders, payment requests ...
 	*
 	*/
 	showSpotDetails: function(button, eventObj, eOpts) {
 		console.log('showSpotDetails for ');
-	}
+	},
 
 })

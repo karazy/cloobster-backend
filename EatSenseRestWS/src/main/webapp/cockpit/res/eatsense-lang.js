@@ -18,6 +18,7 @@ var translation = {
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
 		"savePasswordToggle" : "Automatisch<br/>einloggen?",
 		"logoutQuestion" : "Wirklich ausloggen?",
+		"noBusinessAssigned" : "Dein Benutzer ist keinem Betrieb zugewiesen.",
 		//spot
 		"errorSpotLoading" : "Laden der Daten fehlgeschlagen."
 	}

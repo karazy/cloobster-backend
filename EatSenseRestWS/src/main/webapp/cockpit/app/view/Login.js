@@ -5,12 +5,15 @@ Ext.define('EatSense.view.Login', {
 		fullscreen: true,
 		centered: true,
 		width: 500,
+		height: 400,
+		layout: {
+			type: 'card',
+			animation: 'fade'
+		},
+		activeItem: 0,
 		// height:200,
 		floatingCls: 'loginbox',
 		// cls: 'loginbox',
-		// layout: {
-		// 	type: 'fit'
-		// },
 		items: [
 		{
 			xtype: 'panel',
@@ -51,9 +54,10 @@ Ext.define('EatSense.view.Login', {
 					action: 'login'
 				}
 			]
+		},
+		{
+			xtype: 'choosebusiness'
 		}
-
-
 		]
 	}
 });

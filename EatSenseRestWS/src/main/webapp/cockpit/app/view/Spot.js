@@ -26,6 +26,7 @@ Ext.define('EatSense.view.Spot', {
     				// 	itemsingletab: function(dv, index, target, record) {alert('itemsingletab '+record.get('name'))},
     				// }
     				initialize: function() {
+    					//TODO remove?
 						Ext.Logger.info('Spot initialize');
 
 						this.on('itemtap', function(view, index, node, e) {
