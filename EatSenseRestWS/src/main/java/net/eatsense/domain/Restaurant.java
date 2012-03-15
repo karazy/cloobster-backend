@@ -42,6 +42,8 @@ public class Restaurant extends GenericEntity {
 	@Valid
 	@Unindexed
 	private List<PaymentMethod> paymentMethods;
+	
+	private List<String> channelIds;
 
 	public Restaurant() {
 	}
@@ -90,6 +92,14 @@ public class Restaurant extends GenericEntity {
 
 	public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
 		this.paymentMethods = paymentMethods;
+	}
+
+	public List<String> getChannelIds() {
+		return channelIds;
+	}
+
+	public void setChannelIds(List<String> channelTokens) {
+		this.channelIds = channelTokens;
 	}
 	
 }

@@ -16,6 +16,7 @@ public class Request extends GenericEntity {
 	}
 	RequestType type;
 	String status;
+	// Represents the datastore id of the corresponding of this request (type == RequestType.ORDER means objectId is id of the order object)
 	Long objectId;
 	Key<Spot> spot;
 	Key<CheckIn> checkIn;

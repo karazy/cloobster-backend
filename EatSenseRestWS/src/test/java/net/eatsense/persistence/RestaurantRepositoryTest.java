@@ -45,7 +45,7 @@ public class RestaurantRepositoryTest {
 	@Test
 	public void testSave() {
 		
-		Restaurant found = rr.findByKey(1l);
+		Restaurant found = rr.getById(1l);
 		assertNull(found);
 		
 		Restaurant r = new Restaurant();
@@ -54,14 +54,14 @@ public class RestaurantRepositoryTest {
 		r.setId(1l);
 		rr.saveOrUpdate(r);
 		
-		found = rr.findByKey(1l);
+		found = rr.getById(1l);
 		assertNotNull(found);
 		
 	}
 
 	@Test
 	public void testUpdate() {
-		Restaurant found = rr.findByKey(1l);
+		Restaurant found = rr.getById(1l);
 		Assert.assertNull(found);
 		
 		Restaurant r = new Restaurant();
@@ -70,14 +70,14 @@ public class RestaurantRepositoryTest {
 //		r.setId(1l);
 		Key<Restaurant> key = rr.saveOrUpdate(r);
 		
-		found = rr.findByKey(key.getId());
+		found = rr.getById(key.getId());
 		assertEquals("Heidi und Paul", found.getName());
 		found = null;
 		
 		r.setName("Vappiano");		
 		rr.saveOrUpdate(r);
 		
-		found = rr.findByKey(key.getId());
+		found = rr.getById(key.getId());
 		assertEquals("Vappiano", found.getName());
 	}
 
@@ -89,12 +89,12 @@ public class RestaurantRepositoryTest {
 		r.setId(1l);
 		rr.saveOrUpdate(r);
 		
-		Restaurant found = rr.findByKey(1l);
+		Restaurant found = rr.getById(1l);
 		assertNotNull(found);
 		
 		rr.delete(r);
 		
-		found = rr.findByKey(1l);
+		found = rr.getById(1l);
 		assertNull(found);
 	}
 	

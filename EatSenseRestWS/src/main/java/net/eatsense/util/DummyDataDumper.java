@@ -50,7 +50,8 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for restaurants
-		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "restaurantadmin");
+		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "restaurantadmin", rr.getAllKeys());
+		
 	}	
 
 	public void generateDummyRestaurants() {

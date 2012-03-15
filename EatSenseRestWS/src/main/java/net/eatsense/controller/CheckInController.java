@@ -24,6 +24,7 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.cockpit.SpotCockpitDTO;
 import net.eatsense.util.IdHelper;
 import net.eatsense.util.NicknameGenerator;
 
@@ -56,11 +57,13 @@ public class CheckInController {
 	private SpotRepository barcodeRepo;
 	private NicknameGenerator nnGen;
 	private Transformer transform;
+	private ChannelController channelCtrl;
 
 	@Inject
-	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo, NicknameGenerator nnGen, Transformer trans) {
+	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo, NicknameGenerator nnGen, Transformer trans, ChannelController cr) {
 		this.restaurantRepo = r;
 		this.checkInRepo = checkInRepo;
+		this.channelCtrl = cr;
 		this.barcodeRepo = barcodeRepo;
 		this.nnGen = nnGen;
 		this.transform = trans;
@@ -208,13 +211,20 @@ public class CheckInController {
 		checkInDto.setUserId(checkInId);
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
+		SpotCockpitDTO spotData = new SpotCockpitDTO();
 		
-		//TODO make it clean
-		ChannelService channelService = ChannelServiceFactory.getChannelService();
-		ChannelMessage cm = new ChannelMessage("admin", "CHECKEDIN");
-		logger.debug("send channel message "+cm);		
-		channelService.sendMessage(cm);
-
+		spotData.setId(spot.getId());
+		// we already have all other checkins in a list, so we count them and add one for the new checkin
+		spotData.setCheckInCount(checkInsAtSpot.size() + 1);
+		
+		// send the message with the updated data field
+		try {
+			channelCtrl.sendMessageToAllClients(restaurant.getId(), "spot", "update", spotData);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
 		return checkInDto;
 	}
 
@@ -318,6 +328,20 @@ public class CheckInController {
 		if (chkin.getStatus() == CheckInStatus.INTENT) {
 			logger.info("Cancel CheckIn with userId {}", userId);
 			checkInRepo.delete(chkin);
+			
+			SpotCockpitDTO spotData = new SpotCockpitDTO();
+			
+			spotData.setId(chkin.getSpot().getId());
+			// we already have all other checkins in a list, so we count them and add one for the new checkin
+			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", chkin.getSpot()).count());
+			
+			// send the message with the updated data field
+			try {
+				channelCtrl.sendMessageToAllClients(chkin.getRestaurant().getId(), "spot", "update", spotData);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} else {
 			// Error handling

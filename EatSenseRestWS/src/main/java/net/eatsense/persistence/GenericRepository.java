@@ -111,7 +111,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 * 		Found entity. <code>null</code> if no entity with this id exists.
 	 */
-	public T findByKey(long id) {
+	public T getById(long id) {
 		logger.info("findByKey {} ", id);
 		
 		return ofy().find(clazz, id);
@@ -186,11 +186,11 @@ public class GenericRepository<T> extends DAOBase{
 	/**
 	 * Gets all key of entities of type T.
 	 * @return
-	 * 		Collection of keys of type T
+	 * 		List of keys of type T
 	 */
-	public Collection<Key<T>> getAllKeys() {
+	public List<Key<T>> getAllKeys() {
 		logger.info("getAllKeys of type {} ", clazz);
-		Collection<Key<T>> list = ofy().query(clazz).listKeys();
+		List<Key<T>> list = ofy().query(clazz).listKeys();
 		return list;
 	}
 

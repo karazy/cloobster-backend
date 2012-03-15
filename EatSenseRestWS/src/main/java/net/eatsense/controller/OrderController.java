@@ -34,6 +34,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
+import net.eatsense.representation.cockpit.SpotCockpitDTO;
 import net.eatsense.representation.Transformer;
 
 import com.google.appengine.api.channel.ChannelMessage;
@@ -64,12 +65,15 @@ public class OrderController {
 	private Transformer transform;
 
 	private RequestRepository requestRepo;
+
+	private ChannelController channelCtrl;
 	
 	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans, ChannelController channelCtrl) {
 		super();
+		this.channelCtrl = channelCtrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
@@ -125,18 +129,23 @@ public class OrderController {
 
 			requestRepo.saveOrUpdate(request);
 			
-			//TODO just a test case
-			
-			ChannelService channelService = ChannelServiceFactory.getChannelService();
-			JSONObject json = new JSONObject();
-			try {
-				json.put("status",CheckInStatus.ORDER_PLACED.toString());
-			} catch (JSONException e) {
-				e.printStackTrace();
+			Request oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").get();
+			// If we have an older request in the database ...
+			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+				// Send message to notify clients over their channel
+				
+				SpotCockpitDTO spotData = new SpotCockpitDTO();
+				spotData.setId(checkIn.getSpot().getId());
+				spotData.setStatus(request.getStatus());
+				
+				try {
+					channelCtrl.sendMessageToAllClients(restaurantId, "spot", "update", spotData);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
-			ChannelMessage cm = new ChannelMessage("admin", "ORDER_PLACED");
-			logger.debug("send channel message "+cm);
-			channelService.sendMessage(cm);
 		}
 		else {
 			// build validation error messages
@@ -162,7 +171,7 @@ public class OrderController {
 
 	public Order getOrder(Long restaurantId, Long orderId) {
 		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.findByKey(restaurantId);
+		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 		if(restaurant == null) {
 			logger.error("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
 			throw new NotFoundException("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
@@ -190,7 +199,7 @@ public class OrderController {
 	 */
 	public List<Order> getOrders(Long restaurantId, String checkInId, String status) {
 		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.findByKey(restaurantId);
+		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 		if(restaurant == null) {
 			logger.error("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
 			throw new NotFoundException("Orders cannot be retrieved, restaurant id unknown: " + restaurantId);
@@ -230,7 +239,7 @@ public class OrderController {
 			return null;
 		}
 		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.findByKey(restaurantId);
+		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 		if(restaurant == null) {
 			logger.error("Order cannot be placed, restaurant id unknown" + restaurantId);
 			return null;

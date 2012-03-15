@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 
 /**
  * Manages Account creation, updates and authentication.
@@ -32,14 +33,32 @@ public class AccountController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private AccountRepository accountRepo;
 	private RestaurantRepository restaurantRepo;
+	private ChannelController channelCtrl;
 	
 	@Inject
-	public AccountController(AccountRepository accountRepo, RestaurantRepository rr) {
+	public AccountController(AccountRepository accountRepo, RestaurantRepository rr, ChannelController cctrl) {
 		super();
+		this.channelCtrl = cctrl;
 		this.restaurantRepo = rr;
 		this.accountRepo = accountRepo;
 	}
 	
+	
+	/**
+	 * Check if the account is allowed to manage a given restaurant.
+	 * 
+	 * @param account
+	 * @param restaurantId identifying the restaurant to check for
+	 * @return
+	 */
+	public boolean isAccountManagingRestaurantId(final Account account, long restaurantId){
+		
+		for (Key<Restaurant> restaurantKey : account.getRestaurants()) {
+			if(restaurantKey.getId() == restaurantId) 
+				return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * Retrieve an account from the store ONLY if the given credentials match.
@@ -53,22 +72,13 @@ public class AccountController {
 		if(account == null)
 			return null;
 		
-		ChannelService channelService = ChannelServiceFactory.getChannelService();	
-		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
 			// Reset failed attempts counter
 			if(account.getFailedLoginAttempts() > 0) {
 				account.setFailedLoginAttempts(0);
 				accountRepo.saveOrUpdate(account);
 			}
-			
-//			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
-			//TODO remove 1 minute timeout
-				String token = channelService.createChannel(account.getLogin(), 1);
-				logger.debug("created channel token "+token);
-				account.setChannelToken(token);
-//			}
-			
+
 			return account;
 		}			
 		else {
@@ -76,6 +86,7 @@ public class AccountController {
 			account.setFailedLoginAttempts(account.getFailedLoginAttempts()+1);
 			account.setLastFailedLogin(new Date());
 			accountRepo.saveOrUpdate(account);
+			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
 			
@@ -86,6 +97,7 @@ public class AccountController {
 	 * 
 	 * @param login
 	 * @param password cleartext
+	 * @param restaurantId to check wether this account is responsible for the restaurant
 	 * @return
 	 */
 	public Account authenticate(String login, String password) {	
@@ -93,23 +105,13 @@ public class AccountController {
 		if(account == null)
 			return null;
 		
-		ChannelService channelService = ChannelServiceFactory.getChannelService();		
-		
 		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
 			// Reset failed attempts counter
 			if(account.getFailedLoginAttempts() > 0) {
 				account.setFailedLoginAttempts(0);
 				accountRepo.saveOrUpdate(account);
 			}
-			
-//			if(account.getChannelToken() == null || account.getChannelToken().isEmpty()) {
-				//TODO remove 1 minute timeout
-				String token = channelService.createChannel(account.getLogin(), 1);
-				logger.debug("created channel token "+token);
-				account.setChannelToken(token);
-//			}
-			
-			
+		
 			return account;
 		}			
 		else {
@@ -117,6 +119,7 @@ public class AccountController {
 			account.setFailedLoginAttempts(account.getFailedLoginAttempts()+1);
 			account.setLastFailedLogin(new Date());
 			accountRepo.saveOrUpdate(account);
+			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
 			
@@ -134,10 +137,15 @@ public class AccountController {
 	 * @param password
 	 * @param email
 	 * @param role
+	 * @param restaurantIds list of restaurant ids this account manages
 	 * @return
 	 */
-	public Account createAndSaveAccount(String login, String password, String email, String role) {
-		return accountRepo.createAndSaveAccount(login, password, email, role);
+	public Account createAndSaveAccount(String login, String password, String email, String role, List<Long> restaurantIds) {
+		ArrayList<Key<Restaurant>> restaurantKeys = new ArrayList<Key<Restaurant>>();
+		for (Long restaurantId : restaurantIds) {
+			restaurantKeys.add( new Key<Restaurant>(Restaurant.class,restaurantId));
+		}
+		return accountRepo.createAndSaveAccount(login, password, email, role, restaurantKeys);
 	}
 	
 	public AccountDTO toDto(Account account) {
@@ -149,7 +157,6 @@ public class AccountController {
 		accountData.setRole(account.getRole());
 		accountData.setEmail(account.getEmail());
 		accountData.setPasswordHash(account.getHashedPassword());
-		accountData.setToken(account.getChannelToken());
 		return accountData;
 	}
 	
@@ -162,7 +169,7 @@ public class AccountController {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
 		if(account != null && account.getRole().equals("restaurantadmin")) {
-			for (Restaurant restaurant :restaurantRepo.getAll()) {
+			for (Restaurant restaurant :restaurantRepo.getByKeys(account.getRestaurants())) {
 				BusinessDTO businessData = new BusinessDTO();
 				businessData.setId(restaurant.getId());
 				businessData.setName(restaurant.getName());
@@ -178,12 +185,13 @@ public class AccountController {
 	 * Generates and returns a new channel token.
 	 * @param login
 	 * 		login name for which to create the token
+	 * @param businessId 
 	 * @return
 	 * 		the token
 	 */
-	public String requestToken (String login) {
+	public String requestToken (String login, Long businessId) {
 		logger.debug("new token requested for "+login);
-		ChannelService channelService = ChannelServiceFactory.getChannelService();			
-		return channelService.createChannel(login); 
+		Restaurant restaurant = restaurantRepo.getById(businessId);
+		return channelCtrl.createChannel(restaurant, login);
 	}
 }

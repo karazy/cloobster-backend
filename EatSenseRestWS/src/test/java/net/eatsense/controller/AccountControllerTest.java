@@ -33,12 +33,6 @@ public class AccountControllerTest {
 	    private Injector injector;
 	    private AccountController ctr;
 	    private RestaurantRepository rr;
-	    private MenuRepository mr;
-	    private ProductRepository pr;
-	    private ChoiceRepository cr;
-	    private DummyDataDumper ddd;
-
-		private SpotRepository br;
 
 		private String password;
 
@@ -50,25 +44,24 @@ public class AccountControllerTest {
 
 		private Account account;
 
+		private AccountRepository ar;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(AccountController.class);
 		rr = injector.getInstance(RestaurantRepository.class);
-		pr = injector.getInstance(ProductRepository.class);
-		mr = injector.getInstance(MenuRepository.class);
-		cr = injector.getInstance(ChoiceRepository.class);
-		br = injector.getInstance(SpotRepository.class);
+		ar = injector.getInstance(AccountRepository.class);
 		
-		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		 password = "diesisteintestpasswort";
 		 login = "testlogin";
 		 email = "wurst@wurst.de";
 		 role = "admin";
-		account = ctr.createAndSaveAccount( login, password,
-				email, role);
+		 //TODO update to use restaurant id
+		account = ar.createAndSaveAccount( login, password,
+				email, role, rr.getAllKeys());
 		
 	}
 

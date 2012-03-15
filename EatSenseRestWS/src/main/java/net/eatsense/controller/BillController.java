@@ -32,6 +32,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.cockpit.SpotCockpitDTO;
 
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
@@ -63,12 +64,14 @@ public class BillController {
 
 	private Transformer transform;
 	private RequestRepository requestRepo;
+	private ChannelController channelCtrl;
 	
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, Transformer trans, BillRepository billRepo) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, Transformer trans, BillRepository billRepo, ChannelController cctrl) {
 		super();
+		this.channelCtrl = cctrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
@@ -90,7 +93,7 @@ public class BillController {
 		}
 		
 		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.findByKey(restaurantId);
+		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 		if(restaurant == null) {
 			logger.error("Bill cannot be created, restaurant id unknown" + restaurantId);
 		}
@@ -137,15 +140,24 @@ public class BillController {
 			
 			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 			
-			if(checkInRepo.saveOrUpdate(checkIn) == null ) {
-				throw new RuntimeException("CheckIn status could not be updated for id: " + checkIn.getId());
+			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
+			
+			// If we have an older request in the database ...
+			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+				// Send message to notify clients over their channel
+				
+				SpotCockpitDTO spotData = new SpotCockpitDTO();
+				spotData.setId(checkIn.getSpot().getId());
+				spotData.setStatus(request.getStatus());
+				
+				try {
+					channelCtrl.sendMessageToAllClients(restaurantId, "spot", "update", spotData);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}		
-			
-			ChannelService channelService = ChannelServiceFactory.getChannelService();
-			ChannelMessage cm = new ChannelMessage("admin", "ORDER_PLACED");
-			logger.debug("send channel message "+cm);
-			channelService.sendMessage(cm);
-			
 		}
 		return billData;
 	}

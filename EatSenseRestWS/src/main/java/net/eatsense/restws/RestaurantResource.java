@@ -82,7 +82,7 @@ public class RestaurantResource{
 	@Path("{restaurantId}/spots")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
-	public Collection<SpotCockpitDTO> getSpotCockpitInformation(@PathParam("restaurantId") Long restaurantId) {
+	public Collection<SpotCockpitDTO> getSpotCockpitInformation(@PathParam("restaurantId") Long restaurantId) throws Exception {
 		return restaurantCtrl.getSpotDtos(restaurantId);
 	}
 	

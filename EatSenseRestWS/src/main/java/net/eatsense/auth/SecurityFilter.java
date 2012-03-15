@@ -4,10 +4,13 @@
 package net.eatsense.auth;
 
 import java.security.Principal;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
@@ -66,7 +69,24 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String login = request.getHeaderValue("login");
 		String password = request.getHeaderValue("password");
 		String passwordHash = request.getHeaderValue("passwordHash");
-
+		
+		Long restaurantId = null;
+		
+		for (Iterator<PathSegment> iterator = request.getPathSegments(true).iterator(); iterator.hasNext();) {
+			PathSegment pathSegment = iterator.next();
+			if(pathSegment.getPath().equals("restaurants")) {
+				try {
+					restaurantId = Long.valueOf(iterator.next().getPath());
+				} catch (NumberFormatException e) {
+				}
+			}
+		}
+		
+		if(restaurantId == null) {
+			if( request.getFormParameters().getFirst("businessId") != null)
+				restaurantId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
+		}
+		
 		if(checkInId != null && !checkInId.isEmpty()) {
 			 Authorizer auth = authenticateCheckIn(checkInId);
 			 if(auth != null) {
@@ -80,27 +100,13 @@ public class SecurityFilter implements ContainerRequestFilter {
 		if(login != null && !login.isEmpty()) {
 			logger.info("recieved login request from user: " +login);
 			Account account = null;
-			if(password != null && !password.isEmpty()) {
-				// Authenticate with the clear password, should usually been doing only once during a session.
-				account = accountCtrl.authenticate(login, password);
-				
-				if(account != null) {
-					request.setSecurityContext(new Authorizer(account));
-					servletRequest.setAttribute("net.eatsense.domain.Account", account);
-					logger.info("authentication success for user: "+login);
-					return request;
-				}
-				else {
-					logger.info("Failed login for user: "+login);
-				}
-					
-			}
+
 			if(passwordHash != null && !passwordHash.isEmpty()) {
 				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticateHashed(login, passwordHash);
 				
 				if(account != null) {
-					request.setSecurityContext(new Authorizer(account));
+					request.setSecurityContext(new Authorizer(account, restaurantId));
 					servletRequest.setAttribute("net.eatsense.domain.Account", account);
 					logger.info("authentication success for user: "+login);
 					return request;
@@ -131,6 +137,7 @@ public class SecurityFilter implements ContainerRequestFilter {
     	
     	private CheckIn checkIn;
 		private Account account;
+		private Long restaurantId;
 
         public Authorizer(final CheckIn checkIn) {
         	this.checkIn = checkIn;
@@ -141,8 +148,9 @@ public class SecurityFilter implements ContainerRequestFilter {
             };
         }
         
-        public Authorizer(final Account account) {
+        public Authorizer(final Account account, Long restaurantId) {
         	this.account = account;
+        	this.restaurantId = restaurantId;
             this.principal = new Principal() {
                 public String getName() {
                 		return account.getLogin();
@@ -167,9 +175,9 @@ public class SecurityFilter implements ContainerRequestFilter {
         		return true;
         	
 
-        	if(account != null && role.equals(account.getRole()))
-        		return true;
-		
+        	if(role.equals("restaurantadmin") && account != null && role.equals(account.getRole())){
+             		return accountCtrl.isAccountManagingRestaurantId(account, restaurantId);
+        	}
             return false;
         }
 

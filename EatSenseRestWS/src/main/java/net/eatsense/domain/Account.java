@@ -1,6 +1,7 @@
 package net.eatsense.domain;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -21,12 +22,6 @@ public class Account extends GenericEntity {
 	@Email
 	String email;
 	
-	/**
-	 * The token created by channel API.
-	 * Needed to enable push communication.
-	 */
-	String channelToken;
-	
 	@NotNull
 	@NotEmpty
 	String role;
@@ -34,6 +29,16 @@ public class Account extends GenericEntity {
 	Date lastFailedLogin;
 	int failedLoginAttempts;
 	
+	List<Key<Restaurant>> restaurants;
+	
+	public List<Key<Restaurant>> getRestaurants() {
+		return restaurants;
+	}
+
+	public void setRestaurants(List<Key<Restaurant>> restaurants) {
+		this.restaurants = restaurants;
+	}
+
 	public Date getLastFailedLogin() {
 		return lastFailedLogin;
 	}
@@ -82,15 +87,6 @@ public class Account extends GenericEntity {
 		this.role = role;
 	}
 		
-
-	public String getChannelToken() {
-		return channelToken;
-	}
-
-	public void setChannelToken(String channelToken) {
-		this.channelToken = channelToken;
-	}
-
 	@JsonIgnore
 	@Transient
 	public Key<Account> getKey() {
