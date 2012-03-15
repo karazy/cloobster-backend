@@ -13,7 +13,7 @@ Ext.application({
 	name : 'EatSense',
 	controllers : ['Login','Spot'],
 	models : ['Account','Spot', 'Business'],
-	views : ['Login', 'Main'], 
+	views : ['Login', 'ChooseBusiness', 'Main'], 
 	stores : ['Account', 'AppState',  'Spot', 'Business' ],
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
 	init : function() {

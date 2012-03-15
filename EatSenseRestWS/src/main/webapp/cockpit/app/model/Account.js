@@ -12,9 +12,14 @@ Ext.define('EatSense.model.Account', {
 			name: 'passwordHash'
 		}, {
 			name: 'role'
-		}, {
-			name: 'token'
-		}		
+		}, 
+		{
+			name: 'businessId'
+		},	
+		//TODO maybe store an association?
+		{
+			name: 'business'
+		}	
 		],
 		proxy : {
 			type : 'rest',

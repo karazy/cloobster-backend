@@ -10,14 +10,23 @@ Ext.define('EatSense.controller.Login', {
 			},
 			logoutButton: {
 				tap: 'logout'
-			}
+			},
+		 	businessList: {
+		 		itemtap: 'setBusinessId'
+		 	},
+		 	cancelLoginButton: {
+	 			tap: 'cancelLogin'
+		 	}
 		},		
 		refs: {
+			loginPanel: 'login',
 			loginButton: 'login button[action=login]',
 			logoutButton: 'button[action=logout]',
 			loginField: 'textfield[name=login]',
 			passwordField: 'passwordfield[name=password]',
-			savePassword: 'togglefield[name=savePasswordToggle]'
+			savePassword: 'login togglefield[name=savePasswordToggle]',
+			businessList: 'choosebusiness list',
+			cancelLoginButton: 'choosebusiness button[action=cancel]',
 		},		
 
 		account : Ext.create('EatSense.model.Account'),
@@ -25,13 +34,37 @@ Ext.define('EatSense.controller.Login', {
 
 	init: function() {
 		console.log('init');
+		var		me = this;
 
 
 		//private functions
+		/*
+		*	Resets Account proxy headers to prevent passwort from being send plain.
+		*/
 		this.resetAccountProxyHeaders =  function() {
 			console.log('resetAccountProxyHeaders');
 			EatSense.model.Account.getProxy().setHeaders({});
-	 	}
+	 	};
+
+	 	/*
+	 	*	Save application state by using localstorage.
+	 	*/
+	 	this.saveAppState = function() {
+	 		var 	accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
+
+			if(me.getSavePassword().getValue() === 1) {
+				me.getAccount().setDirty();
+				accountLocalStore.add(me.getAccount());
+				accountLocalStore.sync();
+			};
+	 	};
+	 	/*
+	 	*	Reset login fields.
+	 	*/
+	 	this.resetLoginFields = function() {
+	 		me.getLoginField().setValue("");
+	 		me.getPasswordField().setValue("");
+	 	};
 	},
 
 	/**
@@ -42,7 +75,8 @@ Ext.define('EatSense.controller.Login', {
 	restoreCredentials: function() {
 		Ext.Logger.info('restoreCredentials');
 		console.log('restoreCredentials');
-		var accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+		var me = this,
+		accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
 		spotCtr = this.getApplication().getController('Spot'),
 		account;
 
@@ -68,14 +102,8 @@ Ext.define('EatSense.controller.Login', {
 				'login': account.get('login'),
 				'passwordHash': account.get('passwordHash')
 			});
-			//open channel for server side push messagens
-			Karazy.channel.createChannel( {
-				token: account.get('token'), 
-				messageHandler: spotCtr.loadSpots,
-				requestTokenHandler: this.requestNewToken,
-				messageHandlerScope: spotCtr,
-				requestTokenHandlerScope: this
-			});
+			
+			me.openChannel();
 
 	   		return true;	   		 	   		
 	   	 } else {
@@ -94,10 +122,11 @@ Ext.define('EatSense.controller.Login', {
 		Ext.Logger.info('login');
 		console.log('login');
 
-		var account, 
+		var me = this,
+		account, 
 		login = this.getLoginField().getValue(),
 		password = this.getPasswordField().getValue(),
-		accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+		// accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
 		spotCtr = this.getApplication().getController('Spot'),
 		me = this;
 
@@ -108,7 +137,7 @@ Ext.define('EatSense.controller.Login', {
 		}
 
 		EatSense.model.Account.getProxy().setHeaders({
-				//provide credentials, they will be added to request header and deleted from params object
+				//provide credentials, they will be added to request header
 				'login': login,
 				'password': password
 		});
@@ -126,34 +155,31 @@ Ext.define('EatSense.controller.Login', {
 
 				me.resetAccountProxyHeaders();
 
-				if(me.getSavePassword().getValue() === 1) {
-					me.getAccount().setDirty();
-					accountLocalStore.add(me.getAccount());
-					accountLocalStore.sync();
-				}
-
-				//open channel for server side push messagens
-				Karazy.channel.createChannel( {
-					token: record.get('token'), 
-					messageHandler: spotCtr.loadSpots,
-					requestTokenHandler: me.requestNewToken,
-					messageHandlerScope: spotCtr,
-					requestTokenHandlerScope: me
-
-				});
-
 				//TODO remove in a more reliable way!
 				//remove login view				
-				Ext.Viewport.remove(Ext.Viewport.down('login'));
-				//show main view				
-				Ext.create('EatSense.view.Main');
-				spotCtr.loadSpots();
+				// Ext.Viewport.remove(Ext.Viewport.down('login'));
+				me.showBusinesses();				
 			},
 			failure: function(record, operation){
 				console.log('failure');
 				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('wrongCredentials')); 
 			}
 		});
+	},
+	/**
+	*	Cancel login process in choose business view.
+	*
+	*/
+	cancelLogin: function() {
+		var		me = this,
+				loginPanel = this.getLoginPanel();
+
+		loginPanel.setActiveItem(0);
+		me.resetLoginFields();
+
+		Ext.Ajax.setDefaultHeaders({});	
+		me.setAccount({});
+		me.resetAccountProxyHeaders();		
 	},
 	/**
 	*	Logout signed in user and show login screen.
@@ -187,7 +213,7 @@ Ext.define('EatSense.controller.Login', {
 						Ext.Ajax.setDefaultHeaders({});	
 
 						//TODO remove in a more reliable way!
-						//remove login view				
+						//remove main view				
 						Ext.Viewport.remove(Ext.Viewport.down('main'));
 						//show main view				
 						Ext.create('EatSense.view.Login');		
@@ -207,8 +233,11 @@ Ext.define('EatSense.controller.Login', {
 		token;		
 
 		Ext.Ajax.request({
-		    url: 'accounts/'+login+'/tokens',
+		    url: 'accounts/'+login+'/tokens',		    
 		    method: 'POST',
+		    params: {
+		    	'businessId' :  this.getAccount().get('businessId')
+		    },
 		    success: function(response){
 		       	token = response.responseText;
 		       	callback(token);
@@ -217,6 +246,119 @@ Ext.define('EatSense.controller.Login', {
 		    	
 		    }
 		});
+	},
+	/**
+	* 	Requstes a token and
+	*	opens a channel for server side push messages.
+	*
+	*/
+	openChannel: function() {
+		var		me = this;
+
+		me.requestNewToken(function(newToken) {
+			Karazy.channel.createChannel( {
+				token: newToken, 
+				messageHandler: me.routeMessage,
+				requestTokenHandler: me.requestNewToken,
+				messageHandlerScope: me,
+				requestTokenHandlerScope: me
+			});
+		});
+	}, 
+	/**
+	*	Called after receiving a channel message.
+	*	Delegates to the responsible method.
+	*
+	*	@param rawMessage	
+	*		The raw string message which will be parsed as JSON
+	*/
+	routeMessage: function(rawMessage) {
+		var 	message = Ext.JSON.decode(rawMessage, true),
+				ctr;
+
+		if(message) {
+			if(message.type == 'spot') {
+				ctr = this.getApplication().getController('Spot');
+				if(message.action == 'update') {
+					ctr.updateSpotIncremental(message.content);
+				}
+			}
+		}
+	},
+
+	/**
+	*	Loads all businesses (e. g. restaurants or hotels) this user account is assigned to.
+	*
+	*/
+	showBusinesses: function() {
+		console.log('showBusinesses');
+		var 	me = this,
+				businessStore = Ext.StoreManager.lookup('businessStore'),
+				account = this.getAccount(),
+				spotCtr = this.getApplication().getController('Spot'),
+				loginPanel = this.getLoginPanel();
+
+		Ext.create('EatSense.view.ChooseBusiness');
+
+		this.getBusinessList().getStore().load({
+			params: {
+				pathId: account.get('login')
+			},
+			callback: function(records, operation, success) {
+			 	if(success) {
+
+			 		if(!records || records.length == 0) {
+			 			loginPanel.setActiveItem(0);
+			 			Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('noBusinessAssigned'), Ext.emptyFn);
+			 		}
+
+			 		if(records.length > 1) {
+			 			//more than one assigned business exists. show chooseBusiness view
+			 			loginPanel.setActiveItem(1);
+			 		} else if(records.length == 1){
+			 			account.set('businessId', records[0].get('id'));
+			 			account.set('business', record.get('name'));						
+			 			me.saveAppState();
+
+			 			Ext.Viewport.remove(Ext.Viewport.down('login'));
+			 			//show main view				
+						Ext.create('EatSense.view.Main');
+						spotCtr.loadSpots();
+
+						me.openChannel();						
+			 		} 
+
+			 	} else {
+			 		//TODO user can't log in because he is not assigned to a business
+			 		loginPanel.setActiveItem(0);
+			 		// Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
+			 	}				
+			 },
+			 scope: this
+		});
+	},
+
+	/**
+	*	Sets the businessId in account the user wants to log in for.
+	*	This Id will be used for calls to the webservice.
+	* 	e.g. /restaurants/{id}/spots
+	*	
+	*/
+	setBusinessId: function(dv, index, target, record) {
+		console.log('setBusiness');
+		var 	me = this,
+				account = this.getAccount(),
+				spotCtr = this.getApplication().getController('Spot'); 
+
+		account.set('businessId', record.get('id'));
+		account.set('business', record.get('name'));
+		me.saveAppState();
+
+		Ext.Viewport.remove(Ext.Viewport.down('login'));
+		Ext.create('EatSense.view.Main');
+		spotCtr.loadSpots();
+
+		me.openChannel();		
 	}
 
 

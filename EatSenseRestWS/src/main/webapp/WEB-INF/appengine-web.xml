@@ -10,9 +10,10 @@
 	<system-properties>
 		<property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties" />
 	</system-properties>
-	<!-- 
-	  <static-files>
-        <include path="**/app/*" />
-  	  </static-files>
- 	-->
+
+	<inbound-services>
+		<service>channel_presence</service>
+	</inbound-services>
+
+	<!-- <static-files> <include path="**/app/*" /> </static-files> -->
 </appengine-web-app>

@@ -212,7 +212,7 @@ public class CheckInController {
 		//TODO make it clean
 		ChannelService channelService = ChannelServiceFactory.getChannelService();
 		ChannelMessage cm = new ChannelMessage("admin", "CHECKEDIN");
-		logger.debug("send channel message "+cm);		
+		logger.debug("send channel message "+cm);
 		channelService.sendMessage(cm);
 
 		return checkInDto;
