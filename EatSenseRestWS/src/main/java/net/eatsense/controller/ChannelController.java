@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -80,19 +82,12 @@ public class ChannelController {
 	 */
 	public String createChannel(Restaurant restaurant, String clientId , Integer timeout) {
 		String token = null;
-		// create a channel id with the format "restaurantId|clientId|timestamp"
+		// create a channel id with the format "restaurantId|clientId"
 		clientId = restaurant.getId() + "|" + clientId;
-		clientId = clientId + "|" + new Date().getTime();
 		
 		logger.debug("creating channel for channelID: " +clientId);
 		token = (timeout != null)?channelService.createChannel(clientId, timeout):channelService.createChannel(clientId);
-		
-		if(restaurant.getChannelIds() == null) {
-			restaurant.setChannelIds(new ArrayList<String>());
-		}
-		
-		restaurant.getChannelIds().add(clientId);
-		restaurantRepo.saveOrUpdate(restaurant);
+
 		return token;
 	}
 	
@@ -176,19 +171,43 @@ public class ChannelController {
 		String lastMessage = "";
 		for (String clientId : restaurant.getChannelIds()) {
 			lastMessage = sendMessage(clientId, type, action, content);
+			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
 		}
-		logger.debug("last message sent: "+ lastMessage);
+		
 	}
 
 	public void handleDisconnected(HttpServletRequest request) {
+		String clientId;
 		try {
-			unsubscribeClient(channelService.parsePresence(request).clientId());
+			clientId = channelService.parsePresence(request).clientId();
 		} catch (IOException e) {
 			logger.error("could not parse presence", e);
 			throw new RuntimeException(e);
 		}
+		logger.debug("recieved disconnected from clientId:" + clientId);
+		unsubscribeClient(clientId);
 	}
 	
+	
+	public void handleConnected(HttpServletRequest request) {
+		String clientId;
+		try {
+			clientId = channelService.parsePresence(request).clientId();
+			
+			
+		} catch (IOException e) {
+			logger.error("could not parse presence", e);
+			throw new RuntimeException(e);
+		}
+		logger.debug("recieved connected from clientId:" + clientId);
+		subscribeToRestaurant(clientId);
+	}
+	
+	/**
+	 * Remove this client from the restaurant, so that it doesnt recieve further change updates.
+	 * 
+	 * @param clientId
+	 */
 	public void unsubscribeClient(String clientId) {
 		Restaurant restaurant = parseRestaurant(clientId);
 		
@@ -199,10 +218,8 @@ public class ChannelController {
 			if (restaurant.getChannelIds() == null || restaurant.getChannelIds().isEmpty())	{
 				return;
 			}
-				
-			for (String subscribedClientId : restaurant.getChannelIds()) {
-				
-			}
+			restaurant.getChannelIds().remove(clientId);
+			restaurantRepo.saveOrUpdate(restaurant);
 		}
 			
 		
@@ -210,23 +227,25 @@ public class ChannelController {
 	
 	private Restaurant parseRestaurant(String clientId) {
 		// retrieve the restaurantId appended at the front of the client id seperated with a "|"
-		Long restaurantId = Long.valueOf(clientId.substring(0, clientId.indexOf("|")-1) );
+		Long restaurantId = Long.valueOf(clientId.substring(0, clientId.indexOf("|") ));
 		
 		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 				
 		return restaurant;
 	}
 
-	public void subscribeToRestaurant(Long restaurantId, String clientId) {
+	public void subscribeToRestaurant( String clientId) {
+		Restaurant restaurant = parseRestaurant(clientId);
 		
-	}
-	
-	public void handleConnected(HttpServletRequest request) {
-		try {
-			channelService.parsePresence(request);
-		} catch (IOException e) {
-			logger.error("could not parse presence", e);
-			throw new RuntimeException(e);
+		if(restaurant == null) {
+			throw new IllegalArgumentException("unknown restaurantId encoded in clientId: "+ clientId);
+		}
+		else { 
+			if(restaurant.getChannelIds() == null)
+				restaurant.setChannelIds(new ArrayList<String>());
+			restaurant.getChannelIds().add(clientId);
+			restaurantRepo.saveOrUpdate(restaurant);
 		}
 	}
+
 }

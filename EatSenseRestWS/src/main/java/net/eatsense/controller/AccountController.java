@@ -186,12 +186,13 @@ public class AccountController {
 	 * @param login
 	 * 		login name for which to create the token
 	 * @param businessId 
+	 * @param clientId 
 	 * @return
 	 * 		the token
 	 */
-	public String requestToken (String login, Long businessId) {
-		logger.debug("new token requested for "+login);
+	public String requestToken (Long businessId, String clientId) {
+		logger.debug("new token requested for "+clientId);
 		Restaurant restaurant = restaurantRepo.getById(businessId);
-		return channelCtrl.createChannel(restaurant, login);
+		return channelCtrl.createChannel(restaurant, clientId);
 	}
 }

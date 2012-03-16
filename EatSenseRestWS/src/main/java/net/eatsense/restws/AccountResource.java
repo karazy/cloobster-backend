@@ -74,8 +74,8 @@ public class AccountResource {
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
-	public String requestToken(@PathParam("login") String login, @FormParam("businessId") Long businessId) {
-		return accountCtr.requestToken(login, businessId);
+	public String requestToken(@PathParam("login") String login, @FormParam("businessId") Long businessId, @FormParam("clientId") String clientId) {
+		return accountCtr.requestToken(businessId, clientId);
 	};
 	
 }
