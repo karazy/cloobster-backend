@@ -15,6 +15,7 @@ Ext.define('EatSense.view.ChooseBusiness', {
 		},
 		{
 			xtype: 'list',
+			ui: 'round',
 			store: 'businessStore',
 			itemTpl: '<h2>{name}</h2>',
 			// flex: 3

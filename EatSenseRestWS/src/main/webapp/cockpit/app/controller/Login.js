@@ -45,6 +45,12 @@ Ext.define('EatSense.controller.Login', {
 			console.log('resetAccountProxyHeaders');
 			EatSense.model.Account.getProxy().setHeaders({});
 	 	};
+	 	/*
+		*	Resets default Ajax headers.
+		*/
+	 	this.resetDefaultAjaxHeaders = function() {
+	 		Ext.Ajax.setDefaultHeaders({});
+	 	};
 
 	 	/*
 	 	*	Save application state by using localstorage.
@@ -55,6 +61,9 @@ Ext.define('EatSense.controller.Login', {
 			if(me.getSavePassword().getValue() === 1) {
 				me.getAccount().setDirty();
 				accountLocalStore.add(me.getAccount());
+				accountLocalStore.sync();
+			} else {
+				accountLocalStore.removeAll();
 				accountLocalStore.sync();
 			};
 	 	};
@@ -75,10 +84,10 @@ Ext.define('EatSense.controller.Login', {
 	restoreCredentials: function() {
 		Ext.Logger.info('restoreCredentials');
 		console.log('restoreCredentials');
-		var me = this,
-		accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
-		spotCtr = this.getApplication().getController('Spot'),
-		account;
+		var 	me = this,
+				accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+				spotCtr = this.getApplication().getController('Spot'),
+				account;
 
 		if(!accountLocalStore) {
 			return false;
@@ -102,12 +111,36 @@ Ext.define('EatSense.controller.Login', {
 				'login': account.get('login'),
 				'passwordHash': account.get('passwordHash')
 			});
-			
-			me.openChannel();
 
-	   		return true;	   		 	   		
+
+			//check if saved credentials are valid
+			EatSense.model.Account.load(account.get('login'), {
+				success: function(record, operation){
+					//credentials are valid, proceed
+					//merge account data
+					// me.setAccount(record);
+
+					Ext.create('EatSense.view.Main');
+					spotCtr.loadSpots();
+					me.openChannel();
+					return true;
+				},
+				failure: function(record, operation){					
+					//error verifying credentials, maybe account changed on server or server ist not aaccessible
+					me.resetDefaultAjaxHeaders();
+					Ext.create('EatSense.view.Login');
+					//TODO handle 401 unauthorized
+
+					me.getLoginField().setValue(account.get('login'));
+
+					Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('restoreCredentialsErr')); 
+					return false;
+				}
+			});
+							   			   		 	   		
 	   	 } else {
-	   	 	accountLocalStore.removeAll();	
+	   	 	accountLocalStore.removeAll();
+	   	 	Ext.create('EatSense.view.Login');	
 	   	 	return false;
 	   	 }
 	},
@@ -317,7 +350,7 @@ Ext.define('EatSense.controller.Login', {
 			 			loginPanel.setActiveItem(1);
 			 		} else if(records.length == 1){
 			 			account.set('businessId', records[0].get('id'));
-			 			account.set('business', record.get('name'));						
+			 			account.set('business', records[0].get('name'));						
 			 			me.saveAppState();
 
 			 			Ext.Viewport.remove(Ext.Viewport.down('login'));

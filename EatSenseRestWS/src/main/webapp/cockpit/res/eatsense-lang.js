@@ -19,6 +19,7 @@ var translation = {
 		"savePasswordToggle" : "Automatisch<br/>einloggen?",
 		"logoutQuestion" : "Wirklich ausloggen?",
 		"noBusinessAssigned" : "Dein Benutzer ist keinem Betrieb zugewiesen.",
+		"restoreCredentialsErr" : "Login mit gespeicherten Daten fehlgeschlagen",
 		//spot
 		"errorSpotLoading" : "Laden der Daten fehlgeschlagen."
 	}

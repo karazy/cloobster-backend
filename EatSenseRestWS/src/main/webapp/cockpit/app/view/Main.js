@@ -12,6 +12,11 @@ Ext.define('EatSense.view.Main', {
 			docked: 'bottom',
 			items: [
 			{
+			xtype: 'label',
+			itemId: 'info',
+			tpl: 'Logged in as <span>{login}</strong> at <strong>{business}</strong>'
+			},
+			{
 				xtype: 'spacer'
 			},
 			{

@@ -22,7 +22,7 @@ Ext.define('EatSense.model.Spot', {
 		}, { //shows 
 			name: 'status',
 			type: 'string'
-		}, { //time when first person checked in
+		}, { 
 			name: 'checkInCount',
 			type: 'number'			
 		}, { //value of all orders

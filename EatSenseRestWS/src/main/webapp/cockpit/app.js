@@ -25,12 +25,15 @@ Ext.application({
 	   	var loginCtr = this.getController('Login'),
 	   		spotCtr = this.getController('Spot');
 
-		if(loginCtr.restoreCredentials() === true) {
-			Ext.create('EatSense.view.Main');
-			spotCtr.loadSpots();
-		} else {			
-			Ext.create('EatSense.view.Login');
-		}		
+	   	//try to restore credentials
+	   	loginCtr.restoreCredentials();
+
+		// if( === true) {
+		// 	Ext.create('EatSense.view.Main');
+		// 	spotCtr.loadSpots();
+		// } else {			
+		// 	Ext.create('EatSense.view.Login');
+		// }		
 		
 	}
 });

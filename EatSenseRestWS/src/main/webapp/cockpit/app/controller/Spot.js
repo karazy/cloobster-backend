@@ -4,7 +4,8 @@ Ext.define('EatSense.controller.Spot', {
 	config: {
 		refs: {
 			spotitem: 'spotitem button',
-			spotsview: '#spotsview'
+			spotsview: '#spotsview',
+			info: 'toolbar[docked=bottom] #info'
 		},
 
 		control : {
@@ -24,8 +25,11 @@ Ext.define('EatSense.controller.Spot', {
 	*/
 	loadSpots: function() {
 		console.log('loadSpots');
-		var loginCtr = this.getApplication().getController('Login'),
-		account = loginCtr.getAccount();
+		var 	loginCtr = this.getApplication().getController('Login'),
+				account = loginCtr.getAccount(),
+				info = this.getInfo();
+
+		info.getTpl().overwrite(info.element, account.data);
 
 		this.getSpotsview().getStore().load({
 			 params: {
@@ -52,9 +56,8 @@ Ext.define('EatSense.controller.Spot', {
 		//load corresponding spot
 		var dirtySpot, index, spotStore = this.getSpotsview().getStore();
 		
-		//TODO decode spot?
-
-		index = spotStore.findExact('id', updatedSpot.get('id'));
+		//raw json, so no get('id')
+		index = spotStore.findExact('id', updatedSpot.id);
 
 		if(index > -1) {
 			dirtySpot = spotStore.getAt(index);			

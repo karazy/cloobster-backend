@@ -31,7 +31,7 @@ Karazy.channel = (function() {
 
 	function onMessage(data) {
 		console.log('channel message received');
-		messageHandlerFunction.apply(scopeMessageHandler, [data]);
+		messageHandlerFunction.apply(scopeMessageHandler, [data.data]);
 	};
 
 	function onError(error) {
