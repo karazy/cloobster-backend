@@ -25,10 +25,12 @@ Ext.application({
 		console.log('launch');
 		
     	//try to restore application state
-	   	 var appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
-	   	 checkInCtr = this.getController('CheckIn'),
-	   	 main = Ext.create('EatSense.view.Main'),
-	   	 restoredCheckInId;	 
+	   	 var 	appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+	   	 		checkInCtr = this.getController('CheckIn'),
+	   	 		restoredCheckInId;	 
+	   	 
+	   	 //create main screen
+	   	 Ext.create('EatSense.view.Main');
 	   	 
 	   	 try {
 	   		appStateStore.load();
@@ -57,25 +59,21 @@ Ext.application({
 	   					}	   						   				
 	   				},
 	   				failure: function(record, operation) {
-	   					Ext.create('EatSense.view.Main');
 	   					console.log('error restoring state');
 	   					appStateStore.removeAll();
+	   					appStateStore.sync();
 	   					appStateStore.add(checkInCtr.getAppState());
 	   		   		 	checkInCtr.showDashboard();
-	   				},
-	   				callback: function() {
-	   					
 	   				}
 	   			 });	   			 
-	   	}	   		 	   	 	   	 
+	   	 }	   		 	   	 	   	 
 	   	 else {	   		 
 	   		if (appStateStore.getCount() > 1){
 		   		 console.log('Too many appStates! clear cache. this should never happen.');
 		   	 } else {
 		   		console.log('no app state found.');
 		   		appStateStore.removeAll();
-		   	 } 	
-	   		 
+		   	 } 		   		 
 	   		 appStateStore.add(checkInCtr.getAppState());
 	   		 checkInCtr.showDashboard();
 	   	 }
