@@ -338,7 +338,7 @@ public class CheckInController {
 			SpotStatusDTO spotData = new SpotStatusDTO();
 			
 			spotData.setId(chkin.getSpot().getId());
-			// we already have all other checkins in a list, so we count them and add one for the new checkin
+
 			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", chkin.getSpot()).count());
 			
 			// send the message with the updated data field
@@ -441,7 +441,7 @@ public class CheckInController {
 			SpotStatusDTO spotData = new SpotStatusDTO();
 			
 			spotData.setId(checkIn.getSpot().getId());
-			// we already have all other checkins in a list, so we count them and add one for the new checkin
+
 			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
 			
 			// send the message with the updated data field
