@@ -34,18 +34,18 @@ Karazy.channel = (function() {
 		messageHandlerFunction.apply(scopeMessageHandler, [data.data]);
 	};
 
-	function onError(error) {
-		console.log('channel error ' + error);
-		if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
+	function onError(error) {		
+		console.log('channel error ' + (error && error.description) ? error.description : "");
+		// if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
 			// requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-		}		
+		// }		
 	};
 
 	function onClose() {
 		console.log('channel closed');
-		if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
+		// if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
 			// requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-		}
+		// }
 	};
 
 	function setupChannel(token) {
@@ -84,7 +84,7 @@ Karazy.channel = (function() {
 				(options.requestTokenHandlerScope) ? scopeTokenRequestHandler = options.requestTokenHandlerScope : this;
 			};
 
-			forcedClose = false;
+			// forcedClose = false;
 
 			setupChannel(options.token);
 		},
@@ -108,7 +108,7 @@ Karazy.channel = (function() {
 		* Closes the cannel and prevents a new token request.
 		*/
 		closeChannel: function() {
-			forcedClose = true;
+			// forcedClose = true;
 			if(socket) {
 				socket.close();
 			};			

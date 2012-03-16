@@ -513,6 +513,7 @@
 				myordersStore = Ext.data.StoreManager.lookup('orderStore'),
 				checkInId = me.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
 				payButton = me.getPaymentButton();
+				leaveButton = me.getLeaveButton();
 		
 		//TODO investigate if this is a bug
 		myordersStore.removeAll();
@@ -671,16 +672,17 @@
 	leave: function() {
 		var		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
 				myordersStore = Ext.data.StoreManager.lookup('orderStore');	
-		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) {
-//			Ext.Ajax.setDisableCaching(true); 
-			checkIn.erase({
-				callback: function(records, operation, success) {
-					if(success) {
-						this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
-					}					
-				}				
-			});
-//			Ext.Ajax.setDisableCaching(true); 
+		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) { 
+			checkIn.erase(
+//			{
+//				callback: function(records, operation, success) {
+//					if(operation.success) {
+//						
+//					}					
+//				}				
+//			}
+			);
+			this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
 		}				
 	},
 	/**
