@@ -107,11 +107,10 @@ Ext.define('EatSense.controller.Login', {
 					success: function(record, operation){
 						//credentials are valid, proceed
 
-						//set account data to update record 
-						// me.setAccount(record);
-
 						//generate clientId for channel
 						account.set('clientId', account.get('login') + new Date().getTime());
+
+						//ToDo check if business still exists
 
 						Ext.create('EatSense.view.Main');
 						spotCtr.loadSpots();

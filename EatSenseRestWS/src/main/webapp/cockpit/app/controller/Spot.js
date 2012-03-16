@@ -67,7 +67,7 @@ Ext.define('EatSense.controller.Spot', {
 			dirtySpot = spotStore.getAt(index);			
 			//update fields
 			for(prop in updatedSpot) {
-				if(prop && updatedSpot[prop]) {
+				if(prop && (updatedSpot[prop] || typeof updatedSpot[prop] == "number")) {
 					dirtySpot.set(prop, updatedSpot[prop]);					
 				}
 			}
