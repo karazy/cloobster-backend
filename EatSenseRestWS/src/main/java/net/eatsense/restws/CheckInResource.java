@@ -3,6 +3,7 @@ package net.eatsense.restws;
 import java.util.Collection;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -57,6 +58,12 @@ public class CheckInResource {
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO getCheckIn(@PathParam("checkInId") String checkInId) {
 		return checkInCtr.getCheckInAsDTO(checkInId);
+	}
+	
+	@DELETE
+	@Path("{checkInId}")
+	public void deleteCheckIn(@PathParam("checkInId") String checkInId) {
+		checkInCtr.checkOut(checkInId);
 	}
 	
 }

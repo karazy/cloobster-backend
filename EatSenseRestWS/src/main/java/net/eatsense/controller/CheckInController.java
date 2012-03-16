@@ -10,14 +10,18 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
+import net.eatsense.domain.Order;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.validation.CheckInStep2;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
@@ -51,6 +55,8 @@ public class CheckInController {
 	private SpotRepository barcodeRepo;
 	private Transformer transform;
 	private ChannelController channelCtrl;
+	private ObjectMapper mapper;
+    private Validator validator;
 
 	/**
 	 * Constructor using injection for creation.
@@ -75,8 +81,8 @@ public class CheckInController {
 		this.validator = validator;
 	}
 	
-	private ObjectMapper mapper;
-    private Validator validator;
+
+	
 
     /**
      * Get spot data for a given barcode.
@@ -372,7 +378,8 @@ public class CheckInController {
 	public CheckIn getCheckIn(String checkInId) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);		
 		if(checkIn == null)
-			throw new NotFoundException("unknown id");
+			// returns with code 404(Not Found)
+			throw new NotFoundException("unknown checkInId: " + checkInId);
 		return checkIn;
 	}
 	
@@ -414,5 +421,24 @@ public class CheckInController {
 		return (existingCheckIn.getLinkedUserId() == null && 
 				existingCheckIn.getStatus() != CheckInStatus.INTENT && 
 				existingCheckIn.getStatus() != CheckInStatus.PAYMENT_REQUEST);
+	}
+
+	/**
+	 * Delete the checkIn from database only if there are no orders placed or payment requested.
+	 * 
+	 * @param checkInId
+	 */
+	public void checkOut(String checkInId) {
+		CheckIn checkIn = getCheckIn(checkInId);
+		
+		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST) {
+			// return with return code 403(Forbidden)
+			throw new WebApplicationException(Response.noContent().status(Response.Status.FORBIDDEN).build());
+		}
+		else {
+			checkInRepo.ofy().delete(checkInRepo.ofy().query(Order.class).filter("status", "CART").listKeys());
+					
+			checkInRepo.delete(checkIn);
+		}			
 	}
 }
