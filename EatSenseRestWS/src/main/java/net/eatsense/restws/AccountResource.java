@@ -45,14 +45,20 @@ public class AccountResource {
 	@Produces("application/json; charset=UTF-8")
 	//@RolesAllowed({"restaurantadmin", "user"})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
-		//Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		Account account = null;
+		AccountDTO accountData = null;
+		if( (account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account")) != null ) {
+			accountData = accountCtr.toDto(account);
+		}
+		else {
+			accountData = accountCtr.getAccount(login, password);
+			if(accountData == null )
+				throw new WebApplicationException(401);
+		}
 		
-		AccountDTO account = accountCtr.getAccount(login, password);
-		if(account == null )
-			throw new WebApplicationException(401);
 		logger.info("Authenticated request from user :" + account.getLogin());
 		accountCtr.getAccount(login, password);
-		return account;
+		return accountData;
 	}
 	
 	@GET
