@@ -56,7 +56,7 @@ public class AccountResource {
 				throw new WebApplicationException(401);
 		}
 		
-		logger.info("Authenticated request from user :" + account.getLogin());
+		logger.info("Authenticated request from user :" + accountData.getLogin());
 		accountCtr.getAccount(login, password);
 		return accountData;
 	}
