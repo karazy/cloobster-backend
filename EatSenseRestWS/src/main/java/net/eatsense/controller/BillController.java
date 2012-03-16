@@ -4,11 +4,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.validation.Validator;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
@@ -23,20 +18,17 @@ import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.ChoiceRepository;
-import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
-import net.eatsense.representation.Transformer;
-import net.eatsense.representation.cockpit.SpotCockpitDTO;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
 
-import com.google.appengine.api.channel.ChannelMessage;
-import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -53,33 +45,25 @@ public class BillController {
 	private OrderChoiceRepository orderChoiceRepo;
 	private BillRepository billRepo;
 	
-	@Inject
-	private Validator validator;
-
 	private CheckInRepository checkInRepo;
 
 	private RestaurantRepository restaurantRepo;
 
-	private ChoiceRepository choiceRepo;
-
-	private Transformer transform;
 	private RequestRepository requestRepo;
 	private ChannelController channelCtrl;
 	
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, Transformer trans, BillRepository billRepo, ChannelController cctrl) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo,  BillRepository billRepo, ChannelController cctrl) {
 		super();
 		this.channelCtrl = cctrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
 		this.orderChoiceRepo = orderChoiceRepo;
-		this.choiceRepo = choiceRepo;
 		this.checkInRepo = checkInRepo;
 		this.restaurantRepo = restaurantRepo;
-		this.transform = trans;
 		this.billRepo = billRepo;
 	}
 	
@@ -146,7 +130,7 @@ public class BillController {
 			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
 				// Send message to notify clients over their channel
 				
-				SpotCockpitDTO spotData = new SpotCockpitDTO();
+				SpotStatusDTO spotData = new SpotStatusDTO();
 				spotData.setId(checkIn.getSpot().getId());
 				spotData.setStatus(request.getStatus());
 				

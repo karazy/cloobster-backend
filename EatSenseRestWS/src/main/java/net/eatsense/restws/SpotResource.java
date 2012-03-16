@@ -52,7 +52,6 @@ public class SpotResource {
 	public Collection<SpotDTO> getAllSpots() {
 		
 		SpotRepository sr = new SpotRepository();
-		SpotDTO spotDto = new SpotDTO();
 		Collection<Spot> spots = sr.getAll();
 		Collection<SpotDTO> dtos = new ArrayList<SpotDTO>();
 		

@@ -9,6 +9,12 @@ import com.google.inject.Inject;
 
 import net.eatsense.controller.ChannelController;
 
+/**
+ * Provides the endpoint for the Channel API presence service.
+ * 
+ * @author Nils Weiher
+ *
+ */
 @Path("_ah/channel")
 public class ChannelResource {
 	private ChannelController channelCtrl;

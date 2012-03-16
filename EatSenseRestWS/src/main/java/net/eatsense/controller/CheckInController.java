@@ -24,21 +24,15 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
-import net.eatsense.representation.cockpit.SpotCockpitDTO;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.IdHelper;
-import net.eatsense.util.NicknameGenerator;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.channel.ChannelMessage;
-import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 
@@ -55,35 +49,42 @@ public class CheckInController {
 	private RestaurantRepository restaurantRepo;
 	private CheckInRepository checkInRepo;
 	private SpotRepository barcodeRepo;
-	private NicknameGenerator nnGen;
 	private Transformer transform;
 	private ChannelController channelCtrl;
 
+	/**
+	 * Constructor using injection for creation.
+	 * 
+	 * @param restaurantRepository
+	 * @param checkInRepository
+	 * @param spotRepository
+	 * @param transformer
+	 * @param channelController
+	 * @param objectMapper
+	 * @param validator
+	 */
 	@Inject
-	public CheckInController(RestaurantRepository r, CheckInRepository checkInRepo, SpotRepository barcodeRepo, NicknameGenerator nnGen, Transformer trans, ChannelController cr) {
-		this.restaurantRepo = r;
-		this.checkInRepo = checkInRepo;
-		this.channelCtrl = cr;
-		this.barcodeRepo = barcodeRepo;
-		this.nnGen = nnGen;
-		this.transform = trans;
+	public CheckInController(RestaurantRepository restaurantRepository, CheckInRepository checkInRepository, SpotRepository spotRepository,
+			Transformer transformer, ChannelController channelController, ObjectMapper objectMapper, Validator validator) {
+		this.restaurantRepo = restaurantRepository;
+		this.checkInRepo = checkInRepository;
+		this.channelCtrl = channelController;
+		this.barcodeRepo = spotRepository;
+		this.transform = transformer;
+		this.mapper = objectMapper;
+		this.validator = validator;
 	}
 	
-	@Inject
 	private ObjectMapper mapper;
-	
-	
-	public void setMapper(ObjectMapper mapper) {
-		this.mapper = mapper;
-	}
-
-	@Inject
     private Validator validator;
 
-    public void setValidator(Validator validator) {
-        this.validator = validator;
-    }
-    
+    /**
+     * Get spot data for a given barcode.
+     * 
+     * @param barcode
+     * @return SpotDTO containing all relevant data for the client
+     * @throws NotFoundException
+     */
     public SpotDTO getSpotInformation(String barcode) throws NotFoundException {
     	if(barcode == null || barcode.isEmpty() )
     		return null;
@@ -211,7 +212,7 @@ public class CheckInController {
 		checkInDto.setUserId(checkInId);
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
-		SpotCockpitDTO spotData = new SpotCockpitDTO();
+		SpotStatusDTO spotData = new SpotStatusDTO();
 		
 		spotData.setId(spot.getId());
 		// we already have all other checkins in a list, so we count them and add one for the new checkin
@@ -329,7 +330,7 @@ public class CheckInController {
 			logger.info("Cancel CheckIn with userId {}", userId);
 			checkInRepo.delete(chkin);
 			
-			SpotCockpitDTO spotData = new SpotCockpitDTO();
+			SpotStatusDTO spotData = new SpotStatusDTO();
 			
 			spotData.setId(chkin.getSpot().getId());
 			// we already have all other checkins in a list, so we count them and add one for the new checkin
@@ -378,7 +379,6 @@ public class CheckInController {
 	/**
 	 * Return other checkins at the same spot.
 	 * 
-	 * 
 	 * @param chkin A user
 	 * @return All users at spot checkedin.
 	 */
@@ -394,7 +394,8 @@ public class CheckInController {
 			// Other users at this table exist.
 			for (CheckIn checkIn : checkInsAtSpot) {
 				
-				if(!checkIn.getUserId().equals(chkin.getUserId()) && checkIn.getStatus() == CheckInStatus.CHECKEDIN ) {
+				if(!checkIn.getUserId().equals(chkin.getUserId())
+						&& (checkIn.getStatus() == CheckInStatus.CHECKEDIN || checkIn.getStatus() == CheckInStatus.ORDER_PLACED)) {
 					otherCheckIns.add(checkIn);
 				}
 			}

@@ -11,7 +11,6 @@ import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
@@ -31,14 +30,12 @@ import com.googlecode.objectify.NotFoundException;
  */
 public class MenuController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private RestaurantRepository restaurantRepo;
 	private MenuRepository menuRepo;
 	private ProductRepository productRepo;
 	private Transformer transform;
 
 	@Inject
-	public MenuController(RestaurantRepository r, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans) {
-		this.restaurantRepo = r;
+	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans) {
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
@@ -92,10 +89,7 @@ public class MenuController {
 			logger.error("Product not found with id "+id, e);
 			return null;
 		}
-		
-		
-		
-				
+			
 		return productDto;
 	}
 

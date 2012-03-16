@@ -5,7 +5,6 @@ import java.util.Collection;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -13,25 +12,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
 import net.eatsense.controller.BillController;
-import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.controller.RestaurantController;
 import net.eatsense.domain.Restaurant;
-import net.eatsense.domain.User;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
-import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.RestaurantDTO;
-import net.eatsense.representation.SpotDTO;
-import net.eatsense.representation.cockpit.SpotCockpitDTO;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
@@ -82,8 +76,8 @@ public class RestaurantResource{
 	@Path("{restaurantId}/spots")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
-	public Collection<SpotCockpitDTO> getSpotCockpitInformation(@PathParam("restaurantId") Long restaurantId) throws Exception {
-		return restaurantCtrl.getSpotDtos(restaurantId);
+	public Collection<SpotStatusDTO> getSpotCockpitInformation(@PathParam("restaurantId") Long restaurantId) throws Exception {
+		return restaurantCtrl.getSpotStatusData(restaurantId);
 	}
 	
 	@GET

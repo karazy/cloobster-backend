@@ -1,19 +1,17 @@
 package net.eatsense.controller;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+
+import net.eatsense.domain.Restaurant;
+import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +19,6 @@ import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
-
-import net.eatsense.domain.Restaurant;
-import net.eatsense.persistence.RestaurantRepository;
-import net.eatsense.representation.cockpit.MessageDTO;
 
 /**
  * Sends push messages via the Google Channel Service.

@@ -1,14 +1,12 @@
 package net.eatsense.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
@@ -17,8 +15,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -160,11 +156,43 @@ public class AccountController {
 		return accountData;
 	}
 	
-	public AccountDTO getAccount(String login, String password) {
-		return toDto(authenticate(login, password));
+	/**
+	 * Get the account data for the given login and authenticate with the given password.
+	 * 
+	 * @param login
+	 * @param password
+	 * @return AccountDTO containing the account data
+	 */
+	public AccountDTO getAccountDto(String login) {
+		Account account = accountRepo.getByProperty("login", login);
+		if(account == null)
+			return null;
+		
+		return toDto(account);
+	}
+	
+	/**
+	 * Get the account data for the given login and authenticate with the given password.
+	 * 
+	 * @param login
+	 * @param password
+	 * @return AccountDTO containing the account data
+	 */
+	public AccountDTO getAccount(String login) {
+		Account account = accountRepo.getByProperty("login", login);
+		if(account == null)
+			return null;
+		
+		return toDto(account);
 	}
 
 
+	/**
+	 * Get a list of businesses the given account manages.
+	 * 
+	 * @param login the login of the account
+	 * @return list of BusinessDTO objects the account manages
+	 */
 	public List<BusinessDTO> getBusinessDtos(String login) {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
@@ -183,12 +211,10 @@ public class AccountController {
 	
 	/**
 	 * Generates and returns a new channel token.
-	 * @param login
-	 * 		login name for which to create the token
+	 * 
 	 * @param businessId 
-	 * @param clientId 
-	 * @return
-	 * 		the token
+	 * @param clientId to use for token creation 
+	 * @return the generated channel token
 	 */
 	public String requestToken (Long businessId, String clientId) {
 		logger.debug("new token requested for "+clientId);

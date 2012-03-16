@@ -12,7 +12,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
@@ -51,13 +50,12 @@ public class AccountResource {
 			accountData = accountCtr.toDto(account);
 		}
 		else {
-			accountData = accountCtr.getAccount(login, password);
+			accountData = accountCtr.getAccountDto(login);
 			if(accountData == null )
 				throw new WebApplicationException(401);
 		}
 		
 		logger.info("Authenticated request from user :" + accountData.getLogin());
-		accountCtr.getAccount(login, password);
 		return accountData;
 	}
 	

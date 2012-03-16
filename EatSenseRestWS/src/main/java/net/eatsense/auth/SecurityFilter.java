@@ -5,29 +5,23 @@ package net.eatsense.auth;
 
 import java.security.Principal;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.persistence.CheckInRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
-import com.sun.jersey.api.Responses;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
@@ -104,6 +98,18 @@ public class SecurityFilter implements ContainerRequestFilter {
 			if(passwordHash != null && !passwordHash.isEmpty()) {
 				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticateHashed(login, passwordHash);
+				
+				if(account != null) {
+					request.setSecurityContext(new Authorizer(account, restaurantId));
+					servletRequest.setAttribute("net.eatsense.domain.Account", account);
+					logger.info("authentication success for user: "+login);
+					return request;
+				}	
+			}
+			
+			if(password != null && !password.isEmpty()) {
+				// Authenticate with hash comparison ...
+				account = accountCtrl.authenticate(login, password);
 				
 				if(account != null) {
 					request.setSecurityContext(new Authorizer(account, restaurantId));

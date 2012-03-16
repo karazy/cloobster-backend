@@ -9,11 +9,6 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Choice;
@@ -23,8 +18,8 @@ import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Request.RequestType;
+import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -34,13 +29,12 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
-import net.eatsense.representation.cockpit.SpotCockpitDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
 
-import com.google.appengine.api.channel.ChannelMessage;
-import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
-import com.google.appengine.api.taskqueue.TaskQueuePb.TaskQueueAddRequest.RequestMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
@@ -52,27 +46,20 @@ public class OrderController {
 	private OrderRepository orderRepo;
 	private ProductRepository productRepo;
 	private OrderChoiceRepository orderChoiceRepo;
-	
-	@Inject
 	private Validator validator;
-
 	private CheckInRepository checkInRepo;
-
 	private RestaurantRepository restaurantRepo;
-
 	private ChoiceRepository choiceRepo;
-
 	private Transformer transform;
-
 	private RequestRepository requestRepo;
-
 	private ChannelController channelCtrl;
 	
 	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans, ChannelController channelCtrl) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans, ChannelController channelCtrl, Validator validator) {
 		super();
+		this.validator = validator;
 		this.channelCtrl = channelCtrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
@@ -83,16 +70,31 @@ public class OrderController {
 		this.restaurantRepo = restaurantRepo;
 		this.transform = trans;
 	}
-	
-	public void setValidator(Validator validator) {
-        this.validator = validator;
-    }
-	
 
+	/**
+	 * Delete the specified order from the datastore.
+	 * 
+	 * @param restaurantId
+	 * @param orderId
+	 */
 	public void deleteOrder(Long restaurantId, Long orderId) {
 		orderRepo.ofy().delete(new Key<Order>(new Key<Restaurant>(Restaurant.class, restaurantId), Order.class, orderId));
 	}
 	
+	/**
+	 * <p>
+	 * Updates a specific order (identified by orderId)<br>
+	 * from a given checkIn (identified by checkInId)<br>
+	 * of a specific restaurant (identified by restaurantId)<br>
+	 * with new data contained in orderData.
+	 * </p>
+	 * 
+	 * @param restaurantId
+	 * @param orderId
+	 * @param orderData
+	 * @param checkInId
+	 * @return the updated OrderDTO
+	 */
 	public OrderDTO updateOrder(Long restaurantId, Long orderId, OrderDTO orderData, String checkInId) {
 		Order order = getOrder(restaurantId, orderId);
 		
@@ -141,7 +143,7 @@ public class OrderController {
 				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
 					// Send message to notify clients over their channel
 					
-					SpotCockpitDTO spotData = new SpotCockpitDTO();
+					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
 					spotData.setStatus(request.getStatus());
 					
@@ -167,12 +169,26 @@ public class OrderController {
 		return transform.orderToDto( order );
 	}
 	
+	/**
+	 * Get the data for a specified order of a restaurant.
+	 * 
+	 * @param restaurantId
+	 * @param orderId
+	 * @return
+	 */
 	public OrderDTO getOrderAsDTO(Long restaurantId, Long orderId) {
 		Order order = getOrder(restaurantId, orderId);
 				
 		return transform.orderToDto( order );
 	}
 
+	/**
+	 * Get the order entity for a given orderId of a restaurant.
+	 * 
+	 * @param restaurantId
+	 * @param orderId
+	 * @return the Order entity, if existing
+	 */
 	public Order getOrder(Long restaurantId, Long orderId) {
 		// Check if the restaurant exists.
 		Restaurant restaurant = restaurantRepo.getById(restaurantId);
@@ -189,6 +205,14 @@ public class OrderController {
 		return order;
 	}
 	
+	/**
+	 * Get all order data 
+	 * 
+	 * @param restaurantId
+	 * @param checkInId
+	 * @param status
+	 * @return
+	 */
 	public Collection<OrderDTO> getOrdersAsDTO(Long restaurantId, String checkInId, String status) {
 		return transform.ordersToDto(getOrders( restaurantId, checkInId, status));
 	}
