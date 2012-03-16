@@ -98,13 +98,18 @@ public class OrderController {
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
-			logger.error("Order cannot be placed, checkin not found!");
+			logger.error("Order cannot be updated, checkin not found!");
 			return null;
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			logger.error("Order cannot be placed, payment already requested or not checked in");
+			logger.error("Order cannot be updated, payment already requested or not checked in");
 			return null;
 		}
+		if(order.getStatus() != OrderStatus.CART) {
+			logger.error("Order cannot be updated, order already placed or completed.");
+			return null;
+		}
+		
 		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
 		order.setComment(orderData.getComment());
@@ -116,33 +121,36 @@ public class OrderController {
 			if( orderRepo.saveOrUpdate(order) == null )
 				throw new RuntimeException("order could not be updated, id: " + orderId);
 
-			checkIn.setStatus(CheckInStatus.ORDER_PLACED);
-			checkInRepo.saveOrUpdate(checkIn);
-			Request request = new Request();
-			request.setCheckIn(checkIn.getKey());
-			request.setRestaurant(Restaurant.getKey(restaurantId));
-			request.setObjectId(orderId);
-			request.setType(RequestType.ORDER);
-			request.setReceivedTime(new Date());
-			request.setSpot(checkIn.getSpot());
-			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
+			// only create a new request if the order status was updated to be placed
+			if(order.getStatus() == OrderStatus.PLACED) {
+				checkIn.setStatus(CheckInStatus.ORDER_PLACED);
+				checkInRepo.saveOrUpdate(checkIn);
+				Request request = new Request();
+				request.setCheckIn(checkIn.getKey());
+				request.setRestaurant(Restaurant.getKey(restaurantId));
+				request.setObjectId(orderId);
+				request.setType(RequestType.ORDER);
+				request.setReceivedTime(new Date());
+				request.setSpot(checkIn.getSpot());
+				request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 
-			requestRepo.saveOrUpdate(request);
-			
-			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
-			// If we have an older request in the database ...
-			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
-				// Send message to notify clients over their channel
+				requestRepo.saveOrUpdate(request);
 				
-				SpotCockpitDTO spotData = new SpotCockpitDTO();
-				spotData.setId(checkIn.getSpot().getId());
-				spotData.setStatus(request.getStatus());
-				
-				try {
-					channelCtrl.sendMessageToAllClients(restaurantId, "spot", "update", spotData);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
+				// If we have an older request in the database ...
+				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+					// Send message to notify clients over their channel
+					
+					SpotCockpitDTO spotData = new SpotCockpitDTO();
+					spotData.setId(checkIn.getSpot().getId());
+					spotData.setStatus(request.getStatus());
+					
+					try {
+						channelCtrl.sendMessageToAllClients(restaurantId, "spot", "update", spotData);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
