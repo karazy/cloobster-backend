@@ -53,7 +53,7 @@ Ext.define('EatSense.controller.Login', {
 	 	};
 
 	 	/*
-	 	*	Save application state by using localstorage.
+	 	*	Save application state by using localstorage when getSavePassword is checked.
 	 	*/
 	 	this.saveAppState = function() {
 	 		var 	accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
@@ -97,7 +97,9 @@ Ext.define('EatSense.controller.Login', {
 	   		accountLocalStore.load();
 	   	 } catch (e) {
 	   	 	console.log('Failed restoring cockpit state.');
-	   		accountLocalStore.removeAll();	   		
+	   		accountLocalStore.removeAll();	
+	   		accountLocalStore.removeAll();
+	   	 	Ext.create('EatSense.view.Login');	   		
 	   		return false;
 	   	 }
 
@@ -117,8 +119,9 @@ Ext.define('EatSense.controller.Login', {
 			EatSense.model.Account.load(account.get('login'), {
 				success: function(record, operation){
 					//credentials are valid, proceed
-					//merge account data
-					// me.setAccount(record);
+
+					//set account data to update record? 
+					//me.setAccount(record);
 
 					Ext.create('EatSense.view.Main');
 					spotCtr.loadSpots();
@@ -136,9 +139,9 @@ Ext.define('EatSense.controller.Login', {
 					Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('restoreCredentialsErr')); 
 					return false;
 				}
-			});
-							   			   		 	   		
+			});							   			   		 	   		
 	   	 } else {
+	   	 	//more than one local account exists. That should not happen!
 	   	 	accountLocalStore.removeAll();
 	   	 	Ext.create('EatSense.view.Login');	
 	   	 	return false;
@@ -155,13 +158,12 @@ Ext.define('EatSense.controller.Login', {
 		Ext.Logger.info('login');
 		console.log('login');
 
-		var me = this,
-		account, 
-		login = this.getLoginField().getValue(),
-		password = this.getPasswordField().getValue(),
-		// accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
-		spotCtr = this.getApplication().getController('Spot'),
-		me = this;
+		var 	me = this,
+				account, 
+				login = this.getLoginField().getValue(),
+				password = this.getPasswordField().getValue(),				
+				spotCtr = this.getApplication().getController('Spot'),
+				me = this;
 
 		if(Ext.String.trim(login).length == 0 || Ext.String.trim(password).length == 0) {
 			
@@ -187,10 +189,6 @@ Ext.define('EatSense.controller.Login', {
 				});				
 
 				me.resetAccountProxyHeaders();
-
-				//TODO remove in a more reliable way!
-				//remove login view				
-				// Ext.Viewport.remove(Ext.Viewport.down('login'));
 				me.showBusinesses();				
 			},
 			failure: function(record, operation){
@@ -281,7 +279,7 @@ Ext.define('EatSense.controller.Login', {
 		});
 	},
 	/**
-	* 	Requstes a token and
+	* 	Requests a token and
 	*	opens a channel for server side push messages.
 	*
 	*/

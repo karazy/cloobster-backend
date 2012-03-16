@@ -1,3 +1,8 @@
+/**
+*	Controlls actions for the spot view.
+* 	- showing and updating status for spots (tables, rooms, ...)
+*	- processing incoming orders, payment requests ...
+*/
 Ext.define('EatSense.controller.Spot', {
 	extend: 'Ext.app.Controller',
 	requires: ['EatSense.view.Main'],
@@ -49,27 +54,25 @@ Ext.define('EatSense.controller.Spot', {
 	*	Takes a spot and refreshes the associated item in view.
 	*	
 	*	@param updatedSpot
-	*		A spot where only updated fields are set
+	*		A spot where only updated fields are set. (raw data)
 	*/
 	updateSpotIncremental: function(updatedSpot) {
 		console.log('updateSpotIncremental');
 		//load corresponding spot
 		var dirtySpot, index, spotStore = this.getSpotsview().getStore();
 		
-		//raw json, so no get('id')
 		index = spotStore.findExact('id', updatedSpot.id);
 
 		if(index > -1) {
 			dirtySpot = spotStore.getAt(index);			
 			//update fields
 			for(prop in updatedSpot) {
-				if(prop) {
+				if(prop && updatedSpot[prop]) {
 					dirtySpot.set(prop, updatedSpot[prop]);					
 				}
 			}
-			//test alternative
-			// dirtySpot.mergeData(updatedSpot);
-			// dirtySpot.setData(updatedSpot);
+
+			this.getSpotsview().refresh();
 		}
 
 	},
