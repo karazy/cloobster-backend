@@ -122,6 +122,9 @@ Ext.define('EatSense.controller.Login', {
 
 					//set account data to update record? 
 					//me.setAccount(record);
+					
+					//generate token for channel
+					account.set('token', account.get('login') + new Date());
 
 					Ext.create('EatSense.view.Main');
 					spotCtr.loadSpots();
@@ -181,6 +184,8 @@ Ext.define('EatSense.controller.Login', {
 			success: function(record, operation){
 				console.log('success');
 				me.setAccount(record);
+				//generate token for channel
+				account.set('token', account.get('login') + new Date());
 
 				//Set default headers so that always credentials are send
 				Ext.Ajax.setDefaultHeaders({
@@ -260,14 +265,16 @@ Ext.define('EatSense.controller.Login', {
 	requestNewToken: function(callback) {		
 		console.log('request new token');
 
-		var login = this.getAccount().get('login'),
-		token;		
+		var 	account = this.getAccount(),
+				login = account.get('login'),
+				token = account.get('token');
 
 		Ext.Ajax.request({
 		    url: 'accounts/'+login+'/tokens',		    
 		    method: 'POST',
 		    params: {
-		    	'businessId' :  this.getAccount().get('businessId')
+		    	'businessId' :  this.getAccount().get('businessId'),
+		    	'token' : token
 		    },
 		    success: function(response){
 		       	token = response.responseText;

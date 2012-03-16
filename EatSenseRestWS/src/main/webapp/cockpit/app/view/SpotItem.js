@@ -4,7 +4,7 @@ Ext.define('EatSense.view.SpotItem', {
 	config: {
 
 		spot : {
-			tpl: '<div><h2>{name}</h2><p>Check in: {checkInCount}</p></div>',
+			tpl: '<div><h2>{name}</h2><p>Check-ins: {checkInCount}</p></div>',
 			cls: 'spot-button',
 			baseCls: 'spotitem',
 			pressedCls: 'spotitem-pressed'
@@ -16,7 +16,7 @@ Ext.define('EatSense.view.SpotItem', {
 
 		dataMap: {
 			getSpot: {
-				setData: 'name'
+				// setData: 'name'
 				// setStatus: 'status',
 				// setCheckInTime: 'checkInTime',
 				// setCurrenttotal: 'currentTotal'
@@ -34,17 +34,13 @@ Ext.define('EatSense.view.SpotItem', {
 	},
 
 	applySpot: function(config) {
-		// Ext.Logger.log('applySpot');
-		console.log('applySpot');
 		var button = Ext.factory(config, Ext.Button, this.getSpot());
 		button.getTpl().overwrite(button.element, this.getRecord().getData());
 
 		if(this.getRecord().get('status') == 'ORDER_PLACED') {
 			button.addCls('spotitem-placed');
-			// button.setLabelCls('spot-placed');
 		} else if(this.getRecord().get('checkInCount') >  0) {
 			button.addCls('spotitem-checkedin');
-			// button.setLabelCls('spot-checkedin');
 		} else {
 			button.removeCls('spotitem-checkedin');
 			button.removeCls('spotitem-placed');
@@ -54,8 +50,6 @@ Ext.define('EatSense.view.SpotItem', {
 	},
 
 	updateSpot: function(newSpot, oldSpot) {
-		console.log('updateSpot');
-		// Ext.Logger.log('updateSpot newSpot' + newSpot + ' oldSpot '+oldSpot);
 		if(newSpot) {
 			this.add(newSpot);
 		}
@@ -70,7 +64,6 @@ Ext.define('EatSense.view.SpotItem', {
 			return;
 		};
 		
-		console.log('updateRecord');
 		var button = this.getSpot();
 			if(this.getSpot()) {
 					

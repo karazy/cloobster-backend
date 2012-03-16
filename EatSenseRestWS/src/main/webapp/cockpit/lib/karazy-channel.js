@@ -37,15 +37,14 @@ Karazy.channel = (function() {
 	function onError(error) {
 		console.log('channel error ' + error);
 		if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
+			// requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
 		}		
 	};
 
-	function onClose(dontRequestToken) {
+	function onClose() {
 		console.log('channel closed');
 		if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-			// setupChannel(newToken);
+			// requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
 		}
 	};
 
