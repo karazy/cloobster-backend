@@ -9,7 +9,7 @@ public class SpotStatusDTO {
 	private String name;
 	private Long id;
 	private String status;
-	private int checkInCount;
+	private Integer checkInCount;
 	
 	public String getGroupTag() {
 		return groupTag;
@@ -35,10 +35,10 @@ public class SpotStatusDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public int getCheckInCount() {
+	public Integer getCheckInCount() {
 		return checkInCount;
 	}
-	public void setCheckInCount(int checkInCount) {
+	public void setCheckInCount(Integer checkInCount) {
 		this.checkInCount = checkInCount;
 	}
 }
