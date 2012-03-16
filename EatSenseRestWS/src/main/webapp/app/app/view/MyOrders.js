@@ -19,6 +19,13 @@ Ext.define('EatSense.view.MyOrders', {
 				ui: 'forward',
 				action: 'pay',
 				align: 'right'
+			},
+			{
+				xtype: 'button',
+				text: i18nPlugin.translate('leaveButton'),
+				ui: 'forward',
+				action: 'leave',
+				align: 'right'
 			}
 			]
 		},
