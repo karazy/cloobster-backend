@@ -26,7 +26,8 @@
 			myordersview: '#myorderstab #myorders',
 			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar',
-			paymentButton: '#myorderstab button[action="pay"]'
+			paymentButton: '#myorderstab button[action="pay"]',
+			leaveButton: '#myorderstab button[action="leave"]'
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
@@ -64,6 +65,9 @@
              },
              myordersCompleteButton : {
             	 tap: this.completePayment
+             },
+             leaveButton : {
+            	 tap: this.leave
              }
 		 });
 		
@@ -504,11 +508,11 @@
 	 * Refresh myorderlist and recalculate the total price.
 	 */
 	refreshMyOrdersList: function() {
-		var myorderlist = this.getMyorderlist(),
-		myordersStore = Ext.data.StoreManager.lookup('orderStore'),
-		checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
-		payButton = this.getPaymentButton();
-		me = this;
+		var 	me = this,
+				myorderlist = me.getMyorderlist(),
+				myordersStore = Ext.data.StoreManager.lookup('orderStore'),
+				checkInId = me.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
+				payButton = me.getPaymentButton();
 		
 		//TODO investigate if this is a bug
 		myordersStore.removeAll();
@@ -524,6 +528,7 @@
 				try {
 					if(success == true) {
 						(records.length > 0) ? payButton.show() : payButton.hide();
+						(records.length > 0) ? leaveButton.hide() : leaveButton.show();
 						
 						//WORKAROUND to make sure all data is available in data property
 						//otherwise nested choices won't be shown
@@ -536,6 +541,7 @@
 						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, [total]);
 					} else {
 						payButton.disable();
+						leaveButton.enable();
 					}	
 				} catch(e) {
 					
@@ -658,6 +664,24 @@
 				
 			}
 		});			
+	},
+	/**
+	 * Called when user checks in and wants to leave without issuing an order.
+	 */
+	leave: function() {
+		var		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				myordersStore = Ext.data.StoreManager.lookup('orderStore');	
+		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) {
+//			Ext.Ajax.setDisableCaching(true); 
+			checkIn.erase({
+				callback: function(records, operation, success) {
+					if(success) {
+						this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
+					}					
+				}				
+			});
+//			Ext.Ajax.setDisableCaching(true); 
+		}				
 	},
 	/**
 	 * Marks the process as complete and returns to home menu

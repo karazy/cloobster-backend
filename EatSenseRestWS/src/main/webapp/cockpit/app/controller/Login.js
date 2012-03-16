@@ -77,9 +77,8 @@ Ext.define('EatSense.controller.Login', {
 	},
 
 	/**
-	* 	Restores saved credentials from local webstorage.
-	* 	@return
-	*		true if restore was successful, false otherwise
+	* 	Tries to restore saved credentials from local webstorage.
+	*	If this fails login screen is shown.
 	*/
 	restoreCredentials: function() {
 		Ext.Logger.info('restoreCredentials');
@@ -89,65 +88,56 @@ Ext.define('EatSense.controller.Login', {
 				spotCtr = this.getApplication().getController('Spot'),
 				account;
 
-		if(!accountLocalStore) {
-			return false;
-		}
-
 	   	 try {
-	   		accountLocalStore.load();
-	   	 } catch (e) {
+
+	   			accountLocalStore.load();	   	
+		   	 if(accountLocalStore.getCount() == 1) {
+		   		 console.log('app state found');
+		   		 account = accountLocalStore.first();
+		   		 this.setAccount(account);
+
+		   		 //Set default headers so that always credentials are send
+				Ext.Ajax.setDefaultHeaders({
+					'login': account.get('login'),
+					'passwordHash': account.get('passwordHash')
+				});
+
+				//check if saved credentials are valid
+				EatSense.model.Account.load(account.get('login'), {
+					success: function(record, operation){
+						//credentials are valid, proceed
+
+						//set account data to update record? 
+						//me.setAccount(record);
+
+						//generate token for channel
+						account.set('token', account.get('login') + new Date());
+
+						Ext.create('EatSense.view.Main');
+						spotCtr.loadSpots();
+						me.openChannel();
+					},
+					failure: function(record, operation){					
+						//error verifying credentials, maybe account changed on server or server ist not aaccessible
+						me.resetDefaultAjaxHeaders();
+						Ext.create('EatSense.view.Login');
+						//TODO handle 401 unauthorized
+
+						me.getLoginField().setValue(account.get('login'));
+
+						Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('restoreCredentialsErr')); 
+					}
+				});							   			   		 	   		
+		   	 } else {
+		   	 	//more than one local account exists. That should not happen!
+		   	 	accountLocalStore.removeAll();
+		   	 	Ext.create('EatSense.view.Login');	
+		   	 }
+
+	   	  } catch (e) {
 	   	 	console.log('Failed restoring cockpit state.');
 	   		accountLocalStore.removeAll();	
-	   		accountLocalStore.removeAll();
 	   	 	Ext.create('EatSense.view.Login');	   		
-	   		return false;
-	   	 }
-
-	   	 if(accountLocalStore.getCount() == 1) {
-	   		 console.log('app state found');
-	   		 account = accountLocalStore.first();
-	   		 this.setAccount(account);
-
-	   		 //Set default headers so that always credentials are send
-			Ext.Ajax.setDefaultHeaders({
-				'login': account.get('login'),
-				'passwordHash': account.get('passwordHash')
-			});
-
-
-			//check if saved credentials are valid
-			EatSense.model.Account.load(account.get('login'), {
-				success: function(record, operation){
-					//credentials are valid, proceed
-
-					//set account data to update record? 
-					//me.setAccount(record);
-					
-					//generate token for channel
-					account.set('token', account.get('login') + new Date());
-
-					Ext.create('EatSense.view.Main');
-					spotCtr.loadSpots();
-					me.openChannel();
-					return true;
-				},
-				failure: function(record, operation){					
-					//error verifying credentials, maybe account changed on server or server ist not aaccessible
-					me.resetDefaultAjaxHeaders();
-					Ext.create('EatSense.view.Login');
-					//TODO handle 401 unauthorized
-
-					me.getLoginField().setValue(account.get('login'));
-
-					Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('restoreCredentialsErr')); 
-					return false;
-				}
-			});							   			   		 	   		
-	   	 } else {
-	   	 	//more than one local account exists. That should not happen!
-	   	 	accountLocalStore.removeAll();
-	   	 	Ext.create('EatSense.view.Login');	
-	   	 	return false;
 	   	 }
 	},
  	/**
@@ -162,7 +152,6 @@ Ext.define('EatSense.controller.Login', {
 		console.log('login');
 
 		var 	me = this,
-				account, 
 				login = this.getLoginField().getValue(),
 				password = this.getPasswordField().getValue(),				
 				spotCtr = this.getApplication().getController('Spot'),
@@ -185,7 +174,7 @@ Ext.define('EatSense.controller.Login', {
 				console.log('success');
 				me.setAccount(record);
 				//generate token for channel
-				account.set('token', account.get('login') + new Date());
+				me.getAccount().set('token', me.getAccount().get('login') + new Date());
 
 				//Set default headers so that always credentials are send
 				Ext.Ajax.setDefaultHeaders({
