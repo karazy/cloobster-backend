@@ -21,7 +21,6 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.validation.CheckInStep2;
 import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
@@ -439,6 +438,19 @@ public class CheckInController {
 			checkInRepo.ofy().delete(checkInRepo.ofy().query(Order.class).filter("status", "CART").listKeys());
 					
 			checkInRepo.delete(checkIn);
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			
+			spotData.setId(checkIn.getSpot().getId());
+			// we already have all other checkins in a list, so we count them and add one for the new checkin
+			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
+			
+			// send the message with the updated data field
+			try {
+				channelCtrl.sendMessageToAllClients(checkIn.getRestaurant().getId(), "spot", "update", spotData);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}			
 	}
 }
