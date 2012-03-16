@@ -215,7 +215,7 @@ public class CheckInController {
 		
 		spotData.setId(spot.getId());
 		// we already have all other checkins in a list, so we count them and add one for the new checkin
-		spotData.setCheckInCount(checkInsAtSpot == null? 0: checkInsAtSpot.size() + 1);
+		spotData.setCheckInCount(checkInsAtSpot == null? 1: checkInsAtSpot.size() + 1);
 		
 		// send the message with the updated data field
 		try {
