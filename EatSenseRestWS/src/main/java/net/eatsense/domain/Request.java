@@ -7,8 +7,10 @@ import javax.persistence.Transient;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
+@Cached
 public class Request extends GenericEntity {
 	public enum RequestType {
 		ORDER,

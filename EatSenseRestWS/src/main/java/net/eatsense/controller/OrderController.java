@@ -105,11 +105,11 @@ public class OrderController {
 			logger.error("Order cannot be placed, payment already requested or not checked in");
 			return null;
 		}
-
-		
+		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
 		order.setComment(orderData.getComment());
 		order.setAmount(orderData.getAmount());
+		
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		if(violations.isEmpty()) {
 			// save order
@@ -129,7 +129,7 @@ public class OrderController {
 
 			requestRepo.saveOrUpdate(request);
 			
-			Request oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").get();
+			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			// If we have an older request in the database ...
 			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
 				// Send message to notify clients over their channel
@@ -144,7 +144,6 @@ public class OrderController {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 			}
 		}
 		else {
@@ -156,10 +155,7 @@ public class OrderController {
 			}
 			throw new RuntimeException("Validation errors:\n"+message);
 		}
-		
-		
-		
-		
+
 		return transform.orderToDto( order );
 	}
 	
