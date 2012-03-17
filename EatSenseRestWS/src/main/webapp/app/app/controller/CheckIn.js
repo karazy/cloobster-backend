@@ -82,6 +82,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	 
     	 this.on('statusChanged', this.handleStatusChange, this);
     	 
+    	 
     	 //private functions
     	 
     	 //called by checkInIntent. 
@@ -206,6 +207,16 @@ Ext.define('EatSense.controller.CheckIn', {
 		 }
 		 
     	 };
+    },
+    /**
+     * Called after init.
+     */
+    launch: function() {
+    	console.log('CheckIn Controller -> launch');
+    	//for convenience that focus on barcode field on desktop version
+    	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
+    		this.getSearchfield().focus();
+    	}
     },
     /**
      * CheckIn Process

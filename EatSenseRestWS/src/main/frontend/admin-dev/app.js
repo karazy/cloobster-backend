@@ -8,14 +8,16 @@ Ext.application({
 			id : 'viewport',
 			items : [ {
 				xtype : 'panel',
-				title : 'eatSense DickPit',
+				title : 'eatSense admin panel',
 				itemId : 'wrapper',
 				layout : {
 					type : 'fit',
 				},
 				items : [ {
 					xtype : 'tabpanel',
-					items : [ {
+					items : [ 
+					//<mass-import>
+					{ 
 						xtype : 'panel',
 						title : 'data mass import',
 											
@@ -38,55 +40,10 @@ Ext.application({
 							name : 'message',
 							fieldLabel : 'JSON data',
 							labelAlign : 'top',
-//							anchor : '100%',
-//							height : '100%',
 							style: {
 								margin: '10px'
 							}
-//							width : 500
 						}, 
-//						{
-//							xtype : 'panel',
-//							layout : {
-//								type : 'hbox',
-//								pack : 'center',
-//								align : 'middle'
-//							},
-//							frame: false,
-//							bodyBorder: false,
-////							width : 200,
-////							height : 200,
-//							 defaults : {
-//								 style: {
-//							            margin : '10px'
-//							        }
-//							 },
-//							items : [ {
-//								xtype : 'button',
-//								text : 'Clear data',
-//								handler : function() {
-//									Ext.getCmp('viewport').getComponent('wrapper').getComponent('jsonData').setValue('');
-//								}
-//							}, {
-//								xtype : 'button',
-//								text : 'Upload data',
-//								handler : function() {
-//									Ext.Ajax.request({
-//										url : '/restaurant/import',
-//										// 'file://Users/fred/karazy/Dropbox/karazy_entwicklung/import_Sergio.json',
-//										method : 'PUT',
-//										scope : this,
-//										jsonData : Ext.getCmp('viewport').getComponent('wrapper').getComponent('jsonData').getValue(),
-//										success : function(response) {
-//											Ext.Msg.alert('Success', 'Upload finished');
-//										},
-//										failure : function(response) {
-//											Ext.Msg.alert('Error', response.statusText);
-//										}
-//									});
-//								}
-//							} ]
-//						}
 						],
 			            dockedItems: [{
 						    xtype: 'toolbar',
@@ -146,23 +103,87 @@ Ext.application({
 						    ]
 						}]
 						
-					}, {
-						xtype: 'panel',
-						title: 'empty tab',
-						listeners: {
-			                render: function() {
-			                    Ext.MessageBox.alert('Genius', 'Guess what. I\'m empty!');
-			                }
-			            },
+					}, 
+					//</mass-import>
+					//<nickname-import>
+					{
+
+						xtype : 'panel',
+						title : 'nickname import',											
+						layout: {
+							type: 'vbox',
+								align: 'stretch'
+						},
+						items : [ {
+							xtype: 'container',
+							html: '<h1>Use Textarea below to input json data containing nickname  informations. </h1>',	
+							height: 20,
+							style: {
+								margin: '10px'
+							}
+						},{
+							xtype : 'textareafield',
+							 flex: 1,
+							id : 'nicknameData',
+							allowBlank : false,
+							name : 'message',
+							fieldLabel : 'JSON data',
+							labelAlign : 'top',
+							style: {
+								margin: '10px'
+							}
+						},
+						{
+					        xtype: 'radiogroup',
+					        fieldLabel: 'Nickname type',
+					        id: 'nicknameType',
+					        // Arrange radio buttons into two columns, distributed vertically
+					        columns: 1,
+					        vertical: true,
+					        items: [
+					            { boxLabel: 'Nickname', name: 'nicknameRb', inputValue: 'noun', checked: true },
+					            { boxLabel: 'Adjective', name: 'nicknameRb', inputValue: 'adjective'}
+					        ]
+					    }	 
+						],
 			            dockedItems: [{
 						    xtype: 'toolbar',
 						    dock: 'bottom',
 						    items: [
-						        { xtype: 'button', text: 'Button 1' }
-						    ]
-						}]
-					}
+						            {
+										xtype : 'button',
+										text : 'Clear data field',
+										handler : function() {
+											Ext.getCmp('nicknameData').setValue('');
+										}
+									}, 									
+																	
+									{
+										xtype : 'button',
+										text : 'Upload data',
+										handler : function() {
+											//get type
+											var radios = Ext.getCmp('nicknameType'),
+												type = radios.getValue();
 
+											Ext.Ajax.request({
+												url : '/nicknames/'+type.nicknameRb+'/list',
+												method : 'PUT',
+												scope : this,
+												jsonData : Ext.getCmp('nicknameData').getValue(),
+												success : function(response) {
+													Ext.Msg.alert('Success', 'Upload finished');
+												},
+												failure : function(response) {
+													Ext.Msg.alert('Error', response.statusText);
+												}
+											});
+										}
+									}
+						    ]
+						}]											
+					},
+					//</nickname-import>
 					]
 				}
 				// {
