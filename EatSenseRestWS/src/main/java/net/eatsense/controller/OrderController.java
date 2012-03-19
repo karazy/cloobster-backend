@@ -433,6 +433,14 @@ public class OrderController {
 		return orderKey;
 	}
 
+	/**
+	 * Update method for orders called by the backend.
+	 * 
+	 * @param businessId
+	 * @param orderId
+	 * @param orderData new data update
+	 * @return updated Data
+	 */
 	public OrderDTO updateOrderForBusiness(Long businessId, Long orderId, OrderDTO orderData) {
 		Order order = getOrder(businessId, orderId);
 		if(order == null) {
@@ -488,5 +496,4 @@ public class OrderController {
 
 		return transform.orderToDto( order );
 	}
-
 }
