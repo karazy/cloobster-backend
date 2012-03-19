@@ -47,11 +47,6 @@ public class Spot extends GenericEntity{
 		this.barcode = code;
 	}	
 
-	@Transient
-	public Key<Spot> getKey() {
-	   return new Key<Spot>(getRestaurant(), Spot.class, getId());
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -74,6 +69,16 @@ public class Spot extends GenericEntity{
 
 	public void setGroupTag(String groupTag) {
 		this.groupTag = groupTag;
+	}
+	
+	@Transient
+	public Key<Spot> getKey() {
+	   return getKey(getRestaurant(), getId());
+	}
+	
+	@Transient
+	public static Key<Spot> getKey(Key<Restaurant> restaurant, Long spotId) {
+		return new Key<Spot>(restaurant ,Spot.class,spotId);
 	}
 	
 }

@@ -216,7 +216,7 @@ public class OrderController {
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDTO(Long restaurantId, String checkInId, String status) {
+	public Collection<OrderDTO> getOrdersAsDto(Long restaurantId, String checkInId, String status) {
 		return transform.ordersToDto(getOrders( restaurantId, checkInId, status));
 	}
 	
@@ -251,6 +251,31 @@ public class OrderController {
 		
 		return orders;
 	}
+	
+	public Collection<OrderDTO> getOrdersBySpotAsDto(Long businessId, Long spotId, Long checkInId) {
+		return transform.ordersToDto(getOrdersBySpot( businessId, spotId, checkInId));
+	}
+	
+	public List<Order> getOrdersBySpot(Long restaurantId, Long spotId, Long checkInId) {
+		// Check if the restaurant exists.
+		Restaurant restaurant = restaurantRepo.getById(restaurantId);
+		if(restaurant == null) {
+			logger.error("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
+			throw new NotFoundException("Orders cannot be retrieved, restaurant id unknown: " + restaurantId);
+		}
+		
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(restaurant);
+		
+		if(checkInId != null) {
+			query = query.filter("checkIn", CheckIn.getKey(checkInId));
+		}
+		
+		List<Order> orders = query.list();
+		
+		return orders;
+	}
+	
+	
 	
 	public Long placeOrder(Long restaurantId, String checkInId, OrderDTO order) {
 		Long orderId = null;

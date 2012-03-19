@@ -15,6 +15,7 @@ import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.RestaurantResource;
 import net.eatsense.restws.SpotResource;
+import net.eatsense.restws.business.BusinessesResource;
 
 import org.apache.bval.guice.ValidationModule;
 
@@ -49,6 +50,7 @@ public class EatSenseGuiceServletContextListener extends
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
 						bind(RestaurantResource.class);
+						bind(BusinessesResource.class);
 						bind(NicknameResource.class);
 						bind(SpotResource.class);
 						bind(CheckInResource.class);
@@ -60,6 +62,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(Menu.class);
 						bind(GenericRepository.class);
 						//serve("*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*accounts(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*restaurants(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);

@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,7 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.cockpit.CheckInStatusDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.IdHelper;
 
@@ -452,5 +454,53 @@ public class CheckInController {
 				e.printStackTrace();
 			}
 		}			
+	}
+
+
+
+
+	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Long businessId, Long spotId) {
+		return toStatusDtos(getCheckInsBySpot(businessId, spotId));
+	}
+
+
+
+
+	private Collection<CheckInStatusDTO> toStatusDtos(List<CheckIn> checkIns) {
+		if(checkIns == null) {
+			return null;
+		}
+		ArrayList<CheckInStatusDTO> checkInStatuses = new ArrayList<CheckInStatusDTO>();
+		
+		for (CheckIn checkIn : checkIns) {
+			checkInStatuses.add(toStatusDto(checkIn));
+		}
+		
+		return checkInStatuses;
+	}
+	
+	private CheckInStatusDTO toStatusDto(CheckIn checkIn) {
+		if(checkIn == null)
+			return null;
+			
+		CheckInStatusDTO checkInStatus = new CheckInStatusDTO();
+		
+		checkInStatus.setId(checkIn.getId());
+		checkInStatus.setNickname(checkIn.getNickname());
+		checkInStatus.setStatus(checkIn.getStatus());
+		checkInStatus.setCheckInTime(checkIn.getCheckInTime());
+		
+		return checkInStatus;
+	}
+
+	private List<CheckIn> getCheckInsBySpot(Long businessId, Long spotId) {
+		// Check if the restaurant exists.
+		Restaurant restaurant = restaurantRepo.getById(businessId);
+		if(restaurant == null) {
+			logger.error("CheckIns cannot be retrieved, businessId unknown: " + businessId);
+			throw new NotFoundException("CheckIns cannot be retrieved, businessId unknown: " + businessId);
+		}
+		
+		return checkInRepo.getListByProperty("spot", Spot.getKey(restaurant.getKey(), spotId));
 	}
 }
