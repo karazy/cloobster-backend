@@ -14,23 +14,16 @@ Ext.define('EatSense.view.SpotItem', {
 			// currentTotal: ''
 		},
 
-		dataMap: {
-			getSpot: {
-				// setData: 'name'
-				// setStatus: 'status',
-				// setCheckInTime: 'checkInTime',
-				// setCurrenttotal: 'currentTotal'
-			}
-		},
+		// dataMap: {
+		// 	getSpot: {
+		// 		// setData: 'name'
+		// 		// setStatus: 'status',
+		// 		// setCheckInTime: 'checkInTime',
+		// 		// setCurrenttotal: 'currentTotal'
+		// 	}
+		// },
 		 cls: 'di-cls',
-		 baseCls: 'di-baseCls',
-		 listeners: {
-		 	updatedata: function(di, newdata, eOpts){
-		 		console.log('spotitem updatedata');
-		 		//TODO remove
-		 	}
-		 }
-
+		 baseCls: 'di-baseCls'
 	},
 
 	applySpot: function(config) {

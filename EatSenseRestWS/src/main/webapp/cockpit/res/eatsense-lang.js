@@ -20,8 +20,17 @@ var translation = {
 		"logoutQuestion" : "Wirklich ausloggen?",
 		"noBusinessAssigned" : "Dein Benutzer ist keinem Betrieb zugewiesen.",
 		"restoreCredentialsErr" : "Login mit gespeicherten Daten fehlgeschlagen",
+		"chooseStore" : "Filiale auswählen",
 		//spot
-		"errorSpotLoading" : "Laden der Daten fehlgeschlagen."
+		"errorSpotLoading" : "Laden der Daten fehlgeschlagen!",
+		//spot details
+		"spotDetailCustomerLabel" : "Gäste",
+		"errorSpotDetailCheckInLoading" : "Laden der eingecheckten Personen fehlgeschlagen!",
+		"errorSpotDetailOrderLoading" : "Laden der Bestellungen fehlgeschlagen!",
+
+		//status
+		"ORDER_PLACED" : "Neu!",
+		"PLACED" : "Neu!",
 	}
 
 };

@@ -13,16 +13,33 @@ Ext.define('EatSense.controller.Spot', {
 			spotcard: 'spotcard',
 			mainview: 'main',
 			info: 'toolbar[docked=bottom] #info',
+			//<spot detail>
 			spotDetail: {
 		        selector: 'spotdetail',
 		        xtype: 'spotdetail',
 		        autoCreate: true
-		    }
+		    },
+
+		    spotDetailCustomerList: 'spotdetail #checkInList',
+		    spotDetailOrderList: 'spotdetail #spotDetailOrders',
+		    confirmOrderButton: 'spotdetail button[action=confirm]',
+		    chargeButton: 'spotdetail button[action=pay]'		    
+
+		    //</spot-detail>
 		},
 
 		control : {
 			spotitem: {
 		 		tap:  'showSpotDetails'
+		 	},
+		 	spotDetailCustomerList: {
+		 		itemtap: 'showCustomerOrders'
+		 	},
+		 	confirmOrderButton: {
+		 		tap: 'confirmOrder'
+		 	},
+		 	chargeButton: {
+		 		tap: 'chargeCustomer'
 		 	}
 		}
 	},
@@ -94,6 +111,7 @@ Ext.define('EatSense.controller.Spot', {
 		var		me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				detail = me.getSpotDetail(),
+				checkInList = detail.down('#checkInList'),
 				data = button.getParent().getRecord(),
 				checkInStore = Ext.StoreManager.lookup('checkInStore');
 
@@ -104,11 +122,10 @@ Ext.define('EatSense.controller.Spot', {
 				spotId: data.get('id')
 			},
 			 callback: function(records, operation, success) {
-			 	if(success) {
-			 		this.getSpotsview().refresh();	 		
-			 		detail.
+			 	if(success) { 		
+			 		// checkInList.refresh();
 			 	} else {
-			 		// Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
+			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailCheckInLoading'), Ext.emptyFn);
 			 	}				
 			 },
 			 scope: this
@@ -119,5 +136,48 @@ Ext.define('EatSense.controller.Spot', {
 		detail.show();
 		// me.getMainview().add(detail);
 	},
+	/**
+	*	Shows orders of a customer.
+	*	Fired when customer in checkInList in spot detail view is tapped.
+	*/
+	showCustomerOrders: function(dataview, index, target, record) {
+		var 	me = this,
+				loginCtr = this.getApplication().getController('Login'),
+				orderStore = Ext.StoreManager.lookup('orderStore');
+
+
+		orderStore.load({
+			params: {
+				pathId: loginCtr.getAccount().get('businessId'),
+				checkInId: record.get('id'),
+				//currently not evaluated
+				// spotId: 
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) { 		
+			 		// checkInList.refresh();
+			 		// me.getSpotDetailOrderList().refresh();
+			 	} else {
+			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderLoading'), Ext.emptyFn);
+			 	}				
+			 },
+			 scope: this
+		});
+
+	},
+	/**
+	*	Marks a single order as confirmed. This indicates that the business received 
+	*	the order and starts to process it.
+	*
+	*/
+	confirmOrder: function(button, eventObj, eOpts) {
+		var 	me = this,
+				loginCtr = this.getApplication().getController('Login'),
+				orderStore = Ext.StoreManager.lookup('orderStore'),
+				order = button.getParent().getRecord();
+
+		order.set('status', Karazy.constants.Order.RECEIVED);
+
+	}
 
 })

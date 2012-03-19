@@ -8,12 +8,14 @@ Karazy.constants = (function() {
 		//check in status
 		INTENT : 'INTENT',
 		CHECKEDIN : 'CHECKEDIN',
+		ORDER_PLACED: 'ORDER_PLACED',
 		PAYMENT_REQUEST : 'PAYMENT_REQUEST',
 		COMPLETE : 'COMPLETE',
 		Order : {
 			CART : 'CART',
 			PLACED : 'PLACED',
 			CANCELED : 'CANCELED',
+			RECEIVED: 'RECEIVED',
 			COMPLETE : 'COMPLETE'
 		}
 

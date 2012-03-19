@@ -12,9 +12,9 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : ['Login','Spot'],
-	models : ['Account','Spot', 'Business'],
+	models : ['Account','Spot', 'Business', 'CheckIn', 'Order'],
 	views : ['Login', 'ChooseBusiness', 'Main'], 
-	stores : ['Account', 'AppState',  'Spot', 'Business' ],
+	stores : ['Account', 'AppState',  'Spot', 'Business', 'CheckIn', 'Order' ],
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
 	init : function() {
 		console.log('init');
@@ -27,14 +27,6 @@ Ext.application({
 
 	   	//try to restore credentials
 	   	loginCtr.restoreCredentials();
-
-		// if( === true) {
-		// 	Ext.create('EatSense.view.Main');
-		// 	spotCtr.loadSpots();
-		// } else {			
-		// 	Ext.create('EatSense.view.Login');
-		// }		
-		
 	}
 });
 

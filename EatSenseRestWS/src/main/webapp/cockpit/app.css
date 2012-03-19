@@ -59,3 +59,18 @@
 .loginbox-field {
 	margin-bottom: 10px;
 }
+
+.spotdetailitem-customer-label {
+	background-color: white;
+}
+
+.spotdetailitem-flag {
+	/*width: 25px;
+	height: 10px;*/
+	background-color: red;
+	border: solid 1px;
+	border-color: black;
+	margin-right: 10px;
+	margin-left: 5px;
+
+}

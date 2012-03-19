@@ -10,7 +10,7 @@ Ext.define('EatSense.view.ChooseBusiness', {
 		items: [
 		{
 			xtype: 'label',
-			html: '<h1>Filiale auswählen</h1>',
+			html: '<h1>'+Karazy.i18n.translate('chooseStore')+'</h1>',
 			docked: 'top'
 		},
 		{
