@@ -17,7 +17,7 @@ import net.eatsense.controller.BillController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
-import net.eatsense.controller.RestaurantController;
+import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
@@ -47,10 +47,10 @@ public class RestaurantResource{
 	private ImportController importCtrl;
 	private OrderController orderCtrl;
 	private BillController billCtrl;
-	private RestaurantController restaurantCtrl;
+	private BusinessController restaurantCtrl;
 
 	@Inject
-	public RestaurantResource(RestaurantController restaurantCtr, RestaurantRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
+	public RestaurantResource(BusinessController restaurantCtr, RestaurantRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
 		this.restaurantRepo = repo;
 		this.restaurantCtrl = restaurantCtr;
 		this.menuCtrl = menuCtr;
@@ -123,7 +123,7 @@ public class RestaurantResource{
 	@Path("{restaurantId}/orders")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<OrderDTO> getOrders(@PathParam("restaurantId")Long restaurantId, @QueryParam("checkInId") String checkInId, @QueryParam("status") String status) {
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(restaurantId, checkInId, status);
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(restaurantId, checkInId, status);
 		return orders;
 	}
 	

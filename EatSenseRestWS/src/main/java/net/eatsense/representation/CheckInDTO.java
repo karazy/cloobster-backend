@@ -10,8 +10,6 @@ import net.eatsense.domain.CheckInStatus;
  * 
  */
 public class CheckInDTO {
-	
-
 	/**
 	 * Status indicating for example if a restaurant with this code was found.
 	 */

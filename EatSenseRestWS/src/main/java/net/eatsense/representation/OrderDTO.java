@@ -58,6 +58,4 @@ public class OrderDTO {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
-	
 }

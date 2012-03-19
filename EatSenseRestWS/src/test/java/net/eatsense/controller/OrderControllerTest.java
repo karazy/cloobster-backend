@@ -154,7 +154,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(checkIn.getRestaurantId(), checkIn.getUserId(), null);
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getRestaurantId(), checkIn.getUserId(), null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -267,7 +267,7 @@ public class OrderControllerTest {
 		}
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDTO(checkIn.getRestaurantId(), checkIn.getUserId(), "CART");
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getRestaurantId(), checkIn.getUserId(), "CART");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
