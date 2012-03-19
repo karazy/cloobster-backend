@@ -19,9 +19,11 @@
 	<key>AllowInlineMediaPlayback</key>
 	<false/>
 	<key>OpenAllWhitelistURLsInWebView</key>
-	<false/>
+	<true/>
 	<key>ExternalHosts</key>
-	<array/>
+	<array>
+		<string>*</string>
+	</array>
 	<key>Plugins</key>
 	<dict>
 		<key>org.apache.cordova.accelerometer</key>
@@ -50,6 +52,8 @@
 		<string>CDVSplashScreen</string>
 		<key>org.apache.cordova.battery</key>
 		<string>CDVBattery</string>
+		<key>org.apache.cordova.barcodeScanner</key>
+		<string>CDVBarcodeScanner</string>		
 	</dict>
 </dict>
 </plist>
