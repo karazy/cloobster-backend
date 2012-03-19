@@ -26,7 +26,7 @@ Ext.define('EatSense.controller.Login', {
 			passwordField: 'passwordfield[name=password]',
 			savePassword: 'login togglefield[name=savePasswordToggle]',
 			businessList: 'choosebusiness list',
-			cancelLoginButton: 'choosebusiness button[action=cancel]',
+			cancelLoginButton: 'choosebusiness button[action=cancel]',			
 		},		
 
 		account : Ext.create('EatSense.model.Account'),

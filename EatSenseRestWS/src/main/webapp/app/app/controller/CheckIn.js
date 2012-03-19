@@ -229,12 +229,13 @@ Ext.define('EatSense.controller.CheckIn', {
     	var barcode, that = this, deviceId;
     	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
     		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
-    		deviceId = '_browser'; //just for testing
+    		deviceId = '_browser';
     		this.getDashboard().showLoadScreen(true);
     		this.doCheckInIntent(barcode, button, deviceId);
     	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
     			window.plugins.barcodeScanner.scan(function(result, barcode) {
     			barcode = result.text;
+    			console.log('scanned ' + barcode);
     			that.getDashboard().showLoadScreen(true);
     			deviceId = device.uuid;
     			that.doCheckInIntent(barcode, button, deviceId);
@@ -481,7 +482,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 */
 	generateNickname : function(callback) {
 		Ext.Ajax.request({
-    	    url: '/nicknames',
+    	    url: Karazy.config.serviceUrl+'/nicknames',
     	    method: 'GET',
     	    scope: this,
     	    params: {

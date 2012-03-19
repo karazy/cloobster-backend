@@ -26,7 +26,7 @@ Ext.define('EatSense.view.SpotItem', {
 		 baseCls: 'di-baseCls',
 		 listeners: {
 		 	updatedata: function(di, newdata, eOpts){
-		 		console.log('updatedata');
+		 		console.log('spotitem updatedata');
 		 		//TODO remove
 		 	}
 		 }
@@ -37,7 +37,7 @@ Ext.define('EatSense.view.SpotItem', {
 		var button = Ext.factory(config, Ext.Button, this.getSpot());
 		button.getTpl().overwrite(button.element, this.getRecord().getData());
 
-		if(this.getRecord().get('status') == 'ORDER_PLACED') {
+		if(this.getRecord().get('status') == Karazy.constants.ORDER_PLACED || this.getRecord().get('status') == Karazy.constants.PAYMENT_REQUEST) {
 			button.addCls('spotitem-placed');
 		} else if(this.getRecord().get('checkInCount') >  0) {
 			button.addCls('spotitem-checkedin');

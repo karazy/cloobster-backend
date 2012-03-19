@@ -10,7 +10,14 @@ Ext.define('EatSense.controller.Spot', {
 		refs: {
 			spotitem: 'spotitem button',
 			spotsview: '#spotsview',
-			info: 'toolbar[docked=bottom] #info'
+			spotcard: 'spotcard',
+			mainview: 'main',
+			info: 'toolbar[docked=bottom] #info',
+			spotDetail: {
+		        selector: 'spotdetail',
+		        xtype: 'spotdetail',
+		        autoCreate: true
+		    }
 		},
 
 		control : {
@@ -67,6 +74,7 @@ Ext.define('EatSense.controller.Spot', {
 			dirtySpot = spotStore.getAt(index);			
 			//update fields
 			for(prop in updatedSpot) {
+				//TODO improve?!
 				if(prop && (updatedSpot[prop] || typeof updatedSpot[prop] == "number")) {
 					dirtySpot.set(prop, updatedSpot[prop]);					
 				}
@@ -82,7 +90,34 @@ Ext.define('EatSense.controller.Spot', {
 	*
 	*/
 	showSpotDetails: function(button, eventObj, eOpts) {
-		console.log('showSpotDetails for ');
+		console.log('showSpotDetails');
+		var		me = this,
+				loginCtr = this.getApplication().getController('Login'),
+				detail = me.getSpotDetail(),
+				data = button.getParent().getRecord(),
+				checkInStore = Ext.StoreManager.lookup('checkInStore');
+
+		//load checkins and orders and set lists
+		checkInStore.load({
+			params: {
+				pathId: loginCtr.getAccount().get('businessId'),
+				spotId: data.get('id')
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) {
+			 		this.getSpotsview().refresh();	 		
+			 		detail.
+			 	} else {
+			 		// Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
+			 	}				
+			 },
+			 scope: this
+		});
+
+		//show detail view
+		Ext.Viewport.add(detail);
+		detail.show();
+		// me.getMainview().add(detail);
 	},
 
 })
