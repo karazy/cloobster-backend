@@ -66,7 +66,8 @@ Ext.define('EatSense.controller.Spot', {
 			 },
 			 callback: function(records, operation, success) {
 			 	if(success) {
-			 		this.getSpotsview().refresh();	 		
+			 		//explicit refresh should not be necessary
+			 		//this.getSpotsview().refresh();	 		
 			 	} else {
 			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
 			 	}				
@@ -96,8 +97,8 @@ Ext.define('EatSense.controller.Spot', {
 					dirtySpot.set(prop, updatedSpot[prop]);					
 				}
 			}
-
-			this.getSpotsview().refresh();
+			//explicit refresh should not be necessary
+			// this.getSpotsview().refresh();
 		}
 
 	},
@@ -176,8 +177,28 @@ Ext.define('EatSense.controller.Spot', {
 				orderStore = Ext.StoreManager.lookup('orderStore'),
 				order = button.getParent().getRecord();
 
+		if(order.get('status') == Karazy.constants.Order.RECEIVED) {
+			console.log('order already confirmed')
+			//you can confirm an order only once
+			return;
+		};
+
+		//update order status
 		order.set('status', Karazy.constants.Order.RECEIVED);
 
+		//persist changes
+		order.save({
+			params: {
+				pathId: loginCtr.getAccount().get('businessId'),
+			},
+			succes: function(record, operation) {
+				console.log('order saved');
+			},
+			failure: function(record, operation) {
+				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+			}
+
+		});
 	}
 
 })

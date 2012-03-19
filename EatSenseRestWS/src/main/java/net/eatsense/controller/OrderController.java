@@ -470,14 +470,26 @@ public class OrderController {
 
 			List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 			
-			// If we have an older request in the database ...
-			if( requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId() == order.getId() ) {
+			
+			for (Request request : requests) {
 				// delete the request for this order
+				if( request.getType() == RequestType.ORDER &&  request.getObjectId().equals(order.getId())) {
+					requestRepo.delete(request); 
+				}
+			}
+			
+			// If we have an older request in the database ...
+			if( requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId().equals(order.getId()) ) {
 				
-				requestRepo.delete(requests.get(0));
+				
+//				requestRepo.delete(requests.get(0));
 				String newStatus = null;
-				if(requests.size() > 1 )
-					newStatus = requests.get(1).getStatus(); 
+				if(requests.size() > 1 ) {
+					newStatus = requests.get(1).getStatus();
+				} else if(!requests.get(0).getStatus().equals(OrderStatus.PLACED)) {
+					//all pending orders are processed
+					newStatus = CheckInStatus.CHECKEDIN.toString();
+				}
 					
 				if(!requests.get(0).getStatus().equals(newStatus)) {
 					// Send message to notify clients over their channel

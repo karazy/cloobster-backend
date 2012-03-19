@@ -62,8 +62,10 @@ Ext.define('EatSense.view.SpotItem', {
 					
 			if(newRecord.get('status') == 'ORDER_PLACED') {
 				button.addCls('spotitem-placed');
+				button.removeCls('spotitem-checkedin');
 			} else if(newRecord.get('checkInCount') >  0) {
 				button.addCls('spotitem-checkedin');
+				button.removeCls('spotitem-placed');
 			}  else {
 				button.removeCls('spotitem-checkedin');
 				button.removeCls('spotitem-placed');

@@ -27,6 +27,7 @@ var translation = {
 		"spotDetailCustomerLabel" : "Gäste",
 		"errorSpotDetailCheckInLoading" : "Laden der eingecheckten Personen fehlgeschlagen!",
 		"errorSpotDetailOrderLoading" : "Laden der Bestellungen fehlgeschlagen!",
+		"errorSpotDetailOrderSave" : "Speichern der Bestellung fehlgeschlagen!",
 
 		//status
 		"ORDER_PLACED" : "Neu!",
