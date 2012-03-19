@@ -2,6 +2,8 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -270,9 +272,14 @@ public class OrderController {
 		if(checkInId != null) {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
-		// newest orders first
-		query.order("-orderTime");
+		
 		List<Order> orders = query.list();
+		
+		Collections.sort(orders, new Comparator<Order>(){
+	           public int compare (Order m1, Order m2){
+	               return m1.getOrderTime().compareTo(m2.getOrderTime());
+	           }
+	       });
 		
 		return orders;
 	}
@@ -468,11 +475,15 @@ public class OrderController {
 				// delete the request for this order
 				
 				requestRepo.delete(requests.get(0));
-				if(requests.get(1).getStatus() != requests.get(0).getStatus()) {
+				String newStatus = null;
+				if(requests.size() > 1 )
+					newStatus = requests.get(1).getStatus(); 
+					
+				if(!requests.get(0).getStatus().equals(newStatus)) {
 					// Send message to notify clients over their channel
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
-					spotData.setStatus(requests.get(1).getStatus());
+					spotData.setStatus(newStatus);
 					
 					try {
 						channelCtrl.sendMessageToAllClients(businessId, "spot", "update", spotData);
@@ -494,6 +505,6 @@ public class OrderController {
 			throw new RuntimeException("Validation errors:\n"+message);
 		}
 
-		return transform.orderToDto( order );
+		return orderData; //transform.orderToDto( order );
 	}
 }

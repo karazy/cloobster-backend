@@ -13,9 +13,11 @@ import net.eatsense.representation.OrderDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class OrderResource {
+	@Inject
 	public OrderResource(OrderController orderController) {
 		super();
 		this.orderController = orderController;
@@ -33,11 +35,14 @@ public class OrderResource {
 		this.businessId = businessId;
 	}
 
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
 	@PUT
-	@Path("{orderId}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public OrderDTO updateOrder(@PathParam("orderId") Long orderId, OrderDTO orderData) {
+	public OrderDTO updateOrder(OrderDTO orderData) {
 		return orderController.updateOrderForBusiness(businessId, orderId, orderData);
 	}
 }
