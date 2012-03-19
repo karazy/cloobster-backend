@@ -2,6 +2,8 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +20,7 @@ import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Request;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.CheckInRepository;
@@ -264,13 +267,19 @@ public class OrderController {
 			throw new NotFoundException("Orders cannot be retrieved, restaurant id unknown: " + restaurantId);
 		}
 		
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(restaurant);
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(restaurant).filter("status !=", OrderStatus.CART.toString());
 		
 		if(checkInId != null) {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
 		
 		List<Order> orders = query.list();
+		
+		Collections.sort(orders, new Comparator<Order>(){
+	           public int compare (Order m1, Order m2){
+	               return m1.getOrderTime().compareTo(m2.getOrderTime());
+	           }
+	       });
 		
 		return orders;
 	}
@@ -431,4 +440,71 @@ public class OrderController {
 		return orderKey;
 	}
 
+	/**
+	 * Update method for orders called by the backend.
+	 * 
+	 * @param businessId
+	 * @param orderId
+	 * @param orderData new data update
+	 * @return updated Data
+	 */
+	public OrderDTO updateOrderForBusiness(Long businessId, Long orderId, OrderDTO orderData) {
+		Order order = getOrder(businessId, orderId);
+		if(order == null) {
+			logger.error("Order cannot be updated, orderId not found!");
+			return null;
+		}
+	
+		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
+		
+		// update order object from submitted data
+		order.setStatus(orderData.getStatus());
+		//order.setComment(orderData.getComment());
+		//order.setAmount(orderData.getAmount());
+		
+		Set<ConstraintViolation<Order>> violations = validator.validate(order);
+		if(violations.isEmpty()) {
+			// save order
+			if( orderRepo.saveOrUpdate(order) == null )
+				throw new RuntimeException("order could not be updated, id: " + orderId);
+
+			List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
+			
+			// If we have an older request in the database ...
+			if( requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId() == order.getId() ) {
+				// delete the request for this order
+				
+				requestRepo.delete(requests.get(0));
+				String newStatus = null;
+				if(requests.size() > 1 )
+					newStatus = requests.get(1).getStatus(); 
+					
+				if(!requests.get(0).getStatus().equals(newStatus)) {
+					// Send message to notify clients over their channel
+					SpotStatusDTO spotData = new SpotStatusDTO();
+					spotData.setId(checkIn.getSpot().getId());
+					spotData.setStatus(newStatus);
+					
+					try {
+						channelCtrl.sendMessageToAllClients(businessId, "spot", "update", spotData);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		}
+		else {
+			// build validation error messages
+			String message = "";
+			for (ConstraintViolation<Order> constraintViolation : violations) {
+				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
+				
+			}
+			throw new RuntimeException("Validation errors:\n"+message);
+		}
+
+		return orderData; //transform.orderToDto( order );
+	}
 }

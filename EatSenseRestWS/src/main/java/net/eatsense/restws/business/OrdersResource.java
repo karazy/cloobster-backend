@@ -3,6 +3,8 @@ package net.eatsense.restws.business;
 import java.util.Collection;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -40,5 +42,13 @@ public class OrdersResource {
 	public Collection<OrderDTO> getOrders(@QueryParam("spotId") Long spotId, @QueryParam("checkInId") Long checkInId) {
 		logger.debug("retrieving orders");
 		return orderController.getOrdersBySpotAsDto(businessId, spotId, checkInId);
+	}
+	
+	@Path("{id}")
+	public OrderResource getOrderResource(@PathParam("id") Long orderId) {
+		OrderResource orderResource = resourceContext.getResource(OrderResource.class);
+		orderResource.setBusinessId(businessId);
+		orderResource.setOrderId(orderId);
+		return orderResource;
 	}
 }
