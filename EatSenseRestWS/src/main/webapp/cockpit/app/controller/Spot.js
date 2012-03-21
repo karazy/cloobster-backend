@@ -186,15 +186,19 @@ Ext.define('EatSense.controller.Spot', {
 		//update order status
 		order.set('status', Karazy.constants.Order.RECEIVED);
 
+		//button.disable();
+
 		//persist changes
 		order.save({
 			params: {
 				pathId: loginCtr.getAccount().get('businessId'),
 			},
-			succes: function(record, operation) {
+			success: function(record, operation) {
 				console.log('order saved');
 			},
 			failure: function(record, operation) {
+		//		button.enable();
+				order.set('status', Karazy.constants.Order.PLACED);
 				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
 			}
 

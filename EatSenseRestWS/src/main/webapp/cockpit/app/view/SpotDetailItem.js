@@ -59,11 +59,13 @@ Ext.define('EatSense.view.SpotDetailItem', {
 	},
 
 	applyConfirmButton: function(config) {
+		console.log('SpotDetailItem applyConfirmButton');
 		var button = Ext.factory(config, Ext.Button, this.getConfirmButton());
 		return button;
 	},
 
 	updateConfirmButton: function(newItem, oldItem) {
+		console.log('SpotDetailItem updateConfirmButton');
 		if(newItem) {
 			this.add(newItem);
 		}
@@ -94,13 +96,15 @@ Ext.define('EatSense.view.SpotDetailItem', {
 
 		if(newRecord.get('status') == Karazy.constants.Order.PLACED) {
 			this.getFlag().setHtml(Karazy.i18n.translate('PLACED'));
-			this.getFlag().show();
+			this.getFlag().show();			
+			this.getConfirmButton().enable();
 		} else {
 			this.getFlag().hide();
+			this.getConfirmButton().disable();
 		}
 
 		//overrides the default updateRecord, perhabs we remove this completely
-		//this.callParent([newRecord]);
+		this.callParent([newRecord]);
 	}
 
 });

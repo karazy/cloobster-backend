@@ -14,6 +14,7 @@ Karazy.constants = (function() {
 		Order : {
 			CART : 'CART',
 			PLACED : 'PLACED',
+			RECEIVED: 'RECEIVED',
 			CANCELED : 'CANCELED',
 			COMPLETE : 'COMPLETE'
 		}

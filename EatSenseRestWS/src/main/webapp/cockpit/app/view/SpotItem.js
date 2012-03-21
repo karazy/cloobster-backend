@@ -8,20 +8,8 @@ Ext.define('EatSense.view.SpotItem', {
 			cls: 'spot-button',
 			baseCls: 'spotitem',
 			pressedCls: 'spotitem-pressed'
-			// name: '',
-			// status: '',
-			// checkInTime: '',
-			// currentTotal: ''
 		},
 
-		// dataMap: {
-		// 	getSpot: {
-		// 		// setData: 'name'
-		// 		// setStatus: 'status',
-		// 		// setCheckInTime: 'checkInTime',
-		// 		// setCurrenttotal: 'currentTotal'
-		// 	}
-		// },
 		 cls: 'di-cls',
 		 baseCls: 'di-baseCls'
 	},

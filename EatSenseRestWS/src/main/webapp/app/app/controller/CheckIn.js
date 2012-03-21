@@ -167,7 +167,12 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   model: 'EatSense.model.Order',
 	 			   storeId: 'orderStore',
 	 			   filters: [
-	 			             {property: "status", value: "PLACED"}
+//	 			             {property: "status", value: "PLACED"},
+	 			     
+	 			    {filterFn:	 function(record, id) {
+							return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
+	 			    	 }
+	 			    }
 	 			   ],
 	 			   proxy: {
 	 				   type: 'rest',

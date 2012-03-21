@@ -523,7 +523,7 @@
 			scope   : this,
 			params : {
 				'checkInId' : checkInId,
-				'status' : Karazy.constants.Order.PLACED
+//				'status' : Karazy.constants.Order.PLACED,
 			},
 			callback: function(records, operation, success) {
 				try {
@@ -536,6 +536,11 @@
 						Ext.each(records, function(order) {
 							order.getProduct().getData(true);
 						});
+						//only display placed or received orders
+//						myordersStore.filter(function(record, id) {
+//							return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
+//						});
+						
 						//refresh the order list
 						total = me.calculateOrdersTotal(myordersStore);
 						myorderlist.refresh();
