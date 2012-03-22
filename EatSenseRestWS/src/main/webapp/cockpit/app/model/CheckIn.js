@@ -9,13 +9,19 @@ Ext.define('EatSense.model.CheckIn', {
 		},
 		{
 			name : 'id',
-		}, {
+		}, 
+		{
 			name : 'nickname',
 			type : 'string'
-		}, {
+		}, 
+		{
 			name : 'status',
 			type : 'string'
-		}, {
+		}, 
+		{
+			name: 'spotId'
+		},
+		{
 			name : 'checkintime',
 			type : 'date',
 			dateFormat : 'time'

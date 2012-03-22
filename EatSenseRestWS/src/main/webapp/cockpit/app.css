@@ -58,16 +58,16 @@
 
 .loginbox-field {
 	margin-bottom: 10px;
+}
+
+.spotdetail-status {
+	border: 1px solid black;	
 	position: absolute;
 	right: 10px;
 	top: 10px;
 }
 
-.spotdetail-status {
-	border: 1px solid black;	
-}
-
-.spotdetail-status .place{
+.spotdetail-status .order_placed{
 	background-color: red;
 }
 

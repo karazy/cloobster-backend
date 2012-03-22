@@ -60,7 +60,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		},
 		//cancel Order
 		cancelButton: {
-			action: 'confirm',
+			action: 'cancel',
 			iconCls: 'delete',
 			ui: 'action',
 			iconMask: true,
@@ -167,9 +167,15 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			this.getFlag().setHtml(Karazy.i18n.translate('PLACED'));
 			this.getFlag().show();			
 			this.getConfirmButton().enable();
+			this.getCancelButton().enable();
+		} else if(newRecord.get('status') == Karazy.constants.Order.RECEIVED) {
+			this.getFlag().hide();		
+			this.getConfirmButton().disable();
+			this.getCancelButton().enable();
 		} else {
 			this.getFlag().hide();
 			this.getConfirmButton().disable();
+			this.getCancelButton().disable();
 		}
 
 		//overrides the default updateRecord, perhabs we remove this completely

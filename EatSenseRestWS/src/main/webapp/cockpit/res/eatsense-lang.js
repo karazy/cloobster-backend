@@ -24,16 +24,16 @@ var translation = {
 		//spot
 		"errorSpotLoading" : "Laden der Daten fehlgeschlagen!",
 		//spot details
-		"spotDetailCustomerLabel" : "Gäste",
+		"spotDetailCustomerLabel" : "Kunden",
 		"errorSpotDetailCheckInLoading" : "Laden der eingecheckten Personen fehlgeschlagen!",
 		"errorSpotDetailOrderLoading" : "Laden der Bestellungen fehlgeschlagen!",
 		"errorSpotDetailOrderSave" : "Speichern der Bestellung fehlgeschlagen!",
 		"status" : "Status",
 
 		//status
-		"ORDER_PLACED" : "Neu Bestellung!",
+		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",
-		"CHECKEDIN" : "Cheked-In"
+		"CHECKEDIN" : "Checked-In"
 	}
 
 };
