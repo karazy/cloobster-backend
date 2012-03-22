@@ -1,6 +1,6 @@
 package net.eatsense.restws.business;
 
-import javax.ws.rs.GET;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -30,6 +30,7 @@ public class BusinessesResource {
 	
 	
 	@Path("{businessId}")
+	@RolesAllowed({"restaurantadmin"})
 	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
 		logger.debug("retrieving businessresource");
 		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class); 

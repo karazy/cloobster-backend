@@ -29,6 +29,7 @@ import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
+import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.IdHelper;
 
@@ -225,9 +226,15 @@ public class CheckInController {
 		// we already have all other checkins in a list, so we count them and add one for the new checkin
 		spotData.setCheckInCount(checkInsAtSpot == null? 1: checkInsAtSpot.size() + 1);
 		
-		// send the message with the updated data field
+		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
+		
+		// add the messages we want to send as one package
+		messages.add(new MessageDTO("spot","update",spotData));
+		messages.add(new MessageDTO("checkin","new", toStatusDto(checkIn)));
+		
+		// send the messages
 		try {
-			channelCtrl.sendMessageToAllClients(restaurant.getId(), "spot", "update", spotData);
+			channelCtrl.sendMessagesToAllClients(restaurant.getId(), messages);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

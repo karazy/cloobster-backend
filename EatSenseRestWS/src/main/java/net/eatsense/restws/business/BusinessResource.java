@@ -1,6 +1,5 @@
 package net.eatsense.restws.business;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 

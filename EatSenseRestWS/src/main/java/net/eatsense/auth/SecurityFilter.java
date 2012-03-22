@@ -68,9 +68,10 @@ public class SecurityFilter implements ContainerRequestFilter {
 		
 		for (Iterator<PathSegment> iterator = request.getPathSegments(true).iterator(); iterator.hasNext();) {
 			PathSegment pathSegment = iterator.next();
-			if(pathSegment.getPath().equals("restaurants")) {
+			if(pathSegment.getPath().equals("businesses") || pathSegment.getPath().equals("restaurants")) {
 				try {
-					restaurantId = Long.valueOf(iterator.next().getPath());
+					if(iterator.hasNext())
+						restaurantId = Long.valueOf(iterator.next().getPath());
 				} catch (NumberFormatException e) {
 				}
 			}

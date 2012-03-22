@@ -20,7 +20,6 @@ import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.CheckInRepository;
@@ -33,6 +32,7 @@ import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
@@ -125,14 +125,13 @@ public class OrderController {
 			// save order
 			if( orderRepo.saveOrUpdate(order) == null )
 				throw new RuntimeException("order could not be updated, id: " + orderId);
-
+			orderData = transform.orderToDto( order );
 			// only create a new request if the order status was updated to be placed
 			if(order.getStatus() == OrderStatus.PLACED) {
 				
-				checkInRepo.saveOrUpdate(checkIn);
-				
 				checkIn.setStatus(CheckInStatus.ORDER_PLACED);
-				
+				checkInRepo.saveOrUpdate(checkIn);
+								
 				Request request = new Request();
 				request.setCheckIn(checkIn.getKey());
 				request.setRestaurant(Restaurant.getKey(restaurantId));
@@ -144,6 +143,10 @@ public class OrderController {
 
 				requestRepo.saveOrUpdate(request);
 				
+				ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+				
+				messages.add(new MessageDTO("order", "update", orderData));
+				
 				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 				// If we have an older request in the database ...
 				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
@@ -152,13 +155,14 @@ public class OrderController {
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
 					spotData.setStatus(request.getStatus());
+					messages.add(new MessageDTO("spot","update",spotData));
 					
-					try {
-						channelCtrl.sendMessageToAllClients(restaurantId, "spot", "update", spotData);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				}
+				try {
+					channelCtrl.sendMessagesToAllClients(restaurantId, messages);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
@@ -172,7 +176,7 @@ public class OrderController {
 			throw new RuntimeException("Validation errors:\n"+message);
 		}
 
-		return transform.orderToDto( order );
+		return orderData;
 	}
 	
 	/**

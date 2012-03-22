@@ -5,8 +5,6 @@ import java.util.List;
 
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.CheckInStatus;
-import net.eatsense.domain.Order;
-import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.domain.Spot;
