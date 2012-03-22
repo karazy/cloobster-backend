@@ -20,7 +20,6 @@ import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Restaurant;
 import net.eatsense.persistence.CheckInRepository;
