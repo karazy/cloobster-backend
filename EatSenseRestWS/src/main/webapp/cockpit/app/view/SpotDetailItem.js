@@ -17,8 +17,8 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			tpl: new Ext.XTemplate(
 			// "<div class='orderListItem'>" +
 				"<h2 >{Product.name}</h2>" +
-				"<div> {amount} {Product.price_calculated}€</div>" +
-				"<div>"+
+				"<div class='price'>{amount} - {Product.price_calculated}€</div>" +
+				"<div class='choices'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
 							//"<h3>{text}</h3>" +
@@ -58,12 +58,24 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		flag: {
 			cls: 'spotdetailitem-flag' 
 		},
-
+		//cancel Order
+		cancelButton: {
+			action: 'confirm',
+			iconCls: 'delete',
+			ui: 'action',
+			iconMask: true,
+			cls: 'spotdetailitem-cancel' 
+		},
 		//mark order as processed
 		confirmButton: {
 			action: 'confirm',
-			text: 'confirm'
+			ui: 'action',
+			iconCls: 'add',
+			iconMask: true,
+			cls: 'spotdetailitem-confirm' 
 		},
+
+
 
 		// dataMap: {
 	 //    	getName: {
@@ -74,19 +86,18 @@ Ext.define('EatSense.view.SpotDetailItem', {
 
 		layout: {
 			type: 'hbox',
-			align: 'center'
+			pack: 'end',
+			align: 'start'
 		}
 
 	},
 
 	applyName: function(config) {
-		console.log('SpotDetailItem applyName');
 		var obj = Ext.factory(config, Ext.Label, this.getName());
 		return obj;
 	},
 
 	updateName: function(newName, oldName) {
-		console.log('SpotDetailItem updateName');
 		if(newName) {
 			this.add(newName);
 		}
@@ -96,14 +107,27 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		}
 	},
 
+	applyCancelButton: function(config) {
+		var button = Ext.factory(config, Ext.Button, this.getCancelButton());
+		return button;
+	},
+
+	updateCancelButton: function(newItem, oldItem) {		
+		if(newItem) {
+			this.add(newItem);
+		}
+
+		if(oldItem) {
+			this.remove(oldItem);
+		}
+	},
+
 	applyConfirmButton: function(config) {
-		console.log('SpotDetailItem applyConfirmButton');
 		var button = Ext.factory(config, Ext.Button, this.getConfirmButton());
 		return button;
 	},
 
 	updateConfirmButton: function(newItem, oldItem) {
-		console.log('SpotDetailItem updateConfirmButton');
 		if(newItem) {
 			this.add(newItem);
 		}
@@ -114,7 +138,6 @@ Ext.define('EatSense.view.SpotDetailItem', {
 	},
 
 	applyFlag: function(config) {
-		console.log('LOGG');
 		return Ext.factory(config, Ext.Label, this.getFlag());
 	},
 
@@ -127,10 +150,16 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		}
 	}, 
 
+	/**
+	*	Overrides the private updateRecord method. Does some special actions
+	*	which could not be done in dataMap. 
+	*	 
+	*/
 	updateRecord: function(newRecord) {
 		console.log('SpotDetailItem updateRecord');
 		
-
+		//make sure prices are calculated before displaying
+		newRecord.calculate();
 		// this.getName().setHtml(newRecord.raw.product.name);
 		this.getName().getTpl().overwrite(this.getName().element, newRecord.getData(true));
 

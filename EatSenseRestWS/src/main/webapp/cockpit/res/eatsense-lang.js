@@ -31,8 +31,9 @@ var translation = {
 		"status" : "Status",
 
 		//status
-		"ORDER_PLACED" : "Neu!",
+		"ORDER_PLACED" : "Neu Bestellung!",
 		"PLACED" : "Neu!",
+		"CHECKEDIN" : "Cheked-In"
 	}
 
 };

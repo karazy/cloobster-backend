@@ -144,8 +144,13 @@ Ext.define('EatSense.controller.Spot', {
 	showCustomerOrders: function(dataview, index, target, record) {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
-				orderStore = Ext.StoreManager.lookup('orderStore');
+				orderStore = Ext.StoreManager.lookup('orderStore'),
+				detail = me.getSpotDetail();
+				
 
+		//render order status
+		statusLabel = detail.down('#statusLabel');
+		statusLabel.getTpl().overwrite(statusLabel.element, record.getData());
 
 		orderStore.load({
 			params: {
