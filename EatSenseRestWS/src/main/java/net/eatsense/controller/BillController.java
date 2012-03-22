@@ -25,6 +25,7 @@ import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
+import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
@@ -53,12 +54,15 @@ public class BillController {
 
 	private RequestRepository requestRepo;
 	private ChannelController channelCtrl;
+	private Transformer transform;
 	
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo,  BillRepository billRepo, ChannelController cctrl) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo,
+			BillRepository billRepo, ChannelController cctrl, Transformer transformer) {
 		super();
+		this.transform = transformer;
 		this.channelCtrl = cctrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
@@ -124,8 +128,6 @@ public class BillController {
 			requestRepo.saveOrUpdate(request);
 			
 			
-			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
-			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 			messages.add(new MessageDTO("bill","action", billData));
 			
@@ -133,8 +135,14 @@ public class BillController {
 			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have an older request in the database ...
-			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+			if( oldestRequest == null || oldestRequest.getId() == request.getId() || checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST  ) {
 				// Send message to notify clients over their channel
+				
+				// Update the status of the checkIn
+				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
+				checkInRepo.saveOrUpdate(checkIn);
+				
+				messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
 				
 				SpotStatusDTO spotData = new SpotStatusDTO();
 				spotData.setId(checkIn.getSpot().getId());

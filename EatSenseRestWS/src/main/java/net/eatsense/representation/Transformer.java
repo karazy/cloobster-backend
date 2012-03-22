@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
@@ -20,8 +21,11 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.googlecode.objectify.NotFoundException;
 import com.sun.jersey.api.container.MappableContainerException;
 
@@ -31,6 +35,7 @@ import com.sun.jersey.api.container.MappableContainerException;
  * @author Nils Weiher
  *
  */
+@Singleton
 public class Transformer {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private ChoiceRepository choiceRepo;
@@ -41,7 +46,7 @@ public class Transformer {
 	
 	
 	@Inject
-	public Transformer(SpotRepository spotRepo, ChoiceRepository choiceRepo, ProductRepository productRepo, OrderChoiceRepository orderChoiceRepo, RestaurantRepository restaurantRepo) {
+	private Transformer(SpotRepository spotRepo, ChoiceRepository choiceRepo, ProductRepository productRepo, OrderChoiceRepository orderChoiceRepo, RestaurantRepository restaurantRepo) {
 		super();
 		this.choiceRepo = choiceRepo;
 		this.productRepo = productRepo;
@@ -49,7 +54,7 @@ public class Transformer {
 		this.restaurantRepo = restaurantRepo;
 		this.spotRepo = spotRepo;
 	}
-	
+
 	public List<OrderDTO> ordersToDto(List<Order> orders ) {
 		if(orders == null || orders.isEmpty()) {
 			logger.error("orders list is null or empty");
@@ -210,5 +215,33 @@ public class Transformer {
 		dto.setSpotId(spot.getBarcode());
 		
 		return dto;
+	}
+
+	public Collection<CheckInStatusDTO> toStatusDtos(List<CheckIn> checkIns) {
+		if(checkIns == null) {
+			return null;
+		}
+		ArrayList<CheckInStatusDTO> checkInStatuses = new ArrayList<CheckInStatusDTO>();
+		
+		for (CheckIn checkIn : checkIns) {
+			checkInStatuses.add(toStatusDto(checkIn));
+		}
+		
+		return checkInStatuses;
+	}
+
+	public CheckInStatusDTO toStatusDto(CheckIn checkIn) {
+		if(checkIn == null)
+			return null;
+			
+		CheckInStatusDTO checkInStatus = new CheckInStatusDTO();
+		
+		checkInStatus.setId(checkIn.getId());
+		checkInStatus.setNickname(checkIn.getNickname());
+		checkInStatus.setStatus(checkIn.getStatus());
+		checkInStatus.setCheckInTime(checkIn.getCheckInTime());
+		checkInStatus.setSpotId(checkIn.getSpot().getId());
+		
+		return checkInStatus;
 	}
 }
