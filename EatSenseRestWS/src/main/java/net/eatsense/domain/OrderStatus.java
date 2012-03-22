@@ -3,7 +3,7 @@ package net.eatsense.domain;
 public enum OrderStatus {
 	CART,
 	PLACED,
-	CANCELLED,
+	CANCELED,
 	RECEIVED,
 	INPROCESS,
 	COMPLETE
