@@ -340,9 +340,7 @@ Ext.define('EatSense.controller.Login', {
 				break;
 			case 'checkin':
 				ctr = this.getApplication().getController('Spot');
-				if(message.action == 'new') {
-					ctr.updateSpotDetailCheckInIncremental(message.content);
-				}
+				ctr.updateSpotDetailCheckInIncremental(message.action, Ext.create('EatSense.model.CheckIn',message.content));
 				break;
 			case 'order':
 				ctr = this.getApplication().getController('Spot');
@@ -353,13 +351,6 @@ Ext.define('EatSense.controller.Login', {
 				break;
 			default: console.log('unmapped message.type');
 		}
-
-		// if(message.type == 'spot') {
-		// 	ctr = this.getApplication().getController('Spot');
-		// 	if(message.action == 'update') {
-		// 		ctr.updateSpotIncremental(message.content);
-		// 	}
-		// } 
 	},
 
 	/**

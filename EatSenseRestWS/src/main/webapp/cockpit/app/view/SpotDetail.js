@@ -67,8 +67,6 @@ Ext.define('EatSense.view.SpotDetail', {
 			 {
 				xtype: 'dataview',
 				itemId: 'spotDetailOrders',
-				// height: 300,
-				// fullscreen: true,
 				store: 'orderStore',
 				useComponents: true,
 				defaultType: 'spotdetailitem'
@@ -77,13 +75,18 @@ Ext.define('EatSense.view.SpotDetail', {
 			{
 				xtype: 'toolbar',
 				docked: 'bottom',
+				layout: {
+					type: 'hbox',
+					align: 'middle',
+					pack: 'center'
+				},
 				items: [
 				{
 					text: 'Paid',
 					action: 'pay'
 				},
 				{
-					text: 'Reedem'
+					text: 'Redeem'
 				}, {
 					text: 'User'
 				}, {

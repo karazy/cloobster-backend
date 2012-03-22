@@ -18,7 +18,9 @@ Ext.define('EatSense.model.Order', {
 			name : 'orderTime',
 			type : 'date',
 			dateFormat: 'time'
-		} ],
+		}, {
+			name: 'checkInId'
+		}],
 
 		associations : {
 			type : 'hasOne',
@@ -44,6 +46,7 @@ Ext.define('EatSense.model.Order', {
 		rawJson.amount = this.get('amount');
 		rawJson.comment = this.get('comment');
 		rawJson.orderTime = this.get('orderTime');
+		rawJson.checkInId = this.get('checkInId');
 		
 		rawJson.product = this.getProduct().getRawJsonData();
 		

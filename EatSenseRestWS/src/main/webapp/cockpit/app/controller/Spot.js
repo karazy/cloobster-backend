@@ -113,23 +113,36 @@ Ext.define('EatSense.controller.Spot', {
 					dirtySpot.set(prop, updatedSpot[prop]);					
 				}
 			}
-			//explicit refresh should not be necessary
-			// this.getSpotsview().refresh();
 		}
-
 	},
 	/**
 	*	Updates spotdetail view with when a checkIn change at this spot occurs.
 	*
 	*/
-	updateSpotDetailCheckInIncremental: function(updatedCheckIn) {
+	updateSpotDetailCheckInIncremental: function(action, updatedCheckIn) {
 		var		me = this,
-				detail = me.getSpotDetail();
+				detail = me.getSpotDetail(),
+				store = this.getSpotDetailCustomerList().getStore(),
+				dirtyCheckIn;
 				
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
 		if(!detail.isHidden() && me.getActiveSpot()) {
-			if(updatedCheckIn.spotId == me.getActiveSpot().get('id')) {
-				me.getSpotDetailCustomerList().getStore().add(updatedCheckIn);
+			if(updatedCheckIn.get('spotId') == me.getActiveSpot().get('id')) {
+				if(action == 'new') {
+					store.add(updatedCheckIn);	
+				} else if (action == 'update') {
+					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
+					if(dirtyCheckIn) {
+						// store.remove(dirtyCheckIn);
+						// store.add(updatedCheckIn);
+						//update existing checkin
+						dirtyCheckIn.setData(updatedCheckIn.getData());
+						me.updateCustomerStatusPanel(updatedCheckIn);
+					} else {
+						Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorGeneralCommunication'), Ext.emptyFn);
+					}
+				}
+				
 			}
 		}
 	},
@@ -142,15 +155,19 @@ Ext.define('EatSense.controller.Spot', {
 				detail = me.getSpotDetail(),
 				store = me.getSpotDetailOrderList().getStore(),
 				oldOrder;
-				
+		//Be careful! updatedOrder is not yet a model
+
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
 		//and if the order belongs to current selected checkin		
 		if(!detail.isHidden() && me.getActiveCustomer()) {
 			if(updatedOrder.checkInId == me.getActiveCustomer().get('id')) {
 				if(action == 'new') {
-					store.add(updatedOrder);
+					
 				} else if(action == 'update') {
-					//oldOrder = store.getById(updatedOrder.get('id'));
+					oldOrder = store.getById(updatedOrder.id);
+					if(oldOrder) {
+						store.remove(oldOrder);
+					}
 					store.add(updatedOrder);
 				}
 			}
@@ -178,7 +195,6 @@ Ext.define('EatSense.controller.Spot', {
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 		
-			 		// checkInList.refresh();
 			 		if(records.length > 0) {
 			 			me.setActiveSpot(data);
 			 			me.getSpotDetailCustomerList().select(0);
@@ -193,6 +209,19 @@ Ext.define('EatSense.controller.Spot', {
 		//show detail view
 		Ext.Viewport.add(detail);
 		detail.show();
+	},
+	/**
+	*	Updates the status panel of selected customer in spotdetail view.
+	*	@param checkIn
+	*		contains the relevant information
+	*/
+	updateCustomerStatusPanel: function(checkIn) {
+		var 	me = this,
+				detail = me.getSpotDetail();
+
+		//render order status
+		statusLabel = detail.down('#statusLabel');
+		statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
 	},
 	/**
 	*	Shows orders of a customer.
@@ -212,9 +241,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		me.setActiveCustomer(record);
 
-		//render order status
-		statusLabel = detail.down('#statusLabel');
-		statusLabel.getTpl().overwrite(statusLabel.element, record.getData());
+		this.updateCustomerStatusPanel(record);
 
 		orderStore.load({
 			params: {
@@ -225,7 +252,6 @@ Ext.define('EatSense.controller.Spot', {
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 		
-			 		// checkInList.refresh();
 			 		// me.getSpotDetailOrderList().refresh();
 			 	} else {
 			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderLoading'), Ext.emptyFn);
@@ -254,23 +280,36 @@ Ext.define('EatSense.controller.Spot', {
 
 		//update order status
 		order.set('status', Karazy.constants.Order.RECEIVED);
-		// order.getData(true);
-		//button.disable();
+		order.getData(true);
 
 		//persist changes
-		order.save({
-			params: {
-				pathId: loginCtr.getAccount().get('businessId'),
-			},
-			success: function(record, operation) {
-				console.log('order confirmed');
-			},
-			failure: function(record, operation) {
-		//		button.enable();
-				order.set('status', Karazy.constants.Order.PLACED);
-				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
-			}
+		// order.save({
+		// 	params: {
+		// 		pathId: loginCtr.getAccount().get('businessId'),
+		// 	},
+		// 	success: function(record, operation) {
+		// 		console.log('order confirmed');
+		// 	},
+		// 	failure: function(record, operation) {
+		// 		order.set('status', Karazy.constants.Order.PLACED);
+		// 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+		// 	}
+		// });
 
+		//same approach as in eatSense App. Magic lies in getRawJsonData()
+		//still kind of a workaround
+		Ext.Ajax.request({				
+    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
+    	    method: 'PUT',    	    
+    	    jsonData: order.getRawJsonData(),
+    	    scope: this,
+    	    success: function(response) {
+    	    	console.log('order confirmed');
+    	    },
+    	    failure: function(response) {
+    	    					order.set('status', Karazy.constants.Order.PLACED);
+				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+	   	    }
 		});
 	},
 	/**

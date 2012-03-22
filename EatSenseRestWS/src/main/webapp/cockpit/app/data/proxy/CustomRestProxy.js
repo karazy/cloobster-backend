@@ -41,10 +41,6 @@ Ext.define('EatSense.data.proxy.CustomRestProxy', {
 	        	
 	        request.setUrl(_serviceUrl + url);
 
-			
-	        //  var  me = this, _serviceUrl = globalConf.serviceUrl, url = me.getUrl(request);
-	        // request.setUrl(_serviceUrl + url);
-
 	        return me.callParent([request]);
 	    }
 });
