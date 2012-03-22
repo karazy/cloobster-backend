@@ -460,7 +460,36 @@ public class OrderController {
 		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
+		// Check that status CANCELLED will not be changed.
+		if(OrderStatus.CANCELLED.equals(order.getStatus())) {
+			logger.error("{} already cancelled, cannot update", order.getKey());
+			return null;
+		}
 		
+		// Check that the status CART cannot be changed from this request.
+		// ( only consumer can place an order from the cart, a business would directy create it as recieved)
+		if(OrderStatus.CART.equals(order.getStatus())) {
+			logger.error("{} still in cart, cannot update", order.getKey());
+			return null;
+		}
+		// Check that the request doesnt set the status to CART.
+		if(OrderStatus.CART.equals(orderData.getStatus())) {
+			logger.error("{} update status to CART not allowed", order.getKey());
+			return null;
+		}
+		// Check if the new status is different from the current status.	
+		if(orderData.getStatus().equals(order.getStatus())) {
+			logger.info("{} status already, set to {}", order.getStatus());
+			return orderData;
+		}
+		// Check if 
+		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELLED)) {
+			logger.error("{} status RECEIVED can only be set to CANCELLED, unable to update", order.getKey());
+			return null;
+		}
+		
+			
+			
 		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
 		//order.setComment(orderData.getComment());
@@ -481,6 +510,9 @@ public class OrderController {
 					requestRepo.delete(request); 
 				}
 			}
+			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+			
+			messages.add(new MessageDTO("order","update",orderData));
 			
 			// If we have an older request in the database ...
 			if( requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId().equals(order.getId()) ) {
@@ -500,16 +532,16 @@ public class OrderController {
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
 					spotData.setStatus(newStatus);
-					
-					try {
-						channelCtrl.sendMessageToAllClients(businessId, "spot", "update", spotData);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
+					messages.add(new MessageDTO("spot","update",spotData));
+				}	
 			}
+			try {
+				channelCtrl.sendMessagesToAllClients(businessId, messages);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 		}
 		else {
 			// build validation error messages

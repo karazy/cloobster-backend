@@ -46,10 +46,18 @@ Ext.define('EatSense.view.SpotDetail', {
 				items: [
 				{
 					xtype: 'label',
+					itemId: 'statusLabel',
 					top: 10,
 					left: 10,
-					tpl: '<p>'+Karazy.i18n.translate('status')+'</p>'+
-					'<span class="{status}">TEST</span>'
+					cls: 'spotdetail-status',
+					tpl: new Ext.XTemplate('<p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
+						{
+							translateStatus: function(status) {
+								console.log('translateStatus');
+								return Karazy.i18n.translate(status);
+							}
+						}
+					)
 				}]
 			},
 			 {

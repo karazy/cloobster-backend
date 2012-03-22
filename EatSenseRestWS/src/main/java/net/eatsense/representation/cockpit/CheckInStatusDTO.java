@@ -22,6 +22,11 @@ public class CheckInStatusDTO {
 	 * Time of checkin.
 	 */
 	private Date checkInTime;
+	
+	/**
+	 * Id of spot checkIn takes place.
+	 */
+	private Long spotId;
 
 	public CheckInStatus getStatus() {
 		return status;
@@ -54,5 +59,13 @@ public class CheckInStatusDTO {
 	public void setCheckInTime(Date checkInTime) {
 		this.checkInTime = checkInTime;
 	}
-	
+
+	public Long getSpotId() {
+		return spotId;
+	}
+
+	public void setSpotId(Long spotId) {
+		this.spotId = spotId;
+	}
+			
 }

@@ -96,6 +96,7 @@ public class Transformer {
 		dto.setOrderTime(order.getOrderTime());
 		dto.setStatus(order.getStatus());
 		dto.setComment(order.getComment());
+		dto.setCheckInId(order.getCheckIn().getId());
 				
 		return dto;
 	}
