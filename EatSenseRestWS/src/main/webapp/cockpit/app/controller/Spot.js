@@ -24,6 +24,7 @@ Ext.define('EatSense.controller.Spot', {
 		    spotDetailOrderList: 'spotdetail #spotDetailOrders',
 		    confirmOrderButton: 'spotdetail button[action=confirm]',
 		    cancelOrderButton: 'spotdetail button[action=cancel]',
+		    closeSpotDetailButton: 'spotdetail button[action=close]',
 		    chargeButton: 'spotdetail button[action=pay]'		    
 
 		    //</spot-detail>
@@ -40,7 +41,10 @@ Ext.define('EatSense.controller.Spot', {
 		 		tap: 'confirmOrder'
 		 	},
 		 	cancelOrderButton: {
-		 		typ: 'cancelOrder'
+		 		tap: 'cancelOrder'
+		 	},
+		 	closeSpotDetailButton: {
+		 		tap: 'closeSpotDetail'
 		 	},
 		 	chargeButton: {
 		 		tap: 'chargeCustomer'
@@ -133,15 +137,22 @@ Ext.define('EatSense.controller.Spot', {
 	*	Updates spotdetail view with when a new order arrives.
 	*
 	*/
-	updateSpotDetailOrderIncremental: function(updatedOrder) {
+	updateSpotDetailOrderIncremental: function(action, updatedOrder) {
 		var		me = this,
-				detail = me.getSpotDetail();
+				detail = me.getSpotDetail(),
+				store = me.getSpotDetailOrderList().getStore(),
+				oldOrder;
 				
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
-		//and if the order belongs to current selected checkin
+		//and if the order belongs to current selected checkin		
 		if(!detail.isHidden() && me.getActiveCustomer()) {
 			if(updatedOrder.checkInId == me.getActiveCustomer().get('id')) {
-				me.getSpotDetailOrderList().getStore().add(updatedOrder);
+				if(action == 'new') {
+					store.add(updatedOrder);
+				} else if(action == 'update') {
+					//oldOrder = store.getById(updatedOrder.get('id'));
+					store.add(updatedOrder);
+				}
 			}
 		}
 	},
@@ -171,7 +182,6 @@ Ext.define('EatSense.controller.Spot', {
 			 		if(records.length > 0) {
 			 			me.setActiveSpot(data);
 			 			me.getSpotDetailCustomerList().select(0);
-			 			// me.showCustomerOrders(null,null,null, records[0]);
 			 		}
 			 	} else {
 			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailCheckInLoading'), Ext.emptyFn);
@@ -195,7 +205,11 @@ Ext.define('EatSense.controller.Spot', {
 				loginCtr = this.getApplication().getController('Login'),
 				orderStore = Ext.StoreManager.lookup('orderStore'),
 				detail = me.getSpotDetail();
-				
+		
+		if(!record) {
+			return;
+		}
+
 		me.setActiveCustomer(record);
 
 		//render order status
@@ -297,11 +311,19 @@ Ext.define('EatSense.controller.Spot', {
 		});
 	},
 	/**
+	*	Close spot detail.
+	*
+	*/
+	closeSpotDetail: function(button) {
+		this.getSpotDetail().hide();
+	},
+	/**
 	*	Called when spotdetail panel get hidden.
 	*	This is a place to cleanup the panel.
 	*/
 	hideSpotDetail: function(spotdetail) {
-		this.getSpotDetailCustomerList().deselectAll();
+		this.getSpotDetailCustomerList().deselectAll();	
+		this.getSpotDetailOrderList().getStore().removeAll();
 		this.setActiveSpot(null);
 		this.setActiveCustomer(null);
 	}

@@ -63,16 +63,31 @@
 .spotdetail-status {
 	border: 1px solid black;	
 	position: absolute;
-	right: 10px;
-	top: 10px;
+	left: 25px;
+	top: 25px;	
 }
 
 .spotdetail-status .order_placed{
 	background-color: red;
+	padding: 3px;
 }
 
 .spotdetail-status .checkedin{
 	background-color: green;
+	padding: 3px;
+}
+
+.spotdetail-close {
+	background-color: black;
+	border-radius: 1em;
+	text-align: center;	
+	vertical-align: middle;
+	color: white;
+	height: 1.5em;
+	width: 1.5em;
+	position: absolute;
+	right: 3px;
+	top: 3px;
 }
 
 .spotdetailitem-customer-label {
@@ -80,8 +95,6 @@
 }
 
 .spotdetailitem-flag {
-	/*width: 25px;
-	height: 10px;*/
 	width: 10%;
 	top: 0;
 	background-color: red;
@@ -112,6 +125,7 @@
 
 .spotdetailitem-order .choices{
 	clear: both;
+	margin-left: 10px;
 }
 
 .spotdetailitem-confirm {

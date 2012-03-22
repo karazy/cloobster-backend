@@ -346,9 +346,7 @@ Ext.define('EatSense.controller.Login', {
 				break;
 			case 'order':
 				ctr = this.getApplication().getController('Spot');
-				if(message.action == 'update') {
-					ctr.updateSpotDetailOrderIncremental(message.content);
-				}
+				ctr.updateSpotDetailOrderIncremental(message.action, message.content);
 				break;
 			case 'bill':
 

@@ -34,9 +34,9 @@ Ext.define('EatSense.view.SpotDetail', {
 		},
 		{
 			xtype: 'panel',
-			// layout: {
-			// 	type: 'fit'
-			// },
+			layout: {
+				type: 'fit'
+			},
 			// fullscreen: true,
 			items: [
 			{
@@ -45,10 +45,14 @@ Ext.define('EatSense.view.SpotDetail', {
 				height: 100,
 				items: [
 				{
+					xtype: 'button',
+					action: 'close',
+					baseCls: 'spotdetail-close',
+					text: 'X'
+				},
+				{
 					xtype: 'label',
 					itemId: 'statusLabel',
-					top: 10,
-					left: 10,
 					cls: 'spotdetail-status',
 					tpl: new Ext.XTemplate('<p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
 						{
@@ -63,8 +67,7 @@ Ext.define('EatSense.view.SpotDetail', {
 			 {
 				xtype: 'dataview',
 				itemId: 'spotDetailOrders',
-				width: 500,
-				height: 300,
+				// height: 300,
 				// fullscreen: true,
 				store: 'orderStore',
 				useComponents: true,
