@@ -185,7 +185,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		//update order status
 		order.set('status', Karazy.constants.Order.RECEIVED);
-
+		// order.getData(true);
 		//button.disable();
 
 		//persist changes

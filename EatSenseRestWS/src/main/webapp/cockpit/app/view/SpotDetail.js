@@ -43,12 +43,19 @@ Ext.define('EatSense.view.SpotDetail', {
 				xtype: 'panel',
 				docked: 'top',
 				height: 100,
-				html: 'UPPER PANEL'
+				items: [
+				{
+					xtype: 'label',
+					top: 10,
+					left: 10,
+					tpl: '<p>'+Karazy.i18n.translate('status')+'</p>'+
+					'<span class="{status}">TEST</span>'
+				}]
 			},
 			 {
 				xtype: 'dataview',
 				itemId: 'spotDetailOrders',
-				width: 300,
+				width: 500,
 				height: 300,
 				// fullscreen: true,
 				store: 'orderStore',

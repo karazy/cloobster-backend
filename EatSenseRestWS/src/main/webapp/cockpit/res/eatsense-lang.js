@@ -28,6 +28,7 @@ var translation = {
 		"errorSpotDetailCheckInLoading" : "Laden der eingecheckten Personen fehlgeschlagen!",
 		"errorSpotDetailOrderLoading" : "Laden der Bestellungen fehlgeschlagen!",
 		"errorSpotDetailOrderSave" : "Speichern der Bestellung fehlgeschlagen!",
+		"status" : "Status",
 
 		//status
 		"ORDER_PLACED" : "Neu!",

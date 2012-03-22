@@ -521,6 +521,7 @@
 		
 		myordersStore.load({
 			scope   : this,
+			enablePagingParams: false,
 			params : {
 				'checkInId' : checkInId,
 //				'status' : Karazy.constants.Order.PLACED,
@@ -528,18 +529,15 @@
 			callback: function(records, operation, success) {
 				try {
 					if(success == true) {
-						(records.length > 0) ? payButton.show() : payButton.hide();
-						(records.length > 0) ? leaveButton.hide() : leaveButton.show();
+						(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
+						(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 						
 						//WORKAROUND to make sure all data is available in data property
 						//otherwise nested choices won't be shown
 						Ext.each(records, function(order) {
 							order.getProduct().getData(true);
 						});
-						//only display placed or received orders
-//						myordersStore.filter(function(record, id) {
-//							return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
-//						});
+
 						
 						//refresh the order list
 						total = me.calculateOrdersTotal(myordersStore);

@@ -12,7 +12,7 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : ['Login','Spot'],
-	models : ['Account','Spot', 'Business', 'CheckIn', 'Order'],
+	models : ['Account','Spot', 'Business', 'CheckIn', 'Order', 'Product', 'Choice', 'Option'],
 	views : ['Login', 'ChooseBusiness', 'Main'], 
 	stores : ['Account', 'AppState',  'Spot', 'Business', 'CheckIn', 'Order' ],
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
