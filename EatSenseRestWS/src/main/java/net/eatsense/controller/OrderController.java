@@ -129,10 +129,9 @@ public class OrderController {
 			// only create a new request if the order status was updated to be placed
 			if(order.getStatus() == OrderStatus.PLACED) {
 				
-				checkInRepo.saveOrUpdate(checkIn);
-				
 				checkIn.setStatus(CheckInStatus.ORDER_PLACED);
-				
+				checkInRepo.saveOrUpdate(checkIn);
+								
 				Request request = new Request();
 				request.setCheckIn(checkIn.getKey());
 				request.setRestaurant(Restaurant.getKey(restaurantId));
