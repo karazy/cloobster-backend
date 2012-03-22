@@ -21,6 +21,11 @@ public class OrderDTO {
 	
 	Date orderTime;
 	
+	/**
+	 * CheckIn Id this order is assigned to.
+	 */
+	private Long checkInId;
+	
 	public Date getOrderTime() {
 		return orderTime;
 	}
@@ -58,4 +63,12 @@ public class OrderDTO {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+	public Long getCheckInId() {
+		return checkInId;
+	}
+	public void setCheckInId(Long checkInId) {
+		this.checkInId = checkInId;
+	}
+	
+	
 }

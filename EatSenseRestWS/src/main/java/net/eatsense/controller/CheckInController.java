@@ -496,6 +496,7 @@ public class CheckInController {
 		checkInStatus.setNickname(checkIn.getNickname());
 		checkInStatus.setStatus(checkIn.getStatus());
 		checkInStatus.setCheckInTime(checkIn.getCheckInTime());
+		checkInStatus.setSpotId(checkIn.getSpot().getId());
 		
 		return checkInStatus;
 	}

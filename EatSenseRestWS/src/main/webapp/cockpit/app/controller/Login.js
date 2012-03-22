@@ -284,7 +284,7 @@ Ext.define('EatSense.controller.Login', {
 		me.requestNewToken(function(newToken) {
 			Karazy.channel.createChannel( {
 				token: newToken, 
-				messageHandler: me.routeMessage,
+				messageHandler: me.processMessages,
 				requestTokenHandler: me.requestNewToken,
 				messageHandlerScope: me,
 				requestTokenHandlerScope: me
@@ -293,23 +293,75 @@ Ext.define('EatSense.controller.Login', {
 	}, 
 	/**
 	*	Called after receiving a channel message.
-	*	Delegates to the responsible method.
-	*
-	*	@param rawMessage	
-	*		The raw string message which will be parsed as JSON
+	*	
+	*	@param rawMessages	
+	*		The raw string message(s) which will be parsed as JSON.
+	*		This could be a single object or an array.
 	*/
-	routeMessage: function(rawMessage) {
-		var 	message = Ext.JSON.decode(rawMessage, true),
+	processMessages: function(rawMessages) {
+		var 	message = Ext.JSON.decode(rawMessages, true),
 				ctr;
 
-		if(message) {
-			if(message.type == 'spot') {
+		if(Ext.isArray(message)) {
+				for(index = 0; index < message.length; index++) {
+				if(message[index]) {
+					this.routeMessage(message[index]);
+				}	
+			}
+		}
+		else if(message) {
+			this.routeMessage(message);
+		}				
+	},
+	/**
+	*	Processes a single message delivered.
+	*	Delegates to the responsible method.
+	*
+	*	@param message	
+	*		A message consists of 3 fields
+	*			type	- a type like spot
+	*			action	- an action like update, new ...
+	*			content - the data
+	*/
+	routeMessage: function(message) {
+		var 	ctr;
+
+		if(!message) {
+			console.log('param is no message');
+			return;
+		}	
+
+		switch(message.type.toLowerCase()) {
+			case 'spot': 
 				ctr = this.getApplication().getController('Spot');
 				if(message.action == 'update') {
 					ctr.updateSpotIncremental(message.content);
 				}
-			}
+				break;
+			case 'checkin':
+				ctr = this.getApplication().getController('Spot');
+				if(message.action == 'new') {
+					ctr.updateSpotDetailCheckInIncremental(message.content);
+				}
+				break;
+			case 'order':
+				ctr = this.getApplication().getController('Spot');
+				if(message.action == 'update') {
+					ctr.updateSpotDetailOrderIncremental(message.content);
+				}
+				break;
+			case 'bill':
+
+				break;
+			default: console.log('unmapped message.type');
 		}
+
+		// if(message.type == 'spot') {
+		// 	ctr = this.getApplication().getController('Spot');
+		// 	if(message.action == 'update') {
+		// 		ctr.updateSpotIncremental(message.content);
+		// 	}
+		// } 
 	},
 
 	/**
