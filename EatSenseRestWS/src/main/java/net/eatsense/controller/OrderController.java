@@ -367,7 +367,7 @@ public class OrderController {
 		}
 		
 
-		Key<Order> orderKey = createOrder(restaurant.getKey(), checkIn.getKey(), productKey, order.getAmount(), choices, order.getComment());		
+		Key<Order> orderKey = createAndSaveOrder(restaurant.getKey(), checkIn.getKey(), productKey, order.getAmount(), choices, order.getComment());		
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();
@@ -378,7 +378,7 @@ public class OrderController {
 
 	
 
-	public Key<Order> createOrder(Key<Restaurant> restaurant, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
+	public Key<Order> createAndSaveOrder(Key<Restaurant> restaurant, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
 		Key<Order> orderKey = null;
 		Order order = new Order();
 		order.setAmount(amount);
@@ -461,7 +461,7 @@ public class OrderController {
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
 		// Check that status CANCELLED will not be changed.
-		if(OrderStatus.CANCELLED.equals(order.getStatus())) {
+		if(OrderStatus.CANCELED.equals(order.getStatus())) {
 			logger.error("{} already cancelled, cannot update", order.getKey());
 			return null;
 		}
@@ -483,7 +483,7 @@ public class OrderController {
 			return orderData;
 		}
 		// Check if 
-		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELLED)) {
+		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELED)) {
 			logger.error("{} status RECEIVED can only be set to CANCELLED, unable to update", order.getKey());
 			return null;
 		}
