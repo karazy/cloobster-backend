@@ -152,6 +152,8 @@ public class OrderController {
 				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
 					// Send message to notify clients over their channel
 					
+					messages.add(new MessageDTO("checkin", "update", transform.toStatusDto(checkIn)));
+					
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
 					spotData.setStatus(request.getStatus());
