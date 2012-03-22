@@ -230,7 +230,7 @@ public class CheckInController {
 		
 		// add the messages we want to send as one package
 		messages.add(new MessageDTO("spot","update",spotData));
-		messages.add(new MessageDTO("checkin","new", toStatusDto(checkIn)));
+		messages.add(new MessageDTO("checkin","new", transform.toStatusDto(checkIn)));
 		
 		// send the messages
 		try {
@@ -467,38 +467,7 @@ public class CheckInController {
 
 
 	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Long businessId, Long spotId) {
-		return toStatusDtos(getCheckInsBySpot(businessId, spotId));
-	}
-
-
-
-
-	private Collection<CheckInStatusDTO> toStatusDtos(List<CheckIn> checkIns) {
-		if(checkIns == null) {
-			return null;
-		}
-		ArrayList<CheckInStatusDTO> checkInStatuses = new ArrayList<CheckInStatusDTO>();
-		
-		for (CheckIn checkIn : checkIns) {
-			checkInStatuses.add(toStatusDto(checkIn));
-		}
-		
-		return checkInStatuses;
-	}
-	
-	private CheckInStatusDTO toStatusDto(CheckIn checkIn) {
-		if(checkIn == null)
-			return null;
-			
-		CheckInStatusDTO checkInStatus = new CheckInStatusDTO();
-		
-		checkInStatus.setId(checkIn.getId());
-		checkInStatus.setNickname(checkIn.getNickname());
-		checkInStatus.setStatus(checkIn.getStatus());
-		checkInStatus.setCheckInTime(checkIn.getCheckInTime());
-		checkInStatus.setSpotId(checkIn.getSpot().getId());
-		
-		return checkInStatus;
+		return transform.toStatusDtos( getCheckInsBySpot(businessId, spotId));
 	}
 
 	private List<CheckIn> getCheckInsBySpot(Long businessId, Long spotId) {

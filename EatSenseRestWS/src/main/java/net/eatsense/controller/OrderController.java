@@ -528,6 +528,12 @@ public class OrderController {
 				}
 					
 				if(!requests.get(0).getStatus().equals(newStatus)) {
+					// Update the status of the checkIn
+					checkIn.setStatus(CheckInStatus.valueOf(newStatus));
+					checkInRepo.saveOrUpdate(checkIn);
+					
+					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+					
 					// Send message to notify clients over their channel
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
