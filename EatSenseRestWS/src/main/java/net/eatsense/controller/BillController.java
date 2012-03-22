@@ -1,5 +1,6 @@
 package net.eatsense.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.representation.BillDTO;
+import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
@@ -124,6 +126,10 @@ public class BillController {
 			
 			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 			
+			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+			messages.add(new MessageDTO("bill","action", billData));
+			
+			
 			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have an older request in the database ...
@@ -133,15 +139,15 @@ public class BillController {
 				SpotStatusDTO spotData = new SpotStatusDTO();
 				spotData.setId(checkIn.getSpot().getId());
 				spotData.setStatus(request.getStatus());
-				
-				try {
-					channelCtrl.sendMessageToAllClients(restaurantId, "spot", "update", spotData);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				messages.add(new MessageDTO("spot", "update", spotData));				
+			}
+			try {
+				channelCtrl.sendMessagesToAllClients(restaurantId, messages);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-			}		
 		}
 		return billData;
 	}

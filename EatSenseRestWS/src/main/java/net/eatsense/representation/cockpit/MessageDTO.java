@@ -5,6 +5,26 @@ public class MessageDTO {
 	String action;
 	Object content;
 	
+	
+	
+	/**
+	 * 
+	 */
+	public MessageDTO() {
+		super();
+	}
+	
+	/**
+	 * @param type
+	 * @param action
+	 * @param content
+	 */
+	public MessageDTO(String type, String action, Object content) {
+		super();
+		this.type = type;
+		this.action = action;
+		this.content = content;
+	}
 	public String getType() {
 		return type;
 	}
