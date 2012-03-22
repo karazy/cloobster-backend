@@ -2,6 +2,8 @@ package net.eatsense.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -136,6 +138,42 @@ public class ChannelController {
 		return messageString;
 	}
 	
+	/**
+	 * Send a message to the client identified by the client id.
+	 * 
+	 * @param clientId
+	 * @param type
+	 * @param action 
+	 * @param content an object for data serialization to JSON
+	 * @return the complete message string 
+	 * @throws IOException, JsonGenerationException, JsonMappingException 
+	 */
+	public String sendMessageJson(String clientId, Object messageData) throws IOException, JsonGenerationException, JsonMappingException  {
+		if(messageData == null) {
+			logger.error("messageData is null");
+			return null;
+		}
+			
+		String messageString;
+		
+			try {
+				messageString = mapper.writeValueAsString(messageData);
+			} catch (JsonGenerationException e) {
+				throw e;
+			} catch (JsonMappingException e) {
+				throw e;
+			} catch (IOException e) {
+				throw e;
+			}
+		if(messageString.length() > 32786)
+			throw new IllegalArgumentException("data package too long, reduce content size");
+		
+		ChannelMessage message = new ChannelMessage(clientId, messageString);
+		channelService.sendMessage(message);
+		
+		return messageString;
+	}
+	
 	
 	/**
 	 * Send message with only the given string.
@@ -165,6 +203,16 @@ public class ChannelController {
 		String lastMessage = "";
 		for (String clientId : restaurant.getChannelIds()) {
 			lastMessage = sendMessage(clientId, type, action, content);
+			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
+		}
+		
+	}
+	
+	public void sendMessagesToAllClients(Long restaurantId, List<MessageDTO> messages) throws JsonGenerationException, JsonMappingException, IOException  {
+		Restaurant restaurant = restaurantRepo.getById(restaurantId);
+		String lastMessage = "";
+		for (String clientId : restaurant.getChannelIds()) {
+			lastMessage = sendMessageJson(clientId,messages);
 			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
 		}
 		
