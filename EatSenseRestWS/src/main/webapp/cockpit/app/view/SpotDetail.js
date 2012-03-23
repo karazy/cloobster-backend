@@ -5,6 +5,7 @@ Ext.define('EatSense.view.SpotDetail', {
 	config: {
 		modal: true,
 		hideOnMaskTap: 'true',
+		baseCls: 'spotdetail',
 		top: '10%',
 		left: '10%',
 		right: '10%',
@@ -27,8 +28,17 @@ Ext.define('EatSense.view.SpotDetail', {
 				cls: 'spotdetailitem-customer-label'
 			},{
 				xtype: 'list',
-				itemId: 'checkInList',
-				itemTpl: '<h2>{nickname}</h2>',
+				itemId: 'checkInList', 
+				itemTpl: new Ext.XTemplate(
+					"<h2 class='spotdetail-customer-name'>{nickname}</h2>"+
+					"<tpl if='status == \"ORDER_PLACED\"'>"+
+						"<span class='spotdetail-customer-flag'>X</span>"+
+					"</tpl>",
+						{
+							translateStatus: function(status) {
+								return Karazy.i18n.translate(status);
+							}
+						}),
 				store: 'checkInStore',
 				ui: 'round'
 			}
@@ -87,22 +97,29 @@ Ext.define('EatSense.view.SpotDetail', {
 			}, 
 			{
 				xtype: 'toolbar',
+				baseCls: 'spotdetail-toolbar',
 				docked: 'bottom',
 				layout: {
 					type: 'hbox',
 					align: 'middle',
 					pack: 'center'
 				},
+				defaults: {
+					ui: 'action',
+					cls: 'spotdetail-toolbar-button'
+				},
 				items: [
 				{
 					text: 'Paid',
-					action: 'pay'
+					action: 'pay',
 				},
 				{
 					text: 'Redeem'
-				}, {
+				}, 
+				{
 					text: 'User'
-				}, {
+				}, 
+				{
 					text: 'Cancel'
 				}
 				]				

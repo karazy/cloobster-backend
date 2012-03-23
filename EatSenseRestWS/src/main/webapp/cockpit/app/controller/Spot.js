@@ -140,8 +140,21 @@ Ext.define('EatSense.controller.Spot', {
 						//update existing checkin
 						dirtyCheckIn.setData(updatedCheckIn.getData());
 						me.updateCustomerStatusPanel(updatedCheckIn);
+						me.getSpotDetailCustomerList().refresh();
 					} else {
 						Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorGeneralCommunication'), Ext.emptyFn);
+					}
+				} else if (action == "delete") {
+					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
+					//TODO check if orders for this checkin exist? Normally this should not occur.
+					if(dirtyCheckIn) {
+						store.remove(dirtyCheckIn);
+						//clear status panel if deleted checkin is activeCustomer
+						if(updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
+							me.updateCustomerStatusPanel();
+						}						
+					} else {
+						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
 					}
 				}
 				
@@ -228,9 +241,9 @@ Ext.define('EatSense.controller.Spot', {
 			statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
 			statisticsLabel.getTpl().overwrite(statisticsLabel.element, checkIn.getData());
 		} else {
-			//reset
-			// statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
-			// statisticsLabel.getTpl().overwrite(statisticsLabel.element, checkIn.getData());
+			//pass dummy objects with no data
+			statusLabel.getTpl().overwrite(statusLabel.element, {status: '-'});
+			statisticsLabel.getTpl().overwrite(statisticsLabel.element, {checkInTime: ''});
 		}
 
 	},

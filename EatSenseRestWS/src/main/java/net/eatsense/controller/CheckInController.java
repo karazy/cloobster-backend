@@ -444,6 +444,8 @@ public class CheckInController {
 			throw new WebApplicationException(Response.noContent().status(Response.Status.FORBIDDEN).build());
 		}
 		else {
+			List<MessageDTO> messages = new ArrayList<MessageDTO>();
+			
 			checkInRepo.ofy().delete(checkInRepo.ofy().query(Order.class).filter("status", "CART").listKeys());
 					
 			checkInRepo.delete(checkIn);
@@ -453,9 +455,10 @@ public class CheckInController {
 
 			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
 			
-			// send the message with the updated data field
+			messages.add(new MessageDTO("spot", "update", spotData));
+			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
 			try {
-				channelCtrl.sendMessageToAllClients(checkIn.getRestaurant().getId(), "spot", "update", spotData);
+				channelCtrl.sendMessagesToAllClients(checkIn.getRestaurant().getId(), messages);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -198,7 +198,6 @@ public class RestaurantResource{
 	public void deleteAllData() {
 		//TODO DELETE
 		importCtrl.deleteAllData();
-		dummyUsers();
 	}
 	
 	/**
