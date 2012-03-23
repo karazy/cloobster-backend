@@ -186,14 +186,30 @@ public class RestaurantResource{
 		    return id.toString();
 	}
 	
+	
+	
+	/**
+	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
+	 * {@link ImportController#deleteAllData()}
+	 * Also recreates the dummy users.
+	 */
+	@DELETE
+	@Path("all")
+	public void deleteAllData() {
+		//TODO DELETE
+		importCtrl.deleteAllData();
+		dummyUsers();
+	}
+	
 	/**
 	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
 	 * {@link ImportController#deleteAllData()}
 	 */
-	@GET
-	@Path("deleteall")
-	public void deleteAllData() {
-		importCtrl.deleteAllData();
+	@DELETE
+	@Path("livedata")
+	public void deleteLiveData() {
+		//TODO DELETE
+		importCtrl.deleteLiveData();
 	}
 
 }

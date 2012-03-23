@@ -11,6 +11,8 @@ Ext.define('EatSense.view.SpotDetail', {
 		bottom: '10%',
 		layout: 'fit',
 		fullscreen: true,
+		//this should be initially hidden
+		hidden: true,
 		items: [{
 			xtype: 'panel',
 			layout:  {
@@ -52,12 +54,23 @@ Ext.define('EatSense.view.SpotDetail', {
 				},
 				{
 					xtype: 'label',
+					itemId: 'statistics',
+					cls: 'spotdetail-statistics',
+					tpl: new Ext.XTemplate('<p>'+Karazy.i18n.translate('statistic')+'</p><p>Check-In: {[this.formatTime(values.checkInTime)]}</p>',
+						{
+							formatTime: function(time) {
+								return Ext.util.Format.date(time, 'H:i');
+							}
+						}
+					)
+				},
+				{
+					xtype: 'label',
 					itemId: 'statusLabel',
 					cls: 'spotdetail-status',
-					tpl: new Ext.XTemplate('<p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
+					tpl: new Ext.XTemplate('<p>Status:</p><p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
 						{
 							translateStatus: function(status) {
-								console.log('translateStatus');
 								return Karazy.i18n.translate(status);
 							}
 						}

@@ -25,6 +25,7 @@ import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.RestaurantRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
@@ -54,6 +55,7 @@ public class ImportController {
 	private ChoiceRepository choiceRepo;
 	private CheckInRepository checkinRepo;
 	private OrderRepository orderRepo;
+	private RequestRepository requestRepo;
 	
 	private String returnMessage;
 	
@@ -68,7 +70,7 @@ public class ImportController {
 	
 
 	@Inject
-	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br) {
+	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr) {
 		this.restaurantRepo = r;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -78,6 +80,7 @@ public class ImportController {
 		this.orderRepo = or;
 		this.billRepo = br;
 		this.orderChoiceRepo = ocr;
+		this.requestRepo = reqr;
 	}
 	
     public void setValidator(Validator validator) {
@@ -268,10 +271,20 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
 		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	};
 	
-	public void deleteCheckIns() {
+	/**
+	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
+	 * Deletes only live data like checkIns, requests and so on.
+	 * Does not delete restaurant data.
+	 */
+	public void deleteLiveData() {
 		checkinRepo.ofy().delete(checkinRepo.ofy().query(CheckIn.class).fetchKeys());
+		requestRepo.ofy().delete(requestRepo.getAllKeys());
+		orderRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
 }

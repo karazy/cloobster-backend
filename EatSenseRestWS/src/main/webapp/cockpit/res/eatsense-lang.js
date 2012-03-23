@@ -30,11 +30,13 @@ var translation = {
 		"errorSpotDetailOrderLoading" : "Laden der Bestellungen fehlgeschlagen!",
 		"errorSpotDetailOrderSave" : "Speichern der Bestellung fehlgeschlagen!",
 		"status" : "Status",
+		"statistic" : "Infos",
 
 		//status
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",
-		"CHECKEDIN" : "Checked-In"
+		"CHECKEDIN" : "Checked-In",
+		"PAYMENT_REQUEST" : "Bezahlen"
 	}
 
 };

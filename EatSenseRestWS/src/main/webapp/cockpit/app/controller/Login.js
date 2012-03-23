@@ -9,7 +9,7 @@ Ext.define('EatSense.controller.Login', {
 				tap: 'login'
 			},
 			logoutButton: {
-				tap: 'logout'
+				tap: 'showLogoutDialog'
 			},
 		 	businessList: {
 		 		itemtap: 'setBusinessId'
@@ -212,7 +212,28 @@ Ext.define('EatSense.controller.Login', {
 	*/
 	logout: function() {
 		console.log('logout');
-		var accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
+		var 	accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
+		
+		Karazy.channel.closeChannel();
+		//remove all stored credentials
+		accountLocalStore.removeAll();
+		accountLocalStore.sync();
+
+		Ext.Ajax.setDefaultHeaders({});	
+
+		//TODO remove in a more reliable way!
+		//remove main view				
+		Ext.Viewport.remove(Ext.Viewport.down('main'));
+		//show main view				
+		Ext.create('EatSense.view.Login');		
+
+	},
+	/**
+	*	Displays a logout dialog and logs user out if he confirms.
+	*	
+	*/
+	showLogoutDialog: function() {
+		var 	me = this;
 
 			Ext.Msg.show({
 				title: i18nPlugin.translate('hint'),
@@ -229,18 +250,7 @@ Ext.define('EatSense.controller.Login', {
 				scope: this,
 				fn: function(btnId, value, opt) {
 					if(btnId=='yes') {
-						Karazy.channel.closeChannel();
-						//remove all stored credentials
-						accountLocalStore.removeAll();
-						accountLocalStore.sync();
-
-						Ext.Ajax.setDefaultHeaders({});	
-
-						//TODO remove in a more reliable way!
-						//remove main view				
-						Ext.Viewport.remove(Ext.Viewport.down('main'));
-						//show main view				
-						Ext.create('EatSense.view.Login');		
+						me.logout();	
 					};
 				}
 		});

@@ -66,7 +66,8 @@ Ext.define('EatSense.controller.Spot', {
 	},
 	/**
 	*	Loads all spots and refreshes spot view.
-	*
+	*	Called after a successful login or credentials restore.
+	*	If spot loading fails user will be logged out
 	*/
 	loadSpots: function() {
 		console.log('loadSpots');
@@ -85,6 +86,7 @@ Ext.define('EatSense.controller.Spot', {
 			 		//explicit refresh should not be necessary
 			 		//this.getSpotsview().refresh();	 		
 			 	} else {
+			 		loginCtr.logout();
 			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
 			 	}				
 			 },
@@ -195,8 +197,8 @@ Ext.define('EatSense.controller.Spot', {
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 		
-			 		if(records.length > 0) {
-			 			me.setActiveSpot(data);
+			 		me.setActiveSpot(data);
+			 		if(records.length > 0) {			 	
 			 			me.getSpotDetailCustomerList().select(0);
 			 		}
 			 	} else {
@@ -213,15 +215,24 @@ Ext.define('EatSense.controller.Spot', {
 	/**
 	*	Updates the status panel of selected customer in spotdetail view.
 	*	@param checkIn
-	*		contains the relevant information
+	*		contains the relevant information. I none provided fields will be reseted.
 	*/
 	updateCustomerStatusPanel: function(checkIn) {
 		var 	me = this,
-				detail = me.getSpotDetail();
+				detail = me.getSpotDetail(),
+				statusLabel = detail.down('#statusLabel'),
+				statisticsLabel = detail.down('#statistics');
 
-		//render order status
-		statusLabel = detail.down('#statusLabel');
-		statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
+		if(checkIn) {
+			//render order status		
+			statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
+			statisticsLabel.getTpl().overwrite(statisticsLabel.element, checkIn.getData());
+		} else {
+			//reset
+			// statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
+			// statisticsLabel.getTpl().overwrite(statisticsLabel.element, checkIn.getData());
+		}
+
 	},
 	/**
 	*	Shows orders of a customer.
@@ -363,6 +374,7 @@ Ext.define('EatSense.controller.Spot', {
 	hideSpotDetail: function(spotdetail) {
 		this.getSpotDetailCustomerList().deselectAll();	
 		this.getSpotDetailOrderList().getStore().removeAll();
+		this.updateCustomerStatusPanel();
 		this.setActiveSpot(null);
 		this.setActiveCustomer(null);
 	}
