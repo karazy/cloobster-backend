@@ -517,7 +517,7 @@ public class OrderController {
 			messages.add(new MessageDTO("order","update",orderData));
 			
 			// If we have an older request in the database ...
-			if( requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId().equals(order.getId()) ) {
+			if(requests.size() > 0 && requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId().equals(order.getId()) ) {
 				
 				
 //				requestRepo.delete(requests.get(0));

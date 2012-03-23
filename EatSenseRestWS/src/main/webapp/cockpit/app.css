@@ -121,6 +121,7 @@
 	border-radius: 0.5em;
 	float: left;
 	font-size: 0.7em;
+	min-width: 40px;
 }
 
 .spotdetail-close {
