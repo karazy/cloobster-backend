@@ -63,18 +63,33 @@ Ext.define('EatSense.view.SpotDetail', {
 					text: 'X'
 				},
 				{
-					xtype: 'label',
-					itemId: 'statistics',
+					xtype: 'panel',
+					// itemId: 'statistics',
 					cls: 'spotdetail-statistics',
-					tpl: new Ext.XTemplate('<p>'+Karazy.i18n.translate('statistic')+'</p>'+
-						'<p>Check-In: {[this.formatTime(values.checkIn.checkInTime)]}</p>'+
-						'<p>Total: {total}€</p>',
+					items: [
 						{
-							formatTime: function(time) {
-								return Ext.util.Format.date(time, 'H:i');
-							}
+							xtype: 'label',
+							itemId: 'title',					
+							html: '<p>'+Karazy.i18n.translate('statistic')+'</p>'
+						},
+						{
+							xtype: 'label',
+							itemId: 'checkInTime',
+							tpl: new Ext.XTemplate(
+								'<p>Check-In: {[this.formatTime(values.checkInTime)]}</p>',
+								{
+									formatTime: function(time) {
+										return Ext.util.Format.date(time, 'H:i');
+									}
+								}
+							)
+						},				
+						{
+							xtype: 'label',
+							itemId: 'total',
+							tpl: '<p>Total: {total}€</p>'
 						}
-					)
+					]
 				},
 				{
 					xtype: 'label',
@@ -114,15 +129,19 @@ Ext.define('EatSense.view.SpotDetail', {
 				{
 					text: 'Paid',
 					action: 'pay',
+					disabled: true
 				},
 				{
-					text: 'Redeem'
+					text: 'Redeem',
+					disabled: true
 				}, 
 				{
-					text: 'User'
+					text: 'User',
+					disabled: true
 				}, 
 				{
-					text: 'Cancel'
+					text: 'Cancel',
+					disabled: true
 				}
 				]				
 			}

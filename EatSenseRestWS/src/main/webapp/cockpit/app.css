@@ -3,7 +3,7 @@
 
 .spot {
 	float: left;
-	width: 20%;
+	width: 15%;
 	margin: 10px;
 }
 
@@ -69,7 +69,8 @@
 
 .spotdetail-toolbar {
 	background-color: white;
-
+	border-top: 2px solid black;
+	padding-top: 3px;
 }
 
 .spotdetail-customer-name {
@@ -160,6 +161,10 @@
 .spotdetailitem-order h2{
 	font-weight: bold;
 	float: left;
+}
+
+.spotdetailitem-order-cancel {
+	text-decoration: line-through;
 }
 
 .spotdetailitem-order div:nth-of-type(1){

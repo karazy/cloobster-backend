@@ -12,6 +12,10 @@ Ext.define('EatSense.store.Order', {
 					return -1;
 			   } else if(status1 != status2 && status2 == Karazy.constants.Order.PLACED) {
 					return 1;
+			   } else if(status1 != status2 && status1 == Karazy.constants.Order.CANCELED) {
+					return 1;
+			   } else if(status1 != status2 && status2 == Karazy.constants.Order.CANCELED) {
+					return -1;
 			   } else {
 			   		return (status1 > status2) ? 1 : (status1 == status2 ? 0 : -1);
 			   }               

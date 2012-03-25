@@ -50,9 +50,6 @@ Ext.define('EatSense.controller.Spot', {
 		 	},
 		 	spotDetail: {
 		 		hide: 'hideSpotDetail'
-		 	},
-		 	spotDetailStatistic: {
-		 		update: 'updateCustomerStatusPanel'
 		 	}
 		},
 
@@ -65,6 +62,10 @@ Ext.define('EatSense.controller.Spot', {
 	init: function() {
 		Ext.Logger.info('initializing Spot Controller');
 		console.log('initializing Spot Controller');
+
+		//add listeners for message events
+		var messageCtr = this.getApplication().getController('Message');
+		messageCtr.on('eatSense.spot', this.updateSpotIncremental, this);
 	},
 	/**
 	*	Loads all spots and refreshes spot view.
@@ -101,10 +102,13 @@ Ext.define('EatSense.controller.Spot', {
 	*	@param updatedSpot
 	*		A spot where only updated fields are set. (raw data)
 	*/
-	updateSpotIncremental: function(updatedSpot) {
+	updateSpotIncremental: function(action, updatedSpot) {
 		console.log('updateSpotIncremental');
 		//load corresponding spot
-		var dirtySpot, index, spotStore = this.getSpotsview().getStore();
+		var 	dirtySpot, 
+				index, 
+				spotStore = this.getSpotsview().getStore();
+				// spotData = updatedSpot.getData();
 		
 		index = spotStore.findExact('id', updatedSpot.id);
 
@@ -120,7 +124,7 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 	/**
-	*	Updates spotdetail view with when a checkIn change at this spot occurs.
+	*	Updates spotdetail view when a checkIn change at this spot occurs.
 	*
 	*/
 	updateSpotDetailCheckInIncremental: function(action, updatedCheckIn) {
@@ -130,7 +134,8 @@ Ext.define('EatSense.controller.Spot', {
 				orders = Ext.StoreManager.lookup('orderStore').getData(),
 				dirtyCheckIn,
 				index,
-				listElement;
+				listElement,
+				updatedCheckIn = Ext.create('EatSense.model.CheckIn', updatedCheckIn);
 				
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
 		if(!detail.isHidden() && me.getActiveSpot()) {
@@ -141,11 +146,11 @@ Ext.define('EatSense.controller.Spot', {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					index = store.indexOf(dirtyCheckIn);
 					if(dirtyCheckIn) {
-						// store.remove(dirtyCheckIn);
-						// store.add(updatedCheckIn);
 						//update existing checkin
 						dirtyCheckIn.setData(updatedCheckIn.getData());
-						me.updateCustomerStatusPanel(updatedCheckIn, orders.items);
+
+						//update status
+						me.updateCustomerStatusPanel(updatedCheckIn);
 						//TODO? refresh only the active checkin?
 						me.getSpotDetailCustomerList().refresh();
 
@@ -163,24 +168,30 @@ Ext.define('EatSense.controller.Spot', {
 						//clear status panel if deleted checkin is activeCustomer
 						if(updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
 							me.updateCustomerStatusPanel();
+							//update displayed status and checkInTime
+							// statusLabel.getTpl().overwrite(statusLabel.element, {});
+							// checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {});	
 						}						
 					} else {
 						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
 					}
 				}
-				
+
 			}
 		}
 	},
 	/**
-	*	Updates spotdetail view with when a new order arrives.
+	*	Updates spotdetail view when a new order arrives.
 	*
 	*/
 	updateSpotDetailOrderIncremental: function(action, updatedOrder) {
 		var		me = this,
 				detail = me.getSpotDetail(),
 				store = me.getSpotDetailOrderList().getStore(),
-				oldOrder;
+				oldOrder,
+				statisticsLabel = detail.down('#total'),
+				sum = 0,
+				totalLabel = detail.down('#total');
 		//Be careful! updatedOrder is not yet a model
 
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
@@ -196,6 +207,9 @@ Ext.define('EatSense.controller.Spot', {
 					}
 					store.add(updatedOrder);
 				}
+
+				//update total sum 
+				me.updateCustomerTotal(store.getData().items);
 			}
 		}
 	},
@@ -208,10 +222,15 @@ Ext.define('EatSense.controller.Spot', {
 		console.log('showSpotDetails');
 		var		me = this,
 				loginCtr = this.getApplication().getController('Login'),
+				messageCtr = this.getApplication().getController('Message'),
 				detail = me.getSpotDetail(),
 				checkInList = detail.down('#checkInList'),
 				data = button.getParent().getRecord(),
 				checkInStore = Ext.StoreManager.lookup('checkInStore');
+
+		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
+		// messageCtr.on('eatSense.checkin', this.updateCustomerStatusPanel, this);
+		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 
 		//load checkins and orders and set lists
 		checkInStore.load({
@@ -240,42 +259,64 @@ Ext.define('EatSense.controller.Spot', {
 	*	Updates the status panel of selected customer in spotdetail view.
 	*	@param checkIn
 	*		contains the relevant information. I none provided fields will be reseted.
-	*	@param orders
-	*		all orders for the current checkin
 	*/
-	updateCustomerStatusPanel: function(checkIn, orders) {
+	updateCustomerStatusPanel: function(checkIn) {
 		var 	me = this,
 				detail = me.getSpotDetail(),
 				statusLabel = detail.down('#statusLabel'),
-				statisticsLabel = detail.down('#statistics'),
+				checkInTimeLabel = detail.down('#checkInTime'),
+				totalLabel = detail.down('#total'),
+				sum = 0;
+
+		if(checkIn) {
+			//render order status					
+			statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
+			checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {'checkInTime': checkIn.get('checkInTime')});
+			
+		} else {
+			//pass dummy objects with no data
+			statusLabel.getTpl().overwrite(statusLabel.element, {status: '-'});
+			checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {'checkInTime' : ''});
+		}
+	},
+	/**
+	*	Updates the displayed total sum of selected customer in spotdetail view.
+	*	@param orders
+	*		all orders for the current checkin
+	*/
+	updateCustomerTotal: function(orders) {
+		var 	me = this,
+				detail = me.getSpotDetail(),
+				totalLabel = detail.down('#total'),
 				sum = 0;
 
 		if(orders) {
+			//if orders exist calculate total sum 
 			try {
 				Ext.each(orders, function(o) {
-					sum += o.calculate();
+					//TODO only take orders with correct status into account?
+					if(o.get('status') != Karazy.constants.Order.CANCELED) {
+						sum += o.calculate();
+					}					
 				});
 				sum = Math.round(sum*100)/100;
 			} catch(e) {
 				console.log('failed calculating total price ' + e);
 				sum = 0
 			}
-		}
-
-		if(checkIn) {
-			//render order status					
-			statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
-			statisticsLabel.getTpl().overwrite(statisticsLabel.element, {'checkIn': checkIn.getData(), 'total': sum});
+			totalLabel.getTpl().overwrite(totalLabel.element, {'total': sum});	
 		} else {
-			//pass dummy objects with no data
-			statusLabel.getTpl().overwrite(statusLabel.element, {status: '-'});
-			statisticsLabel.getTpl().overwrite(statisticsLabel.element, {'checkIn' : {checkInTime: ''}, total: '0'});
+			totalLabel.getTpl().overwrite(totalLabel.element, {'total': '0'});
 		}
-
 	},
 	/**
 	*	Shows orders of a customer.
 	*	Fired when customer in checkInList in spot detail view is tapped.
+	*	Loads all orders based on the passed checkin.
+	*
+	*	@param record
+	*			selected checkIn
+	*
 	*/
 	//itemTap
 	// showCustomerOrders: function(dataview, index, target, record) {
@@ -302,7 +343,8 @@ Ext.define('EatSense.controller.Spot', {
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 		
-			 		this.updateCustomerStatusPanel(record, records);
+			 		this.updateCustomerStatusPanel(record);
+			 		this.updateCustomerTotal(records);
 			 	} else {
 			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderLoading'), Ext.emptyFn);
 			 	}				
@@ -357,7 +399,7 @@ Ext.define('EatSense.controller.Spot', {
     	    	console.log('order confirmed');
     	    },
     	    failure: function(response) {
-    	    					order.set('status', Karazy.constants.Order.PLACED);
+    	    	order.set('status', Karazy.constants.Order.PLACED);
 				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
 	   	    }
 		});
@@ -381,22 +423,38 @@ Ext.define('EatSense.controller.Spot', {
 
 		//update order status
 		order.set('status', Karazy.constants.Order.CANCELED);
-		// order.getData(true);
 		//button.disable();
 
 		//persist changes
-		order.save({
-			params: {
-				pathId: loginCtr.getAccount().get('businessId'),
-			},
-			success: function(record, operation) {
-				console.log('order canceled');
-			},
-			failure: function(record, operation) {
-				order.set('status', prevStatus);
-				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
-			}
+		// order.save({
+		// 	params: {
+		// 		pathId: loginCtr.getAccount().get('businessId'),
+		// 	},
+		// 	success: function(record, operation) {
+		// 		console.log('order canceled');
+		// 		me.updateCustomerTotal(orderStore.getData().items);
+		// 	},
+		// 	failure: function(record, operation) {
+		// 		order.set('status', prevStatus);
+		// 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+		// 	}
+		// });
 
+		//same approach as in eatSense App. Magic lies in getRawJsonData()
+		//still kind of a workaround
+		Ext.Ajax.request({				
+    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
+    	    method: 'PUT',    	    
+    	    jsonData: order.getRawJsonData(),
+    	    scope: this,
+    	    success: function(response) {
+    	    	console.log('order confirmed');
+    	    	me.updateCustomerTotal(orderStore.getData().items);
+    	    },
+    	    failure: function(response) {
+    	    	order.set('status', prevStatus);
+				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+	   	    }
 		});
 	},
 	/**
@@ -411,11 +469,17 @@ Ext.define('EatSense.controller.Spot', {
 	*	This is a place to cleanup the panel.
 	*/
 	hideSpotDetail: function(spotdetail) {
+		var		messageCtr = this.getApplication().getController('Message');
+
 		this.getSpotDetailCustomerList().deselectAll();	
 		this.getSpotDetailOrderList().getStore().removeAll();
 		this.updateCustomerStatusPanel();
+		this.updateCustomerTotal();
 		this.setActiveSpot(null);
 		this.setActiveCustomer(null);
+
+		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
+		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 	}
 
 })

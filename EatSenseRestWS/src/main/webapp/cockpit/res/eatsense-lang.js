@@ -14,6 +14,7 @@ var translation = {
 		"success" : "Erfolg",
 		"yes" : "Ja",
 		"no" : "Nein",
+		"comment" : "Kommentar",
 		//login
 		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",

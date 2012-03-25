@@ -11,11 +11,13 @@ Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
 	name : 'EatSense',
-	controllers : ['Login','Spot'],
+	controllers : ['Login','Spot', 'Message'],
 	models : ['Account','Spot', 'Business', 'CheckIn', 'Order', 'Product', 'Choice', 'Option'],
 	views : ['Login', 'ChooseBusiness', 'Main'], 
 	stores : ['Account', 'AppState',  'Spot', 'Business', 'CheckIn', 'Order' ],
 	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement'],
+	//used on iOS devices for homescreen
+	icon: 'res/images/icon.png',
 	init : function() {
 		console.log('init');
 	},

@@ -289,14 +289,15 @@ Ext.define('EatSense.controller.Login', {
 	*
 	*/
 	openChannel: function() {
-		var		me = this;
+		var		me = this,
+				messageCtr = this.getApplication().getController('Message');
 
 		me.requestNewToken(function(newToken) {
 			Karazy.channel.createChannel( {
 				token: newToken, 
-				messageHandler: me.processMessages,
+				messageHandler: messageCtr.processMessages,
 				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: me,
+				messageHandlerScope: messageCtr,
 				requestTokenHandlerScope: me
 			});
 		});
@@ -308,21 +309,21 @@ Ext.define('EatSense.controller.Login', {
 	*		The raw string message(s) which will be parsed as JSON.
 	*		This could be a single object or an array.
 	*/
-	processMessages: function(rawMessages) {
-		var 	message = Ext.JSON.decode(rawMessages, true),
-				ctr;
+	// processMessages: function(rawMessages) {
+	// 	var 	message = Ext.JSON.decode(rawMessages, true),
+	// 			ctr;
 
-		if(Ext.isArray(message)) {
-				for(index = 0; index < message.length; index++) {
-				if(message[index]) {
-					this.routeMessage(message[index]);
-				}	
-			}
-		}
-		else if(message) {
-			this.routeMessage(message);
-		}				
-	},
+	// 	if(Ext.isArray(message)) {
+	// 			for(index = 0; index < message.length; index++) {
+	// 			if(message[index]) {
+	// 				this.routeMessage(message[index]);
+	// 			}	
+	// 		}
+	// 	}
+	// 	else if(message) {
+	// 		this.routeMessage(message);
+	// 	}				
+	// },
 	/**
 	*	Processes a single message delivered.
 	*	Delegates to the responsible method.
@@ -333,35 +334,37 @@ Ext.define('EatSense.controller.Login', {
 	*			action	- an action like update, new ...
 	*			content - the data
 	*/
-	routeMessage: function(message) {
-		var 	ctr;
+	// routeMessage: function(message) {
+	// 	var 	ctr;
 
-		if(!message) {
-			console.log('param is no message');
-			return;
-		}	
+	// 	if(!message) {
+	// 		console.log('param is no message');
+	// 		return;
+	// 	}	
 
-		switch(message.type.toLowerCase()) {
-			case 'spot': 
-				ctr = this.getApplication().getController('Spot');
-				if(message.action == 'update') {
-					ctr.updateSpotIncremental(message.content);
-				}
-				break;
-			case 'checkin':
-				ctr = this.getApplication().getController('Spot');
-				ctr.updateSpotDetailCheckInIncremental(message.action, Ext.create('EatSense.model.CheckIn',message.content));
-				break;
-			case 'order':
-				ctr = this.getApplication().getController('Spot');
-				ctr.updateSpotDetailOrderIncremental(message.action, message.content);
-				break;
-			case 'bill':
+	// 	switch(message.type.toLowerCase()) {
+	// 		case 'spot': 
+	// 			ctr = this.getApplication().getController('Spot');
+	// 			if(message.action == 'update') {
+	// 				ctr.updateSpotIncremental(message.content);
+	// 			}
+	// 			break;
+	// 		case 'checkin':
+	// 			ctr = this.getApplication().getController('Spot');
+	// 			ctr.updateSpotDetailCheckInIncremental(message.action, Ext.create('EatSense.model.CheckIn',message.content));
+	// 			break;
+	// 		case 'order':
+	// 			ctr = this.getApplication().getController('Spot');
+	// 			ctr.updateSpotDetailOrderIncremental(message.action, message.content);
+	// 			break;
+	// 		case 'bill':
 
-				break;
-			default: console.log('unmapped message.type');
-		}
-	},
+	// 			break;
+	// 		default: console.log('unmapped message.type');
+	// 	}
+
+
+	// },
 
 	/**
 	*	Loads all businesses (e. g. restaurants or hotels) this user account is assigned to.
