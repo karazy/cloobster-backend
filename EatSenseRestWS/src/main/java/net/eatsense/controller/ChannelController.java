@@ -2,7 +2,6 @@ package net.eatsense.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -114,28 +113,13 @@ public class ChannelController {
 	 */
 	public String sendMessage(String clientId, String type, String action, Object content) throws IOException, JsonGenerationException, JsonMappingException  {
 		MessageDTO messageData = new MessageDTO();
-		String messageString;
+
 		messageData.setAction(action);
 		messageData.setType(type);
 		
 		messageData.setContent(content);
 		
-			try {
-				messageString = mapper.writeValueAsString(messageData);
-			} catch (JsonGenerationException e) {
-				throw e;
-			} catch (JsonMappingException e) {
-				throw e;
-			} catch (IOException e) {
-				throw e;
-			}
-		if(messageString.length() > 32786)
-			throw new IllegalArgumentException("data package too long, reduce content size");
-		
-		ChannelMessage message = new ChannelMessage(clientId, messageString);
-		channelService.sendMessage(message);
-		
-		return messageString;
+		return sendMessageJson(clientId, messageData);
 	}
 	
 	/**
@@ -156,15 +140,16 @@ public class ChannelController {
 			
 		String messageString;
 		
-			try {
-				messageString = mapper.writeValueAsString(messageData);
-			} catch (JsonGenerationException e) {
-				throw e;
-			} catch (JsonMappingException e) {
-				throw e;
-			} catch (IOException e) {
-				throw e;
-			}
+		try {
+			// Try to map the message data as a JSON string.
+			messageString = mapper.writeValueAsString(messageData);
+		} catch (JsonGenerationException e) {
+			throw e;
+		} catch (JsonMappingException e) {
+			throw e;
+		} catch (IOException e) {
+			throw e;
+		}
 		if(messageString.length() > 32786)
 			throw new IllegalArgumentException("data package too long, reduce content size");
 		
@@ -208,6 +193,15 @@ public class ChannelController {
 		
 	}
 	
+	/**
+	 * Send a list of messages as one package over the channel using a JSON array.
+	 * 
+	 * @param restaurantId
+	 * @param messages
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	public void sendMessagesToAllClients(Long restaurantId, List<MessageDTO> messages) throws JsonGenerationException, JsonMappingException, IOException  {
 		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 		String lastMessage = "";
@@ -218,6 +212,12 @@ public class ChannelController {
 		
 	}
 
+	/**
+	 * Called by the Channel API, after a channel was disconnected.<br>
+	 * Unsubscribe this channel, from existing message subscriptions.
+	 * 
+	 * @param request
+	 */
 	public void handleDisconnected(HttpServletRequest request) {
 		String clientId;
 		try {
@@ -231,12 +231,17 @@ public class ChannelController {
 	}
 	
 	
+	/**
+	 * Called by the Channel API, after a channel was connected.<br>
+	 * Subscribe this channel for updates of this business.
+	 * 
+	 * @param request
+	 */
 	public void handleConnected(HttpServletRequest request) {
 		String clientId;
+		
 		try {
-			clientId = channelService.parsePresence(request).clientId();
-			
-			
+			clientId = channelService.parsePresence(request).clientId();		
 		} catch (IOException e) {
 			logger.error("could not parse presence", e);
 			throw new RuntimeException(e);
@@ -267,6 +272,12 @@ public class ChannelController {
 		
 	}
 	
+	/**
+	 * Get the Restaurant entity by the id saved in the given clientId string.
+	 * 
+	 * @param clientId
+	 * @return Restaurant entity
+	 */
 	private Restaurant parseRestaurant(String clientId) {
 		// retrieve the restaurantId appended at the front of the client id seperated with a "|"
 		Long restaurantId = Long.valueOf(clientId.substring(0, clientId.indexOf("|") ));
@@ -276,6 +287,12 @@ public class ChannelController {
 		return restaurant;
 	}
 
+	
+	/**
+	 * Save the given client as a listener to updates for this business.
+	 * 
+	 * @param clientId
+	 */
 	public void subscribeToRestaurant( String clientId) {
 		Restaurant restaurant = parseRestaurant(clientId);
 		
