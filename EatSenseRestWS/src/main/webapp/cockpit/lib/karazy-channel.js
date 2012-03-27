@@ -23,7 +23,7 @@ Karazy.channel = (function() {
 	//scope in which to execute tokenRequestHandler function
 	var scopeTokenRequestHandler;
 	//indicates if the client forced a close and won't try to request a new token.
-	var forcedClose;
+	var timedOut;
 
 	function onOpened() {
 		console.log('channel opened');
@@ -36,16 +36,18 @@ Karazy.channel = (function() {
 
 	function onError(error) {		
 		console.log('channel error ' + (error && error.description) ? error.description : "");
-		// if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			// requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-		// }		
+		if(error && error.code == '401') {
+			timedOut = true;
+		}	
 	};
 
 	function onClose() {
 		console.log('channel closed');
-		// if(forcedClose === false && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			// requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-		// }
+		if(timedOut === true && Karazy.util.isFunction(requestTokenHandlerFunction)) {
+			console.log('requesting new token');
+			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
+			timedOut = false;
+		}
 	};
 
 	function setupChannel(token) {
@@ -84,7 +86,7 @@ Karazy.channel = (function() {
 				(options.requestTokenHandlerScope) ? scopeTokenRequestHandler = options.requestTokenHandlerScope : this;
 			};
 
-			// forcedClose = false;
+			timedOut = false;
 
 			setupChannel(options.token);
 		},
@@ -108,7 +110,6 @@ Karazy.channel = (function() {
 		* Closes the cannel and prevents a new token request.
 		*/
 		closeChannel: function() {
-			// forcedClose = true;
 			if(socket) {
 				socket.close();
 			};			

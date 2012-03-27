@@ -116,15 +116,32 @@ Ext.define('EatSense.controller.Login', {
 						spotCtr.loadSpots();
 						me.openChannel();
 					},
-					failure: function(record, operation){					
+					failure: function(record, operation) {					
 						//error verifying credentials, maybe account changed on server or server ist not aaccessible
 						me.resetDefaultAjaxHeaders();
+						me.resetAccountProxyHeaders();
+
 						Ext.create('EatSense.view.Login');
 						//TODO handle 401 unauthorized
 
 						me.getLoginField().setValue(account.get('login'));
 
-						Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('restoreCredentialsErr')); 
+
+						if(operation.error) {
+							//not authorized
+							if(operation.error.status == "401" || operation.error.status == "403") {
+								errorMessage = i18nPlugin.translate('restoreCredentialsErr');
+								//login data not valid. delete
+								accountLocalStore.removeAll();
+								accountLocalStore.sync();
+							} else if (operation.error.status == "404") {
+								errorMessage = i18nPlugin.translate('resourceNotAvailable');
+							}
+						} 
+
+						(!errorMessage || errorMessage == "") ?	errorMessage = i18nPlugin.translate('restoreCredentialsErr') : errorMessage;
+
+						Ext.Msg.alert(i18nPlugin.translate('error'), errorMessage); 
 					}
 				});							   			   		 	   		
 		   	 } else {
@@ -132,7 +149,6 @@ Ext.define('EatSense.controller.Login', {
 		   	 	accountLocalStore.removeAll();
 		   	 	Ext.create('EatSense.view.Login');	
 		   	 }
-
 	   	  } catch (e) {
 	   	 	console.log('Failed restoring cockpit state.');
 	   		accountLocalStore.removeAll();	
@@ -154,7 +170,8 @@ Ext.define('EatSense.controller.Login', {
 				login = this.getLoginField().getValue(),
 				password = this.getPasswordField().getValue(),				
 				spotCtr = this.getApplication().getController('Spot'),
-				me = this;
+				me = this,
+				errorMessage;
 
 		if(Ext.String.trim(login).length == 0 || Ext.String.trim(password).length == 0) {
 			
@@ -186,7 +203,19 @@ Ext.define('EatSense.controller.Login', {
 			},
 			failure: function(record, operation){
 				console.log('failure');
-				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('wrongCredentials')); 
+				me.resetAccountProxyHeaders();
+				me.resetDefaultAjaxHeaders();
+				if(operation.error) {
+					//not authorized
+					if(operation.error.status == "401" || operation.error.status == "403") {
+						errorMessage = i18nPlugin.translate('wrongCredentials');
+					} else if (operation.error.status == "404") {
+						errorMessage = i18nPlugin.translate('resourceNotAvailable');
+					}
+				} 
+
+				(!errorMessage || errorMessage == "") ?	errorMessage = i18nPlugin.translate('wrongCredentials') : errorMessage;			
+				Ext.Msg.alert(i18nPlugin.translate('error'), errorMessage); 
 			}
 		});
 	},
@@ -279,7 +308,7 @@ Ext.define('EatSense.controller.Login', {
 		       	callback(token);
 		    }, 
 		    failure: function(response) {
-		    	
+		    	Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('channelTokenError')); 
 		    }
 		});
 	},

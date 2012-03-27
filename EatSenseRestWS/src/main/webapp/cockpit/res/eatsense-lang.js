@@ -9,6 +9,8 @@ var translation = {
 		"error" : "Fehler",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
+		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
+		"channelTokenError" : "Updates im Hintegrund nicht funktionsfähig.",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
@@ -21,7 +23,7 @@ var translation = {
 		"savePasswordToggle" : "Automatisch<br/>einloggen?",
 		"logoutQuestion" : "Wirklich ausloggen?",
 		"noBusinessAssigned" : "Dein Benutzer ist keinem Betrieb zugewiesen.",
-		"restoreCredentialsErr" : "Login mit gespeicherten Daten fehlgeschlagen",
+		"restoreCredentialsErr" : "Login mit gespeicherten Daten fehlgeschlagen.",
 		"chooseStore" : "Filiale auswählen",
 		//spot
 		"errorSpotLoading" : "Laden der Daten fehlgeschlagen!",

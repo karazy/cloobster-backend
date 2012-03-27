@@ -1,6 +1,6 @@
 /**
 *	This controller handles push messages send from the server
-*	and fires events when the arrive. Anyone componente interested in thos events
+*	and fires events when they arrive. Any component interested in those events
 * 	can listen.
 */
 Ext.define('EatSense.controller.Message', {
@@ -9,9 +9,6 @@ Ext.define('EatSense.controller.Message', {
 
 	},
 
-	init: function() {
-
-	},
 
 	/**
 	*	Called after receiving a channel message.
@@ -38,7 +35,7 @@ Ext.define('EatSense.controller.Message', {
 	/**
 	*	Fires events to notify listeners about a new message.
 	*	Naming schmeme: eatSense.messageType
-	*   where message type can be something like spot
+	*   where message type can be something like spot, order ...
 	*
 	*	The fired event submits two additional parameters
 	*	1. action type (e. g. update, new , delete)
