@@ -3,6 +3,7 @@ package net.eatsense.restws;
 import java.util.Calendar;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,8 @@ public class CronResource {
 	 */
 	@GET
 	@Path("cleanintents")
-	public void cleanIntents() {
+	@Produces("text/plain")
+	public String cleanIntents() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.MINUTE, -10);			
 		logger.info("JOB: Cleaning old checkin intents ...");
@@ -39,5 +41,6 @@ public class CronResource {
 				.fetchKeys();
 		
 		checkInRepo.getOfy().delete(checkins);
+		return "Deleted old intents";
 	}
 }
