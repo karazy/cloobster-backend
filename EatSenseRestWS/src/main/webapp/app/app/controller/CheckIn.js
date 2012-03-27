@@ -445,11 +445,14 @@ Ext.define('EatSense.controller.CheckIn', {
 				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-				    	 me.getApplication().getController('Menu').models.menudata = records;						    	 			    	 
+				    	 me.getApplication().getController('Menu').models.menudata = records;				    					    	 
 			    	 }
 			     }
 			 });
 			 
+			//always show menuoverview on first access
+			 //TODO schoener loesen
+			 menu.getComponent('menuCardPanel').setActiveItem(0);
 			 menu.hideBackButton();
 	    	 main.switchAnim('left');
 	    	 main.setActiveItem(lounge);
@@ -563,7 +566,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 */
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
-		//TODO check status transsions
+		//TODO check status transitions
 				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
 			this.getMenuTab().disable();

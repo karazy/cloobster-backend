@@ -16,7 +16,7 @@ Ext.define('EatSense.view.MenuOverview', {
 			type : 'fit',
 			ui: 'round',
 			allowDeselect: true,
-			itemTpl : '<div>{title}</div>',
+			itemTpl : '{title}',
 			listeners: {
 				select : function(dv, index, target, record, e, eOpts) {					
 					Ext.defer((function() {

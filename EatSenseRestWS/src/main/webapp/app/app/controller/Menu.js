@@ -159,7 +159,7 @@ Ext.define('EatSense.controller.Menu', {
 			 record.choices().each(function(_choice) {
 				 var choice = _choice;				 			 
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
+				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text); //+'<hr/>');
 				 //single choice. Create Radio buttons
 				 var optionType = '';
 				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
@@ -201,9 +201,9 @@ Ext.define('EatSense.controller.Menu', {
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 },this);
-			 choicesPanel.add( {
-				 html: '<hr/>'
-			 });
+//			 choicesPanel.add( {
+//				 html: '<hr/>'
+//			 });
 		 }
 		 
 		 
