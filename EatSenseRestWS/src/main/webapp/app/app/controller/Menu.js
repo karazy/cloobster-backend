@@ -291,7 +291,7 @@ Ext.define('EatSense.controller.Menu', {
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
 			
 			Ext.Ajax.request({				
-	    	    url: Karazy.config.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/',
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
 	    	    method: 'POST',    	    
 	    	    params: {
 	    	    	'checkInId' : activeCheckIn.get('userId'),

@@ -11,10 +11,10 @@ Ext.define('EatSense.model.Spot', {
 			name : 'barcode',
 			type : 'string'
 		}, {
-			name : 'restaurant',
+			name : 'business',
 			type : 'string'
 		}, {
-			name : 'restaurantId',
+			name : 'businessId',
 			type : 'string'
 		}, {
 			name : 'name',
@@ -31,7 +31,7 @@ Ext.define('EatSense.model.Spot', {
 		}],
 		proxy : {
 			type : 'rest',
-			url : '/restaurants/{pathId}/spots/'
+			url : '/b/businesses/{pathId}/spots/'
 		}
 	}
 });

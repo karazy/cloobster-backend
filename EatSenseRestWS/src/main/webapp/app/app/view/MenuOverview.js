@@ -1,5 +1,5 @@
 /**
- * Displays the restaurants menu(s).
+ * Displays the businesses menu(s).
  * E. g.
  * Burgers, Drinks, Steaks, Salads
  * 

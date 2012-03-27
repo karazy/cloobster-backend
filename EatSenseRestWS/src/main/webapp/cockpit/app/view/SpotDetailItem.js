@@ -18,7 +18,6 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		name: {		
 			cls: 'spotdetailitem-order',	
 			tpl: new Ext.XTemplate(
-			// "<div class='orderListItem'>" +
 				"<h2 >{Product.name}</h2>" +
 				"<div class='price'>{amount} - {Product.price_calculated}€</div>" +
 				"<div class='choices'>"+
@@ -38,7 +37,6 @@ Ext.define('EatSense.view.SpotDetailItem', {
 					"<p>"+Karazy.i18n.translate('comment')+": {comment}</p>" +
 					"</tpl>" +
 				"</div>" 
-			// "</div>"
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
 				//we need to pass the product as the choices object in this context is raw data

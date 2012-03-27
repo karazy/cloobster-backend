@@ -115,17 +115,17 @@ Ext.define('EatSense.controller.CheckIn', {
     	 };
     	 
     	 /*
-    	  * Sets up all necessary store which depend on the restaurant id.
+    	  * Sets up all necessary stores which depend on the business id.
     	  * This method is called once after checkin was successful.
     	  */
-    	 this.createStores = function(restaurantId) {
+    	 this.createStores = function(businessId) {
     		 console.log('create menu store');
     		 var menusStore =	 Ext.create('Ext.data.Store', {
 	 			   model: 'EatSense.model.Menu',
 	 			   storeId: 'menuStore',
 	 			   proxy: {
 	 				   type: 'rest',
-	 				   url : '/restaurants/'+restaurantId+'/menus',
+	 				   url : '/c/businesses/'+businessId+'/menus',
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}
@@ -144,7 +144,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   storeId: 'productStore',	 			   
 	 			   proxy: {
 	 				   type: 'rest',
-	 				   url : '/restaurants/'+restaurantId+'/products',
+	 				   url : '/c/businesses/'+businessId+'/products',
 	 				   reader: {
 	 					   type: 'json'
 	 			   		},
@@ -175,7 +175,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   proxy: {
 	 				   type: 'rest',
 	 				  enablePagingParams: false,
-	 				   url : '/restaurants/'+restaurantId+'/orders',
+	 				   url : '/c/businesses/'+businessId+'/orders',
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}
@@ -200,7 +200,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	 			   proxy: {
 	 				   type: 'rest',
 	 				  enablePagingParams: false,
-	 				   url : '/restaurants/'+restaurantId+'/bills',
+	 				   url : '/c/businesses/'+businessId+'/bills',
 	 				   reader: {
 	 					   type: 'json'
 	 			   		}
@@ -272,8 +272,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	   	 }
 		
 		checkIn.set('spotId', options.model.get('barcode'));
-		checkIn.set('restaurantName', options.model.get('restaurant'));
-		checkIn.set('restaurantId', options.model.get('restaurantId'));
+		checkIn.set('businessName', options.model.get('business'));
+		checkIn.set('businessId', options.model.get('businessId'));
 		checkIn.set('spot', options.model.get('name'));
 		checkIn.set('status','INTENT');
 		
@@ -429,15 +429,15 @@ Ext.define('EatSense.controller.CheckIn', {
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
 		
-		this.createStores(this.models.activeCheckIn.get('restaurantId'));
+		this.createStores(this.models.activeCheckIn.get('businessId'));
 		
 		 var menu = this.getMenuview(), 
 		 lounge = this.getLoungeview(),
 		 main = this.getMain(), 
-		 restaurantId = Ext.String.trim(this.models.activeCheckIn.data.restaurantId), 
+		 businessId = Ext.String.trim(this.models.activeCheckIn.data.businessId), 
 		 me = this; 
 		 
-		 if(restaurantId.toString().length != 0) {
+		 if(businessId.toString().length != 0) {
 			 this.getMenulist().getStore().load({
 				 scope   : this,
 				 params: {

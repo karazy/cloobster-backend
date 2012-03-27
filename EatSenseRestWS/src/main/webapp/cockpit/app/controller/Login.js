@@ -450,7 +450,7 @@ Ext.define('EatSense.controller.Login', {
 	/**
 	*	Sets the businessId in account the user wants to log in for.
 	*	This Id will be used for calls to the webservice.
-	* 	e.g. /restaurants/{id}/spots
+	* 	e.g. /businesses/{id}/spots
 	*	
 	*/
 	setBusinessId: function(dv, index, target, record) {

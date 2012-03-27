@@ -7,10 +7,10 @@ Ext.define('EatSense.model.CheckIn', {
 			name : 'status',
 			type : 'string'
 		}, {
-			name : 'restaurantName',
+			name : 'businessName',
 			type : 'string'
 		}, {
-			name : 'restaurantId',
+			name : 'businessId',
 			type : 'string'
 		}, {
 			name : 'spot',
