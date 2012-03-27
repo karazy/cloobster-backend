@@ -10,7 +10,7 @@ var translation = {
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
 		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
-		"channelTokenError" : "Updates im Hintegrund nicht funktionsfähig.",
+		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",

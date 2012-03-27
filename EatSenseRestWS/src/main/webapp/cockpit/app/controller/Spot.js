@@ -153,11 +153,14 @@ Ext.define('EatSense.controller.Spot', {
 						//update existing checkin
 						dirtyCheckIn.setData(updatedCheckIn.getData());
 
-						//update status
-						me.updateCustomerStatusPanel(updatedCheckIn);
-						//TODO? refresh only the active checkin?
+						//always refresh list to flag incoming orders on non active customers
 						me.getSpotDetailCustomerList().refresh();
 
+						if(me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
+							//update status only if this is the active customer
+							me.updateCustomerStatusPanel(updatedCheckIn);
+						}
+												
 						//BUGGY
 						// listElement = me.getSpotDetailCustomerList().getAt(index);
 						// listElement.getTpl().overwrite(listElement.element, dirtyCheckIn);
@@ -177,7 +180,6 @@ Ext.define('EatSense.controller.Spot', {
 						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
 					}
 				}
-
 			}
 		}
 	},
@@ -233,7 +235,6 @@ Ext.define('EatSense.controller.Spot', {
 				checkInStore = Ext.StoreManager.lookup('checkInStore');
 
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
-		// messageCtr.on('eatSense.checkin', this.updateCustomerStatusPanel, this);
 		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 
 		//load checkins and orders and set lists
