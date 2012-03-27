@@ -42,7 +42,7 @@ public class AccountResource {
 	@GET
 	@Path("{login}")
 	@Produces("application/json; charset=UTF-8")
-	//@RolesAllowed({"restaurantadmin", "user"})
+	@RolesAllowed({"user"})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
 		Account account = null;
 		AccountDTO accountData = null;

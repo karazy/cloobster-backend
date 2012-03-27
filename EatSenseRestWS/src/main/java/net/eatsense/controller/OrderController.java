@@ -121,6 +121,7 @@ public class OrderController {
 		order.setAmount(orderData.getAmount());
 		
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
+		
 		if(violations.isEmpty()) {
 			// save order
 			if( orderRepo.saveOrUpdate(order) == null )
@@ -163,7 +164,6 @@ public class OrderController {
 				try {
 					channelCtrl.sendMessagesToAllClients(restaurantId, messages);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -265,6 +265,14 @@ public class OrderController {
 		return transform.ordersToDto(getOrdersBySpot( businessId, spotId, checkInId));
 	}
 	
+	/**
+	 * Return all orders not in the cart for the given spot.
+	 * 
+	 * @param restaurantId
+	 * @param spotId
+	 * @param checkInId
+	 * @return list of the orders found
+	 */
 	public List<Order> getOrdersBySpot(Long restaurantId, Long spotId, Long checkInId) {
 		// Check if the restaurant exists.
 		Restaurant restaurant = restaurantRepo.getById(restaurantId);
@@ -290,8 +298,14 @@ public class OrderController {
 		return orders;
 	}
 	
-	
-	
+	/**
+	 * Create a new Order entity with status CART and save in the datastore.
+	 * 
+	 * @param restaurantId
+	 * @param checkInId
+	 * @param order
+	 * @return id of the order
+	 */
 	public Long placeOrder(Long restaurantId, String checkInId, OrderDTO order) {
 		Long orderId = null;
 		
@@ -309,6 +323,7 @@ public class OrderController {
 			logger.error("Order cannot be placed, unexpected order status: "+order.getStatus());
 			return null;
 		}
+		
 		// Check if the restaurant exists.
 		Restaurant restaurant = restaurantRepo.getById(restaurantId);
 		if(restaurant == null) {
@@ -380,6 +395,17 @@ public class OrderController {
 
 	
 
+	/**
+	 * Create a new Order entity with the given data and save it in the datastore;
+	 * 
+	 * @param restaurant
+	 * @param checkIn
+	 * @param product
+	 * @param amount
+	 * @param choices
+	 * @param comment
+	 * @return key of the new entity
+	 */
 	public Key<Order> createAndSaveOrder(Key<Restaurant> restaurant, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
 		Key<Order> orderKey = null;
 		Order order = new Order();
@@ -484,7 +510,7 @@ public class OrderController {
 			logger.info("{} status already, set to {}", order.getStatus());
 			return orderData;
 		}
-		// Check if 
+		// Check that status RECEIVED will not be overwritten with an earlier status, only with CANCELED
 		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELED)) {
 			logger.error("{} status RECEIVED can only be set to CANCELLED, unable to update", order.getKey());
 			return null;
@@ -503,9 +529,9 @@ public class OrderController {
 			if( orderRepo.saveOrUpdate(order) == null )
 				throw new RuntimeException("order could not be updated, id: " + orderId);
 
+			// Get all pending requests sorted by oldest first.
 			List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
-			
-			
+						
 			for (Request request : requests) {
 				// delete the request for this order
 				if( request.getType() == RequestType.ORDER &&  request.getObjectId().equals(order.getId())) {
@@ -514,6 +540,7 @@ public class OrderController {
 			}
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 			
+			// Add a message with updated order status to the message package.
 			messages.add(new MessageDTO("order","update",orderData));
 			
 			// If we have an older request in the database ...
@@ -522,21 +549,23 @@ public class OrderController {
 				
 //				requestRepo.delete(requests.get(0));
 				String newStatus = null;
+				// Save the status of the next request in line, if there is one.
 				if(requests.size() > 1 ) {
 					newStatus = requests.get(1).getStatus();
 				} else if(!requests.get(0).getStatus().equals(OrderStatus.PLACED)) {
-					//all pending orders are processed
+					//all pending orders are processed for this spot, 
 					newStatus = CheckInStatus.CHECKEDIN.toString();
 				}
 					
 				if(!requests.get(0).getStatus().equals(newStatus)) {
-					// Update the status of the checkIn
+					// Update the status of the checkIn in the datastore.
 					checkIn.setStatus(CheckInStatus.valueOf(newStatus));
 					checkInRepo.saveOrUpdate(checkIn);
 					
+					// Add a message with updated checkin status to the package.
 					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
 					
-					// Send message to notify clients over their channel
+					// Add a message with updated spot status to the package.
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
 					spotData.setStatus(newStatus);
