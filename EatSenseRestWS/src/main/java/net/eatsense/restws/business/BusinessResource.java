@@ -32,6 +32,16 @@ public class BusinessResource {
 		
 		return checkInsResource;
 	}
+	
+	@Path("spots")
+	public SpotsResource getSpotsResource() {
+		SpotsResource spotsResource = resourceContext.getResource(SpotsResource.class);
+		
+		spotsResource.setBusinessId(businessId);
+		
+		return spotsResource;
+	}
+
 
 	public void setBusinessId(Long businessId) {
 		this.businessId = businessId;
