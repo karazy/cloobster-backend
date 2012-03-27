@@ -42,7 +42,6 @@ Ext.define('EatSense.view.Login', {
 				{
 					xtype : 'togglefield',
 					name : 'savePasswordToggle',
-					// labelAlign: 'top',
 					value : 0,
 					labelWidth: '40%',
 					width: '100%',

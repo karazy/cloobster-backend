@@ -1,3 +1,7 @@
+/**
+*	Displays details of a spot.
+*	Details are checkIns, orders and statistics.
+*/
 Ext.define('EatSense.view.SpotDetail', {
 	extend: 'Ext.Panel',
 	xtype: 'spotdetail',

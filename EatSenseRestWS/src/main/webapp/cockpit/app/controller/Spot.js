@@ -13,7 +13,7 @@ Ext.define('EatSense.controller.Spot', {
 			spotcard: 'spotcard',
 			mainview: 'main',
 			info: 'toolbar[docked=bottom] #info',
-			//<spot detail>
+			//<spot-detail>
 			spotDetail: {
 		        selector: 'spotdetail',
 		        xtype: 'spotdetail',
@@ -96,6 +96,9 @@ Ext.define('EatSense.controller.Spot', {
 			 scope: this
 		});	
 	},
+
+	//<push-message-handlers>
+
 	/**
 	*	Takes a spot and refreshes the associated item in view.
 	*	
@@ -110,6 +113,7 @@ Ext.define('EatSense.controller.Spot', {
 				spotStore = this.getSpotsview().getStore();
 				// spotData = updatedSpot.getData();
 		
+		//don't use getById, because barcode is the id
 		index = spotStore.findExact('id', updatedSpot.id);
 
 		if(index > -1) {
@@ -168,9 +172,6 @@ Ext.define('EatSense.controller.Spot', {
 						//clear status panel if deleted checkin is activeCustomer
 						if(updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
 							me.updateCustomerStatusPanel();
-							//update displayed status and checkInTime
-							// statusLabel.getTpl().overwrite(statusLabel.element, {});
-							// checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {});	
 						}						
 					} else {
 						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
@@ -181,7 +182,7 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 	/**
-	*	Updates spotdetail view when a new order arrives.
+	*	Updates spotdetail view when a new/changed order.
 	*
 	*/
 	updateSpotDetailOrderIncremental: function(action, updatedOrder) {
@@ -213,9 +214,12 @@ Ext.define('EatSense.controller.Spot', {
 			}
 		}
 	},
+
+	//</push-message-handlers>
+
 	/**
 	*	Gets called when user taps on a spot. Shows whats going on at a particular spot.
-	*   Like orders, payment requests ...
+	*   Like incoming orders, payment requests ...
 	*
 	*/
 	showSpotDetails: function(button, eventObj, eOpts) {
@@ -258,7 +262,7 @@ Ext.define('EatSense.controller.Spot', {
 	/**
 	*	Updates the status panel of selected customer in spotdetail view.
 	*	@param checkIn
-	*		contains the relevant information. I none provided fields will be reseted.
+	*		contains the checkin information. If none provided, fields will be reseted.
 	*/
 	updateCustomerStatusPanel: function(checkIn) {
 		var 	me = this,
@@ -275,7 +279,7 @@ Ext.define('EatSense.controller.Spot', {
 			
 		} else {
 			//pass dummy objects with no data
-			statusLabel.getTpl().overwrite(statusLabel.element, {status: '-'});
+			statusLabel.getTpl().overwrite(statusLabel.element, {status: ''});
 			checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {'checkInTime' : ''});
 		}
 	},
@@ -294,7 +298,6 @@ Ext.define('EatSense.controller.Spot', {
 			//if orders exist calculate total sum 
 			try {
 				Ext.each(orders, function(o) {
-					//TODO only take orders with correct status into account?
 					if(o.get('status') != Karazy.constants.Order.CANCELED) {
 						sum += o.calculate();
 					}					
@@ -332,8 +335,6 @@ Ext.define('EatSense.controller.Spot', {
 
 		me.setActiveCustomer(record);
 
-		
-
 		orderStore.load({
 			params: {
 				pathId: loginCtr.getAccount().get('businessId'),
@@ -362,7 +363,8 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				orderStore = Ext.StoreManager.lookup('orderStore'),
-				order = button.getParent().getRecord();
+				order = button.getParent().getRecord(),
+				prevStatus = order.get('status');
 
 		if(order.get('status') == Karazy.constants.Order.RECEIVED) {
 			console.log('order already confirmed')
@@ -399,7 +401,7 @@ Ext.define('EatSense.controller.Spot', {
     	    	console.log('order confirmed');
     	    },
     	    failure: function(response) {
-    	    	order.set('status', Karazy.constants.Order.PLACED);
+    	    	order.set('status', prevStatus);
 				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
 	   	    }
 		});
@@ -423,22 +425,6 @@ Ext.define('EatSense.controller.Spot', {
 
 		//update order status
 		order.set('status', Karazy.constants.Order.CANCELED);
-		//button.disable();
-
-		//persist changes
-		// order.save({
-		// 	params: {
-		// 		pathId: loginCtr.getAccount().get('businessId'),
-		// 	},
-		// 	success: function(record, operation) {
-		// 		console.log('order canceled');
-		// 		me.updateCustomerTotal(orderStore.getData().items);
-		// 	},
-		// 	failure: function(record, operation) {
-		// 		order.set('status', prevStatus);
-		// 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
-		// 	}
-		// });
 
 		//same approach as in eatSense App. Magic lies in getRawJsonData()
 		//still kind of a workaround
@@ -457,6 +443,7 @@ Ext.define('EatSense.controller.Spot', {
 	   	    }
 		});
 	},
+
 	/**
 	*	Close spot detail.
 	*
@@ -464,8 +451,9 @@ Ext.define('EatSense.controller.Spot', {
 	closeSpotDetail: function(button) {
 		this.getSpotDetail().hide();
 	},
+
 	/**
-	*	Called when spotdetail panel get hidden.
+	*	Called when spotdetail panel gets hidden.
 	*	This is a place to cleanup the panel.
 	*/
 	hideSpotDetail: function(spotdetail) {

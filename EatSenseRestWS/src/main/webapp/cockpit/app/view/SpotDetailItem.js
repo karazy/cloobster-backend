@@ -1,6 +1,6 @@
 /**
 *	A single order item shown in SpotDetail.
-*
+*	Displays the status, name and possible actions.
 */
 Ext.define('EatSense.view.SpotDetailItem', {
 	extend: 'Ext.dataview.component.DataItem',

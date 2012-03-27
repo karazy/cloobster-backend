@@ -1,3 +1,7 @@
+/**
+*	A single spot in spot view.
+* 	Displays spot name and number of checkIns.
+*/
 Ext.define('EatSense.view.SpotItem', {
 	extend: 'Ext.dataview.component.DataItem',
 	xtype: 'spotitem',
