@@ -224,7 +224,7 @@ public class CheckInController {
 		
 		spotData.setId(spot.getId());
 		// we already have all other checkins in a list, so we count them and add one for the new checkin
-		spotData.setCheckInCount(checkInsAtSpot == null? 1: checkInsAtSpot.size() + 1);
+		spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
 		
 		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
 		
@@ -452,7 +452,7 @@ public class CheckInController {
 			SpotStatusDTO spotData = new SpotStatusDTO();
 			
 			spotData.setId(checkIn.getSpot().getId());
-
+			
 			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
 			
 			messages.add(new MessageDTO("spot", "update", spotData));

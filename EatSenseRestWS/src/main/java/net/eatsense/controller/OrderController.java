@@ -132,7 +132,7 @@ public class OrderController {
 				
 				checkIn.setStatus(CheckInStatus.ORDER_PLACED);
 				checkInRepo.saveOrUpdate(checkIn);
-								
+				
 				Request request = new Request();
 				request.setCheckIn(checkIn.getKey());
 				request.setRestaurant(Restaurant.getKey(restaurantId));
@@ -571,6 +571,14 @@ public class OrderController {
 					//all pending orders are processed for this spot, 
 					newSpotStatus = CheckInStatus.CHECKEDIN.toString();
 				}
+				if(!requests.get(0).getStatus().equals(newSpotStatus)) {
+					// Add a message with updated spot status to the package.
+					SpotStatusDTO spotData = new SpotStatusDTO();
+					spotData.setId(checkIn.getSpot().getId());
+					spotData.setStatus(newSpotStatus);
+					messages.add(new MessageDTO("spot","update",spotData));
+				}	
+				
 				// If the payment hasnt already been requested and the status has has changed ...  
 				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
 					// ...update the status of the checkIn in the datastore ...
@@ -581,20 +589,13 @@ public class OrderController {
 					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
 				}
 				
-				if(!requests.get(0).getStatus().equals(newSpotStatus)) {	
-					// Add a message with updated spot status to the package.
-					SpotStatusDTO spotData = new SpotStatusDTO();
-					spotData.setId(checkIn.getSpot().getId());
-					spotData.setStatus(newSpotStatus);
-					messages.add(new MessageDTO("spot","update",spotData));
-				}	
+				
 			}
 			try {
 				channelCtrl.sendMessagesToAllClients(businessId, messages);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		
 		}
 		else {
 			// build validation error messages
