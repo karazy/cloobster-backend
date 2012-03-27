@@ -8,6 +8,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.PaymentMethod;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -15,7 +17,7 @@ import com.googlecode.objectify.annotation.Unindexed;
 public class Bill extends GenericEntity {
 	@Parent
 	@NotNull
-	private Key<Restaurant> restaurant;
+	private Key<Business> business;
 	
 	@NotNull
 	private Key<CheckIn> checkIn;
@@ -33,12 +35,12 @@ public class Bill extends GenericEntity {
 	@Min(0)
 	private Float total;
 
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
 
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 
 	public Key<CheckIn> getCheckIn() {
@@ -75,7 +77,7 @@ public class Bill extends GenericEntity {
 	
 	@Transient
 	public Key<Bill> getKey() {
-		return new Key<Bill>(getRestaurant(), Bill.class, super.getId());
+		return new Key<Bill>(getBusiness(), Bill.class, super.getId());
 	}
 
 }

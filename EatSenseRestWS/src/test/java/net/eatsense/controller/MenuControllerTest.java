@@ -7,14 +7,14 @@ import static org.hamcrest.CoreMatchers.*;
 
 import java.util.Collection;
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
@@ -38,7 +38,7 @@ public class MenuControllerTest {
 	    
 	    private Injector injector;
 	    private MenuController ctr;
-	    private RestaurantRepository rr;
+	    private BusinessRepository rr;
 	    private MenuRepository mr;
 	    private ProductRepository pr;
 	    private ChoiceRepository cr;
@@ -51,7 +51,7 @@ public class MenuControllerTest {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(MenuController.class);
-		rr = injector.getInstance(RestaurantRepository.class);
+		rr = injector.getInstance(BusinessRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
@@ -59,7 +59,7 @@ public class MenuControllerTest {
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
-		ddd.generateDummyRestaurants();
+		ddd.generateDummyBusinesses();
 		
 	}
 
@@ -69,7 +69,7 @@ public class MenuControllerTest {
 	}
 	@Test
 	public void testGetProduct() {
-		Restaurant restaurant = rr.getByProperty("name", "Sergio");
+		Business restaurant = rr.getByProperty("name", "Sergio");
 		Product product = pr.getByProperty("name", "Classic Burger");
 		
 		ProductDTO productDto = ctr.getProduct(restaurant.getId(), product.getId());
@@ -84,7 +84,7 @@ public class MenuControllerTest {
 	@Test
 	public void testGetMenus() {
 		// retrieve all menus saved for this restaurant
-		Restaurant restaurant = rr.getByProperty("name", "Sergio");
+		Business restaurant = rr.getByProperty("name", "Sergio");
 		
 		Collection<MenuDTO> menusdto = ctr.getMenus(restaurant.getId());
 		

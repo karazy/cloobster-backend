@@ -16,10 +16,10 @@ import com.googlecode.objectify.annotation.Parent;
 public class Spot extends GenericEntity{
 	
 	/**
-	 * The restaurant this spot belongs to.
+	 * The business this spot belongs to.
 	 */
 	@Parent
-	private Key<Restaurant> restaurant;
+	private Key<Business> business;
 	
 	/**
 	 * Barcode identifying this spot.
@@ -55,12 +55,12 @@ public class Spot extends GenericEntity{
 		this.name = name;
 	}
 
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
 
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 
 	public String getGroupTag() {
@@ -73,12 +73,12 @@ public class Spot extends GenericEntity{
 	
 	@Transient
 	public Key<Spot> getKey() {
-	   return getKey(getRestaurant(), getId());
+	   return getKey(getBusiness(), getId());
 	}
 	
 	@Transient
-	public static Key<Spot> getKey(Key<Restaurant> restaurant, Long spotId) {
-		return new Key<Spot>(restaurant ,Spot.class,spotId);
+	public static Key<Spot> getKey(Key<Business> business, Long spotId) {
+		return new Key<Spot>(business ,Spot.class,spotId);
 	}
 	
 }

@@ -7,6 +7,8 @@ import javax.persistence.Transient;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.PaymentMethod;
+
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -19,7 +21,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Frederik Reifschneider
  *
  */
-public class Restaurant extends GenericEntity {
+public class Business extends GenericEntity {
  
 	/**
 	 * Name of location.
@@ -45,7 +47,7 @@ public class Restaurant extends GenericEntity {
 	
 	private List<String> channelIds;
 
-	public Restaurant() {
+	public Business() {
 	}
 
 	public String getName() {
@@ -74,16 +76,16 @@ public class Restaurant extends GenericEntity {
 
 	@Transient
 	@JsonIgnore
-	public Key<Restaurant> getKey() {
+	public Key<Business> getKey() {
 		
 		return getKey(super.getId());
 	}
 	
 	@Transient
 	@JsonIgnore
-	public static Key<Restaurant> getKey(Long id) {
+	public static Key<Business> getKey(Long id) {
 		
-		return new Key<Restaurant>(Restaurant.class, id);
+		return new Key<Business>(Business.class, id);
 	}
 
 	public List<PaymentMethod> getPaymentMethods() {

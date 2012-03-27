@@ -1,4 +1,4 @@
-package net.eatsense.domain;
+package net.eatsense.domain.embedded;
 
 /**
  * Status codes reflecting the whole process of a guests visit.
@@ -24,14 +24,4 @@ public enum CheckInStatus {
 	 * User is in an idle state. At least on order was served.
 	 */
 	PAYMENT_REQUEST,	
-	/**
-	 * Error during object validation. 
-	 */
-	VALIDATION_ERROR,
-	
-	/**
-	 * General error during checkin
-	 */
-	ERROR
-
 }

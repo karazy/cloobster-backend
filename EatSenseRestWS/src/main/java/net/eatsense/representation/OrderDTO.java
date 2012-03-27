@@ -6,7 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import net.eatsense.domain.OrderStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 
 public class OrderDTO {
 	Long id;

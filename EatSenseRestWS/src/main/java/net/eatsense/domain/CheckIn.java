@@ -6,15 +6,16 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.validation.CheckInStep2;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 
 /**
- * Represents a user checked in on a certain spot in a restaurant.
+ * Represents a user checked in on a certain spot in a location.
  * Created when user tries to check in and exists until user payed.
- * Used to simulate the whole process of a restaurant visit.
+ * Used to simulate the whole process of a visit in a location.
  * 
  * @author Frederik Reifschneider
  *
@@ -63,13 +64,13 @@ public class CheckIn extends GenericEntity{
 	private String deviceId;
 	
 	/**
-	 * Restaurant this checkIn belongs to.
+	 * Business this checkIn belongs to.
 	 */
 	@NotNull
-	private Key<Restaurant> restaurant;
+	private Key<Business> business;
 	
 	/**
-	 * Spot in this restaurant.
+	 * Spot in this business.
 	 */
 	@NotNull
 	private Key<Spot> spot;
@@ -82,12 +83,12 @@ public class CheckIn extends GenericEntity{
 		this.userId = userId;
 	}
 
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
 
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 
 	public Key<Spot> getSpot() {

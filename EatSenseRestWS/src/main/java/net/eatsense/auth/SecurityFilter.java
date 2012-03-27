@@ -68,7 +68,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 		
 		for (Iterator<PathSegment> iterator = request.getPathSegments(true).iterator(); iterator.hasNext();) {
 			PathSegment pathSegment = iterator.next();
-			if(pathSegment.getPath().equals("businesses") || pathSegment.getPath().equals("restaurants")) {
+			if(pathSegment.getPath().equals("businesses") ) {
 				try {
 					if(iterator.hasNext())
 						businessId = Long.valueOf(iterator.next().getPath());
@@ -187,7 +187,7 @@ public class SecurityFilter implements ContainerRequestFilter {
         	
         	// only grant the restaurantadmin role if an account was authenticated and the account has the role for this business
         	if(role.equals("restaurantadmin") && account != null && role.equals(account.getRole())){
-             		return accountCtrl.isAccountManagingRestaurantId(account, businessId);
+             		return accountCtrl.isAccountManagingBusiness(account, businessId);
         	}
         	// grant the user role, if an account was authenticated
         	if(role.equals("user") && account != null) {

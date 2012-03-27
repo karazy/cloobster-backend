@@ -6,9 +6,8 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import com.googlecode.objectify.Key;
 
-import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 
 public class AccountRepository extends GenericRepository<Account> {
 
@@ -17,12 +16,22 @@ public class AccountRepository extends GenericRepository<Account> {
 		super.clazz = Account.class;
 	}
 	
-	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Restaurant>> restaurantKeys) {
+	/**
+	 * Create and save the account in the datastore. password is encrypted as bcrypt hash.
+	 * 
+	 * @param login
+	 * @param password
+	 * @param email
+	 * @param role
+	 * @param businessKeys
+	 * @return
+	 */
+	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Business>> businessKeys) {
 		Account account = new Account();
 		account.setLogin(login);
 		account.setEmail(email);
 		account.setRole(role);
-		account.setRestaurants(restaurantKeys);
+		account.setBusinesses(businessKeys);
 		
 		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
 		

@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.eatsense.domain.Restaurant;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.domain.Business;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.JsonGenerationException;
@@ -30,15 +30,15 @@ import com.google.inject.Inject;
 public class ChannelController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	RestaurantRepository restaurantRepo;
+	BusinessRepository businessRepo;
 	
 	ChannelService channelService;
 	private ObjectMapper mapper;
 	
 	@Inject
-	public ChannelController(RestaurantRepository rr) {
+	public ChannelController(BusinessRepository rr) {
 		super();
-		this.restaurantRepo = rr;
+		this.businessRepo = rr;
 		channelService = ChannelServiceFactory.getChannelService();	
 		mapper = new ObjectMapper();
 	}
@@ -46,39 +46,39 @@ public class ChannelController {
 	/**
 	 * Create a new message channel for push notification.
 	 * 
-	 * @param restaurantId numeric id of a restaurant
+	 * @param businessId id of a business
 	 * @param clientId
 	 * @return
 	 */
-	public String createChannel(Long restaurantId, String clientId) {
-		return createChannel(restaurantId, clientId, null);
+	public String createChannel(Long businessId, String clientId) {
+		return createChannel(businessId, clientId, null);
 	}
 	
 	/**
 	 * Create a new message channel for push notification, with a default timeout of 2h,
-	 * and register the client id in the restaurant.
+	 * and register the client id in the business.
 	 * 
-	 * @param restaurant datastore object
+	 * @param business datastore entity
 	 * @param clientId
 	 * @return the token to send to the client
 	 */
-	public String createChannel(Restaurant restaurant, String clientId) {
-		return createChannel(restaurant, clientId, null);
+	public String createChannel(Business business, String clientId) {
+		return createChannel(business, clientId, null);
 	}
 	
 	
 	/**
 	 * Create a new message channel for push notification, with the given timeout.
 	 * 
-	 * @param restaurant datastore object
+	 * @param business datastore entity
 	 * @param clientId
 	 * @param timeout in minutes
 	 * @return the token to send to the client
 	 */
-	public String createChannel(Restaurant restaurant, String clientId , Integer timeout) {
+	public String createChannel(Business business, String clientId , Integer timeout) {
 		String token = null;
-		// create a channel id with the format "restaurantId|clientId"
-		clientId = restaurant.getId() + "|" + clientId;
+		// create a channel id with the format "businessId|clientId"
+		clientId = business.getId() + "|" + clientId;
 		
 		logger.debug("creating channel for channelID: " +clientId);
 		token = (timeout != null)?channelService.createChannel(clientId, timeout):channelService.createChannel(clientId);
@@ -89,16 +89,16 @@ public class ChannelController {
 	/**
 	 * Create a new message channel for push notification, with the given timeout.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param clientId
 	 * @param timeout
 	 * @return the token to send to the client
 	 */
-	public String createChannel(Long restaurantId, String clientId , Integer timeout) {
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
-		if(restaurant == null)
-			throw new IllegalArgumentException("got unknown restaurantId: " + restaurantId);
-		return createChannel(restaurant, clientId, timeout);
+	public String createChannel(Long businessId, String clientId , Integer timeout) {
+		Business business = businessRepo.getById(businessId);
+		if(business == null)
+			throw new IllegalArgumentException("unknown businessId: " + businessId);
+		return createChannel(business, clientId, timeout);
 	}
 	
 	/**
@@ -175,18 +175,20 @@ public class ChannelController {
 	}
 	
 	/**
-	 * @param restaurantId
+	 * Send message to all subscribed channels of this business.
+	 * 
+	 * @param businessId
 	 * @param type
 	 * @param action
-	 * @param content
+	 * @param content JSON model
 	 * @throws IOException 
 	 * @throws JsonMappingException 
 	 * @throws JsonGenerationException 
 	 */
-	public void sendMessageToAllClients(Long restaurantId, String type, String action, Object content) throws JsonGenerationException, JsonMappingException, IOException  {
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
+	public void sendMessageToAllClients(Long businessId, String type, String action, Object content) throws JsonGenerationException, JsonMappingException, IOException  {
+		Business business = businessRepo.getById(businessId);
 		String lastMessage = "";
-		for (String clientId : restaurant.getChannelIds()) {
+		for (String clientId : business.getChannelIds()) {
 			lastMessage = sendMessage(clientId, type, action, content);
 			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
 		}
@@ -194,18 +196,18 @@ public class ChannelController {
 	}
 	
 	/**
-	 * Send a list of messages as one package over the channel using a JSON array.
+	 * Send a list of messages as one package over the channel as a JSON array.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param messages
 	 * @throws JsonGenerationException
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public void sendMessagesToAllClients(Long restaurantId, List<MessageDTO> messages) throws JsonGenerationException, JsonMappingException, IOException  {
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
+	public void sendMessagesToAllClients(Long businessId, List<MessageDTO> messages) throws JsonGenerationException, JsonMappingException, IOException  {
+		Business business = businessRepo.getById(businessId);
 		String lastMessage = "";
-		for (String clientId : restaurant.getChannelIds()) {
+		for (String clientId : business.getChannelIds()) {
 			lastMessage = sendMessageJson(clientId,messages);
 			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
 		}
@@ -247,44 +249,45 @@ public class ChannelController {
 			throw new RuntimeException(e);
 		}
 		logger.debug("recieved connected from clientId:" + clientId);
-		subscribeToRestaurant(clientId);
+		subscribeToBusiness(clientId);
 	}
 	
 	/**
-	 * Remove this client from the restaurant, so that it doesnt recieve further change updates.
+	 * Remove the channel from the business<br>
+	 * It doesnt recieve further messages, concerning this business.
 	 * 
 	 * @param clientId
 	 */
 	public void unsubscribeClient(String clientId) {
-		Restaurant restaurant = parseRestaurant(clientId);
+		Business business = parseBusiness(clientId);
 		
-		if(restaurant == null) {
-			throw new IllegalArgumentException("unknown restaurantId encoded in clientId: "+ clientId);
+		if(business == null) {
+			throw new IllegalArgumentException("unknown businessId encoded in clientId: "+ clientId);
 		}
 		else {
-			if (restaurant.getChannelIds() == null || restaurant.getChannelIds().isEmpty())	{
+			if (business.getChannelIds() == null || business.getChannelIds().isEmpty())	{
 				return;
 			}
-			restaurant.getChannelIds().remove(clientId);
-			restaurantRepo.saveOrUpdate(restaurant);
+			business.getChannelIds().remove(clientId);
+			businessRepo.saveOrUpdate(business);
 		}
 			
 		
 	}
 	
 	/**
-	 * Get the Restaurant entity by the id saved in the given clientId string.
+	 * Get the Business entity by the id saved in the given clientId string.
 	 * 
 	 * @param clientId
-	 * @return Restaurant entity
+	 * @return Business entity
 	 */
-	private Restaurant parseRestaurant(String clientId) {
-		// retrieve the restaurantId appended at the front of the client id seperated with a "|"
-		Long restaurantId = Long.valueOf(clientId.substring(0, clientId.indexOf("|") ));
+	private Business parseBusiness(String clientId) {
+		// retrieve the businessId appended at the front of the client id seperated with a "|"
+		Long businessId = Long.valueOf(clientId.substring(0, clientId.indexOf("|") ));
 		
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
+		Business business = businessRepo.getById(businessId);
 				
-		return restaurant;
+		return business;
 	}
 
 	
@@ -293,17 +296,17 @@ public class ChannelController {
 	 * 
 	 * @param clientId
 	 */
-	public void subscribeToRestaurant( String clientId) {
-		Restaurant restaurant = parseRestaurant(clientId);
+	public void subscribeToBusiness( String clientId) {
+		Business business = parseBusiness(clientId);
 		
-		if(restaurant == null) {
-			throw new IllegalArgumentException("unknown restaurantId encoded in clientId: "+ clientId);
+		if(business == null) {
+			throw new IllegalArgumentException("unknown businessId encoded in clientId: "+ clientId);
 		}
 		else { 
-			if(restaurant.getChannelIds() == null)
-				restaurant.setChannelIds(new ArrayList<String>());
-			restaurant.getChannelIds().add(clientId);
-			restaurantRepo.saveOrUpdate(restaurant);
+			if(business.getChannelIds() == null)
+				business.setChannelIds(new ArrayList<String>());
+			business.getChannelIds().add(clientId);
+			businessRepo.saveOrUpdate(business);
 		}
 	}
 

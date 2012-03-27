@@ -1,4 +1,4 @@
-package net.eatsense.domain;
+package net.eatsense.domain.embedded;
 
 /**
  * Options how to use the price value of a product choice

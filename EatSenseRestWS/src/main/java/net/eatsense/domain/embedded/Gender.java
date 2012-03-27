@@ -1,4 +1,4 @@
-package net.eatsense.domain;
+package net.eatsense.domain.embedded;
 
 /**
  * Types of grammatical gender.

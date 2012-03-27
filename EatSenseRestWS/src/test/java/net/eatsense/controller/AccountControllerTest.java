@@ -10,7 +10,7 @@ import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.util.DummyDataDumper;
 
@@ -32,7 +32,7 @@ public class AccountControllerTest {
 	    
 	    private Injector injector;
 	    private AccountController ctr;
-	    private RestaurantRepository rr;
+	    private BusinessRepository rr;
 
 		private String password;
 
@@ -51,7 +51,7 @@ public class AccountControllerTest {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(AccountController.class);
-		rr = injector.getInstance(RestaurantRepository.class);
+		rr = injector.getInstance(BusinessRepository.class);
 		ar = injector.getInstance(AccountRepository.class);
 		
 		

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-import net.eatsense.domain.PaymentMethod;
+import net.eatsense.domain.embedded.PaymentMethod;
 
 public class BillDTO {
 	private Long id;

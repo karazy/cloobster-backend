@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
-import net.eatsense.domain.PaymentMethod;
+import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -34,26 +34,26 @@ public class SpotDTO {
 	@NotEmpty
 	private String name;
 	
-	private String restaurant;
+	private String business;
 	
-	private Long restaurantId;
+	private Long businessId;
 	
 	private Collection<PaymentMethod> payments;
 	
-	public String getRestaurant() {
-		return restaurant;
+	public String getBusiness() {
+		return business;
 	}
 
-	public void setRestaurant(String restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(String business) {
+		this.business = business;
 	}
 
-	public Long getRestaurantId() {
-		return restaurantId;
+	public Long getBusinessId() {
+		return businessId;
 	}
 
-	public void setRestaurantId(Long restaurantId) {
-		this.restaurantId = restaurantId;
+	public void setBusinessId(Long businessId) {
+		this.businessId = businessId;
 	}
 
 	/**

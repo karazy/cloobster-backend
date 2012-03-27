@@ -7,7 +7,7 @@ import java.util.List;
 
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -42,20 +42,20 @@ public class MenuController {
 	}
 	
 	/**
-	 * Return all menus with corresponding products of a given restaurant.
+	 * Return all menus with corresponding products of a given business.
 	 * 
-	 * @param restaurantId entity id of the restaurant
+	 * @param businessId entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenus(Long restaurantId){
-		if(restaurantId == null )
-			throw new IllegalArgumentException("Invalid restaurant key specified.");
+	public Collection<MenuDTO> getMenus(Long businessId){
+		if(businessId == null )
+			throw new IllegalArgumentException("Invalid business key specified.");
 		
 		
-		logger.info("Returning menus of restaurant id: " + restaurantId);
-		Key<Restaurant> restaurant = new Key<Restaurant>(Restaurant.class, restaurantId);
+		logger.info("Returning menus of business id: " + businessId);
+		Key<Business> business = new Key<Business>(Business.class, businessId);
 		
-		List<Menu> menus = menuRepo.getByParent( restaurant);
+		List<Menu> menus = menuRepo.getByParent( business);
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		
 		for ( Menu menu : menus) {
@@ -73,17 +73,17 @@ public class MenuController {
 		return menuDTOs;
 	}
 
-	public Collection<ProductDTO> getAllProducts(Long restaurantId) {
+	public Collection<ProductDTO> getAllProducts(Long businessId) {
 		
-		return transform.productsToDto(productRepo.getByParent( new Key<Restaurant>(Restaurant.class, restaurantId)));
+		return transform.productsToDto(productRepo.getByParent( new Key<Business>(Business.class, businessId)));
 	}
 	
-	public ProductDTO getProduct(Long restaurantId, Long id) {
-		logger.info("Trying to get product id : " + id + " for restaurant : id");
+	public ProductDTO getProduct(Long businessId, Long id) {
+		logger.info("Trying to get product id : " + id + " for business : id");
 		ProductDTO productDto = new ProductDTO(); 
 		
 		try {
-			productDto = transform.productToDto(productRepo.getById(new Key<Restaurant>(Restaurant.class ,restaurantId), id));
+			productDto = transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
 			
 		} catch (NotFoundException e) {
 			logger.error("Product not found with id "+id, e);

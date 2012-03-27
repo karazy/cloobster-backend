@@ -2,6 +2,8 @@ package net.eatsense.domain;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.Gender;
+
 /**
  * Used to load nickname adjectives from database and combine them to a full
  * nickname.

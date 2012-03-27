@@ -1,6 +1,6 @@
 package net.eatsense.representation;
 
-import net.eatsense.domain.CheckInStatus;
+import net.eatsense.domain.embedded.CheckInStatus;
 
 /**
  * Represents information transferred after submitting a barcode for checkIn.
@@ -11,22 +11,22 @@ import net.eatsense.domain.CheckInStatus;
  */
 public class CheckInDTO {
 	/**
-	 * Status indicating for example if a restaurant with this code was found.
+	 * Status indicating for example if a customer checked in or an order was placed.
 	 */
 	private CheckInStatus status;
 
 	/**
-	 * Restaurants name
+	 * business name
 	 */
-	private String restaurantName;
+	private String businessName;
 	
 	/**
-	 * Restaurants UID
+	 * business UID
 	 */
-	private Long restaurantId;
+	private Long businessId;
 
 	/**
-	 * Name of location inside the restaurant
+	 * Name of location inside the business
 	 */
 	private String spot;
 	
@@ -71,12 +71,12 @@ public class CheckInDTO {
 		this.status = status;
 	}
 
-	public String getRestaurantName() {
-		return restaurantName;
+	public String getBusinessName() {
+		return businessName;
 	}
 
-	public void setRestaurantName(String restaurantName) {
-		this.restaurantName = restaurantName;
+	public void setBusinessName(String businessName) {
+		this.businessName = businessName;
 	}
 
 
@@ -104,12 +104,12 @@ public class CheckInDTO {
 		this.nickname = nickname;
 	}
 
-	public Long getRestaurantId() {
-		return restaurantId;
+	public Long getBusinessId() {
+		return businessId;
 	}
 
-	public void setRestaurantId(Long restaurantId) {
-		this.restaurantId = restaurantId;
+	public void setBusinessId(Long businessId) {
+		this.businessId = businessId;
 	}
 	
 

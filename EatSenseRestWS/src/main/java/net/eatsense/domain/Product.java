@@ -23,7 +23,7 @@ public class Product extends GenericEntity {
 	private Key<Menu> menu;
 	
 	@Parent
-	private Key<Restaurant> restaurant;
+	private Key<Business> business;
 	
 	@Unindexed
 	private List<Key<Choice>> choices;
@@ -80,7 +80,7 @@ public class Product extends GenericEntity {
 
 	@Transient
 	public Key<Product> getKey() {
-		return new Key<Product>(getRestaurant(), Product.class, super.getId());
+		return new Key<Product>(getBusiness(), Product.class, super.getId());
 	}
 
 
@@ -94,13 +94,13 @@ public class Product extends GenericEntity {
 	}
 
 
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
 
 
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 	
 }

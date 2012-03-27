@@ -15,14 +15,14 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Order;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
+import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.validation.CheckInStep2;
 import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
@@ -44,7 +44,7 @@ import com.sun.jersey.api.NotFoundException;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a
- * restaurant is made, various validations have must be executed.
+ * business is made, various validations have must be executed.
  * 
  * @author Frederik Reifschneider
  * 
@@ -52,7 +52,7 @@ import com.sun.jersey.api.NotFoundException;
 public class CheckInController {
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private RestaurantRepository restaurantRepo;
+	private BusinessRepository businessRepo;
 	private CheckInRepository checkInRepo;
 	private SpotRepository barcodeRepo;
 	private Transformer transform;
@@ -63,7 +63,7 @@ public class CheckInController {
 	/**
 	 * Constructor using injection for creation.
 	 * 
-	 * @param restaurantRepository
+	 * @param businessRepository
 	 * @param checkInRepository
 	 * @param spotRepository
 	 * @param transformer
@@ -72,9 +72,9 @@ public class CheckInController {
 	 * @param validator
 	 */
 	@Inject
-	public CheckInController(RestaurantRepository restaurantRepository, CheckInRepository checkInRepository, SpotRepository spotRepository,
+	public CheckInController(BusinessRepository businessRepository, CheckInRepository checkInRepository, SpotRepository spotRepository,
 			Transformer transformer, ChannelController channelController, ObjectMapper objectMapper, Validator validator) {
-		this.restaurantRepo = restaurantRepository;
+		this.businessRepo = businessRepository;
 		this.checkInRepo = checkInRepository;
 		this.channelCtrl = channelController;
 		this.barcodeRepo = spotRepository;
@@ -101,14 +101,14 @@ public class CheckInController {
     	if(spot == null )
     		throw new NotFoundException("barcode unknown");
     	
-    	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
+    	Business business = businessRepo.getByKey(spot.getBusiness());
     	
     	    	
     	spotDto.setBarcode(barcode);
     	spotDto.setName(spot.getName());
-    	spotDto.setRestaurant(restaurant.getName());
-    	spotDto.setRestaurantId(restaurant.getId());
-    	spotDto.setPayments(restaurant.getPaymentMethods());
+    	spotDto.setBusiness(business.getName());
+    	spotDto.setBusinessId(business.getId());
+    	spotDto.setPayments(business.getPaymentMethods());
     	spotDto.setGroupTag(spot.getGroupTag());
     	
 		return spotDto ;
@@ -130,12 +130,12 @@ public class CheckInController {
     	if(spot == null )
     		throw new NotFoundException("barcode unknown");
     	
-    	Restaurant restaurant = restaurantRepo.getByKey(spot.getRestaurant());
+    	Business business = businessRepo.getByKey(spot.getBusiness());
     	
     	CheckIn checkIn = new CheckIn();
     	
     	String checkInId = IdHelper.generateId();
-		checkIn.setRestaurant(restaurant.getKey());
+		checkIn.setBusiness(business.getKey());
 		checkIn.setSpot(spot.getKey());
 		checkIn.setUserId(checkInId);
 		checkIn.setStatus(CheckInStatus.CHECKEDIN);
@@ -234,7 +234,7 @@ public class CheckInController {
 		
 		// send the messages
 		try {
-			channelCtrl.sendMessagesToAllClients(restaurant.getId(), messages);
+			channelCtrl.sendMessagesToAllClients(business.getId(), messages);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -352,7 +352,7 @@ public class CheckInController {
 			
 			// send the message with the updated data field
 			try {
-				channelCtrl.sendMessageToAllClients(chkin.getRestaurant().getId(), "spot", "update", spotData);
+				channelCtrl.sendMessageToAllClients(chkin.getBusiness().getId(), "spot", "update", spotData);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -458,7 +458,7 @@ public class CheckInController {
 			messages.add(new MessageDTO("spot", "update", spotData));
 			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
 			try {
-				channelCtrl.sendMessagesToAllClients(checkIn.getRestaurant().getId(), messages);
+				channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -474,13 +474,13 @@ public class CheckInController {
 	}
 
 	private List<CheckIn> getCheckInsBySpot(Long businessId, Long spotId) {
-		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.getById(businessId);
-		if(restaurant == null) {
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
 			logger.error("CheckIns cannot be retrieved, businessId unknown: " + businessId);
 			throw new NotFoundException("CheckIns cannot be retrieved, businessId unknown: " + businessId);
 		}
 		
-		return checkInRepo.getListByProperty("spot", Spot.getKey(restaurant.getKey(), spotId));
+		return checkInRepo.getListByProperty("spot", Spot.getKey(business.getKey(), spotId));
 	}
 }

@@ -12,23 +12,23 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
-import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.domain.Business;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -43,6 +43,12 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 import com.sun.jersey.api.NotFoundException;
 
+/**
+ * Manages order creation, update and retrieval.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class OrderController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -51,7 +57,7 @@ public class OrderController {
 	private OrderChoiceRepository orderChoiceRepo;
 	private Validator validator;
 	private CheckInRepository checkInRepo;
-	private RestaurantRepository restaurantRepo;
+	private BusinessRepository businessRepo;
 	private ChoiceRepository choiceRepo;
 	private Transformer transform;
 	private RequestRepository requestRepo;
@@ -60,7 +66,7 @@ public class OrderController {
 	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans, ChannelController channelCtrl, Validator validator) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, BusinessRepository businessRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans, ChannelController channelCtrl, Validator validator) {
 		super();
 		this.validator = validator;
 		this.channelCtrl = channelCtrl;
@@ -70,36 +76,36 @@ public class OrderController {
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.choiceRepo = choiceRepo;
 		this.checkInRepo = checkInRepo;
-		this.restaurantRepo = restaurantRepo;
+		this.businessRepo = businessRepo;
 		this.transform = trans;
 	}
 
 	/**
 	 * Delete the specified order from the datastore.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param orderId
 	 */
-	public void deleteOrder(Long restaurantId, Long orderId) {
-		orderRepo.ofy().delete(new Key<Order>(new Key<Restaurant>(Restaurant.class, restaurantId), Order.class, orderId));
+	public void deleteOrder(Long businessId, Long orderId) {
+		orderRepo.ofy().delete(new Key<Order>(new Key<Business>(Business.class, businessId), Order.class, orderId));
 	}
 	
 	/**
 	 * <p>
 	 * Updates a specific order (identified by orderId)<br>
 	 * from a given checkIn (identified by checkInId)<br>
-	 * of a specific restaurant (identified by restaurantId)<br>
+	 * of a specific business (identified by businessId)<br>
 	 * with new data contained in orderData.
 	 * </p>
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param orderId
 	 * @param orderData
 	 * @param checkInId
 	 * @return the updated OrderDTO
 	 */
-	public OrderDTO updateOrder(Long restaurantId, Long orderId, OrderDTO orderData, String checkInId) {
-		Order order = getOrder(restaurantId, orderId);
+	public OrderDTO updateOrder(Long businessId, Long orderId, OrderDTO orderData, String checkInId) {
+		Order order = getOrder(businessId, orderId);
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
@@ -135,7 +141,7 @@ public class OrderController {
 				
 				Request request = new Request();
 				request.setCheckIn(checkIn.getKey());
-				request.setRestaurant(Restaurant.getKey(restaurantId));
+				request.setBusiness(Business.getKey(businessId));
 				request.setObjectId(orderId);
 				request.setType(RequestType.ORDER);
 				request.setReceivedTime(new Date());
@@ -162,7 +168,7 @@ public class OrderController {
 					
 				}
 				try {
-					channelCtrl.sendMessagesToAllClients(restaurantId, messages);
+					channelCtrl.sendMessagesToAllClients(businessId, messages);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -182,34 +188,34 @@ public class OrderController {
 	}
 	
 	/**
-	 * Get the data for a specified order of a restaurant.
+	 * Get the data for a specified order of a business.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param orderId
 	 * @return
 	 */
-	public OrderDTO getOrderAsDTO(Long restaurantId, Long orderId) {
-		Order order = getOrder(restaurantId, orderId);
+	public OrderDTO getOrderAsDTO(Long businessId, Long orderId) {
+		Order order = getOrder(businessId, orderId);
 				
 		return transform.orderToDto( order );
 	}
 
 	/**
-	 * Get the order entity for a given orderId of a restaurant.
+	 * Get the order entity for a given orderId of a business.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param orderId
 	 * @return the Order entity, if existing
 	 */
-	public Order getOrder(Long restaurantId, Long orderId) {
-		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
-		if(restaurant == null) {
-			logger.error("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
-			throw new NotFoundException("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
+	public Order getOrder(Long businessId, Long orderId) {
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
+			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
+			throw new NotFoundException("Order cannot be retrieved, business id unknown: " + businessId);
 		}
 		
-		Order order = orderRepo.getById(restaurant.getKey(), orderId);
+		Order order = orderRepo.getById(business.getKey(), orderId);
 		if( order == null) {
 			logger.error("Order cannot be retrieved, order id unknown: " + orderId);
 			throw new NotFoundException("Order cannot be retrieved, order id unknown: " + orderId);
@@ -220,29 +226,29 @@ public class OrderController {
 	/**
 	 * Get all order data 
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param checkInId
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDto(Long restaurantId, String checkInId, String status) {
-		return transform.ordersToDto(getOrders( restaurantId, checkInId, status));
+	public Collection<OrderDTO> getOrdersAsDto(Long businessId, String checkInId, String status) {
+		return transform.ordersToDto(getOrders( businessId, checkInId, status));
 	}
 	
 	/**
 	 * Get orders saved for the given checkin and filter by status if set.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param checkInId
 	 * @param status 
 	 * @return
 	 */
-	public List<Order> getOrders(Long restaurantId, String checkInId, String status) {
-		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
-		if(restaurant == null) {
-			logger.error("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
-			throw new NotFoundException("Orders cannot be retrieved, restaurant id unknown: " + restaurantId);
+	public List<Order> getOrders(Long businessId, String checkInId, String status) {
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
+			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
+			throw new NotFoundException("Orders cannot be retrieved, business id unknown: " + businessId);
 		}
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
@@ -252,7 +258,7 @@ public class OrderController {
 		}
 		
 		
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(restaurant).filter("checkIn", checkIn.getKey());
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
 		if(status != null && !status.isEmpty()) {
 			query = query.filter("status", status.toUpperCase());
 		}
@@ -268,20 +274,20 @@ public class OrderController {
 	/**
 	 * Return all orders not in the cart for the given spot.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param spotId
 	 * @param checkInId
 	 * @return list of the orders found
 	 */
-	public List<Order> getOrdersBySpot(Long restaurantId, Long spotId, Long checkInId) {
-		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
-		if(restaurant == null) {
-			logger.error("Order cannot be retrieved, restaurant id unknown: " + restaurantId);
-			throw new NotFoundException("Orders cannot be retrieved, restaurant id unknown: " + restaurantId);
+	public List<Order> getOrdersBySpot(Long businessId, Long spotId, Long checkInId) {
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
+			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
+			throw new NotFoundException("Orders cannot be retrieved, business id unknown: " + businessId);
 		}
 		
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(restaurant).filter("status !=", OrderStatus.CART.toString());
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business).filter("status !=", OrderStatus.CART.toString());
 		
 		if(checkInId != null) {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
@@ -301,12 +307,12 @@ public class OrderController {
 	/**
 	 * Create a new Order entity with status CART and save in the datastore.
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @param checkInId
 	 * @param order
 	 * @return id of the order
 	 */
-	public Long placeOrder(Long restaurantId, String checkInId, OrderDTO order) {
+	public Long placeOrder(Long businessId, String checkInId, OrderDTO order) {
 		Long orderId = null;
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
@@ -324,19 +330,19 @@ public class OrderController {
 			return null;
 		}
 		
-		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
-		if(restaurant == null) {
-			logger.error("Order cannot be placed, restaurant id unknown" + restaurantId);
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
+			logger.error("Order cannot be placed, business id unknown" + businessId);
 			return null;
 		}
-		if(restaurant.getId() != checkIn.getRestaurant().getId()) {
-			logger.error("Order cannot be placed, checkin is not at the same restaurant to which the order was sent: id="+checkIn.getRestaurant().getId());
+		if(business.getId() != checkIn.getBusiness().getId()) {
+			logger.error("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
 			return null;
 		}
 		
 		// Check if the product to be ordered exists
-		Product product = productRepo.getById(checkIn.getRestaurant(), order.getProduct().getId());
+		Product product = productRepo.getById(checkIn.getBusiness(), order.getProduct().getId());
 		if(product == null) {
 			logger.error("Order cannot be placed, productId unknown: "+ order.getProduct().getId());
 			return null;
@@ -350,7 +356,7 @@ public class OrderController {
 			for (ChoiceDTO choiceDto : order.getProduct().getChoices()) {
 				OrderChoice choice = new OrderChoice();
 				int selected = 0;
-				Choice originalChoice = choiceRepo.getById(checkIn.getRestaurant(), choiceDto.getId());
+				Choice originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
 				
 				if(originalChoice == null) {
 					logger.error("Order cannot be placed, unknown choice id="+choiceDto.getId());
@@ -384,7 +390,7 @@ public class OrderController {
 		}
 		
 
-		Key<Order> orderKey = createAndSaveOrder(restaurant.getKey(), checkIn.getKey(), productKey, order.getAmount(), choices, order.getComment());		
+		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, order.getAmount(), choices, order.getComment());		
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();
@@ -398,7 +404,7 @@ public class OrderController {
 	/**
 	 * Create a new Order entity with the given data and save it in the datastore;
 	 * 
-	 * @param restaurant
+	 * @param business
 	 * @param checkIn
 	 * @param product
 	 * @param amount
@@ -406,11 +412,11 @@ public class OrderController {
 	 * @param comment
 	 * @return key of the new entity
 	 */
-	public Key<Order> createAndSaveOrder(Key<Restaurant> restaurant, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
+	public Key<Order> createAndSaveOrder(Key<Business> business, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
 		Key<Order> orderKey = null;
 		Order order = new Order();
 		order.setAmount(amount);
-		order.setRestaurant(restaurant);
+		order.setBusiness(business);
 		order.setCheckIn(checkIn);
 		order.setComment(comment);
 		order.setStatus(OrderStatus.CART);

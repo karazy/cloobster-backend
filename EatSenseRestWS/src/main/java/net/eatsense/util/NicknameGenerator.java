@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import net.eatsense.domain.Gender;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
+import net.eatsense.domain.embedded.Gender;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
 

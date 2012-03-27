@@ -2,7 +2,7 @@ package net.eatsense.persistence;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.Before;
@@ -20,27 +20,27 @@ public class DummyDataCreator {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
         
         private Injector injector;
-        private RestaurantRepository rr;
+        private BusinessRepository rr;
         private SpotRepository br;
          
     	@Before
     	public void setUp() throws Exception {
     		helper.setUp();
     		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-    		rr = injector.getInstance(RestaurantRepository.class);
+    		rr = injector.getInstance(BusinessRepository.class);
     		br = injector.getInstance(SpotRepository.class);
     	}
     	
     	@Test
     	public void createTestData() {
-    		Restaurant r = new Restaurant();
+    		Business r = new Business();
     		r.setName("Zum flotten Hasen");
     		r.setDescription("Geiles Bio Burger Restaurant.");
-    		Key<Restaurant> kR = rr.saveOrUpdate(r);
+    		Key<Business> kR = rr.saveOrUpdate(r);
     		
     		Spot b = new Spot();
     		b.setBarcode("b4rc0de");
-    		b.setRestaurant(kR);
+    		b.setBusiness(kR);
     		Key<Spot> kB = br.saveOrUpdate(b); 
     	}
 
