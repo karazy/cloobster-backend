@@ -149,7 +149,7 @@ public class OrderController {
 				messages.add(new MessageDTO("order", "update", orderData));
 				
 				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
-				// If we have an older request in the database ...
+				// If we have no older request in the database or the new request is the oldest...
 				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
 					// Send message to notify clients over their channel
 					
@@ -531,13 +531,29 @@ public class OrderController {
 
 			// Get all pending requests sorted by oldest first.
 			List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
-						
+			
+			int index = 0;
+			String newCheckInStatus = null;
 			for (Request request : requests) {
 				// delete the request for this order
 				if( request.getType() == RequestType.ORDER &&  request.getObjectId().equals(order.getId())) {
 					requestRepo.delete(request); 
 				}
+				// Look for other order requests for the current checkin as long as we have no new status or there are no more requests ...
+				if( request.getType() == RequestType.ORDER && index > 0 && newCheckInStatus == null && request.getCheckIn().getId() == checkIn.getId()) {
+					// ... set the status to the new found one.
+					newCheckInStatus = request.getStatus();
+				}
+				
+				index++;
 			}
+			
+			// No other requests for the current checkin were found ...
+			if(newCheckInStatus == null) {
+				// ... set the status back to CHECKEDIN.
+				newCheckInStatus = CheckInStatus.CHECKEDIN.toString();
+			}
+			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 			
 			// Add a message with updated order status to the message package.
@@ -546,36 +562,36 @@ public class OrderController {
 			// If we have an older request in the database ...
 			if(requests.size() > 0 && requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId().equals(order.getId()) ) {
 				
-				
-//				requestRepo.delete(requests.get(0));
-				String newStatus = null;
+				// requestRepo.delete(requests.get(0));
+				String newSpotStatus = null;
 				// Save the status of the next request in line, if there is one.
 				if(requests.size() > 1 ) {
-					newStatus = requests.get(1).getStatus();
+					newSpotStatus = requests.get(1).getStatus();
 				} else if(!requests.get(0).getStatus().equals(OrderStatus.PLACED)) {
 					//all pending orders are processed for this spot, 
-					newStatus = CheckInStatus.CHECKEDIN.toString();
+					newSpotStatus = CheckInStatus.CHECKEDIN.toString();
 				}
-					
-				if(!requests.get(0).getStatus().equals(newStatus)) {
-					// Update the status of the checkIn in the datastore.
-					checkIn.setStatus(CheckInStatus.valueOf(newStatus));
+				// If the payment hasnt already been requested and the status has has changed ...  
+				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
+					// ...update the status of the checkIn in the datastore ...
+					checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
 					checkInRepo.saveOrUpdate(checkIn);
 					
-					// Add a message with updated checkin status to the package.
+					// ... and add a message with updated checkin status to the package.
 					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
-					
+				}
+				
+				if(!requests.get(0).getStatus().equals(newSpotStatus)) {	
 					// Add a message with updated spot status to the package.
 					SpotStatusDTO spotData = new SpotStatusDTO();
 					spotData.setId(checkIn.getSpot().getId());
-					spotData.setStatus(newStatus);
+					spotData.setStatus(newSpotStatus);
 					messages.add(new MessageDTO("spot","update",spotData));
 				}	
 			}
 			try {
 				channelCtrl.sendMessagesToAllClients(businessId, messages);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		

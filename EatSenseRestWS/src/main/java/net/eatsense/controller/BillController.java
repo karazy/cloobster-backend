@@ -56,7 +56,6 @@ public class BillController {
 	private ChannelController channelCtrl;
 	private Transformer transform;
 	
-	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo,
@@ -129,27 +128,30 @@ public class BillController {
 			
 			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-			messages.add(new MessageDTO("bill","action", billData));
+			
+			// Add a message with the new bill to the message package.
+			messages.add(new MessageDTO("bill","new", billData));
 			
 			
 			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have an older request in the database ...
 			if( oldestRequest == null || oldestRequest.getId() == request.getId() || checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST  ) {
-				// Send message to notify clients over their channel
-				
 				// Update the status of the checkIn
 				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 				checkInRepo.saveOrUpdate(checkIn);
 				
+				// Add a message with updated checkin status to the package.
 				messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
 				
 				SpotStatusDTO spotData = new SpotStatusDTO();
 				spotData.setId(checkIn.getSpot().getId());
 				spotData.setStatus(request.getStatus());
+				// Add a message with updated spot status to the package.
 				messages.add(new MessageDTO("spot", "update", spotData));				
 			}
 			try {
+				// Send messages to notify clients over their channel.
 				channelCtrl.sendMessagesToAllClients(restaurantId, messages);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

@@ -64,22 +64,22 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String password = request.getHeaderValue("password");
 		String passwordHash = request.getHeaderValue("passwordHash");
 		
-		Long restaurantId = null;
+		Long businessId = null;
 		
 		for (Iterator<PathSegment> iterator = request.getPathSegments(true).iterator(); iterator.hasNext();) {
 			PathSegment pathSegment = iterator.next();
 			if(pathSegment.getPath().equals("businesses") || pathSegment.getPath().equals("restaurants")) {
 				try {
 					if(iterator.hasNext())
-						restaurantId = Long.valueOf(iterator.next().getPath());
+						businessId = Long.valueOf(iterator.next().getPath());
 				} catch (NumberFormatException e) {
 				}
 			}
 		}
 		
-		if(restaurantId == null) {
+		if(businessId == null) {
 			if( request.getFormParameters().getFirst("businessId") != null)
-				restaurantId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
+				businessId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
 		}
 		
 		if(checkInId != null && !checkInId.isEmpty()) {
@@ -101,7 +101,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 				account = accountCtrl.authenticateHashed(login, passwordHash);
 				
 				if(account != null) {
-					request.setSecurityContext(new Authorizer(account, restaurantId));
+					request.setSecurityContext(new Authorizer(account, businessId));
 					servletRequest.setAttribute("net.eatsense.domain.Account", account);
 					logger.info("authentication success for user: "+login);
 					return request;
@@ -113,7 +113,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 				account = accountCtrl.authenticate(login, password);
 				
 				if(account != null) {
-					request.setSecurityContext(new Authorizer(account, restaurantId));
+					request.setSecurityContext(new Authorizer(account, businessId));
 					servletRequest.setAttribute("net.eatsense.domain.Account", account);
 					logger.info("authentication success for user: "+login);
 					return request;
@@ -142,11 +142,13 @@ public class SecurityFilter implements ContainerRequestFilter {
      */
     public class Authorizer implements SecurityContext {
     	
-    	private CheckIn checkIn;
-		private Account account;
-		private Long restaurantId;
+    	private final CheckIn checkIn;
+		private final Account account;
+		private final Long businessId;
 
         public Authorizer(final CheckIn checkIn) {
+        	this.account = null;
+        	this.businessId = null;
         	this.checkIn = checkIn;
             this.principal = new Principal() {
                 public String getName() {
@@ -155,9 +157,10 @@ public class SecurityFilter implements ContainerRequestFilter {
             };
         }
         
-        public Authorizer(final Account account, Long restaurantId) {
+        public Authorizer(final Account account, Long businessId) {
+        	this.checkIn = null;
         	this.account = account;
-        	this.restaurantId = restaurantId;
+        	this.businessId = businessId;
             this.principal = new Principal() {
                 public String getName() {
                 		return account.getLogin();
@@ -178,13 +181,15 @@ public class SecurityFilter implements ContainerRequestFilter {
          * @param role Role to be checked
          */
         public boolean isUserInRole(String role) {
+        	// guest role is for checkedin customers
         	if( role.equals("guest") && checkIn != null && checkIn.getUserId() != null)
         		return true;
         	
-
+        	// only grant the restaurantadmin role if an account was authenticated and the account has the role for this business
         	if(role.equals("restaurantadmin") && account != null && role.equals(account.getRole())){
-             		return accountCtrl.isAccountManagingRestaurantId(account, restaurantId);
+             		return accountCtrl.isAccountManagingRestaurantId(account, businessId);
         	}
+        	// grant the user role, if an account was authenticated
         	if(role.equals("user") && account != null) {
         		return true;
         	}
