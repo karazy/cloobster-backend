@@ -148,7 +148,7 @@ public class BillController {
 				spotData.setId(checkIn.getSpot().getId());
 				spotData.setStatus(request.getStatus());
 				// Add a message with updated spot status to the package.
-				messages.add(new MessageDTO("spot", "update", spotData));				
+				messages.add(new MessageDTO("spot", "update", spotData));
 			}
 			try {
 				// Send messages to notify clients over their channel.
