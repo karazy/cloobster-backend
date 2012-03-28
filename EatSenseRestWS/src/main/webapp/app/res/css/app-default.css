@@ -6883,9 +6883,30 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*
+* Orderlist
+*/
+/* line 99, app-default.scss */
+.orderListItem h2 {
+  float: left;
+  /*width: 80%;*/
+}
+/* line 105, app-default.scss */
+.orderListItem div {
+  position: relative;
+}
+/* line 109, app-default.scss */
+.orderListItem div.price {
+  position: absolute;
+  right: 0;
+  /*	width: 30%;*/
+  text-align: right;
+  padding-right: 10px;
+}
+
+/*
 * Dashboard
 */
-/* line 97, app-default.scss */
+/* line 123, app-default.scss */
 .dashboard-button {
   width: 90px !important;
   height: 90px !important;
@@ -6899,7 +6920,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-bottom: 5px;
 }
 
-/* line 110, app-default.scss */
+/* line 136, app-default.scss */
 .dashboard-button-pressed {
   width: 90px !important;
   height: 90px !important;
@@ -6907,7 +6928,7 @@ input[type="search"]::-webkit-search-cancel-button {
   border-color: blue;
 }
 
-/* line 117, app-default.scss */
+/* line 143, app-default.scss */
 .dashboard-button-label {
   font-size: 0.6em;
   position: absolute;
@@ -6915,14 +6936,14 @@ input[type="search"]::-webkit-search-cancel-button {
   bottom: 2px;
 }
 
-/* line 133, app-default.scss */
+/* line 159, app-default.scss */
 .checkInButton {
   height: 110px !important;
   background-image: url("../images/landing.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 139, app-default.scss */
+/* line 165, app-default.scss */
 .checkInButton-label {
   font-size: 0.6em;
   position: absolute;
@@ -6936,20 +6957,20 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 90px;
 }
 
-/* line 152, app-default.scss */
+/* line 178, app-default.scss */
 .currentDealsButton {
   background-image: url("../images/club1.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 157, app-default.scss */
+/* line 183, app-default.scss */
 .newRestaurantsButton {
   font-size: 0.9em !important;
   background-image: url("../images/club4.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 166, app-default.scss */
+/* line 192, app-default.scss */
 .x-tab .x-button-icon.cart {
   -webkit-mask-image: url("../images/cart.png");
 }
