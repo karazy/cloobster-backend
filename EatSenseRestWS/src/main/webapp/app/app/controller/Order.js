@@ -29,25 +29,18 @@
 			paymentButton: '#myorderstab button[action="pay"]',
 			leaveButton: '#myorderstab button[action="leave"]'
 		},
-		/**
-		 * Tooltip menu, shown when user taps an order
-		 */
-		tooltip : ''				
-	},
-	init: function() {
-		 
-		this.control({
-			 cancelOrderBt : {
-				 tap: this.dumpCart
+		control: {
+			cancelOrderBt : {
+				 tap: 'dumpCart'
 			 }, 
 			 submitOrderBt : {
-				 tap: this.submitOrders
+				 tap: 'submitOrders'
 			 },
 			 orderlist : {
-				 itemtap: this.cartItemContextMenu
+				 itemtap: 'cartItemContextMenu'
 			 },
 			 editOrderBt : {
-				tap: this.editOrder
+				tap: 'editOrder'
 			 },
 			 backBt : {
             	 tap: function() {
@@ -58,19 +51,24 @@
             	 }
              },
              amountSpinner : {
-            	 spin: this.amountChanged
+            	 spin: 'amountChanged'
              },
              paymentButton: {
-            	 tap: this.choosePaymentMethod,            	             	 
+            	 tap: 'choosePaymentMethod'
              },
              myordersCompleteButton : {
-            	 tap: this.completePayment
+            	 tap: 'completePayment'
              },
              leaveButton : {
-            	 tap: this.leave
+            	 tap: 'leave'
              }
-		 });
-		
+		},
+		/**
+		 * Tooltip menu, shown when user taps an order
+		 */
+		tooltip : ''				
+	},
+	init: function() {
 		
 		//store retrieved models
 		 var models = {};

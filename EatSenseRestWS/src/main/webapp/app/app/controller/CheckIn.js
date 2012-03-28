@@ -6,7 +6,6 @@
  */
 Ext.define('EatSense.controller.CheckIn', {
     extend: 'Ext.app.Controller',
-    requires: ['EatSense.data.proxy.CustomRestProxy'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
     	refs: {
@@ -111,104 +110,7 @@ Ext.define('EatSense.controller.CheckIn', {
      	        	    }
     	        	});
     	    	}
-    	 };
-    	 
-    	 /*
-    	  * Sets up all necessary stores which depend on the business id.
-    	  * This method is called once after checkin was successful.
-    	  */
-    	 this.createStores = function(businessId) {
-    	// 	 console.log('create menu store');
-    	// 	 var menusStore =	 Ext.create('Ext.data.Store', {
-	 			//    model: 'EatSense.model.Menu',
-	 			//    storeId: 'menuStore',
-	 			//    proxy: {
-	 			// 	   type: 'rest',
-	 			// 	   url : '/c/businesses/'+businessId+'/menus',
-	 			// 	   reader: {
-	 			// 		   type: 'json'
-	 			//    		}
-	 			//    }
-	 		 // });
-    		 
-    	// 	 this.getMenulist().setStore(menusStore);
-    		 
- 
-        //setup store for products	 
-  		 // var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
-  		 // if(ProductType.getProxy() == null) {
-  			// console.log('create product store');
-  	 	// 	 var _productListStore =	 Ext.create('Ext.data.Store', {
-	 			//    model: 'EatSense.model.Product',
-	 			//    storeId: 'productStore',	 			   
-	 			//    proxy: {
-	 			// 	   type: 'rest',
-	 			// 	   url : '/c/businesses/'+businessId+'/products',
-	 			// 	   reader: {
-	 			// 		   type: 'json'
-	 			//    		},
-	 			//    		writer: {
-	 			//    			type: 'json',
-	 			//    			writeAllFields: true
-	 			//    		}
-	 			//    }
-	 		 // });
-  			 
-  			// ProductType.setProxy(_productListStore.getProxy());
-  		 // }  		 
-   	
-		 
-  		//setup store for orders
-		 // var OrderType = Ext.ModelManager.getModel('EatSense.model.Order');
-		 // if(OrderType.getProxy() == null) {
-			//  console.log('create order store');
-			//  var _orderListStore =	 Ext.create('Ext.data.Store', {
-	 	// 		   model: 'EatSense.model.Order',
-	 	// 		   storeId: 'orderStore',
-	 	// 		   filters: [	 			     
-	 	// 		    {filterFn:	 function(record, id) {
-			// 				return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
-	 	// 		    	 }
-	 	// 		    }
-	 	// 		   ],
-	 	// 		   proxy: {
-	 	// 			   type: 'rest',
-	 	// 			  enablePagingParams: false,
-	 	// 			   url : '/c/businesses/'+businessId+'/orders',
-	 	// 			   reader: {
-	 	// 				   type: 'json'
-	 	// 		   		}
-	 	// 		   }
-	 	// 	 });
-			 
-			//  OrderType.setProxy(_orderListStore.getProxy());
-			//  if(this.getMyorderlist() != null && this.getMyorderlist() !== 'undefined') {
-			// 	 this.getMyorderlist().setStore(_orderListStore);
-			//  } else {
-			// 	 console.log('Could not access myorderlist.');
-			//  }			 
-		 // }
-		 
-		 //setup store for bills
-		 // var BillType = Ext.ModelManager.getModel('EatSense.model.Bill');
-		 // if(BillType.getProxy() == null) {
-			//  console.log('create bill store');
-			//  var billStore =	 Ext.create('Ext.data.Store', {
-	 	// 		   model: 'EatSense.model.Bill',
-	 	// 		   storeId: 'billStore',
-	 	// 		   proxy: {
-	 	// 			   type: 'rest',
-	 	// 			  enablePagingParams: false,
-	 	// 			   url : '/c/businesses/'+businessId+'/bills',
-	 	// 			   reader: {
-	 	// 				   type: 'json'
-	 	// 		   		}
-	 	// 		   }
-	 	// 	 });
-			//  BillType.setProxy(billStore.getProxy());	 
-		 // }
-		 
-    	 };
+    	 };    	    
     },
     /**
      * Called after init.
@@ -428,7 +330,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	showMenu : function() {
 		console.log("CheckIn Controller -> showMenu");
 		
-		this.createStores(this.models.activeCheckIn.get('businessId'));
+		// this.createStores(this.models.activeCheckIn.get('businessId'));
 		
 		 var menu = this.getMenuview(), 
 		 lounge = this.getLoungeview(),

@@ -1,6 +1,6 @@
 Ext.define('EatSense.model.Menu', {
 	extend: 'Ext.data.Model',
-	requires: ['EatSense.model.Product','EatSense.model.Choice','EatSense.model.Option','EatSense.data.proxy.CustomRestProxy'],
+	requires: ['EatSense.model.Product','EatSense.model.Choice','EatSense.model.Option'],
 	config : {
 		idProperty: 'id',
 		fields: [

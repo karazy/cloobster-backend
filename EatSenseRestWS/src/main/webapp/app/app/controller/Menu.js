@@ -31,28 +31,26 @@ Ext.define('EatSense.controller.Menu', {
         	loungeview: 'lounge',
         	loungeTabBar: '#loungeTabBar',
         	myordersview: '#myorderstab #myorders',
-		}
-    },
-    init: function() {
-    	console.log('initialized MenuController');
-    	 this.control({
-    		 menulist: {
-             	select: this.showProductlist
+		},
+
+		control: {
+			menulist: {
+             	select: 'showProductlist'
              },
              productlist : {
-            	select: this.loadProductDetail 
+            	select: 'loadProductDetail' 
              },
              backToMenu: {
-            	 tap: this.showMenu
+            	 tap: 'showMenu'
              }, 
              prodDetailBackBt: {
-            	 tap: this.prodDetailBackBtHandler
+            	 tap: 'prodDetailBackBtHandler'
              },
              createOrderBt : {
-            	 tap: this.createOrder
+            	 tap: 'createOrder'
              },
              bottomTapToMenu : {
-            	 tap: this.showMenu
+            	 tap: 'showMenu'
              },
              backBt : {
             	 tap: function() {
@@ -63,7 +61,7 @@ Ext.define('EatSense.controller.Menu', {
             	 }
              },
              amountSpinner : {
-            	 spin: this.amountChanged
+            	 spin: 'amountChanged'
              },
              //TODO refactor general loungeview control into another controller?!
              loungeview : {
@@ -93,7 +91,10 @@ Ext.define('EatSense.controller.Menu', {
     				this.getCreateOrderBt().hide();
     			}
     		}
-        });
+		}
+    },
+    init: function() {
+    	console.log('initialized MenuController');
     	 
     	 //store retrieved models
     	 var models = {};

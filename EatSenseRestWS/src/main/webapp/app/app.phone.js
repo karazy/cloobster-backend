@@ -19,7 +19,7 @@ Ext.application({
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
-	requires: ['EatSense.data.proxy.CustomRestProxy','EatSense.data.proxy.OperationImprovement', 'EatSense.view.fragment.DashboardButton', 'EatSense.override.RadioOverride', 'EatSense.model.AppState'],
+	requires: ['EatSense.override.CustomRestProxy','EatSense.override.OperationImprovement', 'EatSense.view.fragment.DashboardButton', 'EatSense.override.RadioOverride', 'EatSense.model.AppState'],
 	launch : function() {
     	this.launched = true;
         this.mainLaunch();
