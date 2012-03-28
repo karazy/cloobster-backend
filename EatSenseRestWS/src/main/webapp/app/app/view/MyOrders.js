@@ -32,6 +32,7 @@ Ext.define('EatSense.view.MyOrders', {
 		{
 			xtype: 'list',
 			id: 'myorderlist',
+			store: 'orderStore',
 			ui: 'round',
 			styleHtmlContent: true,
 			allowDeselect: true,

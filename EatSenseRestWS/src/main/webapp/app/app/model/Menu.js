@@ -7,13 +7,13 @@ Ext.define('EatSense.model.Menu', {
 		    {name: 'id', type: 'string'},
 			{name: 'title', type: 'string'}
 		],
-//		proxy: {
-//			type: 'rest',
-//			url: globalConf.serviceUrl+'/restaurants/{restaurantId}/menu/', 
-//			reader: {
-//				type: 'json',
-//			},			
-//		},
+		proxy: {
+		   type: 'rest',
+		   url : '/c/businesses/{pathId}/menus',
+		   reader: {
+			   type: 'json'
+	   		}
+	 	},
 		hasMany: {model: 'EatSense.model.Product', name: 'products'}
 	}
 });

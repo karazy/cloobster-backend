@@ -9,84 +9,83 @@ Ext.define('EatSense.controller.CheckIn', {
     requires: ['EatSense.data.proxy.CustomRestProxy'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
-    	refs: 
-    	        {
-    	            main : 'mainview',
-    	            searchfield : 'dashboard textfield',
-    	            checkinconfirmation : 'checkinconfirmation',
-    	        	nickname : '#nicknameTf',
-    	        	menuoverview: 'menuoverview',   
-    	        	checkinwithothers: 'checkinwithothers',
-    	        	dashboard: 'dashboard',
-    	        	settingsBt: 'dashboard button[action=settings]',
-    	        	settingsBackBt: 'settings button[action=back]',
-    	        	nicknameTogglefield: 'checkinconfirmation togglefield[name=nicknameToggle]',
-    	        	nicknameSettingsField: 'settings #nicknameSetting',
-    	        	settingsview: 'settings',
-    	        	userlist: '#checkinDlg2Userlist',
-    	        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
-    	        	cancelCheckInBt: '#cancelCheckInBt',    	       
-    	        	menulist: 'lounge #menulist',
-    	        	menuview: 'menu',
-    	        	loungeview : 'lounge',
-    	        	myorderlist: '#myorderlist',
-    	        	checkInBtn: '#checkInBtn',
-    	        	confirmCheckInBt : '#confirmCheckInBt',
-    	        	checkinDlg2Userlist: '#checkinDlg2Userlist',
-    	        	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
-    	        	cancelCheckInBt : '#cancelCheckInBt',
-    	        	regenerateNicknameBt : '#regenerateNicknameBt',
-    	        	menuTab: '#menutab',
-    	        	cartTab: '#carttab'    	        		
-    	        },
-    	        /**
-    	    	  * Contains information to resume application state after the app was closed.
-    	    	  */
-    	 appState : Ext.create('EatSense.model.AppState', {id: '1'})
+    	refs: {
+            main : 'mainview',
+            searchfield : 'dashboard textfield',
+            checkinconfirmation : 'checkinconfirmation',
+        	nickname : '#nicknameTf',
+        	menuoverview: 'menuoverview',   
+        	checkinwithothers: 'checkinwithothers',
+        	dashboard: 'dashboard',
+        	settingsBt: 'dashboard button[action=settings]',
+        	settingsBackBt: 'settings button[action=back]',
+        	nicknameTogglefield: 'checkinconfirmation togglefield[name=nicknameToggle]',
+        	nicknameSettingsField: 'settings #nicknameSetting',
+        	settingsview: 'settings',
+        	userlist: '#checkinDlg2Userlist',
+        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
+        	cancelCheckInBt: '#cancelCheckInBt',    	       
+        	menulist: 'lounge #menulist',
+        	menuview: 'menu',
+        	loungeview : 'lounge',
+        	myorderlist: '#myorderlist',
+        	checkInBtn: '#checkInBtn',
+        	confirmCheckInBt : '#confirmCheckInBt',
+        	checkinDlg2Userlist: '#checkinDlg2Userlist',
+        	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
+        	cancelCheckInBt : '#cancelCheckInBt',
+        	regenerateNicknameBt : '#regenerateNicknameBt',
+        	menuTab: '#menutab',
+        	cartTab: '#carttab'    	        		
+    	},
+    	control: {
+    		checkInBtn: {
+                tap: 'checkInIntent'
+            },
+            confirmCheckInBt: {
+            	tap: 'checkIn'
+            }, 
+            checkinDlg2Userlist: {
+            	select: 'linkToUser'
+            },
+            checkinDlg2CancelBt: {
+            	tap: 'showMenu'
+            },
+            cancelCheckInBt: {
+            	tap: 'showDashboard'
+            },
+            regenerateNicknameBt: {
+            	tap: 'generateNickname'
+            },
+            settingsBt: {
+            	tap: 'showSettings'
+            },
+            settingsBackBt: {
+            	tap: 'showDashboard'            	
+            },
+            nicknameSettingsField: {            	
+            	change: 'saveNickname'
+            }
+    	},
+        /**
+    	* Contains information to resume application state after the app was closed.
+    	*/
+    	appState : Ext.create('EatSense.model.AppState', {id: '1'})
     },
     init: function() {
     	console.log('initialized CheckInController');
-    	 this.control({
-    		 checkInBtn: {
-                tap: this.checkInIntent
-            },
-            confirmCheckInBt: {
-            	tap: this.checkIn
-            }, 
-            checkinDlg2Userlist: {
-            	select: this.linkToUser
-            },
-            checkinDlg2CancelBt: {
-            	tap: this.showMenu
-            },
-            cancelCheckInBt: {
-            	tap: this.showDashboard
-            },
-            regenerateNicknameBt: {
-            	tap: this.generateNickname
-            },
-            settingsBt: {
-            	tap: this.showSettings
-            },
-            settingsBackBt: {
-            	tap: this.showDashboard            	
-            },
-            nicknameSettingsField: {            	
-            	change: this.saveNickname
-            }
-        });
-    	 
-    	 var models = {};
-    	 this.models = models;
+
+    	var models = {};
+    	this.models = models;
 
     	 
-    	 this.on('statusChanged', this.handleStatusChange, this);
+    	this.on('statusChanged', this.handleStatusChange, this);
     	 
     	 
     	 //private functions
     	 
     	 //called by checkInIntent. 
-    	 this.doCheckInIntent = function(barcode, button, deviceId) {    		 
+    	this.doCheckInIntent = function(barcode, button, deviceId) {    		 
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
     	    		this.getDashboard().showLoadScreen(false);
@@ -119,95 +118,95 @@ Ext.define('EatSense.controller.CheckIn', {
     	  * This method is called once after checkin was successful.
     	  */
     	 this.createStores = function(businessId) {
-    		 console.log('create menu store');
-    		 var menusStore =	 Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.Menu',
-	 			   storeId: 'menuStore',
-	 			   proxy: {
-	 				   type: 'rest',
-	 				   url : '/c/businesses/'+businessId+'/menus',
-	 				   reader: {
-	 					   type: 'json'
-	 			   		}
-	 			   }
-	 		 });
+    	// 	 console.log('create menu store');
+    	// 	 var menusStore =	 Ext.create('Ext.data.Store', {
+	 			//    model: 'EatSense.model.Menu',
+	 			//    storeId: 'menuStore',
+	 			//    proxy: {
+	 			// 	   type: 'rest',
+	 			// 	   url : '/c/businesses/'+businessId+'/menus',
+	 			// 	   reader: {
+	 			// 		   type: 'json'
+	 			//    		}
+	 			//    }
+	 		 // });
     		 
-    		 this.getMenulist().setStore(menusStore);
+    	// 	 this.getMenulist().setStore(menusStore);
     		 
  
         //setup store for products	 
-  		 var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
-  		 if(ProductType.getProxy() == null) {
-  			console.log('create product store');
-  	 		 var _productListStore =	 Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.Product',
-	 			   storeId: 'productStore',	 			   
-	 			   proxy: {
-	 				   type: 'rest',
-	 				   url : '/c/businesses/'+businessId+'/products',
-	 				   reader: {
-	 					   type: 'json'
-	 			   		},
-	 			   		writer: {
-	 			   			type: 'json',
-	 			   			writeAllFields: true
-	 			   		}
-	 			   }
-	 		 });
+  		 // var ProductType = Ext.ModelManager.getModel('EatSense.model.Product');
+  		 // if(ProductType.getProxy() == null) {
+  			// console.log('create product store');
+  	 	// 	 var _productListStore =	 Ext.create('Ext.data.Store', {
+	 			//    model: 'EatSense.model.Product',
+	 			//    storeId: 'productStore',	 			   
+	 			//    proxy: {
+	 			// 	   type: 'rest',
+	 			// 	   url : '/c/businesses/'+businessId+'/products',
+	 			// 	   reader: {
+	 			// 		   type: 'json'
+	 			//    		},
+	 			//    		writer: {
+	 			//    			type: 'json',
+	 			//    			writeAllFields: true
+	 			//    		}
+	 			//    }
+	 		 // });
   			 
-  			ProductType.setProxy(_productListStore.getProxy());
-  		 }  		 
+  			// ProductType.setProxy(_productListStore.getProxy());
+  		 // }  		 
    	
 		 
   		//setup store for orders
-		 var OrderType = Ext.ModelManager.getModel('EatSense.model.Order');
-		 if(OrderType.getProxy() == null) {
-			 console.log('create order store');
-			 var _orderListStore =	 Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.Order',
-	 			   storeId: 'orderStore',
-	 			   filters: [	 			     
-	 			    {filterFn:	 function(record, id) {
-							return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
-	 			    	 }
-	 			    }
-	 			   ],
-	 			   proxy: {
-	 				   type: 'rest',
-	 				  enablePagingParams: false,
-	 				   url : '/c/businesses/'+businessId+'/orders',
-	 				   reader: {
-	 					   type: 'json'
-	 			   		}
-	 			   }
-	 		 });
+		 // var OrderType = Ext.ModelManager.getModel('EatSense.model.Order');
+		 // if(OrderType.getProxy() == null) {
+			//  console.log('create order store');
+			//  var _orderListStore =	 Ext.create('Ext.data.Store', {
+	 	// 		   model: 'EatSense.model.Order',
+	 	// 		   storeId: 'orderStore',
+	 	// 		   filters: [	 			     
+	 	// 		    {filterFn:	 function(record, id) {
+			// 				return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
+	 	// 		    	 }
+	 	// 		    }
+	 	// 		   ],
+	 	// 		   proxy: {
+	 	// 			   type: 'rest',
+	 	// 			  enablePagingParams: false,
+	 	// 			   url : '/c/businesses/'+businessId+'/orders',
+	 	// 			   reader: {
+	 	// 				   type: 'json'
+	 	// 		   		}
+	 	// 		   }
+	 	// 	 });
 			 
-			 OrderType.setProxy(_orderListStore.getProxy());
-			 if(this.getMyorderlist() != null && this.getMyorderlist() !== 'undefined') {
-				 this.getMyorderlist().setStore(_orderListStore);
-			 } else {
-				 console.log('Could not access myorderlist.');
-			 }			 
-		 }
+			//  OrderType.setProxy(_orderListStore.getProxy());
+			//  if(this.getMyorderlist() != null && this.getMyorderlist() !== 'undefined') {
+			// 	 this.getMyorderlist().setStore(_orderListStore);
+			//  } else {
+			// 	 console.log('Could not access myorderlist.');
+			//  }			 
+		 // }
 		 
 		 //setup store for bills
-		 var BillType = Ext.ModelManager.getModel('EatSense.model.Bill');
-		 if(BillType.getProxy() == null) {
-			 console.log('create bill store');
-			 var billStore =	 Ext.create('Ext.data.Store', {
-	 			   model: 'EatSense.model.Bill',
-	 			   storeId: 'billStore',
-	 			   proxy: {
-	 				   type: 'rest',
-	 				  enablePagingParams: false,
-	 				   url : '/c/businesses/'+businessId+'/bills',
-	 				   reader: {
-	 					   type: 'json'
-	 			   		}
-	 			   }
-	 		 });
-			 BillType.setProxy(billStore.getProxy());	 
-		 }
+		 // var BillType = Ext.ModelManager.getModel('EatSense.model.Bill');
+		 // if(BillType.getProxy() == null) {
+			//  console.log('create bill store');
+			//  var billStore =	 Ext.create('Ext.data.Store', {
+	 	// 		   model: 'EatSense.model.Bill',
+	 	// 		   storeId: 'billStore',
+	 	// 		   proxy: {
+	 	// 			   type: 'rest',
+	 	// 			  enablePagingParams: false,
+	 	// 			   url : '/c/businesses/'+businessId+'/bills',
+	 	// 			   reader: {
+	 	// 				   type: 'json'
+	 	// 		   		}
+	 	// 		   }
+	 	// 	 });
+			//  BillType.setProxy(billStore.getProxy());	 
+		 // }
 		 
     	 };
     },
@@ -434,14 +433,15 @@ Ext.define('EatSense.controller.CheckIn', {
 		 var menu = this.getMenuview(), 
 		 lounge = this.getLoungeview(),
 		 main = this.getMain(), 
-		 businessId = Ext.String.trim(this.models.activeCheckIn.data.businessId), 
+		 businessId = Ext.String.trim(this.models.activeCheckIn.get('businessId')), 
 		 me = this; 
 		 
 		 if(businessId.toString().length != 0) {
 			 this.getMenulist().getStore().load({
 				 scope   : this,
 				 params: {
-					 includeProducts : true
+					 includeProducts : true,
+					 pathId: businessId
 				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
@@ -532,7 +532,8 @@ Ext.define('EatSense.controller.CheckIn', {
    				scope: this,
    				params: {
    					'status': Karazy.constants.Order.CART,
-   					'checkInId': this.models.activeCheckIn.getId()
+   					'checkInId': this.models.activeCheckIn.getId(),
+   					pathId: this.models.activeCheckIn.get('businessId')
    				},
    				callback: function(records, operation, success) {
    					if(success == true) {

@@ -511,7 +511,7 @@
 		var 	me = this,
 				myorderlist = me.getMyorderlist(),
 				myordersStore = Ext.data.StoreManager.lookup('orderStore'),
-				checkInId = me.getApplication().getController('CheckIn').models.activeCheckIn.get('userId'),
+				activeCheckIn = me.getApplication().getController('CheckIn').models.activeCheckIn,
 				payButton = me.getPaymentButton();
 				leaveButton = me.getLeaveButton();
 		
@@ -523,8 +523,8 @@
 			scope   : this,
 			enablePagingParams: false,
 			params : {
-				'checkInId' : checkInId,
-//				'status' : Karazy.constants.Order.PLACED,
+				'checkInId' : activeCheckIn.get('userId'),
+				pathId: activeCheckIn.get('businessId')
 			},
 			callback: function(records, operation, success) {
 				try {
@@ -651,7 +651,8 @@
 		bill.save({
 			scope: this,
 			params: {
-				'checkInId' : checkIn.getId()
+				'checkInId' : checkIn.getId(),
+				pathId: checkIn.get('businessId')
 			},
 			success: function(record, operation) {
 					me.models.activeBill = record;

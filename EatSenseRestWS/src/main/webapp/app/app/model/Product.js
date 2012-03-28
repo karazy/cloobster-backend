@@ -24,7 +24,7 @@ Ext.define('EatSense.model.Product', {
 		}, { //dont change, gets set automatically
 			name: 'price_calculated',
 			type: 'number'
-		}],
+		}],		
 		 associations: [{
 	            type: 'hasMany',
 	            model: 'EatSense.model.Choice',
@@ -32,7 +32,18 @@ Ext.define('EatSense.model.Product', {
 	            name: 'choices',
 	            autoLoad: true,
 	            associationKey: 'choices' // read child data from child_groups
-	        }],
+	    }],
+	    proxy: {
+		   type: 'rest',
+		   url : '/c/businesses/{pathId}/products',
+		   reader: {
+			   type: 'json'
+	   		},
+	   		writer: {
+	   			type: 'json',
+	   			writeAllFields: true
+	   		}
+	   }
 	},
 	
 	validate: function() {
