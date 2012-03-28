@@ -141,16 +141,15 @@ Ext.define('EatSense.controller.CheckIn', {
     			barcode = result.text;
     			console.log('scanned ' + barcode);
     			that.getDashboard().showLoadScreen(true);
-    			deviceId = device.uuid;
+    			//FR 28.03.12 apple rejects apps which track device uuid
+    			// deviceId = device.uuid;
     			that.doCheckInIntent(barcode, button, deviceId);
     		}, function(error) {
     			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
     		});
     	} else {
     		button.enable();
-    	}
-    	
-
+    	}    	
    },
    /**
     * CheckIn Process
