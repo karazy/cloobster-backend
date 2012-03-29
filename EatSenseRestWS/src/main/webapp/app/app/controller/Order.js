@@ -15,11 +15,17 @@
 			cancelOrderBt : '#cartTopBar button[action="trash"]',
 			submitOrderBt : '#cartTopBar button[action="order"]',
 			topToolbar : '#cartTopBar',
-			productdetail : '#cartCardPanel #cartProductdetail',	
-			choicespanel : '#cartCardPanel #cartProductdetail #choicesPanel',
+			// productdetail : '#cartCardPanel #cartProductdetail',	
+			productdetail : {
+                selector: 'orderdetail',
+                xtype: 'orderdetail',
+                autoCreate: true
+            },
+			choicespanel : 'orderdetail #choicesPanel',
 			editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
-			amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
-			prodDetailLabel :'#cartCardPanel #cartProductdetail #prodDetailLabel' ,	
+			// amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
+			amountSpinner : 'orderdetail spinnerfield',
+			prodDetailLabel :'orderdetail #prodDetailLabel' ,	
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: '#myorderlist',
@@ -338,10 +344,11 @@
 	 */
 	showOrderDetail: function(dataview, order) {
 		console.log("Cart Controller -> showProductDetail");		
-		 var detail = this.getProductdetail(), 
-		 choicesPanel =  this.getChoicespanel(),
-		 product = order.getProduct();
-		 this.models.activeOrder = order;
+		 var 	detail = this.getProductdetail(), 
+		 		choicesPanel =  this.getChoicespanel(),
+		 		product = order.getProduct();
+		 		this.models.activeOrder = order,
+		 		main = this.getMain();
 
 		 choicesPanel.removeAll(false);
 		 //reset product spinner
@@ -409,9 +416,11 @@
 			value: order.get('comment')
 			}
 		);
-		 this.menuBackBtContext = this.editOrder;
+		 // this.menuBackBtContext = this.editOrder;
 
-		 this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
+		 // this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
+		 main.add(detail);
+		 detail.show();
 	},
 	/**
 	 * Edit an existing order.

@@ -11,6 +11,7 @@ Ext.define('EatSense.view.Lounge', {
 		items : [ {
 			title : i18nPlugin.translate('menuTitle'),
 			itemId : 'menutab',
+			name: 'menu',			
 			iconCls : 'compose',
 			layout : 'fit',
 			items : [ {

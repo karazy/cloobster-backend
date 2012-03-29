@@ -1,9 +1,9 @@
 /**
  * Displays details and options of a product.
  */
-Ext.define('EatSense.view.ProductDetail', {
+Ext.define('EatSense.view.OrderDetail', {
 	extend : 'Ext.Panel',
-	xtype : 'productdetail',	
+	xtype : 'orderdetail',	
 	layout : {
 		type : 'vbox',
 		align : 'stretch',
@@ -50,7 +50,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
-					itemId : 'productAmountSpinner',
 					style : 'background-color:white;',
 					value : 1,
 					width: 200,

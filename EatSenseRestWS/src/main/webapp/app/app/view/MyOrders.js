@@ -37,6 +37,7 @@ Ext.define('EatSense.view.MyOrders', {
 			styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
+			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
