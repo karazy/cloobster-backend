@@ -4,4 +4,7 @@
         <property name="status" direction="asc"/>
         <property name="checkInTime" direction="asc"/>
 	</datastore-index>
+	<datastore-index kind="Order" ancestor="true" source="manual">
+        <property name="status" direction="asc"/>
+    </datastore-index>
 </datastore-indexes>
