@@ -29,14 +29,14 @@ public class Account extends GenericEntity {
 	Date lastFailedLogin;
 	int failedLoginAttempts;
 	
-	List<Key<Restaurant>> restaurants;
+	List<Key<Business>> businessess;
 	
-	public List<Key<Restaurant>> getRestaurants() {
-		return restaurants;
+	public List<Key<Business>> getBusinesses() {
+		return businessess;
 	}
 
-	public void setRestaurants(List<Key<Restaurant>> restaurants) {
-		this.restaurants = restaurants;
+	public void setBusinesses(List<Key<Business>> businesses) {
+		this.businessess = businesses;
 	}
 
 	public Date getLastFailedLogin() {

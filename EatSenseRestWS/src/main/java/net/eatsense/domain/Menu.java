@@ -12,7 +12,7 @@ public class Menu extends GenericEntity{
 	private String description;
 	
 	@Parent
-	private Key<Restaurant> restaurant;
+	private Key<Business> business;
 	
 	
 	
@@ -40,21 +40,21 @@ public class Menu extends GenericEntity{
 
 
 
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
 
 
 
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 
 
 
 	@Transient
 	public Key<Menu> getKey() {
-		return new Key<Menu>(getRestaurant(), Menu.class, super.getId());
+		return new Key<Menu>(getBusiness(), Menu.class, super.getId());
 	}
 	
 }

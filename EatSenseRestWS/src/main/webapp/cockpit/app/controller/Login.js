@@ -9,7 +9,7 @@ Ext.define('EatSense.controller.Login', {
 				tap: 'login'
 			},
 			logoutButton: {
-				tap: 'logout'
+				tap: 'showLogoutDialog'
 			},
 		 	businessList: {
 		 		itemtap: 'setBusinessId'
@@ -116,15 +116,32 @@ Ext.define('EatSense.controller.Login', {
 						spotCtr.loadSpots();
 						me.openChannel();
 					},
-					failure: function(record, operation){					
+					failure: function(record, operation) {					
 						//error verifying credentials, maybe account changed on server or server ist not aaccessible
 						me.resetDefaultAjaxHeaders();
+						me.resetAccountProxyHeaders();
+
 						Ext.create('EatSense.view.Login');
 						//TODO handle 401 unauthorized
 
 						me.getLoginField().setValue(account.get('login'));
 
-						Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('restoreCredentialsErr')); 
+
+						if(operation.error) {
+							//not authorized
+							if(operation.error.status == "401" || operation.error.status == "403") {
+								errorMessage = i18nPlugin.translate('restoreCredentialsErr');
+								//login data not valid. delete
+								accountLocalStore.removeAll();
+								accountLocalStore.sync();
+							} else if (operation.error.status == "404") {
+								errorMessage = i18nPlugin.translate('resourceNotAvailable');
+							}
+						} 
+
+						(!errorMessage || errorMessage == "") ?	errorMessage = i18nPlugin.translate('restoreCredentialsErr') : errorMessage;
+
+						Ext.Msg.alert(i18nPlugin.translate('error'), errorMessage); 
 					}
 				});							   			   		 	   		
 		   	 } else {
@@ -132,7 +149,6 @@ Ext.define('EatSense.controller.Login', {
 		   	 	accountLocalStore.removeAll();
 		   	 	Ext.create('EatSense.view.Login');	
 		   	 }
-
 	   	  } catch (e) {
 	   	 	console.log('Failed restoring cockpit state.');
 	   		accountLocalStore.removeAll();	
@@ -154,7 +170,8 @@ Ext.define('EatSense.controller.Login', {
 				login = this.getLoginField().getValue(),
 				password = this.getPasswordField().getValue(),				
 				spotCtr = this.getApplication().getController('Spot'),
-				me = this;
+				me = this,
+				errorMessage;
 
 		if(Ext.String.trim(login).length == 0 || Ext.String.trim(password).length == 0) {
 			
@@ -186,7 +203,19 @@ Ext.define('EatSense.controller.Login', {
 			},
 			failure: function(record, operation){
 				console.log('failure');
-				Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('wrongCredentials')); 
+				me.resetAccountProxyHeaders();
+				me.resetDefaultAjaxHeaders();
+				if(operation.error) {
+					//not authorized
+					if(operation.error.status == "401" || operation.error.status == "403") {
+						errorMessage = i18nPlugin.translate('wrongCredentials');
+					} else if (operation.error.status == "404") {
+						errorMessage = i18nPlugin.translate('resourceNotAvailable');
+					}
+				} 
+
+				(!errorMessage || errorMessage == "") ?	errorMessage = i18nPlugin.translate('wrongCredentials') : errorMessage;			
+				Ext.Msg.alert(i18nPlugin.translate('error'), errorMessage); 
 			}
 		});
 	},
@@ -212,7 +241,28 @@ Ext.define('EatSense.controller.Login', {
 	*/
 	logout: function() {
 		console.log('logout');
-		var accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
+		var 	accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
+		
+		Karazy.channel.closeChannel();
+		//remove all stored credentials
+		accountLocalStore.removeAll();
+		accountLocalStore.sync();
+
+		Ext.Ajax.setDefaultHeaders({});	
+
+		//TODO remove in a more reliable way!
+		//remove main view				
+		Ext.Viewport.remove(Ext.Viewport.down('main'));
+		//show main view				
+		Ext.create('EatSense.view.Login');		
+
+	},
+	/**
+	*	Displays a logout dialog and logs user out if he confirms.
+	*	
+	*/
+	showLogoutDialog: function() {
+		var 	me = this;
 
 			Ext.Msg.show({
 				title: i18nPlugin.translate('hint'),
@@ -229,18 +279,7 @@ Ext.define('EatSense.controller.Login', {
 				scope: this,
 				fn: function(btnId, value, opt) {
 					if(btnId=='yes') {
-						Karazy.channel.closeChannel();
-						//remove all stored credentials
-						accountLocalStore.removeAll();
-						accountLocalStore.sync();
-
-						Ext.Ajax.setDefaultHeaders({});	
-
-						//TODO remove in a more reliable way!
-						//remove main view				
-						Ext.Viewport.remove(Ext.Viewport.down('main'));
-						//show main view				
-						Ext.create('EatSense.view.Login');		
+						me.logout();	
 					};
 				}
 		});
@@ -269,7 +308,7 @@ Ext.define('EatSense.controller.Login', {
 		       	callback(token);
 		    }, 
 		    failure: function(response) {
-		    	
+		    	Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('channelTokenError')); 
 		    }
 		});
 	},
@@ -279,14 +318,15 @@ Ext.define('EatSense.controller.Login', {
 	*
 	*/
 	openChannel: function() {
-		var		me = this;
+		var		me = this,
+				messageCtr = this.getApplication().getController('Message');
 
 		me.requestNewToken(function(newToken) {
 			Karazy.channel.createChannel( {
 				token: newToken, 
-				messageHandler: me.processMessages,
+				messageHandler: messageCtr.processMessages,
 				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: me,
+				messageHandlerScope: messageCtr,
 				requestTokenHandlerScope: me
 			});
 		});
@@ -298,21 +338,21 @@ Ext.define('EatSense.controller.Login', {
 	*		The raw string message(s) which will be parsed as JSON.
 	*		This could be a single object or an array.
 	*/
-	processMessages: function(rawMessages) {
-		var 	message = Ext.JSON.decode(rawMessages, true),
-				ctr;
+	// processMessages: function(rawMessages) {
+	// 	var 	message = Ext.JSON.decode(rawMessages, true),
+	// 			ctr;
 
-		if(Ext.isArray(message)) {
-				for(index = 0; index < message.length; index++) {
-				if(message[index]) {
-					this.routeMessage(message[index]);
-				}	
-			}
-		}
-		else if(message) {
-			this.routeMessage(message);
-		}				
-	},
+	// 	if(Ext.isArray(message)) {
+	// 			for(index = 0; index < message.length; index++) {
+	// 			if(message[index]) {
+	// 				this.routeMessage(message[index]);
+	// 			}	
+	// 		}
+	// 	}
+	// 	else if(message) {
+	// 		this.routeMessage(message);
+	// 	}				
+	// },
 	/**
 	*	Processes a single message delivered.
 	*	Delegates to the responsible method.
@@ -323,46 +363,37 @@ Ext.define('EatSense.controller.Login', {
 	*			action	- an action like update, new ...
 	*			content - the data
 	*/
-	routeMessage: function(message) {
-		var 	ctr;
+	// routeMessage: function(message) {
+	// 	var 	ctr;
 
-		if(!message) {
-			console.log('param is no message');
-			return;
-		}	
+	// 	if(!message) {
+	// 		console.log('param is no message');
+	// 		return;
+	// 	}	
 
-		switch(message.type.toLowerCase()) {
-			case 'spot': 
-				ctr = this.getApplication().getController('Spot');
-				if(message.action == 'update') {
-					ctr.updateSpotIncremental(message.content);
-				}
-				break;
-			case 'checkin':
-				ctr = this.getApplication().getController('Spot');
-				if(message.action == 'new') {
-					ctr.updateSpotDetailCheckInIncremental(message.content);
-				}
-				break;
-			case 'order':
-				ctr = this.getApplication().getController('Spot');
-				if(message.action == 'update') {
-					ctr.updateSpotDetailOrderIncremental(message.content);
-				}
-				break;
-			case 'bill':
+	// 	switch(message.type.toLowerCase()) {
+	// 		case 'spot': 
+	// 			ctr = this.getApplication().getController('Spot');
+	// 			if(message.action == 'update') {
+	// 				ctr.updateSpotIncremental(message.content);
+	// 			}
+	// 			break;
+	// 		case 'checkin':
+	// 			ctr = this.getApplication().getController('Spot');
+	// 			ctr.updateSpotDetailCheckInIncremental(message.action, Ext.create('EatSense.model.CheckIn',message.content));
+	// 			break;
+	// 		case 'order':
+	// 			ctr = this.getApplication().getController('Spot');
+	// 			ctr.updateSpotDetailOrderIncremental(message.action, message.content);
+	// 			break;
+	// 		case 'bill':
 
-				break;
-			default: console.log('unmapped message.type');
-		}
+	// 			break;
+	// 		default: console.log('unmapped message.type');
+	// 	}
 
-		// if(message.type == 'spot') {
-		// 	ctr = this.getApplication().getController('Spot');
-		// 	if(message.action == 'update') {
-		// 		ctr.updateSpotIncremental(message.content);
-		// 	}
-		// } 
-	},
+
+	// },
 
 	/**
 	*	Loads all businesses (e. g. restaurants or hotels) this user account is assigned to.
@@ -419,7 +450,7 @@ Ext.define('EatSense.controller.Login', {
 	/**
 	*	Sets the businessId in account the user wants to log in for.
 	*	This Id will be used for calls to the webservice.
-	* 	e.g. /restaurants/{id}/spots
+	* 	e.g. /businesses/{id}/spots
 	*	
 	*/
 	setBusinessId: function(dv, index, target, record) {

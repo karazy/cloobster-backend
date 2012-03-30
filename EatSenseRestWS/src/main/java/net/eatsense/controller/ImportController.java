@@ -11,13 +11,13 @@ import javax.validation.Validator;
 
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
-import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Menu;
-import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
+import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -25,12 +25,13 @@ import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.RequestRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
-import net.eatsense.representation.RestaurantDTO;
+import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.SpotDTO;
 
 import org.slf4j.Logger;
@@ -40,20 +41,21 @@ import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
 /**
- * Controller for data import of complete restaurant data.
+ * Controller for data import of complete business data.
  * 
  * @author Nils Weiher
  *
  */
 public class ImportController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private RestaurantRepository restaurantRepo;
+	private BusinessRepository businessRepo;
 	private SpotRepository spotRepo;
 	private MenuRepository menuRepo;
 	private ProductRepository productRepo;
 	private ChoiceRepository choiceRepo;
 	private CheckInRepository checkinRepo;
 	private OrderRepository orderRepo;
+	private RequestRepository requestRepo;
 	
 	private String returnMessage;
 	
@@ -68,8 +70,8 @@ public class ImportController {
 	
 
 	@Inject
-	public ImportController(RestaurantRepository r, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br) {
-		this.restaurantRepo = r;
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr) {
+		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
@@ -78,33 +80,34 @@ public class ImportController {
 		this.orderRepo = or;
 		this.billRepo = br;
 		this.orderChoiceRepo = ocr;
+		this.requestRepo = reqr;
 	}
 	
     public void setValidator(Validator validator) {
         this.validator = validator;
     }
 
-	public Long addRestaurant(RestaurantDTO restaurantData) {
-		if (!isValidRestaurantData(restaurantData)) {
-			logger.info("Invalid restaurant data, import aborted.");
+	public Long addBusiness(BusinessImportDTO businessData) {
+		if (!isValidBusinessData(businessData)) {
+			logger.info("Invalid business data, import aborted.");
 			logger.info(returnMessage);
 			return null;
 		}
 		
-		logger.info("New import request recieved for restaurant: " + restaurantData.getName() );
+		logger.info("New import request recieved for business: " + businessData.getName() );
 		
-		Key<Restaurant> kR = createAndSaveRestaurant(restaurantData.getName(), restaurantData.getDescription(), restaurantData.getPayments() );
+		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getPayments() );
 		if(kR == null) {
-			logger.info("Creation of restaurant in datastore failed, import aborted.");
+			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
 		}
 		
-		for(SpotDTO spot : restaurantData.getSpots()) {
+		for(SpotDTO spot : businessData.getSpots()) {
 			if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), spot.getGroupTag()) == null )
 				logger.info("Error while saving spot with name: " + spot.getName());
 		}
 		
-		for(MenuDTO menu : restaurantData.getMenus()) {
+		for(MenuDTO menu : businessData.getMenus()) {
 			Key<Menu> kM = createAndSaveMenu(kR, menu.getTitle(), menu.getDescription());
 			
 			if(kM != null) {
@@ -142,30 +145,30 @@ public class ImportController {
 
 		}
 		
-		logger.info("Import finished for restaurant: " +restaurantData.getName() );
+		logger.info("Import finished for business: " +businessData.getName() );
 		return kR.getId();
 	}
 	
-	private Key<Restaurant> createAndSaveRestaurant(String name, String desc, Collection<PaymentMethod> paymentMethods) {
-		logger.info("Creating new restaurant with data: " + name + ", " + desc );
+	private Key<Business> createAndSaveBusiness(String name, String desc, Collection<PaymentMethod> paymentMethods) {
+		logger.info("Creating new business with data: " + name + ", " + desc );
 		
-		Restaurant r = new Restaurant();
-		r.setName(name);
-		r.setDescription(desc);
-		r.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
+		Business business = new Business();
+		business.setName(name);
+		business.setDescription(desc);
+		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
-		Key<Restaurant> kR = restaurantRepo.saveOrUpdate(r);
-		logger.info("Created new restaurant with id: " + kR.getId());
-		return kR;
+		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
+		logger.info("Created new business with id: " + businessKey.getId());
+		return businessKey;
 	}
 	
-	private Key<Spot> createAndSaveSpot(Key<Restaurant> restaurantKey, String name, String barcode, String groupTag) {
-		if(restaurantKey == null)
-			throw new NullPointerException("restaurantKey was not set");
-		logger.info("Creating new spot for restaurant ("+ restaurantKey.getId() + ") with name: " + name );
+	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, String groupTag) {
+		if(businessKey == null)
+			throw new NullPointerException("businessKey was not set");
+		logger.info("Creating new spot for business ("+ businessKey.getId() + ") with name: " + name );
 		
 		Spot s = new Spot();
-		s.setRestaurant(restaurantKey);
+		s.setBusiness(businessKey);
 		s.setName(name);
 		s.setBarcode(barcode);
 		s.setGroupTag(groupTag);
@@ -175,14 +178,14 @@ public class ImportController {
 		return kS;
 	}
 	
-	private Key<Menu> createAndSaveMenu (Key<Restaurant> restaurantKey, String title, String description) {
-		if(restaurantKey == null)
-			throw new NullPointerException("restaurantKey was not set");
-		logger.info("Creating new menu for restaurant ("+ restaurantKey.getId() + ") with title: " + title );
+	private Key<Menu> createAndSaveMenu (Key<Business> businessKey, String title, String description) {
+		if(businessKey == null)
+			throw new NullPointerException("businessKey was not set");
+		logger.info("Creating new menu for business ("+ businessKey.getId() + ") with title: " + title );
 		
 		Menu menu = new Menu();
 		menu.setTitle(title);
-		menu.setRestaurant(restaurantKey);
+		menu.setBusiness(businessKey);
 		menu.setDescription(description);
 				
 		Key<Menu> kM = menuRepo.saveOrUpdate(menu);
@@ -190,14 +193,14 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Restaurant> restaurant, String name, Float price, String shortDesc, String longDesc)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Float price, String shortDesc, String longDesc)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
 		
 		Product product = new Product();
 		product.setMenu(menuKey);
-		product.setRestaurant(restaurant);
+		product.setBusiness(business);
 		product.setName(name);
 		product.setPrice(price);
 		product.setShortDesc(shortDesc);
@@ -206,14 +209,14 @@ public class ImportController {
 		return product;
 	}
 	
-	private Key<Choice> createAndSaveChoice(Key<Product> productKey, Key<Restaurant> restaurantKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions) {
+	private Key<Choice> createAndSaveChoice(Key<Product> productKey, Key<Business> businessKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions) {
 		if(productKey == null)
 			throw new NullPointerException("productKey was not set");
 		logger.info("Creating new choice for product ("+ productKey.getId() + ") with text: " +text);
 		
 		Choice choice = new Choice();
 		choice.setProduct(productKey);
-		choice.setRestaurant(restaurantKey);
+		choice.setBusiness(businessKey);
 		choice.setText(text);
 		choice.setPrice(price);
 		choice.setOverridePrice(overridePrice);
@@ -229,25 +232,25 @@ public class ImportController {
 		return kC;
 	}
 	
-	private boolean isValidRestaurantData(RestaurantDTO restaurant) throws IllegalArgumentException,NullPointerException {
+	private boolean isValidBusinessData(BusinessImportDTO business) throws IllegalArgumentException,NullPointerException {
 		StringBuilder messageBuilder = new StringBuilder();
 		boolean isValid = true;
-		if( restaurant != null ) {
-			Set<ConstraintViolation<RestaurantDTO>> violation = validator.validate(restaurant);
+		if( business != null ) {
+			Set<ConstraintViolation<BusinessImportDTO>> violation = validator.validate(business);
 			
 			if(violation.isEmpty()) {
 				isValid = true;
 			}
 			else {
 				isValid = false;
-				messageBuilder.append("restaurant data not valid:\n");
-				for (ConstraintViolation<RestaurantDTO> constraintViolation : violation) {
+				messageBuilder.append("business data not valid:\n");
+				for (ConstraintViolation<BusinessImportDTO> constraintViolation : violation) {
 					messageBuilder.append("\n").append(constraintViolation.getPropertyPath()).append(" ").append(constraintViolation.getMessage());
 				}
 			}
 		}
 		else {
-			returnMessage = "restaurant object was null";
+			returnMessage = "business object was null";
 			return false;
 		}
 		returnMessage = messageBuilder.toString();
@@ -257,10 +260,10 @@ public class ImportController {
 	/**
 	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
 	 * Deletes all data from datastore except nicknames.
-	 * Deletes restaurants, spots, checkins, menus, products, choices and so on.
+	 * Deletes businesses, spots, checkins, menus, products, choices and so on.
 	 */
 	public void deleteAllData() {
-		restaurantRepo.ofy().delete(restaurantRepo.getAllKeys());
+		businessRepo.ofy().delete(businessRepo.getAllKeys());
 		spotRepo.ofy().delete(spotRepo.getAllKeys());
 		menuRepo.ofy().delete(menuRepo.getAllKeys());
 		productRepo.ofy().delete(productRepo.getAllKeys());
@@ -268,10 +271,20 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
 		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	};
 	
-	public void deleteCheckIns() {
+	/**
+	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
+	 * Deletes only live data like checkIns, requests and so on.
+	 * Does not delete business data.
+	 */
+	public void deleteLiveData() {
 		checkinRepo.ofy().delete(checkinRepo.ofy().query(CheckIn.class).fetchKeys());
+		requestRepo.ofy().delete(requestRepo.getAllKeys());
+		orderRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
 }

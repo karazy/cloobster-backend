@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
 
-import net.eatsense.domain.ChoiceOverridePrice;
-import net.eatsense.domain.ProductOption;
+import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.ProductOption;
 
 public class ChoiceDTO {
 	Long id;

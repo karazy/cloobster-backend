@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.List;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
 
@@ -28,29 +28,29 @@ public class AccountController {
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private AccountRepository accountRepo;
-	private RestaurantRepository restaurantRepo;
+	private BusinessRepository businessRepo;
 	private ChannelController channelCtrl;
 	
 	@Inject
-	public AccountController(AccountRepository accountRepo, RestaurantRepository rr, ChannelController cctrl) {
+	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository, ChannelController cctrl) {
 		super();
 		this.channelCtrl = cctrl;
-		this.restaurantRepo = rr;
+		this.businessRepo = businessRepository;
 		this.accountRepo = accountRepo;
 	}
 	
 	
 	/**
-	 * Check if the account is allowed to manage a given restaurant.
+	 * Check if the account is allowed to manage a given business.
 	 * 
 	 * @param account
-	 * @param restaurantId identifying the restaurant to check for
+	 * @param businessId identifying the business to check for
 	 * @return
 	 */
-	public boolean isAccountManagingRestaurantId(final Account account, long restaurantId){
+	public boolean isAccountManagingBusiness(final Account account, long businessId){
 		
-		for (Key<Restaurant> restaurantKey : account.getRestaurants()) {
-			if(restaurantKey.getId() == restaurantId) 
+		for (Key<Business> businessKey : account.getBusinesses()) {
+			if(businessKey.getId() == businessId) 
 				return true;
 		}
 		return false;
@@ -93,7 +93,6 @@ public class AccountController {
 	 * 
 	 * @param login
 	 * @param password cleartext
-	 * @param restaurantId to check wether this account is responsible for the restaurant
 	 * @return
 	 */
 	public Account authenticate(String login, String password) {	
@@ -133,15 +132,15 @@ public class AccountController {
 	 * @param password
 	 * @param email
 	 * @param role
-	 * @param restaurantIds list of restaurant ids this account manages
+	 * @param businessIds list of business ids this account manages
 	 * @return
 	 */
-	public Account createAndSaveAccount(String login, String password, String email, String role, List<Long> restaurantIds) {
-		ArrayList<Key<Restaurant>> restaurantKeys = new ArrayList<Key<Restaurant>>();
-		for (Long restaurantId : restaurantIds) {
-			restaurantKeys.add( new Key<Restaurant>(Restaurant.class,restaurantId));
+	public Account createAndSaveAccount(String login, String password, String email, String role, List<Long> businessIds) {
+		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
+		for (Long businessId : businessIds) {
+			businessKeys.add( new Key<Business>(Business.class,businessId));
 		}
-		return accountRepo.createAndSaveAccount(login, password, email, role, restaurantKeys);
+		return accountRepo.createAndSaveAccount(login, password, email, role, businessKeys);
 	}
 	
 	public AccountDTO toDto(Account account) {
@@ -197,11 +196,11 @@ public class AccountController {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
 		if(account != null && account.getRole().equals("restaurantadmin")) {
-			for (Restaurant restaurant :restaurantRepo.getByKeys(account.getRestaurants())) {
+			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
 				BusinessDTO businessData = new BusinessDTO();
-				businessData.setId(restaurant.getId());
-				businessData.setName(restaurant.getName());
-				businessData.setDescription(restaurant.getDescription());
+				businessData.setId(business.getId());
+				businessData.setName(business.getName());
+				businessData.setDescription(business.getDescription());
 				businessDtos.add(businessData);
 			}
 		}
@@ -218,7 +217,7 @@ public class AccountController {
 	 */
 	public String requestToken (Long businessId, String clientId) {
 		logger.debug("new token requested for "+clientId);
-		Restaurant restaurant = restaurantRepo.getById(businessId);
-		return channelCtrl.createChannel(restaurant, clientId);
+		Business business = businessRepo.getById(businessId);
+		return channelCtrl.createChannel(business, clientId);
 	}
 }

@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNull;
 import junit.framework.Assert;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
@@ -26,14 +26,14 @@ public class RestaurantRepositoryTest {
         new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
      
     private Injector injector;
-    private RestaurantRepository rr;
+    private BusinessRepository rr;
     private SpotRepository br;
 
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-		rr = injector.getInstance(RestaurantRepository.class);
+		rr = injector.getInstance(BusinessRepository.class);
 		br = injector.getInstance(SpotRepository.class);
 	}
 
@@ -45,10 +45,10 @@ public class RestaurantRepositoryTest {
 	@Test
 	public void testSave() {
 		
-		Restaurant found = rr.getById(1l);
+		Business found = rr.getById(1l);
 		assertNull(found);
 		
-		Restaurant r = new Restaurant();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		r.setId(1l);
@@ -61,14 +61,14 @@ public class RestaurantRepositoryTest {
 
 	@Test
 	public void testUpdate() {
-		Restaurant found = rr.getById(1l);
+		Business found = rr.getById(1l);
 		Assert.assertNull(found);
 		
-		Restaurant r = new Restaurant();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 //		r.setId(1l);
-		Key<Restaurant> key = rr.saveOrUpdate(r);
+		Key<Business> key = rr.saveOrUpdate(r);
 		
 		found = rr.getById(key.getId());
 		assertEquals("Heidi und Paul", found.getName());
@@ -83,13 +83,13 @@ public class RestaurantRepositoryTest {
 
 	@Test
 	public void testDelete() {
-		Restaurant r = new Restaurant();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		r.setId(1l);
 		rr.saveOrUpdate(r);
 		
-		Restaurant found = rr.getById(1l);
+		Business found = rr.getById(1l);
 		assertNotNull(found);
 		
 		rr.delete(r);
@@ -100,18 +100,18 @@ public class RestaurantRepositoryTest {
 	
 	@Test
 	public void testFindRestaurantByBarcode() {
-		Restaurant r = new Restaurant();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
-		Key<Restaurant> kR = rr.saveOrUpdate(r);
+		Key<Business> kR = rr.saveOrUpdate(r);
 		
 		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
-		b.setRestaurant(kR);
+		b.setBusiness(kR);
 		
 		Key<Spot> kB = br.saveOrUpdate(b); 
 		
-		Restaurant found = rr.findByBarcode("b4rc0de");
+		Business found = rr.findByBarcode("b4rc0de");
 		assertNotNull(found);
 		assertEquals(kR.getId(), (long) found.getId());
 	}

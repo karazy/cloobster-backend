@@ -7,24 +7,25 @@ import java.util.List;
 
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.CheckInStatus;
-import net.eatsense.domain.ChoiceOverridePrice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
-import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.domain.Business;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.BillDTO;
+import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
@@ -49,27 +50,29 @@ public class BillController {
 	
 	private CheckInRepository checkInRepo;
 
-	private RestaurantRepository restaurantRepo;
+	private BusinessRepository businessRepo;
 
 	private RequestRepository requestRepo;
 	private ChannelController channelCtrl;
-	
+	private Transformer transform;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, RestaurantRepository restaurantRepo, CheckInRepository checkInRepo,  BillRepository billRepo, ChannelController cctrl) {
+			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, BusinessRepository businessRepo, CheckInRepository checkInRepo,
+			BillRepository billRepo, ChannelController cctrl, Transformer transformer) {
 		super();
+		this.transform = transformer;
 		this.channelCtrl = cctrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.checkInRepo = checkInRepo;
-		this.restaurantRepo = restaurantRepo;
+		this.businessRepo = businessRepo;
 		this.billRepo = billRepo;
 	}
 	
-	public BillDTO createBill(Long restaurantId, String checkInId, BillDTO billData) {
+	public BillDTO createBill(Long businessId, String checkInId, BillDTO billData) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
 			throw new IllegalArgumentException("Bill cannot be created, checkin not found!");
@@ -78,17 +81,17 @@ public class BillController {
 			throw new IllegalArgumentException("Bill cannot be created, payment already requested or not checked in");
 		}
 		
-		// Check if the restaurant exists.
-		Restaurant restaurant = restaurantRepo.getById(restaurantId);
-		if(restaurant == null) {
-			logger.error("Bill cannot be created, restaurant id unknown" + restaurantId);
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
+			logger.error("Bill cannot be created, business id unknown" + businessId);
 		}
-		if(restaurant.getId() != checkIn.getRestaurant().getId()) {
-			logger.error("Bill cannot be created, checkin is not at the same restaurant to which the request was sent: id="+checkIn.getRestaurant().getId());
+		if(business.getId() != checkIn.getBusiness().getId()) {
+			logger.error("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
 			return null;
 		}
 		
-		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(restaurant).filter("checkIn", checkIn.getKey()).list();
+		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
 		
 		Long billId = null;
 		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
@@ -104,7 +107,7 @@ public class BillController {
 			billData.setId(billId);
 		}
 		else {
-			Bill bill = saveBill(restaurant, checkIn, orders, billData.getPaymentMethod());	
+			Bill bill = saveBill(business, checkIn, orders, billData.getPaymentMethod());	
 			if(bill == null) {
 				throw new RuntimeException("Bill cannot be created, error saving data");
 			}
@@ -113,7 +116,7 @@ public class BillController {
 			billData.setTotal(bill.getTotal());
 			
 			Request request = new Request();
-			request.setRestaurant(restaurant.getKey());
+			request.setBusiness(business.getKey());
 			request.setCheckIn(checkIn.getKey());
 			request.setSpot(checkIn.getSpot());
 			request.setType(RequestType.BILL);
@@ -124,25 +127,32 @@ public class BillController {
 			requestRepo.saveOrUpdate(request);
 			
 			
-			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
-			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-			messages.add(new MessageDTO("bill","action", billData));
+			
+			// Add a message with the new bill to the message package.
+			messages.add(new MessageDTO("bill","new", billData));
 			
 			
 			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have an older request in the database ...
-			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
-				// Send message to notify clients over their channel
+			if( oldestRequest == null || oldestRequest.getId() == request.getId() || checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST  ) {
+				// Update the status of the checkIn
+				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
+				checkInRepo.saveOrUpdate(checkIn);
+				
+				// Add a message with updated checkin status to the package.
+				messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
 				
 				SpotStatusDTO spotData = new SpotStatusDTO();
 				spotData.setId(checkIn.getSpot().getId());
 				spotData.setStatus(request.getStatus());
-				messages.add(new MessageDTO("spot", "update", spotData));				
+				// Add a message with updated spot status to the package.
+				messages.add(new MessageDTO("spot", "update", spotData));
 			}
 			try {
-				channelCtrl.sendMessagesToAllClients(restaurantId, messages);
+				// Send messages to notify clients over their channel.
+				channelCtrl.sendMessagesToAllClients(businessId, messages);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -153,22 +163,22 @@ public class BillController {
 	}
 	
 	
-	private Bill saveBill(Restaurant restaurant, CheckIn checkIn,
+	private Bill saveBill(Business business, CheckIn checkIn,
 			List<Order> orders, PaymentMethod paymentMethod) {
 		
-		if(restaurant.getPaymentMethods() == null || restaurant.getPaymentMethods().isEmpty()) {
-			throw new RuntimeException("Bill cannot be created, restaurant has no payment methods saved");
+		if(business.getPaymentMethods() == null || business.getPaymentMethods().isEmpty()) {
+			throw new RuntimeException("Bill cannot be created, business has no payment methods saved");
 		}
 		Bill bill = new Bill();
 		
-		for (PaymentMethod payment : restaurant.getPaymentMethods()) {
+		for (PaymentMethod payment : business.getPaymentMethods()) {
 			if(payment.getName().equals(paymentMethod.getName()) )
 				bill.setPaymentMethod(paymentMethod);
 		}
 		if(bill.getPaymentMethod() == null )
 			throw new RuntimeException("Bill cannot be created, no matching payment method found for: " + paymentMethod.getName());
 				
-		bill.setRestaurant(restaurant.getKey());
+		bill.setBusiness(business.getKey());
 		bill.setCheckIn(checkIn.getKey());
 		bill.setCreationTime(new Date());
 		

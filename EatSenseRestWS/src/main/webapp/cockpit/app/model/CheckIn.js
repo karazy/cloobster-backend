@@ -22,7 +22,7 @@ Ext.define('EatSense.model.CheckIn', {
 			name: 'spotId'
 		},
 		{
-			name : 'checkintime',
+			name : 'checkInTime',
 			type : 'date',
 			dateFormat : 'time'
 		}],

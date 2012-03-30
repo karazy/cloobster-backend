@@ -24,7 +24,7 @@ public class Request extends GenericEntity {
 	Key<CheckIn> checkIn;
 	
 	@Parent
-	Key<Restaurant> restaurant;
+	Key<Business> business;
 	Date receivedTime;
 	
 	public Key<CheckIn> getCheckIn() {
@@ -33,11 +33,11 @@ public class Request extends GenericEntity {
 	public void setCheckIn(Key<CheckIn> checkIn) {
 		this.checkIn = checkIn;
 	}
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 	public RequestType getType() {
 		return type;

@@ -11,12 +11,12 @@ import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.CheckInStatus;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
+import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
@@ -43,7 +43,7 @@ public class CheckInControllerTest {
 	    
 	    private Injector injector;
 	    private CheckInController ctr;
-	    private RestaurantRepository rr;
+	    private BusinessRepository rr;
 	    private SpotRepository br;
 	    private CheckInRepository cr;
 
@@ -54,20 +54,20 @@ public class CheckInControllerTest {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(CheckInController.class);
-		rr = injector.getInstance(RestaurantRepository.class);
+		rr = injector.getInstance(BusinessRepository.class);
 		br = injector.getInstance(SpotRepository.class);
 		cr = injector.getInstance(CheckInRepository.class);
 		mapper = injector.getInstance(ObjectMapper.class);
 		//create necessary data in datastore
-		Restaurant r = new Restaurant();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
-		Key<Restaurant> kR = rr.saveOrUpdate(r);
+		Key<Business> kR = rr.saveOrUpdate(r);
 		
 		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
 		b.setName("Tisch 1");
-		b.setRestaurant(kR);
+		b.setBusiness(kR);
 		Key<Spot> kB = br.saveOrUpdate(b); 
 	}
 
@@ -82,10 +82,10 @@ public class CheckInControllerTest {
 		CheckInDTO checkIn = new CheckInDTO();
 		checkIn.setSpotId("b4rc0de");
 		
-		assertEquals("Heidi und Paul", spot.getRestaurant());
+		assertEquals("Heidi und Paul", spot.getBusiness());
 		assertNotNull(spot.getBarcode());
 		assertNotNull(spot.getName());
-		assertNotNull(spot.getRestaurantId());
+		assertNotNull(spot.getBusinessId());
 		
 		checkIn.setNickname("FakeNik");
 		checkIn.setStatus(CheckInStatus.INTENT);
@@ -106,10 +106,10 @@ public class CheckInControllerTest {
 		checkInData.setSpotId("b4rc0de");
 		checkInData.setStatus(CheckInStatus.INTENT);
 		
-		assertEquals("Heidi und Paul", spot.getRestaurant());
+		assertEquals("Heidi und Paul", spot.getBusiness());
 		assertNotNull(spot.getBarcode());
 		assertNotNull(spot.getName());
-		assertNotNull(spot.getRestaurantId());
+		assertNotNull(spot.getBusinessId());
 		
 		//Part1: set nickname too short for this test
 		checkInData.setNickname("Fa");
@@ -168,10 +168,10 @@ public class CheckInControllerTest {
 		checkInData.setStatus(CheckInStatus.INTENT);
 		checkInData.setNickname("Peter Pan");
 		
-		assertEquals("Heidi und Paul", spot.getRestaurant());
+		assertEquals("Heidi und Paul", spot.getBusiness());
 		assertNotNull(spot.getBarcode());
 		assertNotNull(spot.getName());
-		assertNotNull(spot.getRestaurantId());
+		assertNotNull(spot.getBusinessId());
 		
 		checkInData = ctr.createCheckIn(checkInData);
 		assertThat(checkInData, notNullValue());
@@ -208,10 +208,10 @@ public class CheckInControllerTest {
 		CheckInDTO checkIn = new CheckInDTO();
 		checkIn.setSpotId("b4rc0de");
 		
-		assertEquals("Heidi und Paul", spot.getRestaurant());
+		assertEquals("Heidi und Paul", spot.getBusiness());
 		assertNotNull(spot.getBarcode());
 		assertNotNull(spot.getName());
-		assertNotNull(spot.getRestaurantId());
+		assertNotNull(spot.getBusinessId());
 		
 		checkIn.setNickname("FakeNik");
 		checkIn.setStatus(CheckInStatus.INTENT);

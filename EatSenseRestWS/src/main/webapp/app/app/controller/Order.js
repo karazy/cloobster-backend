@@ -147,7 +147,7 @@
 				Ext.Msg.hide();
 				activeCheckIn.orders().each(function(order) {
 					Ext.Ajax.request({				
-			    	    url: Karazy.config.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/'+order.getId(),
+			    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
 			    	    method: 'DELETE',    	    
 			    	    params: {
 			    	    	'checkInId' : activeCheckIn.get('userId'),
@@ -171,7 +171,7 @@
 		var checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn, 
 		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
 		checkInId = checkIn.get('userId'),
-		restaurantId = checkIn.get('restaurantId'),
+		businessId = checkIn.get('businessId'),
 		errorIndicator = false,
 		cartview = this.getCartview(),
 		ajaxOrderCount = 0,
@@ -206,7 +206,7 @@
 							order.set('status',Karazy.constants.Order.PLACED);
 							
 							Ext.Ajax.request({				
-					    	    url: Karazy.config.serviceUrl+'/restaurants/'+restaurantId+'/orders/'+order.getId(),
+					    	    url: Karazy.config.serviceUrl+'/c/businesses/'+businessId+'/orders/'+order.getId(),
 					    	    method: 'PUT',    	    
 					    	    params: {
 					    	    	'checkInId' : checkInId,
@@ -302,7 +302,7 @@
 			orders.remove(tooltip.getSelectedProduct());
 			
 			Ext.Ajax.request({				
-	    	    url: Karazy.config.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/'+tooltip.getSelectedProduct().getId(),
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+tooltip.getSelectedProduct().getId(),
 	    	    method: 'DELETE',    	    
 	    	    params: {
 	    	    	'checkInId' : activeCheckIn.get('userId'),
@@ -436,7 +436,7 @@
 		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
 		
 		Ext.Ajax.request({				
-    	    url: Karazy.config.serviceUrl+'/restaurants/'+activeCheckIn.get('restaurantId')+'/orders/'+order.getId(),
+    	    url: Karazy.config.serviceUrl+'/c/business/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
     	    method: 'PUT',
     	    params: {
     	    	'checkInId' : activeCheckIn.get('userId'),

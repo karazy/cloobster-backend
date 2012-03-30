@@ -1,6 +1,6 @@
 /**
 *	A single order item shown in SpotDetail.
-*
+*	Displays the status, name and possible actions.
 */
 Ext.define('EatSense.view.SpotDetailItem', {
 	extend: 'Ext.dataview.component.DataItem',
@@ -10,12 +10,14 @@ Ext.define('EatSense.view.SpotDetailItem', {
         'Ext.Button'
     ],
 	config: {
-
+		//flag showing if an order is new
+		flag: {
+			cls: 'spotdetailitem-flag' 
+		},
 		//label containing product details
 		name: {		
 			cls: 'spotdetailitem-order',	
 			tpl: new Ext.XTemplate(
-			// "<div class='orderListItem'>" +
 				"<h2 >{Product.name}</h2>" +
 				"<div class='price'>{amount} - {Product.price_calculated}€</div>" +
 				"<div class='choices'>"+
@@ -32,10 +34,9 @@ Ext.define('EatSense.view.SpotDetailItem', {
 						"</tpl>" +
 					"</tpl>" +
 					"<tpl if='comment!=\"\"'>" +
-					"<p>Kommentar: {comment}</p>" +
+					"<p>"+Karazy.i18n.translate('comment')+": {comment}</p>" +
 					"</tpl>" +
 				"</div>" 
-			// "</div>"
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
 				//we need to pass the product as the choices object in this context is raw data
@@ -54,10 +55,6 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			})
 		},
 
-		//flag showing if an order is new
-		flag: {
-			cls: 'spotdetailitem-flag' 
-		},
 		//cancel Order
 		cancelButton: {
 			action: 'cancel',
@@ -74,15 +71,6 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			iconMask: true,
 			cls: 'spotdetailitem-confirm' 
 		},
-
-
-
-		// dataMap: {
-	 //    	getName: {
-	 //           setHtml: 'status'
-	 //       	},
-
-	 //    },
 
 		layout: {
 			type: 'hbox',
@@ -172,13 +160,17 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			this.getFlag().hide();		
 			this.getConfirmButton().disable();
 			this.getCancelButton().enable();
-		} else {
+		} else if(newRecord.get('status') == Karazy.constants.Order.CANCELED) {
+			// this.getName().addCls('spotdetailitem-order-cancel');
 			this.getFlag().hide();
 			this.getConfirmButton().disable();
 			this.getCancelButton().disable();
 		}
 
-		//overrides the default updateRecord, perhabs we remove this completely
+		(newRecord.get('status') == Karazy.constants.Order.CANCELED) ? 
+			this.getName().addCls('spotdetailitem-order-cancel') : this.getName().removeCls('spotdetailitem-order-cancel');
+
+		//overrides the default updateRecord, so we need to call ist (perhabs we can remove this call completely?!)
 		this.callParent([newRecord]);
 	}
 

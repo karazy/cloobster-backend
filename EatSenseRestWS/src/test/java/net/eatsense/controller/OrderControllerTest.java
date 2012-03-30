@@ -7,17 +7,17 @@ import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Order;
-import net.eatsense.domain.OrderStatus;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
+import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ChoiceDTO;
@@ -45,7 +45,7 @@ public class OrderControllerTest {
 	    private Injector injector;
 	    private OrderController orderCtrl;
 	    private CheckInController checkinCtrl;
-	    private RestaurantRepository rr;
+	    private BusinessRepository rr;
 	    private MenuRepository mr;
 	    private ProductRepository pr;
 	    private ChoiceRepository cr;
@@ -64,7 +64,7 @@ public class OrderControllerTest {
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
-		rr = injector.getInstance(RestaurantRepository.class);
+		rr = injector.getInstance(BusinessRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
@@ -77,7 +77,7 @@ public class OrderControllerTest {
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
-		ddd.generateDummyRestaurants();
+		ddd.generateDummyBusinesses();
 		
 	}
 
@@ -94,7 +94,7 @@ public class OrderControllerTest {
 		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn.setSpotId("serg2011");
 		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setRestaurantId(spotDto.getRestaurantId());
+		checkIn.setBusinessId(spotDto.getBusinessId());
 		
 		
 		assertThat(checkIn.getUserId(), notNullValue());
@@ -112,10 +112,10 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -135,10 +135,10 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -154,7 +154,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getRestaurantId(), checkIn.getUserId(), null);
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getBusinessId(), checkIn.getUserId(), null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -171,7 +171,7 @@ public class OrderControllerTest {
 		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn.setSpotId("serg2011");
 		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setRestaurantId(spotDto.getRestaurantId());
+		checkIn.setBusinessId(spotDto.getBusinessId());
 		
 		
 		assertThat(checkIn.getUserId(), notNullValue());
@@ -189,14 +189,14 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
-		orderCtrl.deleteOrder(checkIn.getRestaurantId(), placedOrder.getId());
+		orderCtrl.deleteOrder(checkIn.getBusinessId(), placedOrder.getId());
 		
-		List<Order> orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId(), null);
+		List<Order> orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
 		assertThat(orders.isEmpty(), is(true));
 	}
 	
@@ -208,7 +208,7 @@ public class OrderControllerTest {
 		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn.setSpotId("serg2011");
 		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setRestaurantId(spotDto.getRestaurantId());
+		checkIn.setBusinessId(spotDto.getBusinessId());
 		
 		
 		assertThat(checkIn.getUserId(), notNullValue());
@@ -226,10 +226,10 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -249,10 +249,10 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -267,7 +267,7 @@ public class OrderControllerTest {
 		}
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getRestaurantId(), checkIn.getUserId(), "CART");
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getBusinessId(), checkIn.getUserId(), "CART");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {

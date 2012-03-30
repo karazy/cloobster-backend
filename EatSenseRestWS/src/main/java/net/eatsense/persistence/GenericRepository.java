@@ -16,7 +16,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class GenericRepository<T> extends DAOBase{
 		//Register classes with Objectify
 		ObjectifyService.register(Request.class);
 		ObjectifyService.register(Account.class);
-		ObjectifyService.register(Restaurant.class);
+		ObjectifyService.register(Business.class);
 		ObjectifyService.register(Spot.class);
 		ObjectifyService.register(Menu.class);
 		ObjectifyService.register(Product.class);

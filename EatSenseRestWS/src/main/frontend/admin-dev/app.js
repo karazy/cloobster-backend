@@ -60,7 +60,7 @@ Ext.application({
 										text : 'Upload data',
 										handler : function() {
 											Ext.Ajax.request({
-												url : '/restaurants/import',
+												url : '/c/businesses/import',
 												// 'file://Users/fred/karazy/Dropbox/karazy_entwicklung/import_Sergio.json',
 												method : 'PUT',
 												scope : this,
@@ -86,10 +86,36 @@ Ext.application({
 												fn: function(btn) {
 													if (btn == 'yes'){
 														Ext.Ajax.request({
-															url : '/restaurants/deleteall', 
-															method : 'GET',
+															url : '/c/businesses/all', 
+															method : 'DELETE',
 															success : function(response) {
 																Ext.Msg.alert('Success', "All data deleted. I'm sure you know what you did!");
+															},
+															failure : function(response) {
+																Ext.Msg.alert('Error', response.statusText);
+															}
+														});
+											    }
+												}
+											});
+										}
+									},
+									{
+										xtype: 'button',
+										text: 'Delete live data',
+										handler: function() {
+											Ext.Msg.show({
+												title: 'ATTENTION',
+												msg: 'This will <strong>delete</strong> all only live data. <br/> This function will be removed in production.',
+												buttons: Ext.Msg.YESNO,
+												icon: Ext.Msg.QUESTION,
+												fn: function(btn) {
+													if (btn == 'yes'){
+														Ext.Ajax.request({
+															url : '/c/businesses/livedata', 
+															method : 'DELETE',
+															success : function(response) {
+																Ext.Msg.alert('Success', "All live data deleted. I'm sure you know what you did!");
 															},
 															failure : function(response) {
 																Ext.Msg.alert('Error', response.statusText);

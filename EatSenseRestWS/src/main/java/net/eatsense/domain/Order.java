@@ -9,6 +9,8 @@ import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.OrderStatus;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
@@ -61,15 +63,15 @@ public class Order extends GenericEntity {
 
 	@Parent
 	@NotNull
-	Key<Restaurant> restaurant;
+	Key<Business> business;
 	
-	public Key<Restaurant> getRestaurant() {
-		return restaurant;
+	public Key<Business> getBusiness() {
+		return business;
 	}
 
 
-	public void setRestaurant(Key<Restaurant> restaurant) {
-		this.restaurant = restaurant;
+	public void setBusiness(Key<Business> business) {
+		this.business = business;
 	}
 
 
@@ -126,7 +128,7 @@ public class Order extends GenericEntity {
 	
 	@Transient
 	public Key<Order> getKey() {
-		return new Key<Order>(getRestaurant(), Order.class, super.getId());
+		return new Key<Order>(getBusiness(), Order.class, super.getId());
 	}
 
 }

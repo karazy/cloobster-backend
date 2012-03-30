@@ -6,7 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import net.eatsense.domain.PaymentMethod;
+import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -16,7 +16,7 @@ import org.apache.bval.constraints.NotEmpty;
  * @author Nils Weiher
  *
  */
-public class RestaurantDTO {
+public class BusinessImportDTO {
 
 	/**
 	 * Name of location.
@@ -32,7 +32,7 @@ public class RestaurantDTO {
 	private String description;
 
 	/**
-	 * All menus the restaurant is offering.
+	 * All menus the business is offering.
 	 */
 	@NotNull
 	@NotEmpty
@@ -48,7 +48,7 @@ public class RestaurantDTO {
 	private Collection<SpotDTO> spots;
 	
 	/**
-	 * All payment methods the restaurant accepts.
+	 * All payment methods the business accepts.
 	 */
 	@NotNull
 	@NotEmpty
@@ -56,7 +56,7 @@ public class RestaurantDTO {
 	private Collection<PaymentMethod> payments;
 	
 
-	public RestaurantDTO() {
+	public BusinessImportDTO() {
 	}
 
 	public String getName() {

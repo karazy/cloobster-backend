@@ -7,10 +7,10 @@ Ext.define('EatSense.model.Spot', {
 			name : 'barcode',
 			type : 'string'
 		}, {
-			name : 'restaurant',
+			name : 'business',
 			type : 'string'
 		}, {
-			name : 'restaurantId',
+			name : 'businessId',
 			type : 'string'
 		}, {
 			name : 'name',

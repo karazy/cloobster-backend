@@ -2,11 +2,11 @@ package net.eatsense.representation.cockpit;
 
 import java.util.Date;
 
-import net.eatsense.domain.CheckInStatus;
+import net.eatsense.domain.embedded.CheckInStatus;
 
 public class CheckInStatusDTO {
 	/**
-	 * Status indicating for example if a restaurant with this code was found.
+	 * Status indicating for example if customer checked in or an order was placed.
 	 */
 	private CheckInStatus status;
 	

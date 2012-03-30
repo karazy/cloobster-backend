@@ -8,19 +8,19 @@ import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Order;
-import net.eatsense.domain.OrderStatus;
-import net.eatsense.domain.PaymentMethod;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.ProductOption;
+import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
@@ -50,7 +50,7 @@ public class BillControllerTest {
 	    private Injector injector;
 	    private OrderController orderCtrl;
 	    private CheckInController checkinCtrl;
-	    private RestaurantRepository rr;
+	    private BusinessRepository rr;
 	    private MenuRepository mr;
 	    private ProductRepository pr;
 	    private ChoiceRepository cr;
@@ -74,7 +74,7 @@ public class BillControllerTest {
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		billCtrl = injector.getInstance(BillController.class);
-		rr = injector.getInstance(RestaurantRepository.class);
+		rr = injector.getInstance(BusinessRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
@@ -90,7 +90,7 @@ public class BillControllerTest {
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
-		ddd.generateDummyRestaurants();
+		ddd.generateDummyBusinesses();
 		
 	}
 
@@ -107,7 +107,7 @@ public class BillControllerTest {
 		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn.setSpotId("serg2011");
 		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setRestaurantId(spotDto.getRestaurantId());
+		checkIn.setBusinessId(spotDto.getBusinessId());
 		
 		
 		assertThat(checkIn.getUserId(), notNullValue());
@@ -125,10 +125,10 @@ public class BillControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -158,10 +158,10 @@ public class BillControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrder(checkIn.getRestaurantId(), checkIn.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getRestaurantId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -177,7 +177,7 @@ public class BillControllerTest {
 		
 		//#3 Check calculateTotalPrice
 		
-		List<Order> orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId(), null);
+		List<Order> orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (Order order : orders) {
@@ -196,7 +196,7 @@ public class BillControllerTest {
 		PaymentMethod paymentMethod = spotDto.getPayments().iterator().next();
 		billData.setPaymentMethod(paymentMethod);
 		
-		billData = billCtrl.createBill(checkIn.getRestaurantId(), checkIn.getUserId(), billData);
+		billData = billCtrl.createBill(checkIn.getBusinessId(), checkIn.getUserId(), billData);
 		assertThat(billData.getId(), notNullValue());
 		
 		Collection<Bill> bills = br.getAll();
@@ -210,7 +210,7 @@ public class BillControllerTest {
 			assertThat(bill.getTotal(), is(11.5f));
 		}
 		// Check orders again to see if they are linked ...
-		orders = orderCtrl.getOrders(checkIn.getRestaurantId(), checkIn.getUserId(), null);
+		orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
 		
 		for (Order order : orders) {
 			assertThat(order.getBill().getId(), is(billData.getId()));

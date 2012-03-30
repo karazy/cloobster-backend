@@ -1,9 +1,9 @@
-package net.eatsense.domain;
+package net.eatsense.domain.embedded;
 
 public enum OrderStatus {
 	CART,
 	PLACED,
-	CANCELLED,
+	CANCELED,
 	RECEIVED,
 	INPROCESS,
 	COMPLETE

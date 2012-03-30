@@ -13,12 +13,12 @@ Ext.define('EatSense.view.ProductOverview', {
 			ui: 'round',
 			type : 'fit',
 			allowDeselect : true,
-			itemTpl : "<div class='productListItem'>" +
+			itemCls: 'productListItem',
+			itemTpl :
 					"<h2>{name}</h2>  " +
 					"<div class='price'>{price}€</div>" +
 					"<div style='clear: both;'></div>"+
-					"<p>{shortDesc}</p>"+
-					"</div>",
+					"<p>{shortDesc}</p>",
 			listeners : {
 				select : function(dv, index, target, record, e, eOpts) {					
 					Ext.defer((function() {

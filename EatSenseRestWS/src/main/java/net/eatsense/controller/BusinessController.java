@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.CheckInStatus;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Restaurant;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
+import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 
 
 /**
- * Manages restaurant data concerning the whole restaurant. 
+ * Manages data concerning one business. 
  * 
  * @author Frederik Reifschneider
  *
@@ -39,16 +39,16 @@ public class BusinessController {
 	}
 	
 	/**
-	 * Retrieve initial status data of all spots for the given restaurantId
+	 * Retrieve initial status data of all spots for the given business id.<br>
 	 * (mainly used by the Eatsense Cockpit application).
 	 * 
-	 * @param restaurantId
+	 * @param businessId
 	 * @return List of SpotCockpitDTO objects
 	 */
-	public List<SpotStatusDTO> getSpotStatusData(Long restaurantId){
-		List<Spot> allSpots = spotRepo.getByParent(Restaurant.getKey(restaurantId));
-		//Restaurant restaurant = restaurantRepo.getById(restaurantId);
+	public List<SpotStatusDTO> getSpotStatusData(Long businessId){
+		List<Spot> allSpots = spotRepo.getByParent(Business.getKey(businessId));
 		List<SpotStatusDTO> spotDtos = new ArrayList<SpotStatusDTO>();
+		
 		for (Spot spot : allSpots) {
 			SpotStatusDTO spotDto = new SpotStatusDTO();
 			spotDto.setId(spot.getId());

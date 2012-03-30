@@ -1,3 +1,7 @@
+/**
+*	Displays details of a spot.
+*	Details are checkIns, orders and statistics.
+*/
 Ext.define('EatSense.view.SpotDetail', {
 	extend: 'Ext.Panel',
 	xtype: 'spotdetail',
@@ -5,12 +9,15 @@ Ext.define('EatSense.view.SpotDetail', {
 	config: {
 		modal: true,
 		hideOnMaskTap: 'true',
+		baseCls: 'spotdetail',
 		top: '10%',
 		left: '10%',
 		right: '10%',
 		bottom: '10%',
 		layout: 'fit',
 		fullscreen: true,
+		//this should be initially hidden
+		hidden: true,
 		items: [{
 			xtype: 'panel',
 			layout:  {
@@ -25,8 +32,17 @@ Ext.define('EatSense.view.SpotDetail', {
 				cls: 'spotdetailitem-customer-label'
 			},{
 				xtype: 'list',
-				itemId: 'checkInList',
-				itemTpl: '<h2>{nickname}</h2>',
+				itemId: 'checkInList', 
+				itemTpl: new Ext.XTemplate(
+					"<h2 class='spotdetail-customer-name'>{nickname}</h2>"+
+					"<tpl if='status == \"ORDER_PLACED\"'>"+
+						"<span class='spotdetail-customer-flag'>X</span>"+
+					"</tpl>",
+						{
+							translateStatus: function(status) {
+								return Karazy.i18n.translate(status);
+							}
+						}),
 				store: 'checkInStore',
 				ui: 'round'
 			}
@@ -34,9 +50,9 @@ Ext.define('EatSense.view.SpotDetail', {
 		},
 		{
 			xtype: 'panel',
-			// layout: {
-			// 	type: 'fit'
-			// },
+			layout: {
+				type: 'fit'
+			},
 			// fullscreen: true,
 			items: [
 			{
@@ -45,15 +61,47 @@ Ext.define('EatSense.view.SpotDetail', {
 				height: 100,
 				items: [
 				{
+					xtype: 'button',
+					action: 'close',
+					baseCls: 'spotdetail-close',
+					text: 'X'
+				},
+				{
+					xtype: 'panel',
+					// itemId: 'statistics',
+					cls: 'spotdetail-statistics',
+					items: [
+						{
+							xtype: 'label',
+							itemId: 'title',					
+							html: '<p>'+Karazy.i18n.translate('statistic')+'</p>'
+						},
+						{
+							xtype: 'label',
+							itemId: 'checkInTime',
+							tpl: new Ext.XTemplate(
+								'<p>Check-In: {[this.formatTime(values.checkInTime)]}</p>',
+								{
+									formatTime: function(time) {
+										return Ext.util.Format.date(time, 'H:i');
+									}
+								}
+							)
+						},				
+						{
+							xtype: 'label',
+							itemId: 'total',
+							tpl: '<p>Total: {total}€</p>'
+						}
+					]
+				},
+				{
 					xtype: 'label',
 					itemId: 'statusLabel',
-					top: 10,
-					left: 10,
 					cls: 'spotdetail-status',
-					tpl: new Ext.XTemplate('<p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
+					tpl: new Ext.XTemplate('<p>Status:</p><p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
 						{
 							translateStatus: function(status) {
-								console.log('translateStatus');
 								return Karazy.i18n.translate(status);
 							}
 						}
@@ -63,9 +111,6 @@ Ext.define('EatSense.view.SpotDetail', {
 			 {
 				xtype: 'dataview',
 				itemId: 'spotDetailOrders',
-				width: 500,
-				height: 300,
-				// fullscreen: true,
 				store: 'orderStore',
 				useComponents: true,
 				defaultType: 'spotdetailitem'
@@ -73,18 +118,34 @@ Ext.define('EatSense.view.SpotDetail', {
 			}, 
 			{
 				xtype: 'toolbar',
+				baseCls: 'spotdetail-toolbar',
 				docked: 'bottom',
+				layout: {
+					type: 'hbox',
+					align: 'middle',
+					pack: 'center'
+				},
+				defaults: {
+					ui: 'action',
+					cls: 'spotdetail-toolbar-button'
+				},
 				items: [
 				{
 					text: 'Paid',
-					action: 'pay'
+					action: 'pay',
+					disabled: true
 				},
 				{
-					text: 'Reedem'
-				}, {
-					text: 'User'
-				}, {
-					text: 'Cancel'
+					text: 'Redeem',
+					disabled: true
+				}, 
+				{
+					text: 'User',
+					disabled: true
+				}, 
+				{
+					text: 'Cancel',
+					disabled: true
 				}
 				]				
 			}
