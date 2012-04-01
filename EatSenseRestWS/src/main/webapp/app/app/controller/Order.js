@@ -10,9 +10,10 @@
 			myordersComplete: 'myorders #myorderscompletepanel',
 			myordersCompleteButton: 'myorders button[action=complete]',
 			menutab: '#menutab',
-			orderlist : '#cartCardPanel #orderlist',
+			// orderlist : '#cartCardPanel #orderlist',
+			orderlist : 'cartoverview #orderlist',
 			backBt : '#cartTopBar button[action="back"]',
-			cancelOrderBt : '#cartTopBar button[action="trash"]',
+			cancelAllOrdersBt : '#cartTopBar button[action="trash"]',
 			submitOrderBt : '#cartTopBar button[action="order"]',
 			topToolbar : '#cartTopBar',
 			// productdetail : '#cartCardPanel #cartProductdetail',	
@@ -22,10 +23,13 @@
                 autoCreate: true
             },
 			choicespanel : 'orderdetail #choicesPanel',
-			editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
+			// editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
+			editOrderBt : 'cartoverviewitem button[action=edit]',
+			cancelOrderBt : 'cartoverviewitem button[action=cancel]',
 			// amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
 			amountSpinner : 'orderdetail spinnerfield',
-			prodDetailLabel :'orderdetail #prodDetailLabel' ,	
+			prodDetailLabel :'orderdetail #prodDetailLabel' ,
+			closeOrderDetailBt: 'orderdetail button[action=close]',
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: '#myorderlist',
@@ -36,17 +40,21 @@
 			leaveButton: '#myorderstab button[action="leave"]'
 		},
 		control: {
-			cancelOrderBt : {
+			cancelAllOrdersBt : {
 				 tap: 'dumpCart'
 			 }, 
 			 submitOrderBt : {
 				 tap: 'submitOrders'
 			 },
-			 orderlist : {
-				 itemtap: 'cartItemContextMenu'
-			 },
+			 // orderlist : {
+				//  itemtap: 'cartItemContextMenu'
+			 // },
 			 editOrderBt : {
-				tap: 'editOrder'
+				// tap: 'editOrder'
+				tap: 'showOrderDetail'
+			 },
+			 cancelOrderBt : {
+			 	tap: 'cancelOrder'
 			 },
 			 backBt : {
             	 tap: function() {
@@ -67,12 +75,18 @@
              },
              leaveButton : {
             	 tap: 'leave'
-             }
+             }, 
+             productdetail : {
+             	hide: 'editOrder'
+             },
+             closeOrderDetailBt: {
+             	tap: 'closeOrderDetail'
+             },
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
 		 */
-		tooltip : ''				
+		// tooltip : ''				
 	},
 	init: function() {
 		
@@ -81,8 +95,8 @@
     	 this.models = models;
     	 
     	 //create tooltip for reuse
-    	 var tooltip = Ext.create('EatSense.util.CartToolTip');
-    	 this.setTooltip(tooltip);
+    	 // var tooltip = Ext.create('EatSense.util.CartToolTip');
+    	 // this.setTooltip(tooltip);
 	},
 	/**
 	 * Load cart orders.
@@ -341,12 +355,14 @@
 	 * Displays detailed information for an existing order (e.g. Burger)
 	 * @param dataview
 	 * @param order
-	 */
-	showOrderDetail: function(dataview, order) {
+	 */	 
+	// showOrderDetail: function(dataview, order) {
+	showOrderDetail: function(button, eventObj, eOpts) {
 		console.log("Cart Controller -> showProductDetail");		
 		 var 	detail = this.getProductdetail(), 
 		 		choicesPanel =  this.getChoicespanel(),
-		 		product = order.getProduct();
+		 		order = button.getParent().getRecord(),
+		 		product = order.getProduct();		 		
 		 		this.models.activeOrder = order,
 		 		main = this.getMain();
 
@@ -419,19 +435,23 @@
 		 // this.menuBackBtContext = this.editOrder;
 
 		 // this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
-		 main.add(detail);
-		 detail.show();
+		//add to viewport. otherwise Ext.MessageBox will show behind detail panel
+		Ext.Viewport.add(detail);
+		detail.show();
 	},
 	/**
 	 * Edit an existing order.
 	 */
-	editOrder : function() {
+	editOrder : function(component, eOpts) {
 		var order = this.models.activeOrder,
 		product = this.models.activeOrder.getProduct(), 
 		validationError = "", 
 		productIsValid = true,
-		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;
+		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+		detail = this.getProductdetail();
 		
+		order.getData(true);
+
 		product.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
 				//coice is not valid
@@ -440,25 +460,74 @@
 			}
 		});
 		
-		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
-		
-		Ext.Ajax.request({				
-    	    url: Karazy.config.serviceUrl+'/c/business/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-    	    method: 'PUT',
-    	    params: {
-    	    	'checkInId' : activeCheckIn.get('userId'),
-    	    },
-    	    jsonData: order.getRawJsonData()
-		});
-		
 		if(productIsValid) {
+			this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
+		
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'PUT',
+	    	    params: {
+	    	    	'checkInId' : activeCheckIn.get('userId'),
+	    	    },
+	    	    jsonData: order.getRawJsonData()
+			});
+
 			this.refreshCart();
-			this.showCart();
+			return true;
+			// this.showCart();
 		} else {
 			//show validation error
-			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn);
+			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn, detail);
+			if(component) {
+				//component exists if this was called by hide listener
+				component.show();
+			}
+			return false;
 		}
 		
+	},
+
+	/**
+	*	Deletes a single order.
+	* 	Called by cancelButton of an individual order.
+	*
+	*/
+	cancelOrder: function(button, eventObj, eOpts) {
+		var 	order = button.getParent().getRecord(),
+				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				productName = order.getProduct().get('name');
+			//delete item
+			activeCheckIn.orders().remove(order);
+			
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'DELETE',    	    
+	    	    params: {
+	    	    	'checkInId' : activeCheckIn.get('userId'),
+	    	    }
+	    	});
+			
+			this.refreshCart();
+			
+			//show success message and switch to next view
+			Ext.Msg.show({
+				title : i18nPlugin.translate('orderRemoved'),
+				message : productName,
+				buttons : []
+			});
+			//show short alert and then hide
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), globalConf.msgboxHideTimeout, this);
+	},
+
+	closeOrderDetail: function() {
+		var 	detail = this.getProductdetail();
+		
+		// if(this.editOrder() === true) {
+			detail.hide();	
+		// }
+	
 	},
 	/**
 	 * Switches to another view
@@ -789,37 +858,37 @@
 	}
 });
 
-Ext.define('EatSense.util.CartToolTip', {
-	extend: 'Ext.Panel',
-	xtype: 'cartToolTip',
-	config: {
-		layout: {
-			type: 'hbox'
-		},
-		centered: true,
-		width: 150,
-		height:70,
-		modal: true,
-		selectedProduct : null,
-		hideOnMaskTap: true,
-		defaults : {
-			margin: 5
-		},
-		items: [ {
-			xtype: 'button',
-			itemId: 'editCartItem',
-			iconCls : 'compose',
-			iconMask : true,
-			flex: 1,
-		}, {
-			xtype: 'spacer',
-			width: 7
-		} ,{
-			xtype: 'button',
-			itemId: 'deleteCartItem',
-			iconCls : 'trash',
-			iconMask : true,
-			flex: 1	,
-		}]
-	}	
-});
+// Ext.define('EatSense.util.CartToolTip', {
+// 	extend: 'Ext.Panel',
+// 	xtype: 'cartToolTip',
+// 	config: {
+// 		layout: {
+// 			type: 'hbox'
+// 		},
+// 		centered: true,
+// 		width: 150,
+// 		height:70,
+// 		modal: true,
+// 		selectedProduct : null,
+// 		hideOnMaskTap: true,
+// 		defaults : {
+// 			margin: 5
+// 		},
+// 		items: [ {
+// 			xtype: 'button',
+// 			itemId: 'editCartItem',
+// 			iconCls : 'compose',
+// 			iconMask : true,
+// 			flex: 1,
+// 		}, {
+// 			xtype: 'spacer',
+// 			width: 7
+// 		} ,{
+// 			xtype: 'button',
+// 			itemId: 'deleteCartItem',
+// 			iconCls : 'trash',
+// 			iconMask : true,
+// 			flex: 1	,
+// 		}]
+// 	}	
+// });

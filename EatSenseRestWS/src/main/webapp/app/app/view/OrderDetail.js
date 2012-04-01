@@ -1,5 +1,6 @@
 /**
- * Displays details and options of a product.
+ * Displays details and options of an order.
+ * Very similar to productdetail.
  */
 Ext.define('EatSense.view.OrderDetail', {
 	extend : 'Ext.Panel',
@@ -68,24 +69,24 @@ Ext.define('EatSense.view.OrderDetail', {
 			minHeight: '200px',
 			scrollable : false,
 		},
-		{
-			xtype: 'toolbar',
-			docked: 'bottom',
-			layout: {
-   				type: 'hbox',
-   				align: 'middle',
-   				pack: 'center'
-			},
-			items: [
-				{
-					xtype: 'button',
-					ui: 'confirm',
-					icon: '../app/res/images/into_cart.png',
-					iconAlign: 'centered',
-					action: 'cart'
-				}
-			]
-		}
+		// {
+		// 	xtype: 'toolbar',
+		// 	docked: 'bottom',
+		// 	layout: {
+  //  				type: 'hbox',
+  //  				align: 'middle',
+  //  				pack: 'center'
+		// 	},
+		// 	items: [
+		// 		{
+		// 			xtype: 'button',
+		// 			ui: 'confirm',
+		// 			icon: '../app/res/images/into_cart.png',
+		// 			iconAlign: 'centered',
+		// 			action: 'cart'
+		// 		}
+		// 	]
+		// }
 		]		
 	}
 });

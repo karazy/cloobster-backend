@@ -220,7 +220,7 @@ Ext.define('EatSense.controller.Menu', {
 		);
 		 
 		 // this.menuBackBtContext = this.backToProductOverview;
-		 main.add(detail);
+		 Ext.Viewport.add(detail);
 		 detail.show();
 		 // this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
 	},
