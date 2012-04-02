@@ -1,37 +1,46 @@
 Ext.define('EatSense.view.CartOverview', {
 	extend : 'Ext.Panel',
 	xtype: 'cartoverview',
+	requires: ['EatSense.view.CartOverviewItem'],
 	config: {
 		items: [
+		 {
+				xtype: 'dataview',
+				itemId: 'orderlist',
+				useComponents: true,
+				defaultType: 'cartoverviewitem'				
+		}, 
+		/*
 		{
 			xtype: 'list',
 			itemId: 'orderlist',
 			ui: 'round',
-			styleHtmlContent: true,
+			// styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
+			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
-			"<div class='orderListItem''>" +
-				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}€</div>" +
-				"<div style='clear: both;'>"+
-					"<tpl for='Product.choices'>" +				
-						"<tpl if='this.checkSelections(values, xindex)'>" +
-							"<h3>{text}</h3>" +
-							"<ul>" +
-								"<tpl for='options'>" +
-									"<tpl if='selected === true'>" +
-										"<li>{name}</li>" +
-									"</tpl>" +
-								"</tpl>" +
-							"</ul>" +
-						"</tpl>" +
-					"</tpl>" +
-					"<tpl if='comment!=\"\"'>" +
-					"<p>Kommentar: {comment}</p>" +
-					"</tpl>" +
-				"</div>" +
-			"</div>"
+			// "<div class='orderListItem''>" +
+				"<h2>{Product.name}</h2>" +
+				"<div class='price'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}€</div>"+
+				"<div style='clear: both;'>"
+				// 	"<tpl for='Product.choices'>" +				
+				// 		"<tpl if='this.checkSelections(values, xindex)'>" +
+				// 			"<h3>{text}</h3>" +
+				// 			"<ul>" +
+				// 				"<tpl for='options'>" +
+				// 					"<tpl if='selected === true'>" +
+				// 						"<li>{name}</li>" +
+				// 					"</tpl>" +
+				// 				"</tpl>" +
+				// 			"</ul>" +
+				// 		"</tpl>" +
+				// 	"</tpl>" +
+				// 	"<tpl if='comment!=\"\"'>" +
+				// 	"<p>Kommentar: {comment}</p>" +
+				// 	"</tpl>" +
+				// "</div>" +
+			// "</div>"
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
 				//we need to pass the product as the choices object in this context is raw data
@@ -55,7 +64,8 @@ Ext.define('EatSense.view.CartOverview', {
 					}), 100, this);					
 				}
 			}
-		}, {
+		},
+		*/ {
 			type: 'panel',
 			docked: 'bottom',
 			itemId: 'carttotalpanel',

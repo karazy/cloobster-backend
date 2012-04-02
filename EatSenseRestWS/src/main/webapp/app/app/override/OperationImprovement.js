@@ -1,4 +1,4 @@
-Ext.define('EatSense.data.proxy.OperationImprovement', {
+Ext.define('EatSense.override.OperationImprovement', {
     override: 'Ext.data.Operation',
 
     processCreate: function(resultSet) {

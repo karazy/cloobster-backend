@@ -19,11 +19,18 @@ Ext.define('EatSense.model.Order', {
 			type : 'date',
 			dateFormat: 'time'
 		} ],
-
 		associations : {
 			type : 'hasOne',
 			model : 'EatSense.model.Product',
-		}
+		},
+		proxy: {
+			type: 'rest',
+			enablePagingParams: false,
+			url : '/c/businesses/{pathId}/orders',
+			reader: {
+				type: 'json'
+		   	}
+	 	}
 	},
 
 	calculate : function() {

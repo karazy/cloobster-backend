@@ -22,6 +22,14 @@ Ext.define('EatSense.model.Bill', {
 			name : 'time',
 			type : 'date',
 			dateFormat : 'time'
-		} ]
+		} ],
+		proxy: {
+	 		type: 'rest',
+	 		enablePagingParams: false,
+	 		url : '/c/businesses/{pathId}/bills',
+	 		reader: {
+	 			type: 'json'
+	 		}
+	 	}
 	}
 });

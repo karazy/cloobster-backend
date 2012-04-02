@@ -15,7 +15,7 @@ Ext.define('EatSense.view.ProductOverview', {
 			allowDeselect : true,
 			itemCls: 'productListItem',
 			itemTpl :
-					"<h2>{name}</h2>  " +
+					"<h2>{name}</h2>" +
 					"<div class='price'>{price}€</div>" +
 					"<div style='clear: both;'></div>"+
 					"<p>{shortDesc}</p>",

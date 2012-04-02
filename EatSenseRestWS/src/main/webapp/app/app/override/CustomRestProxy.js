@@ -1,4 +1,4 @@
-Ext.define('EatSense.data.proxy.CustomRestProxy', {
+Ext.define('EatSense.override.CustomRestProxy', {
 	override: 'Ext.data.proxy.Rest',
 	   buildUrl: function(request) {		
 	        var  me = this, _serviceUrl = globalConf.serviceUrl, 

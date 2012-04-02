@@ -46,11 +46,11 @@ Ext.define('EatSense.view.Cart', {
 				itemId: 'cartoverview',
 				layout: 'fit'
 			}, 
-			{
-				xtype: 'productdetail',
-				itemId : 'cartProductdetail',
-				layout: 'vbox'
-			}			        
+			// {
+			// 	xtype: 'productdetail',
+			// 	itemId : 'cartProductdetail',
+			// 	layout: 'vbox'
+			// }			        
 			]
 			
 		} ]

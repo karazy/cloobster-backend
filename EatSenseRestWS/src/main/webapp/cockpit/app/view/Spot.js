@@ -8,16 +8,15 @@ Ext.define('EatSense.view.Spot', {
 		fullscreen: true,
 		layout: 'fit',
 		items: [		
-				{
-					xtype: 'dataview',
-					itemId: 'spotsview',
-					store: 'spotStore',
-					baseCls: 'dv-baseCls',
-					itemCls: 'spot',
-					useComponents: true,
-    				defaultType: 'spotitem',
-				}
-							
+			{
+				xtype: 'dataview',
+				itemId: 'spotsview',
+				store: 'spotStore',
+				baseCls: 'dv-baseCls',
+				itemCls: 'spot',
+				useComponents: true,
+				defaultType: 'spotitem',
+			}							
 		]
 	}
 

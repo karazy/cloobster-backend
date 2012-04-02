@@ -17,6 +17,12 @@ Ext.define('EatSense.view.MenuOverview', {
 			ui: 'round',
 			allowDeselect: true,
 			itemTpl : '{title}',
+			store: 'menuStore',
+			// itemCls: 'menuCategoryItem',
+			// scrollable: {
+   //  			direction: 'horizontal',
+   //  			directionLock: true
+			// },
 			listeners: {
 				select : function(dv, index, target, record, e, eOpts) {					
 					Ext.defer((function() {

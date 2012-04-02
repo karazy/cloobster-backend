@@ -14,45 +14,56 @@ Ext.define('EatSense.controller.Menu', {
         	productlist :'#menuCardPanel #productlist',        	
         	productoverview :'productoverview' ,	     
         	menuoverview :'menuoverview' ,	       
-        	productdetail :'#menuCardPanel #menuProductDetail' ,        		       
+        	// productdetail :'#menuCardPanel #menuProductDetail',
+        	productdetail :{
+                selector: 'tabpanel panel[name=menu] productdetail',
+                xtype: 'productdetail',
+                autoCreate: true
+            },
         	backToMenu :'#productOvBackBt' ,	        
-        	prodDetailLabel :'#menuCardPanel #menuProductDetail #prodDetailLabel' ,	     
+        	// prodDetailLabel :'#menuCardPanel #menuProductDetail #prodDetailLabel' ,
+        	prodDetailLabel :'productdetail #prodDetailLabel' ,	     
         	prodDetailBackBt :'#prodDetailBackBt' ,	   
-        	amountSpinner : 'menu panel panel #productAmountSpinner',
+        	// amountSpinner : 'menu panel panel #productAmountSpinner',
+        	// amountSpinner : '#productAmountSpinner',
+        	amountSpinner: 'productdetail spinnerfield',
+        	createOrderBt :'productdetail button[action="cart"]',
+        	closeProductDetailBt: 'productdetail button[action=close]',
         	cartview : 'cartview',
         	menuview: 'menu',
         	productcomment: '#productComment',
         	//#menutap #menu
 //        	createOrderBt :'menu #menuCardPanel #menuProductDetail #prodDetailcartBt',
-        	createOrderBt :'menu #menuTopBar #productCartBt',
+        	// createOrderBt :'menu #menuTopBar #productCartBt',
         	backBt: 'menu button[action=back]',
         	topToolbar: 'menu #menuTopBar',
         	bottomTapToMenu : '#menuBottomBar #bottomTapToMenu',
         	loungeview: 'lounge',
         	loungeTabBar: '#loungeTabBar',
         	myordersview: '#myorderstab #myorders',
-		}
-    },
-    init: function() {
-    	console.log('initialized MenuController');
-    	 this.control({
-    		 menulist: {
-             	select: this.showProductlist
+		},
+
+		control: {
+			menulist: {
+             	select: 'showProductlist'
              },
              productlist : {
-            	select: this.loadProductDetail 
+            	select: 'loadProductDetail' 
              },
              backToMenu: {
-            	 tap: this.showMenu
+            	 tap: 'showMenu'
              }, 
              prodDetailBackBt: {
-            	 tap: this.prodDetailBackBtHandler
+            	 tap: 'prodDetailBackBtHandler'
              },
              createOrderBt : {
-            	 tap: this.createOrder
+            	 tap: 'createOrder'
              },
              bottomTapToMenu : {
-            	 tap: this.showMenu
+            	 tap: 'showMenu'
+             },
+             closeProductDetailBt: {
+             	tap: 'closeProductDetail'
              },
              backBt : {
             	 tap: function() {
@@ -63,7 +74,7 @@ Ext.define('EatSense.controller.Menu', {
             	 }
              },
              amountSpinner : {
-            	 spin: this.amountChanged
+            	 spin: 'amountChanged'
              },
              //TODO refactor general loungeview control into another controller?!
              loungeview : {
@@ -84,16 +95,10 @@ Ext.define('EatSense.controller.Menu', {
     				return status;
     			}
     		},
-    		
-    		productdetail: {
-    			show: function() {
-    				this.getCreateOrderBt().show();
-    			},
-    			hide: function() {
-    				this.getCreateOrderBt().hide();
-    			}
-    		}
-        });
+		}
+    },
+    init: function() {
+    	console.log('initialized MenuController');
     	 
     	 //store retrieved models
     	 var models = {};
@@ -201,9 +206,6 @@ Ext.define('EatSense.controller.Menu', {
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 },this);
-//			 choicesPanel.add( {
-//				 html: '<hr/>'
-//			 });
 		 }
 		 
 		 
@@ -217,8 +219,18 @@ Ext.define('EatSense.controller.Menu', {
 			}
 		);
 		 
-		 this.menuBackBtContext = this.backToProductOverview;
-		 this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
+		 // this.menuBackBtContext = this.backToProductOverview;
+		 Ext.Viewport.add(detail);
+		 detail.show();
+		 // this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
+	},
+	/**
+	*	Hides Product detail.
+	*/
+	closeProductDetail: function() {
+		var 	detail = this.getProductdetail();
+
+		detail.hide();
 	},
 	/**
 	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
@@ -241,8 +253,8 @@ Ext.define('EatSense.controller.Menu', {
 
 		this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 			
-		this.menuBackBtContext = this.showMenu;
-		this.switchView(pov, this.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
+		// this.menuBackBtContext = this.showMenu;
+		// this.switchView(pov, this.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
 		if (message) {
 			Ext.Msg.show({
 				title : i18nPlugin.translate('orderPlaced'),
@@ -262,14 +274,16 @@ Ext.define('EatSense.controller.Menu', {
 	createOrder: function(button) {
 		console.log('Menu Controller -> createOrder');
 		//get active product and set choice values
-		var productForCart = this.models.activeProduct,
-		order,
-		validationError = "",
-		cartButton = this.getLoungeTabBar().getAt(1),
-		productIsValid = true,
-		appState = this.getApplication().getController('CheckIn').getAppState(),
-		appStateStore = Ext.StoreManager.lookup('appStateStore'),
-		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;	
+		var 	productForCart = this.models.activeProduct,
+				order,
+				validationError = "",
+				cartButton = this.getLoungeTabBar().getAt(1),
+				productIsValid = true,
+				appState = this.getApplication().getController('CheckIn').getAppState(),
+				appStateStore = Ext.StoreManager.lookup('appStateStore'),
+				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				detail = this.getProductdetail();	
+		
 		//validate choices 
 		productForCart.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
@@ -303,15 +317,9 @@ Ext.define('EatSense.controller.Menu', {
 	    	});
 			
 			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
-			//TODO temporarily persist data on phone or send to server	
-//			try {
-//				appState.cartOrders().add(order.getRawJsonData());
-//				appState.save();
-//				appStateStore.sync();
-//			} catch (e) {
-//				console.log('could not persist order to resume state');
-//			}
 			
+			detail.hide();
+
 			this.backToProductOverview(i18nPlugin.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
 		} else {
 			//show validation error
