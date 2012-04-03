@@ -50,6 +50,39 @@ Ext.define('EatSense.model.Choice', {
 		return (validationError.toString().length == 0) ? true : false;
 	},
 	/**
+	*	Validates choice based on given options which are not yet set. 
+	*
+	*/
+	preValidateChoice: function(options) {
+		var counter = 0, validationError = "";
+		Ext.each(options, function(o) {
+			if(option.get('selected') === true) {
+				counter ++;
+			}
+		});
+
+		if(this.get('minOccurence') <= 1 && this.get('maxOccurence') == 1 && counter != 1) {
+			//radio button mandatory field
+			validationError += "Bitte triff eine Wahl für "+this.get('text')+ "<br/>";
+		}
+		else if(counter < this.get('minOccurence')) {
+			validationError += "Bitte wähle mindestens " + this.get('minOccurence') + " "+this.get('text')+ " aus. <br/>";
+		}else if(counter > this.get('maxOccurence')) {
+			validationError += "Du kannst maximal " + this.get('maxOccurence') + " "+this.get('text')+" auswählen. <br/>";
+		}
+		return (validationError.toString().length == 0) ? true : false;
+	},
+	setSelectedOptions: function(options) {
+		if(options.length != this.options().getCount()) {
+			return;
+		}
+
+		Ext.Array.each(options, function(selected, index) {
+			this.options().getAt(index).set('selected', selected);
+		});
+
+	},
+	/**
 	 * Caluclates the price for this choice.
 	 */
 	calculate: function() {
@@ -139,6 +172,31 @@ Ext.define('EatSense.model.Choice', {
 			rawJson.options[int] = this.options().getAt(int).getRawJsonData();
 		}		
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		for ( var int = 0; int < this.options().data.length; int++) {
+			if(!this.options().getAt(int).setRawJsonData(rawData.options[int])) {
+				return false;
+			}
+		}	
+		
+		this.set('id', rawData.id);
+		this.set('text', rawData.text);
+		this.set('maxOccurence', rawData.maxOccurence);
+		this.get('minOccurence', rawData.minOccurence);
+		this.get('price', rawData.price);
+		this.get('included', rawData.included);
+		this.get('overridePrice', rawData.overridePrice);	
+
+		return true;			
 	}
 
 });

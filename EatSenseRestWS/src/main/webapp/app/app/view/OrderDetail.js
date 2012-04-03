@@ -12,7 +12,7 @@ Ext.define('EatSense.view.OrderDetail', {
 	config : {
     	scrollable : 'vertical',
     	modal: true,
-		hideOnMaskTap: true,
+		// hideOnMaskTap: true,
 		top: '8%',
 		left: '5%',
 		right: '5%',

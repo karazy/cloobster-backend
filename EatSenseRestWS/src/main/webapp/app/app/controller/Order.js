@@ -77,7 +77,7 @@
             	 tap: 'leave'
              }, 
              productdetail : {
-             	hide: 'editOrder'
+             	// hide: 'editOrder'
              },
              closeOrderDetailBt: {
              	tap: 'closeOrderDetail'
@@ -366,6 +366,8 @@
 		 		this.models.activeOrder = order,
 		 		main = this.getMain();
 
+		 //save state of order to undo changes
+		 order.saveState();
 		 choicesPanel.removeAll(false);
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(order.get('amount'));
