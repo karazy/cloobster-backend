@@ -13,11 +13,15 @@ Ext.define('EatSense.view.OrderDetail', {
     	scrollable : 'vertical',
     	modal: true,
 		// hideOnMaskTap: true,
-		top: '8%',
-		left: '5%',
-		right: '5%',
-		bottom: '5%',
+		top: '5%',
+		left: '3%',
+		right: '3%',
+		bottom: '3%',
 		items : [
+		{
+			xtype: 'titlebar',
+			docked: 'top'
+		},
 		{
 			xtype : 'panel',
 			cls: 'productDetailPanel',
@@ -26,21 +30,10 @@ Ext.define('EatSense.view.OrderDetail', {
 			},
 			items : [ 
 			{
-					xtype: 'button',
-					action: 'close',
-					baseCls: 'productDetail-close',
-					text: 'X'
-			},
-			{
 				xtype : 'label',
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
-				tpl: new Ext.XTemplate(
-				 	'<h2>{product.data.name}</h2>'+
-				 	'<div class="price">{[values.product.calculate(values.amount)]}</div>'+
-				 	'<div style="clear: both;">'+
-				 	'<p class="desc">{product.data.longDesc}</p>'
-				)
+				tpl: '<p class="desc">{product.data.longDesc}</p>'
 			}, {
 				xtype : 'panel',
 				layout : {
@@ -51,14 +44,20 @@ Ext.define('EatSense.view.OrderDetail', {
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
-					style : 'background-color:white;',
+					// style : 'background-color:white;',
 					value : 1,
-					width: 200,
+					// width: 200,
 					minValue : '1',
 					maxValue : '10',
-					height: '25px',
+					// height: '25px',
 					cycle : true,
-				}, 
+				},
+				{
+					xtype: 'label',
+					cls: 'productPrice',
+					itemId : 'prodPriceLabel',
+					tpl: '<p class="price">{[values.product.calculate(values.amount)]}</p>'
+				} 
 				]
 			}]
 		}, 
@@ -69,24 +68,31 @@ Ext.define('EatSense.view.OrderDetail', {
 			minHeight: '200px',
 			scrollable : false,
 		},
-		// {
-		// 	xtype: 'toolbar',
-		// 	docked: 'bottom',
-		// 	layout: {
-  //  				type: 'hbox',
-  //  				align: 'middle',
-  //  				pack: 'center'
-		// 	},
-		// 	items: [
-		// 		{
-		// 			xtype: 'button',
-		// 			ui: 'confirm',
-		// 			icon: '../app/res/images/into_cart.png',
-		// 			iconAlign: 'centered',
-		// 			action: 'cart'
-		// 		}
-		// 	]
-		// }
+		{
+			xtype: 'toolbar',
+			docked: 'bottom',
+			layout: {
+   				type: 'hbox',
+   				align: 'middle',
+   				pack: 'center'
+			},
+			items: [
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					// icon: '../app/res/images/into_cart.png',
+					// iconAlign: 'centered',
+					text: Karazy.i18n.translate('ok'),
+					action: 'edit'
+				},
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					text: Karazy.i18n.translate('cancel'),
+					action: 'undo'
+				}
+			]
+		}
 		]		
 	}
 });

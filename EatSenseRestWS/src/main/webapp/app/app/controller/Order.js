@@ -29,6 +29,7 @@
 			// amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
 			amountSpinner : 'orderdetail spinnerfield',
 			prodDetailLabel :'orderdetail #prodDetailLabel' ,
+			prodPriceLabel :'orderdetail #prodPriceLabel' ,
 			closeOrderDetailBt: 'orderdetail button[action=close]',
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
@@ -37,7 +38,9 @@
 			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: '#myorderstab button[action="pay"]',
-			leaveButton: '#myorderstab button[action="leave"]'
+			leaveButton: '#myorderstab button[action="leave"]',
+			confirmEditButton: 'orderdetail button[action="edit"]',
+			undoEditButton: 'orderdetail button[action="undo"]'
 		},
 		control: {
 			cancelAllOrdersBt : {
@@ -82,6 +85,12 @@
              closeOrderDetailBt: {
              	tap: 'closeOrderDetail'
              },
+             confirmEditButton: {
+             	tap: 'editOrder'
+             },
+             undoEditButton: {
+             	tap: 'closeOrderDetail'
+             }
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
@@ -280,16 +289,14 @@
 
 					}
 				}
-			});		
-			
-			
-
+			});						
 	}
 	},
 	/**
 	 * Listener for itemTap event of orderlist.
 	 * Show a tooltip with buttons to edit, delete the selected item.
 	 */
+	 //TODO remove
 	cartItemContextMenu: function(dv, number, dataitem, model, event, opts) {
 		console.log('Cart Controller -> cartItemContextMenu');
 		var x = event.pageX,
@@ -364,14 +371,21 @@
 		 		order = button.getParent().getRecord(),
 		 		product = order.getProduct();		 		
 		 		this.models.activeOrder = order,
-		 		main = this.getMain();
+		 		main = this.getMain(),
+		 		titlebar = detail.down('titlebar');
 
 		 //save state of order to undo changes
 		 order.saveState();
+
 		 choicesPanel.removeAll(false);
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(order.get('amount'));
+
+		 //set title
+		 titlebar.setTitle(product.get('name'));
+
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
+		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof product.choices() !== 'undefined' && product.choices().getCount() > 0) {
 			 product.choices().each(function(_choice) {
@@ -474,6 +488,7 @@
 	    	    jsonData: order.getRawJsonData()
 			});
 
+			detail.hide();
 			this.refreshCart();
 			return true;
 			// this.showCart();
@@ -501,9 +516,9 @@
 			//delete item
 			activeCheckIn.orders().remove(order);
 			
-			Ext.Ajax.request({				
+			Ext.Ajax.request({
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-	    	    method: 'DELETE',    	    
+	    	    method: 'DELETE',
 	    	    params: {
 	    	    	'checkInId' : activeCheckIn.get('userId'),
 	    	    }
@@ -526,10 +541,9 @@
 	closeOrderDetail: function() {
 		var 	detail = this.getProductdetail();
 		
-		// if(this.editOrder() === true) {
-			detail.hide();	
-		// }
-	
+		this.models.activeOrder.restoreState();
+		this.refreshCart();
+		detail.hide();		
 	},
 	/**
 	 * Switches to another view
@@ -567,7 +581,7 @@
 	 */
 	recalculate: function(order) {
 		console.log('Cart Controller -> recalculate');
-		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.getProduct(), amount: order.get('amount')});
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
 	/**
 	 * Refreshes the badge text on cart tab icon.

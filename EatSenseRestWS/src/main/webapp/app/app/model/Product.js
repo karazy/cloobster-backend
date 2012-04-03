@@ -105,8 +105,8 @@ Ext.define('EatSense.model.Product', {
 		this.set('id', rawData.id);
 		this.set('name', rawData.name);
 		this.set('shortDesc', rawData.shortDesc);
-		this.get('longDesc', rawData.longDesc);
-		this.get('price', rawData.price);
+		this.set('longDesc', rawData.longDesc);
+		this.set('price', rawData.price);
 						
 		return true;
 	}

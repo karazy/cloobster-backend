@@ -191,10 +191,10 @@ Ext.define('EatSense.model.Choice', {
 		this.set('id', rawData.id);
 		this.set('text', rawData.text);
 		this.set('maxOccurence', rawData.maxOccurence);
-		this.get('minOccurence', rawData.minOccurence);
-		this.get('price', rawData.price);
-		this.get('included', rawData.included);
-		this.get('overridePrice', rawData.overridePrice);	
+		this.set('minOccurence', rawData.minOccurence);
+		this.set('price', rawData.price);
+		this.set('included', rawData.included);
+		this.set('overridePrice', rawData.overridePrice);	
 
 		return true;			
 	}

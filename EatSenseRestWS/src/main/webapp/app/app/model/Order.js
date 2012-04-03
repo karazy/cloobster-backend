@@ -93,8 +93,8 @@ Ext.define('EatSense.model.Order', {
 		this.set('id', rawData.id);
 		this.set('status', rawData.status);
 		this.set('amount', rawData.amount);
-		this.get('comment', rawData.comment);
-		this.get('orderTime', rawData.orderTime);
+		this.set('comment', rawData.comment);
+		this.set('orderTime', rawData.orderTime);
 
 		return true;
 		
