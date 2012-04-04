@@ -24,6 +24,7 @@ Ext.define('EatSense.controller.Spot', {
 		    confirmOrderButton: 'spotdetail button[action=confirm]',
 		    cancelOrderButton: 'spotdetail button[action=cancel]',
 		    closeSpotDetailButton: 'spotdetail button[action=close]',
+		    paidSpotDetailButton: 'spotdetail button[action=paid]',
 		    chargeButton: 'spotdetail button[action=pay]',		    
 		    spotDetailStatistic: 'spotdetail #statistics'
 		    //</spot-detail>
@@ -176,11 +177,30 @@ Ext.define('EatSense.controller.Spot', {
 						if(updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
 							me.updateCustomerStatusPanel();
 						}						
-					} else {
+					} else { 
 						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
 					}
 				}
 			}
+		}
+	},
+	/**
+	*	Updates spotdetail view when a new/changed bill arrives.
+	*
+	*/
+	updateSpotDetailBillIncremental: function(action, bill) {
+		var		me = this,
+				detail = this.getSpotDetail(),
+				paymentLabel = detail.down('#paymentLabel'),
+				paidButton = this.getPaidSpotDetailButton();
+
+				//check if spot detail is visible and if it is the same spot the checkin belongs to
+		if(!detail.isHidden() && me.getActiveSpot()) {
+			// if(bill.checkInId == me.getActiveCustomer().get('id')) {
+				paidButton.enable();
+				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.paymentMethod.name});
+				paymentLabel.show();
+			// }
 		}
 	},
 	/**
@@ -236,7 +256,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
-		messageCtr.on('eatSense.bill', function() {console.log('bill received')}, this);
+		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
 
 		//load checkins and orders and set lists
 		checkInStore.load({
@@ -271,14 +291,12 @@ Ext.define('EatSense.controller.Spot', {
 				detail = me.getSpotDetail(),
 				statusLabel = detail.down('#statusLabel'),
 				checkInTimeLabel = detail.down('#checkInTime'),
-				totalLabel = detail.down('#total'),
 				sum = 0;
 
 		if(checkIn) {
 			//render order status					
 			statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
 			checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {'checkInTime': checkIn.get('checkInTime')});
-			
 		} else {
 			//pass dummy objects with no data
 			statusLabel.getTpl().overwrite(statusLabel.element, {status: ''});

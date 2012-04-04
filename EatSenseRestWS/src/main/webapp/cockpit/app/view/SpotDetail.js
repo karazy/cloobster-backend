@@ -10,10 +10,10 @@ Ext.define('EatSense.view.SpotDetail', {
 		modal: true,
 		hideOnMaskTap: 'true',
 		baseCls: 'spotdetail',
-		top: '10%',
-		left: '10%',
-		right: '10%',
-		bottom: '10%',
+		top: '5%',
+		left: '5%',
+		right: '5%',
+		bottom: '5%',
 		layout: 'fit',
 		fullscreen: true,
 		//this should be initially hidden
@@ -106,6 +106,19 @@ Ext.define('EatSense.view.SpotDetail', {
 							}
 						}
 					)
+				},
+				{
+					xtype: 'label',
+					itemId: 'paymentLabel',
+					cls: 'spotdetail-status',
+					hidden: true,
+					tpl: new Ext.XTemplate('<p>Bezahlart:</p><p class="payment">{paymentMethod}</p>',
+						{
+							translateStatus: function(status) {
+								return Karazy.i18n.translate(status);
+							}
+						}
+					)
 				}]
 			},
 			 {
@@ -113,8 +126,7 @@ Ext.define('EatSense.view.SpotDetail', {
 				itemId: 'spotDetailOrders',
 				store: 'orderStore',
 				useComponents: true,
-				defaultType: 'spotdetailitem'
-				
+				defaultType: 'spotdetailitem'				
 			}, 
 			{
 				xtype: 'toolbar',
@@ -131,8 +143,8 @@ Ext.define('EatSense.view.SpotDetail', {
 				},
 				items: [
 				{
-					text: 'Paid',
-					action: 'pay',
+					text: '€',
+					action: 'paid',
 					disabled: true
 				},
 				{

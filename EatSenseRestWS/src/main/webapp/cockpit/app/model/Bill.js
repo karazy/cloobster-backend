@@ -29,7 +29,7 @@ Ext.define('EatSense.model.Bill', {
 		proxy: {
 	 		type: 'rest',
 	 		enablePagingParams: false,
-	 		url : '/c/businesses/{pathId}/bills',
+	 		url : '/b/businesses/{pathId}/bills',
 	 		reader: {
 	 			type: 'json'
 	 		}
