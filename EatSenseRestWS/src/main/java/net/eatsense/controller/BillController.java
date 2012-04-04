@@ -73,6 +73,22 @@ public class BillController {
 		this.billRepo = billRepo;
 	}
 	
+	public BillDTO getBillForCheckIn(Long businessId, Long checkInId) {
+		BillDTO billData = new BillDTO();
+		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(Business.getKey(businessId)).filter("checkIn", CheckIn.getKey(checkInId)).get();
+		if(bill == null)
+			return null;
+		
+		billData.setId(bill.getId());
+		billData.setCheckInId(bill.getCheckIn().getId());
+		billData.setCleared(bill.isCleared());
+		billData.setPaymentMethod(bill.getPaymentMethod());
+		billData.setTotal(bill.getTotal());
+		billData.setTime(bill.getCreationTime());
+		
+		return billData;
+	}
+	
 	public BillDTO updateBill(Long businessId, Long billId , BillDTO billData) {
 		// Check if the business exists.
 		Business business = businessRepo.getById(businessId);
