@@ -10,9 +10,12 @@ import net.eatsense.representation.BillDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class BillResource {
+	
+	@Inject
 	public BillResource(BillController billController) {
 		super();
 		this.billController = billController;
