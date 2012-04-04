@@ -14,6 +14,7 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.domain.Business;
@@ -72,6 +73,33 @@ public class BillController {
 		this.billRepo = billRepo;
 	}
 	
+	public BillDTO updateBill(Long businessId, Long billId , BillDTO billData) {
+		// Check if the business exists.
+		Business business = businessRepo.getById(businessId);
+		if(business == null) {
+			logger.error("Bill cannot be updated, business id unknown" + businessId);
+			return null;
+		}
+		
+		Bill bill = billRepo.getById(business.getKey(), billId);
+		if(bill == null) {
+			logger.error("Bill cannot be updated, bill id unknown" + businessId);
+			return null;
+		}
+		
+		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", bill.getCheckIn()).list();
+		for (Order order : orders) {
+			if(order.getStatus() == OrderStatus.PLACED) {
+				
+			}
+		}
+				
+		bill.setCleared(billData.isCleared());
+		
+		
+		return billData;
+	}
+	
 	public BillDTO createBill(Long businessId, String checkInId, BillDTO billData) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
@@ -85,6 +113,7 @@ public class BillController {
 		Business business = businessRepo.getById(businessId);
 		if(business == null) {
 			logger.error("Bill cannot be created, business id unknown" + businessId);
+			return null;
 		}
 		if(business.getId() != checkIn.getBusiness().getId()) {
 			logger.error("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
@@ -100,18 +129,48 @@ public class BillController {
 				billId = order.getBill().getId();
 				iterator.remove();
 			}
-				
+			else {
+				if(order.getStatus().equals(OrderStatus.CANCELED) || order.getStatus().equals(OrderStatus.CART) )
+					iterator.remove();
+			}
 		}
 		if(orders.isEmpty()) {
 			logger.info("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
 			billData.setId(billId);
 		}
 		else {
-			Bill bill = saveBill(business, checkIn, orders, billData.getPaymentMethod());	
-			if(bill == null) {
+			if(business.getPaymentMethods() == null || business.getPaymentMethods().isEmpty()) {
+				throw new RuntimeException("Bill cannot be created, business has no payment methods saved");
+			}
+			Bill bill = new Bill();
+			
+			for (PaymentMethod payment : business.getPaymentMethods()) {
+				if(payment.getName().equals(billData.getPaymentMethod().getName()) )
+					bill.setPaymentMethod(billData.getPaymentMethod());
+			}
+			if(bill.getPaymentMethod() == null )
+				throw new RuntimeException("Bill cannot be created, no matching payment method found for: " + billData.getPaymentMethod().getName());
+					
+			bill.setBusiness(business.getKey());
+			bill.setCheckIn(checkIn.getKey());
+			bill.setCreationTime(new Date());
+			bill.setCleared(false);
+			
+			Float billTotal= 0f;
+			
+			for (Order order : orders) {
+				billTotal += calculateTotalPrice(order);
+			}
+			
+			bill.setTotal(billTotal);
+			
+			Key<Bill> billKey = billRepo.saveOrUpdate(bill);
+			if(billKey == null) {
 				throw new RuntimeException("Bill cannot be created, error saving data");
 			}
+		
 			billData.setId(bill.getId());
+			billData.setCheckInId(checkIn.getId());
 			billData.setTime(bill.getCreationTime());
 			billData.setTotal(bill.getTotal());
 			
@@ -160,49 +219,6 @@ public class BillController {
 
 		}
 		return billData;
-	}
-	
-	
-	private Bill saveBill(Business business, CheckIn checkIn,
-			List<Order> orders, PaymentMethod paymentMethod) {
-		
-		if(business.getPaymentMethods() == null || business.getPaymentMethods().isEmpty()) {
-			throw new RuntimeException("Bill cannot be created, business has no payment methods saved");
-		}
-		Bill bill = new Bill();
-		
-		for (PaymentMethod payment : business.getPaymentMethods()) {
-			if(payment.getName().equals(paymentMethod.getName()) )
-				bill.setPaymentMethod(paymentMethod);
-		}
-		if(bill.getPaymentMethod() == null )
-			throw new RuntimeException("Bill cannot be created, no matching payment method found for: " + paymentMethod.getName());
-				
-		bill.setBusiness(business.getKey());
-		bill.setCheckIn(checkIn.getKey());
-		bill.setCreationTime(new Date());
-		
-		Float billTotal= 0f;
-		
-		for (Order order : orders) {
-			billTotal += calculateTotalPrice(order);
-		}
-		
-		bill.setTotal(billTotal);
-		
-		Key<Bill> billKey = billRepo.saveOrUpdate(bill);
-		if(billKey == null)
-			return null;
-		else {
-			for (Order order : orders) {
-				order.setBill(billKey);
-			}
-			orderRepo.saveOrUpdate(orders);
-			
-		}
-			
-		
-		return bill;
 	}
 
 	public Float calculateTotalPrice(Order order) {
