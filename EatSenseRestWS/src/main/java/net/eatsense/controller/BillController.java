@@ -139,7 +139,8 @@ public class BillController {
 		
 		// Get all pending requests sorted by oldest first.
 		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
-		String oldStatus = requests.get(0).getStatus();
+
+		String oldStatus = requests.isEmpty() ? null : requests.get(0).getStatus();
 		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
 			Request request = iterator.next();
 			if(request.getType() == RequestType.BILL && request.getObjectId().equals(bill.getId())) {
