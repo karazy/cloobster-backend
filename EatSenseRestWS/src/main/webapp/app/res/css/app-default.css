@@ -6824,13 +6824,13 @@ input[type="search"]::-webkit-search-cancel-button {
 /*
 * Productlist
 */
-/* line 35, app-default.scss */
+/* line 37, app-default.scss */
 .productListItem h2 {
   float: left;
   width: 70%;
   margin: 0;
 }
-/* line 41, app-default.scss */
+/* line 43, app-default.scss */
 .productListItem div.price {
   position: absolute;
   right: 0;
@@ -6840,13 +6840,13 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-right: 10px;
   font-size: 1em;
 }
-/* line 51, app-default.scss */
+/* line 53, app-default.scss */
 .productListItem div p {
   font-size: 0.6em;
   clear: both;
 }
 
-/* line 58, app-default.scss */
+/* line 60, app-default.scss */
 .productDetailPanel {
   background-color: #FFBF40;
   border-bottom-left-radius: 10px;
@@ -6854,23 +6854,23 @@ input[type="search"]::-webkit-search-cancel-button {
   padding: 10px;
 }
 
-/* line 67, app-default.scss */
+/* line 69, app-default.scss */
 .productDetail {
   font-size: 0.7em;
   margin-bottom: 10px;
 }
-/* line 70, app-default.scss */
+/* line 72, app-default.scss */
 .productDetail h2 {
   font-size: 1.5em;
   float: left;
   width: 80%;
   margin: 0;
 }
-/* line 77, app-default.scss */
+/* line 79, app-default.scss */
 .productDetail div {
   position: relative;
 }
-/* line 81, app-default.scss */
+/* line 83, app-default.scss */
 .productDetail div.price {
   position: absolute;
   font-size: 1.2em;
@@ -6879,12 +6879,18 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 30%;
   text-align: right;
 }
-/* line 90, app-default.scss */
+/* line 92, app-default.scss */
 .productDetail desc {
   font-size: 0.7em;
 }
 
-/* line 96, app-default.scss */
+/* line 98, app-default.scss */
+.productPrice {
+  margin-left: 10px;
+  font-size: 1.5em;
+}
+
+/* line 103, app-default.scss */
 .productDetail-close {
   background-color: black;
   border-radius: 1em;
@@ -6899,18 +6905,38 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*
+* Choices and Options
+*/
+/* line 120, app-default.scss */
+.choicePanel {
+  margin-bottom: 5px;
+}
+/* line 123, app-default.scss */
+.choicePanel .choice {
+  font-size: 0.8em;
+}
+/* line 127, app-default.scss */
+.choicePanel .option {
+  font-size: 0.7em;
+}
+/* line 131, app-default.scss */
+.choicePanel .optionpanel {
+  margin-bottom: 5px;
+}
+
+/*
 * Orderlist
 */
-/* line 114, app-default.scss */
+/* line 143, app-default.scss */
 .orderListItem h2 {
   float: left;
   /*width: 80%;*/
 }
-/* line 120, app-default.scss */
+/* line 149, app-default.scss */
 .orderListItem div {
   position: relative;
 }
-/* line 124, app-default.scss */
+/* line 153, app-default.scss */
 .orderListItem div.price {
   position: absolute;
   right: 0;
@@ -6919,22 +6945,22 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-right: 10px;
 }
 
-/* line 135, app-default.scss */
+/* line 164, app-default.scss */
 .cartoverviewitem .name {
   width: 75%;
   margin-bottom: 20px;
 }
-/* line 139, app-default.scss */
+/* line 168, app-default.scss */
 .cartoverviewitem .name h2 {
   float: left;
   padding-left: 10px;
   /*width: 80%;*/
 }
-/* line 146, app-default.scss */
+/* line 175, app-default.scss */
 .cartoverviewitem .name div {
   position: relative;
 }
-/* line 150, app-default.scss */
+/* line 179, app-default.scss */
 .cartoverviewitem .name div.price {
   /*position: absolute;*/
   right: 0;
@@ -6942,44 +6968,55 @@ input[type="search"]::-webkit-search-cancel-button {
   text-align: right;
   padding-right: 10px;
 }
-/* line 159, app-default.scss */
+/* line 188, app-default.scss */
 .cartoverviewitem .edit {
   top: 0;
   margin-right: 10px;
 }
-/* line 164, app-default.scss */
+/* line 193, app-default.scss */
 .cartoverviewitem .cancel {
   top: 0;
   margin-right: 5px;
 }
 
-/* line 170, app-default.scss */
+/* line 199, app-default.scss */
 .cartoverviewitem-name {
   width: 70%;
   margin-bottom: 20px;
 }
 
-/* line 175, app-default.scss */
+/* line 204, app-default.scss */
 .cartoverviewitem-edit {
   top: 0;
 }
 
-/* line 179, app-default.scss */
+/* line 208, app-default.scss */
 .cartoverviewitem-cancel {
   top: 0;
   margin-right: 5px;
 }
 
-/* line 185, app-default.scss */
+/* line 214, app-default.scss */
 .menuCategoryItem {
   float: left;
   width: 15%;
 }
 
 /*
+*	OrderDetail Panel
+*/
+/* line 223, app-default.scss */
+.orderdetail-floating {
+  border-radius: 0.3em !important;
+  padding: 6px !important;
+  background-color: #86B22D !important;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
+}
+
+/*
 * Dashboard
 */
-/* line 194, app-default.scss */
+/* line 234, app-default.scss */
 .dashboard-button {
   width: 90px !important;
   height: 90px !important;
@@ -6993,7 +7030,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-bottom: 5px;
 }
 
-/* line 207, app-default.scss */
+/* line 247, app-default.scss */
 .dashboard-button-pressed {
   width: 90px !important;
   height: 90px !important;
@@ -7001,7 +7038,7 @@ input[type="search"]::-webkit-search-cancel-button {
   border-color: blue;
 }
 
-/* line 214, app-default.scss */
+/* line 254, app-default.scss */
 .dashboard-button-label {
   font-size: 0.6em;
   position: absolute;
@@ -7009,14 +7046,14 @@ input[type="search"]::-webkit-search-cancel-button {
   bottom: 2px;
 }
 
-/* line 230, app-default.scss */
+/* line 270, app-default.scss */
 .checkInButton {
   height: 110px !important;
   background-image: url("../images/landing.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 236, app-default.scss */
+/* line 276, app-default.scss */
 .checkInButton-label {
   font-size: 0.6em;
   position: absolute;
@@ -7030,20 +7067,20 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 90px;
 }
 
-/* line 249, app-default.scss */
+/* line 289, app-default.scss */
 .currentDealsButton {
   background-image: url("../images/club1.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 254, app-default.scss */
+/* line 294, app-default.scss */
 .newRestaurantsButton {
   font-size: 0.9em !important;
   background-image: url("../images/club4.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 263, app-default.scss */
+/* line 303, app-default.scss */
 .x-tab .x-button-icon.cart {
   -webkit-mask-image: url("../images/cart.png");
 }

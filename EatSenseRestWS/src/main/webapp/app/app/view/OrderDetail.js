@@ -17,6 +17,7 @@ Ext.define('EatSense.view.OrderDetail', {
 		left: '3%',
 		right: '3%',
 		bottom: '3%',
+		floatingCls: 'orderdetail-floating',
 		items : [
 		{
 			xtype: 'titlebar',
@@ -56,7 +57,7 @@ Ext.define('EatSense.view.OrderDetail', {
 					xtype: 'label',
 					cls: 'productPrice',
 					itemId : 'prodPriceLabel',
-					tpl: '<p class="price">{[values.product.calculate(values.amount)]}</p>'
+					tpl: '{[values.product.calculate(values.amount)]}'
 				} 
 				]
 			}]
@@ -64,6 +65,7 @@ Ext.define('EatSense.view.OrderDetail', {
 		{
 			xtype : 'formpanel',
 			itemId : 'choicesPanel',
+			cls: 'choicePanel',
 			layout: 'vbox',
 			minHeight: '200px',
 			scrollable : false,
@@ -82,7 +84,7 @@ Ext.define('EatSense.view.OrderDetail', {
 					ui: 'confirm',
 					// icon: '../app/res/images/into_cart.png',
 					// iconAlign: 'centered',
-					text: Karazy.i18n.translate('ok'),
+					text: Karazy.i18n.translate('change'),
 					action: 'edit'
 				},
 				{

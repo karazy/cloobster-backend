@@ -391,7 +391,7 @@
 			 product.choices().each(function(_choice) {
 				 var choice = _choice;				 			 
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
+				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
 				 //single choice. Create Radio buttons
 				 var optionType = '';
 				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
@@ -406,7 +406,8 @@
 						 name : choice.data.id,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
-						 checked: opt.get('selected')
+						 checked: opt.get('selected'),
+						 cls: 'option'
 					 }, this);
 					 
 					 checkbox.addListener('check',function(cbox) {
@@ -433,19 +434,17 @@
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 },this);
-			 choicesPanel.add( {
-				 html: '<hr/>'
-			 });
 		 }
 		 
 		 
 		 //insert comment field after options have been added so it is positioned correctly
 		 choicesPanel.add({
-			xtype: 'textfield',
-			label: i18nPlugin.translate('orderComment'),
-			labelAlign: 'top',
-			itemId: 'productComment',
-			value: order.get('comment')
+				xtype: 'textfield',
+				label: i18nPlugin.translate('orderComment'),
+				labelAlign: 'top',
+				itemId: 'productComment',
+				value: order.get('comment'),
+				cls: 'choice'
 			}
 		);
 		 // this.menuBackBtContext = this.editOrder;
@@ -453,6 +452,7 @@
 		 // this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
 		//add to viewport. otherwise Ext.MessageBox will show behind detail panel
 		Ext.Viewport.add(detail);
+		detail.getScrollable().getScroller().scrollToTop();
 		detail.show();
 	},
 	/**
