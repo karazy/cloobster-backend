@@ -73,6 +73,22 @@ public class BillController {
 		this.billRepo = billRepo;
 	}
 	
+	public BillDTO getBillForCheckIn(Long businessId, Long checkInId) {
+		BillDTO billData = new BillDTO();
+		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(Business.getKey(businessId)).filter("checkIn", CheckIn.getKey(checkInId)).get();
+		if(bill == null)
+			return null;
+		
+		billData.setId(bill.getId());
+		billData.setCheckInId(bill.getCheckIn().getId());
+		billData.setCleared(bill.isCleared());
+		billData.setPaymentMethod(bill.getPaymentMethod());
+		billData.setTotal(bill.getTotal());
+		billData.setTime(bill.getCreationTime());
+		
+		return billData;
+	}
+	
 	public BillDTO updateBill(Long businessId, Long billId , BillDTO billData) {
 		// Check if the business exists.
 		Business business = businessRepo.getById(businessId);
@@ -87,15 +103,84 @@ public class BillController {
 			return null;
 		}
 		
+		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
+		if(checkIn == null) {
+			logger.error("Bill cannot be updated, check in not found.");
+			return null;
+		}
+		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", bill.getCheckIn()).list();
-		for (Order order : orders) {
+		
+		Float billTotal= 0f;
+		
+		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
+			Order order = iterator.next();
 			if(order.getStatus() == OrderStatus.PLACED) {
-				
+				throw new RuntimeException("Unconfirmed orders available.");
+			}
+			else if(order.getStatus().equals(OrderStatus.CANCELED) || order.getStatus().equals(OrderStatus.CART) || order.getStatus() == OrderStatus.COMPLETE ) {
+					iterator.remove();
+			}
+			else {
+				billTotal += calculateTotalPrice(order);
 			}
 		}
-				
+		bill.setTotal(billTotal);
 		bill.setCleared(billData.isCleared());
 		
+		if(billRepo.saveOrUpdate(bill)== null) {
+			throw new RuntimeException("Bill cannot be saved");
+		}
+		
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		
+		// Add a message with updated order status to the message package.
+		messages.add(new MessageDTO("bill","update",billData));
+		
+		// Get all pending requests sorted by oldest first.
+		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
+		String oldStatus = requests.get(0).getStatus();
+		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
+			Request request = iterator.next();
+			if(request.getType() == RequestType.BILL && request.getObjectId().equals(bill.getId())) {
+				requestRepo.delete(request);
+				iterator.remove();
+			}
+		}
+		
+		String newSpotStatus = null;
+		// Save the status of the next request in line, if there is one.
+		if( !requests.isEmpty()) {
+			newSpotStatus = requests.get(0).getStatus();
+		} else  {
+			//all pending requests are processed for this spot, 
+			newSpotStatus = null;
+		}
+		if(!oldStatus.equals(newSpotStatus)) {
+			// Add a message with updated spot status to the package.
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			spotData.setId(checkIn.getSpot().getId());
+			spotData.setStatus(newSpotStatus);
+			messages.add(new MessageDTO("spot","update",spotData));
+		}
+		
+		// ...update the status of the checkIn in the datastore ...
+		checkIn.setStatus(CheckInStatus.COMPLETE);
+		checkIn.setArchived(true);
+		checkInRepo.saveOrUpdate(checkIn);
+		
+		// ... and add a message with updated checkin status to the package.
+		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+		
+		try {
+			// Send messages to notify clients over their channel.
+			channelCtrl.sendMessagesToAllClients(businessId, messages);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		billData.setTotal(bill.getTotal());
 		
 		return billData;
 	}
@@ -155,14 +240,7 @@ public class BillController {
 			bill.setCheckIn(checkIn.getKey());
 			bill.setCreationTime(new Date());
 			bill.setCleared(false);
-			
-			Float billTotal= 0f;
-			
-			for (Order order : orders) {
-				billTotal += calculateTotalPrice(order);
-			}
-			
-			bill.setTotal(billTotal);
+
 			
 			Key<Bill> billKey = billRepo.saveOrUpdate(bill);
 			if(billKey == null) {
@@ -172,7 +250,6 @@ public class BillController {
 			billData.setId(bill.getId());
 			billData.setCheckInId(checkIn.getId());
 			billData.setTime(bill.getCreationTime());
-			billData.setTotal(bill.getTotal());
 			
 			Request request = new Request();
 			request.setBusiness(business.getKey());

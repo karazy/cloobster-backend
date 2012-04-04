@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 import com.sun.jersey.api.NotFoundException;
 
 /**
@@ -190,11 +191,12 @@ public class CheckInController {
 			return null;
 		}			
  		
-		List<CheckIn> checkInsAtSpot = getOtherChekIns(checkIn);
-		
+		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(checkIn.getSpot());
+		int checkInCount = 1;
 		if(checkInsAtSpot != null) {
 			Iterator<CheckIn> it = checkInsAtSpot.iterator();
 			while(it.hasNext()) {
+				checkInCount++;
 				CheckIn next = it.next();
 				
 				if(next.getNickname().equals(checkIn.getNickname() ) ) {
@@ -224,7 +226,8 @@ public class CheckInController {
 		
 		spotData.setId(spot.getId());
 		// we already have all other checkins in a list, so we count them and add one for the new checkin
-		spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
+		
+		spotData.setCheckInCount(checkInCount);
 		
 		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
 		
@@ -263,7 +266,7 @@ public class CheckInController {
     	if(spot == null )
     		throw new NotFoundException("barcode unknown");
 		
-		List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", spot.getKey());
+		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(spot.getKey());
 		
 		if (checkInsAtSpot != null && !checkInsAtSpot.isEmpty()) {
 			usersAtSpot = new ArrayList<User>();
@@ -348,7 +351,7 @@ public class CheckInController {
 			
 			spotData.setId(chkin.getSpot().getId());
 
-			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", chkin.getSpot()).count());
+			spotData.setCheckInCount(countCheckInsAtSpot(chkin.getSpot()));
 			
 			// send the message with the updated data field
 			try {
@@ -401,7 +404,7 @@ public class CheckInController {
 	{
 		List<CheckIn> otherCheckIns = null;
 		
-		List<CheckIn> checkInsAtSpot = checkInRepo.getListByProperty("spot", chkin.getSpot());
+		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(chkin.getSpot());
 		
 		if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
 			otherCheckIns = new ArrayList<CheckIn>();
@@ -453,7 +456,7 @@ public class CheckInController {
 			
 			spotData.setId(checkIn.getSpot().getId());
 			
-			spotData.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", checkIn.getSpot()).count());
+			spotData.setCheckInCount(countCheckInsAtSpot(checkIn.getSpot()));
 			
 			messages.add(new MessageDTO("spot", "update", spotData));
 			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
@@ -466,11 +469,16 @@ public class CheckInController {
 		}			
 	}
 
-
-
-
 	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Long businessId, Long spotId) {
 		return transform.toStatusDtos( getCheckInsBySpot(businessId, spotId));
+	}
+	
+	private int countCheckInsAtSpot(Key<Spot> spotKey) {
+		return checkInRepo.ofy().query(CheckIn.class).filter("spot", spotKey).filter("archived", false).count();
+	}
+	
+	private List<CheckIn> getCheckInsBySpot(Key<Spot> spotKey) {
+		return checkInRepo.ofy().query(CheckIn.class).filter("spot", spotKey).filter("archived", false).list();
 	}
 
 	private List<CheckIn> getCheckInsBySpot(Long businessId, Long spotId) {
@@ -481,6 +489,6 @@ public class CheckInController {
 			throw new NotFoundException("CheckIns cannot be retrieved, businessId unknown: " + businessId);
 		}
 		
-		return checkInRepo.getListByProperty("spot", Spot.getKey(business.getKey(), spotId));
+		return getCheckInsBySpot(Spot.getKey(business.getKey(), spotId));
 	}
 }
