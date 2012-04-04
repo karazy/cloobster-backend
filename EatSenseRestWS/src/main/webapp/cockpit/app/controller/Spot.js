@@ -194,10 +194,9 @@ Ext.define('EatSense.controller.Spot', {
 					checkInId: record.get('id'),
 				},
 				 callback: function(records, operation, success) {
-				 	if(success) { 		
+				 	if(success && records.length == 1) { 
 				 		me.setActiveBill(records[0]);
-				 		me.updateCustomerPaymentMethod(records[0].get('paymentMethod'));
-
+				 		me.updateCustomerPaymentMethod(records[0].getPaymentMethod().get('name'));
 				 	} else {
 				 		console.log('could not load bill');
 			    		me.updateCustomerPaymentMethod();
@@ -205,36 +204,11 @@ Ext.define('EatSense.controller.Spot', {
 				 },
 				 scope: this
 			});
+		} else {
+			//make sure to hide payment method label
+			me.updateCustomerPaymentMethod();
+			paidButton.disable();
 		}
-
-
-		//check if customer has status PAYMEN_REQUEST and load bill
-		// Ext.Ajax.request({
-		//     url: '/b/businesses/'+restaurantId+'/bills',
-		//     params: {
-		//         checkInId: record.get('id')
-		//     },
-		//     success: function(response){
-		//     	try {
-		//     		if(response && response.responseText) {
-		//     			bill = Ext.create('EatSense.model.Bill');
-		// 	    		bill.setData(response.responseText);
-		// 	    		me.setActiveBill(bill);
-		// 	    		me.updateCustomerPaymentMethod(bill.get('paymentMethod'));
-		//     		} else {
-		//     			me.updateCustomerPaymentMethod();
-		//     		}		    		
-		//     	} catch(e) {
-		//     		console.log('could not load/create bill');
-		//     		me.updateCustomerPaymentMethod();
-		//     	}		      
-		//     },
-		//     failure: function(response, opts) {
-		//     	console.log('could not load bill');
-		//     	me.updateCustomerPaymentMethod();
-		//     }
-		// });
-
 	},
 
 	// </LOAD AND SHOW DATA>
@@ -521,6 +495,7 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				orderStore = Ext.StoreManager.lookup('orderStore'),
 				unprocessedOrders,
+				loginCtr = this.getApplication().getController('Login'),
 				bill = this.getActiveBill();
 
 		if(!bill) {
@@ -540,7 +515,14 @@ Ext.define('EatSense.controller.Spot', {
 			Ext.Msg.alert(i18nPlugin.translate('hint'), i18nPlugin.translate('processOrdersFirst'), Ext.emptyFn);
 		} else {
 			bill.set('cleared', true);
-			bill.save();
+			bill.save({
+				params: {
+					pathId: loginCtr.getAccount().get('businessId')
+				},
+				failure: function(record, operation) {
+					console.log('saving bill failed');
+				}
+			});
 		}
 
 	},
