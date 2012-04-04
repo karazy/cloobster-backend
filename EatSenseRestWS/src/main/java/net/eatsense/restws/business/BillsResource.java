@@ -1,6 +1,8 @@
 package net.eatsense.restws.business;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -39,5 +41,13 @@ public class BillsResource {
 		if(billData == null)
 			throw new NotFoundException();
 		return billData;
-	}	
+	}
+	
+	@Path("{id}")
+	public BillResource getOrderResource(@PathParam("id") Long billId) {
+		BillResource billResource = resourceContext.getResource(BillResource.class);
+		billResource.setBusinessId(businessId);
+		billResource.setBillId(billId);
+		return billResource;
+	}
 }
