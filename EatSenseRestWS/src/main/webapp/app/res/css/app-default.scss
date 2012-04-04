@@ -117,8 +117,9 @@ $base-gradient: 'matte';
 * Choices and Options
 */
 
-.choicePanel {
-	margin-bottom: 5px;
+.choice-panel {
+
+	padding: 5px;
 
 	.choice {
 		font-size: 0.8em;
@@ -128,7 +129,7 @@ $base-gradient: 'matte';
 		font-size: 0.7em;
 	}
 
-	.optionpanel {
+	.option-panel {
 		margin-bottom: 5px;
 	}
 }
@@ -161,19 +162,20 @@ $base-gradient: 'matte';
 }
 
 .cartoverviewitem {
+	padding: 5px;
+
 	.name {
 		width: 75%;
-		margin-bottom: 20px;
+		/*margin-bottom: 20px;*/
 
 		h2 {
-		float: left;
-		padding-left: 10px;
-		/*width: 80%;*/
+			float: left;
+			padding-left: 10px;
+			padding-right: 5px;
 		}
 
-
-		div {
-			position: relative;
+		div.amount {
+			float: left;
 		}
 
 		div.price {

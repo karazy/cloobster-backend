@@ -12,7 +12,7 @@ Ext.define('EatSense.view.CartOverviewItem', {
 			tpl: 
 				"<h2>{Product.name}</h2>" +
 				//"+i18nPlugin.translate('amount')+"
-				"<div class='amount'>({amount})</div>" + 
+				"<div class='amount'>({amount}x)</div>" + 
 				"<div class='price'>{Product.price_calculated}€</div>"+
 				"<div style='clear: both;'>",
 			cls: 'name'

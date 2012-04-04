@@ -236,6 +236,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
+		messageCtr.on('eatSense.bill', function() {console.log('bill received')}, this);
 
 		//load checkins and orders and set lists
 		checkInStore.load({

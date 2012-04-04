@@ -6908,35 +6908,35 @@ input[type="search"]::-webkit-search-cancel-button {
 * Choices and Options
 */
 /* line 120, app-default.scss */
-.choicePanel {
-  margin-bottom: 5px;
+.choice-panel {
+  padding: 5px;
 }
-/* line 123, app-default.scss */
-.choicePanel .choice {
+/* line 124, app-default.scss */
+.choice-panel .choice {
   font-size: 0.8em;
 }
-/* line 127, app-default.scss */
-.choicePanel .option {
+/* line 128, app-default.scss */
+.choice-panel .option {
   font-size: 0.7em;
 }
-/* line 131, app-default.scss */
-.choicePanel .optionpanel {
+/* line 132, app-default.scss */
+.choice-panel .option-panel {
   margin-bottom: 5px;
 }
 
 /*
 * Orderlist
 */
-/* line 143, app-default.scss */
+/* line 144, app-default.scss */
 .orderListItem h2 {
   float: left;
   /*width: 80%;*/
 }
-/* line 149, app-default.scss */
+/* line 150, app-default.scss */
 .orderListItem div {
   position: relative;
 }
-/* line 153, app-default.scss */
+/* line 154, app-default.scss */
 .orderListItem div.price {
   position: absolute;
   right: 0;
@@ -6946,21 +6946,25 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /* line 164, app-default.scss */
+.cartoverviewitem {
+  padding: 5px;
+}
+/* line 167, app-default.scss */
 .cartoverviewitem .name {
   width: 75%;
-  margin-bottom: 20px;
+  /*margin-bottom: 20px;*/
 }
-/* line 168, app-default.scss */
+/* line 171, app-default.scss */
 .cartoverviewitem .name h2 {
   float: left;
   padding-left: 10px;
-  /*width: 80%;*/
+  padding-right: 5px;
 }
-/* line 175, app-default.scss */
-.cartoverviewitem .name div {
-  position: relative;
+/* line 177, app-default.scss */
+.cartoverviewitem .name div.amount {
+  float: left;
 }
-/* line 179, app-default.scss */
+/* line 181, app-default.scss */
 .cartoverviewitem .name div.price {
   /*position: absolute;*/
   right: 0;
@@ -6968,35 +6972,35 @@ input[type="search"]::-webkit-search-cancel-button {
   text-align: right;
   padding-right: 10px;
 }
-/* line 188, app-default.scss */
+/* line 190, app-default.scss */
 .cartoverviewitem .edit {
   top: 0;
   margin-right: 10px;
 }
-/* line 193, app-default.scss */
+/* line 195, app-default.scss */
 .cartoverviewitem .cancel {
   top: 0;
   margin-right: 5px;
 }
 
-/* line 199, app-default.scss */
+/* line 201, app-default.scss */
 .cartoverviewitem-name {
   width: 70%;
   margin-bottom: 20px;
 }
 
-/* line 204, app-default.scss */
+/* line 206, app-default.scss */
 .cartoverviewitem-edit {
   top: 0;
 }
 
-/* line 208, app-default.scss */
+/* line 210, app-default.scss */
 .cartoverviewitem-cancel {
   top: 0;
   margin-right: 5px;
 }
 
-/* line 214, app-default.scss */
+/* line 216, app-default.scss */
 .menuCategoryItem {
   float: left;
   width: 15%;
@@ -7005,7 +7009,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /*
 *	OrderDetail Panel
 */
-/* line 223, app-default.scss */
+/* line 225, app-default.scss */
 .orderdetail-floating {
   border-radius: 0.3em !important;
   padding: 6px !important;
@@ -7016,7 +7020,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /*
 * Dashboard
 */
-/* line 234, app-default.scss */
+/* line 236, app-default.scss */
 .dashboard-button {
   width: 90px !important;
   height: 90px !important;
@@ -7030,7 +7034,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-bottom: 5px;
 }
 
-/* line 247, app-default.scss */
+/* line 249, app-default.scss */
 .dashboard-button-pressed {
   width: 90px !important;
   height: 90px !important;
@@ -7038,7 +7042,7 @@ input[type="search"]::-webkit-search-cancel-button {
   border-color: blue;
 }
 
-/* line 254, app-default.scss */
+/* line 256, app-default.scss */
 .dashboard-button-label {
   font-size: 0.6em;
   position: absolute;
@@ -7046,14 +7050,14 @@ input[type="search"]::-webkit-search-cancel-button {
   bottom: 2px;
 }
 
-/* line 270, app-default.scss */
+/* line 272, app-default.scss */
 .checkInButton {
   height: 110px !important;
   background-image: url("../images/landing.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 276, app-default.scss */
+/* line 278, app-default.scss */
 .checkInButton-label {
   font-size: 0.6em;
   position: absolute;
@@ -7067,20 +7071,20 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 90px;
 }
 
-/* line 289, app-default.scss */
+/* line 291, app-default.scss */
 .currentDealsButton {
   background-image: url("../images/club1.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 294, app-default.scss */
+/* line 296, app-default.scss */
 .newRestaurantsButton {
   font-size: 0.9em !important;
   background-image: url("../images/club4.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 303, app-default.scss */
+/* line 305, app-default.scss */
 .x-tab .x-button-icon.cart {
   -webkit-mask-image: url("../images/cart.png");
 }
