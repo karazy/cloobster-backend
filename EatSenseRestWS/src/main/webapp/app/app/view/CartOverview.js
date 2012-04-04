@@ -1,8 +1,16 @@
 Ext.define('EatSense.view.CartOverview', {
 	extend : 'Ext.Panel',
 	xtype: 'cartoverview',
+	requires: ['EatSense.view.CartOverviewItem'],
 	config: {
 		items: [
+		 {
+				xtype: 'dataview',
+				itemId: 'orderlist',
+				useComponents: true,
+				defaultType: 'cartoverviewitem'				
+		}, 
+		/*
 		{
 			xtype: 'list',
 			itemId: 'orderlist',
@@ -56,7 +64,8 @@ Ext.define('EatSense.view.CartOverview', {
 					}), 100, this);					
 				}
 			}
-		}, {
+		},
+		*/ {
 			type: 'panel',
 			docked: 'bottom',
 			itemId: 'carttotalpanel',

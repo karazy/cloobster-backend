@@ -5,6 +5,7 @@ var translation = {
 		"ok" : "Ok",
 		"cancel" : "Abbrechen",
 		"back" : "zurück",
+		"change" : "Ändern",
 		"barcode" : "Barcode",
 		"errorTitle" : "Fehler",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",

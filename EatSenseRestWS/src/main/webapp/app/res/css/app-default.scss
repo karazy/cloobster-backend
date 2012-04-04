@@ -1,6 +1,8 @@
-$base-color: #7DD76F;
+$base-color: #9FEE00;
 $active-color: #FF8718;
-//$page-bg-color: #95A0A2;
+//$toolbar-base-color: #679b00;
+//$neutral-color: #123456;
+//$page-bg-color: #FFAA00;
 
 
 $base-gradient: 'matte';
@@ -56,7 +58,7 @@ $base-gradient: 'matte';
 }
 
 .productDetailPanel {
-	background-color: #E9B579;
+	background-color: #FFBF40;
 	//background-image: -webkit-linear-gradient(bottom, rgb(53,127,184) 4%, rgb(26,214,214) 87%);
 	//border-bottom: 2px solid black;
 	border-bottom-left-radius: 10px;
@@ -65,9 +67,10 @@ $base-gradient: 'matte';
 }
 
 .productDetail {
-	font-size:1em; 
+	font-size:0.7em; 
 	margin-bottom: 10px;
 	h2 {
+		font-size: 1.5em; 
 		float: left; 
 		width: 80%; 
 		margin: 0;
@@ -79,8 +82,9 @@ $base-gradient: 'matte';
 	
 	div.price {
 		position: absolute; 
-		right: 0; 
-		top: 10; 
+		font-size: 1.2em;
+		bottom: 10px;
+		right: 10px;
 		width: 30%; 
 		text-align: right;
 	}
@@ -90,6 +94,46 @@ $base-gradient: 'matte';
 	}
 	
 }
+
+.productPrice {
+	margin-left: 10px;
+	font-size: 1.5em;
+}
+
+.productDetail-close {
+	background-color: black;
+	border-radius: 1em;
+	text-align: center;	
+	vertical-align: middle;
+	color: white;
+	height: 1.5em;
+	width: 1.5em;
+	position: absolute;
+	right: 3px;
+	top: 3px;
+}
+
+/*
+* Choices and Options
+*/
+
+.choicePanel {
+	margin-bottom: 5px;
+
+	.choice {
+		font-size: 0.8em;
+	}	
+
+	.option {
+		font-size: 0.7em;
+	}
+
+	.optionpanel {
+		margin-bottom: 5px;
+	}
+}
+
+
 
 /*
 * Orderlist
@@ -114,6 +158,73 @@ $base-gradient: 'matte';
 		padding-right: 10px;
 	}
 
+}
+
+.cartoverviewitem {
+	.name {
+		width: 75%;
+		margin-bottom: 20px;
+
+		h2 {
+		float: left;
+		padding-left: 10px;
+		/*width: 80%;*/
+		}
+
+
+		div {
+			position: relative;
+		}
+
+		div.price {
+			/*position: absolute;*/
+			right: 0;
+		/*	width: 30%;*/
+			text-align: right;
+			padding-right: 10px;
+		}
+	}
+
+	.edit {
+		top: 0;
+		margin-right: 10px;
+	}
+
+	.cancel {
+		top: 0;
+		margin-right: 5px;
+	}
+}
+
+.cartoverviewitem-name {
+	width: 70%;
+	margin-bottom: 20px;
+}
+
+.cartoverviewitem-edit {
+	top: 0;
+}
+
+.cartoverviewitem-cancel {
+	top: 0;	
+	margin-right: 5px;
+}
+
+
+.menuCategoryItem {
+	float: left;
+	width: 15%;
+}
+
+/*
+*	OrderDetail Panel
+*/
+
+.orderdetail-floating {
+	border-radius: 0.3em !important;
+	padding: 6px !important;
+	background-color: #86B22D !important;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
 }
 
 

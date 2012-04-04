@@ -10,16 +10,27 @@
 			myordersComplete: 'myorders #myorderscompletepanel',
 			myordersCompleteButton: 'myorders button[action=complete]',
 			menutab: '#menutab',
-			orderlist : '#cartCardPanel #orderlist',
+			// orderlist : '#cartCardPanel #orderlist',
+			orderlist : 'cartoverview #orderlist',
 			backBt : '#cartTopBar button[action="back"]',
-			cancelOrderBt : '#cartTopBar button[action="trash"]',
+			cancelAllOrdersBt : '#cartTopBar button[action="trash"]',
 			submitOrderBt : '#cartTopBar button[action="order"]',
 			topToolbar : '#cartTopBar',
-			productdetail : '#cartCardPanel #cartProductdetail',	
-			choicespanel : '#cartCardPanel #cartProductdetail #choicesPanel',
-			editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
-			amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
-			prodDetailLabel :'#cartCardPanel #cartProductdetail #prodDetailLabel' ,	
+			// productdetail : '#cartCardPanel #cartProductdetail',	
+			productdetail : {
+                selector: 'orderdetail',
+                xtype: 'orderdetail',
+                autoCreate: true
+            },
+			choicespanel : 'orderdetail #choicesPanel',
+			// editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
+			editOrderBt : 'cartoverviewitem button[action=edit]',
+			cancelOrderBt : 'cartoverviewitem button[action=cancel]',
+			// amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
+			amountSpinner : 'orderdetail spinnerfield',
+			prodDetailLabel :'orderdetail #prodDetailLabel' ,
+			prodPriceLabel :'orderdetail #prodPriceLabel' ,
+			closeOrderDetailBt: 'orderdetail button[action=close]',
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: '#myorderlist',
@@ -27,20 +38,26 @@
 			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: '#myorderstab button[action="pay"]',
-			leaveButton: '#myorderstab button[action="leave"]'
+			leaveButton: '#myorderstab button[action="leave"]',
+			confirmEditButton: 'orderdetail button[action="edit"]',
+			undoEditButton: 'orderdetail button[action="undo"]'
 		},
 		control: {
-			cancelOrderBt : {
+			cancelAllOrdersBt : {
 				 tap: 'dumpCart'
 			 }, 
 			 submitOrderBt : {
 				 tap: 'submitOrders'
 			 },
-			 orderlist : {
-				 itemtap: 'cartItemContextMenu'
-			 },
+			 // orderlist : {
+				//  itemtap: 'cartItemContextMenu'
+			 // },
 			 editOrderBt : {
-				tap: 'editOrder'
+				// tap: 'editOrder'
+				tap: 'showOrderDetail'
+			 },
+			 cancelOrderBt : {
+			 	tap: 'cancelOrder'
 			 },
 			 backBt : {
             	 tap: function() {
@@ -61,12 +78,24 @@
              },
              leaveButton : {
             	 tap: 'leave'
+             }, 
+             productdetail : {
+             	// hide: 'editOrder'
+             },
+             closeOrderDetailBt: {
+             	tap: 'closeOrderDetail'
+             },
+             confirmEditButton: {
+             	tap: 'editOrder'
+             },
+             undoEditButton: {
+             	tap: 'closeOrderDetail'
              }
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
 		 */
-		tooltip : ''				
+		// tooltip : ''				
 	},
 	init: function() {
 		
@@ -75,8 +104,8 @@
     	 this.models = models;
     	 
     	 //create tooltip for reuse
-    	 var tooltip = Ext.create('EatSense.util.CartToolTip');
-    	 this.setTooltip(tooltip);
+    	 // var tooltip = Ext.create('EatSense.util.CartToolTip');
+    	 // this.setTooltip(tooltip);
 	},
 	/**
 	 * Load cart orders.
@@ -260,16 +289,14 @@
 
 					}
 				}
-			});		
-			
-			
-
+			});						
 	}
 	},
 	/**
 	 * Listener for itemTap event of orderlist.
 	 * Show a tooltip with buttons to edit, delete the selected item.
 	 */
+	 //TODO remove
 	cartItemContextMenu: function(dv, number, dataitem, model, event, opts) {
 		console.log('Cart Controller -> cartItemContextMenu');
 		var x = event.pageX,
@@ -335,24 +362,36 @@
 	 * Displays detailed information for an existing order (e.g. Burger)
 	 * @param dataview
 	 * @param order
-	 */
-	showOrderDetail: function(dataview, order) {
+	 */	 
+	// showOrderDetail: function(dataview, order) {
+	showOrderDetail: function(button, eventObj, eOpts) {
 		console.log("Cart Controller -> showProductDetail");		
-		 var detail = this.getProductdetail(), 
-		 choicesPanel =  this.getChoicespanel(),
-		 product = order.getProduct();
-		 this.models.activeOrder = order;
+		 var 	detail = this.getProductdetail(), 
+		 		choicesPanel =  this.getChoicespanel(),
+		 		order = button.getParent().getRecord(),
+		 		product = order.getProduct();		 		
+		 		this.models.activeOrder = order,
+		 		main = this.getMain(),
+		 		titlebar = detail.down('titlebar');
+
+		 //save state of order to undo changes
+		 order.saveState();
 
 		 choicesPanel.removeAll(false);
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(order.get('amount'));
+
+		 //set title
+		 titlebar.setTitle(product.get('name'));
+
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
+		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof product.choices() !== 'undefined' && product.choices().getCount() > 0) {
 			 product.choices().each(function(_choice) {
 				 var choice = _choice;				 			 
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
+				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
 				 //single choice. Create Radio buttons
 				 var optionType = '';
 				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
@@ -367,7 +406,8 @@
 						 name : choice.data.id,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
-						 checked: opt.get('selected')
+						 checked: opt.get('selected'),
+						 cls: 'option'
 					 }, this);
 					 
 					 checkbox.addListener('check',function(cbox) {
@@ -394,35 +434,40 @@
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 },this);
-			 choicesPanel.add( {
-				 html: '<hr/>'
-			 });
 		 }
 		 
 		 
 		 //insert comment field after options have been added so it is positioned correctly
 		 choicesPanel.add({
-			xtype: 'textfield',
-			label: i18nPlugin.translate('orderComment'),
-			labelAlign: 'top',
-			itemId: 'productComment',
-			value: order.get('comment')
+				xtype: 'textfield',
+				label: i18nPlugin.translate('orderComment'),
+				labelAlign: 'top',
+				itemId: 'productComment',
+				value: order.get('comment'),
+				cls: 'choice'
 			}
 		);
-		 this.menuBackBtContext = this.editOrder;
+		 // this.menuBackBtContext = this.editOrder;
 
-		 this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
+		 // this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
+		//add to viewport. otherwise Ext.MessageBox will show behind detail panel
+		Ext.Viewport.add(detail);
+		detail.getScrollable().getScroller().scrollToTop();
+		detail.show();
 	},
 	/**
 	 * Edit an existing order.
 	 */
-	editOrder : function() {
+	editOrder : function(component, eOpts) {
 		var order = this.models.activeOrder,
 		product = this.models.activeOrder.getProduct(), 
 		validationError = "", 
 		productIsValid = true,
-		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;
+		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+		detail = this.getProductdetail();
 		
+		order.getData(true);
+
 		product.choices().each(function(choice) {
 			if(choice.validateChoice() !== true) {
 				//coice is not valid
@@ -431,25 +476,74 @@
 			}
 		});
 		
-		this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
-		
-		Ext.Ajax.request({				
-    	    url: Karazy.config.serviceUrl+'/c/business/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-    	    method: 'PUT',
-    	    params: {
-    	    	'checkInId' : activeCheckIn.get('userId'),
-    	    },
-    	    jsonData: order.getRawJsonData()
-		});
-		
 		if(productIsValid) {
+			this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
+		
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'PUT',
+	    	    params: {
+	    	    	'checkInId' : activeCheckIn.get('userId'),
+	    	    },
+	    	    jsonData: order.getRawJsonData()
+			});
+
+			detail.hide();
 			this.refreshCart();
-			this.showCart();
+			return true;
+			// this.showCart();
 		} else {
 			//show validation error
-			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn);
+			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn, detail);
+			if(component) {
+				//component exists if this was called by hide listener
+				component.show();
+			}
+			return false;
 		}
 		
+	},
+
+	/**
+	*	Deletes a single order.
+	* 	Called by cancelButton of an individual order.
+	*
+	*/
+	cancelOrder: function(button, eventObj, eOpts) {
+		var 	order = button.getParent().getRecord(),
+				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				productName = order.getProduct().get('name');
+			//delete item
+			activeCheckIn.orders().remove(order);
+			
+			Ext.Ajax.request({
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'DELETE',
+	    	    params: {
+	    	    	'checkInId' : activeCheckIn.get('userId'),
+	    	    }
+	    	});
+			
+			this.refreshCart();
+			
+			//show success message and switch to next view
+			Ext.Msg.show({
+				title : i18nPlugin.translate('orderRemoved'),
+				message : productName,
+				buttons : []
+			});
+			//show short alert and then hide
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), globalConf.msgboxHideTimeout, this);
+	},
+
+	closeOrderDetail: function() {
+		var 	detail = this.getProductdetail();
+		
+		this.models.activeOrder.restoreState();
+		this.refreshCart();
+		detail.hide();		
 	},
 	/**
 	 * Switches to another view
@@ -487,7 +581,7 @@
 	 */
 	recalculate: function(order) {
 		console.log('Cart Controller -> recalculate');
-		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.getProduct(), amount: order.get('amount')});
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
 	/**
 	 * Refreshes the badge text on cart tab icon.
@@ -780,37 +874,37 @@
 	}
 });
 
-Ext.define('EatSense.util.CartToolTip', {
-	extend: 'Ext.Panel',
-	xtype: 'cartToolTip',
-	config: {
-		layout: {
-			type: 'hbox'
-		},
-		centered: true,
-		width: 150,
-		height:70,
-		modal: true,
-		selectedProduct : null,
-		hideOnMaskTap: true,
-		defaults : {
-			margin: 5
-		},
-		items: [ {
-			xtype: 'button',
-			itemId: 'editCartItem',
-			iconCls : 'compose',
-			iconMask : true,
-			flex: 1,
-		}, {
-			xtype: 'spacer',
-			width: 7
-		} ,{
-			xtype: 'button',
-			itemId: 'deleteCartItem',
-			iconCls : 'trash',
-			iconMask : true,
-			flex: 1	,
-		}]
-	}	
-});
+// Ext.define('EatSense.util.CartToolTip', {
+// 	extend: 'Ext.Panel',
+// 	xtype: 'cartToolTip',
+// 	config: {
+// 		layout: {
+// 			type: 'hbox'
+// 		},
+// 		centered: true,
+// 		width: 150,
+// 		height:70,
+// 		modal: true,
+// 		selectedProduct : null,
+// 		hideOnMaskTap: true,
+// 		defaults : {
+// 			margin: 5
+// 		},
+// 		items: [ {
+// 			xtype: 'button',
+// 			itemId: 'editCartItem',
+// 			iconCls : 'compose',
+// 			iconMask : true,
+// 			flex: 1,
+// 		}, {
+// 			xtype: 'spacer',
+// 			width: 7
+// 		} ,{
+// 			xtype: 'button',
+// 			itemId: 'deleteCartItem',
+// 			iconCls : 'trash',
+// 			iconMask : true,
+// 			flex: 1	,
+// 		}]
+// 	}	
+// });
