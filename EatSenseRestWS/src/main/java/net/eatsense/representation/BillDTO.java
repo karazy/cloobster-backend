@@ -13,6 +13,8 @@ public class BillDTO {
 	private Float total;
 	@JsonIgnore
 	private String billnumber;
+	private boolean cleared;
+	private Long checkInId;
 	
 	public Long getId() {
 		return id;
@@ -45,6 +47,16 @@ public class BillDTO {
 	public void setBillnumber(String billnumber) {
 		this.billnumber = billnumber;
 	}
-	
-	
+	public boolean isCleared() {
+		return cleared;
+	}
+	public void setCleared(boolean cleared) {
+		this.cleared = cleared;
+	}
+	public Long getCheckInId() {
+		return checkInId;
+	}
+	public void setCheckInId(Long checkInId) {
+		this.checkInId = checkInId;
+	}
 }
