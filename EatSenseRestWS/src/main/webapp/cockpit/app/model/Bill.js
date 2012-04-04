@@ -28,6 +28,10 @@ Ext.define('EatSense.model.Bill', {
 		}, {
 			name: 'checkInId'
 		} ],
+		associations : {
+			type : 'hasOne',
+			model : 'EatSense.model.PaymentMethod',
+		},
 		proxy: {
 	 		type: 'rest',
 	 		enablePagingParams: false,

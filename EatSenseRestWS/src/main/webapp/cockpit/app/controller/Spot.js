@@ -54,11 +54,11 @@ Ext.define('EatSense.controller.Spot', {
 		},
 
 		//the active spot, when spot detail view is visible
-		activeSpot: {},
+		activeSpot: null,
 		//active customer in detail spot view
-		activeCustomer: {},
+		activeCustomer: null,
 		//active Bill of active Customer
-		activeBill : {}
+		activeBill : null
 	},
 
 	init: function() {
@@ -156,6 +156,7 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				orderStore = Ext.StoreManager.lookup('orderStore'),
+				billStore = Ext.StoreManager.lookup('billStore'),
 				detail = me.getSpotDetail(),
 				restaurantId = loginCtr.getAccount().get('businessId'),
 				bill,
@@ -166,9 +167,6 @@ Ext.define('EatSense.controller.Spot', {
 		}
 
 		me.setActiveCustomer(record);
-
-		paidButton.setDisabled(record.get('status') != Karazy.constants.PAYMENT_REQUEST);
-
 
 		orderStore.load({
 			params: {
@@ -188,32 +186,54 @@ Ext.define('EatSense.controller.Spot', {
 			 scope: this
 		});
 
+		if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
+			paidButton.enable();
+			billStore.load({
+				params: {
+					pathId: restaurantId,
+					checkInId: record.get('id'),
+				},
+				 callback: function(records, operation, success) {
+				 	if(success) { 		
+				 		me.setActiveBill(records[0]);
+				 		me.updateCustomerPaymentMethod(records[0].get('paymentMethod'));
+
+				 	} else {
+				 		console.log('could not load bill');
+			    		me.updateCustomerPaymentMethod();
+				 	}				
+				 },
+				 scope: this
+			});
+		}
+
+
 		//check if customer has status PAYMEN_REQUEST and load bill
-		Ext.Ajax.request({
-		    url: '/b/businesses/'+restaurantId+'/bills',
-		    params: {
-		        checkInId: record.get('id')
-		    },
-		    success: function(response){
-		    	try {
-		    		if(response && response.responseText) {
-		    			bill = Ext.create('EatSense.model.Bill');
-			    		bill.setData(response.responseText);
-			    		me.setActiveBill(bill);
-			    		me.updateCustomerPaymentMethod(bill.get('paymentMethod'));
-		    		} else {
-		    			me.updateCustomerPaymentMethod();
-		    		}		    		
-		    	} catch(e) {
-		    		console.log('could not load/create bill');
-		    		me.updateCustomerPaymentMethod();
-		    	}		      
-		    },
-		    failure: function(response, opts) {
-		    	console.log('could not load bill');
-		    	me.updateCustomerPaymentMethod();
-		    }
-		});
+		// Ext.Ajax.request({
+		//     url: '/b/businesses/'+restaurantId+'/bills',
+		//     params: {
+		//         checkInId: record.get('id')
+		//     },
+		//     success: function(response){
+		//     	try {
+		//     		if(response && response.responseText) {
+		//     			bill = Ext.create('EatSense.model.Bill');
+		// 	    		bill.setData(response.responseText);
+		// 	    		me.setActiveBill(bill);
+		// 	    		me.updateCustomerPaymentMethod(bill.get('paymentMethod'));
+		//     		} else {
+		//     			me.updateCustomerPaymentMethod();
+		//     		}		    		
+		//     	} catch(e) {
+		//     		console.log('could not load/create bill');
+		//     		me.updateCustomerPaymentMethod();
+		//     	}		      
+		//     },
+		//     failure: function(response, opts) {
+		//     	console.log('could not load bill');
+		//     	me.updateCustomerPaymentMethod();
+		//     }
+		// });
 
 	},
 
@@ -309,17 +329,21 @@ Ext.define('EatSense.controller.Spot', {
 	*	Updates spotdetail view when a new/changed bill arrives.
 	*
 	*/
-	updateSpotDetailBillIncremental: function(action, bill) {
+	updateSpotDetailBillIncremental: function(action, billData) {
 		var		me = this,
 				detail = this.getSpotDetail(),
 				paymentLabel = detail.down('#paymentLabel'),
-				paidButton = this.getPaidSpotDetailButton();
+				paidButton = this.getPaidSpotDetailButton(),
+				bill;
 
 				//check if spot detail is visible and if it is the same spot the checkin belongs to
 		if(!detail.isHidden() && me.getActiveSpot()) {
-			if(bill.checkInId == me.getActiveCustomer().get('id')) {
+			if(billData.checkInId == me.getActiveCustomer().get('id')) {
+				bill = Ext.create('EatSense.model.Bill');
+				bill.setData(billData);
+				this.setActiveBill(bill);
 				paidButton.enable();
-				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.paymentMethod.name});
+				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.getPaymentMethod().get('name')});
 				paymentLabel.show();
 			}
 		}
@@ -497,7 +521,12 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				orderStore = Ext.StoreManager.lookup('orderStore'),
 				unprocessedOrders,
-				bill;
+				bill = this.getActiveBill();
+
+		if(!bill) {
+			console.log('cannot confirm payment because no bill exists');
+			return;
+		}
 
 		//check if all orders are processed
 		unprocessedOrders = orderStore.queryBy(function(record, id) {
@@ -577,6 +606,7 @@ Ext.define('EatSense.controller.Spot', {
 		this.updateCustomerTotal();
 		this.setActiveSpot(null);
 		this.setActiveCustomer(null);
+		this.setActiveBill(null);
 
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
