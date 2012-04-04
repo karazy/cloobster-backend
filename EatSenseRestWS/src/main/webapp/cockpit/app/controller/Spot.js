@@ -24,8 +24,7 @@ Ext.define('EatSense.controller.Spot', {
 		    confirmOrderButton: 'spotdetail button[action=confirm]',
 		    cancelOrderButton: 'spotdetail button[action=cancel]',
 		    closeSpotDetailButton: 'spotdetail button[action=close]',
-		    paidSpotDetailButton: 'spotdetail button[action=paid]',
-		    chargeButton: 'spotdetail button[action=pay]',		    
+		    paidSpotDetailButton: 'spotdetail button[action=paid]',   
 		    spotDetailStatistic: 'spotdetail #statistics'
 		    //</spot-detail>
 		},
@@ -35,7 +34,7 @@ Ext.define('EatSense.controller.Spot', {
 		 		tap:  'showSpotDetails'
 		 	},
 		 	spotDetailCustomerList: {
-		 		select: 'showCustomerOrders'
+		 		select: 'showCustomerDetail'
 		 	},
 		 	confirmOrderButton: {
 		 		tap: 'confirmOrder'
@@ -46,18 +45,20 @@ Ext.define('EatSense.controller.Spot', {
 		 	closeSpotDetailButton: {
 		 		tap: 'closeSpotDetail'
 		 	},
-		 	chargeButton: {
-		 		tap: 'chargeCustomer'
-		 	},
 		 	spotDetail: {
 		 		hide: 'hideSpotDetail'
+		 	},
+		 	paidSpotDetailButton: {
+		 		tap: 'confirmPayment'
 		 	}
 		},
 
 		//the active spot, when spot detail view is visible
 		activeSpot: {},
 		//active customer in detail spot view
-		activeCustomer: {}
+		activeCustomer: {},
+		//active Bill of active Customer
+		activeBill : {}
 	},
 
 	init: function() {
@@ -68,6 +69,8 @@ Ext.define('EatSense.controller.Spot', {
 		var messageCtr = this.getApplication().getController('Message');
 		messageCtr.on('eatSense.spot', this.updateSpotIncremental, this);
 	},
+
+	// <LOAD AND SHOW DATA>
 	/**
 	*	Loads all spots and refreshes spot view.
 	*	Called after a successful login or credentials restore.
@@ -86,10 +89,7 @@ Ext.define('EatSense.controller.Spot', {
 			 	pathId : account.get('businessId'),
 			 },
 			 callback: function(records, operation, success) {
-			 	if(success) {
-			 		//explicit refresh should not be necessary
-			 		//this.getSpotsview().refresh();	 		
-			 	} else {
+			 	if(!success) {
 			 		loginCtr.logout();
 			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotLoading'), Ext.emptyFn);
 			 	}				
@@ -98,7 +98,128 @@ Ext.define('EatSense.controller.Spot', {
 		});	
 	},
 
-	//<push-message-handlers>
+	/**
+	*	Gets called when user taps on a spot. Shows whats going on at a particular spot.
+	*   Like incoming orders, payment requests ...
+	*
+	*/
+	showSpotDetails: function(button, eventObj, eOpts) {
+		console.log('showSpotDetails');
+		var		me = this,
+				loginCtr = this.getApplication().getController('Login'),
+				messageCtr = this.getApplication().getController('Message'),
+				detail = me.getSpotDetail(),
+				checkInList = detail.down('#checkInList'),
+				data = button.getParent().getRecord(),
+				checkInStore = Ext.StoreManager.lookup('checkInStore');
+
+		//add listeners for channel messages
+		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
+		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
+		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
+
+		//load checkins and orders and set lists
+		checkInStore.load({
+			params: {
+				pathId: loginCtr.getAccount().get('businessId'),
+				spotId: data.get('id')
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) { 		
+			 		me.setActiveSpot(data);
+			 		if(records.length > 0) {
+			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
+			 			me.getSpotDetailCustomerList().select(0);
+			 		}
+			 	} else {
+			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailCheckInLoading'), Ext.emptyFn);
+			 	}				
+			 },
+			 scope: this
+		});
+
+		//show detail view
+		Ext.Viewport.add(detail);
+		detail.show();
+	},
+
+	/**
+	*	Shows details (orders, bills, requests) of a customer.
+	*	Fired when customer in checkInList in spot detail view is tapped.
+	*	Loads all orders based on the passed checkin.
+	*
+	*	@param record
+	*			selected checkIn
+	*
+	*/
+	showCustomerDetail: function(dataview, record, options) {
+		var 	me = this,
+				loginCtr = this.getApplication().getController('Login'),
+				orderStore = Ext.StoreManager.lookup('orderStore'),
+				detail = me.getSpotDetail(),
+				restaurantId = loginCtr.getAccount().get('businessId'),
+				bill,
+				paidButton = this.getPaidSpotDetailButton();
+		
+		if(!record) {
+			return;
+		}
+
+		me.setActiveCustomer(record);
+
+		paidButton.setDisabled(record.get('status') != Karazy.constants.PAYMENT_REQUEST);
+
+
+		orderStore.load({
+			params: {
+				pathId: restaurantId,
+				checkInId: record.get('id'),
+				//currently not evaluated
+				// spotId: 
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) { 		
+			 		this.updateCustomerStatusPanel(record);
+			 		this.updateCustomerTotal(records);
+			 	} else {
+			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderLoading'), Ext.emptyFn);
+			 	}				
+			 },
+			 scope: this
+		});
+
+		//check if customer has status PAYMEN_REQUEST and load bill
+		Ext.Ajax.request({
+		    url: '/b/businesses/'+restaurantId+'/bills',
+		    params: {
+		        checkInId: record.get('id')
+		    },
+		    success: function(response){
+		    	try {
+		    		if(response && response.responseText) {
+		    			bill = Ext.create('EatSense.model.Bill');
+			    		bill.setData(response.responseText);
+			    		me.setActiveBill(bill);
+			    		me.updateCustomerPaymentMethod(bill.get('paymentMethod'));
+		    		} else {
+		    			me.updateCustomerPaymentMethod();
+		    		}		    		
+		    	} catch(e) {
+		    		console.log('could not load/create bill');
+		    		me.updateCustomerPaymentMethod();
+		    	}		      
+		    },
+		    failure: function(response, opts) {
+		    	console.log('could not load bill');
+		    	me.updateCustomerPaymentMethod();
+		    }
+		});
+
+	},
+
+	// </LOAD AND SHOW DATA>
+
+	//<PUSH MESSAGE HANDLERS>
 
 	/**
 	*	Takes a spot and refreshes the associated item in view.
@@ -196,11 +317,11 @@ Ext.define('EatSense.controller.Spot', {
 
 				//check if spot detail is visible and if it is the same spot the checkin belongs to
 		if(!detail.isHidden() && me.getActiveSpot()) {
-			// if(bill.checkInId == me.getActiveCustomer().get('id')) {
+			if(bill.checkInId == me.getActiveCustomer().get('id')) {
 				paidButton.enable();
 				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.paymentMethod.name});
 				paymentLabel.show();
-			// }
+			}
 		}
 	},
 	/**
@@ -237,50 +358,10 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 
-	//</push-message-handlers>
+	// </PUSH MESSAGE HANDLERS>
 
-	/**
-	*	Gets called when user taps on a spot. Shows whats going on at a particular spot.
-	*   Like incoming orders, payment requests ...
-	*
-	*/
-	showSpotDetails: function(button, eventObj, eOpts) {
-		console.log('showSpotDetails');
-		var		me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				messageCtr = this.getApplication().getController('Message'),
-				detail = me.getSpotDetail(),
-				checkInList = detail.down('#checkInList'),
-				data = button.getParent().getRecord(),
-				checkInStore = Ext.StoreManager.lookup('checkInStore');
+	//<VIEW UPDATE METHODS>
 
-		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
-		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
-		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
-
-		//load checkins and orders and set lists
-		checkInStore.load({
-			params: {
-				pathId: loginCtr.getAccount().get('businessId'),
-				spotId: data.get('id')
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 		
-			 		me.setActiveSpot(data);
-			 		if(records.length > 0) {			 	
-			 			me.getSpotDetailCustomerList().select(0);
-			 		}
-			 	} else {
-			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailCheckInLoading'), Ext.emptyFn);
-			 	}				
-			 },
-			 scope: this
-		});
-
-		//show detail view
-		Ext.Viewport.add(detail);
-		detail.show();
-	},
 	/**
 	*	Updates the status panel of selected customer in spotdetail view.
 	*	@param checkIn
@@ -333,47 +414,29 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 	/**
-	*	Shows orders of a customer.
-	*	Fired when customer in checkInList in spot detail view is tapped.
-	*	Loads all orders based on the passed checkin.
-	*
-	*	@param record
-	*			selected checkIn
-	*
+	*	Displays the chose paymentMethod when a payment request is active.
+	*	@param paymentMethod
+	* 		if empty hides the payment label, otherwise shows the paymentMethod
 	*/
-	//itemTap
-	// showCustomerOrders: function(dataview, index, target, record) {
-	showCustomerOrders: function(dataview, record, options) {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				orderStore = Ext.StoreManager.lookup('orderStore'),
-				detail = me.getSpotDetail();
-		
-		if(!record) {
-			return;
+	updateCustomerPaymentMethod: function(paymentMethod) {
+		var		me = this,
+				detail = this.getSpotDetail(),
+				paymentLabel = detail.down('#paymentLabel');
+
+				//check if spot detail is visible and if it is the same spot the checkin belongs to
+		if(paymentMethod) {
+			paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : paymentMethod});
+			paymentLabel.show();
+		} else {
+			paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : ''});
+			paymentLabel.hide();
 		}
-
-		me.setActiveCustomer(record);
-
-		orderStore.load({
-			params: {
-				pathId: loginCtr.getAccount().get('businessId'),
-				checkInId: record.get('id'),
-				//currently not evaluated
-				// spotId: 
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 		
-			 		this.updateCustomerStatusPanel(record);
-			 		this.updateCustomerTotal(records);
-			 	} else {
-			 		Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderLoading'), Ext.emptyFn);
-			 	}				
-			 },
-			 scope: this
-		});
-
 	},
+
+	//</VIEW UPDATE METHODS>
+
+	// <ACTIONS>
+
 	/**
 	*	Marks a single order as confirmed. This indicates that the business received 
 	*	the order and starts to process it.
@@ -427,6 +490,32 @@ Ext.define('EatSense.controller.Spot', {
 		});
 	},
 	/**
+	* Marks a bill as paid.
+	*
+	*/
+	confirmPayment: function(button, eventObj, eOpts){
+		var 	me = this,
+				orderStore = Ext.StoreManager.lookup('orderStore'),
+				unprocessedOrders,
+				bill;
+
+		//check if all orders are processed
+		unprocessedOrders = orderStore.queryBy(function(record, id) {
+			if(record.get('status') == Karazy.constants.Order.PLACED) {
+				return true;
+			}
+
+		});
+
+		if(unprocessedOrders.getCount() > 0 ) {
+			Ext.Msg.alert(i18nPlugin.translate('hint'), i18nPlugin.translate('processOrdersFirst'), Ext.emptyFn);
+		} else {
+			bill.set('cleared', true);
+			bill.save();
+		}
+
+	},
+	/**
 	*	Marks a single order as canceled. 
 	*
 	*/
@@ -464,6 +553,9 @@ Ext.define('EatSense.controller.Spot', {
 		});
 	},
 
+	// </ACTIONS>
+
+	// <MISC VIEW ACTIONS>
 	/**
 	*	Close spot detail.
 	*
@@ -489,5 +581,7 @@ Ext.define('EatSense.controller.Spot', {
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 	}
+
+	// </MISC VIEW ACTIONS>
 
 })

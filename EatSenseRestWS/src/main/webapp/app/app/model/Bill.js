@@ -25,7 +25,9 @@ Ext.define('EatSense.model.Bill', {
 		}, {
 			name: 'cleared',
 			type: 'boolean'
-		} ],
+		}, {
+			name: 'checkInId'
+		}],
 		proxy: {
 	 		type: 'rest',
 	 		enablePagingParams: false,

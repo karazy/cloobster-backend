@@ -34,15 +34,11 @@ Ext.define('EatSense.view.SpotDetail', {
 				xtype: 'list',
 				itemId: 'checkInList', 
 				itemTpl: new Ext.XTemplate(
-					"<h2 class='spotdetail-customer-name'>{nickname}</h2>"+
-					"<tpl if='status == \"ORDER_PLACED\"'>"+
-						"<span class='spotdetail-customer-flag'>X</span>"+
-					"</tpl>",
-						{
-							translateStatus: function(status) {
-								return Karazy.i18n.translate(status);
-							}
-						}),
+						"<h2 class='spotdetail-customer-name'>{nickname}</h2>"+
+						"<tpl if='status == \"ORDER_PLACED\" || status = \"PAYMENT_REQUEST\"'>"+
+							"<span class='spotdetail-customer-flag'>X</span>"+
+						"</tpl>"
+						),
 				store: 'checkInStore',
 				ui: 'round'
 			}
@@ -147,16 +143,17 @@ Ext.define('EatSense.view.SpotDetail', {
 					action: 'paid',
 					disabled: true
 				},
-				{
-					text: 'Redeem',
-					disabled: true
-				}, 
-				{
-					text: 'User',
-					disabled: true
-				}, 
+				// {
+				// 	text: 'Redeem',
+				// 	disabled: true
+				// }, 
+				// {
+				// 	text: 'User',
+				// 	disabled: true
+				// }, 
 				{
 					text: 'Cancel',
+					action: 'cancelAll',
 					disabled: true
 				}
 				]				
