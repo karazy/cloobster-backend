@@ -44,7 +44,7 @@ public class BillsResource {
 	}
 	
 	@Path("{id}")
-	public BillResource getOrderResource(@PathParam("id") Long billId) {
+	public BillResource getBillResource(@PathParam("id") Long billId) {
 		BillResource billResource = resourceContext.getResource(BillResource.class);
 		billResource.setBusinessId(businessId);
 		billResource.setBillId(billId);
