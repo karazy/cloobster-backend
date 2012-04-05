@@ -65,7 +65,7 @@ Ext.define('EatSense.view.OrderDetail', {
 		{
 			xtype : 'formpanel',
 			itemId : 'choicesPanel',
-			cls: 'choicePanel',
+			cls: 'choice-panel',
 			layout: 'vbox',
 			minHeight: '200px',
 			scrollable : false,

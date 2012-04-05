@@ -24,7 +24,7 @@ Ext.define('EatSense.view.OptionDetail', {
 				align : 'stretch'
 			},
 			itemId : 'optionsPanel',
-			cls: 'optionpanel'			
+			cls: 'option-panel'			
 
 		} ]
 	}
