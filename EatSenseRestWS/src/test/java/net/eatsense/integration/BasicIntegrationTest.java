@@ -407,7 +407,7 @@ public class BasicIntegrationTest {
 			// Place Order in Cart
 			response = given().contentType("application/json")
 					.body(orders1[i])
-					.queryParam("checkInId",checkIns[0].getUserId())
+					.queryParam("checkInId",checkInId)
 					.expect().statusCode(200).when().post("/c/businesses/{id}/orders", businessId);
 			String orderId = response.asString();
 			assertThat(orderId , notNullValue());
