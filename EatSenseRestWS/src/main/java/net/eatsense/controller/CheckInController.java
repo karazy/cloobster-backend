@@ -351,7 +351,7 @@ public class CheckInController {
 			
 			spotData.setId(chkin.getSpot().getId());
 
-			spotData.setCheckInCount(countCheckInsAtSpot(chkin.getSpot()));
+			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(chkin.getSpot()));
 			
 			// send the message with the updated data field
 			try {
@@ -456,7 +456,7 @@ public class CheckInController {
 			
 			spotData.setId(checkIn.getSpot().getId());
 			
-			spotData.setCheckInCount(countCheckInsAtSpot(checkIn.getSpot()));
+			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot()));
 			
 			messages.add(new MessageDTO("spot", "update", spotData));
 			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
@@ -471,10 +471,6 @@ public class CheckInController {
 
 	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Long businessId, Long spotId) {
 		return transform.toStatusDtos( getCheckInsBySpot(businessId, spotId));
-	}
-	
-	private int countCheckInsAtSpot(Key<Spot> spotKey) {
-		return checkInRepo.ofy().query(CheckIn.class).filter("spot", spotKey).filter("archived", false).count();
 	}
 	
 	private List<CheckIn> getCheckInsBySpot(Key<Spot> spotKey) {
