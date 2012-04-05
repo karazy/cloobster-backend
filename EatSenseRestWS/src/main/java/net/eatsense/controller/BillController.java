@@ -131,8 +131,15 @@ public class BillController {
 		if(billRepo.saveOrUpdate(bill)== null) {
 			throw new RuntimeException("Bill cannot be saved");
 		}
+		// ...update the status of the checkIn in the datastore ...
+		checkIn.setStatus(CheckInStatus.COMPLETE);
+		checkIn.setArchived(true);
+		checkInRepo.saveOrUpdate(checkIn);
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+
+		// ... and add a message with updated checkin status to the package.
+		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
 		
 		// Add a message with updated order status to the message package.
 		messages.add(new MessageDTO("bill","update",billData));
@@ -140,7 +147,6 @@ public class BillController {
 		// Get all pending requests sorted by oldest first.
 		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 
-		String oldStatus = requests.isEmpty() ? null : requests.get(0).getStatus();
 		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
 			Request request = iterator.next();
 			if(request.getType() == RequestType.BILL && request.getObjectId().equals(bill.getId())) {
@@ -157,27 +163,17 @@ public class BillController {
 			//all pending requests are processed for this spot, 
 			newSpotStatus = null;
 		}
-		if(!oldStatus.equals(newSpotStatus)) {
-			// Add a message with updated spot status to the package.
-			SpotStatusDTO spotData = new SpotStatusDTO();
-			spotData.setId(checkIn.getSpot().getId());
-			spotData.setStatus(newSpotStatus);
-			messages.add(new MessageDTO("spot","update",spotData));
-		}
-		
-		// ...update the status of the checkIn in the datastore ...
-		checkIn.setStatus(CheckInStatus.COMPLETE);
-		checkIn.setArchived(true);
-		checkInRepo.saveOrUpdate(checkIn);
-		
-		// ... and add a message with updated checkin status to the package.
-		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
-		
+		// Add a message with updated spot status to the package.
+		SpotStatusDTO spotData = new SpotStatusDTO();
+		spotData.setId(checkIn.getSpot().getId());
+		spotData.setStatus(newSpotStatus);
+		spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot()));
+		messages.add(new MessageDTO("spot","update",spotData));
+				
 		try {
 			// Send messages to notify clients over their channel.
 			channelCtrl.sendMessagesToAllClients(businessId, messages);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

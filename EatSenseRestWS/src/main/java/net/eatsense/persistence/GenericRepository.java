@@ -274,8 +274,17 @@ public class GenericRepository<T> extends DAOBase{
 
 	}
 	
-	
-	
+	/**
+	 * Count entities matching a filter.
+	 * 
+	 * @param propFilter
+	 * @param propValue
+	 * @return Count of matching entities
+	 */
+	public int countByProperty(String propFilter, Object propValue) {
+		return ofy().query(clazz).filter(propFilter, propValue).count();
+	}
+		
 	/**
 	 * Returns the {@link Objectify} object to directly query datastore. 
 	 * @return
