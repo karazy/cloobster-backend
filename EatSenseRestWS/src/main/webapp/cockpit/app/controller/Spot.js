@@ -252,16 +252,22 @@ Ext.define('EatSense.controller.Spot', {
 				detail = this.getSpotDetail(),
 				store = this.getSpotDetailCustomerList().getStore(),
 				orders = Ext.StoreManager.lookup('orderStore').getData(),
+				customerList = this.getSpotDetailCustomerList(),
 				dirtyCheckIn,
 				index,
 				listElement,
-				updatedCheckIn = Ext.create('EatSense.model.CheckIn', updatedCheckIn);
+				updatedCheckIn = Ext.create('EatSense.model.CheckIn', updatedCheckIn),
+				customerIndex;
 				
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
 		if(!detail.isHidden() && me.getActiveSpot()) {
 			if(updatedCheckIn.get('spotId') == me.getActiveSpot().get('id')) {
 				if(action == 'new') {
-					store.add(updatedCheckIn);	
+					store.add(updatedCheckIn);
+					if(store.getCount() == 1) {
+						//only one checkIn exists so set this checkIn as selected
+						customerList.select(0);
+					}
 				} else if (action == 'update') {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					index = store.indexOf(dirtyCheckIn);
@@ -287,10 +293,18 @@ Ext.define('EatSense.controller.Spot', {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					//TODO check if orders for this checkin exist? Normally this should not occur.
 					if(dirtyCheckIn) {
-						store.remove(dirtyCheckIn);
-						//clear status panel if deleted checkin is activeCustomer
+						customerIndex = store.indexOf(dirtyCheckIn);
+						store.remove(dirtyCheckIn);						
+						//clear status panel if deleted checkin is activeCustomer or select another checkin
 						if(updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
-							me.updateCustomerStatusPanel();
+							if(store.getCount() > 0) {
+								customerList.select(customerIndex);
+							} else {
+								orders.removeAll();
+								me.updateCustomerStatusPanel();
+								me.updateCustomerTotal();
+								me.updateCustomerPaymentMethod();
+							}
 						}						
 					} else { 
 						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
@@ -315,6 +329,7 @@ Ext.define('EatSense.controller.Spot', {
 			if(billData.checkInId == me.getActiveCustomer().get('id')) {
 				bill = Ext.create('EatSense.model.Bill');
 				bill.setData(billData);
+				bill.set('id', billData.id);
 				this.setActiveBill(bill);
 				paidButton.enable();
 				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.getPaymentMethod().get('name')});
@@ -494,9 +509,12 @@ Ext.define('EatSense.controller.Spot', {
 	confirmPayment: function(button, eventObj, eOpts){
 		var 	me = this,
 				orderStore = Ext.StoreManager.lookup('orderStore'),
+				customerStore = Ext.StoreManager.lookup('checkInStore'),
 				unprocessedOrders,
 				loginCtr = this.getApplication().getController('Login'),
-				bill = this.getActiveBill();
+				bill = this.getActiveBill(),
+				customerList = this.getSpotDetailCustomerList(),
+				customerIndex;
 
 		if(!bill) {
 			console.log('cannot confirm payment because no bill exists');
@@ -519,10 +537,24 @@ Ext.define('EatSense.controller.Spot', {
 				params: {
 					pathId: loginCtr.getAccount().get('businessId')
 				},
+				success: function(record, operation) {
+					me.setActiveBill(null);		
+				},
 				failure: function(record, operation) {
 					console.log('saving bill failed');
 				}
-			});
+			});			
+			//remove customer
+			customerIndex = customerStore.indexOf(this.getActiveCustomer());
+			customerStore.remove(this.getActiveCustomer());
+			if(customerStore.getCount() > 0) {
+				customerList.select(customerIndex);
+			} else {
+				orderStore.removeAll();
+				this.updateCustomerStatusPanel();
+				this.updateCustomerTotal();
+				this.updateCustomerPaymentMethod();
+			}
 		}
 
 	},
@@ -533,7 +565,7 @@ Ext.define('EatSense.controller.Spot', {
 	cancelOrder: function(button, eventObj, eOpts) {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
-				orderStore = Ext.StoreManager.lookup('orderStore'),
+				orderStore = Ext.StoreManager.lookup('orderStore'),				
 				order = button.getParent().getRecord(),
 				prevStatus = order.get('status');
 

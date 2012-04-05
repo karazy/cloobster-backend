@@ -22,6 +22,7 @@ Ext.application({
    		72: 'res/images/icon-72.png',
    		114: 'res/images/icon-114.png'
 	},
+	glossOnIcon: false,
 	init : function() {
 		console.log('init');
 	},
