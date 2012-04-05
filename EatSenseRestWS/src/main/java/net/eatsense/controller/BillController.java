@@ -147,7 +147,7 @@ public class BillController {
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 
 		// ... and add a message with updated checkin status to the package.
-		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+		messages.add(new MessageDTO("checkin","delete",transform.toStatusDto(checkIn)));
 		
 		// Add a message with updated order status to the message package.
 		messages.add(new MessageDTO("bill","update",billData));

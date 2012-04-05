@@ -327,48 +327,6 @@ public class CheckInController {
 	}
 
 	/**
-	 * User clicked cancel on checkIn confirm page. Deletes this checkIn form
-	 * datastore.
-	 * 
-	 * @param userId
-	 *            User issuing this request.
-	 */
-	public void cancelCheckIn(String userId) {
-		//Don't return something. User is not really interested if check in cancel failed.
-		//System has to deal with this.
-		CheckIn chkin = checkInRepo.getByProperty("userId", userId);
-		
-		if (chkin == null) { // CheckIn not found for this userId
-			logger.info("Error: Recieved cancel for CheckIn with userId {}, but this userId was not found.", userId);
-			return;
-		}
-			
-		if (chkin.getStatus() == CheckInStatus.INTENT) {
-			logger.info("Cancel CheckIn with userId {}", userId);
-			checkInRepo.delete(chkin);
-			
-			SpotStatusDTO spotData = new SpotStatusDTO();
-			
-			spotData.setId(chkin.getSpot().getId());
-
-			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(chkin.getSpot()));
-			
-			// send the message with the updated data field
-			try {
-				channelCtrl.sendMessageToAllClients(chkin.getBusiness().getId(), "spot", "update", spotData);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		} else {
-			// Error handling
-			logger.info("Error: Recieved cancel for CheckIn with userId {}, but status was not INTENT.", userId);
-			
-		}
-	}
-	
-	/**
 	 * Load checkin.
 	 * @param checkInId
 	 * 			Id of CheckIn to load	
@@ -392,33 +350,6 @@ public class CheckInController {
 			// returns with code 404(Not Found)
 			throw new NotFoundException("unknown checkInId: " + checkInId);
 		return checkIn;
-	}
-	
-	/**
-	 * Return other checkins at the same spot.
-	 * 
-	 * @param chkin A user
-	 * @return All users at spot checkedin.
-	 */
-	private List<CheckIn> getOtherChekIns(CheckIn chkin)
-	{
-		List<CheckIn> otherCheckIns = null;
-		
-		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(chkin.getSpot());
-		
-		if (checkInsAtSpot != null && checkInsAtSpot.size() > 0) {
-			otherCheckIns = new ArrayList<CheckIn>();
-			
-			// Other users at this table exist.
-			for (CheckIn checkIn : checkInsAtSpot) {
-				
-				if(!checkIn.getUserId().equals(chkin.getUserId())
-						&& (checkIn.getStatus() == CheckInStatus.CHECKEDIN || checkIn.getStatus() == CheckInStatus.ORDER_PLACED)) {
-					otherCheckIns.add(checkIn);
-				}
-			}
-		}
-		return otherCheckIns;
 	}
 	
 	/**
