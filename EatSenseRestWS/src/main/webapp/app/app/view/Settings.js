@@ -2,6 +2,7 @@ Ext.define('EatSense.view.Settings', {
 	extend : 'Ext.Panel',
 	xtype : 'settings',
 	config : {
+		layout: 'vbox',
 		items : [ {
 			xtype : 'titlebar',
 			docked : 'top',
