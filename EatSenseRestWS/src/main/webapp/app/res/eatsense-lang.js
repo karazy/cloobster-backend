@@ -12,6 +12,7 @@ var translation = {
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
+		"leave" : "Verlassen",
 		// main menu
 		"checkInButton" : "CheckIn",
 		"currentDealsButton" : "Deals",

@@ -270,7 +270,6 @@ Ext.define('EatSense.controller.Spot', {
 					}
 				} else if (action == 'update') {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
-					index = store.indexOf(dirtyCheckIn);
 					if(dirtyCheckIn) {
 						//update existing checkin
 						dirtyCheckIn.setData(updatedCheckIn.getData());
@@ -282,10 +281,6 @@ Ext.define('EatSense.controller.Spot', {
 							//update status only if this is the active customer
 							me.updateCustomerStatusPanel(updatedCheckIn);
 						}
-												
-						//BUGGY
-						// listElement = me.getSpotDetailCustomerList().getAt(index);
-						// listElement.getTpl().overwrite(listElement.element, dirtyCheckIn);
 					} else {
 						Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorGeneralCommunication'), Ext.emptyFn);
 					}
@@ -329,7 +324,9 @@ Ext.define('EatSense.controller.Spot', {
 			if(billData.checkInId == me.getActiveCustomer().get('id')) {
 				bill = Ext.create('EatSense.model.Bill');
 				bill.setData(billData);
-				bill.set('id', billData.id);
+				bill.setId(billData.get('id'));
+				//this is an already persistent object!
+				bill.phantom = false;
 				this.setActiveBill(bill);
 				paidButton.enable();
 				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.getPaymentMethod().get('name')});
@@ -521,6 +518,8 @@ Ext.define('EatSense.controller.Spot', {
 			return;
 		}
 
+		// button.disable();
+
 		//check if all orders are processed
 		unprocessedOrders = orderStore.queryBy(function(record, id) {
 			if(record.get('status') == Karazy.constants.Order.PLACED) {
@@ -538,23 +537,24 @@ Ext.define('EatSense.controller.Spot', {
 					pathId: loginCtr.getAccount().get('businessId')
 				},
 				success: function(record, operation) {
+					//remove customer
+					customerIndex = customerStore.indexOf(me.getActiveCustomer());
+					customerStore.remove(me.getActiveCustomer());
+					if(customerStore.getCount() > 0) {
+						customerList.select(customerIndex);
+					} else {
+						orderStore.removeAll();
+						me.updateCustomerStatusPanel();
+						me.updateCustomerTotal();
+						me.updateCustomerPaymentMethod();
+					}
 					me.setActiveBill(null);		
 				},
 				failure: function(record, operation) {
 					console.log('saving bill failed');
+					button.enable();
 				}
 			});			
-			//remove customer
-			customerIndex = customerStore.indexOf(this.getActiveCustomer());
-			customerStore.remove(this.getActiveCustomer());
-			if(customerStore.getCount() > 0) {
-				customerList.select(customerIndex);
-			} else {
-				orderStore.removeAll();
-				this.updateCustomerStatusPanel();
-				this.updateCustomerTotal();
-				this.updateCustomerPaymentMethod();
-			}
 		}
 
 	},

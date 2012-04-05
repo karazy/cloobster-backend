@@ -98,7 +98,7 @@ Ext.define('EatSense.view.MyOrders', {
 				hidden: true,
 				items: [{
 					xtype: 'button',
-					text: 'Ok',
+					text: Karazy.i18n.translate('leave'),
 					ui: 'confirm',
 					action: 'complete',
 					height: '50px'

@@ -6,8 +6,7 @@ Ext.define('EatSense.model.Bill', {
 	config : {
 		idProperty : 'id',
 		fields : [ {
-			name : 'id',
-			type : 'string'
+			name : 'id'
 		}, {
 			name : 'billnumber',
 			type : 'string'
