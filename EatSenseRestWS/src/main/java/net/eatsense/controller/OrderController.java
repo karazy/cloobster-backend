@@ -128,18 +128,19 @@ public class OrderController {
 		order.setAmount(orderData.getAmount());
 		
 		List<OrderChoice> savedChoices = orderChoiceRepo.getByParent(order.getKey());
-		
-		for( ChoiceDTO choiceData : orderData.getProduct().getChoices()) {
-			for( OrderChoice savedChoice : savedChoices ) {
-				if(choiceData.getId().equals(savedChoice.getChoice().getId())) {
-					HashSet<ProductOption> optionSet = new HashSet<ProductOption>(savedChoice.getChoice().getOptions());
-					// Check if any of the options were changed
-					if ( ! optionSet.containsAll(choiceData.getOptions()) ) {
-						logger.info("Saving updated options for choice: {}", choiceData.getText() );
-						savedChoice.getChoice().getOptions().clear();
-						savedChoice.getChoice().getOptions().addAll(choiceData.getOptions());
-						
-						orderChoiceRepo.saveOrUpdate(savedChoice);
+		if(orderData.getProduct().getChoices() != null ) {
+			for( ChoiceDTO choiceData : orderData.getProduct().getChoices()) {
+				for( OrderChoice savedChoice : savedChoices ) {
+					if(choiceData.getId().equals(savedChoice.getChoice().getId())) {
+						HashSet<ProductOption> optionSet = new HashSet<ProductOption>(savedChoice.getChoice().getOptions());
+						// Check if any of the options were changed
+						if ( ! optionSet.containsAll(choiceData.getOptions()) ) {
+							logger.info("Saving updated options for choice: {}", choiceData.getText() );
+							savedChoice.getChoice().getOptions().clear();
+							savedChoice.getChoice().getOptions().addAll(choiceData.getOptions());
+							
+							orderChoiceRepo.saveOrUpdate(savedChoice);
+						}
 					}
 				}
 			}
