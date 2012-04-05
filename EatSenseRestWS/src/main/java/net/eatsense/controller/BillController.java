@@ -131,6 +131,14 @@ public class BillController {
 		if(billRepo.saveOrUpdate(bill)== null) {
 			throw new RuntimeException("Bill cannot be saved");
 		}
+
+		billData.setTotal(bill.getTotal());
+		billData.setCheckInId(bill.getCheckIn().getId());
+		billData.setCleared(bill.isCleared());
+		billData.setId(bill.getId());
+		billData.setTime(bill.getCreationTime());
+		billData.setPaymentMethod(bill.getPaymentMethod());
+
 		// ...update the status of the checkIn in the datastore ...
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);
@@ -176,8 +184,6 @@ public class BillController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		billData.setTotal(bill.getTotal());
 		
 		return billData;
 	}
