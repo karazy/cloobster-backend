@@ -6,8 +6,7 @@ Ext.define('EatSense.model.Bill', {
 	config : {
 		idProperty : 'id',
 		fields : [ {
-			name : 'id',
-			type : 'string'
+			name : 'id'
 		}, {
 			name : 'billnumber',
 			type : 'string'
@@ -27,11 +26,15 @@ Ext.define('EatSense.model.Bill', {
 			type: 'boolean'
 		}, {
 			name: 'checkInId'
-		}],
+		} ],
+		associations : {
+			type : 'hasOne',
+			model : 'EatSense.model.PaymentMethod',
+		},
 		proxy: {
 	 		type: 'rest',
 	 		enablePagingParams: false,
-	 		url : '/c/businesses/{pathId}/bills',
+	 		url : '/b/businesses/{pathId}/bills',
 	 		reader: {
 	 			type: 'json'
 	 		}

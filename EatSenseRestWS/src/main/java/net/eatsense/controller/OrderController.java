@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -126,6 +127,25 @@ public class OrderController {
 		order.setComment(orderData.getComment());
 		order.setAmount(orderData.getAmount());
 		
+		List<OrderChoice> savedChoices = orderChoiceRepo.getByParent(order.getKey());
+		
+		for( ChoiceDTO choiceData : orderData.getProduct().getChoices()) {
+			for( OrderChoice savedChoice : savedChoices ) {
+				if(choiceData.getId().equals(savedChoice.getChoice().getId())) {
+					HashSet<ProductOption> optionSet = new HashSet<ProductOption>(savedChoice.getChoice().getOptions());
+					// Check if any of the options were changed
+					if ( ! optionSet.containsAll(choiceData.getOptions()) ) {
+						logger.info("Saving updated options for choice: {}", choiceData.getText() );
+						savedChoice.getChoice().getOptions().clear();
+						savedChoice.getChoice().getOptions().addAll(choiceData.getOptions());
+						
+						orderChoiceRepo.saveOrUpdate(savedChoice);
+					}
+				}
+			}
+		}
+		
+				
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		
 		if(violations.isEmpty()) {

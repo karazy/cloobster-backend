@@ -29,6 +29,7 @@
 			// amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
 			amountSpinner : 'orderdetail spinnerfield',
 			prodDetailLabel :'orderdetail #prodDetailLabel' ,
+			prodPriceLabel :'orderdetail #prodPriceLabel' ,
 			closeOrderDetailBt: 'orderdetail button[action=close]',
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
@@ -37,7 +38,9 @@
 			myorderstab: '#myorderstab',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: '#myorderstab button[action="pay"]',
-			leaveButton: '#myorderstab button[action="leave"]'
+			leaveButton: '#myorderstab button[action="leave"]',
+			confirmEditButton: 'orderdetail button[action="edit"]',
+			undoEditButton: 'orderdetail button[action="undo"]'
 		},
 		control: {
 			cancelAllOrdersBt : {
@@ -77,11 +80,17 @@
             	 tap: 'leave'
              }, 
              productdetail : {
-             	hide: 'editOrder'
+             	// hide: 'editOrder'
              },
              closeOrderDetailBt: {
              	tap: 'closeOrderDetail'
              },
+             confirmEditButton: {
+             	tap: 'editOrder'
+             },
+             undoEditButton: {
+             	tap: 'closeOrderDetail'
+             }
 		},
 		/**
 		 * Tooltip menu, shown when user taps an order
@@ -280,16 +289,14 @@
 
 					}
 				}
-			});		
-			
-			
-
+			});						
 	}
 	},
 	/**
 	 * Listener for itemTap event of orderlist.
 	 * Show a tooltip with buttons to edit, delete the selected item.
 	 */
+	 //TODO remove
 	cartItemContextMenu: function(dv, number, dataitem, model, event, opts) {
 		console.log('Cart Controller -> cartItemContextMenu');
 		var x = event.pageX,
@@ -364,18 +371,27 @@
 		 		order = button.getParent().getRecord(),
 		 		product = order.getProduct();		 		
 		 		this.models.activeOrder = order,
-		 		main = this.getMain();
+		 		main = this.getMain(),
+		 		titlebar = detail.down('titlebar');
+
+		 //save state of order to undo changes
+		 order.saveState();
 
 		 choicesPanel.removeAll(false);
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(order.get('amount'));
+
+		 //set title
+		 titlebar.setTitle(product.get('name'));
+
 		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
+		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof product.choices() !== 'undefined' && product.choices().getCount() > 0) {
 			 product.choices().each(function(_choice) {
 				 var choice = _choice;				 			 
 				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text+'<hr/>');
+				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
 				 //single choice. Create Radio buttons
 				 var optionType = '';
 				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
@@ -390,7 +406,8 @@
 						 name : choice.data.id,
 						 labelWidth: '80%',
 						 label : opt.get('name'),
-						 checked: opt.get('selected')
+						 checked: opt.get('selected'),
+						 cls: 'option'
 					 }, this);
 					 
 					 checkbox.addListener('check',function(cbox) {
@@ -417,19 +434,17 @@
 				 },this);	 
 				 choicesPanel.add(optionsDetailPanel);
 			 },this);
-			 choicesPanel.add( {
-				 html: '<hr/>'
-			 });
 		 }
 		 
 		 
 		 //insert comment field after options have been added so it is positioned correctly
 		 choicesPanel.add({
-			xtype: 'textfield',
-			label: i18nPlugin.translate('orderComment'),
-			labelAlign: 'top',
-			itemId: 'productComment',
-			value: order.get('comment')
+				xtype: 'textfield',
+				label: i18nPlugin.translate('orderComment'),
+				labelAlign: 'top',
+				itemId: 'productComment',
+				value: order.get('comment'),
+				cls: 'choice'
 			}
 		);
 		 // this.menuBackBtContext = this.editOrder;
@@ -437,6 +452,7 @@
 		 // this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
 		//add to viewport. otherwise Ext.MessageBox will show behind detail panel
 		Ext.Viewport.add(detail);
+		detail.getScrollable().getScroller().scrollToTop();
 		detail.show();
 	},
 	/**
@@ -472,6 +488,7 @@
 	    	    jsonData: order.getRawJsonData()
 			});
 
+			detail.hide();
 			this.refreshCart();
 			return true;
 			// this.showCart();
@@ -499,9 +516,9 @@
 			//delete item
 			activeCheckIn.orders().remove(order);
 			
-			Ext.Ajax.request({				
+			Ext.Ajax.request({
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-	    	    method: 'DELETE',    	    
+	    	    method: 'DELETE',
 	    	    params: {
 	    	    	'checkInId' : activeCheckIn.get('userId'),
 	    	    }
@@ -524,10 +541,9 @@
 	closeOrderDetail: function() {
 		var 	detail = this.getProductdetail();
 		
-		// if(this.editOrder() === true) {
-			detail.hide();	
-		// }
-	
+		this.models.activeOrder.restoreState();
+		this.refreshCart();
+		detail.hide();		
 	},
 	/**
 	 * Switches to another view
@@ -565,7 +581,7 @@
 	 */
 	recalculate: function(order) {
 		console.log('Cart Controller -> recalculate');
-		this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: order.getProduct(), amount: order.get('amount')});
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
 	/**
 	 * Refreshes the badge text on cart tab icon.

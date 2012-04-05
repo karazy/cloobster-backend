@@ -179,7 +179,8 @@ Ext.define('EatSense.controller.Menu', {
 						 name : choice.get('id'),
 						 labelWidth: '80%',
 						 label : opt.get('name'),
-						 checked: opt.get('selected')
+						 checked: opt.get('selected'),
+						 cls: 'option'
 					 }, this);							 
 					
 					 checkbox.addListener('check',function(cbox) {
@@ -215,12 +216,14 @@ Ext.define('EatSense.controller.Menu', {
 			label: i18nPlugin.translate('orderComment'),
 			labelAlign: 'top',
 			itemId: 'productComment',
-			value: ''
+			value: '',
+			cls: 'choice'
 			}
 		);
 		 
 		 // this.menuBackBtContext = this.backToProductOverview;
 		 Ext.Viewport.add(detail);
+		 detail.getScrollable().getScroller().scrollToTop();
 		 detail.show();
 		 // this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
 	},

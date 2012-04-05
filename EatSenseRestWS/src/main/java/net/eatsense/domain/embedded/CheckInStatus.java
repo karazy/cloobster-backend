@@ -21,7 +21,9 @@ public enum CheckInStatus {
 	 */
 	ORDER_PLACED,
 	/**
-	 * User is in an idle state. At least on order was served.
+	 * User requested the bill.
 	 */
-	PAYMENT_REQUEST,	
+	PAYMENT_REQUEST,
+	
+	COMPLETE,	
 }

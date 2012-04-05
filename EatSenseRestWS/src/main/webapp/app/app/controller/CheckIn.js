@@ -480,7 +480,8 @@ Ext.define('EatSense.controller.CheckIn', {
 			this.getCartTab().enable();
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
-			
+			//remove menu to prevent problems on reload
+			this.getMenulist().getStore().removeAll();
 			this.showDashboard();
 			
 		}

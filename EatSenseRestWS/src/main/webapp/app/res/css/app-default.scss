@@ -1,5 +1,7 @@
 $base-color: #9FEE00;
 $active-color: #FF8718;
+//$toolbar-base-color: #679b00;
+//$neutral-color: #123456;
 //$page-bg-color: #FFAA00;
 
 
@@ -65,7 +67,7 @@ $base-gradient: 'matte';
 }
 
 .productDetail {
-	font-size:1em; 
+	font-size:0.7em; 
 	margin-bottom: 10px;
 	h2 {
 		font-size: 1.5em; 
@@ -93,6 +95,11 @@ $base-gradient: 'matte';
 	
 }
 
+.productPrice {
+	margin-left: 10px;
+	font-size: 1.5em;
+}
+
 .productDetail-close {
 	background-color: black;
 	border-radius: 1em;
@@ -105,6 +112,29 @@ $base-gradient: 'matte';
 	right: 3px;
 	top: 3px;
 }
+
+/*
+* Choices and Options
+*/
+
+.choice-panel {
+
+	padding: 5px;
+
+	.choice {
+		font-size: 0.8em;
+	}	
+
+	.option {
+		font-size: 0.7em;
+	}
+
+	.option-panel {
+		margin-bottom: 5px;
+	}
+}
+
+
 
 /*
 * Orderlist
@@ -132,19 +162,20 @@ $base-gradient: 'matte';
 }
 
 .cartoverviewitem {
+	padding: 5px;
+
 	.name {
 		width: 75%;
-		margin-bottom: 20px;
+		/*margin-bottom: 20px;*/
 
 		h2 {
-		float: left;
-		padding-left: 10px;
-		/*width: 80%;*/
+			float: left;
+			padding-left: 10px;
+			padding-right: 5px;
 		}
 
-
-		div {
-			position: relative;
+		div.amount {
+			float: left;
 		}
 
 		div.price {
@@ -185,6 +216,17 @@ $base-gradient: 'matte';
 .menuCategoryItem {
 	float: left;
 	width: 15%;
+}
+
+/*
+*	OrderDetail Panel
+*/
+
+.orderdetail-floating {
+	border-radius: 0.3em !important;
+	padding: 6px !important;
+	background-color: #86B22D !important;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
 }
 
 

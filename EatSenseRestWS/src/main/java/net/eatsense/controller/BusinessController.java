@@ -54,7 +54,7 @@ public class BusinessController {
 			spotDto.setId(spot.getId());
 			spotDto.setName(spot.getName());
 			spotDto.setGroupTag(spot.getGroupTag());
-			spotDto.setCheckInCount(checkInRepo.ofy().query(CheckIn.class).filter("spot", spot.getKey()).filter("status !=", CheckInStatus.PAYMENT_REQUEST).count());
+			spotDto.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(spot.getKey()));
 			Request request = requestRepo.ofy().query(Request.class).filter("spot",spot.getKey()).order("-receivedTime").get();
 			
 			if(request != null) {

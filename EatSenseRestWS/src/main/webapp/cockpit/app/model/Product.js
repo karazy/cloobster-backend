@@ -57,42 +57,6 @@ Ext.define('EatSense.model.Product', {
 		this.set('price_calculated', _total);
 		return _total;
 	},
-	/**
-	 * Returns a deep copy of this product containing only data.
-	 */
-	deepCopy: function() {
-		console.log('Product -> deepCopy')
-		var _productCopy, _choiceCopy, _optionCopy;
-		_productCopy = Ext.create('EatSense.model.Product', {
-//			id: this.get('id'),
-			name: this.get('name'),
-			shortDesc: this.get('shortDesc'),
-			longDesc: this.get('longDesc'),
-			price: this.get('price')
-		});
-
-		this.choices().each(function(choice) {
-			_choiceCopy = Ext.create('EatSense.model.Choice', {
-				text: choice.get('text'),
-				price: choice.get('price'),
-				minOccurence: choice.get('minOccurence'),
-				maxOccurence: choice.get('maxOccurence'),
-				included: choice.get('included'),
-				overridePrice: choice.get('overridePrice')
-			});
-			choice.options().each(function(option) {
-				_optionCopy = Ext.create('EatSense.model.Option', {
-					name : option.get('name'),
-					price : option.get('price'),
-					selected : option.get('selected'),
-				});
-				_choiceCopy.options().add(option.copy());
-			});
-			_productCopy.choices().add(_choiceCopy);
-		});
-		return _productCopy;
-	},
-	
 	getRawJsonData: function() {
 		var rawJson = {};
 		

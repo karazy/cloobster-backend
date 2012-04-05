@@ -41,8 +41,16 @@ public class BusinessResource {
 		
 		return spotsResource;
 	}
-
-
+	
+	@Path("bills")
+	public BillsResource getBillsResource() {
+		BillsResource billsResource = resourceContext.getResource(BillsResource.class);
+		
+		billsResource.setBusinessId(businessId);
+		
+		return billsResource;
+	}
+	
 	public void setBusinessId(Long businessId) {
 		this.businessId = businessId;
 	}
