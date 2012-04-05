@@ -34,7 +34,6 @@ Ext.define('EatSense.view.Main', {
 			// No fit layout! Won't display correctly otherwise.
 			xtype : 'lounge'
 		}, {
-			layout : 'fit',
 			xtype : 'settings'
 		} ]
 	},

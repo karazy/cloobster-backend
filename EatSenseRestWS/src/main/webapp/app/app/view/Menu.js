@@ -15,19 +15,15 @@ Ext.define('EatSense.view.Menu', {
 				ui : 'back',
 				align: 'left'
 			},
-//			{
-//				xtype: 'spacer'
-//			},
-			{
-				xtype: 'button',
-//				text: i18nPlugin.translate('productCartBt'),
-				itemId : 'productCartBt',
-				ui: 'confirm',
-				icon: '../app/res/images/into_cart.png',
-				iconAlign: 'centered',
-				hidden: true,
-				align: 'right'
-			},
+			// {
+			// 	xtype: 'button',
+			// 	itemId : 'productCartBt',
+			// 	ui: 'confirm',
+			// 	icon: '../app/res/images/into_cart.png',
+			// 	iconAlign: 'centered',
+			// 	hidden: true,
+			// 	align: 'right'
+			// },
 			]
 		},
 		{
@@ -46,11 +42,11 @@ Ext.define('EatSense.view.Menu', {
 			        	xtype: 'productoverview',
 			        	layout: 'fit'
 			        }, 
-			        {
-			        	xtype: 'productdetail',
-			        	itemId: 'menuProductDetail',
-			        	layout: 'vbox',
-			        }
+			        // {
+			        // 	xtype: 'productdetail',
+			        // 	itemId: 'menuProductDetail',
+			        // 	layout: 'vbox',
+			        // }
 			]
 			
 		}

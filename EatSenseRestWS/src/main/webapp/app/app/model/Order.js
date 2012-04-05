@@ -19,18 +19,51 @@ Ext.define('EatSense.model.Order', {
 			type : 'date',
 			dateFormat: 'time'
 		} ],
-
 		associations : {
 			type : 'hasOne',
 			model : 'EatSense.model.Product',
-		}
+		},
+		proxy: {
+			type: 'rest',
+			enablePagingParams: false,
+			url : '/c/businesses/{pathId}/orders',
+			reader: {
+				type: 'json'
+		   	}
+	 	},
+	 	// current state of this order. used for store and restore
+	 	state: null
 	},
 
 	calculate : function() {
 		var _amount = parseFloat(this.get('amount'));
 		return this.getProduct().calculate(_amount);
 	},
-	
+	/**
+	*	Saves the state of this order.
+	*	The state can be restored after changes.
+	*	An existing state will be overriden.
+	*/
+	saveState: function() {
+		if(this.getState()) {
+			console.log('override existing order state');
+		}
+
+		this.setState(this.getRawJsonData());
+	},
+	/**
+	*	If a state exists it will be restored.
+	*/
+	restoreState: function() {
+		if(this.getState()) {
+			this.setRawJsonData(this.getState());
+			this.setState(null);
+		}
+	},
+	/**
+	*	Returns a deep raw json representation of this object.
+	*
+	*/	
 	getRawJsonData: function() {
 		var rawJson = {};
 		
@@ -43,6 +76,29 @@ Ext.define('EatSense.model.Order', {
 		rawJson.product = this.getProduct().getRawJsonData();
 		
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		if(!this.getProduct().setRawJsonData(rawData.product)) {
+			return false;
+		}
+
+		this.set('id', rawData.id);
+		this.set('status', rawData.status);
+		this.set('amount', rawData.amount);
+		this.set('comment', rawData.comment);
+		this.set('orderTime', rawData.orderTime);
+
+		return true;
+		
+			
 	}
 
 });

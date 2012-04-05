@@ -1,6 +1,6 @@
 Ext.define('EatSense.view.Lounge', {
 	extend : 'Ext.tab.Panel',
-	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu', 'EatSense.view.MenuOverview' ],
+	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu', 'EatSense.view.MenuOverview', 'EatSense.view.SettingsTab' ],
 	xtype : 'lounge',
 	config : {
 		tabBar : {
@@ -11,6 +11,7 @@ Ext.define('EatSense.view.Lounge', {
 		items : [ {
 			title : i18nPlugin.translate('menuTitle'),
 			itemId : 'menutab',
+			name: 'menu',			
 			iconCls : 'compose',
 			layout : 'fit',
 			items : [ {
@@ -37,11 +38,14 @@ Ext.define('EatSense.view.Lounge', {
 				xtype : 'myorders',
 				itemId : 'myorders',
 				layout : 'fit'
-			} ]
+			},
+			]
+		},
+		{
+			xtype: 'settingstab',
+			tabName: 'settings'
 		}
-
 		]
-
 	},
 	/**
 	 * Switch the tab.

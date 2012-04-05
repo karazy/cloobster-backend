@@ -34,6 +34,8 @@ public class Bill extends GenericEntity {
 	@NotNull
 	@Min(0)
 	private Float total;
+	
+	private boolean cleared;
 
 	public Key<Business> getBusiness() {
 		return business;
@@ -78,6 +80,14 @@ public class Bill extends GenericEntity {
 	@Transient
 	public Key<Bill> getKey() {
 		return new Key<Bill>(getBusiness(), Bill.class, super.getId());
+	}
+
+	public boolean isCleared() {
+		return cleared;
+	}
+
+	public void setCleared(boolean cleared) {
+		this.cleared = cleared;
 	}
 
 }

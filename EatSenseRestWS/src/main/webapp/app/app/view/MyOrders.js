@@ -32,10 +32,12 @@ Ext.define('EatSense.view.MyOrders', {
 		{
 			xtype: 'list',
 			id: 'myorderlist',
+			store: 'orderStore',
 			ui: 'round',
 			styleHtmlContent: true,
 			allowDeselect: true,
 			onItemDisclosure: this.removeItem,
+			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
@@ -96,7 +98,7 @@ Ext.define('EatSense.view.MyOrders', {
 				hidden: true,
 				items: [{
 					xtype: 'button',
-					text: 'Ok',
+					text: Karazy.i18n.translate('leave'),
 					ui: 'confirm',
 					action: 'complete',
 					height: '50px'

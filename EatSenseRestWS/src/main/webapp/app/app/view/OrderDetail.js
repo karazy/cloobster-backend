@@ -1,9 +1,10 @@
 /**
- * Displays details and options of a product.
+ * Displays details and options of an order.
+ * Very similar to productdetail.
  */
-Ext.define('EatSense.view.ProductDetail', {
+Ext.define('EatSense.view.OrderDetail', {
 	extend : 'Ext.Panel',
-	xtype : 'productdetail',	
+	xtype : 'orderdetail',	
 	layout : {
 		type : 'vbox',
 		align : 'stretch',
@@ -11,12 +12,17 @@ Ext.define('EatSense.view.ProductDetail', {
 	config : {
     	scrollable : 'vertical',
     	modal: true,
-		hideOnMaskTap: true,
-		top: '8%',
-		left: '5%',
-		right: '5%',
-		bottom: '5%',
+		// hideOnMaskTap: true,
+		top: '5%',
+		left: '3%',
+		right: '3%',
+		bottom: '3%',
+		floatingCls: 'orderdetail-floating',
 		items : [
+		{
+			xtype: 'titlebar',
+			docked: 'top'
+		},
 		{
 			xtype : 'panel',
 			cls: 'productDetailPanel',
@@ -25,21 +31,10 @@ Ext.define('EatSense.view.ProductDetail', {
 			},
 			items : [ 
 			{
-					xtype: 'button',
-					action: 'close',
-					baseCls: 'productDetail-close',
-					text: 'X'
-			},
-			{
 				xtype : 'label',
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
-				tpl: new Ext.XTemplate(
-				 	'<h2>{product.data.name}</h2>'+
-				 	'<div class="price">{[values.product.calculate(values.amount)]}</div>'+
-				 	'<div style="clear: both;">'+
-				 	'<p class="desc">{product.data.longDesc}</p>'
-				)
+				tpl: '<p class="desc">{product.data.longDesc}</p>'
 			}, {
 				xtype : 'panel',
 				layout : {
@@ -50,21 +45,27 @@ Ext.define('EatSense.view.ProductDetail', {
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
-					itemId : 'productAmountSpinner',
-					style : 'background-color:white;',
+					// style : 'background-color:white;',
 					value : 1,
-					width: 200,
+					// width: 200,
 					minValue : '1',
 					maxValue : '10',
-					height: '25px',
+					// height: '25px',
 					cycle : true,
-				}, 
+				},
+				{
+					xtype: 'label',
+					cls: 'productPrice',
+					itemId : 'prodPriceLabel',
+					tpl: '{[values.product.calculate(values.amount)]}'
+				} 
 				]
 			}]
 		}, 
 		{
 			xtype : 'formpanel',
 			itemId : 'choicesPanel',
+			cls: 'choice-panel',
 			layout: 'vbox',
 			minHeight: '200px',
 			scrollable : false,
@@ -81,9 +82,16 @@ Ext.define('EatSense.view.ProductDetail', {
 				{
 					xtype: 'button',
 					ui: 'confirm',
-					icon: '../app/res/images/into_cart.png',
-					iconAlign: 'centered',
-					action: 'cart'
+					// icon: '../app/res/images/into_cart.png',
+					// iconAlign: 'centered',
+					text: Karazy.i18n.translate('change'),
+					action: 'edit'
+				},
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					text: Karazy.i18n.translate('cancel'),
+					action: 'undo'
 				}
 			]
 		}

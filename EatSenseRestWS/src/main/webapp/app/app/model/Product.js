@@ -24,7 +24,7 @@ Ext.define('EatSense.model.Product', {
 		}, { //dont change, gets set automatically
 			name: 'price_calculated',
 			type: 'number'
-		}],
+		}],		
 		 associations: [{
 	            type: 'hasMany',
 	            model: 'EatSense.model.Choice',
@@ -32,7 +32,18 @@ Ext.define('EatSense.model.Product', {
 	            name: 'choices',
 	            autoLoad: true,
 	            associationKey: 'choices' // read child data from child_groups
-	        }],
+	    }],
+	    proxy: {
+		   type: 'rest',
+		   url : '/c/businesses/{pathId}/products',
+		   reader: {
+			   type: 'json'
+	   		},
+	   		writer: {
+	   			type: 'json',
+	   			writeAllFields: true
+	   		}
+	   }
 	},
 	
 	validate: function() {
@@ -58,41 +69,9 @@ Ext.define('EatSense.model.Product', {
 		return _total;
 	},
 	/**
-	 * Returns a deep copy of this product containing only data.
-	 */
-	deepCopy: function() {
-		console.log('Product -> deepCopy')
-		var _productCopy, _choiceCopy, _optionCopy;
-		_productCopy = Ext.create('EatSense.model.Product', {
-//			id: this.get('id'),
-			name: this.get('name'),
-			shortDesc: this.get('shortDesc'),
-			longDesc: this.get('longDesc'),
-			price: this.get('price')
-		});
-
-		this.choices().each(function(choice) {
-			_choiceCopy = Ext.create('EatSense.model.Choice', {
-				text: choice.get('text'),
-				price: choice.get('price'),
-				minOccurence: choice.get('minOccurence'),
-				maxOccurence: choice.get('maxOccurence'),
-				included: choice.get('included'),
-				overridePrice: choice.get('overridePrice')
-			});
-			choice.options().each(function(option) {
-				_optionCopy = Ext.create('EatSense.model.Option', {
-					name : option.get('name'),
-					price : option.get('price'),
-					selected : option.get('selected'),
-				});
-				_choiceCopy.options().add(option.copy());
-			});
-			_productCopy.choices().add(_choiceCopy);
-		});
-		return _productCopy;
-	},
-	
+	*	Returns a deep raw json representation of this product.
+	*
+	*/	
 	getRawJsonData: function() {
 		var rawJson = {};
 		
@@ -107,5 +86,28 @@ Ext.define('EatSense.model.Product', {
 			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
 		}		
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*	
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		for ( var int = 0; int < this.choices().data.length; int++) {
+			if(!this.choices().getAt(int).setRawJsonData(rawData.choices[int])) {
+				return false;
+			}
+		}
+
+		this.set('id', rawData.id);
+		this.set('name', rawData.name);
+		this.set('shortDesc', rawData.shortDesc);
+		this.set('longDesc', rawData.longDesc);
+		this.set('price', rawData.price);
+						
+		return true;
 	}
 });

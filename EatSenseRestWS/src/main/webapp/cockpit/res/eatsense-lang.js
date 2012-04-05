@@ -34,7 +34,7 @@ var translation = {
 		"errorSpotDetailOrderSave" : "Speichern der Bestellung fehlgeschlagen!",
 		"status" : "Status",
 		"statistic" : "Infos",
-
+		"processOrdersFirst" : "Bitte arbeite zuerst alle Bestellungen ab.",
 		//status
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",

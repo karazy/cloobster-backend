@@ -74,6 +74,8 @@ public class CheckIn extends GenericEntity{
 	 */
 	@NotNull
 	private Key<Spot> spot;
+	
+	private boolean archived = false;
 
 	public String getUserId() {
 		return userId;
@@ -147,6 +149,14 @@ public class CheckIn extends GenericEntity{
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public boolean isArchived() {
+		return archived;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
 	}
 	
 	
