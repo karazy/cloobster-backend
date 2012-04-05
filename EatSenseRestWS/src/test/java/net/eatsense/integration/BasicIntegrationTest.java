@@ -45,8 +45,8 @@ public class BasicIntegrationTest {
 	@Before
 	public void setUp() throws Exception {
 		barcode = "hup001";
-		RestAssured.baseURI = "http://eatsense-test.appspot.com";
-		RestAssured.port = 80;
+		RestAssured.baseURI = "http://localhost";
+		RestAssured.port = 8080;
 		
 		this.jsonMapper = new ObjectMapper();
 	}
@@ -129,11 +129,7 @@ public class BasicIntegrationTest {
 		menu.setRoot("products");
 		
 		// Find Coca Cola
-		Map<String, String> productMap = menu.get("find {p -> p.name == 'Coca-Cola'}");
-		productMap.put("choices", "[]");
-		logger.info("Ordering product {}", productMap.toString());
-		
-		ProductDTO productData= jsonMapper.convertValue(productMap, ProductDTO.class);
+		ProductDTO productData = menu.getObject("find {p -> p.name == 'Coca-Cola'}",ProductDTO.class);
 		
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
@@ -153,11 +149,7 @@ public class BasicIntegrationTest {
 		menu.setRoot("products");
 
 		// Find "Die Knusprigen"
-		productMap = menu.get("find {p -> p.name == 'Die Knusprigen'}");
-		productMap.put("choices", "[]");
-		logger.info("Ordering product {}", productMap.toString());
-		
-		ProductDTO productData2= jsonMapper.convertValue(productMap, ProductDTO.class);
+		ProductDTO productData2 = menu.getObject("find {p -> p.name == 'Die Knusprigen'}", ProductDTO.class);
 		
 		OrderDTO orderData2 = new OrderDTO();
 		orderData2.setAmount(1);
