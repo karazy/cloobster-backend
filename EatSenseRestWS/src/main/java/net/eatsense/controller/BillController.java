@@ -123,11 +123,13 @@ public class BillController {
 			}
 			else {
 				billTotal += calculateTotalPrice(order);
+				order.setStatus(OrderStatus.COMPLETE);
+				order.setBill(bill.getKey());
 			}
 		}
 		bill.setTotal(billTotal);
 		bill.setCleared(billData.isCleared());
-		
+		orderRepo.saveOrUpdate(orders);
 		if(billRepo.saveOrUpdate(bill)== null) {
 			throw new RuntimeException("Bill cannot be saved");
 		}
@@ -163,13 +165,10 @@ public class BillController {
 			}
 		}
 		
-		String newSpotStatus = null;
+		String newSpotStatus = CheckInStatus.CHECKEDIN.toString();
 		// Save the status of the next request in line, if there is one.
 		if( !requests.isEmpty()) {
 			newSpotStatus = requests.get(0).getStatus();
-		} else  {
-			//all pending requests are processed for this spot, 
-			newSpotStatus = null;
 		}
 		// Add a message with updated spot status to the package.
 		SpotStatusDTO spotData = new SpotStatusDTO();
