@@ -233,14 +233,23 @@ Ext.define('EatSense.controller.Spot', {
 		index = spotStore.findExact('id', updatedSpot.id);
 
 		if(index > -1) {
-			dirtySpot = spotStore.getAt(index);			
-			//update fields
-			for(prop in updatedSpot) {
-				//TODO improve?!
-				if(prop && (updatedSpot[prop] || typeof updatedSpot[prop] == "number")) {
-					dirtySpot.set(prop, updatedSpot[prop]);					
-				}
+			dirtySpot = spotStore.getAt(index);		
+
+			if(updatedSpot.status) {
+				dirtySpot.set('status', updatedSpot.status);
 			}
+
+			if(updatedSpot.checkInCount || typeof updatedSpot.checkInCount == "number") {
+				dirtySpot.set('checkInCount', updatedSpot.checkInCount);
+			}
+			
+			//update fields
+			// for(prop in updatedSpot) {
+			// 	//TODO improve?!
+			// 	if(prop && (updatedSpot[prop] || typeof updatedSpot[prop] == "number")) {
+			// 		dirtySpot.set(prop, updatedSpot[prop]);					
+			// 	}
+			// }
 		}
 	},
 	/**
@@ -251,7 +260,7 @@ Ext.define('EatSense.controller.Spot', {
 		var		me = this,
 				detail = this.getSpotDetail(),
 				store = this.getSpotDetailCustomerList().getStore(),
-				orders = Ext.StoreManager.lookup('orderStore').getData(),
+				orders = Ext.StoreManager.lookup('orderStore'),
 				customerList = this.getSpotDetailCustomerList(),
 				dirtyCheckIn,
 				index,
@@ -286,7 +295,6 @@ Ext.define('EatSense.controller.Spot', {
 					}
 				} else if (action == "delete") {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
-					//TODO check if orders for this checkin exist? Normally this should not occur.
 					if(dirtyCheckIn) {
 						customerIndex = store.indexOf(dirtyCheckIn);
 						store.remove(dirtyCheckIn);						
@@ -324,13 +332,19 @@ Ext.define('EatSense.controller.Spot', {
 			if(billData.checkInId == me.getActiveCustomer().get('id')) {
 				bill = Ext.create('EatSense.model.Bill');
 				bill.setData(billData);
-				bill.setId(billData.get('id'));
+				bill.setId(billData.id);
 				//this is an already persistent object!
 				bill.phantom = false;
-				this.setActiveBill(bill);
-				paidButton.enable();
-				paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.getPaymentMethod().get('name')});
-				paymentLabel.show();
+
+				if(action == 'new') {
+					this.setActiveBill(bill);
+					paidButton.enable();
+					paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.getPaymentMethod().get('name')});
+					paymentLabel.show();
+				} else if (action == 'update') {
+					//currently no action needed. update occurs when a bill is cleared
+					//since we also receive a checkin delete method no further action required
+				}
 			}
 		}
 	},
