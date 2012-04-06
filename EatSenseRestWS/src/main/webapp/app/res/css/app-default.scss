@@ -161,12 +161,18 @@ $base-gradient: 'matte';
 
 }
 
+.cartoverview {
+	padding: 0.3em 0em;
+}
+
 .cartoverviewitem {
 	padding: 5px;
+	margin: 5px;
+	border-radius: 0.3em;
+	background-color: #FFD073;
 
 	.name {
-		width: 75%;
-		/*margin-bottom: 20px;*/
+		width: 50%;
 
 		h2 {
 			float: left;
@@ -181,9 +187,10 @@ $base-gradient: 'matte';
 		div.price {
 			/*position: absolute;*/
 			right: 0;
-		/*	width: 30%;*/
+			float: right;
 			text-align: right;
 			padding-right: 10px;
+			padding-left: 10px;
 		}
 	}
 
@@ -304,4 +311,8 @@ $base-gradient: 'matte';
 
 .x-tab .x-button-icon.cart {
 	-webkit-mask-image: url('../images/cart.png');
+}
+
+.x-tab .x-button-icon.requests {
+	-webkit-mask-image: url('../images/volume.png');
 }

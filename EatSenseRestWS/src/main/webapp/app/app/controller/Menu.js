@@ -80,18 +80,12 @@ Ext.define('EatSense.controller.Menu', {
              loungeview : {
      			activeitemchange : function(container, value, oldValue, opts) {
     				console.log('tab change');
-    				var status = true;
     				if(value.getItemId() === 'carttab') {
     					status = this.getApplication().getController('Order').refreshCart();
     				} else if (value.getItemId() === 'myorderstab') {
-//    					this.getMyordersview().showLoadScreen(true);
     					this.getApplication().getController('Order').refreshMyOrdersList();
     				}
-    				
-    				if(status === false) { //TODO not used currently, status always true
-    					    this.getLoungeview().setActiveItem(oldValue);					
-    				}
-    				
+
     				return status;
     			}
     		},

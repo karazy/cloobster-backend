@@ -14,16 +14,7 @@ Ext.define('EatSense.view.Menu', {
 				text : i18nPlugin.translate('back'),
 				ui : 'back',
 				align: 'left'
-			},
-			// {
-			// 	xtype: 'button',
-			// 	itemId : 'productCartBt',
-			// 	ui: 'confirm',
-			// 	icon: '../app/res/images/into_cart.png',
-			// 	iconAlign: 'centered',
-			// 	hidden: true,
-			// 	align: 'right'
-			// },
+			}
 			]
 		},
 		{
@@ -41,12 +32,7 @@ Ext.define('EatSense.view.Menu', {
 			        {
 			        	xtype: 'productoverview',
 			        	layout: 'fit'
-			        }, 
-			        // {
-			        // 	xtype: 'productdetail',
-			        // 	itemId: 'menuProductDetail',
-			        // 	layout: 'vbox',
-			        // }
+			        }
 			]
 			
 		}
@@ -60,7 +46,7 @@ Ext.define('EatSense.view.Menu', {
 	switchMenuview : function(view, direction){
 		var cardpanel = this.getComponent('menuCardPanel');
 		cardpanel.getLayout().setAnimation({
-			 type: 'cube',
+			 type: 'slide',
 	         direction: direction
 		});
 		cardpanel.setActiveItem(view);

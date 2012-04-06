@@ -8,7 +8,9 @@ Ext.define('EatSense.view.CartOverview', {
 				xtype: 'dataview',
 				itemId: 'orderlist',
 				useComponents: true,
-				defaultType: 'cartoverviewitem'				
+				cls: 'cartoverview',
+				defaultType: 'cartoverviewitem',
+				grouped: true			
 		}, 
 		/*
 		{

@@ -7,7 +7,8 @@ Ext.define('EatSense.view.Main', {
 		items: [
 		{
 			xtype: 'spotcard'
-		}, {
+		}, 
+		{
 			xtype: 'toolbar',
 			docked: 'bottom',
 			items: [

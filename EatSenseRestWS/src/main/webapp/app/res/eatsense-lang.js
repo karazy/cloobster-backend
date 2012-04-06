@@ -61,7 +61,11 @@ var translation = {
 		"paymentPickerTitle" : "Bezahlmethode",
 		//Settings
 		"settingsTitle" : "Einstellungen",
-		"nickname" : "Spitzname"			
+		"nickname" : "Spitzname",
+		//Request
+		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
+		"requestsButton" : "Aktionen",
+		"requestsTitle" : "Aktionen"	
 
 	}
 

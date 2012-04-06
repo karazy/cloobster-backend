@@ -17,6 +17,9 @@ Karazy.constants = (function() {
 			CANCELED : 'CANCELED',
 			RECEIVED: 'RECEIVED',
 			COMPLETE : 'COMPLETE'
+		},
+		Request : {
+			CALL_WAITER : 'CALL_WAITER'
 		}
 
 	};

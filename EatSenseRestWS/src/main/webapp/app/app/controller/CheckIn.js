@@ -35,7 +35,9 @@ Ext.define('EatSense.controller.CheckIn', {
         	cancelCheckInBt : '#cancelCheckInBt',
         	regenerateNicknameBt : '#regenerateNicknameBt',
         	menuTab: '#menutab',
-        	cartTab: '#carttab'    	        		
+        	cartTab: '#carttab',
+            settingsTab: 'settingstab',
+            requestsTab: 'requeststab'    	        		
     	},
     	control: {
     		checkInBtn: {
@@ -472,12 +474,16 @@ Ext.define('EatSense.controller.CheckIn', {
 				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
 			this.getMenuTab().disable();
-			this.getCartTab().disable();
+			this.getCartTab().disable()
+            this.getSettingsTab().disable();
+            this.getRequestsTab().disable();
 			
 			this.models.activeCheckIn.set('status', status);
 		} else if (status == Karazy.constants.COMPLETE) {
 			this.getMenuTab().enable();
 			this.getCartTab().enable();
+            this.getSettingsTab().enable();
+            this.getRequestsTab().enable();
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
 			//remove menu to prevent problems on reload

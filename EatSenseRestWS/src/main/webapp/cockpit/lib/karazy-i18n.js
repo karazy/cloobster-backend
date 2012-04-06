@@ -137,7 +137,7 @@ Karazy.i18n = (function() {
 			 * 			2. an array containing placeholders
 			 * 			can be submited
 			 * @returns
-			 * 		Translation.
+			 * 		Translation or key if none was found
 			 */
 			 translate: function(key) {
 //				 var translationObj = this.getStore().getById(key), value ="";
@@ -175,7 +175,7 @@ Karazy.i18n = (function() {
 						 value = Ext.String.format.apply(this, _array);
 					 }
 				 }
-				 return value;
+				 return (value == "") ? key : value;
 			 },
 //			 /**
 //			  * Used to manually set translation object.

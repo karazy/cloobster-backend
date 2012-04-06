@@ -1,11 +1,11 @@
 Ext.define('EatSense.view.Lounge', {
 	extend : 'Ext.tab.Panel',
-	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu', 'EatSense.view.MenuOverview', 'EatSense.view.SettingsTab' ],
+	requires : [ 'EatSense.view.MyOrders', 'EatSense.view.Menu', 'EatSense.view.MenuOverview', 'EatSense.view.SettingsTab', 'EatSense.view.RequestsTab' ],
 	xtype : 'lounge',
 	config : {
+		tabBarPosition: 'bottom',
 		tabBar : {
 			itemId : 'loungeTabBar',
-			docked : 'bottom',
 		},
 		activeItem : 0,
 		items : [ {
@@ -19,33 +19,54 @@ Ext.define('EatSense.view.Lounge', {
 				itemId : 'menu',
 				layout : 'fit'
 			} ]
-		}, {
-			title : i18nPlugin.translate('cartTabBt'),
-			itemId : 'carttab',
-			iconCls : 'cart',
-			layout : 'fit',
-			items : [ {
-				xtype : 'cart',
-				itemId : 'cart',
-				layout : 'fit'
-			} ]
-		}, {
-			title : i18nPlugin.translate('myOrdersTabBt'),
-			iconCls : 'home',
-			itemId : 'myorderstab',
-			layout : 'fit',
-			items : [ {
-				xtype : 'myorders',
-				itemId : 'myorders',
-				layout : 'fit'
+			}, {
+				title : i18nPlugin.translate('cartTabBt'),
+				itemId : 'carttab',
+				iconCls : 'cart',
+				layout : 'fit',
+				items : [ {
+					xtype : 'cart',
+					itemId : 'cart',
+					layout : 'fit'
+				} ]
+			}, {
+				title : i18nPlugin.translate('myOrdersTabBt'),
+				iconCls : 'home',
+				itemId : 'myorderstab',
+				layout : 'fit',
+				items : [ {
+					xtype : 'myorders',
+					itemId : 'myorders',
+					layout : 'fit'
+				},
+				]
 			},
-			]
-		},
-		{
-			xtype: 'settingstab',
-			tabName: 'settings'
-		}
-		]
+			{
+				xtype: 'requeststab',
+				tabName: 'requests'
+			},
+			{
+				xtype: 'settingstab',
+				tabName: 'settings'
+			}
+		],
+		// listeners : {
+	 //        painted : function(panel) {
+	 //            var bar = panel.getTabBar();
+
+	 //            bar.add({
+		// 			xtype: 'button',
+		// 			iconCls : 'request',
+		// 			// iconMask: true,
+		// 			// title: 'Aktion',
+		// 			text: 'Aktion',
+		// 			action: 'request',
+		// 			// ui: 'action',
+		// 			cls: ['x-tab','x-tab-normal', 'x-iconalign-center'],
+		// 			baseCls: 'empty',
+		// 		});
+	 //        }
+  //   	}
 	},
 	/**
 	 * Switch the tab.
