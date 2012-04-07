@@ -1,6 +1,10 @@
 /*Karazy namespace. Create if not exists.*/
 var Karazy = (Karazy) ? Karazy : {};
 
+/**
+*	Contains contants used throughout the application.
+*	
+*/
 Karazy.constants = (function() {
 
 	return {
@@ -20,6 +24,11 @@ Karazy.constants = (function() {
 		},
 		Request : {
 			CALL_WAITER : 'CALL_WAITER'
+		},
+		//regular expressions for different currencies
+		Currency : {
+			EURO: '$1,$2 €',
+			US_DOLLAR: '\$ $1.$2'
 		}
 
 	};

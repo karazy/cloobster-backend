@@ -41,7 +41,7 @@ Ext.define('EatSense.view.MyOrders', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem''>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {Product.price_calculated}€</div>" +
+				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {[this.formatPrice(Product.price_calculated)]}</div>" +
 				"<div style='clear: both;'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
@@ -74,7 +74,10 @@ Ext.define('EatSense.view.MyOrders', {
 					});
 					
 					return result;
-				}
+				},
+				formatPrice: function(price) {
+					return Karazy.util.formatPrice(price);
+				}				
 			}),
 			listeners: {
 				select: function(dv, ix, item, e) {
@@ -88,8 +91,15 @@ Ext.define('EatSense.view.MyOrders', {
 			docked: 'bottom',
 			itemId: 'myorderstotalpanel',
 			items: [{
-				xtype: 'label',				
-				tpl: '<div class="cartTotal" style="text-align:center; font-size: 1.5em;"><h1>Total {0}€</h1></div>'
+				xtype: 'label',	
+				cls: 'cartTotal',		
+				tpl: new Ext.XTemplate('<h1>Total {[this.formatPrice(values.price)]}</h1>',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+				)
 			},
 			{
 				type: 'panel',

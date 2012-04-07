@@ -27,7 +27,13 @@ Ext.define('EatSense.controller.Spot', {
 		    paidSpotDetailButton: 'spotdetail button[action=paid]',
 		    cancelAllButton: 'spotdetail button[action=cancel-all]',    
 		    switchSpotButton: 'spotdetail button[action=switch-spot]', 
-		    spotDetailStatistic: 'spotdetail #statistics'
+		    spotDetailStatistic: 'spotdetail #statistics',
+		    spotSelectionDialog: {
+		    	selector: 'spotselection',
+		    	xtype: 'spotselection',
+		    	autoCreate: true
+		    },
+		    switchSpotList: 'spotselection list'
 		    //</spot-detail>
 		},
 
@@ -58,6 +64,9 @@ Ext.define('EatSense.controller.Spot', {
 		 	},
 		 	switchSpotButton: {
 		 		tap: 'showSpotSelection'
+		 	}, 
+		 	switchSpotList: {
+		 		select: 'switchSpot'
 		 	}
 		},
 
@@ -470,14 +479,14 @@ Ext.define('EatSense.controller.Spot', {
 						sum += o.calculate();
 					}					
 				});
-				sum = Math.round(sum*100)/100;
+				sum = Karazy.util.roundPrice(sum);
 			} catch(e) {
 				console.log('failed calculating total price ' + e);
-				sum = 0
+				sum = '0.00€'
 			}
 			totalLabel.getTpl().overwrite(totalLabel.element, {'total': sum});	
 		} else {
-			totalLabel.getTpl().overwrite(totalLabel.element, {'total': '0'});
+			totalLabel.getTpl().overwrite(totalLabel.element, {'total': '0.00€'});
 		}
 	},
 	/**
@@ -712,7 +721,7 @@ Ext.define('EatSense.controller.Spot', {
 				    	    },
 				    	    failure: function(response) {
 				    	    	order.set('status', prevStatus);
-								Ext.Msg.alert(i18nPlugin.translate('error'), i18nPlugin.translate('errorSpotDetailOrderCancel', order.getProduct().get('name')), Ext.emptyFn);
+								Ext.Msg.alert(Karazy.i18n.translate.translate('error'), Karazy.i18n.translate.translate('errorSpotDetailOrderCancel', order.getProduct().get('name')), Ext.emptyFn);
 					   	    }
 						});
 					});
@@ -722,22 +731,38 @@ Ext.define('EatSense.controller.Spot', {
 
 	},
 	/**
-	*	Switch user to another table.
 	*	Shows a list of all available spots.
+	*	A select triggers switchSpot.
 	*/
 	showSpotSelection: function(button, event) {
 		var 	spotStore = Ext.StoreManager.lookup('spotStore'),
-				spotSelectionDlg = Ext.create('EatSense.view.SpotSelectionDialog');
+				spotSelectionDlg = this.getSpotSelectionDialog();
 
 		// spotSelectionDlg.getComponent('spotList').refresh();
 		spotSelectionDlg.showBy(button, 'br-tc?');
-
-
-		// spotStore.each(function(spot) {
-
-		// });
 	},
+	/**
+	*	Switch user to another table.	
+	*
+	*/
+	switchSpot: function(list, record, options) {
+		var 	activeCustomer = this.getActiveCustomer(),
+				loginCtr = this.getApplication().getController('Login');
 
+		//set new spot id
+		activeCustomer.set('spotId', record.get('id'));
+		activeCustomer.save({
+			params: {
+				pathId: loginCtr.getAccount().get('businessId')
+			},
+			failure: function(record, operation) { 
+				Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('switchSpotError'));
+			}
+		})
+
+		list.getParent().hide();
+		return false;
+	},
 	// </ACTIONS>
 
 	// <MISC VIEW ACTIONS>

@@ -125,7 +125,7 @@
 
 		
 		total = this.calculateOrdersTotal(orders);			
-		this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, [total]);
+		this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, {'price':total});
 		this.refreshCartBadgeText();
 		this.toggleCartButtons();
 		return true;
@@ -634,7 +634,7 @@
 						//refresh the order list
 						total = me.calculateOrdersTotal(myordersStore);
 						myorderlist.refresh();
-						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, [total]);
+						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 					} else {
 						payButton.disable();
 						leaveButton.enable();

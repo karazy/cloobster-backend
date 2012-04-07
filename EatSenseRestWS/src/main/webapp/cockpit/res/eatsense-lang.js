@@ -42,6 +42,7 @@ var translation = {
 		"cancelAllOrdersButton" : "Alles Stornieren",
 		"paidButton" : "Bezahlt",
 		"spotSelectionTitle" : "Tisch auswählen",
+		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",
 		//requests
 		"requestMsgboxTitle" : "Kundenwunsch",
 		//constants

@@ -20,9 +20,10 @@ Ext.define('EatSense.model.Product', {
 			type : 'string'
 		}, {
 			name : 'price',
-			type : 'number'
+			type: 'number'
 		}, { //dont change, gets set automatically
 			name: 'price_calculated',
+			persist: false,
 			type: 'number'
 		}],		
 		 associations: [{
@@ -64,7 +65,8 @@ Ext.define('EatSense.model.Product', {
 		if(amount) {
 			_amount = amount;
 		}
-		_total = Math.round(_total*_amount*100)/100;
+		// _total = Karazy.util.roundPrice(_total*_amount);
+		_total = _total*_amount;
 		this.set('price_calculated', _total);
 		return _total;
 	},

@@ -6951,27 +6951,33 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /* line 168, app-default.scss */
+.cartTotal {
+  text-align: center;
+  font-size: 1.5em;
+}
+
+/* line 173, app-default.scss */
 .cartoverviewitem {
   padding: 5px;
   margin: 5px;
   border-radius: 0.3em;
   background-color: #FFD073;
 }
-/* line 174, app-default.scss */
+/* line 179, app-default.scss */
 .cartoverviewitem .name {
   width: 50%;
 }
-/* line 177, app-default.scss */
+/* line 182, app-default.scss */
 .cartoverviewitem .name h2 {
   float: left;
   padding-left: 10px;
   padding-right: 5px;
 }
-/* line 183, app-default.scss */
+/* line 188, app-default.scss */
 .cartoverviewitem .name div.amount {
   float: left;
 }
-/* line 187, app-default.scss */
+/* line 192, app-default.scss */
 .cartoverviewitem .name div.price {
   /*position: absolute;*/
   right: 0;
@@ -6980,35 +6986,35 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-right: 10px;
   padding-left: 10px;
 }
-/* line 197, app-default.scss */
+/* line 202, app-default.scss */
 .cartoverviewitem .edit {
   top: 0;
   margin-right: 10px;
 }
-/* line 202, app-default.scss */
+/* line 207, app-default.scss */
 .cartoverviewitem .cancel {
   top: 0;
   margin-right: 5px;
 }
 
-/* line 208, app-default.scss */
+/* line 213, app-default.scss */
 .cartoverviewitem-name {
   width: 70%;
   margin-bottom: 20px;
 }
 
-/* line 213, app-default.scss */
+/* line 218, app-default.scss */
 .cartoverviewitem-edit {
   top: 0;
 }
 
-/* line 217, app-default.scss */
+/* line 222, app-default.scss */
 .cartoverviewitem-cancel {
   top: 0;
   margin-right: 5px;
 }
 
-/* line 223, app-default.scss */
+/* line 228, app-default.scss */
 .menuCategoryItem {
   float: left;
   width: 15%;
@@ -7017,7 +7023,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /*
 *	OrderDetail Panel
 */
-/* line 232, app-default.scss */
+/* line 237, app-default.scss */
 .orderdetail-floating {
   border-radius: 0.3em !important;
   padding: 6px !important;
@@ -7028,7 +7034,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /*
 * Dashboard
 */
-/* line 243, app-default.scss */
+/* line 248, app-default.scss */
 .dashboard-button {
   width: 90px !important;
   height: 90px !important;
@@ -7042,7 +7048,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-bottom: 5px;
 }
 
-/* line 256, app-default.scss */
+/* line 261, app-default.scss */
 .dashboard-button-pressed {
   width: 90px !important;
   height: 90px !important;
@@ -7050,7 +7056,7 @@ input[type="search"]::-webkit-search-cancel-button {
   border-color: blue;
 }
 
-/* line 263, app-default.scss */
+/* line 268, app-default.scss */
 .dashboard-button-label {
   font-size: 0.6em;
   position: absolute;
@@ -7058,14 +7064,14 @@ input[type="search"]::-webkit-search-cancel-button {
   bottom: 2px;
 }
 
-/* line 279, app-default.scss */
+/* line 284, app-default.scss */
 .checkInButton {
   height: 110px !important;
   background-image: url("../images/landing.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 285, app-default.scss */
+/* line 290, app-default.scss */
 .checkInButton-label {
   font-size: 0.6em;
   position: absolute;
@@ -7079,25 +7085,25 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 90px;
 }
 
-/* line 298, app-default.scss */
+/* line 303, app-default.scss */
 .currentDealsButton {
   background-image: url("../images/club1.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 303, app-default.scss */
+/* line 308, app-default.scss */
 .newRestaurantsButton {
   font-size: 0.9em !important;
   background-image: url("../images/club4.JPG") !important;
   -webkit-background-size: 95% 80%;
 }
 
-/* line 312, app-default.scss */
+/* line 317, app-default.scss */
 .x-tab .x-button-icon.cart {
   -webkit-mask-image: url("../images/cart.png");
 }
 
-/* line 316, app-default.scss */
+/* line 321, app-default.scss */
 .x-tab .x-button-icon.requests {
   -webkit-mask-image: url("../images/volume.png");
 }

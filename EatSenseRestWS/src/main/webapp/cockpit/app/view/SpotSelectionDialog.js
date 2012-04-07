@@ -19,7 +19,8 @@ Ext.define('EatSense.view.SpotSelectionDialog', {
 			xtype: 'list',
 			store: 'spotStore',
 			itemId: 'spotList',
-			itemTpl: '{name}'
+			itemTpl: '{name}',
+			allowDeselect: true,
 		}]
 	}
 });

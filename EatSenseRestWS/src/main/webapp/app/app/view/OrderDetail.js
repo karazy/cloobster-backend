@@ -57,7 +57,14 @@ Ext.define('EatSense.view.OrderDetail', {
 					xtype: 'label',
 					cls: 'productPrice',
 					itemId : 'prodPriceLabel',
-					tpl: '{[values.product.calculate(values.amount)]}'
+					tpl: new Ext.XTemplate(
+					'{[this.formatPrice(values.product.calculate(values.amount))]}',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+					)
 				} 
 				]
 			}]

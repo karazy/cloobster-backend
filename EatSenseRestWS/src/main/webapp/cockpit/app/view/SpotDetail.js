@@ -96,7 +96,13 @@ Ext.define('EatSense.view.SpotDetail', {
 						{
 							xtype: 'label',
 							itemId: 'total',
-							tpl: '<p>Total: {total}€</p>'
+							tpl: new Ext.XTemplate('<p>Total: {[this.formatPrice(values.total)]}</p>',
+								{
+									formatPrice: function(price) {
+										return Karazy.util.formatPrice(price);
+									}
+								}
+							)
 						}
 					]
 				},

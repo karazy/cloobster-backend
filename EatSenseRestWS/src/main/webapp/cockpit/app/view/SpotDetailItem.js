@@ -19,7 +19,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			cls: 'spotdetailitem-order',	
 			tpl: new Ext.XTemplate(
 				"<h2 >{Product.name}</h2>" +
-				"<div class='price'>{amount} - {Product.price_calculated}€</div>" +
+				"<div class='price'>{amount} - {[this.formatPrice(values.Product.price_calculated)]}</div>" +
 				"<div class='choices'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
@@ -51,6 +51,9 @@ Ext.define('EatSense.view.SpotDetailItem', {
 					});
 					
 					return result;
+				},
+				formatPrice: function(price) {
+					return Karazy.util.formatPrice(price);
 				}
 			})
 		},
