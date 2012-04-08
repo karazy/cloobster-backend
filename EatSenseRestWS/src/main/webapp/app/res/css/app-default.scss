@@ -57,6 +57,13 @@ $base-gradient: 'matte';
 
 }
 
+.productdetail-floating {
+	border-radius: 0.3em !important;
+	padding: 6px !important;
+	background-color: #86B22D !important;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
+}
+
 .productDetailPanel {
 	background-color: #FFBF40;
 	//background-image: -webkit-linear-gradient(bottom, rgb(53,127,184) 4%, rgb(26,214,214) 87%);
@@ -125,15 +132,15 @@ $base-gradient: 'matte';
 	padding: 5px;
 
 	.choice {
-		font-size: 0.8em;
+		font-size: 0.9em;
 	}	
 
 	.option {
-		font-size: 0.7em;
+		font-size: 0.8em;
 	}
 
 	.option-panel {
-		margin-bottom: 5px;
+		padding: 5px 0px;
 	}
 }
 

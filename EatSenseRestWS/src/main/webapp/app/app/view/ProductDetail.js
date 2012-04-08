@@ -12,11 +12,24 @@ Ext.define('EatSense.view.ProductDetail', {
     	scrollable : 'vertical',
     	modal: true,
 		hideOnMaskTap: true,
-		top: '8%',
-		left: '5%',
-		right: '5%',
-		bottom: '5%',
+		top: '5%',
+		left: '3%',
+		right: '3%',
+		bottom: '3%',
+		floatingCls: 'productdetail-floating',
 		items : [
+		{
+			xtype: 'titlebar',
+			docked: 'top',
+			// items: [
+			// {
+			// 		xtype: 'button',
+			// 		action: 'close',
+			// 		baseCls: 'productDetail-close',
+			// 		text: 'X',
+			// 		align: 'right'
+			// }]
+		},
 		{
 			xtype : 'panel',
 			cls: 'productDetailPanel',
@@ -25,19 +38,12 @@ Ext.define('EatSense.view.ProductDetail', {
 			},
 			items : [ 
 			{
-					xtype: 'button',
-					action: 'close',
-					baseCls: 'productDetail-close',
-					text: 'X'
-			},
-			{
 				xtype : 'label',
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
 				tpl: new Ext.XTemplate(
-				 	'<h2>{product.data.name}</h2>'+
-				 	'<div class="price">{[this.formatPrice(values.product.calculate(values.amount))]}</div>'+
-				 	'<div style="clear: both;">'+
+				 	// '<div class="price">{[this.formatPrice(values.product.calculate(values.amount))]}</div>'+
+				 	// '<div style="clear: both;">'+
 				 	'<p class="desc">{product.data.longDesc}</p>',
 				 	{
 						formatPrice: function(price) {
@@ -54,22 +60,33 @@ Ext.define('EatSense.view.ProductDetail', {
 				},
 				items : [ {
 					xtype : 'spinnerfield',
-					increment : 1,
 					itemId : 'productAmountSpinner',
-					style : 'background-color:white;',
+					increment : 1,
 					value : 1,
-					width: 200,
 					minValue : '1',
 					maxValue : '10',
-					height: '25px',
 					cycle : true,
-				}, 
+				},
+				{
+					xtype: 'label',
+					cls: 'productPrice',
+					itemId : 'prodPriceLabel',
+					tpl: new Ext.XTemplate(
+					'{[this.formatPrice(values.product.calculate(values.amount))]}',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+					)
+				} 
 				]
 			}]
 		}, 
 		{
 			xtype : 'formpanel',
 			itemId : 'choicesPanel',
+			cls: 'choice-panel',
 			layout: 'vbox',
 			minHeight: '200px',
 			scrollable : false,
@@ -85,11 +102,17 @@ Ext.define('EatSense.view.ProductDetail', {
 			items: [
 				{
 					xtype: 'button',
-					ui: 'confirm',
+					text: Karazy.i18n.translate('putIntoCartButton'),
+					// ui: 'confirm',
 					// icon: '../app/res/images/into_cart.png',
-					iconCls: 'cart-button',
-					// iconAlign: 'centered',
+					// iconCls: 'cart-button',
 					action: 'cart'
+				}, 
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					action: 'close',
+					text: Karazy.i18n.translate('close')
 				}
 			]
 		}

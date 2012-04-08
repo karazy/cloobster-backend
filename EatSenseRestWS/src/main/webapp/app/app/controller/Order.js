@@ -91,21 +91,13 @@
              undoEditButton: {
              	tap: 'closeOrderDetail'
              }
-		},
-		/**
-		 * Tooltip menu, shown when user taps an order
-		 */
-		// tooltip : ''				
+		}		
 	},
 	init: function() {
 		
 		//store retrieved models
 		 var models = {};
     	 this.models = models;
-    	 
-    	 //create tooltip for reuse
-    	 // var tooltip = Ext.create('EatSense.util.CartToolTip');
-    	 // this.setTooltip(tooltip);
 	},
 	/**
 	 * Load cart orders.
@@ -130,16 +122,6 @@
 		this.toggleCartButtons();
 		return true;
 	},
-	/**
-	 * Switch to cart. Method gets called after editing an order.
-	 */
-	showCart: function() {
-		var orderlist = this.getOrderlist();
-		
-		orderlist.refresh();
-		this.switchView(this.getCartoverview(), i18nPlugin.translate('cartviewTitle'), null, 'right');
-	},
-	
 	/**
 	 * Show menu.
 	 */
@@ -293,72 +275,6 @@
 	}
 	},
 	/**
-	 * Listener for itemTap event of orderlist.
-	 * Show a tooltip with buttons to edit, delete the selected item.
-	 */
-	 //TODO remove
-	cartItemContextMenu: function(dv, number, dataitem, model, event, opts) {
-		console.log('Cart Controller -> cartItemContextMenu');
-		var x = event.pageX,
-		y = event.pageY,
-		tooltip = this.getTooltip(),
-		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
-		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
-		productName = model.getProduct().get('name'),
-		windowX = Ext.Viewport.getWindowWidth();
-		
-		tooltip.setSelectedProduct(model);
-		
-		dv.deselect(tooltip.getSelectedProduct());
-		//position tooltip where tap happened
-		//- dataitem.getHeight()/2
-		tooltip.setTop(y);		
-		tooltip.setLeft(((tooltip.getWidth()+x+5)<windowX)? x : windowX-tooltip.getWidth()-5 );
-		
-		//edit item
-		tooltip.getComponent('editCartItem').addListener('tap', function() {
-			tooltip.hide();
-			this.showOrderDetail(dv, tooltip.getSelectedProduct());
-		}, this);
-		//dump item
-		tooltip.getComponent('deleteCartItem').addListener('tap', function() {
-			tooltip.hide();
-			//delete item
-			orders.remove(tooltip.getSelectedProduct());
-			
-			Ext.Ajax.request({				
-	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+tooltip.getSelectedProduct().getId(),
-	    	    method: 'DELETE',    	    
-	    	    params: {
-	    	    	'checkInId' : activeCheckIn.get('userId'),
-	    	    }
-	    	});
-			
-			this.refreshCart();
-			
-//			if(orders.data.length > 0) {
-//				orderlist.refresh();
-//			} else {
-//				this.showMenu();
-//			}
-			
-			//show success message and switch to next view
-			Ext.Msg.show({
-				title : i18nPlugin.translate('orderRemoved'),
-				message : productName,
-				buttons : []
-			});
-			//show short alert and then hide
-			Ext.defer((function() {
-				Ext.Msg.hide();
-			}), globalConf.msgboxHideTimeout, this);
-
-		}, this);
-		
-		tooltip.show();
-		this.getMain().add(tooltip);
-	},
-	/**
 	 * Displays detailed information for an existing order (e.g. Burger)
 	 * @param dataview
 	 * @param order
@@ -401,40 +317,40 @@
 					 optionType = 'Ext.field.Checkbox';					 
 				 }
 				
-				 choice.options().each(function(opt) {
-					 var checkbox = Ext.create(optionType, {
-						 name : choice.data.id,
-						 labelWidth: '80%',
-						 label : opt.get('name'),
-						 checked: opt.get('selected'),
-						 cls: 'option'
-					 }, this);
+				choice.options().each(function(opt) {
+					var checkbox = Ext.create(optionType, {
+						name : choice.data.id,
+						labelWidth: '80%',
+						label : opt.get('name'),
+						checked: opt.get('selected'),
+						cls: 'option'
+					}, this);
 					 
-					 checkbox.addListener('check',function(cbox) {
-						 console.log('check');
-						 if(cbox.isXType('radiofield',true)) {
-							 choice.options().each(function(innerOpt) {
-								 innerOpt.set('selected', false);
-							 });
-						 };
-						 opt.set('selected', true);
-						 this.recalculate(this.models.activeOrder);
-					 },this);
-					 checkbox.addListener('uncheck',function(cbox) {
-						 console.log('uncheck');
-						 if(cbox.isXType('checkboxfield',true)) {
+					checkbox.addListener('check',function(cbox) {
+						console.log('check');
+						if(cbox.isXType('radiofield',true)) {
+							choice.options().each(function(innerOpt) {
+								innerOpt.set('selected', false);
+							});
+						};
+						opt.set('selected', true);
+						this.recalculate(this.models.activeOrder);
+					},this);
+					checkbox.addListener('uncheck',function(cbox) {
+						console.log('uncheck');
+						if(cbox.isXType('checkboxfield',true)) {
 							 opt.set('selected', false);
-						 } else {
+						} else {
 							 //don't allow radio buttons to be deselected
 							 cbox.setChecked(true);
-						 }
+						}
 						 this.recalculate(this.models.activeOrder);								 
-					 },this);
+					},this);
 					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
-				 },this);	 
+				},this);	 
 				 choicesPanel.add(optionsDetailPanel);
-			 },this);
-		 }
+			},this);
+		}
 		 
 		 
 		 //insert comment field after options have been added so it is positioned correctly
@@ -447,10 +363,6 @@
 				cls: 'choice'
 			}
 		);
-		 // this.menuBackBtContext = this.editOrder;
-
-		 // this.switchView(detail, Karazy.util.shorten(product.get('name'), 15, true), i18nPlugin.translate('back'), 'left');
-		//add to viewport. otherwise Ext.MessageBox will show behind detail panel
 		Ext.Viewport.add(detail);
 		detail.getScrollable().getScroller().scrollToTop();
 		detail.show();
@@ -491,7 +403,6 @@
 			detail.hide();
 			this.refreshCart();
 			return true;
-			// this.showCart();
 		} else {
 			//show validation error
 			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn, detail);
@@ -545,25 +456,6 @@
 		this.refreshCart();
 		detail.hide();		
 	},
-	/**
-	 * Switches to another view
-	 * @param view
-	 * 		new view
-	 * @param title
-	 * 			Toolbar title
-	 * @param labelBackBt
-	 * 			label of back button. If <code>null</code> back button will be hidden.
-	 * @param direction
-	 * 			Direction for switch animation.
-	 */
-	switchView: function(view, title, labelBackBt, direction) {
-		console.log('Cart Controller -> switchView');
-		var panel = this.getCartview();
-    	this.getTopToolbar().setTitle(title);
-    	(labelBackBt == null || labelBackBt.length == 0) ? this.hideBackButton() : this.showBackButton(labelBackBt);
-    	panel.switchView(view,direction);
-	},
-	
 	/**
 	 * Called when the product spinner value changes. 
 	 * Recalculates the price.
@@ -873,38 +765,3 @@
 		return myordersStore.getCount();		
 	}
 });
-
-// Ext.define('EatSense.util.CartToolTip', {
-// 	extend: 'Ext.Panel',
-// 	xtype: 'cartToolTip',
-// 	config: {
-// 		layout: {
-// 			type: 'hbox'
-// 		},
-// 		centered: true,
-// 		width: 150,
-// 		height:70,
-// 		modal: true,
-// 		selectedProduct : null,
-// 		hideOnMaskTap: true,
-// 		defaults : {
-// 			margin: 5
-// 		},
-// 		items: [ {
-// 			xtype: 'button',
-// 			itemId: 'editCartItem',
-// 			iconCls : 'compose',
-// 			iconMask : true,
-// 			flex: 1,
-// 		}, {
-// 			xtype: 'spacer',
-// 			width: 7
-// 		} ,{
-// 			xtype: 'button',
-// 			itemId: 'deleteCartItem',
-// 			iconCls : 'trash',
-// 			iconMask : true,
-// 			flex: 1	,
-// 		}]
-// 	}	
-// });

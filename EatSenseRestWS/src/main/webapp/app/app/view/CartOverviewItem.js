@@ -17,10 +17,6 @@ Ext.define('EatSense.view.CartOverviewItem', {
 					}
 				}
 				),
-				
-				// "<h2>{Product.name}</h2>" +
-				// "<div class='amount'>({amount}x)</div>" + 
-				// "<div class='price'>{Product.price_calculated}€</div>",
 			cls: 'name'
 		},
 

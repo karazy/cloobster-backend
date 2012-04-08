@@ -45,33 +45,10 @@ Ext.define('EatSense.view.Cart', {
 				xtype: 'cartoverview',
 				itemId: 'cartoverview',
 				layout: 'fit'
-			}, 
-			// {
-			// 	xtype: 'productdetail',
-			// 	itemId : 'cartProductdetail',
-			// 	layout: 'vbox'
-			// }			        
+			}		        
 			]
 			
 		} ]
-	},
-	
-	removeItem: function() {
-		console.log('disclosure');
-	},
-	
-	/**
-	 * Change the direction of the slide animation.
-	 * @param direction
-	 * 			left or right
-	 */
-	switchView : function(view, direction){
-		var cardpanel = this.getComponent('cartCardPanel');
-		cardpanel.getLayout().setAnimation({
-			 type: 'slide',
-	         direction: direction
-		});
-		cardpanel.setActiveItem(view);
 	},
 	/**
 	 * Show a loading screen

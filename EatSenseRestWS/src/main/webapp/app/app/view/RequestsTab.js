@@ -13,10 +13,6 @@ Ext.define('EatSense.view.RequestsTab', {
 		iconCls : 'requests',
 		title: Karazy.i18n.translate('requestsButton'),
 		iconMask : true,
-		// top: '30%',
-		// left: '30%',
-		// right: '30%',
-		// bottom: '30%',
 		items : [
 			{
 			xtype : 'titlebar',
@@ -26,7 +22,8 @@ Ext.define('EatSense.view.RequestsTab', {
 			{
 				xtype: 'button',
 				text: 'Bedienung rufen',
-				action: 'waiter'
+				action: 'waiter',
+				ui: 'action'
 			}
 		]
 	}
