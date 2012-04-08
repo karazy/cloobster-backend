@@ -91,8 +91,11 @@ $base-gradient: 'matte';
 	
 	desc {
 		font-size:0.7em;
-	}
-	
+	}	
+}
+
+.x-button .x-button-icon.cart-button {
+	background-image: inline-image('../images/into_cart.png');
 }
 
 .productPrice {
@@ -281,9 +284,9 @@ $base-gradient: 'matte';
 	
 }
 
-.checkInButton {	
+.checkInButton {
 	height: 110px !important;
-	background-image: url('../images/landing.JPG') !important;
+	background-image: inline-image('../images/landing.jpg') !important;
 	-webkit-background-size: 95% 80%;
 }
 
@@ -292,7 +295,7 @@ $base-gradient: 'matte';
 	position: absolute;	
 	right: 2px;
 	bottom: 2px;
-	background-image: url('../images/camera-icon.png');
+	background-image: inline-image('../images/camera-icon.png');
 	-webkit-background-size: 10px 10px;
 	background-position: 10px;
 	background-repeat: no-repeat;
@@ -301,23 +304,23 @@ $base-gradient: 'matte';
 }
 
 .currentDealsButton {	
-	background-image: url('../images/club1.JPG') !important;
+	background-image: inline-image('../images/club1.JPG') !important;
 	-webkit-background-size: 95% 80%;
 }
 
 .newRestaurantsButton {
 	font-size: 0.9em !important;
 	
-	background-image: url('../images/club4.JPG') !important;
+	background-image: inline-image('../images/club4.JPG') !important;
 	-webkit-background-size: 95% 80%;
 	
 }
 
 
 .x-tab .x-button-icon.cart {
-	-webkit-mask-image: url('../images/cart.png');
+	-webkit-mask-image: inline-image('../images/cart.png');
 }
 
 .x-tab .x-button-icon.requests {
-	-webkit-mask-image: url('../images/volume.png');
+	-webkit-mask-image: inline-image('../images/volume.png');
 }

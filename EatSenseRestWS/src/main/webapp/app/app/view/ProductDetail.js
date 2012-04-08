@@ -86,8 +86,9 @@ Ext.define('EatSense.view.ProductDetail', {
 				{
 					xtype: 'button',
 					ui: 'confirm',
-					icon: '../app/res/images/into_cart.png',
-					iconAlign: 'centered',
+					// icon: '../app/res/images/into_cart.png',
+					iconCls: 'cart-button',
+					// iconAlign: 'centered',
 					action: 'cart'
 				}
 			]

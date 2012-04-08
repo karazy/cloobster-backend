@@ -13,7 +13,6 @@ Ext.define('EatSense.view.CartOverviewItem', {
 				"{Product.name} ({amount}x) {[this.formatPrice(values.Product.price_calculated)]}",
 				{
 					formatPrice: function(price) {
-						console.log('CartOverviewItem formatPrice');
 						return Karazy.util.formatPrice(price);
 					}
 				}
