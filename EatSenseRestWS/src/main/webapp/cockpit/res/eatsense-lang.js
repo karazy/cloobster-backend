@@ -45,12 +45,13 @@ var translation = {
 		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",
 		//requests
 		"requestMsgboxTitle" : "Kundenwunsch",
+		"requestDismiss" : "Verwerfen",
 		//constants
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",
 		"CHECKEDIN" : "Checked-In",
 		"PAYMENT_REQUEST" : "Bezahlen",
-		"CALL_WAITER" : "Bitte eine Bedienung zu Tisch {0}."
+		"CALL_WAITER" : "{0} möchte eine Bedienung sprechen."
 	}
 
 };

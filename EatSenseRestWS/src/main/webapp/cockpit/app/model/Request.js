@@ -16,10 +16,19 @@ Ext.define('EatSense.model.Request', {
 		},
 		{
 			name: 'checkInId'
-		}],
+		},
+		{
+			name: 'spotId'
+		},
+		],
+		associations : {
+			type : 'hasOne',
+			model : 'EatSense.model.CheckIn',
+		},
 		proxy: {
 			type: 'rest',
 			url: '/b/businesses/{pathId}/requests'
-		}
+		},
+		syncRemovedRecords: true
 	}
 });

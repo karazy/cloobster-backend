@@ -5,7 +5,7 @@
 */
 Ext.define('EatSense.controller.Spot', {
 	extend: 'Ext.app.Controller',
-	requires: ['EatSense.view.Main', 'EatSense.view.SpotSelectionDialog'],
+	requires: ['EatSense.view.Main', 'EatSense.view.SpotSelectionDialog', 'EatSense.view.CustomerRequestDialog'],
 	config: {
 		refs: {
 			spotitem: 'spotitem button',
@@ -33,7 +33,13 @@ Ext.define('EatSense.controller.Spot', {
 		    	xtype: 'spotselection',
 		    	autoCreate: true
 		    },
-		    switchSpotList: 'spotselection list'
+		    switchSpotList: 'spotselection list',
+		    customerRequestDialog: {
+		    	selector: 'customerrequest',
+		    	xtype: 'customerrequest',
+		    	autoCreate: true
+		    },
+		    dismissRequestsButton: 'customerrequest button[action=dismiss]'
 		    //</spot-detail>
 		},
 
@@ -67,6 +73,9 @@ Ext.define('EatSense.controller.Spot', {
 		 	}, 
 		 	switchSpotList: {
 		 		select: 'switchSpot'
+		 	},
+		 	dismissRequestsButton : {
+		 		tap: 'deleteCustomerRequests'
 		 	}
 		},
 
@@ -129,7 +138,9 @@ Ext.define('EatSense.controller.Spot', {
 				checkInList = detail.down('#checkInList'),
 				data = button.getParent().getRecord(),
 				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				titlebar = detail.down('titlebar');
+				restaurantId = loginCtr.getAccount().get('businessId'),
+				titlebar = detail.down('titlebar'),
+				requestStore = Ext.StoreManager.lookup('requestStore');
 
 		//add listeners for channel messages
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
@@ -141,7 +152,7 @@ Ext.define('EatSense.controller.Spot', {
 		//load checkins and orders and set lists
 		checkInStore.load({
 			params: {
-				pathId: loginCtr.getAccount().get('businessId'),
+				pathId: restaurantId,
 				spotId: data.get('id')
 			},
 			 callback: function(records, operation, success) {
@@ -149,6 +160,7 @@ Ext.define('EatSense.controller.Spot', {
 			 		me.setActiveSpot(data);
 			 		titlebar.setTitle(data.get('name'));
 			 		if(records.length > 0) {
+			 			me.loadRequests();
 			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
 			 			me.getSpotDetailCustomerList().select(0);
 			 		}
@@ -159,9 +171,38 @@ Ext.define('EatSense.controller.Spot', {
 			 scope: this
 		});
 
+
 		//show detail view
 		Ext.Viewport.add(detail);
 		detail.show();
+	},
+
+	loadRequests: function() {
+		var 	me = this,
+				loginCtr = this.getApplication().getController('Login'),
+				restaurantId = loginCtr.getAccount().get('businessId'),
+				requestStore = Ext.StoreManager.lookup('requestStore'),
+				checkInStore = Ext.StoreManager.lookup('checkInStore'),
+				assocCheckIn;
+
+		//check if customer requests for this spot exist and display them
+		requestStore.load({
+			params: {
+				pathId: restaurantId,
+				spotId: me.getActiveSpot().get('id')
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) { 
+			 		if(records.length > 0) {
+			 			Ext.Array.each(records, function(request) {
+			 				assocCheckIn = checkInStore.getById(request.get('checkInId'));
+			 				request.setCheckIn(assocCheckIn);
+			 			});
+			 			me.showCustomerRequestMessages(records);
+			 		}		
+			 	}				
+			 }
+		});
 	},
 
 	/**
@@ -177,8 +218,7 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				orderStore = Ext.StoreManager.lookup('orderStore'),
-				billStore = Ext.StoreManager.lookup('billStore'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
+				billStore = Ext.StoreManager.lookup('billStore'),				
 				detail = me.getSpotDetail(),
 				restaurantId = loginCtr.getAccount().get('businessId'),
 				bill,
@@ -231,23 +271,6 @@ Ext.define('EatSense.controller.Spot', {
 			me.updateCustomerPaymentMethod();
 			paidButton.disable();
 		}
-
-		//check if customer requests exist and display them
-		requestStore.load({
-			params: {
-				pathId: restaurantId,
-				checkInId: record.get('id'),
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 
-			 		if(records.length > 0) {
-			 			//only one customer request should exist
-			 			me.showCustomerRequestMessage(records[0]);
-			 		}		
-			 	}				
-			 },
-			 scope: this
-		});
 	},
 
 	// </LOAD AND SHOW DATA>
@@ -419,16 +442,33 @@ Ext.define('EatSense.controller.Spot', {
 	},
 	/**
 	*	Processes the given request and shows it when the active customer issued this request.
+	*	@param action
 	*
+	*	@param request
 	*/
 	processCustomerRequest: function(action, request) {
 		var 	me = this,
-				detail = me.getSpotDetail();
+				detail = me.getSpotDetail(),
+				requestModel = Ext.create('EatSense.model.Request'),
+				requestStore = Ext.StoreManager.lookup('requestStore'),
+				checkInStore = Ext.StoreManager.lookup('checkInStore'),
+				assocCheckIn;
+
+		requestModel.setData(request);
+		//this is no new object!
+		requestModel.phantom = false;
+		assocCheckIn = checkInStore.getById(requestModel.get('checkInId'));
+		requestModel.setCheckIn(assocCheckIn);
 
 		if(!detail.isHidden() && me.getActiveCustomer()) {
-			if(request.checkInId == me.getActiveCustomer().get('id')) {
+			//only show if the correct spot is active
+			if(request.spotId == me.getActiveSpot().get('id')) {
 				if(action == 'new') {
-					me.showCustomerRequestMessage(request);
+					requestStore.add(requestModel);
+					me.showCustomerRequestMessages(requestModel);
+				} else if(action == 'delete') {
+					// requestModel.erase();
+					requestStore.remove(requestStore.getById(requestModel.get('id')));
 				}
 			}
 		}
@@ -509,22 +549,73 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 	/**
-	*	Displays the given request as a popup message.
+	*	Displays the given requests in a popup message.
 	*	
 	*/
-	showCustomerRequestMessage: function(request) {
-		var 	displayMessage;
+	showCustomerRequestMessages: function(requests) {
+		var 	me = this,
+				displayMessage = "",
+				checkInStore = Ext.StoreManager.lookup('checkInStore'),
+				requestStore = Ext.StoreManager.lookup('requestStore'),
+				customer,
+				dialog = this.getCustomerRequestDialog();
 
-		if(request.type == Karazy.constants.Request.CALL_WAITER) {
-			displayMessage = Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, me.getActiveSpot().get('name'));
-		}
+				//show detail view
+		Ext.Viewport.add(dialog);
+		dialog.show();
 
-		if(displayMessage) {
-			Ext.Msg.alert(i18nPlugin.translate('requestMsgboxTitle'), displayMessage, Ext.emptyFn);	
-		} else {
-			console.log('no invalid request object');
-		}
-		
+		// Ext.Array.each(requests, function(request, index) {
+		// 	customer = checkInStore.getById(request.get('checkInId'));
+
+		// 	if(request.get('type') == Karazy.constants.Request.CALL_WAITER && customer) {
+		// 		displayMessage += Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, customer.get('nickname')) + '<br/>';
+		// 	}
+		// });
+
+		// if(displayMessage) {
+		// 	Ext.Msg.alert(i18nPlugin.translate('requestMsgboxTitle'), displayMessage, function() {
+		// 		me.deleteCustomerRequests(requests);
+		// 		// requestStore.removeAll();
+		// 		// requestStore.sync();
+		// 	});	
+		// } else {
+		// 	console.log('no invalid request object');
+		// }
+	},
+	/**
+	* Deletes given customer requests.
+	*/
+	deleteCustomerRequests: function(requests) {
+		var 	loginCtr = this.getApplication().getController('Login'),
+				requestStore = Ext.StoreManager.lookup('requestStore');
+
+		requestStore.removeAll();
+		requestStore.sync();
+
+		this.getCustomerRequestDialog().hide();
+
+		// requestStore.each(function(request) {
+		// 	request.erase({
+		// 		params: {
+		// 			pathId: loginCtr.getAccount().get('businessId')
+		// 		},
+		// 		callback: function(record, operation) {
+		// 			console.log(operation.error);
+		// 		}
+		// 	});
+		// });
+
+
+		// Ext.Array.each(requests, function(request, index) {
+		// 	request.erase({
+		// 		params: {
+		// 			pathId: loginCtr.getAccount().get('businessId')
+		// 		},
+		// 		callback: function(record, operation) {
+		// 			console.log(operation.error);
+		// 		}
+		// 	});
+		// });
 	},
 	//</VIEW UPDATE METHODS>
 
