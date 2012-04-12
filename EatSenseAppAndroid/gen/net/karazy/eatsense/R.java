@@ -38,9 +38,17 @@ public final class R {
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
         public static final int icon=0x7f020001;
-        public static final int launcher_icon=0x7f020002;
-        public static final int share_via_barcode=0x7f020003;
-        public static final int shopper_icon=0x7f020004;
+        public static final int icon36=0x7f020002;
+        public static final int icon36_2=0x7f020003;
+        public static final int icon48=0x7f020004;
+        public static final int icon48_2=0x7f020005;
+        public static final int icon72_android=0x7f020006;
+        public static final int icon72android_2=0x7f020007;
+        public static final int icon96=0x7f020008;
+        public static final int icon96_2=0x7f020009;
+        public static final int launcher_icon=0x7f02000a;
+        public static final int share_via_barcode=0x7f02000b;
+        public static final int shopper_icon=0x7f02000c;
     }
     public static final class id {
         /**  Messages IDs 

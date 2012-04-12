@@ -44,7 +44,7 @@ Ext.define('EatSense.controller.Message', {
 	*	@param message	
 	*		A message consists of 3 fields
 	*			type	- a type like spot
-	*			action	- an action like update, new ...
+	*			action	- an action like update, new ... 
 	*			content - the data
 	*/
 	broadcastMessage: function(message) {

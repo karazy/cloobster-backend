@@ -7,6 +7,7 @@ var translation = {
 		"back" : "zurück",
 		"barcode" : "Barcode",
 		"error" : "Fehler",
+		"close" : "Schliessen",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
 		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
@@ -35,11 +36,21 @@ var translation = {
 		"status" : "Status",
 		"statistic" : "Infos",
 		"processOrdersFirst" : "Bitte arbeite zuerst alle Bestellungen ab.",
-		//status
+		"cancelAllOrders" : "Möchtest du alle Bestellungen und diesen Gast entfernen?",
+		"errorSpotDetailOrderCancel" : "Bestellung {0} konnte nicht storniert werden.",
+		"switchSpotButton" : "Tisch wechseln",
+		"cancelAllOrdersButton" : "Alles Stornieren",
+		"paidButton" : "Bezahlt",
+		"spotSelectionTitle" : "Tisch auswählen",
+		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",
+		//requests
+		"requestMsgboxTitle" : "Kundenwunsch",
+		//constants
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",
 		"CHECKEDIN" : "Checked-In",
-		"PAYMENT_REQUEST" : "Bezahlen"
+		"PAYMENT_REQUEST" : "Bezahlen",
+		"CALL_WAITER" : "Bitte eine Bedienung zu Tisch {0}."
 	}
 
 };

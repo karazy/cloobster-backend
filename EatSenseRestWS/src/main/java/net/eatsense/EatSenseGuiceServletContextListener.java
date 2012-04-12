@@ -10,11 +10,11 @@ import net.eatsense.domain.Spot;
 import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ChannelResource;
-import net.eatsense.restws.CheckInResource;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.business.BusinessesResource;
+import net.eatsense.restws.customer.CheckInsResource;
 
 import org.apache.bval.guice.ValidationModule;
 
@@ -52,7 +52,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(net.eatsense.restws.customer.BusinessesResource.class);
 						bind(NicknameResource.class);
 						bind(SpotResource.class);
-						bind(CheckInResource.class);
+						bind(CheckInsResource.class);
 						bind(CronResource.class);
 						bind(AccountResource.class);
 						bind(ChannelResource.class);
@@ -63,9 +63,9 @@ public class EatSenseGuiceServletContextListener extends
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*accounts(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*checkins(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
