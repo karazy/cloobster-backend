@@ -44,7 +44,7 @@
      }
      */
     var cordovaInit = false;
-    
+
     //Used for debugging
     window.onerror = function(error) { 
         console.log(error);
@@ -64,7 +64,7 @@
         console.log('onDeviceReady start');
         cordovaInit = true;
         try {
-            EatSense.app.mainLaunch();
+            eatSense.app.mainLaunch();
         }
         catch(e) {
             console.log('error ' + e);
