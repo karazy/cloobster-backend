@@ -8,6 +8,10 @@ Ext.define('EatSense.model.Request', {
 	config: {
 		fields: [
 		{
+			name: 'id',
+			type: 'number'
+		},
+		{
 			name: 'type'
 		},
 		{
