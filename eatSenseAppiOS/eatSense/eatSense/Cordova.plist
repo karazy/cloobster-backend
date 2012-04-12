@@ -53,7 +53,7 @@
 		<key>org.apache.cordova.battery</key>
 		<string>CDVBattery</string>
 		<key>org.apache.cordova.barcodeScanner</key>
-		<string>CDVBarcodeScanner</string>		
+		<string>CDVBarcodeScanner</string>
 	</dict>
 </dict>
 </plist>

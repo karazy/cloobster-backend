@@ -5,11 +5,11 @@ var profile = Ext.os.deviceType.toLowerCase();
 
 Ext.Loader.setConfig({
 	enabled : true,
-	//WORKAORUND related to Android 3x Bug and Webview URL handling
-	disableCaching: false 
 }); 
 //WORKAORUND related to Android 3x Bug and Webview URL handling
 //Ext.Ajax.setDisableCaching(false); 
+
+Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
 	name : 'EatSense',
@@ -26,7 +26,7 @@ Ext.application({
         this.mainLaunch();
 	},
     mainLaunch: function() {
-        if (!device || !this.launched) {
+        if (cordovaInit == false || !this.launched) {
         	return;
         }
         

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B63F670715361C2000F76817 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B640151731B200EE035F /* AssetsLibrary.framework */; };
+		B63F670815361C2C00F76817 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B644151731CC00EE035F /* libiconv.dylib */; };
+		B63F670915361C3600F76817 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B642151731B900EE035F /* CoreVideo.framework */; };
 		B645109015162E60009D2AE3 /* www in Resources */ = {isa = PBXBuildFile; fileRef = B645108F15162E60009D2AE3 /* www */; };
 		B6EC7B2315162C5000DF3484 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6EC7B2215162C5000DF3484 /* Foundation.framework */; };
 		B6EC7B2515162C5000DF3484 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6EC7B2415162C5000DF3484 /* UIKit.framework */; };
@@ -123,6 +126,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B63F670915361C3600F76817 /* CoreVideo.framework in Frameworks */,
+				B63F670815361C2C00F76817 /* libiconv.dylib in Frameworks */,
+				B63F670715361C2000F76817 /* AssetsLibrary.framework in Frameworks */,
 				B6F5B63E151731A500EE035F /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

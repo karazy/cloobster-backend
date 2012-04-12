@@ -7,6 +7,9 @@ Ext.define('EatSense.model.Request', {
 		fields: [
 		{
 			name: 'type'
+		},
+		{
+			name: 'checkInId'
 		}],
 		proxy: {
 			type: 'rest',

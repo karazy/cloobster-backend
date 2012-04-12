@@ -21,6 +21,8 @@ var translation = {
 		"settingsButton" : "Einstellungen",
 		// Checkin process
 		"checkInTitle" : "CheckIn",
+		"barcodePromptTitle" : "Barcode Abfrage",
+		"barcodePromptText" : "Bitte gib den Tischcode ein.",
 		"checkInStep1Label1" : "Wähle einen Nickname",
 		"checkInStep1Button" : "Los gehts!",
 		"checkInStep2Label1" : "Andere haben hier bereits eingecheckt.",
