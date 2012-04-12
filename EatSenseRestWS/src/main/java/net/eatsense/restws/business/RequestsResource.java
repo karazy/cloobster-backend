@@ -46,6 +46,6 @@ public class RequestsResource {
 	@DELETE
 	@Path("{requestId}")
 	public void deleteCustomerRequest(@PathParam("requestId") Long requestId) {
-		
+		checkInCtrl.deleteCustomerRequest(businessId, requestId);
 	}
 }

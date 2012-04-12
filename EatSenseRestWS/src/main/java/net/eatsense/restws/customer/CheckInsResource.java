@@ -74,6 +74,8 @@ public class CheckInsResource {
 	
 	@POST
 	@Path("{checkInId}/requests")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
 	public CustomerRequestDTO postRequest(@PathParam("checkInId") String checkInId, CustomerRequestDTO requestData) {
 		return checkInCtr.saveCustomerRequest(checkInId, requestData);
 	}
