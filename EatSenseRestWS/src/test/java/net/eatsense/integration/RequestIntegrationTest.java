@@ -82,7 +82,8 @@ public class RequestIntegrationTest {
 				.headers("login","admin","password","test")
 				.expect().statusCode(200)
 				.when().get("/b/businesses/{id}/requests", businessId);
-		requestData = response.as(CustomerRequestDTO.class);
+
+		requestData = response.jsonPath().getObject("find {r-> r.checkInId == "+requestData.getCheckInId()+" }", CustomerRequestDTO.class);
 		assertThat(requestData.getType(), equalTo("CALL_WAITER"));
 		assertThat(requestData.getId(), notNullValue());
 		
