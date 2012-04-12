@@ -1,5 +1,7 @@
 package net.eatsense.restws.business;
 
+import java.util.Collection;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -34,10 +36,10 @@ public class RequestsResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public CustomerRequestDTO getCustomerRequest(@QueryParam("checkInId") Long checkInId) {
-		CustomerRequestDTO requestData = businessCtrl.getCustomerRequestData(businessId, checkInId);
+	public Collection<CustomerRequestDTO> getCustomerRequest(@QueryParam("checkInId") Long checkInId, @QueryParam("spotId") Long spotId) {
+		Collection<CustomerRequestDTO> requestData = businessCtrl.getCustomerRequestData(businessId, checkInId, spotId);
 		if( requestData == null)
-			throw new NotFoundException("No request for this checkin found");
+			throw new NotFoundException("No requests found");
 		else
 			return requestData;
 	}
