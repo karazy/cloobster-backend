@@ -482,4 +482,70 @@ public class CheckInController {
 			e.printStackTrace();
 		}
 	}
+
+	public CheckInStatusDTO updateCheckInAsBusiness(Long checkInId, CheckInStatusDTO checkInData) {
+		Objectify ofy = checkInRepo.ofy();
+		
+		CheckIn checkIn = checkInRepo.getById(checkInId);
+		
+		if(checkIn == null)
+			return null;
+		List<MessageDTO> messages = new ArrayList<MessageDTO>();
+		Key<Spot> oldSpotKey = checkIn.getSpot();
+		Key<Spot> newSpotKey = Spot.getKey(checkIn.getBusiness(), checkInData.getSpotId());
+		// Check if spot has changed ...
+		if(oldSpotKey.getId() != newSpotKey.getId()) {
+			// ... then we move the checkin to a new spot.
+			// Create status update messages for listening channels
+			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
+			
+			checkIn.setSpot(newSpotKey);
+			checkInRepo.saveOrUpdate(checkIn);
+			
+			// Get all pending requests of this user.
+			List<Request> requests = ofy.query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();
+			for (Request request : requests) {
+				request.setSpot(newSpotKey);
+			}
+			requestRepo.saveOrUpdate(requests);
+			
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			spotData.setId(oldSpotKey.getId());
+			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(oldSpotKey));
+					
+			Request request = ofy.query(Request.class).filter("spot",oldSpotKey).order("-receivedTime").get();
+			// Save the status of the next request in line, if there is one.
+			if( request != null) {
+				spotData.setStatus(request.getStatus());
+			}
+			else
+				spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+			
+			messages.add(new MessageDTO("spot", "update", spotData));
+			
+			
+			messages.add(new MessageDTO("checkin","new", transform.toStatusDto(checkIn)));
+			spotData = new SpotStatusDTO();
+			spotData.setId(newSpotKey.getId());
+			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(newSpotKey));
+					
+			request = ofy.query(Request.class).filter("spot",newSpotKey).order("-receivedTime").get();
+			// Save the status of the next request in line, if there is one.
+			if( request != null) {
+				spotData.setStatus(request.getStatus());
+			}
+			else
+				spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+			
+			messages.add(new MessageDTO("spot", "update", spotData));
+			
+			try {
+				channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return checkInData;
+	}
 }
