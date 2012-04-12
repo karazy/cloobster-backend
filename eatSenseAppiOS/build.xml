@@ -5,7 +5,7 @@
 
 	<target name="copySenchaApp" depends="">
 		<echo message="Copy App" />
-		<copy todir="eatSense/www">
+		<copy todir="eatSense/www" overwrite="true">
 			<fileset dir="${appDir}">
 				<exclude name="**/*.desktop.*" />
                 <exclude name="**/*.phone.*" />

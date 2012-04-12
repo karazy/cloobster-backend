@@ -2,7 +2,10 @@ package net.eatsense.restws.business;
 
 import java.util.Collection;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -15,6 +18,10 @@ import com.sun.jersey.api.core.ResourceContext;
 
 public class CheckInsResource {
 	private CheckInController checkInController;
+	@Context
+	private ResourceContext resourceContext;
+	
+	private Long businessId;
 	
 	@Inject
 	public CheckInsResource(CheckInController checkInController) {
@@ -22,10 +29,9 @@ public class CheckInsResource {
 		this.checkInController = checkInController;
 	}
 
-	@Context
-	private ResourceContext resourceContext;
-	
-	private Long businessId;
+	public void setBusinessId(Long businessId) {
+		this.businessId = businessId;
+	}
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
@@ -33,8 +39,10 @@ public class CheckInsResource {
 		return checkInController.getCheckInStatusesBySpot(businessId, spotId);	
 	}
 	
-
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
+	@DELETE
+	@Path("{checkInId}")
+	public void cancelAndDeleteCheckIn(@PathParam("checkInId") Long checkInId) {
+		checkInController.deleteCheckIn(checkInId);
 	}
+	
 }

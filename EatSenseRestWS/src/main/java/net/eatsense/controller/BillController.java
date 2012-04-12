@@ -170,6 +170,7 @@ public class BillController {
 		if( !requests.isEmpty()) {
 			newSpotStatus = requests.get(0).getStatus();
 		}
+		
 		// Add a message with updated spot status to the package.
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(checkIn.getSpot().getId());

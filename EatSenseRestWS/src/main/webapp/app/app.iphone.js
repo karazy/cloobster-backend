@@ -12,7 +12,7 @@ Ext.Loader.setConfig({
 Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
-	name : 'EatSense',
+	name : 'eatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request' ],
 	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'CartOverview', 'Lounge'], 
@@ -29,7 +29,7 @@ Ext.application({
         if (cordovaInit == false || !this.launched) {
         	return;
         }
-        
+
         console.log('mainLaunch');
 		
     	//try to restore application state

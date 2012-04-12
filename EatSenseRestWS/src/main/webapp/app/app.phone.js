@@ -29,7 +29,7 @@ Ext.application({
         if (!device || !this.launched) {
         	return;
         }
-        
+
         console.log('mainLaunch');
 		
     	//try to restore application state

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.googlecode.objectify.Query;
 import com.sun.jersey.api.NotFoundException;
 
 
@@ -132,27 +133,38 @@ public class BusinessController {
 	 * 
 	 * @param businessId
 	 * @param checkInId
+	 * @param spotId 
 	 * @return request DTO
 	 */
-	public CustomerRequestDTO getCustomerRequestData(Long businessId, Long checkInId) {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
-		CheckIn checkIn = checkInRepo.getById(checkInId);
-		if(checkIn.isArchived())
-			throw new RuntimeException("Cant get request for archived checkin");
+	public List<CustomerRequestDTO> getCustomerRequestData(Long businessId, Long checkInId, Long spotId) {
+		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
+		Query<Request> query = requestRepo.ofy().query(Request.class).ancestor(Business.getKey(businessId));
+
+		if( spotId != null) {
+			query = query.filter("spot", Spot.getKey(Business.getKey(businessId), spotId));
+		}
 		
-		List<Request> requests = requestRepo.ofy().query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();		
+		if( checkInId != null ) {
+			query = query.filter("checkIn", CheckIn.getKey(checkInId));
+		}
 		
+		List<Request> requests = query.list();		
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
 				
+				CustomerRequestDTO requestData = new CustomerRequestDTO();
 				requestData.setId(request.getId());
-				requestData.setCheckInId(checkIn.getId());
+				requestData.setCheckInId(request.getCheckIn().getId());
 				requestData.setType(request.getStatus());
-				return requestData;
+				
+				requestDataList.add(requestData);
 			}
 				
 		}
-		return null;
+		if(requestDataList.isEmpty())
+			return null;
+		else
+			return requestDataList;
 	}
 
 	/**

@@ -25,7 +25,9 @@ Ext.define('EatSense.controller.Request',{
 				checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.getId();
 
 		request.set('type', Karazy.constants.Request.CALL_WAITER);
-
+		//workaround to prevent sencha from sending phantom id
+		request.setId('');
+		
 		request.save({
 			params: {
 				'pathId' : checkInId

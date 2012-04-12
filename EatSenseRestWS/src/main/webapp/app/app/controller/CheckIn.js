@@ -134,14 +134,30 @@ Ext.define('EatSense.controller.CheckIn', {
     	button.disable();
     	var barcode, that = this, deviceId;
     	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
-            Ext.Msg.prompt(Karazy.i18n.translate('barcodePromptTitle'), Karazy.i18n.translate('barcodePromptText'), function(text) {
-                // process text value and close...
-                barcode = Ext.String.trim(text);
-            });
+            Ext.Msg.show({
+                title: Karazy.i18n.translate('barcodePromptTitle'),
+                message: Karazy.i18n.translate('barcodePromptText'),
+                buttons: [{
+                    text: 'Ja',
+                    itemId: 'yes',
+                    ui: 'action'
+                }, {
+                    text: 'Nein',
+                    itemId: 'no',
+                    ui: 'action'
+                }],
+                prompt : { maxlength : 20},
+                scope: this,
+                fn: function(btnId, value, opt) {
+                if(btnId=='yes') {
+                        barcode = Ext.String.trim(value);    
+                        deviceId = '_browser';
+                        this.getDashboard().showLoadScreen(true);
+                        this.doCheckInIntent(barcode, button, deviceId);
+                    }
+                }
+            }); 
             // barcode = Ext.String.trim(this.getSearchfield().getValue());
-    		deviceId = '_browser';
-    		this.getDashboard().showLoadScreen(true);
-    		this.doCheckInIntent(barcode, button, deviceId);
     	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
     			window.plugins.barcodeScanner.scan(function(result, barcode) {
     			barcode = result.text;

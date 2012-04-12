@@ -88,7 +88,10 @@ public class OrderController {
 	 * @param orderId
 	 */
 	public void deleteOrder(Long businessId, Long orderId) {
-		orderRepo.ofy().delete(new Key<Order>(new Key<Business>(Business.class, businessId), Order.class, orderId));
+		Key<Order> orderKey = new Key<Order>(new Key<Business>(Business.class, businessId), Order.class, orderId);
+		
+		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
+		orderRepo.ofy().delete(orderKey);
 	}
 	
 	/**
