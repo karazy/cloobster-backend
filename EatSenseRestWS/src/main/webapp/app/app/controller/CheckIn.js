@@ -35,7 +35,9 @@ Ext.define('EatSense.controller.CheckIn', {
         	cancelCheckInBt : '#cancelCheckInBt',
         	regenerateNicknameBt : '#regenerateNicknameBt',
         	menuTab: '#menutab',
-        	cartTab: '#carttab'    	        		
+        	cartTab: '#carttab',
+            settingsTab: 'settingstab',
+            requestsTab: 'requeststab'    	        		
     	},
     	control: {
     		checkInBtn: {
@@ -463,25 +465,37 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * This method handle status changes. It checks if valid transsions are made.
 	 * E. g. You cannot directly switch from PAYMENT_REQUEST to INTENT.
 	 * It enables or disbales certain functionalities depending on the status.
+     * Furthermore resets ui states and does cleanups.
 	 * Always use this method to change the application status. 
 	 * @param status
 	 */
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
-		//TODO check status transitions
+        var     orderCtr = this.getApplication().getController('Order'),
+                menuCtr = this.getApplication().getController('Menu');
+		//TODO check status transitions, refactor     
 				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
 			this.getMenuTab().disable();
-			this.getCartTab().disable();
+			this.getCartTab().disable()
+            this.getSettingsTab().disable();
+            this.getRequestsTab().disable();
 			
 			this.models.activeCheckIn.set('status', status);
 		} else if (status == Karazy.constants.COMPLETE) {
 			this.getMenuTab().enable();
 			this.getCartTab().enable();
+            this.getSettingsTab().enable();
+            this.getRequestsTab().enable();
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
 			//remove menu to prevent problems on reload
 			this.getMenulist().getStore().removeAll();
+            menuCtr.showMenu();
+            //remove all orders in cart and refresh badge text
+            this.models.activeCheckIn.orders().removeAll();
+            orderCtr.refreshCartBadgeText();
+
 			this.showDashboard();
 			
 		}

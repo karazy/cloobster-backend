@@ -45,19 +45,23 @@ Ext.define('EatSense.view.OrderDetail', {
 				items : [ {
 					xtype : 'spinnerfield',
 					increment : 1,
-					// style : 'background-color:white;',
 					value : 1,
-					// width: 200,
 					minValue : '1',
 					maxValue : '10',
-					// height: '25px',
 					cycle : true,
 				},
 				{
 					xtype: 'label',
 					cls: 'productPrice',
 					itemId : 'prodPriceLabel',
-					tpl: '{[values.product.calculate(values.amount)]}'
+					tpl: new Ext.XTemplate(
+					'{[this.formatPrice(values.product.calculate(values.amount))]}',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+					)
 				} 
 				]
 			}]

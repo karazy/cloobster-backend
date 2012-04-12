@@ -8,6 +8,7 @@ var translation = {
 		"change" : "Ändern",
 		"barcode" : "Barcode",
 		"errorTitle" : "Fehler",
+		"close" : "Schliessen",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
@@ -32,6 +33,7 @@ var translation = {
 		// Menu
 		"menuTitle" : "Karte",
 		"choicesPanelTitle" : "Optionen",
+		"putIntoCartButton" : "In den Warenkorb",
 		//Order
 		"orderInvalid" : "Bitte überprüfe deine Auswahl",
 		"orderPlacer" : "Bestellung im Warenkorb",
@@ -61,7 +63,11 @@ var translation = {
 		"paymentPickerTitle" : "Bezahlmethode",
 		//Settings
 		"settingsTitle" : "Einstellungen",
-		"nickname" : "Spitzname"			
+		"nickname" : "Spitzname",
+		//Request
+		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
+		"requestsButton" : "Aktionen",
+		"requestsTitle" : "Aktionen"	
 
 	}
 

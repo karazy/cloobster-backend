@@ -9,12 +9,14 @@ Ext.define('EatSense.view.CartOverviewItem', {
 	config: {
 
 		name : {
-			tpl: 
-				"<h2>{Product.name}</h2>" +
-				//"+i18nPlugin.translate('amount')+"
-				"<div class='amount'>({amount}x)</div>" + 
-				"<div class='price'>{Product.price_calculated}€</div>"+
-				"<div style='clear: both;'>",
+			tpl: new Ext.XTemplate(
+				"{Product.name} ({amount}x) {[this.formatPrice(values.Product.price_calculated)]}",
+				{
+					formatPrice: function(price) {
+						return Karazy.util.formatPrice(price);
+					}
+				}
+				),
 			cls: 'name'
 		},
 
@@ -35,11 +37,10 @@ Ext.define('EatSense.view.CartOverviewItem', {
 		},
 
 		 cls: 'cartoverviewitem',
-		 // baseCls: 'di-baseCls'
 		layout: {
 			type: 'hbox',
-			pack: 'center',
-			align: 'start'
+			pack: 'end',
+			align: 'center'
 		}
 	},
 

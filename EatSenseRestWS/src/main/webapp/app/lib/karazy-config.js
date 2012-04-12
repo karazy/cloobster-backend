@@ -9,7 +9,8 @@ Karazy.config = (function() {
 	return {
 		
 		serviceUrl : '#SERVICE_URL',
-		msgboxHideTimeout : 1000
+		msgboxHideTimeout : 1000,
+		currencyFormat: 'EURO'
 		
 	};
 	

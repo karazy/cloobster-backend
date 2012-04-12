@@ -17,6 +17,14 @@ Karazy.constants = (function() {
 			CANCELED : 'CANCELED',
 			RECEIVED: 'RECEIVED',
 			COMPLETE : 'COMPLETE'
+		},
+		Request : {
+			CALL_WAITER : 'CALL_WAITER'
+		},
+		//regular expressions for different currencies
+		Currency : {
+			EURO: '$1,$2 €',
+			US_DOLLAR: '\$ $1.$2'
 		}
 
 	};

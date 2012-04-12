@@ -9,7 +9,13 @@ Ext.define('EatSense.store.Order', {
 				filterFn: function(record, id) {
 					return (record.get('status') == Karazy.constants.Order.PLACED || record.get('status') == Karazy.constants.Order.RECEIVED);
 	 			}
-	 	}
-	 	]
+	 		}
+	 	],
+	 	grouper: {
+            groupFn: function(record) {
+                return record.get('status');
+            },
+            // sortProperty: 'last_name'
+        }
 	}
 })

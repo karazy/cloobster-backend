@@ -18,7 +18,22 @@ Ext.define('EatSense.view.SpotDetail', {
 		fullscreen: true,
 		//this should be initially hidden
 		hidden: true,
-		items: [{
+		items: [
+		{
+			xtype: 'titlebar',
+			docked: 'top',
+			cls: 'spotdetail-titlebar',
+			items: [
+			{
+					xtype: 'button',
+					action: 'close',
+					// baseCls: 'spotdetail-close',
+					text: Karazy.i18n.translate('close'),
+					align: 'right'
+			}
+			]
+		},
+		{
 			xtype: 'panel',
 			layout:  {
 				type: 'fit'
@@ -57,12 +72,6 @@ Ext.define('EatSense.view.SpotDetail', {
 				height: 100,
 				items: [
 				{
-					xtype: 'button',
-					action: 'close',
-					baseCls: 'spotdetail-close',
-					text: 'X'
-				},
-				{
 					xtype: 'panel',
 					// itemId: 'statistics',
 					cls: 'spotdetail-statistics',
@@ -87,7 +96,13 @@ Ext.define('EatSense.view.SpotDetail', {
 						{
 							xtype: 'label',
 							itemId: 'total',
-							tpl: '<p>Total: {total}€</p>'
+							tpl: new Ext.XTemplate('<p>Total: {[this.formatPrice(values.total)]}</p>',
+								{
+									formatPrice: function(price) {
+										return Karazy.util.formatPrice(price);
+									}
+								}
+							)
 						}
 					]
 				},
@@ -139,22 +154,20 @@ Ext.define('EatSense.view.SpotDetail', {
 				},
 				items: [
 				{
-					text: '€',
+					text: Karazy.i18n.translate('paidButton'),
 					action: 'paid',
 					disabled: true
 				},
-				// {
-				// 	text: 'Redeem',
-				// 	disabled: true
-				// }, 
-				// {
-				// 	text: 'User',
-				// 	disabled: true
-				// }, 
 				{
-					text: 'Cancel',
-					action: 'cancelAll',
-					disabled: true
+					text: Karazy.i18n.translate('switchSpotButton'),
+					action: 'switch-spot'
+				},
+				{
+					text: Karazy.i18n.translate('cancelAllOrdersButton'),
+					action: 'cancel-all',
+					// iconCls: 'cancel-all'
+					// icon: '../app/res/images/into_cart.png',
+					// iconAlign: 'centered',
 				}
 				]				
 			}
