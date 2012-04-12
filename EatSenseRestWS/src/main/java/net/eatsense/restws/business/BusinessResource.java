@@ -3,6 +3,8 @@ package net.eatsense.restws.business;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.persistence.RequestRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,14 @@ public class BusinessResource {
 		billsResource.setBusinessId(businessId);
 		
 		return billsResource;
+	}
+	
+	@Path("requests")
+	public RequestsResource getRequestsResource() {
+		RequestsResource requestsResource = resourceContext.getResource(RequestsResource.class);
+		
+		requestsResource.setBusinessId(businessId);
+		return requestsResource;
 	}
 	
 	public void setBusinessId(Long businessId) {

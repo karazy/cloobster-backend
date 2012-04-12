@@ -1,4 +1,4 @@
-package net.eatsense.restws;
+package net.eatsense.restws.customer;
 
 import java.util.Collection;
 
@@ -11,19 +11,25 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.core.ResourceContext;
 
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.User;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.CustomerRequestDTO;
 
-@Path("checkins")
-public class CheckInResource {
+@Path("c/checkins")
+public class CheckInsResource {
 	private CheckInController checkInCtr;
-
+	
+	@Context
+	private ResourceContext resourceContext;
+	
 	@Inject
-	public CheckInResource(CheckInController checkInCtr) {
+	public CheckInsResource(CheckInController checkInCtr) {
 		super();
 		this.checkInCtr = checkInCtr;
 	}
@@ -64,6 +70,14 @@ public class CheckInResource {
 	@Path("{checkInId}")
 	public void deleteCheckIn(@PathParam("checkInId") String checkInId) {
 		checkInCtr.checkOut(checkInId);
+	}
+	
+	@POST
+	@Path("{checkInId}/requests")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public CustomerRequestDTO postRequest(@PathParam("checkInId") String checkInId, CustomerRequestDTO requestData) {
+		return checkInCtr.saveCustomerRequest(checkInId, requestData);
 	}
 	
 }

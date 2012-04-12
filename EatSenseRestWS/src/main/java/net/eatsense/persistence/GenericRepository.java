@@ -103,6 +103,16 @@ public class GenericRepository<T> extends DAOBase{
 		logger.info("delete {} ", obj);
 		ofy().delete(obj);
 	}
+	
+	/**
+	 * Delete object by key
+	 * @param obj
+	 * 		Key of object to delete.
+	 */
+	public void delete(Key<T> obj) {
+		logger.info("delete {} ", obj);
+		ofy().delete(obj);
+	}
 
 	/**
 	 * Finds an object by id. ONLY WORKING WITH OBJECTS WITH NO PARENT ANNOTATION
