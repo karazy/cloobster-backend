@@ -454,7 +454,7 @@ public class CheckInController {
 		// ... and delete all orders for the checkin.
 		ofy.delete(orderKeys);
 		
-		// Finally delte the checkin.
+		// Finally delete the checkin.
 		checkInRepo.delete(checkIn);
 		
 		
