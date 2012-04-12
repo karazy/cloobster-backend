@@ -8,8 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
-import net.eatsense.controller.CheckInController;
-import net.eatsense.controller.OrderController;
+import net.eatsense.controller.BusinessController;
 import net.eatsense.representation.CustomerRequestDTO;
 
 import com.google.inject.Inject;
@@ -22,11 +21,11 @@ public class RequestsResource {
 	
 	private Long businessId;
 
-	private CheckInController checkInCtrl;
+	private BusinessController businessCtrl;
 
 	@Inject
-	public RequestsResource(CheckInController checkInController) {
-		this.checkInCtrl = checkInController;
+	public RequestsResource(BusinessController checkInController) {
+		this.businessCtrl = checkInController;
 	}
 	
 	public void setBusinessId(Long businessId) {
@@ -36,7 +35,7 @@ public class RequestsResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public CustomerRequestDTO getCustomerRequest(@QueryParam("checkInId") Long checkInId) {
-		CustomerRequestDTO requestData = checkInCtrl.getCustomerRequestData(businessId, checkInId);
+		CustomerRequestDTO requestData = businessCtrl.getCustomerRequestData(businessId, checkInId);
 		if( requestData == null)
 			throw new NotFoundException("No request for this checkin found");
 		else
@@ -46,6 +45,6 @@ public class RequestsResource {
 	@DELETE
 	@Path("{requestId}")
 	public void deleteCustomerRequest(@PathParam("requestId") Long requestId) {
-		checkInCtrl.deleteCustomerRequest(businessId, requestId);
+		businessCtrl.deleteCustomerRequest(businessId, requestId);
 	}
 }
