@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -518,34 +519,40 @@ public class OrderController {
 		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
-		// Check that status CANCELLED will not be changed.
-		if(OrderStatus.CANCELED.equals(order.getStatus())) {
-			logger.error("{} already cancelled, cannot update", order.getKey());
-			return null;
-		}
 		
-		// Check that the status CART cannot be changed from this request.
-		// ( only consumer can place an order from the cart, a business would directy create it as recieved)
-		if(OrderStatus.CART.equals(order.getStatus())) {
-			logger.error("{} still in cart, cannot update", order.getKey());
+		if(!order.getStatus().isTransitionAllowed(orderData.getStatus())) {
+			logger.error("{} cannot update, change from {} to {} forbidden.",
+					new Object[] { order.getKey(), order.getStatus().toString(), orderData.getStatus().toString()} );
 			return null;
 		}
-		// Check that the request doesnt set the status to CART.
-		if(OrderStatus.CART.equals(orderData.getStatus())) {
-			logger.error("{} update status to CART not allowed", order.getKey());
-			return null;
-		}
-		// Check if the new status is different from the current status.	
-		if(orderData.getStatus().equals(order.getStatus())) {
-			logger.info("{} status already, set to {}", order.getStatus());
-			return orderData;
-		}
-		// Check that status RECEIVED will not be overwritten with an earlier status, only with CANCELED
-		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELED)) {
-			logger.error("{} status RECEIVED can only be set to CANCELLED, unable to update", order.getKey());
-			return null;
-		}
-		
+//		// Check that status CANCELLED will not be changed.
+//		if(OrderStatus.CANCELED.equals(order.getStatus())) {
+//			logger.error("{} already cancelled, cannot update", order.getKey());
+//			return null;
+//		}
+//		
+//		// Check that the status CART cannot be changed from this request.
+//		// ( only consumer can place an order from the cart, a business would directy create it as recieved)
+//		if(OrderStatus.CART.equals(order.getStatus())) {
+//			logger.error("{} still in cart, cannot update", order.getKey());
+//			return null;
+//		}
+//		// Check that the request doesnt set the status to CART.
+//		if(OrderStatus.CART.equals(orderData.getStatus())) {
+//			logger.error("{} update status to CART not allowed", order.getKey());
+//			return null;
+//		}
+//		// Check if the new status is different from the current status.	
+//		if(orderData.getStatus().equals(order.getStatus())) {
+//			logger.info("{} status already, set to {}", order.getStatus());
+//			return orderData;
+//		}
+//		// Check that status RECEIVED will not be overwritten with an earlier status, only with CANCELED
+//		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELED)) {
+//			logger.error("{} status RECEIVED can only be set to CANCELLED, unable to update", order.getKey());
+//			return null;
+//		}
+//		
 			
 			
 		// update order object from submitted data
@@ -562,20 +569,20 @@ public class OrderController {
 			// Get all pending requests sorted by oldest first.
 			List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 			
-			int index = 0;
 			String newCheckInStatus = null;
-			for (Request request : requests) {
-				// delete the request for this order
+			String oldSpotStatus = requests.get(0).getStatus();
+			
+			for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
+				Request request = iterator.next();
 				if( request.getType() == RequestType.ORDER &&  request.getObjectId().equals(order.getId())) {
-					requestRepo.delete(request); 
+					requestRepo.delete(request);
+					iterator.remove();
 				}
 				// Look for other order requests for the current checkin as long as we have no new status or there are no more requests ...
-				if( request.getType() == RequestType.ORDER && index > 0 && newCheckInStatus == null && request.getCheckIn().getId() == checkIn.getId()) {
+				else if( newCheckInStatus == null && request.getType() == RequestType.ORDER && request.getCheckIn().getId() == checkIn.getId()) {
 					// ... set the status to the new found one.
 					newCheckInStatus = request.getStatus();
 				}
-				
-				index++;
 			}
 			
 			// No other requests for the current checkin were found ...
@@ -589,38 +596,32 @@ public class OrderController {
 			// Add a message with updated order status to the message package.
 			messages.add(new MessageDTO("order","update",orderData));
 			
-			// If we have an older request in the database ...
-			if(requests.size() > 0 && requests.get(0).getType() == RequestType.ORDER && requests.get(0).getObjectId().equals(order.getId()) ) {
-				
-				// requestRepo.delete(requests.get(0));
-				String newSpotStatus = null;
-				// Save the status of the next request in line, if there is one.
-				if(requests.size() > 1 ) {
-					newSpotStatus = requests.get(1).getStatus();
-				} else if(!requests.get(0).getStatus().equals(OrderStatus.PLACED)) {
-					//all pending orders are processed for this spot, 
-					newSpotStatus = CheckInStatus.CHECKEDIN.toString();
-				}
-				if(!requests.get(0).getStatus().equals(newSpotStatus)) {
-					// Add a message with updated spot status to the package.
-					SpotStatusDTO spotData = new SpotStatusDTO();
-					spotData.setId(checkIn.getSpot().getId());
-					spotData.setStatus(newSpotStatus);
-					messages.add(new MessageDTO("spot","update",spotData));
-				}	
-				
-				// If the payment hasnt already been requested and the status has has changed ...  
-				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
-					// ...update the status of the checkIn in the datastore ...
-					checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
-					checkInRepo.saveOrUpdate(checkIn);
-					
-					// ... and add a message with updated checkin status to the package.
-					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
-				}
-				
-				
+			String newSpotStatus;
+			// Save the status of the next request in line, if there is one.
+			if( !requests.isEmpty()) {
+				newSpotStatus = requests.get(0).getStatus();
 			}
+			else
+				newSpotStatus = CheckInStatus.CHECKEDIN.toString();
+			// If the spot status needs to be updated ...
+			if(!oldSpotStatus.equals(newSpotStatus)) {
+				// Add a message with updated spot status to the package.
+				SpotStatusDTO spotData = new SpotStatusDTO();
+				spotData.setId(checkIn.getSpot().getId());
+				spotData.setStatus(newSpotStatus);
+				messages.add(new MessageDTO("spot","update",spotData));
+			}	
+			
+			// If the payment hasnt already been requested and the checkin status has changed ...  
+			if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
+				// ...update the status of the checkIn in the datastore ...
+				checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
+				checkInRepo.saveOrUpdate(checkIn);
+				
+				// ... and add a message with updated checkin status to the package.
+				messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+			}
+			
 			try {
 				channelCtrl.sendMessagesToAllClients(businessId, messages);
 			} catch (Exception e) {
