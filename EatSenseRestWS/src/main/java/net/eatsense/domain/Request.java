@@ -14,7 +14,8 @@ import com.googlecode.objectify.annotation.Parent;
 public class Request extends GenericEntity {
 	public enum RequestType {
 		ORDER,
-		BILL
+		BILL,
+		CUSTOM
 	}
 	RequestType type;
 	String status;
@@ -74,13 +75,13 @@ public class Request extends GenericEntity {
 	@JsonIgnore
 	public Key<Request> getKey() {
 		
-		return getKey(super.getId());
+		return getKey(getBusiness(), super.getId());
 	}
 	
 	@Transient
 	@JsonIgnore
-	public static Key<Request> getKey(Long id) {
+	public static Key<Request> getKey(Key<Business> parent, Long id) {
 		
-		return new Key<Request>(Request.class, id);
+		return new Key<Request>(parent, Request.class, id);
 	}
 }

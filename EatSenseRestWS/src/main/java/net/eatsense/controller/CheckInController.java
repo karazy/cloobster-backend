@@ -14,17 +14,21 @@ import javax.validation.groups.Default;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
+import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.validation.CheckInStep2;
-import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
@@ -60,6 +64,7 @@ public class CheckInController {
 	private ChannelController channelCtrl;
 	private ObjectMapper mapper;
     private Validator validator;
+	private RequestRepository requestRepo;
 
 	/**
 	 * Constructor using injection for creation.
@@ -74,11 +79,12 @@ public class CheckInController {
 	 */
 	@Inject
 	public CheckInController(BusinessRepository businessRepository, CheckInRepository checkInRepository, SpotRepository spotRepository,
-			Transformer transformer, ChannelController channelController, ObjectMapper objectMapper, Validator validator) {
+			Transformer transformer, ChannelController channelController, ObjectMapper objectMapper, Validator validator, RequestRepository requestRepository) {
 		this.businessRepo = businessRepository;
 		this.checkInRepo = checkInRepository;
 		this.channelCtrl = channelController;
 		this.barcodeRepo = spotRepository;
+		this.requestRepo = requestRepository;
 		this.transform = transformer;
 		this.mapper = objectMapper;
 		this.validator = validator;
@@ -417,5 +423,111 @@ public class CheckInController {
 		}
 		
 		return getCheckInsBySpot(Spot.getKey(business.getKey(), spotId));
+	}
+
+	/**
+	 * Save an outstanding request posted by a checkedin customer.
+	 * 
+	 * @param checkInId
+	 * @param requestData
+	 * @return requestData
+	 */
+	public CustomerRequestDTO saveCustomerRequest(String checkInId,	CustomerRequestDTO requestData) {
+		CheckIn checkIn = getCheckIn(checkInId);
+		if(checkIn.isArchived())
+			throw new RuntimeException("Cant post request for archived checkin");
+		
+		requestData.setCheckInId(checkIn.getId());
+		
+		List<Request> requests = requestRepo.ofy().query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();		
+		
+		for (Request oldRequest : requests) {
+			if(oldRequest.getType() == RequestType.CUSTOM && oldRequest.getStatus().equals("CALL_WAITER")) {
+				oldRequest.setReceivedTime(new Date());
+				requestData.setId(oldRequest.getId());
+				requestRepo.saveOrUpdate(oldRequest);
+				return requestData;
+			}
+				
+		}
+		
+		Request request = new Request();
+		request.setBusiness(checkIn.getBusiness());
+		request.setCheckIn(checkIn.getKey());
+		request.setReceivedTime(new Date());
+		request.setSpot(checkIn.getSpot());
+		request.setStatus(requestData.getType());
+		request.setType(RequestType.CUSTOM);
+		
+		if( requestRepo.saveOrUpdate(request) == null)
+			throw new RuntimeException("Error while saving request");
+		
+		requestData.setId(request.getId());
+		
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		
+		messages.add(new MessageDTO("request", "new", requestData));
+		
+		try {
+			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+										
+		return requestData;
+	}
+	
+	/**
+	 * Get an outstanding request for this checkin.
+	 * 
+	 * @param businessId
+	 * @param checkInId
+	 * @return request DTO
+	 */
+	public CustomerRequestDTO getCustomerRequestData(Long businessId, Long checkInId) {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		CheckIn checkIn = checkInRepo.getById(checkInId);
+		if(checkIn.isArchived())
+			throw new RuntimeException("Cant get request for archived checkin");
+		
+		List<Request> requests = requestRepo.ofy().query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();		
+		
+		for (Request request : requests) {
+			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
+				
+				requestData.setId(request.getId());
+				requestData.setCheckInId(checkIn.getId());
+				requestData.setType(request.getStatus());
+				return requestData;
+			}
+				
+		}
+		return null;
+	}
+
+	/**
+	 * Clear an outstanding request of the customer.
+	 * 
+	 * @param businessId
+	 * @param requestId
+	 */
+	public void deleteCustomerRequest(Long businessId, Long requestId) {
+		Request request = requestRepo.getById(Business.getKey(businessId), requestId);
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+
+		requestData.setId(requestId);
+		requestData.setType(request.getStatus());
+		requestData.setCheckInId(request.getCheckIn().getId());
+
+		requestRepo.delete(request);
+		
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		messages.add(new MessageDTO("request", "delete", requestData));
+		
+		try {
+			channelCtrl.sendMessagesToAllClients(request.getBusiness().getId(), messages);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
