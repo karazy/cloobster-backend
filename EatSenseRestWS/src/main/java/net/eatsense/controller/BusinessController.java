@@ -9,6 +9,7 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
+import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -117,6 +118,19 @@ public class BusinessController {
 		requestData.setId(request.getId());
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		Request oldRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").get();
+		
+		SpotStatusDTO spotData = new SpotStatusDTO();
+		spotData.setId(checkIn.getSpot().getId());
+		
+		// Save the status of the next request in line, if there is one.
+		if( oldRequest != null) {
+			spotData.setStatus(oldRequest.getStatus());
+		}
+		else
+			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+				
+		messages.add(new MessageDTO("spot", "update", spotData));
 		
 		messages.add(new MessageDTO("request", "new", requestData));
 		
@@ -188,6 +202,19 @@ public class BusinessController {
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		messages.add(new MessageDTO("request", "delete", requestData));
+		Request oldRequest = requestRepo.ofy().query(Request.class).filter("spot",request.getSpot()).order("-receivedTime").get();
+		
+		SpotStatusDTO spotData = new SpotStatusDTO();
+		spotData.setId(request.getSpot().getId());
+		
+		// Save the status of the next request in line, if there is one.
+		if( oldRequest != null) {
+			spotData.setStatus(oldRequest.getStatus());
+		}
+		else
+			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+		
+		messages.add(new MessageDTO("spot", "update", spotData));
 		
 		try {
 			channelCtrl.sendMessagesToAllClients(request.getBusiness().getId(), messages);
