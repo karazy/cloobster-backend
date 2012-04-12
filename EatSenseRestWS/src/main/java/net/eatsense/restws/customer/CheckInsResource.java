@@ -16,6 +16,7 @@ import javax.ws.rs.core.Context;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
+import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.User;
 import net.eatsense.representation.CheckInDTO;
@@ -23,15 +24,17 @@ import net.eatsense.representation.CustomerRequestDTO;
 
 @Path("c/checkins")
 public class CheckInsResource {
-	private CheckInController checkInCtr;
+	private CheckInController checkInCtrl;
+	private BusinessController businessCtrl;
 	
 	@Context
 	private ResourceContext resourceContext;
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr) {
+	public CheckInsResource(CheckInController checkInCtr, BusinessController businessCtrl) {
 		super();
-		this.checkInCtr = checkInCtr;
+		this.checkInCtrl = checkInCtr;
+		this.businessCtrl = businessCtrl;
 	}
 	
 	@POST
@@ -40,7 +43,7 @@ public class CheckInsResource {
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO createCheckIn(CheckInDTO checkIn) {
 //		String userId = checkInCtr.createCheckIn(checkIn);
-		CheckInDTO userId = checkInCtr.createCheckIn(checkIn);
+		CheckInDTO userId = checkInCtrl.createCheckIn(checkIn);
 		return userId;
 	}
 	
@@ -50,26 +53,26 @@ public class CheckInsResource {
 //	@Produces("text/plain; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO updateCheckIn(@PathParam("checkInId")String checkInId, CheckInDTO checkIn) {
-		return checkInCtr.updateCheckIn(checkInId, checkIn);
+		return checkInCtrl.updateCheckIn(checkInId, checkIn);
 	}
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotId, @QueryParam("checkInId") String checkInId) { 
-		return checkInCtr.getUsersAtSpot(spotId,checkInId);
+		return checkInCtrl.getUsersAtSpot(spotId,checkInId);
 	}
 	
 	@GET
 	@Path("{checkInId}")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO getCheckIn(@PathParam("checkInId") String checkInId) {
-		return checkInCtr.getCheckInAsDTO(checkInId);
+		return checkInCtrl.getCheckInAsDTO(checkInId);
 	}
 	
 	@DELETE
 	@Path("{checkInId}")
 	public void deleteCheckIn(@PathParam("checkInId") String checkInId) {
-		checkInCtr.checkOut(checkInId);
+		checkInCtrl.checkOut(checkInId);
 	}
 	
 	@POST
@@ -77,7 +80,7 @@ public class CheckInsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CustomerRequestDTO postRequest(@PathParam("checkInId") String checkInId, CustomerRequestDTO requestData) {
-		return checkInCtr.saveCustomerRequest(checkInId, requestData);
+		return businessCtrl.saveCustomerRequest(checkInId, requestData);
 	}
 	
 }
