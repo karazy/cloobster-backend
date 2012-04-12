@@ -62,15 +62,16 @@ Ext.define('EatSense.view.Dashboard', {
 				// ui : 'action',
 				// height: '105px',
 				// width : '150px'
-				}, {
-					xtype : 'textfield',
-					label : i18nPlugin.translate('barcode'),
-					labelAlign : 'top',
-//					labelWidth : 100,
-					width : 100,
-					name : 'barcodeTF',
-					hidden : (profile == 'phone' && window.plugins && window.plugins.barcodeScanner) ? true : false
-				} ]
+				}, 
+				// {
+				// 	xtype : 'textfield',
+				// 	label : i18nPlugin.translate('barcode'),
+				// 	labelAlign : 'top',
+				// 	width : 100,
+				// 	name : 'barcodeTF',
+				// 	hidden : (profile == 'phone' && window.plugins && window.plugins.barcodeScanner) ? true : false
+				// } 
+				]
 			} ]
 		},
 		{

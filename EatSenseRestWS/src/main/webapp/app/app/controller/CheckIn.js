@@ -10,7 +10,7 @@ Ext.define('EatSense.controller.CheckIn', {
         profile: Ext.os.deviceType.toLowerCase(),
     	refs: {
             main : 'mainview',
-            searchfield : 'dashboard textfield',
+            // searchfield : 'dashboard textfield',
             checkinconfirmation : 'checkinconfirmation',
         	nickname : '#nicknameTf',
         	menuoverview: 'menuoverview',   
@@ -120,9 +120,9 @@ Ext.define('EatSense.controller.CheckIn', {
     launch: function() {
     	console.log('CheckIn Controller -> launch');
     	//for convenience that focus on barcode field on desktop version
-    	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
-    		this.getSearchfield().focus();
-    	}
+    	// if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
+    	// 	this.getSearchfield().focus();
+    	// }
     },
     /**
      * CheckIn Process
@@ -134,7 +134,11 @@ Ext.define('EatSense.controller.CheckIn', {
     	button.disable();
     	var barcode, that = this, deviceId;
     	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
-    		barcode = Ext.String.trim(this.getSearchfield().getValue());    		
+            Ext.Msg.prompt(Karazy.i18n.translate('barcodePromptTitle'), Karazy.i18n.translate('barcodePromptText'), function(text) {
+                // process text value and close...
+                barcode = Ext.String.trim(text);
+            });
+            // barcode = Ext.String.trim(this.getSearchfield().getValue());
     		deviceId = '_browser';
     		this.getDashboard().showLoadScreen(true);
     		this.doCheckInIntent(barcode, button, deviceId);

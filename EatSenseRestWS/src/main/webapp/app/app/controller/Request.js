@@ -6,13 +6,9 @@ Ext.define('EatSense.controller.Request',{
 	extend: 'Ext.app.Controller',
 	config: {
 		refs: {
-			// requestMenuButton: 'button[action=request]',
 			callWaiterButton: 'requeststab button[action=waiter]'
 		},
 		control: {
-			// requestMenuButton: {
-			// 	tap: 'showRequestMenu'
-			// },
 			callWaiterButton: {
 				tap: 'sendCallWaiterRequest'
 			}
@@ -20,15 +16,6 @@ Ext.define('EatSense.controller.Request',{
 
 		requestPanel: Ext.create('EatSense.view.fragment.RequestMenu')
 	},
-	/**
-	*	Shows a menu with available customer requests.
-	*/
-	// showRequestMenu: function(button, event) {
-	// 	console.log('Request Controller --> showRequestMenu');
-	// 	var 	requestPanel = this.getRequestPanel();
-
-	// 	requestPanel.showBy(button, "br-tc?");
-	// },
 	/**
 	*	Sends a call waiter request.
 	*/
