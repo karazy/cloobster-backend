@@ -5,7 +5,8 @@ public class CustomerRequestDTO {
 	private Long id;
 	
 	private Long checkInId;
-
+	private Long spotId;
+	
 	public String getType() {
 		return type;
 	}
@@ -28,6 +29,14 @@ public class CustomerRequestDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getSpotId() {
+		return spotId;
+	}
+
+	public void setSpotId(Long spotId) {
+		this.spotId = spotId;
 	}
 	
 	

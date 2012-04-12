@@ -89,6 +89,7 @@ public class BusinessController {
 			throw new RuntimeException("Cant post request for archived checkin");
 		
 		requestData.setCheckInId(checkIn.getId());
+		requestData.setSpotId(checkIn.getSpot().getId());
 		
 		List<Request> requests = requestRepo.ofy().query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();		
 		
@@ -155,6 +156,7 @@ public class BusinessController {
 				CustomerRequestDTO requestData = new CustomerRequestDTO();
 				requestData.setId(request.getId());
 				requestData.setCheckInId(request.getCheckIn().getId());
+				requestData.setSpotId(request.getSpot().getId());
 				requestData.setType(request.getStatus());
 				
 				requestDataList.add(requestData);
@@ -180,6 +182,7 @@ public class BusinessController {
 		requestData.setId(requestId);
 		requestData.setType(request.getStatus());
 		requestData.setCheckInId(request.getCheckIn().getId());
+		requestData.setSpotId(request.getSpot().getId());
 
 		requestRepo.delete(request);
 		
