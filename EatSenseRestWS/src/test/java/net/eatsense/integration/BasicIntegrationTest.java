@@ -75,13 +75,13 @@ public class BasicIntegrationTest {
 		response = given().contentType("application/json").body(checkInData)
 				.expect().statusCode(200).body("userId", notNullValue())
 				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-				.when().post("/checkins");
+				.when().post("/c/checkins");
 		checkInData = response.as(CheckInDTO.class);
 		checkInId = checkInData.getUserId();
 
 		// #3 Check if we can retrieve the same data by user id
 		expect().statusCode(200).body("userId", is(checkInId)).when()
-				.get("/checkins/{userId}", checkInId);
+				.get("/c/checkins/{userId}", checkInId);
 
 	}
 
@@ -110,7 +110,7 @@ public class BasicIntegrationTest {
 				.body(checkInData).expect().statusCode(200)
 				.body("userId", notNullValue())
 				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-				.when().post("/checkins");
+				.when().post("/c/checkins");
 		checkInData = response.as(CheckInDTO.class);
 		checkInId = checkInData.getUserId();
 		
@@ -264,7 +264,7 @@ public class BasicIntegrationTest {
 					.body(checkIns[i]).expect().statusCode(200)
 					.body("userId", notNullValue())
 					.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-					.when().post("/checkins");
+					.when().post("/c/checkins");
 			checkIns[i] = response.as(CheckInDTO.class);
 		}
 
@@ -360,7 +360,7 @@ public class BasicIntegrationTest {
 					.body(checkIns[i]).expect().statusCode(200)
 					.body("userId", notNullValue())
 					.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-					.when().post("/checkins");
+					.when().post("/c/checkins");
 			checkIns[i] = response.as(CheckInDTO.class);
 		}
 

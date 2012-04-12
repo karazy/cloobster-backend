@@ -70,7 +70,7 @@ public class BillIntegrationTest {
 				.body(checkInData).expect().statusCode(200)
 				.body("userId", notNullValue())
 				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-				.when().post("/checkins");
+				.when().post("/c/checkins");
 		checkInData = response.as(CheckInDTO.class);
 		checkInId = checkInData.getUserId();
 		
