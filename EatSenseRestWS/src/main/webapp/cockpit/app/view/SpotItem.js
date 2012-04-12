@@ -51,7 +51,9 @@ Ext.define('EatSense.view.SpotItem', {
 		
 		var button = this.getSpot();
 			if(this.getSpot()) {						
-				if(newRecord.get('status') == Karazy.constants.ORDER_PLACED  || newRecord.get('status') == Karazy.constants.PAYMENT_REQUEST) {
+				if(newRecord.get('status') == Karazy.constants.ORDER_PLACED  
+					|| newRecord.get('status') == Karazy.constants.PAYMENT_REQUEST
+					|| newRecord.get('status') == Karazy.constants.Request.CALL_WAITER) {
 					button.addCls('spotitem-placed');
 					button.removeCls('spotitem-checkedin');
 				} else if(newRecord.get('checkInCount') >  0) {

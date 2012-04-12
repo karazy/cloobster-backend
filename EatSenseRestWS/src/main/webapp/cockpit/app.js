@@ -11,7 +11,7 @@ Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
 	name : 'EatSense',
-	controllers : ['Login','Spot', 'Message'],
+	controllers : ['Login','Spot', 'Message', 'Request'],
 	models : ['Account','Spot', 'Business', 'CheckIn', 'Order', 'Product', 'Choice', 'Option', 'Bill', 'PaymentMethod', 'Request'],
 	views : ['Login', 'ChooseBusiness', 'Main'], 
 	stores : ['Account', 'AppState',  'Spot', 'Business', 'CheckIn', 'Order', 'Bill', 'Request' ],

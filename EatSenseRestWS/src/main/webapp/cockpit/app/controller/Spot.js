@@ -34,12 +34,6 @@ Ext.define('EatSense.controller.Spot', {
 		    	autoCreate: true
 		    },
 		    switchSpotList: 'spotselection list',
-		    customerRequestDialog: {
-		    	selector: 'customerrequest',
-		    	xtype: 'customerrequest',
-		    	autoCreate: true
-		    },
-		    dismissRequestsButton: 'customerrequest button[action=dismiss]'
 		    //</spot-detail>
 		},
 
@@ -134,6 +128,7 @@ Ext.define('EatSense.controller.Spot', {
 		var		me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				messageCtr = this.getApplication().getController('Message'),
+				requestCtr = this.getApplication().getController('Request'),
 				detail = me.getSpotDetail(),
 				checkInList = detail.down('#checkInList'),
 				data = button.getParent().getRecord(),
@@ -146,7 +141,7 @@ Ext.define('EatSense.controller.Spot', {
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
-		messageCtr.on('eatSense.request', this.processCustomerRequest, this);
+		messageCtr.on('eatSense.request', requestCtr.processCustomerRequest, requestCtr);
 
 
 		//load checkins and orders and set lists
@@ -160,7 +155,7 @@ Ext.define('EatSense.controller.Spot', {
 			 		me.setActiveSpot(data);
 			 		titlebar.setTitle(data.get('name'));
 			 		if(records.length > 0) {
-			 			me.loadRequests();
+			 			requestCtr.loadRequests();
 			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
 			 			me.getSpotDetailCustomerList().select(0);
 			 		}
@@ -175,34 +170,6 @@ Ext.define('EatSense.controller.Spot', {
 		//show detail view
 		Ext.Viewport.add(detail);
 		detail.show();
-	},
-
-	loadRequests: function() {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				restaurantId = loginCtr.getAccount().get('businessId'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
-				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				assocCheckIn;
-
-		//check if customer requests for this spot exist and display them
-		requestStore.load({
-			params: {
-				pathId: restaurantId,
-				spotId: me.getActiveSpot().get('id')
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 
-			 		if(records.length > 0) {
-			 			Ext.Array.each(records, function(request) {
-			 				assocCheckIn = checkInStore.getById(request.get('checkInId'));
-			 				request.setCheckIn(assocCheckIn);
-			 			});
-			 			me.showCustomerRequestMessages(records);
-			 		}		
-			 	}				
-			 }
-		});
 	},
 
 	/**
@@ -440,39 +407,6 @@ Ext.define('EatSense.controller.Spot', {
 			}
 		}
 	},
-	/**
-	*	Processes the given request and shows it when the active customer issued this request.
-	*	@param action
-	*
-	*	@param request
-	*/
-	processCustomerRequest: function(action, request) {
-		var 	me = this,
-				detail = me.getSpotDetail(),
-				requestModel = Ext.create('EatSense.model.Request'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
-				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				assocCheckIn;
-
-		requestModel.setData(request);
-		//this is no new object!
-		requestModel.phantom = false;
-		assocCheckIn = checkInStore.getById(requestModel.get('checkInId'));
-		requestModel.setCheckIn(assocCheckIn);
-
-		if(!detail.isHidden() && me.getActiveCustomer()) {
-			//only show if the correct spot is active
-			if(request.spotId == me.getActiveSpot().get('id')) {
-				if(action == 'new') {
-					requestStore.add(requestModel);
-					me.showCustomerRequestMessages(requestModel);
-				} else if(action == 'delete') {
-					// requestModel.erase();
-					requestStore.remove(requestStore.getById(requestModel.get('id')));
-				}
-			}
-		}
-	},
 
 	// </PUSH MESSAGE HANDLERS>
 
@@ -547,75 +481,6 @@ Ext.define('EatSense.controller.Spot', {
 			paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : ''});
 			paymentLabel.hide();
 		}
-	},
-	/**
-	*	Displays the given requests in a popup message.
-	*	
-	*/
-	showCustomerRequestMessages: function(requests) {
-		var 	me = this,
-				displayMessage = "",
-				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
-				customer,
-				dialog = this.getCustomerRequestDialog();
-
-				//show detail view
-		Ext.Viewport.add(dialog);
-		dialog.show();
-
-		// Ext.Array.each(requests, function(request, index) {
-		// 	customer = checkInStore.getById(request.get('checkInId'));
-
-		// 	if(request.get('type') == Karazy.constants.Request.CALL_WAITER && customer) {
-		// 		displayMessage += Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, customer.get('nickname')) + '<br/>';
-		// 	}
-		// });
-
-		// if(displayMessage) {
-		// 	Ext.Msg.alert(i18nPlugin.translate('requestMsgboxTitle'), displayMessage, function() {
-		// 		me.deleteCustomerRequests(requests);
-		// 		// requestStore.removeAll();
-		// 		// requestStore.sync();
-		// 	});	
-		// } else {
-		// 	console.log('no invalid request object');
-		// }
-	},
-	/**
-	* Deletes given customer requests.
-	*/
-	deleteCustomerRequests: function(requests) {
-		var 	loginCtr = this.getApplication().getController('Login'),
-				requestStore = Ext.StoreManager.lookup('requestStore');
-
-		requestStore.removeAll();
-		requestStore.sync();
-
-		this.getCustomerRequestDialog().hide();
-
-		// requestStore.each(function(request) {
-		// 	request.erase({
-		// 		params: {
-		// 			pathId: loginCtr.getAccount().get('businessId')
-		// 		},
-		// 		callback: function(record, operation) {
-		// 			console.log(operation.error);
-		// 		}
-		// 	});
-		// });
-
-
-		// Ext.Array.each(requests, function(request, index) {
-		// 	request.erase({
-		// 		params: {
-		// 			pathId: loginCtr.getAccount().get('businessId')
-		// 		},
-		// 		callback: function(record, operation) {
-		// 			console.log(operation.error);
-		// 		}
-		// 	});
-		// });
 	},
 	//</VIEW UPDATE METHODS>
 
@@ -870,10 +735,13 @@ Ext.define('EatSense.controller.Spot', {
 	*	This is a place to cleanup the panel.
 	*/
 	hideSpotDetail: function(spotdetail) {
-		var		messageCtr = this.getApplication().getController('Message');
+		var		messageCtr = this.getApplication().getController('Message'),
+				requestCtr = this.getApplication().getController('Request'),
+				requestStore = Ext.StoreManager.lookup('requestStore');
 
 		this.getSpotDetailCustomerList().deselectAll();	
 		this.getSpotDetailOrderList().getStore().removeAll();
+		requestStore.removeAll(true);
 		this.updateCustomerStatusPanel();
 		this.updateCustomerTotal();
 		this.setActiveSpot(null);
@@ -882,6 +750,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
+		messageCtr.un('eatSense.request', requestCtr.updateSpotDetailOrderIncremental, requestCtr);
 	}
 
 	// </MISC VIEW ACTIONS>

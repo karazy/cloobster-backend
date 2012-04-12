@@ -51,7 +51,7 @@ var translation = {
 		"PLACED" : "Neu!",
 		"CHECKEDIN" : "Checked-In",
 		"PAYMENT_REQUEST" : "Bezahlen",
-		"CALL_WAITER" : "{0} möchte eine Bedienung sprechen."
+		"CALL_WAITER" : "{0} ruft eine Bedienung."
 	}
 
 };

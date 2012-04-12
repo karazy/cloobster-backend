@@ -21,7 +21,7 @@ Ext.define('EatSense.view.CustomerRequestDialog', {
 			itemTpl: new Ext.XTemplate('{[this.formatMessage(values)]}', {
 				formatMessage: function(values) {
 					if(values.type == Karazy.constants.Request.CALL_WAITER) {
-						return Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, values.CheckIn.nickname);
+						return Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, (values.CheckIn) ? values.CheckIn.nickname : "");
 					}
 				}
 			}),
