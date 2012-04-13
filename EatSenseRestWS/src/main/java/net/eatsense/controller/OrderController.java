@@ -111,25 +111,31 @@ public class OrderController {
 	 */
 	public OrderDTO updateOrder(Long businessId, Long orderId, OrderDTO orderData, String checkInId) {
 		Order order = getOrder(businessId, orderId);
+		if(order == null) {
+			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
+		}
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
-			logger.error("Order cannot be updated, checkin not found!");
-			return null;
+			throw new IllegalArgumentException("Order cannot be updated, invalid checkInUid given");
+		}
+		// Check if the order belongs to the specified checkin.
+		if(! checkIn.getId().equals(order.getCheckIn().getId()) ) {
+			throw new IllegalArgumentException("Order cannot be updated, checkIn does not own the order.");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			logger.error("Order cannot be updated, payment already requested or not checked in");
-			return null;
+			throw new RuntimeException("Order cannot be updated, payment already requested or not checked in");
+		}
+		if(order.getStatus() == OrderStatus.PLACED) {
+			throw new RuntimeException("Order cannot be updated, not allowed update after status is PLACED.");
 		}
 		
 		if(orderData.getStatus() != OrderStatus.PLACED) {
-			logger.error("Order cannot be updated, not allowed to set status other than PLACED.");
-			return null;
+			throw new IllegalArgumentException("Order cannot be updated, invalid status given: " + orderData.getStatus());
 		}
-		
+			
 		if(!order.getStatus().isTransitionAllowed(OrderStatus.PLACED)) {
-			logger.error("Order cannot be updated, order already placed or completed.");
-			return null;
+			throw new RuntimeException("Order cannot be updated, already PLACED");
 		}
 		
 		OrderStatus oldStatus = order.getStatus();
@@ -162,8 +168,8 @@ public class OrderController {
 		
 		if(violations.isEmpty()) {
 			// save order
-			if( orderRepo.saveOrUpdate(order) == null )
-				throw new RuntimeException("order could not be updated, id: " + orderId);
+			orderRepo.saveOrUpdate(order);
+			
 			orderData = transform.orderToDto( order );
 			// only create a new request if the order status was updated
 			if(order.getStatus() != oldStatus) {
@@ -199,21 +205,19 @@ public class OrderController {
 					messages.add(new MessageDTO("spot","update",spotData));
 					
 				}
-				try {
-					channelCtrl.sendMessagesToAllClients(businessId, messages);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+
+				channelCtrl.sendMessagesToAllClients(businessId, messages);
+				
 			}
 		}
 		else {
 			// build validation error messages
-			String message = "";
+			String message = "Validation errors:\n";
 			for (ConstraintViolation<Order> constraintViolation : violations) {
 				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
 				
 			}
-			throw new RuntimeException("Validation errors:\n"+message);
+			throw new IllegalArgumentException(message);
 		}
 
 		return orderData;
@@ -240,19 +244,7 @@ public class OrderController {
 	 * @return the Order entity, if existing
 	 */
 	public Order getOrder(Long businessId, Long orderId) {
-		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
-			throw new NotFoundException("Order cannot be retrieved, business id unknown: " + businessId);
-		}
-		
-		Order order = orderRepo.getById(business.getKey(), orderId);
-		if( order == null) {
-			logger.error("Order cannot be retrieved, order id unknown: " + orderId);
-			throw new NotFoundException("Order cannot be retrieved, order id unknown: " + orderId);
-		}
-		return order;
+		return orderRepo.getById(Business.getKey(businessId), orderId);
 	}
 	
 	/**
@@ -340,26 +332,23 @@ public class OrderController {
 	 * Create a new Order entity with status CART and save in the datastore.
 	 * 
 	 * @param businessId
-	 * @param checkInId
-	 * @param order
+	 * @param checkInUid
+	 * @param orderData
 	 * @return id of the order
 	 */
-	public Long placeOrder(Long businessId, String checkInId, OrderDTO order) {
+	public Long placeOrderInCart(Long businessId, String checkInUid, OrderDTO orderData) {
 		Long orderId = null;
 		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null) {
-			logger.error("Order cannot be placed, checkin not found!");
-			return null;
+			throw new IllegalArgumentException("Order cannot be placed, checkin not found!");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			logger.error("Order cannot be placed, payment already requested or not checked in");
-			return null;
+			throw new RuntimeException("Order cannot be placed, payment already requested or not checked in");
 		}
 		
-		if( order.getStatus() != OrderStatus.CART ) {
-			logger.error("Order cannot be placed, unexpected order status: "+order.getStatus());
-			return null;
+		if( orderData.getStatus() != OrderStatus.CART ) {
+			throw new IllegalArgumentException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
 		}
 		
 		// Check if the business exists.
@@ -369,30 +358,27 @@ public class OrderController {
 			return null;
 		}
 		if(business.getId() != checkIn.getBusiness().getId()) {
-			logger.error("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
-			return null;
+			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
 		}
 		
 		// Check if the product to be ordered exists
-		Product product = productRepo.getById(checkIn.getBusiness(), order.getProduct().getId());
+		Product product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
 		if(product == null) {
-			logger.error("Order cannot be placed, productId unknown: "+ order.getProduct().getId());
-			return null;
+			throw new IllegalArgumentException("Order cannot be placed, productId unknown: "+ orderData.getProduct().getId());
 		}
 		Key<Product> productKey = product.getKey();
 		
 		List<OrderChoice> choices = null;
-		if(order.getProduct().getChoices() != null) {
+		if(orderData.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
 			
-			for (ChoiceDTO choiceDto : order.getProduct().getChoices()) {
+			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
 				OrderChoice choice = new OrderChoice();
 				int selected = 0;
 				Choice originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
 				
 				if(originalChoice == null) {
-					logger.error("Order cannot be placed, unknown choice id="+choiceDto.getId());
-					return null;
+					throw new IllegalArgumentException("Order cannot be placed, unknown choice id="+choiceDto.getId());
 				}
 				if(choiceDto.getOptions() != null ) {
 					
@@ -402,13 +388,11 @@ public class OrderController {
 					}
 					// Validate choice selection
 					if(selected < originalChoice.getMinOccurence() ) {
-						logger.error("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
-						return null;
+						throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
 					}
 					
 					if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
-						logger.error("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
-						return null;
+						throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
 					}
 
 					originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
@@ -422,7 +406,7 @@ public class OrderController {
 		}
 		
 
-		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, order.getAmount(), choices, order.getComment());		
+		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());		
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();
@@ -474,8 +458,7 @@ public class OrderController {
 		}
 		
 		if(orderKey == null ) {
-			logger.error("Error saving order for product: " +product.toString());
-			return null;
+			throw new RuntimeException("Error saving order for product: " +product.toString());
 		}
 		
 		if(choices != null) {
@@ -488,8 +471,7 @@ public class OrderController {
 				
 				if(choiceViolations.isEmpty()) {
 					if ( orderChoiceRepo.saveOrUpdate(orderChoice) == null ) {
-						logger.error("Error saving choices for order: " +orderKey.toString());
-						return null;
+						throw new RuntimeException("Error saving choices for order: " +orderKey.toString());
 					}
 				}
 				else { // handle validation errors ...
@@ -501,7 +483,6 @@ public class OrderController {
 						sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
 					}
 					String message = sb.toString();
-					logger.error(message);
 					throw new IllegalArgumentException(message);
 				}	
 			}
@@ -521,128 +502,104 @@ public class OrderController {
 	public OrderDTO updateOrderForBusiness(Long businessId, Long orderId, OrderDTO orderData) {
 		Order order = getOrder(businessId, orderId);
 		if(order == null) {
-			logger.error("Order cannot be updated, orderId not found!");
-			return null;
+			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
 		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
 		
 		if(!order.getStatus().isTransitionAllowed(orderData.getStatus())) {
-			logger.error("{} cannot update, change from {} to {} forbidden.",
-					new Object[] { order.getKey(), order.getStatus(), orderData.getStatus()} );
-			return null;
+			throw new IllegalArgumentException(String.format("Order cannot be updated, change from %s to %s forbidden.",
+					order.getStatus(), orderData.getStatus() ));
 		}
-//		// Check that status CANCELLED will not be changed.
-//		if(OrderStatus.CANCELED.equals(order.getStatus())) {
-//			logger.error("{} already cancelled, cannot update", order.getKey());
-//			return null;
-//		}
-//		
-//		// Check that the status CART cannot be changed from this request.
-//		// ( only consumer can place an order from the cart, a business would directy create it as recieved)
-//		if(OrderStatus.CART.equals(order.getStatus())) {
-//			logger.error("{} still in cart, cannot update", order.getKey());
-//			return null;
-//		}
-//		// Check that the request doesnt set the status to CART.
-//		if(OrderStatus.CART.equals(orderData.getStatus())) {
-//			logger.error("{} update status to CART not allowed", order.getKey());
-//			return null;
-//		}
-//		// Check if the new status is different from the current status.	
-//		if(orderData.getStatus().equals(order.getStatus())) {
-//			logger.info("{} status already, set to {}", order.getStatus());
-//			return orderData;
-//		}
-//		// Check that status RECEIVED will not be overwritten with an earlier status, only with CANCELED
-//		if(OrderStatus.RECEIVED.equals(order.getStatus()) && !orderData.getStatus().equals(OrderStatus.CANCELED)) {
-//			logger.error("{} status RECEIVED can only be set to CANCELLED, unable to update", order.getKey());
-//			return null;
-//		}
-//		
-			
-			
+		
+		OrderStatus oldStatus = order.getStatus();
 		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
-		//order.setComment(orderData.getComment());
-		//order.setAmount(orderData.getAmount());
 		
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		if(violations.isEmpty()) {
 			// save order
 			if( orderRepo.saveOrUpdate(order) == null )
 				throw new RuntimeException("order could not be updated, id: " + orderId);
-
-			// Get all pending requests sorted by oldest first.
-			List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
-			
-			String newCheckInStatus = null;
-			String oldSpotStatus = requests.get(0).getStatus();
-			
-			for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
-				Request request = iterator.next();
-				if( request.getType() == RequestType.ORDER &&  request.getObjectId().equals(order.getId())) {
-					requestRepo.delete(request);
-					iterator.remove();
-				}
-				// Look for other order requests for the current checkin as long as we have no new status or there are no more requests ...
-				else if( newCheckInStatus == null && request.getType() == RequestType.ORDER && request.getCheckIn().getId() == checkIn.getId()) {
-					// ... set the status to the new found one.
-					newCheckInStatus = request.getStatus();
-				}
-			}
-			
-			// No other requests for the current checkin were found ...
-			if(newCheckInStatus == null) {
-				// ... set the status back to CHECKEDIN.
-				newCheckInStatus = CheckInStatus.CHECKEDIN.toString();
-			}
 			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 			
-			// Add a message with updated order status to the message package.
-			messages.add(new MessageDTO("order","update",orderData));
-			
-			String newSpotStatus;
-			// Save the status of the next request in line, if there is one.
-			if( !requests.isEmpty()) {
-				newSpotStatus = requests.get(0).getStatus();
-			}
-			else
-				newSpotStatus = CheckInStatus.CHECKEDIN.toString();
-			// If the spot status needs to be updated ...
-			if(!oldSpotStatus.equals(newSpotStatus)) {
-				// Add a message with updated spot status to the package.
-				SpotStatusDTO spotData = new SpotStatusDTO();
-				spotData.setId(checkIn.getSpot().getId());
-				spotData.setStatus(newSpotStatus);
-				messages.add(new MessageDTO("spot","update",spotData));
-			}	
-			
-			// If the payment hasnt already been requested and the checkin status has changed ...  
-			if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
-				// ...update the status of the checkIn in the datastore ...
-				checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
-				checkInRepo.saveOrUpdate(checkIn);
+			// Check that we actually had a placed request.
+			if(oldStatus == OrderStatus.PLACED && order.getStatus() != oldStatus) {
+				// Get all pending requests sorted by oldest first.
+				List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 				
-				// ... and add a message with updated checkin status to the package.
-				messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+				String newCheckInStatus = null;
+				// Save the current assumed spot status for reference.
+				String oldSpotStatus = requests.get(0).getStatus();
+				
+				for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
+					Request request = iterator.next();
+					if( request.getType() == RequestType.ORDER &&  request.getObjectId().equals(order.getId())) {
+						requestRepo.delete(request);
+						iterator.remove();
+					}
+					// Look for other order requests for the current checkin as long as we have no new status or there are no more requests ...
+					else if( newCheckInStatus == null && request.getType() == RequestType.ORDER && request.getCheckIn().getId() == checkIn.getId()) {
+						// ... set the status to the new found one.
+						newCheckInStatus = request.getStatus();
+					}
+				}
+				
+				// No other requests for the current checkin were found ...
+				if(newCheckInStatus == null) {
+					// ... set the status back to CHECKEDIN.
+					newCheckInStatus = CheckInStatus.CHECKEDIN.toString();
+				}
+				
+				String newSpotStatus;
+				// Save the status of the next request in line, if there is one.
+				if( !requests.isEmpty()) {
+					newSpotStatus = requests.get(0).getStatus();
+				}
+				else
+					newSpotStatus = CheckInStatus.CHECKEDIN.toString();
+				// If the spot status needs to be updated ...
+				if(!oldSpotStatus.equals(newSpotStatus)) {
+					// Add a message with updated spot status to the package.
+					SpotStatusDTO spotData = new SpotStatusDTO();
+					spotData.setId(checkIn.getSpot().getId());
+					spotData.setStatus(newSpotStatus);
+					messages.add(new MessageDTO("spot","update",spotData));
+				}	
+				
+				// If the payment hasnt already been requested and the checkin status has changed ...  
+				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
+					// ...update the status of the checkIn in the datastore ...
+					checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
+					checkInRepo.saveOrUpdate(checkIn);
+					
+					// ... and add a message with updated checkin status to the package.
+					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+				}
 			}
-			
-			try {
-				channelCtrl.sendMessagesToAllClients(businessId, messages);
-			} catch (Exception e) {
-				e.printStackTrace();
+			// if the order changed send a update message
+			if(oldStatus != order.getStatus()) {
+				// Add a message with updated order status to the message package.
+				messages.add(new MessageDTO("order","update",orderData));
+			}
+			// Send messages if there are any.
+			if(!messages.isEmpty()) {
+				try {
+					channelCtrl.sendMessagesToAllClients(businessId, messages);
+				} catch (Exception e) {
+					logger.error("error while sending messages", e);
+				}
 			}
 		}
 		else {
 			// build validation error messages
-			String message = "";
+			String message = "Validation errors:\n";
 			for (ConstraintViolation<Order> constraintViolation : violations) {
 				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
 				
 			}
-			throw new RuntimeException("Validation errors:\n"+message);
+			throw new RuntimeException(message);
 		}
 
 		return orderData; //transform.orderToDto( order );

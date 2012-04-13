@@ -73,24 +73,30 @@ public class MenuController {
 		return menuDTOs;
 	}
 
+	/**
+	 * Retrieve all products saved for the given business.
+	 * 
+	 * @param businessId
+	 * @return
+	 */
 	public Collection<ProductDTO> getAllProducts(Long businessId) {
-		
 		return transform.productsToDto(productRepo.getByParent( new Key<Business>(Business.class, businessId)));
 	}
 	
+	/**
+	 * Retrieve the saved product.
+	 * 
+	 * @param businessId
+	 * @param id
+	 * @return product DTO
+	 */
 	public ProductDTO getProduct(Long businessId, Long id) {
-		logger.info("Trying to get product id : " + id + " for business : id");
-		ProductDTO productDto = new ProductDTO(); 
-		
 		try {
-			productDto = transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
-			
+			return transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
 		} catch (NotFoundException e) {
-			logger.error("Product not found with id "+id, e);
+			logger.error("Unable to retrieve product, no matching entity found");
 			return null;
 		}
-			
-		return productDto;
 	}
 
 }

@@ -101,7 +101,7 @@ public class BusinessesResource{
 	@Consumes("application/json; charset=UTF-8")
 	public String placeOrder(@PathParam("businessId")Long businessId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
 		Long orderId = null;
-		orderId = orderCtrl.placeOrder(businessId, checkInId, order);	
+		orderId = orderCtrl.placeOrderInCart(businessId, checkInId, order);	
 		return orderId.toString();
 	}
 	

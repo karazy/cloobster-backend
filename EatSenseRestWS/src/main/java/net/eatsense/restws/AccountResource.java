@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 @Path("accounts")
 public class AccountResource {
@@ -73,7 +74,10 @@ public class AccountResource {
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") Long businessId, @FormParam("clientId") String clientId) {
-		return accountCtr.requestToken(businessId, clientId);
+		String token = accountCtr.requestToken(businessId, clientId);
+		if(token == null)
+			throw new NotFoundException();
+		return token;
 	};
 	
 }

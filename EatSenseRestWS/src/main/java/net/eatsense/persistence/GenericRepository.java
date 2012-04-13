@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
@@ -119,12 +120,13 @@ public class GenericRepository<T> extends DAOBase{
 	 * @param id
 	 * 		Id of entity to find.
 	 * @return
-	 * 		Found entity. <code>null</code> if no entity with this id exists.
+	 * 		Found entity.
+	 * @throws NotFoundException if no entity with the given id was found
 	 */
-	public T getById(long id) {
+	public T getById(long id) throws NotFoundException {
 		logger.info("findByKey {} ", id);
 		
-		return ofy().find(clazz, id);
+		return ofy().get(clazz, id);
 	}
 
 	/**
@@ -136,8 +138,9 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		Id of entity to load
 	 * @return
 	 * 		Found entity
+	 * @throws NotFoundException if no entity with the given id and parent was found
 	 */
-	public <V> T getById(Key<V> owner, long id) {
+	public <V> T getById(Key<V> owner, long id) throws NotFoundException {
 		logger.info("getByKey {} ", id); 
 		return ofy().get(new Key<T>(owner, clazz, id));
 	}
@@ -150,7 +153,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 * 		Found entity
 	 */
-	public <V> T getByKey(Key<T> key) {
+	public <V> T getByKey(Key<T> key) throws NotFoundException {
 		logger.info("getByKey {} ", key); 
 		return ofy().get(key);
 	}
@@ -163,7 +166,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 * 		Found entity
 	 */
-	public Collection<T> getByKeys(List<Key<T>> keys) {
+	public Collection<T> getByKeys(List<Key<T>> keys) throws NotFoundException {
 		
 		return ofy().get(keys).values();
 	}

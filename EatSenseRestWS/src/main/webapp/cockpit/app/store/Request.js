@@ -3,5 +3,6 @@ Ext.define('EatSense.store.Request', {
 	config: {
 		model: 'EatSense.model.Request',
 		storeId: 'requestStore',
+		syncRemovedRecords: false
 	}			
 });
