@@ -121,11 +121,18 @@ public class OrderController {
 			logger.error("Order cannot be updated, payment already requested or not checked in");
 			return null;
 		}
-		if(order.getStatus() != OrderStatus.CART) {
+		
+		if(orderData.getStatus() != OrderStatus.PLACED) {
+			logger.error("Order cannot be updated, not allowed to set status other than PLACED.");
+			return null;
+		}
+		
+		if(!order.getStatus().isTransitionAllowed(OrderStatus.PLACED)) {
 			logger.error("Order cannot be updated, order already placed or completed.");
 			return null;
 		}
 		
+		OrderStatus oldStatus = order.getStatus();
 		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
 		order.setComment(orderData.getComment());
@@ -158,8 +165,8 @@ public class OrderController {
 			if( orderRepo.saveOrUpdate(order) == null )
 				throw new RuntimeException("order could not be updated, id: " + orderId);
 			orderData = transform.orderToDto( order );
-			// only create a new request if the order status was updated to be placed
-			if(order.getStatus() == OrderStatus.PLACED) {
+			// only create a new request if the order status was updated
+			if(order.getStatus() != oldStatus) {
 				
 				checkIn.setStatus(CheckInStatus.ORDER_PLACED);
 				checkInRepo.saveOrUpdate(checkIn);

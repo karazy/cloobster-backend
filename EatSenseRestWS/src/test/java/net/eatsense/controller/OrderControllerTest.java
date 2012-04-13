@@ -98,7 +98,7 @@ public class OrderControllerTest {
 		helper.tearDown();
 	}
 	@Test
-	public void testPlaceOrder() {
+	public void testPlaceAndUpdateOrder() {
 		
 		assertThat(checkIn.getUserId(), notNullValue());
 				
@@ -162,10 +162,28 @@ public class OrderControllerTest {
 		for (OrderDTO dto : orders) {
 			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
 		}
-		//#4 Update order to placed
+		
+		//#4.1 Update order to placed
 		placedOrder.setStatus(OrderStatus.PLACED);
 		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), placedOrder.getId(), placedOrder, checkIn.getUserId());
 		assertThat(placedOrder.getStatus(), is(OrderStatus.PLACED) );
+		
+		//#4.2 Try to update order with status to CART.
+		placedOrder.setStatus(OrderStatus.CART);
+		OrderDTO result = orderCtrl.updateOrder(checkIn.getBusinessId(), placedOrder.getId(), placedOrder, checkIn.getUserId());
+		//... should return null, because we cannot update the status again.
+		assertThat(result, nullValue() );
+		
+		//#4.3 Update amount and comment after order was placed.
+		placedOrder.setStatus(OrderStatus.PLACED);
+		placedOrder.setAmount(1);
+		String comment = "No comment";
+		placedOrder.setComment(comment);
+		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), placedOrder.getId(), placedOrder, checkIn.getUserId());
+		
+		assertThat(placedOrder.getAmount(), is(1));
+		assertThat(placedOrder.getComment(), is(comment));
+		
 	}
 	
 	@Test

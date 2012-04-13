@@ -195,7 +195,7 @@ public class ChannelController {
 	}
 	
 	/**
-	 * Send a list of messages as one package over the channel as a JSON array.
+	 * Send a list of messages as one package to all subscribed channels of this business as a JSON array.
 	 * 
 	 * @param businessId
 	 * @param messages
@@ -211,7 +211,7 @@ public class ChannelController {
 			throws JsonGenerationException, JsonMappingException, IOException  {
 		Business business = businessRepo.getById(businessId);
 		String messageString = buildJson(content);
-		logger.debug("sending message {} ...", messageString);
+		logger.info("sending message {} ...", messageString);
 		
 		if(business.getChannelIds() != null) {
 			
