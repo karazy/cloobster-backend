@@ -19,7 +19,7 @@ Ext.define('EatSense.model.Request', {
 		},
 		{
 			name: 'spotId'
-		},
+		}
 		],
 		associations : {
 			type : 'hasOne',

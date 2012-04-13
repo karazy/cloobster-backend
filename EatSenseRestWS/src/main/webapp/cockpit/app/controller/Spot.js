@@ -154,8 +154,8 @@ Ext.define('EatSense.controller.Spot', {
 			 	if(success) { 		
 			 		me.setActiveSpot(data);
 			 		titlebar.setTitle(data.get('name'));
-			 		if(records.length > 0) {
-			 			requestCtr.loadRequests();
+			 		requestCtr.loadRequests();
+			 		if(records.length > 0) {			 			
 			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
 			 			me.getSpotDetailCustomerList().select(0);
 			 		}

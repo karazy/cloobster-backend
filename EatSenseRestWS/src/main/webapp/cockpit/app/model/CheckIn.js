@@ -22,6 +22,10 @@ Ext.define('EatSense.model.CheckIn', {
 			name : 'checkInTime',
 			type : 'date',
 			dateFormat : 'time'
+		},
+		{	//foreign key for checkIn. Don't send to server.
+			name: 'request_id',
+			persist: false
 		}],
 		proxy : {
 			type : 'rest',

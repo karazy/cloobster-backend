@@ -10,7 +10,7 @@ Ext.define('EatSense.controller.Request',{
 			customerRequestDialog: {
 		    	selector: 'customerrequest',
 		    	xtype: 'customerrequest',
-		    	autoCreate: true
+		    	// autoCreate: true
 		    },
 			dismissRequestsButton: 'customerrequest button[action=dismiss]',
 			customerRequestList: 'customerrequest list'
@@ -35,6 +35,9 @@ Ext.define('EatSense.controller.Request',{
 				requestStore = Ext.StoreManager.lookup('requestStore'),
 				checkInStore = Ext.StoreManager.lookup('checkInStore'),
 				assocCheckIn;
+
+		//empty the store
+		requestStore.removeAll();
 
 		//check if customer requests for this spot exist and display them
 		requestStore.load({
@@ -90,9 +93,9 @@ Ext.define('EatSense.controller.Request',{
 					oldRequest = requestStore.getById(requestModel.get('id'));
 					if(oldRequest) {
 						requestStore.remove(oldRequest);
-						if(requestStore.getCount() == 0) {
-							this.getCustomerRequestDialog().hide();
-						}
+						// if(requestStore.getCount() == 0) {
+						// 	this.getCustomerRequestDialog().hide();
+						// }
 					}					
 				}
 			}
@@ -108,8 +111,8 @@ Ext.define('EatSense.controller.Request',{
 
 		//show detail view
 		this.getCustomerRequestList().refresh();
-		Ext.Viewport.add(dialog);
-		dialog.show();
+		// Ext.Viewport.add(dialog);
+		// dialog.show();
 	},
 
 	/**
@@ -119,10 +122,12 @@ Ext.define('EatSense.controller.Request',{
 		var 	loginCtr = this.getApplication().getController('Login'),
 				requestStore = Ext.StoreManager.lookup('requestStore');
 
+		requestStore.setSyncRemovedRecords(true);
 		requestStore.removeAll();
 		requestStore.sync();
+		requestStore.setSyncRemovedRecords(false);
 
-		this.getCustomerRequestDialog().hide();
+		// this.getCustomerRequestDialog().hide();
 	}
 
 });

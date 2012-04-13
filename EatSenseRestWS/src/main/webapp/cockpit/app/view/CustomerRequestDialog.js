@@ -2,19 +2,25 @@ Ext.define('EatSense.view.CustomerRequestDialog', {
 	extend: 'Ext.Panel',
 	xtype: 'customerrequest',
 	config: {
-		modal: true,
-		hideOnMaskTap: true,
+		// modal: true,
+		// hideOnMaskTap: true,
 		layout: 'fit',
-		top: '30%',
-		right: '30%',
-		left: '30%',
-		bottom: '30%',
+		// top: '30%',
+		// right: '30%',
+		// left: '30%',
+		// bottom: '30%',
 		items: [
 		{
-			xtype: 'titlebar',
-			docked: 'top',
-			title: Karazy.i18n.translate('requestMsgboxTitle')
+				xtype: 'label',
+				html: Karazy.i18n.translate('requestMsgboxTitle'),
+				docked: 'top',
+				cls: 'spotdetailitem-customer-label'
 		},
+		// {
+		// 	xtype: 'titlebar',
+		// 	docked: 'top',
+		// 	title: Karazy.i18n.translate('requestMsgboxTitle')
+		// },
 		{
 			xtype: 'list',
 			store: 'requestStore',
@@ -29,6 +35,7 @@ Ext.define('EatSense.view.CustomerRequestDialog', {
 		},{
 			xtype: 'toolbar',
 			docked: 'bottom',
+			baseCls: 'spotdetail-toolbar',
 			layout: {
 				type: 'hbox',
 				pack: 'center',

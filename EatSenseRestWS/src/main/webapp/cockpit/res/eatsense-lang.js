@@ -44,8 +44,8 @@ var translation = {
 		"spotSelectionTitle" : "Tisch auswählen",
 		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",
 		//requests
-		"requestMsgboxTitle" : "Kundenwunsch",
-		"requestDismiss" : "Verwerfen",
+		"requestMsgboxTitle" : "Kundenwünsche",
+		"requestDismiss" : "Alle Verwerfen",
 		//constants
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",
