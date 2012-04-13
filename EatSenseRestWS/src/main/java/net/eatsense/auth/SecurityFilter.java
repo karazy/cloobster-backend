@@ -13,15 +13,14 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.controller.AccountController;
-import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.persistence.CheckInRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
@@ -31,16 +30,9 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
  */
 public class SecurityFilter implements ContainerRequestFilter {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	@Inject
-	private CheckInController checkInCtrl;
-	
-	@Inject
+
 	private AccountController accountCtrl;
 	
-    public void setAccountCtrl(AccountController accountCtrl) {
-		this.accountCtrl = accountCtrl;
-	}
-
 	/**
      * <p>The URI information for this request.</p>
      */
@@ -49,9 +41,13 @@ public class SecurityFilter implements ContainerRequestFilter {
     
     @Context
     HttpServletRequest servletRequest;
+    
+	private CheckInRepository checkInRepo;
 	
-	public void setCheckInCtr(CheckInController checkInCtr) {
-		this.checkInCtrl = checkInCtr;
+	@Inject
+	public SecurityFilter(CheckInRepository checkInRepo, AccountController accountController) {
+		this.checkInRepo = checkInRepo;
+		this.accountCtrl = accountController;
 	}
 
 	/* (non-Javadoc)
@@ -126,15 +122,16 @@ public class SecurityFilter implements ContainerRequestFilter {
 	}
 
 	private Authorizer authenticateCheckIn(String checkInId) {
-		CheckIn checkIn = null;
-		try {
-			checkIn = checkInCtrl.getCheckIn(checkInId);
-		} catch (NotFoundException e) {
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+		if(checkIn == null) {
+			logger.info("Invalid checkin uid given");
 			return null;
 		}
-		logger.info("Valid user request recieved from " + checkIn.getNickname());
-		// return a security context build around the checkIn
-		return new Authorizer(checkIn);
+		else {
+			logger.info("Valid user request recieved from " + checkIn.getNickname());
+			// return a security context build around the checkIn
+			return new Authorizer(checkIn);
+		}
 	}
 	
 	/**

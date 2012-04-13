@@ -2,7 +2,6 @@ package net.eatsense.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -112,12 +111,10 @@ public class ChannelController {
 	 * @return the complete message string 
 	 * @throws IOException, JsonGenerationException, JsonMappingException 
 	 */
-	public String sendMessage(String clientId, String type, String action, Object content) throws IOException, JsonGenerationException, JsonMappingException  {
+	public String sendMessage(String clientId, String type, String action, Object content)  {
 		MessageDTO messageData = new MessageDTO();
-
 		messageData.setAction(action);
 		messageData.setType(type);
-		
 		messageData.setContent(content);
 		
 		return sendMessage(clientId, messageData);
@@ -133,15 +130,15 @@ public class ChannelController {
 	 * @return the complete message string 
 	 * @throws IOException, JsonGenerationException, JsonMappingException 
 	 */
-	public String sendMessage(String clientId, MessageDTO messageData) throws IOException, JsonGenerationException, JsonMappingException  {
-		ChannelMessage message = new ChannelMessage(clientId, buildJson(messageData));
+	public String sendMessage(String clientId, MessageDTO messageData)  {
+		ChannelMessage message = new ChannelMessage(clientId, buildJsonMessage(messageData));
 		channelService.sendMessage(message);
 		
 		return message.getMessage();
 	}
 	
 
-	private String buildJson(Object object)  throws IOException, JsonGenerationException, JsonMappingException{
+	private String buildJsonMessage(Object object) {
 		if(object == null) {
 			return null;
 		}
@@ -151,22 +148,18 @@ public class ChannelController {
 		try {
 			// Try to map the message data as a JSON string.
 			messageString = mapper.writeValueAsString(object);
-		} catch (JsonGenerationException e) {
-			throw e;
-		} catch (JsonMappingException e) {
-			throw e;
-		} catch (IOException e) {
-			throw e;
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Cannot build message, error mapping object to JSON : "+ object, e);
 		}
 		if(messageString.length() > 32786)
-			throw new IllegalArgumentException("data package too long, reduce content size");
+			throw new IllegalArgumentException("Cannot build message, data package longer than 32kB");
 		
 		return messageString;
 	}
 	
 	
 	/**
-	 * Send message with only the given string.
+	 * Send message with the given string content.
 	 *  
 	 * @param clientId identifying the client(channel) to send to
 	 * @param messageString the data to send with the message, limited to 32 kb as UTF-8 string
@@ -190,7 +183,7 @@ public class ChannelController {
 	 * @throws JsonMappingException 
 	 * @throws JsonGenerationException 
 	 */
-	public void sendMessageToAllClients(Long businessId, String type, String action, Object content) throws JsonGenerationException, JsonMappingException, IOException  {
+	public void sendMessageToAllClients(Long businessId, String type, String action, Object content) {
 		sendJsonToAllClients(businessId, new MessageDTO(type, action, content));
 	}
 	
@@ -203,18 +196,20 @@ public class ChannelController {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public void sendMessagesToAllClients(Long businessId, List<MessageDTO> content) throws JsonGenerationException, JsonMappingException, IOException  {
+	public void sendMessagesToAllClients(Long businessId, List<MessageDTO> content)  {
 		sendJsonToAllClients(businessId, content);
 	}
 	
-	private void sendJsonToAllClients(Long businessId, Object content)
-			throws JsonGenerationException, JsonMappingException, IOException  {
+	private void sendJsonToAllClients(Long businessId, Object content)  {
 		Business business = businessRepo.getById(businessId);
-		String messageString = buildJson(content);
+		if(business == null)
+			throw new IllegalArgumentException("Unable to send message, unknown business id given.");
+		
+		String messageString = buildJsonMessage(content);
 		logger.info("sending message {} ...", messageString);
 		
 		if(business.getChannelIds() != null) {
-			
+			// Send to all clients registered to the business ...
 			for (String clientId : business.getChannelIds()) {
 				sendMessageRaw(clientId, messageString);
 				logger.debug("sent message to channel {} ", clientId);
@@ -235,8 +230,7 @@ public class ChannelController {
 		try {
 			clientId = channelService.parsePresence(request).clientId();
 		} catch (IOException e) {
-			logger.error("could not parse presence", e);
-			throw new RuntimeException(e);
+			throw new RuntimeException("could not parse presence",e);
 		}
 		logger.debug("recieved disconnected from clientId:" + clientId);
 		unsubscribeClient(clientId);
@@ -255,8 +249,7 @@ public class ChannelController {
 		try {
 			clientId = channelService.parsePresence(request).clientId();		
 		} catch (IOException e) {
-			logger.error("could not parse presence", e);
-			throw new RuntimeException(e);
+			throw new RuntimeException("could not parse presence",e);
 		}
 		logger.debug("recieved connected from clientId:" + clientId);
 		subscribeToBusiness(clientId);
@@ -296,8 +289,11 @@ public class ChannelController {
 		Long businessId = Long.valueOf(clientId.substring(0, clientId.indexOf("|") ));
 		
 		Business business = businessRepo.getById(businessId);
-				
-		return business;
+		if(business == null) {
+			throw new IllegalArgumentException("unknown businessId encoded in clientId: "+ clientId);
+		}
+		else
+			return business;
 	}
 
 	
@@ -308,16 +304,10 @@ public class ChannelController {
 	 */
 	public void subscribeToBusiness( String clientId) {
 		Business business = parseBusiness(clientId);
-		
-		if(business == null) {
-			throw new IllegalArgumentException("unknown businessId encoded in clientId: "+ clientId);
-		}
-		else { 
-			if(business.getChannelIds() == null)
-				business.setChannelIds(new ArrayList<String>());
-			business.getChannelIds().add(clientId);
-			businessRepo.saveOrUpdate(business);
-		}
+		if(business.getChannelIds() == null)
+			business.setChannelIds(new ArrayList<String>());
+		business.getChannelIds().add(clientId);
+		businessRepo.saveOrUpdate(business);
 	}
 
 }

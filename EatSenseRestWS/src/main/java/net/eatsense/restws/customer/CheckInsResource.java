@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 import net.eatsense.controller.BusinessController;
@@ -66,7 +67,10 @@ public class CheckInsResource {
 	@Path("{checkInId}")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO getCheckIn(@PathParam("checkInId") String checkInId) {
-		return checkInCtrl.getCheckInAsDTO(checkInId);
+		CheckInDTO checkIn = checkInCtrl.getCheckInAsDTO(checkInId);
+		if(checkIn == null)
+			throw new NotFoundException();
+		return checkIn;
 	}
 	
 	@DELETE

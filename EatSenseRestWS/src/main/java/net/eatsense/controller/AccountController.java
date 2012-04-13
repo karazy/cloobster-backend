@@ -169,22 +169,6 @@ public class AccountController {
 		
 		return toDto(account);
 	}
-	
-	/**
-	 * Get the account data for the given login and authenticate with the given password.
-	 * 
-	 * @param login
-	 * @param password
-	 * @return AccountDTO containing the account data
-	 */
-	public AccountDTO getAccount(String login) {
-		Account account = accountRepo.getByProperty("login", login);
-		if(account == null)
-			return null;
-		
-		return toDto(account);
-	}
-
 
 	/**
 	 * Get a list of businesses the given account manages.
@@ -218,6 +202,8 @@ public class AccountController {
 	public String requestToken (Long businessId, String clientId) {
 		logger.debug("new token requested for "+clientId);
 		Business business = businessRepo.getById(businessId);
+		if(business == null)
+			return null;
 		return channelCtrl.createChannel(business, clientId);
 	}
 }

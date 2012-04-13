@@ -21,7 +21,6 @@ import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
-import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.validation.CheckInStep2;
 import net.eatsense.persistence.BusinessRepository;
@@ -30,7 +29,6 @@ import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
@@ -111,7 +109,7 @@ public class CheckInController {
     	SpotDTO spotDto = new SpotDTO();
     	Spot spot = barcodeRepo.getByProperty("barcode", barcode);
     	if(spot == null )
-    		throw new NotFoundException("barcode unknown");
+    		return null;
     	
     	Business business = businessRepo.getByKey(spot.getBusiness());
     	
@@ -130,17 +128,16 @@ public class CheckInController {
 		String message = null;
 		
 		if(checkInDto == null ) {
-			throw new RuntimeException("checkin data is empty");
+			throw new IllegalArgumentException("Unable to create checkin, data is empty");
 		}
 		if( checkInDto.getStatus()==null || checkInDto.getStatus() != CheckInStatus.INTENT ) {
-			throw new RuntimeException("checkin status should be INTENT but is " + checkInDto.getStatus());
+			throw new IllegalArgumentException("Unable to create checkin, status should be INTENT but is " + checkInDto.getStatus());
 		}
 			
 		// set values for domain object
 		Spot spot = barcodeRepo.getByProperty("barcode", checkInDto.getSpotId());
-		
-    	if(spot == null )
-    		throw new NotFoundException("barcode unknown");
+		if(spot == null )
+    		throw new IllegalArgumentException("Unable to create checkin, spot barcode unknown");
     	
     	Business business = businessRepo.getByKey(spot.getBusiness());
     	
@@ -157,6 +154,7 @@ public class CheckInController {
 
 		// validation 
 		Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn, Default.class, CheckInStep2.class);
+		// check for validation errors ...
 		if( !constraintViolations.isEmpty() )  {
 			// constraint violations occurred setting status and logging error
 			logger.info("CheckIn validation failed. Message(s):");
@@ -167,7 +165,6 @@ public class CheckInController {
 					
 					try {
 						message = mapper.writeValueAsString(new ErrorDTO("checkInErrorNickname", "3","20"));
-						logger.info("Writing json message:" + message);
 					} catch (JsonGenerationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -183,7 +180,6 @@ public class CheckInController {
 				else {
 					try {
 						message = mapper.writeValueAsString(new ErrorDTO("checkInError", violation.getPropertyPath().toString() + " " + violation.getMessage()));
-						logger.info("Writing json message:" + message);
 					} catch (JsonGenerationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -198,11 +194,10 @@ public class CheckInController {
 				}
 					
 			}
-			
-			return null;
 		}			
  		
 		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(checkIn.getSpot());
+		// at least we have the newly created checkin
 		int checkInCount = 1;
 		if(checkInsAtSpot != null) {
 			Iterator<CheckIn> it = checkInsAtSpot.iterator();
@@ -224,8 +219,6 @@ public class CheckInController {
 					//abort checkin
 					throw new RuntimeException(message);
 				}
-				
-				
 			}
 		}
 
@@ -234,10 +227,7 @@ public class CheckInController {
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
 		SpotStatusDTO spotData = new SpotStatusDTO();
-		
 		spotData.setId(spot.getId());
-		// we already have all other checkins in a list, so we count them and add one for the new checkin
-		
 		spotData.setCheckInCount(checkInCount);
 		
 		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
@@ -250,8 +240,7 @@ public class CheckInController {
 		try {
 			channelCtrl.sendMessagesToAllClients(business.getId(), messages);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("error sending messages",e);
 		}
 	
 		return checkInDto;
@@ -315,7 +304,7 @@ public class CheckInController {
 		if(checkInUser.getLinkedUserId() != checkInDto.getLinkedCheckInId()) {
 			CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", checkInDto.getLinkedCheckInId());
 			if(checkInLinkedUser == null )
-				throw new RuntimeException("linkedCheckInId unknown");
+				throw new IllegalArgumentException("Cannot update checkin, linkedCheckInId unknown");
 			
 			if(checkInUser != null && checkInLinkedUser != null) {
 				if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && isPaymentLinkPossible(checkInLinkedUser)) {
@@ -323,8 +312,7 @@ public class CheckInController {
 					save = true;
 				}
 				else
-//					return "Can't link to this user";
-				return null;
+					throw new RuntimeException("Cannot update checkin, unable to link to given checkin");
 			}
 		}
 		//TODO: allow updating of other fields, like nickname
@@ -332,8 +320,7 @@ public class CheckInController {
 		if(save) {
 			checkInRepo.saveOrUpdate(checkInUser);
 		}
-			
-//		return "OK";
+
 		return checkInDto;
 	}
 
@@ -356,11 +343,7 @@ public class CheckInController {
 	 * 		found checkin otherwise <code>null</code>
 	 */
 	public CheckIn getCheckIn(String checkInId) {
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);		
-		if(checkIn == null)
-			// returns with code 404(Not Found)
-			throw new NotFoundException("unknown checkInId: " + checkInId);
-		return checkIn;
+		return checkInRepo.getByProperty("userId", checkInId);
 	}
 	
 	/**
@@ -379,14 +362,18 @@ public class CheckInController {
 	/**
 	 * Delete the checkIn from database only if there are no orders placed or payment requested.
 	 * 
-	 * @param checkInId
+	 * @param checkInUid
 	 */
-	public void checkOut(String checkInId) {
-		CheckIn checkIn = getCheckIn(checkInId);
+	public void checkOut(String checkInUid) {
+		CheckIn checkIn = getCheckIn(checkInUid);
+		if(checkIn == null) {
+			logger.info("Cannot checkout, unknown checkin uid given.");
+			return;
+		}
+			
 		
 		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST) {
-			// return with return code 403(Forbidden)
-			throw new WebApplicationException(Response.noContent().status(Response.Status.FORBIDDEN).build());
+			throw new RuntimeException("Cannot checkout, order or payment in progress");
 		}
 		else {
 			List<MessageDTO> messages = new ArrayList<MessageDTO>();
@@ -405,8 +392,7 @@ public class CheckInController {
 			try {
 				channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("error sending messages", e);
 			}
 		}			
 	}
@@ -423,8 +409,7 @@ public class CheckInController {
 		// Check if the business exists.
 		Business business = businessRepo.getById(businessId);
 		if(business == null) {
-			logger.error("CheckIns cannot be retrieved, businessId unknown: " + businessId);
-			throw new NotFoundException("CheckIns cannot be retrieved, businessId unknown: " + businessId);
+			return null;
 		}
 		
 		return getCheckInsBySpot(Spot.getKey(business.getKey(), spotId));
@@ -433,15 +418,17 @@ public class CheckInController {
 	/**
 	 * Delete the checkin and all related entities.
 	 * 
-	 * @param checkInId
+	 * @param checkInUid
 	 */
-	public void deleteCheckIn(Long checkInId) {
+	public void deleteCheckIn(Long checkInUid) {
 		Objectify ofy = checkInRepo.ofy();
 		
-		CheckIn checkIn = checkInRepo.getById(checkInId);
-		if(checkIn == null)
+		CheckIn checkIn = checkInRepo.getById(checkInUid);
+		if(checkIn == null) {
+			logger.info("Cannot checkout, unknown checkin uid given.");
 			return;
-		
+		}
+			
 		// Delete requests
 		ofy.delete(ofy.query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).listKeys());
 		
@@ -476,20 +463,26 @@ public class CheckInController {
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
 		messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
-		try {
-			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
+		channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
 	}
 
+	/**
+	 * Update a checkin to move to a new spot.
+	 * 
+	 * @param checkInId
+	 * @param checkInData
+	 * @return updated checkin data
+	 */
 	public CheckInStatusDTO updateCheckInAsBusiness(Long checkInId, CheckInStatusDTO checkInData) {
 		Objectify ofy = checkInRepo.ofy();
 		
 		CheckIn checkIn = checkInRepo.getById(checkInId);
-		
-		if(checkIn == null)
+		if(checkIn == null) {
+			logger.info("unable to update checkin, unknown uid given");
 			return null;
+		}
+			
 		List<MessageDTO> messages = new ArrayList<MessageDTO>();
 		Key<Spot> oldSpotKey = checkIn.getSpot();
 		Key<Spot> newSpotKey = Spot.getKey(checkIn.getBusiness(), checkInData.getSpotId());
@@ -539,11 +532,7 @@ public class CheckInController {
 			
 			messages.add(new MessageDTO("spot", "update", spotData));
 			
-			try {
-				channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
 		}
 		
 		return checkInData;

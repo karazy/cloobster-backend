@@ -114,27 +114,25 @@ public class OrderController {
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
-			logger.error("Order cannot be updated, checkin not found!");
-			return null;
+			throw new IllegalArgumentException("Order cannot be updated, invalid checkInUid given");
+		}
+		// Check if the order belongs to the specified checkin.
+		if(! checkIn.getId().equals(order.getCheckIn().getId()) ) {
+			throw new IllegalArgumentException("Order cannot be updated, checkIn does not own the order.");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			logger.error("Order cannot be updated, payment already requested or not checked in");
-			return null;
+			throw new RuntimeException("Order cannot be updated, payment already requested or not checked in");
+		}
+		if(order.getStatus() == OrderStatus.PLACED) {
+			throw new RuntimeException("Order cannot be updated, not allowed update after status is PLACED.");
 		}
 		
 		if(orderData.getStatus() != OrderStatus.PLACED) {
-			logger.error("Order cannot be updated, not allowed to set status other than PLACED.");
-			return null;
+			throw new IllegalArgumentException("Order cannot be updated, invalid status given: " + orderData.getStatus());
 		}
-		
-		if(order.getStatus() == OrderStatus.PLACED) {
-			logger.error("Order cannot be updated, not allowed update after status is PLACED.");
-			return null;
-		}
-				
+			
 		if(!order.getStatus().isTransitionAllowed(OrderStatus.PLACED)) {
-			logger.error("Order cannot be updated, order already placed or completed.");
-			return null;
+			throw new RuntimeException("Order cannot be updated, already PLACED");
 		}
 		
 		OrderStatus oldStatus = order.getStatus();
@@ -207,18 +205,18 @@ public class OrderController {
 				try {
 					channelCtrl.sendMessagesToAllClients(businessId, messages);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("error sending messages", e);
 				}
 			}
 		}
 		else {
 			// build validation error messages
-			String message = "";
+			String message = "Validation errors:\n";
 			for (ConstraintViolation<Order> constraintViolation : violations) {
 				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
 				
 			}
-			throw new RuntimeException("Validation errors:\n"+message);
+			throw new IllegalArgumentException(message);
 		}
 
 		return orderData;
@@ -345,26 +343,23 @@ public class OrderController {
 	 * Create a new Order entity with status CART and save in the datastore.
 	 * 
 	 * @param businessId
-	 * @param checkInId
-	 * @param order
+	 * @param checkInUid
+	 * @param orderData
 	 * @return id of the order
 	 */
-	public Long placeOrder(Long businessId, String checkInId, OrderDTO order) {
+	public Long placeOrder(Long businessId, String checkInUid, OrderDTO orderData) {
 		Long orderId = null;
 		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null) {
-			logger.error("Order cannot be placed, checkin not found!");
-			return null;
+			throw new IllegalArgumentException("Order cannot be placed, checkin not found!");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			logger.error("Order cannot be placed, payment already requested or not checked in");
-			return null;
+			throw new RuntimeException("Order cannot be placed, payment already requested or not checked in");
 		}
 		
-		if( order.getStatus() != OrderStatus.CART ) {
-			logger.error("Order cannot be placed, unexpected order status: "+order.getStatus());
-			return null;
+		if( orderData.getStatus() != OrderStatus.CART ) {
+			throw new IllegalArgumentException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
 		}
 		
 		// Check if the business exists.
@@ -374,30 +369,27 @@ public class OrderController {
 			return null;
 		}
 		if(business.getId() != checkIn.getBusiness().getId()) {
-			logger.error("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
-			return null;
+			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
 		}
 		
 		// Check if the product to be ordered exists
-		Product product = productRepo.getById(checkIn.getBusiness(), order.getProduct().getId());
+		Product product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
 		if(product == null) {
-			logger.error("Order cannot be placed, productId unknown: "+ order.getProduct().getId());
-			return null;
+			throw new IllegalArgumentException("Order cannot be placed, productId unknown: "+ orderData.getProduct().getId());
 		}
 		Key<Product> productKey = product.getKey();
 		
 		List<OrderChoice> choices = null;
-		if(order.getProduct().getChoices() != null) {
+		if(orderData.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
 			
-			for (ChoiceDTO choiceDto : order.getProduct().getChoices()) {
+			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
 				OrderChoice choice = new OrderChoice();
 				int selected = 0;
 				Choice originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
 				
 				if(originalChoice == null) {
-					logger.error("Order cannot be placed, unknown choice id="+choiceDto.getId());
-					return null;
+					throw new IllegalArgumentException("Order cannot be placed, unknown choice id="+choiceDto.getId());
 				}
 				if(choiceDto.getOptions() != null ) {
 					
@@ -407,13 +399,11 @@ public class OrderController {
 					}
 					// Validate choice selection
 					if(selected < originalChoice.getMinOccurence() ) {
-						logger.error("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
-						return null;
+						throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
 					}
 					
 					if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
-						logger.error("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
-						return null;
+						throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
 					}
 
 					originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
@@ -427,7 +417,7 @@ public class OrderController {
 		}
 		
 
-		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, order.getAmount(), choices, order.getComment());		
+		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());		
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();
@@ -479,8 +469,7 @@ public class OrderController {
 		}
 		
 		if(orderKey == null ) {
-			logger.error("Error saving order for product: " +product.toString());
-			return null;
+			throw new RuntimeException("Error saving order for product: " +product.toString());
 		}
 		
 		if(choices != null) {
@@ -493,8 +482,7 @@ public class OrderController {
 				
 				if(choiceViolations.isEmpty()) {
 					if ( orderChoiceRepo.saveOrUpdate(orderChoice) == null ) {
-						logger.error("Error saving choices for order: " +orderKey.toString());
-						return null;
+						throw new RuntimeException("Error saving choices for order: " +orderKey.toString());
 					}
 				}
 				else { // handle validation errors ...
@@ -506,7 +494,6 @@ public class OrderController {
 						sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
 					}
 					String message = sb.toString();
-					logger.error(message);
 					throw new IllegalArgumentException(message);
 				}	
 			}
@@ -525,19 +512,14 @@ public class OrderController {
 	 */
 	public OrderDTO updateOrderForBusiness(Long businessId, Long orderId, OrderDTO orderData) {
 		Order order = getOrder(businessId, orderId);
-		if(order == null) {
-			logger.error("Order cannot be updated, orderId not found!");
-			return null;
-		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
 		
 		if(!order.getStatus().isTransitionAllowed(orderData.getStatus())) {
-			logger.error("{} cannot update, change from {} to {} forbidden.",
-					new Object[] { order.getKey(), order.getStatus(), orderData.getStatus()} );
-			return null;
+			throw new IllegalArgumentException(String.format("Order cannot be updated, change from %s to %s forbidden.",
+					order.getStatus(), orderData.getStatus() ));
 		}
-			
+		
 		OrderStatus oldStatus = order.getStatus();
 		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
@@ -614,18 +596,18 @@ public class OrderController {
 				try {
 					channelCtrl.sendMessagesToAllClients(businessId, messages);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("error while sending messages", e);
 				}
 			}
 		}
 		else {
 			// build validation error messages
-			String message = "";
+			String message = "Validation errors:\n";
 			for (ConstraintViolation<Order> constraintViolation : violations) {
 				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
 				
 			}
-			throw new RuntimeException("Validation errors:\n"+message);
+			throw new RuntimeException(message);
 		}
 
 		return orderData; //transform.orderToDto( order );

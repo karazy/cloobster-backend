@@ -73,6 +73,13 @@ public class BillController {
 		this.billRepo = billRepo;
 	}
 	
+	/**
+	 * Retrieve a bill for the given checkin.
+	 * 
+	 * @param businessId
+	 * @param checkInId entity id
+	 * @return bill DTO or null if not found 
+	 */
 	public BillDTO getBillForCheckIn(Long businessId, Long checkInId) {
 		BillDTO billData = new BillDTO();
 		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(Business.getKey(businessId)).filter("checkIn", CheckIn.getKey(checkInId)).get();
@@ -89,6 +96,14 @@ public class BillController {
 		return billData;
 	}
 	
+	/**
+	 * Update a bill to cleared status.
+	 * 
+	 * @param businessId
+	 * @param billId
+	 * @param billData
+	 * @return updated bill DTO
+	 */
 	public BillDTO updateBill(Long businessId, Long billId , BillDTO billData) {
 		// Check if the business exists.
 		Business business = businessRepo.getById(businessId);
@@ -105,9 +120,13 @@ public class BillController {
 		
 		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
 		if(checkIn == null) {
-			logger.error("Bill cannot be updated, check in not found.");
-			return null;
+			throw new IllegalArgumentException("Bill cannot be updated, check in not found.");
 		}
+		
+		if(billData.isCleared() == false) {
+			throw new IllegalArgumentException("Bill cannot be updated, cleared must be set to true");
+		}
+			
 		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", bill.getCheckIn()).list();
 		
@@ -188,6 +207,14 @@ public class BillController {
 		return billData;
 	}
 	
+	/**
+	 * Create a new bill and save it in the datastore with the given paymentmethod.
+	 * 
+	 * @param businessId
+	 * @param checkInId
+	 * @param billData
+	 * @return bill DTO saved
+	 */
 	public BillDTO createBill(Long businessId, String checkInId, BillDTO billData) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
@@ -204,8 +231,7 @@ public class BillController {
 			return null;
 		}
 		if(business.getId() != checkIn.getBusiness().getId()) {
-			logger.error("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
-			return null;
+			throw new IllegalArgumentException("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
 		}
 		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
@@ -293,14 +319,19 @@ public class BillController {
 				// Send messages to notify clients over their channel.
 				channelCtrl.sendMessagesToAllClients(businessId, messages);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("error sending messages", e);
 			}
 
 		}
 		return billData;
 	}
 
+	/**
+	 * Calculate the total price of the order with selected choices.
+	 * 
+	 * @param order
+	 * @return total price of the order
+	 */
 	public Float calculateTotalPrice(Order order) {
 		Float total = 0f;
 		
@@ -322,6 +353,12 @@ public class BillController {
 		return total;
 	}
 
+	/**
+	 * Calculate the total price of the selected options of this choice.
+	 * 
+	 * @param orderChoice
+	 * @return
+	 */
 	private Float calculateTotalPrice(OrderChoice orderChoice) {
 		if( orderChoice.getChoice() == null)
 			throw new IllegalArgumentException("no saved choice for orderChoice with id: " + orderChoice.getId());

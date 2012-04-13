@@ -14,6 +14,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 /**
  * Resource to retrieve spot information by a unique barcode.
@@ -41,8 +42,11 @@ public class SpotResource {
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
 	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
-		
-		return checkInCtr.getSpotInformation(barcode);
+		SpotDTO spot = checkInCtr.getSpotInformation(barcode);
+		if(spot == null)
+			throw new NotFoundException("barcode not found");
+		else
+			return spot;
 	}
 	
 	

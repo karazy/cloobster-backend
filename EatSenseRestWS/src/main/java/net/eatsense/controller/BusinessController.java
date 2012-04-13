@@ -87,7 +87,10 @@ public class BusinessController {
 		if(checkIn == null)
 			throw new NotFoundException();
 		if(checkIn.isArchived())
-			throw new RuntimeException("Cant post request for archived checkin");
+			throw new IllegalArgumentException("Cant post request for archived checkin");
+		
+		if( ! "CALL_WAITER".equals(requestData.getType()))
+			throw new IllegalArgumentException("Unrecognized request type: " + requestData.getType());
 		
 		requestData.setCheckInId(checkIn.getId());
 		requestData.setSpotId(checkIn.getSpot().getId());
@@ -96,6 +99,7 @@ public class BusinessController {
 		
 		for (Request oldRequest : requests) {
 			if(oldRequest.getType() == RequestType.CUSTOM && oldRequest.getStatus().equals("CALL_WAITER")) {
+				logger.info("{} already registered.", oldRequest.getKey());
 				oldRequest.setReceivedTime(new Date());
 				requestData.setId(oldRequest.getId());
 				requestRepo.saveOrUpdate(oldRequest);
@@ -137,18 +141,18 @@ public class BusinessController {
 		try {
 			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("error sending messages", e);
 		}
 										
 		return requestData;
 	}
 	
 	/**
-	 * Get an outstanding request for this checkin.
+	 * Get outstanding CALL_WAITER requests for the given business and optionally checkin or spot.
 	 * 
 	 * @param businessId
-	 * @param checkInId
-	 * @param spotId 
+	 * @param checkInId can be null
+	 * @param spotId can be null
 	 * @return request DTO
 	 */
 	public List<CustomerRequestDTO> getCustomerRequestData(Long businessId, Long checkInId, Long spotId) {
@@ -219,7 +223,7 @@ public class BusinessController {
 		try {
 			channelCtrl.sendMessagesToAllClients(request.getBusiness().getId(), messages);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("error sending messages", e);
 		}
 	}
 }
