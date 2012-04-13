@@ -99,7 +99,8 @@ Ext.define('EatSense.controller.Login', {
 		   		 //Set default headers so that always credentials are send
 				Ext.Ajax.setDefaultHeaders({
 					'login': account.get('login'),
-					'passwordHash': account.get('passwordHash')
+					'passwordHash': account.get('passwordHash'),
+					'pathId' : account.get('businessId')
 				});
 
 				//check if saved credentials are valid
@@ -195,7 +196,8 @@ Ext.define('EatSense.controller.Login', {
 				//Set default headers so that always credentials are send
 				Ext.Ajax.setDefaultHeaders({
 					'login': login,
-					'passwordHash': record.get('passwordHash')
+					'passwordHash': record.get('passwordHash'),
+					'pathId' : record.get('businessId')
 				});				
 
 				me.resetAccountProxyHeaders();

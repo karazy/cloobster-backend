@@ -14,6 +14,9 @@ Ext.define('EatSense.model.Request', {
 		},
 		{
 			name: 'checkInId'
+		},
+		{
+			name: 'spotId'
 		}],
 		proxy: {
 			type: 'rest',

@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Order;
+import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -36,6 +38,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.googlecode.objectify.Key;
 
 public class OrderControllerTest {
 	
@@ -58,6 +61,8 @@ public class OrderControllerTest {
 
 		private OrderChoiceRepository ocr;
 
+		private CheckInDTO checkIn;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -78,7 +83,14 @@ public class OrderControllerTest {
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
-		
+		// Do a checkin ...
+		checkIn = new CheckInDTO();
+		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
+		checkIn.setNickname("PlaceOrderTest");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn.setSpotId("serg2011");
+		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
+		checkIn.setBusinessId(spotDto.getBusinessId());
 	}
 
 	@After
@@ -86,19 +98,9 @@ public class OrderControllerTest {
 		helper.tearDown();
 	}
 	@Test
-	public void testPlaceOrder() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
-		
+	public void testPlaceAndUpdateOrder() {
 		
 		assertThat(checkIn.getUserId(), notNullValue());
-		
 				
 		// Should be checked in
 		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
@@ -160,20 +162,32 @@ public class OrderControllerTest {
 		for (OrderDTO dto : orders) {
 			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
 		}
+		
+		//#4.1 Update order to placed
+		placedOrder.setStatus(OrderStatus.PLACED);
+		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), placedOrder.getId(), placedOrder, checkIn.getUserId());
+		assertThat(placedOrder.getStatus(), is(OrderStatus.PLACED) );
+		
+		//#4.2 Try to update order with status to CART.
+		placedOrder.setStatus(OrderStatus.CART);
+		OrderDTO result = orderCtrl.updateOrder(checkIn.getBusinessId(), placedOrder.getId(), placedOrder, checkIn.getUserId());
+		//... should return null, because we cannot update the status again.
+		assertThat(result, nullValue() );
+		
+		//#4.3 Update amount and comment after order was placed.
+		placedOrder.setStatus(OrderStatus.PLACED);
+		placedOrder.setAmount(1);
+		String comment = "No comment";
+		placedOrder.setComment(comment);
+		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), placedOrder.getId(), placedOrder, checkIn.getUserId());
+		
+		assertThat(placedOrder.getAmount(), is(1));
+		assertThat(placedOrder.getComment(), is(comment));
+		
 	}
 	
 	@Test
 	public void testDeleteOrder() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
-		
-		
 		assertThat(checkIn.getUserId(), notNullValue());
 		
 				
@@ -197,20 +211,12 @@ public class OrderControllerTest {
 		orderCtrl.deleteOrder(checkIn.getBusinessId(), placedOrder.getId());
 		
 		List<Order> orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
+		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkIn.getBusinessId()), orderId));
+		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.isEmpty(), is(true));
 	}
 	
 	@Test public void testGetOrdersWithStatus() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
-		
-		
 		assertThat(checkIn.getUserId(), notNullValue());
 		
 				
@@ -273,6 +279,11 @@ public class OrderControllerTest {
 		for (OrderDTO dto : orders) {
 			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
 		}
+	}
+	
+	@Test
+	public void testUpdateOrderAsBusiness() {
+		
 	}
 	
 }

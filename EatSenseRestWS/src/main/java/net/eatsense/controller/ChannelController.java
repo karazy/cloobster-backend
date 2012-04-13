@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -119,7 +120,7 @@ public class ChannelController {
 		
 		messageData.setContent(content);
 		
-		return sendMessageJson(clientId, messageData);
+		return sendMessage(clientId, messageData);
 	}
 	
 	/**
@@ -132,9 +133,16 @@ public class ChannelController {
 	 * @return the complete message string 
 	 * @throws IOException, JsonGenerationException, JsonMappingException 
 	 */
-	public String sendMessageJson(String clientId, Object messageData) throws IOException, JsonGenerationException, JsonMappingException  {
-		if(messageData == null) {
-			logger.error("messageData is null");
+	public String sendMessage(String clientId, MessageDTO messageData) throws IOException, JsonGenerationException, JsonMappingException  {
+		ChannelMessage message = new ChannelMessage(clientId, buildJson(messageData));
+		channelService.sendMessage(message);
+		
+		return message.getMessage();
+	}
+	
+
+	private String buildJson(Object object)  throws IOException, JsonGenerationException, JsonMappingException{
+		if(object == null) {
 			return null;
 		}
 			
@@ -142,7 +150,7 @@ public class ChannelController {
 		
 		try {
 			// Try to map the message data as a JSON string.
-			messageString = mapper.writeValueAsString(messageData);
+			messageString = mapper.writeValueAsString(object);
 		} catch (JsonGenerationException e) {
 			throw e;
 		} catch (JsonMappingException e) {
@@ -152,9 +160,6 @@ public class ChannelController {
 		}
 		if(messageString.length() > 32786)
 			throw new IllegalArgumentException("data package too long, reduce content size");
-		
-		ChannelMessage message = new ChannelMessage(clientId, messageString);
-		channelService.sendMessage(message);
 		
 		return messageString;
 	}
@@ -186,17 +191,11 @@ public class ChannelController {
 	 * @throws JsonGenerationException 
 	 */
 	public void sendMessageToAllClients(Long businessId, String type, String action, Object content) throws JsonGenerationException, JsonMappingException, IOException  {
-		Business business = businessRepo.getById(businessId);
-		String lastMessage = "";
-		for (String clientId : business.getChannelIds()) {
-			lastMessage = sendMessage(clientId, type, action, content);
-			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
-		}
-		
+		sendJsonToAllClients(businessId, new MessageDTO(type, action, content));
 	}
 	
 	/**
-	 * Send a list of messages as one package over the channel as a JSON array.
+	 * Send a list of messages as one package to all subscribed channels of this business as a JSON array.
 	 * 
 	 * @param businessId
 	 * @param messages
@@ -204,14 +203,25 @@ public class ChannelController {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public void sendMessagesToAllClients(Long businessId, List<MessageDTO> messages) throws JsonGenerationException, JsonMappingException, IOException  {
+	public void sendMessagesToAllClients(Long businessId, List<MessageDTO> content) throws JsonGenerationException, JsonMappingException, IOException  {
+		sendJsonToAllClients(businessId, content);
+	}
+	
+	private void sendJsonToAllClients(Long businessId, Object content)
+			throws JsonGenerationException, JsonMappingException, IOException  {
 		Business business = businessRepo.getById(businessId);
-		String lastMessage = "";
-		for (String clientId : business.getChannelIds()) {
-			lastMessage = sendMessageJson(clientId,messages);
-			logger.debug("message sent {} to channel {} ", lastMessage, clientId);
-		}
+		String messageString = buildJson(content);
+		logger.info("sending message {} ...", messageString);
 		
+		if(business.getChannelIds() != null) {
+			
+			for (String clientId : business.getChannelIds()) {
+				sendMessageRaw(clientId, messageString);
+				logger.debug("sent message to channel {} ", clientId);
+			}
+		}
+		else
+			logger.info("no open channels");
 	}
 
 	/**

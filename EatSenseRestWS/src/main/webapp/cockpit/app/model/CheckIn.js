@@ -5,9 +5,6 @@ Ext.define('EatSense.model.CheckIn', {
 		idProperty : 'id',
 		fields : [ 
 		{
-			name: 'id'
-		},
-		{
 			name : 'id',
 		}, 
 		{

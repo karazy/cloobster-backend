@@ -16,8 +16,8 @@ public enum OrderStatus {
 	static {
 		allowed = new EnumMap<OrderStatus, EnumSet<OrderStatus>>(OrderStatus.class);
 		allowed.put(CANCELED, null);
-		allowed.put(CART, EnumSet.of(PLACED));
-		allowed.put(PLACED, EnumSet.of(RECEIVED,CANCELED));
+		allowed.put(CART, EnumSet.of(CART, PLACED));
+		allowed.put(PLACED, EnumSet.of(PLACED, RECEIVED,CANCELED));
 		allowed.put(RECEIVED, EnumSet.of(CANCELED));		
 	}
 	

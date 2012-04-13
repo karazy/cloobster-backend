@@ -9,6 +9,8 @@ import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import net.eatsense.domain.embedded.OrderStatus;
 
 import com.googlecode.objectify.Key;
@@ -77,8 +79,16 @@ public class Order extends GenericEntity {
 
 
 	@Transient
+	@JsonIgnore
 	public Key<Order> getKey() {
-		return new Key<Order>(getBusiness(), Order.class, super.getId());
+		return getKey(getBusiness(), super.getId());
+	}
+	
+	@Transient
+	@JsonIgnore
+	public static Key<Order> getKey(Key<Business> parent, Long id) {
+		
+		return new Key<Order>(parent, Order.class, id);
 	}
 	
 	public Date getOrderTime() {

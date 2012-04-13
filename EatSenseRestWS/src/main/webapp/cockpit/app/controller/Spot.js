@@ -5,7 +5,7 @@
 */
 Ext.define('EatSense.controller.Spot', {
 	extend: 'Ext.app.Controller',
-	requires: ['EatSense.view.Main', 'EatSense.view.SpotSelectionDialog'],
+	requires: ['EatSense.view.Main', 'EatSense.view.SpotSelectionDialog', 'EatSense.view.CustomerRequestDialog'],
 	config: {
 		refs: {
 			spotitem: 'spotitem button',
@@ -33,7 +33,7 @@ Ext.define('EatSense.controller.Spot', {
 		    	xtype: 'spotselection',
 		    	autoCreate: true
 		    },
-		    switchSpotList: 'spotselection list'
+		    switchSpotList: 'spotselection list',
 		    //</spot-detail>
 		},
 
@@ -67,6 +67,9 @@ Ext.define('EatSense.controller.Spot', {
 		 	}, 
 		 	switchSpotList: {
 		 		select: 'switchSpot'
+		 	},
+		 	dismissRequestsButton : {
+		 		tap: 'deleteCustomerRequests'
 		 	}
 		},
 
@@ -125,23 +128,26 @@ Ext.define('EatSense.controller.Spot', {
 		var		me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				messageCtr = this.getApplication().getController('Message'),
+				requestCtr = this.getApplication().getController('Request'),
 				detail = me.getSpotDetail(),
 				checkInList = detail.down('#checkInList'),
 				data = button.getParent().getRecord(),
 				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				titlebar = detail.down('titlebar');
+				restaurantId = loginCtr.getAccount().get('businessId'),
+				titlebar = detail.down('titlebar'),
+				requestStore = Ext.StoreManager.lookup('requestStore');
 
 		//add listeners for channel messages
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
-		messageCtr.on('eatSense.request', this.processCustomerRequest, this);
+		messageCtr.on('eatSense.request', requestCtr.processCustomerRequest, requestCtr);
 
 
 		//load checkins and orders and set lists
 		checkInStore.load({
 			params: {
-				pathId: loginCtr.getAccount().get('businessId'),
+				pathId: restaurantId,
 				spotId: data.get('id')
 			},
 			 callback: function(records, operation, success) {
@@ -149,6 +155,7 @@ Ext.define('EatSense.controller.Spot', {
 			 		me.setActiveSpot(data);
 			 		titlebar.setTitle(data.get('name'));
 			 		if(records.length > 0) {
+			 			requestCtr.loadRequests();
 			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
 			 			me.getSpotDetailCustomerList().select(0);
 			 		}
@@ -158,6 +165,7 @@ Ext.define('EatSense.controller.Spot', {
 			 },
 			 scope: this
 		});
+
 
 		//show detail view
 		Ext.Viewport.add(detail);
@@ -177,8 +185,7 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				orderStore = Ext.StoreManager.lookup('orderStore'),
-				billStore = Ext.StoreManager.lookup('billStore'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
+				billStore = Ext.StoreManager.lookup('billStore'),				
 				detail = me.getSpotDetail(),
 				restaurantId = loginCtr.getAccount().get('businessId'),
 				bill,
@@ -231,23 +238,6 @@ Ext.define('EatSense.controller.Spot', {
 			me.updateCustomerPaymentMethod();
 			paidButton.disable();
 		}
-
-		//check if customer requests exist and display them
-		requestStore.load({
-			params: {
-				pathId: restaurantId,
-				checkInId: record.get('id'),
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 
-			 		if(records.length > 0) {
-			 			//only one customer request should exist
-			 			me.showCustomerRequestMessage(records[0]);
-			 		}		
-			 	}				
-			 },
-			 scope: this
-		});
 	},
 
 	// </LOAD AND SHOW DATA>
@@ -417,22 +407,6 @@ Ext.define('EatSense.controller.Spot', {
 			}
 		}
 	},
-	/**
-	*	Processes the given request and shows it when the active customer issued this request.
-	*
-	*/
-	processCustomerRequest: function(action, request) {
-		var 	me = this,
-				detail = me.getSpotDetail();
-
-		if(!detail.isHidden() && me.getActiveCustomer()) {
-			if(request.checkInId == me.getActiveCustomer().get('id')) {
-				if(action == 'new') {
-					me.showCustomerRequestMessage(request);
-				}
-			}
-		}
-	},
 
 	// </PUSH MESSAGE HANDLERS>
 
@@ -507,24 +481,6 @@ Ext.define('EatSense.controller.Spot', {
 			paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : ''});
 			paymentLabel.hide();
 		}
-	},
-	/**
-	*	Displays the given request as a popup message.
-	*	
-	*/
-	showCustomerRequestMessage: function(request) {
-		var 	displayMessage;
-
-		if(request.type == Karazy.constants.Request.CALL_WAITER) {
-			displayMessage = Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, me.getActiveSpot().get('name'));
-		}
-
-		if(displayMessage) {
-			Ext.Msg.alert(i18nPlugin.translate('requestMsgboxTitle'), displayMessage, Ext.emptyFn);	
-		} else {
-			console.log('no invalid request object');
-		}
-		
 	},
 	//</VIEW UPDATE METHODS>
 
@@ -779,10 +735,13 @@ Ext.define('EatSense.controller.Spot', {
 	*	This is a place to cleanup the panel.
 	*/
 	hideSpotDetail: function(spotdetail) {
-		var		messageCtr = this.getApplication().getController('Message');
+		var		messageCtr = this.getApplication().getController('Message'),
+				requestCtr = this.getApplication().getController('Request'),
+				requestStore = Ext.StoreManager.lookup('requestStore');
 
 		this.getSpotDetailCustomerList().deselectAll();	
 		this.getSpotDetailOrderList().getStore().removeAll();
+		requestStore.removeAll(true);
 		this.updateCustomerStatusPanel();
 		this.updateCustomerTotal();
 		this.setActiveSpot(null);
@@ -791,6 +750,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
+		messageCtr.un('eatSense.request', requestCtr.updateSpotDetailOrderIncremental, requestCtr);
 	}
 
 	// </MISC VIEW ACTIONS>
