@@ -30,6 +30,7 @@ Ext.define('EatSense.model.CheckIn', {
 		proxy : {
 			type : 'rest',
 			url : '/b/businesses/{pathId}/checkins/'
-		}
+		},
+		syncRemovedRecords: false
 	}
 });

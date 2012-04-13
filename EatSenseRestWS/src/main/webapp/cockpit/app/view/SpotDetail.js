@@ -18,6 +18,17 @@ Ext.define('EatSense.view.SpotDetail', {
 		fullscreen: true,
 		//this should be initially hidden
 		hidden: true,
+		listeners: {
+			'eatSense.customer-update': function(active) {
+				try {
+					this.down('button[action=switch-spot]').setDisabled(!active);
+					this.down('button[action=paid]').setDisabled(!active);			
+					this.down('button[action=cancel-all]').setDisabled(!active);
+				} catch(e) {
+					console.log(e);
+				}
+			}
+		},
 		items: [
 		{
 			xtype: 'titlebar',

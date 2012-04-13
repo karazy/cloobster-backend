@@ -196,6 +196,7 @@ Ext.define('EatSense.controller.Spot', {
 		}
 
 		me.setActiveCustomer(record);
+		me.getSpotDetail().fireEvent('eatSense.customer-update', true);
 
 		orderStore.load({
 			params: {
@@ -307,7 +308,7 @@ Ext.define('EatSense.controller.Spot', {
 						//always refresh list to flag incoming orders on non active customers
 						me.getSpotDetailCustomerList().refresh();
 
-						if(me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
+						if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
 							//update status only if this is the active customer
 							me.updateCustomerStatusPanel(updatedCheckIn);
 						}
@@ -320,7 +321,7 @@ Ext.define('EatSense.controller.Spot', {
 						customerIndex = store.indexOf(dirtyCheckIn);
 						store.remove(dirtyCheckIn);						
 						//clear status panel if deleted checkin is activeCustomer or select another checkin
-						if(updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
+						if(me.getActiveCustomer() && updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
 							if(store.getCount() > 0) {
 								if(store.getAt(customerIndex)) {
 									customerList.select(customerIndex);	
@@ -329,6 +330,7 @@ Ext.define('EatSense.controller.Spot', {
 								}
 								
 							} else {
+								me.getSpotDetail().fireEvent('eatSense.customer-update', false);
 								orders.removeAll();
 								me.updateCustomerStatusPanel();
 								me.updateCustomerTotal();
@@ -641,7 +643,14 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
 				orders = Ext.StoreManager.lookup('orderStore'),
-				prevStatus;
+				checkins = Ext.StoreManager.lookup('checkInStore'),
+				customerList = this.getSpotDetailCustomerList(),
+				prevStatus,
+				customerIndex;
+
+		if(!this.getActiveCustomer()) {
+			return;
+		}
 
 		Ext.Msg.show({
 			title: i18nPlugin.translate('hint'),
@@ -658,28 +667,36 @@ Ext.define('EatSense.controller.Spot', {
 			scope: this,
 			fn: function(btnId, value, opt) {
 				if(btnId=='yes') {
-					console.log('cancel all orders');
-					orders.each(function(order) {
-						//save order prev status
-						prevStatus = order.get('status');
-						//update order status
-						order.set('status', Karazy.constants.Order.CANCELED);
-								//same approach as in eatSense App. Magic lies in getRawJsonData()
-						//still kind of a workaround
-						Ext.Ajax.request({				
-				    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
-				    	    method: 'PUT',    	    
-				    	    jsonData: order.getRawJsonData(),
-				    	    scope: this,
-				    	    success: function(response) {
-				    	    	console.log('order confirmed');
-				    	    	me.updateCustomerTotal(orders.getData().items);
-				    	    },
-				    	    failure: function(response) {
-				    	    	order.set('status', prevStatus);
-								Ext.Msg.alert(Karazy.i18n.translate.translate('error'), Karazy.i18n.translate.translate('errorSpotDetailOrderCancel', order.getProduct().get('name')), Ext.emptyFn);
-					   	    }
-						});
+					customerIndex = checkins.indexOf(me.getActiveCustomer());
+
+					if(customerIndex < 0) {
+						return;
+					}
+
+					me.getActiveCustomer().erase({
+						callback: function(records, operation) {
+							if(!operation.success) {
+								Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorMsg'), Ext.emptyFn);
+							} else {
+								//although a message will be received we update the view directly
+								checkins.remove(me.getActiveCustomer());
+
+								if(checkins.getCount() > 0) {
+									if(checkins.getAt(customerIndex)) {
+										customerList.select(customerIndex);	
+									} else {
+										customerList.select(customerIndex-1);
+									}								
+								} else {
+									orders.removeAll();
+									me.setActiveCustomer(null);
+									me.updateCustomerStatusPanel();
+									me.updateCustomerTotal();
+									me.updateCustomerPaymentMethod();
+									me.getSpotDetail().fireEvent('eatSense.customer-update', false);
+								}
+							}					
+						}
 					});
 				}
 			}
@@ -691,10 +708,22 @@ Ext.define('EatSense.controller.Spot', {
 	*	A select triggers switchSpot.
 	*/
 	showSpotSelection: function(button, event) {
-		var 	spotStore = Ext.StoreManager.lookup('spotStore'),
-				spotSelectionDlg = this.getSpotSelectionDialog();
+		var 	me = this,
+				spotStore = Ext.StoreManager.lookup('spotStore'),
+				spotSelectionDlg = this.getSpotSelectionDialog(),
+				spotList = this.getSwitchSpotList(),
+				filteredSpots;
 
-		// spotSelectionDlg.getComponent('spotList').refresh();
+		//don't show active spot
+		// filteredSpots = spotStore.queryBy(function(record, id) {
+		// 	if(record.getId() != me.getActiveSpot().getId()) {
+		// 		return true;
+		// 	}
+		// });
+
+		// filteredSpots.each(function(spot) {
+		// 	spotList.add(spot);	
+		// });
 		spotSelectionDlg.showBy(button, 'br-tc?');
 	},
 	/**
@@ -705,18 +734,21 @@ Ext.define('EatSense.controller.Spot', {
 		var 	activeCustomer = this.getActiveCustomer(),
 				loginCtr = this.getApplication().getController('Login');
 
-		//set new spot id
-		activeCustomer.set('spotId', record.get('id'));
-		activeCustomer.save({
-			params: {
-				pathId: loginCtr.getAccount().get('businessId')
-			},
-			failure: function(record, operation) { 
-				Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('switchSpotError'));
-			}
-		})
+		if(activeCustomer) {
+			//set new spot id
+			activeCustomer.set('spotId', record.get('id'));
+			activeCustomer.save({
+				params: {
+					pathId: loginCtr.getAccount().get('businessId')
+				},
+				failure: function(record, operation) { 
+					Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('switchSpotError'));
+				}
+			})
+		}
 
 		list.getParent().hide();
+		//prevent list selection
 		return false;
 	},
 	// </ACTIONS>
@@ -751,7 +783,19 @@ Ext.define('EatSense.controller.Spot', {
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 		messageCtr.un('eatSense.request', requestCtr.updateSpotDetailOrderIncremental, requestCtr);
-	}
+	},
+
+	// setActiveCustomerWrapper: function(customer) {
+	// 	var 	me = this;
+
+	// 	if(customer) {
+
+	// 	} else {
+	// 		me.setActiveCustomer(null);
+	// 	}
+
+	// 	me.fireEv
+	// }
 
 	// </MISC VIEW ACTIONS>
 
