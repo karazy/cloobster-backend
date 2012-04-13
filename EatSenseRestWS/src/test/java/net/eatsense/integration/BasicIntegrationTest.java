@@ -414,7 +414,7 @@ public class BasicIntegrationTest {
 
 			response = given().contentType("application/json")
 						.body(orders1[i])
-						.queryParam("checkInId",checkIns[0].getUserId())
+						.queryParam("checkInId",checkInId)
 						.expect().statusCode(200).when().put("/c/businesses/{id}/orders/{order}", businessId, orders1[i].getId());		
 
 		}
