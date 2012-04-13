@@ -522,7 +522,7 @@ public class OrderController {
 		
 		if(!order.getStatus().isTransitionAllowed(orderData.getStatus())) {
 			logger.error("{} cannot update, change from {} to {} forbidden.",
-					new Object[] { order.getKey(), order.getStatus().toString(), orderData.getStatus().toString()} );
+					new Object[] { order.getKey(), order.getStatus(), orderData.getStatus()} );
 			return null;
 		}
 //		// Check that status CANCELLED will not be changed.
