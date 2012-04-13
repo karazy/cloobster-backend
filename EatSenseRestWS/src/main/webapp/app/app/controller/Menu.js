@@ -125,7 +125,7 @@ Ext.define('EatSense.controller.Menu', {
 	},
 	
 	loadProductDetail: function(dataview, record) {
-		console.log('Menu Controller -> loadProductDetail');
+		console.log('Menu Controller -> loadProductDetail '+ record.get('id'));
 		//save original ids
 		record.set('genuineId', record.get('id'));
 		record.choices().each(function(choice) {
@@ -135,6 +135,7 @@ Ext.define('EatSense.controller.Menu', {
 			});
 		});
 		this.models.activeProduct = record.copy();
+		console.log('DEBUG Menu Controller -> loadProductDetail after copy id'+ this.models.activeProduct.get('id') + ' genuineId: '+this.models.activeProduct.get('genuineId'));
 		this.showProductDetail(dataview, this.models.activeProduct);
 	},
 	/**

@@ -209,7 +209,7 @@
 					this.getCancelOrderBt().disable();
 					
 					orders.each(function(order) {
-						console.log('save order' + order.getProduct().get('name'));
+						console.log('save order id:' + order.get('id') + ' genuineId: '+order.getProduct().get('genuineId'));
 						
 						if(!errorIndicator) {
 							order.set('status',Karazy.constants.Order.PLACED);
@@ -453,6 +453,7 @@
 		var 	detail = this.getProductdetail();
 		
 		this.models.activeOrder.restoreState();
+		this.recalculate(this.models.activeOrder);
 		this.refreshCart();
 		detail.hide();		
 	},

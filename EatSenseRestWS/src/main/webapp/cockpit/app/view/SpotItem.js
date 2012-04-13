@@ -19,10 +19,14 @@ Ext.define('EatSense.view.SpotItem', {
 	},
 
 	applySpot: function(config) {
-		var button = Ext.factory(config, Ext.Button, this.getSpot());
+		var 	button = Ext.factory(config, Ext.Button, this.getSpot()),
+				status = this.getRecord().get('status');
+		
 		button.getTpl().overwrite(button.element, this.getRecord().getData());
 
-		if(this.getRecord().get('status') == Karazy.constants.ORDER_PLACED || this.getRecord().get('status') == Karazy.constants.PAYMENT_REQUEST) {
+		if(status == Karazy.constants.ORDER_PLACED 
+			|| status == Karazy.constants.PAYMENT_REQUEST
+			|| status == Karazy.constants.Request.CALL_WAITER) {
 			button.addCls('spotitem-placed');
 		} else if(this.getRecord().get('checkInCount') >  0) {
 			button.addCls('spotitem-checkedin');
@@ -49,11 +53,13 @@ Ext.define('EatSense.view.SpotItem', {
 			return;
 		};
 		
-		var button = this.getSpot();
+		var 	button = this.getSpot(),
+				status = newRecord.get('status');
+
 			if(this.getSpot()) {						
-				if(newRecord.get('status') == Karazy.constants.ORDER_PLACED  
-					|| newRecord.get('status') == Karazy.constants.PAYMENT_REQUEST
-					|| newRecord.get('status') == Karazy.constants.Request.CALL_WAITER) {
+				if(status == Karazy.constants.ORDER_PLACED  
+					|| status == Karazy.constants.PAYMENT_REQUEST
+					|| status == Karazy.constants.Request.CALL_WAITER) {
 					button.addCls('spotitem-placed');
 					button.removeCls('spotitem-checkedin');
 				} else if(newRecord.get('checkInCount') >  0) {

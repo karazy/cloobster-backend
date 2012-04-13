@@ -29,6 +29,7 @@ Ext.define('EatSense.model.CheckIn', {
 		}],
 		proxy : {
 			type : 'rest',
+			enablePagingParams: false,
 			url : '/b/businesses/{pathId}/checkins/'
 		},
 		syncRemovedRecords: false

@@ -23,6 +23,7 @@ Ext.application({
 	},
 	launch : function() {
 		console.log('launch');
+		Ext.data.proxy.Server.timeout = 60000;
 		
     	//try to restore application state
 	   	 var 	appStateStore = Ext.data.StoreManager.lookup('appStateStore'),

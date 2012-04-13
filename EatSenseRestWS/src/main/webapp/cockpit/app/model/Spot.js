@@ -31,6 +31,7 @@ Ext.define('EatSense.model.Spot', {
 		}],
 		proxy : {
 			type : 'rest',
+			enablePagingParams: false,
 			url : '/b/businesses/{pathId}/spots/'
 		}
 	}

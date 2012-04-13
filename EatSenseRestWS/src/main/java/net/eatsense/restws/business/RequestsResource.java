@@ -1,5 +1,6 @@
 package net.eatsense.restws.business;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.ws.rs.DELETE;
@@ -39,7 +40,8 @@ public class RequestsResource {
 	public Collection<CustomerRequestDTO> getCustomerRequest(@QueryParam("checkInId") Long checkInId, @QueryParam("spotId") Long spotId) {
 		Collection<CustomerRequestDTO> requestData = businessCtrl.getCustomerRequestData(businessId, checkInId, spotId);
 		if( requestData == null)
-			throw new NotFoundException("No requests found");
+			return new ArrayList<CustomerRequestDTO>();
+//			throw new NotFoundException("No requests found");
 		else
 			return requestData;
 	}

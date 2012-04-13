@@ -74,7 +74,7 @@ Ext.define('EatSense.model.Order', {
 		rawJson.orderTime = this.get('orderTime');
 		
 		rawJson.product = this.getProduct().getRawJsonData();
-		
+		console.log('Order id: ' + this.get('id') +' genuineId: '+this.get('genuineId')+ ' getRawJsonData id: ' + rawJson.id);
 		return rawJson;
 	},
 	/**

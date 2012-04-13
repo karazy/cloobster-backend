@@ -27,6 +27,7 @@ Ext.define('EatSense.model.Account', {
 		],
 		proxy : {
 			type : 'rest',
+			enablePagingParams: false,
 			url : '/accounts/',
 			reader : {
 				type : 'json',

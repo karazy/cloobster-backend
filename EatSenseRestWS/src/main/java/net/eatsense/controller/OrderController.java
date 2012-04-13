@@ -130,9 +130,9 @@ public class OrderController {
 			throw new RuntimeException("Order cannot be updated, not allowed update after status is PLACED.");
 		}
 		
-		if(orderData.getStatus() != OrderStatus.PLACED) {
-			throw new IllegalArgumentException("Order cannot be updated, invalid status given: " + orderData.getStatus());
-		}
+//		if(orderData.getStatus() != OrderStatus.CART) {
+//			throw new IllegalArgumentException("Order cannot be updated, invalid status given: " + orderData.getStatus());
+//		}
 			
 		if(!order.getStatus().isTransitionAllowed(OrderStatus.PLACED)) {
 			throw new RuntimeException("Order cannot be updated, already PLACED");

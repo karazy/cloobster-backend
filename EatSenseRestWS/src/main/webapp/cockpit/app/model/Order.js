@@ -29,6 +29,7 @@ Ext.define('EatSense.model.Order', {
 
 		proxy : {
 			type : 'rest',
+			enablePagingParams: false,
 			url : '/b/businesses/{pathId}/orders/'
 		}
 	},

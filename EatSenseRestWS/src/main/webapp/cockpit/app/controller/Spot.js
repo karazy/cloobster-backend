@@ -288,6 +288,7 @@ Ext.define('EatSense.controller.Spot', {
 				index,
 				listElement,
 				updatedCheckIn = Ext.create('EatSense.model.CheckIn', updatedCheckIn),
+				requestCtr = this.getApplication().getController('Request'),
 				customerIndex;
 				
 		//check if spot detail is visible and if it is the same spot the checkin belongs to
@@ -299,6 +300,8 @@ Ext.define('EatSense.controller.Spot', {
 						//only one checkIn exists so set this checkIn as selected
 						customerList.select(0);
 					}
+					//make sure to load new request so they exist
+					requestCtr.loadRequests();
 				} else if (action == 'update') {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					if(dirtyCheckIn) {
@@ -319,7 +322,10 @@ Ext.define('EatSense.controller.Spot', {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					if(dirtyCheckIn) {
 						customerIndex = store.indexOf(dirtyCheckIn);
-						store.remove(dirtyCheckIn);						
+						store.remove(dirtyCheckIn);	
+						//make sure to load new request so they exist
+						requestCtr.loadRequests();					
+
 						//clear status panel if deleted checkin is activeCustomer or select another checkin
 						if(me.getActiveCustomer() && updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
 							if(store.getCount() > 0) {
@@ -332,6 +338,7 @@ Ext.define('EatSense.controller.Spot', {
 							} else {
 								me.getSpotDetail().fireEvent('eatSense.customer-update', false);
 								orders.removeAll();
+								me.setActiveCustomer(null);
 								me.updateCustomerStatusPanel();
 								me.updateCustomerTotal();
 								me.updateCustomerPaymentMethod();
@@ -729,8 +736,10 @@ Ext.define('EatSense.controller.Spot', {
 	*
 	*/
 	switchSpot: function(list, record, options) {
-		var 	activeCustomer = this.getActiveCustomer(),
-				loginCtr = this.getApplication().getController('Login');
+		var 	me = this,
+				activeCustomer = this.getActiveCustomer(),
+				loginCtr = this.getApplication().getController('Login'),
+				requestCtr = this.getApplication().getController('Request');
 
 		if(activeCustomer) {
 			//set new spot id
@@ -738,6 +747,10 @@ Ext.define('EatSense.controller.Spot', {
 			activeCustomer.save({
 				params: {
 					pathId: loginCtr.getAccount().get('businessId')
+				},
+				success: function(record, operation) {
+					//TODO refactor!
+					requestCtr.loadRequests();
 				},
 				failure: function(record, operation) { 
 					Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('switchSpotError'));
