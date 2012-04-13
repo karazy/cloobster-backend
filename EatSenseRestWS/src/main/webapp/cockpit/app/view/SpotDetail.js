@@ -20,6 +20,7 @@ Ext.define('EatSense.view.SpotDetail', {
 		hidden: true,
 		listeners: {
 			'eatSense.customer-update': function(active) {
+				//enable/disable action buttons depending on customer status
 				try {
 					this.down('button[action=switch-spot]').setDisabled(!active);
 					this.down('button[action=paid]').setDisabled(!active);			

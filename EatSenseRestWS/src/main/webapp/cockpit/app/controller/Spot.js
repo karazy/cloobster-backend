@@ -559,8 +559,6 @@ Ext.define('EatSense.controller.Spot', {
 			return;
 		}
 
-		// button.disable();
-
 		//check if all orders are processed
 		unprocessedOrders = orderStore.queryBy(function(record, id) {
 			if(record.get('status') == Karazy.constants.Order.PLACED) {
