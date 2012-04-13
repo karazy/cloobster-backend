@@ -397,33 +397,48 @@ public class CheckInController {
 		}			
 	}
 
+	/**
+	 * Get status of all active checkins at the given spot.
+	 * 
+	 * @param businessId
+	 * @param spotId
+	 * @return collection of checkin status DTOs
+	 */
 	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Long businessId, Long spotId) {
 		return transform.toStatusDtos( getCheckInsBySpot(businessId, spotId));
 	}
 	
+	/**
+	 * Retrieve active checkins at the given spot.
+	 * 
+	 * @param spotKey
+	 * @return
+	 */
 	private List<CheckIn> getCheckInsBySpot(Key<Spot> spotKey) {
 		return checkInRepo.ofy().query(CheckIn.class).filter("spot", spotKey).filter("archived", false).list();
 	}
 
+	/**
+	 * Retrieve active checkins at the given spot.<br>
+	 * Convenience method.
+	 * 
+	 * @param businessId
+	 * @param spotId
+	 * @return
+	 */
 	private List<CheckIn> getCheckInsBySpot(Long businessId, Long spotId) {
-		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			return null;
-		}
-		
-		return getCheckInsBySpot(Spot.getKey(business.getKey(), spotId));
+		return getCheckInsBySpot(Spot.getKey(Business.getKey(businessId), spotId));
 	}
 
 	/**
 	 * Delete the checkin and all related entities.
 	 * 
-	 * @param checkInUid
+	 * @param checkInId
 	 */
-	public void deleteCheckIn(Long checkInUid) {
+	public void deleteCheckIn(Long checkInId) {
 		Objectify ofy = checkInRepo.ofy();
 		
-		CheckIn checkIn = checkInRepo.getById(checkInUid);
+		CheckIn checkIn = checkInRepo.getById(checkInId);
 		if(checkIn == null) {
 			logger.info("Cannot checkout, unknown checkin uid given.");
 			return;

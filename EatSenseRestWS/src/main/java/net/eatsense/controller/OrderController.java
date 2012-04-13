@@ -111,6 +111,9 @@ public class OrderController {
 	 */
 	public OrderDTO updateOrder(Long businessId, Long orderId, OrderDTO orderData, String checkInId) {
 		Order order = getOrder(businessId, orderId);
+		if(order == null) {
+			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
+		}
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
@@ -165,8 +168,8 @@ public class OrderController {
 		
 		if(violations.isEmpty()) {
 			// save order
-			if( orderRepo.saveOrUpdate(order) == null )
-				throw new RuntimeException("order could not be updated, id: " + orderId);
+			orderRepo.saveOrUpdate(order);
+			
 			orderData = transform.orderToDto( order );
 			// only create a new request if the order status was updated
 			if(order.getStatus() != oldStatus) {
@@ -202,11 +205,9 @@ public class OrderController {
 					messages.add(new MessageDTO("spot","update",spotData));
 					
 				}
-				try {
-					channelCtrl.sendMessagesToAllClients(businessId, messages);
-				} catch (Exception e) {
-					logger.error("error sending messages", e);
-				}
+
+				channelCtrl.sendMessagesToAllClients(businessId, messages);
+				
 			}
 		}
 		else {
@@ -243,19 +244,7 @@ public class OrderController {
 	 * @return the Order entity, if existing
 	 */
 	public Order getOrder(Long businessId, Long orderId) {
-		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
-			throw new NotFoundException("Order cannot be retrieved, business id unknown: " + businessId);
-		}
-		
-		Order order = orderRepo.getById(business.getKey(), orderId);
-		if( order == null) {
-			logger.error("Order cannot be retrieved, order id unknown: " + orderId);
-			throw new NotFoundException("Order cannot be retrieved, order id unknown: " + orderId);
-		}
-		return order;
+		return orderRepo.getById(Business.getKey(businessId), orderId);
 	}
 	
 	/**
@@ -512,6 +501,9 @@ public class OrderController {
 	 */
 	public OrderDTO updateOrderForBusiness(Long businessId, Long orderId, OrderDTO orderData) {
 		Order order = getOrder(businessId, orderId);
+		if(order == null) {
+			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
+		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
 		
