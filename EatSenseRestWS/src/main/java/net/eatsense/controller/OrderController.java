@@ -336,7 +336,7 @@ public class OrderController {
 	 * @param orderData
 	 * @return id of the order
 	 */
-	public Long placeOrder(Long businessId, String checkInUid, OrderDTO orderData) {
+	public Long placeOrderInCart(Long businessId, String checkInUid, OrderDTO orderData) {
 		Long orderId = null;
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);

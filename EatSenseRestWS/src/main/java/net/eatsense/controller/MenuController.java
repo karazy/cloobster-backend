@@ -91,7 +91,12 @@ public class MenuController {
 	 * @return product DTO
 	 */
 	public ProductDTO getProduct(Long businessId, Long id) {
-		return transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
+		try {
+			return transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
+		} catch (NotFoundException e) {
+			logger.error("Unable to retrieve product, no matching entity found");
+			return null;
+		}
 	}
 
 }

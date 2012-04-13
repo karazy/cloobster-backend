@@ -125,7 +125,7 @@ public class BillControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
 		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
@@ -135,6 +135,10 @@ public class BillControllerTest {
 		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
 		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
 		
+		placedOrder.setStatus(OrderStatus.PLACED);
+		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), orderId, placedOrder, checkIn.getUserId());
+		placedOrder.setStatus(OrderStatus.RECEIVED);
+		placedOrder = orderCtrl.updateOrderForBusiness(checkIn.getBusinessId(), orderId, placedOrder);
 		
 		//#2 Place an order with choices
 		Product burger = pr.getByProperty("name", "Classic Burger");
@@ -158,7 +162,7 @@ public class BillControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrderInCart(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
 		assertThat(orderId, notNullValue());
 		
 		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
@@ -174,6 +178,12 @@ public class BillControllerTest {
 					assertThat(option.getSelected(), equalTo(true));
 			}
 		}
+		// Set order to placed and confirm in restaurant.
+		placedOrder.setStatus(OrderStatus.PLACED);
+		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), orderId, placedOrder, checkIn.getUserId());
+		placedOrder.setStatus(OrderStatus.RECEIVED);
+		placedOrder = orderCtrl.updateOrderForBusiness(checkIn.getBusinessId(), orderId, placedOrder);
+		
 		
 		//#3 Check calculateTotalPrice
 		
@@ -181,7 +191,7 @@ public class BillControllerTest {
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (Order order : orders) {
-			assertThat(order.getStatus(), equalTo(OrderStatus.CART));
+			assertThat(order.getStatus(), equalTo(OrderStatus.RECEIVED));
 			if(order.getProduct().getId() == frites.getId()) {
 				assertThat(billCtrl.calculateTotalPrice(order), is( 1.5f));
 			}
@@ -198,6 +208,10 @@ public class BillControllerTest {
 		
 		billData = billCtrl.createBill(checkIn.getBusinessId(), checkIn.getUserId(), billData);
 		assertThat(billData.getId(), notNullValue());
+		billData.setCleared(true);
+		
+		
+		billCtrl.updateBill(checkIn.getBusinessId(), billData.getId(), billData);
 		
 		Collection<Bill> bills = br.getAll();
 		
