@@ -129,6 +129,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 		}
 		else {
 			logger.info("Valid user request recieved from " + checkIn.getNickname());
+			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
 			// return a security context build around the checkIn
 			return new Authorizer(checkIn);
 		}

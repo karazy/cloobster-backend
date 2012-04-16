@@ -88,9 +88,17 @@ public class OrderController {
 	 * 
 	 * @param businessId
 	 * @param orderId
+	 * @param checkInUid 
 	 */
-	public void deleteOrder(Long businessId, Long orderId) {
+	public void deleteOrder(Long businessId, Long orderId, String checkInUid) {
 		Key<Order> orderKey = new Key<Order>(new Key<Business>(Business.class, businessId), Order.class, orderId);
+		Order order;
+		try {
+			order = orderRepo.getByKey(orderKey);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Failed to delete order", e);
+		}
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		
 		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
 		orderRepo.ofy().delete(orderKey);

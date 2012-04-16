@@ -220,7 +220,8 @@ public class ChannelController {
 	 * @throws IOException
 	 */
 	public void sendMessagesToAllCockpitClients(Long businessId, List<MessageDTO> content)  {
-		sendJsonToAllCockpitClients(businessId, content);
+		if(content != null && !content.isEmpty())
+			sendJsonToAllCockpitClients(businessId, content);
 	}
 	
 	private void sendJsonToAllCockpitClients(Long businessId, Object content)  {

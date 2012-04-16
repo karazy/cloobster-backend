@@ -2,6 +2,8 @@ package net.eatsense.restws.customer;
 
 import java.util.Collection;
 
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,11 +13,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.BillDTO;
@@ -45,6 +49,9 @@ public class BusinessesResource{
 	private OrderController orderCtrl;
 	private BillController billCtrl;
 
+	@Context
+	HttpServletRequest servletRequest;
+	
 	@Inject
 	public BusinessesResource(BusinessRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
 		this.businessRepo = repo;
@@ -99,6 +106,7 @@ public class BusinessesResource{
 	@Path("{businessId}/orders")
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
 	public String placeOrder(@PathParam("businessId")Long businessId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
 		Long orderId = null;
 		orderId = orderCtrl.placeOrderInCart(businessId, checkInId, order);	
@@ -128,20 +136,23 @@ public class BusinessesResource{
 	@Path("{businessId}/orders/{orderId}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
 	public OrderDTO updateOrder(@PathParam("businessId")Long businessId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId, OrderDTO order) {
 		return orderCtrl.updateOrder(businessId, orderId, order, checkInId);
 	}
 	
 	@DELETE
 	@Path("{businessId}/orders/{orderId}")
+	@RolesAllowed({"guest"})
 	public void deleteOrder(@PathParam("businessId")Long businessId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId) {
-		orderCtrl.deleteOrder(businessId, orderId);
+		orderCtrl.deleteOrder(businessId, orderId, checkInId);
 	}
 	
 	@POST
 	@Path("{businessId}/bills")
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
 	public BillDTO createBill(@PathParam("businessId")Long businessId, BillDTO bill, @QueryParam("checkInId") String checkInId) {
 		return billCtrl.createBill(businessId, checkInId, bill);
 	}
