@@ -8,6 +8,7 @@
 		<copy todir="assets/www">
 			<fileset dir="${appDir}">
 				<exclude name="**/*.desktop.*" />
+				<exclude name="**/*.iphone.*" />
 			</fileset>
 		</copy>
 	</target>
