@@ -5,4 +5,4 @@
 EatSenseAppAndroid/assets/www/*
 EatSenseAppiOS/eatSense/www/*
 Misc/SenchaTests/touch/*
-EatSenseRestWS/src/main/webapp/app/res/css/.sass-cache/*
+.sass-cache
