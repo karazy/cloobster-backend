@@ -22,7 +22,7 @@ var translation = {
 		"currentDealsButton" : "Deals",
 		"newRestaurantsButton" : "Neue Restaurants",
 		"settingsButton" : "Einstellungen",
-		// Checkin process
+		// Checkin
 		"checkInTitle" : "CheckIn",
 		"barcodePromptTitle" : "Barcode Abfrage",
 		"barcodePromptText" : "Bitte gib den Tischcode ein.",
@@ -35,6 +35,7 @@ var translation = {
 		"checkInErrorNickname" : "Wähle einen Nickname oder nimm den Generierten.<br/>Der Nickname muss zwischen {0} und {1} Zeichen lang sein.",
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 		"saveNicknameToggle" : "Nickname als Standard setzen?",
+		"checkInCanceled" : "Deine Sitzung wurde durch das Restaurant beendet.",
 		// Menu
 		"menuTitle" : "Karte",
 		"choicesPanelTitle" : "Optionen",
