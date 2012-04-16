@@ -97,7 +97,7 @@ Ext.define('EatSense.controller.Message', {
 				requestTokenHandler: me.requestNewToken,
 				messageHandlerScope: me,
 				requestTokenHandlerScope: me
-			}, id);
-		});
+			});
+		}, id);
 	}
 });

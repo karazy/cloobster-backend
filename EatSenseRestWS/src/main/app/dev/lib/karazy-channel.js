@@ -25,7 +25,7 @@ Karazy.channel = (function() {
 	//indicates if a timeout occured and a new token must be requested
 	var timedOut;
 	//connection was los. reopen channel.
-	var connectionLost:
+	var connectionLost;
 
 	function onOpened() {
 		console.log('channel opened');
