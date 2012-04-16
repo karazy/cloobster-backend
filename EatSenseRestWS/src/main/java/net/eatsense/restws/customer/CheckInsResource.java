@@ -18,6 +18,7 @@ import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.User;
 import net.eatsense.representation.CheckInDTO;
@@ -30,12 +31,14 @@ public class CheckInsResource {
 	
 	@Context
 	private ResourceContext resourceContext;
+	private ChannelController channelCtrl;
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr, BusinessController businessCtrl) {
+	public CheckInsResource(CheckInController checkInCtr, BusinessController businessCtrl, ChannelController channelCtrl) {
 		super();
 		this.checkInCtrl = checkInCtr;
 		this.businessCtrl = businessCtrl;
+		this.channelCtrl = channelCtrl;
 	}
 	
 	@POST
@@ -85,6 +88,17 @@ public class CheckInsResource {
 	@Produces("application/json; charset=UTF-8")
 	public CustomerRequestDTO postRequest(@PathParam("checkInId") String checkInId, CustomerRequestDTO requestData) {
 		return businessCtrl.saveCustomerRequest(checkInId, requestData);
+	}
+	
+	@POST
+	@Path("{checkInUid}/tokens")
+	@Produces("text/plain; charset=UTF-8")
+	public String requestToken(@PathParam("checkInUid") String checkInUid) {
+		try {
+			return channelCtrl.createCustomerChannel(checkInUid);
+		} catch (IllegalArgumentException e) {
+			throw new NotFoundException(e.getMessage());
+		}
 	}
 	
 }
