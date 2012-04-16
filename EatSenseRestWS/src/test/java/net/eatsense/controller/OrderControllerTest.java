@@ -204,7 +204,7 @@ public class OrderControllerTest {
 		
 		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
 		
-		orderCtrl.deleteOrder(checkInData.getBusinessId(), placedOrder.getId());
+		orderCtrl.deleteOrder(checkInData.getBusinessId(), placedOrder.getId(),checkInData.getUserId());
 		
 		List<Order> orders = orderCtrl.getOrders(checkInData.getBusinessId(), checkInData.getUserId(), null);
 		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
