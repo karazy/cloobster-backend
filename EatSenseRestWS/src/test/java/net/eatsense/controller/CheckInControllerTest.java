@@ -235,11 +235,21 @@ public class CheckInControllerTest {
 		checkIn = ctr.createCheckIn( checkIn);
 		
 		//#2.1 Request token with bad checkinid ...
-		String result = ctr.requestToken("dafuq");
-		assertThat(result, nullValue());
+		
+		String result;
+		try {
+			result = ctr.requestToken("dafuq");
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+			
+		}
 		//#2.2 Request token with null id ...
-		result = ctr.requestToken(null);
-		assertThat(result, nullValue());
+		try {
+			result = ctr.requestToken(null);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+			
+		}
 		
 		//#3.1 Request token with valid uid ...
 		result = ctr.requestToken(checkIn.getUserId());

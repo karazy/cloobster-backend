@@ -13,6 +13,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
@@ -28,17 +31,16 @@ import net.eatsense.representation.CustomerRequestDTO;
 public class CheckInsResource {
 	private CheckInController checkInCtrl;
 	private BusinessController businessCtrl;
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Context
 	private ResourceContext resourceContext;
-	private ChannelController channelCtrl;
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr, BusinessController businessCtrl, ChannelController channelCtrl) {
+	public CheckInsResource(CheckInController checkInCtr, BusinessController businessCtrl) {
 		super();
 		this.checkInCtrl = checkInCtr;
 		this.businessCtrl = businessCtrl;
-		this.channelCtrl = channelCtrl;
 	}
 	
 	@POST
@@ -95,8 +97,9 @@ public class CheckInsResource {
 	@Produces("text/plain; charset=UTF-8")
 	public String requestToken(@PathParam("checkInUid") String checkInUid) {
 		try {
-			return channelCtrl.createCustomerChannel(checkInUid);
+			return checkInCtrl.requestToken(checkInUid);
 		} catch (IllegalArgumentException e) {
+			logger.error("Failed channel creation", e);
 			throw new NotFoundException(e.getMessage());
 		}
 	}

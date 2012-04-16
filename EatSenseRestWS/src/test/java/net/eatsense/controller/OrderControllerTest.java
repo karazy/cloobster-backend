@@ -341,9 +341,7 @@ public class OrderControllerTest {
 		CheckIn checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
 		assertThat(checkIn.getStatus(), is(CheckInStatus.CHECKEDIN));
 		
-		
-		//#4.3 Try to set the status back to placed
-		
+		//#4.3 Try to set the status back to placed	
 		OrderDTO result;
 		try {
 			placedOrder.setStatus(OrderStatus.PLACED);

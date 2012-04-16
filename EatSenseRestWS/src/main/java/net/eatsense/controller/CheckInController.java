@@ -280,7 +280,7 @@ public class CheckInController {
 		if(checkInUser == null )
 			throw new NotFoundException("Unknown checkInId");
 		
-		if(!checkInUser.getLinkedUserId().equals(checkInDto.getLinkedCheckInId())) {
+		if(checkInDto.getLinkedCheckInId() != null && !checkInDto.getLinkedCheckInId().equals(checkInUser.getLinkedUserId())) {
 			CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", checkInDto.getLinkedCheckInId());
 			if(checkInLinkedUser == null )
 				throw new IllegalArgumentException("Cannot update checkin, linkedCheckInId unknown");
@@ -542,13 +542,6 @@ public class CheckInController {
 	 * @return the generated channel token
 	 */
 	public String requestToken (String checkInUid) {
-		String token = null;
-		try {
-			token = channelCtrl.createCustomerChannel(checkInUid);
-		} catch (IllegalArgumentException e) {
-			logger.error("Failed channel creation, Invalid checkInUid "+ checkInUid, e);
-			return null;
-		}
-		return token;
+		return channelCtrl.createCustomerChannel(checkInUid);
 	}
 }
