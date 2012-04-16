@@ -75,12 +75,14 @@ Ext.define('EatSense.controller.CheckIn', {
     	appState : Ext.create('EatSense.model.AppState', {id: '1'})
     },
     init: function() {
-    	var models = {};
+    	var     models = {},
+                messageCtr = this.getApplication().getController('Message');
+
     	this.models = models;
 
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
-    	 
+    	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
     	 
     	 //private functions
     	 
@@ -136,11 +138,11 @@ Ext.define('EatSense.controller.CheckIn', {
                 title: Karazy.i18n.translate('barcodePromptTitle'),
                 message: Karazy.i18n.translate('barcodePromptText'),
                 buttons: [{
-                    text: 'Ja',
+                    text: Karazy.i18n.translate('yes'),
                     itemId: 'yes',
                     ui: 'action'
                 }, {
-                    text: 'Nein',
+                    text: Karazy.i18n.translate('no'),
                     itemId: 'no',
                     ui: 'action'
                 }],
@@ -177,13 +179,9 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    checkInConfirm: function(options) {
-	   console.log("CheckIn Controller -> checkInConfirm");
 	   var checkInDialog = this.getCheckinconfirmation(), 
 		main = this.getMain(),
-		checkIn = Ext.create('EatSense.model.CheckIn');
-	   
-	   //this.getCheckInDlg1Label1().setHtml(i18nPlugin.translate('checkInStep1Label1', options.model.get('name'), options.model.get('restaurant')));
-		
+		checkIn = Ext.create('EatSense.model.CheckIn');		
 			
 	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
 	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
@@ -212,10 +210,11 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    checkIn: function(){
-	   var me = this,
-	   nickname = Ext.String.trim(this.getNickname().getValue()),
-	   error,
-	   nicknameToggle = this.getNicknameTogglefield();
+	   var     me = this,
+	           nickname = Ext.String.trim(this.getNickname().getValue()),
+	           error,
+	           nicknameToggle = this.getNicknameTogglefield(),
+               messageCtr = this.getApplication().getController('Message');
 	    
 	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
@@ -235,7 +234,13 @@ Ext.define('EatSense.controller.CheckIn', {
 							   if(nicknameToggle.getValue() == 1) {
 								   me.getAppState().set('nickname', nickname);
 								   nicknameToggle.reset();
-							   }						   	     	
+							   }
+                               //open a channel for push messags
+                               try {
+                                    messageCtr.openChannel(response.get('userId'));
+                                } catch(e) {
+                                    console.log('could not open a channel ' + e);
+                                }
 					   	    },
 					   	    failure: function(response, operation) {
 					   	    	console.log('checkIn failure');					   	    	
@@ -431,13 +436,12 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * 		Restored checkin
 	 */
 	restoreState: function(checkIn) {
-		var main = this.getMain(),
-		orderCtr = this.getApplication().getController('Order');
-		
-		this.models.activeCheckIn = checkIn;
-		
-	
-		
+		var   main = this.getMain(),
+		      orderCtr = this.getApplication().getController('Order'),
+              messageCtr = this.getApplication().getController('Message');
+
+		this.models.activeCheckIn = checkIn,              
+
 		//load active spot
 		EatSense.model.Spot.load(checkIn.get('spotId'), {
 		scope: this,
@@ -462,6 +466,14 @@ Ext.define('EatSense.controller.CheckIn', {
    					}
    				}						
    			});
+
+           //open a channel for push messags
+           try {
+                messageCtr.openChannel(checkIn.get('userId'));
+            } catch(e) {
+                console.log('could not open a channel ' + e);
+            }
+
     	    },
     	    failure: function(record, operation) {
     	    	//TODO show error message that  restoring data failed
@@ -500,7 +512,7 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getRequestsTab().disable();
 			
 			this.models.activeCheckIn.set('status', status);
-		} else if (status == Karazy.constants.COMPLETE) {
+		} else if (status == Karazy.constants.COMPLETE || status == Karazy.constants.CANCEL_ALL) {
 			this.getMenuTab().enable();
 			this.getCartTab().enable();
             this.getSettingsTab().enable();
@@ -514,13 +526,22 @@ Ext.define('EatSense.controller.CheckIn', {
             this.models.activeCheckIn.orders().removeAll();
             orderCtr.refreshCartBadgeText();
 
-			this.showDashboard();
-			
+			this.showDashboard();	
 		}
-		
-				
-		
-	}
+	},
+    /**
+    *   Handle push notifications for checkins.
+    *
+    */
+    handleCheckInMessage: function(action, updatedCheckIn) {
+        var     checkIn = this.models.activeCheckIn;
+
+        if(action == "delete") {
+            if(checkIn.get('userId') == updatedCheckIn.userId) {
+                this.fireEvent('statusChanged', Karazy.constants.CANCEL_ALL);
+            }
+        }
+    }
 
 });
 

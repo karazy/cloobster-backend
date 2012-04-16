@@ -297,7 +297,7 @@ Ext.define('EatSense.controller.Login', {
 				clientId = account.get('clientId');
 
 		Ext.Ajax.request({
-		    url: 'accounts/'+login+'/tokens',		    
+		    url: Karazy.config.serviceUrl+'/accounts/'+login+'/tokens',		    
 		    method: 'POST',
 		    params: {
 		    	'businessId' :  this.getAccount().get('businessId'),

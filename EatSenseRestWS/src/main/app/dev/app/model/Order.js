@@ -79,14 +79,17 @@ Ext.define('EatSense.model.Order', {
 	},
 	/**
 	*	Sets the data of this object based on a raw json object.
-	*
+	*	@param rawData
+	*		data to set
+	*	@param shallow
+	*		don't set nested data
 	*/	
-	setRawJsonData: function(rawData) {
+	setRawJsonData: function(rawData, shallow) {
 		if(!rawData) {
 			return false;
 		}
 
-		if(!this.getProduct().setRawJsonData(rawData.product)) {
+		if(shallow && !this.getProduct().setRawJsonData(rawData.product)) {
 			return false;
 		}
 

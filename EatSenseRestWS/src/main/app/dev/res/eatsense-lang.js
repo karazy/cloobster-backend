@@ -13,7 +13,10 @@ var translation = {
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
+		"yes" : "Ja",
+		"no" : "Nein",
 		"leave" : "Verlassen",
+		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
 		// main menu
 		"checkInButton" : "CheckIn",
 		"currentDealsButton" : "Deals",

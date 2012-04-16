@@ -2,14 +2,13 @@
 *	This controller handles push messages send from the server
 *	and fires events when they arrive. Any component interested in those events
 * 	can listen.
+* 	It also requests tokens from the server and initiates open channel calls.
 */
 Ext.define('EatSense.controller.Message', {
 	extend: 'Ext.app.Controller',
 	config: {
 
 	},
-
-
 	/**
 	*	Called after receiving a channel message.
 	*	
@@ -59,6 +58,46 @@ Ext.define('EatSense.controller.Message', {
 
 		//fire event based on the message
 		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
-	
+	},
+	/**
+	*	Requests a new token from server and executes the given callback with new token as parameter.
+	*	@param callback
+	*		callback function to invoke on success
+	*/
+	requestNewToken: function(callback, id) {		
+		Ext.Ajax.request({
+		    url: Karazy.config.serviceUrl+'/c/checkins/'+id+'/tokens',		    
+		    method: 'POST',
+		    params: {
+		    	'checkInId' :  id,
+		    },
+		    success: function(response){
+		       	token = response.responseText;
+		       	callback(token);
+		    }, 
+		    failure: function(response) {
+		    	console.log('request token failed ' + response);
+		    	Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('channelTokenError')); 
+		    }
+		});
+	},
+	/**
+	* 	Requests a token and
+	*	opens a channel for server side push messages.
+	*	@param id
+	*		Id to open channel for
+	*/
+	openChannel: function(id) {
+		var		me = this;
+
+		this.requestNewToken(function(newToken) {
+			Karazy.channel.createChannel( {
+				token: newToken, 
+				messageHandler: me.processMessages,
+				requestTokenHandler: me.requestNewToken,
+				messageHandlerScope: me,
+				requestTokenHandlerScope: me
+			}, id);
+		});
 	}
 });

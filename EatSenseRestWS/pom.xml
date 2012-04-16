@@ -82,7 +82,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/dev</directory>
+											<directory>src/main/cockpit/dev</directory>
 										</resource>
 									</resources>
 								</configuration>

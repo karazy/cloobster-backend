@@ -23,9 +23,7 @@ Ext.define('EatSense.controller.Request',{
 		 		itemswipe : 'dissmissCustomerRequest',
 		 		itemtap : 'dissmissCustomerRequest',
 		 	}
-		},
-
-		
+		},	
 	},
 	/**
 	*	Loads all customer request for the active spot.

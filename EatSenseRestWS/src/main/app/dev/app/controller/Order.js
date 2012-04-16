@@ -94,10 +94,12 @@
 		}		
 	},
 	init: function() {
-		
 		//store retrieved models
-		 var models = {};
-    	 this.models = models;
+		var 	models = {},
+		 		messageCtr = this.getApplication().getController('Message');
+
+    	this.models = models;
+    	messageCtr.on('eatSense.order', this.handleOrderMessage, this);
 	},
 	/**
 	 * Load cart orders.
@@ -765,5 +767,22 @@
 		}
 		
 		return myordersStore.getCount();		
+	},
+	/**
+	*	Handles push notifications for orders.
+	*/
+	handleOrderMessage: function(action, updatedOrder) {
+		var 	orderStore = Ext.StoreManager.lookup('orderStore'),
+				oldOrder;
+
+		if(action == "update") {
+			oldOrder = orderStore.getById(updatedOrder.id);
+			if(oldOrder) {
+				oldOrder.setRawJsonData(updatedOrder, true)
+			} else {
+				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
+			}
+
+		}
 	}
 });
