@@ -89,7 +89,7 @@ Ext.define('EatSense.model.Order', {
 			return false;
 		}
 
-		if(shallow && !this.getProduct().setRawJsonData(rawData.product)) {
+		if(!shallow && !this.getProduct().setRawJsonData(rawData.product)) {
 			return false;
 		}
 

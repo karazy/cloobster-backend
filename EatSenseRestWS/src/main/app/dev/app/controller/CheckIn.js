@@ -149,11 +149,13 @@ Ext.define('EatSense.controller.CheckIn', {
                 prompt : { maxlength : 20},
                 scope: this,
                 fn: function(btnId, value, opt) {
-                if(btnId=='yes') {
+                    if(btnId=='yes') {
                         barcode = Ext.String.trim(value);    
                         deviceId = '_browser';
                         this.getDashboard().showLoadScreen(true);
                         this.doCheckInIntent(barcode, button, deviceId);
+                    } else {
+                        button.enable();
                     }
                 }
             }); 

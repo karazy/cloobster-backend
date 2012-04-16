@@ -316,6 +316,7 @@ Ext.define('EatSense.controller.Menu', {
 	    	    jsonData: order.getRawJsonData(),
 	    	    success: function(response, operation) {
 	    	    	order.setId(response.responseText);
+	    	    	order.phantom = false;
 	    	    }
 	    	});
 			
