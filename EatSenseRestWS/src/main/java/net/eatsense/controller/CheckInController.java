@@ -456,7 +456,10 @@ public class CheckInController {
 		
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
-		messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
+		MessageDTO deleteMessage = new MessageDTO("checkin","delete", transform.toStatusDto(checkIn));
+		messages.add(deleteMessage);
+		// notify client
+		channelCtrl.sendMessage(checkIn.getChannelId(), deleteMessage);
 
 		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 	}
