@@ -84,7 +84,7 @@ public class ChannelController {
 	public String createCockpitChannel(Business business, String clientId , Integer timeout) {
 		String token = null;
 		// create a channel id with the format "businessId|clientId"
-		clientId = business.getId() + "|" + clientId;
+		clientId = "b" + business.getId() + "|" + clientId;
 		
 		logger.debug("creating channel for channelID: " +clientId);
 		token = (timeout != null)?channelService.createChannel(clientId, timeout):channelService.createChannel(clientId);
