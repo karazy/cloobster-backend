@@ -181,10 +181,8 @@ public class BusinessController {
 			}
 				
 		}
-		if(requestDataList.isEmpty())
-			return null;
-		else
-			return requestDataList;
+		
+		return requestDataList;
 	}
 
 	/**

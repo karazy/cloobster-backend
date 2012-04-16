@@ -24,6 +24,7 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.domain.Business;
+import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -106,16 +107,22 @@ public class OrderController {
 	 * @param businessId
 	 * @param orderId
 	 * @param orderData
-	 * @param checkInId
+	 * @param checkInUid
 	 * @return the updated OrderDTO
 	 */
-	public OrderDTO updateOrder(Long businessId, Long orderId, OrderDTO orderData, String checkInId) {
-		Order order = getOrder(businessId, orderId);
-		if(order == null) {
+	public OrderDTO updateOrder(Long businessId, Long orderId, OrderDTO orderData, String checkInUid) {
+		//
+		// Check preconditions and retrieve entities.
+		//
+		// Retrieve the order from the store.
+		Order order;
+		try {
+			order = getOrder(businessId, orderId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
 		}
-		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+		// Retrieve the checkin from the store.
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null) {
 			throw new IllegalArgumentException("Order cannot be updated, invalid checkInUid given");
 		}
@@ -123,37 +130,36 @@ public class OrderController {
 		if(! checkIn.getId().equals(order.getCheckIn().getId()) ) {
 			throw new IllegalArgumentException("Order cannot be updated, checkIn does not own the order.");
 		}
+		// Check that the checkin is allowed to update the order.
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			throw new RuntimeException("Order cannot be updated, payment already requested or not checked in");
+			throw new OrderFailureException("Order cannot be updated, payment already requested or not checked in");
 		}
-		if(order.getStatus() == OrderStatus.PLACED) {
-			throw new RuntimeException("Order cannot be updated, not allowed update after status is PLACED.");
+		// Check that we only save allowed status updates.
+		if(order.getStatus() == OrderStatus.PLACED || !order.getStatus().isTransitionAllowed(orderData.getStatus())) {
+			throw new OrderFailureException("Order cannot be updated, already PLACED");
 		}
-		
-//		if(orderData.getStatus() != OrderStatus.CART) {
-//			throw new IllegalArgumentException("Order cannot be updated, invalid status given: " + orderData.getStatus());
-//		}
-			
-		if(!order.getStatus().isTransitionAllowed(OrderStatus.PLACED)) {
-			throw new RuntimeException("Order cannot be updated, already PLACED");
-		}
-		
+		// save the previous status for reference
 		OrderStatus oldStatus = order.getStatus();
 		// update order object from submitted data
 		order.setStatus(orderData.getStatus());
 		order.setComment(orderData.getComment());
 		order.setAmount(orderData.getAmount());
-		
+		// Retrieve saved choices from the store
 		List<OrderChoice> savedChoices = orderChoiceRepo.getByParent(order.getKey());
 		if(orderData.getProduct().getChoices() != null ) {
+			// iterate over all choices ... 
 			for( ChoiceDTO choiceData : orderData.getProduct().getChoices()) {
 				for( OrderChoice savedChoice : savedChoices ) {
+					// ... and compare ids.
 					if(choiceData.getId().equals(savedChoice.getChoice().getId())) {
+						// Save all made choices for the option.
 						HashSet<ProductOption> optionSet = new HashSet<ProductOption>(savedChoice.getChoice().getOptions());
 						// Check if any of the options were changed
 						if ( ! optionSet.containsAll(choiceData.getOptions()) ) {
 							logger.info("Saving updated options for choice: {}", choiceData.getText() );
+							// Remove old choices.
 							savedChoice.getChoice().getOptions().clear();
+							// Add the new choices to the data.
 							savedChoice.getChoice().getOptions().addAll(choiceData.getOptions());
 							
 							orderChoiceRepo.saveOrUpdate(savedChoice);
@@ -163,9 +169,9 @@ public class OrderController {
 			}
 		}
 		
-				
+		//Validate the order entity.		
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
-		
+		//Check that we have no violations.
 		if(violations.isEmpty()) {
 			// save order
 			orderRepo.saveOrUpdate(order);
@@ -173,9 +179,11 @@ public class OrderController {
 			orderData = transform.orderToDto( order );
 			// only create a new request if the order status was updated
 			if(order.getStatus() != oldStatus) {
-				
-				checkIn.setStatus(CheckInStatus.ORDER_PLACED);
-				checkInRepo.saveOrUpdate(checkIn);
+				// Update the checkin status, if there is none set.
+				if(checkIn.getStatus() == CheckInStatus.CHECKEDIN) {
+					checkIn.setStatus(CheckInStatus.ORDER_PLACED);
+					checkInRepo.saveOrUpdate(checkIn);
+				}
 				
 				Request request = new Request();
 				request.setCheckIn(checkIn.getKey());
@@ -195,8 +203,7 @@ public class OrderController {
 				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 				// If we have no older request in the database or the new request is the oldest...
 				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
-					// Send message to notify clients over their channel
-					
+					// Send message to notify cockpit clients over their channel
 					messages.add(new MessageDTO("checkin", "update", transform.toStatusDto(checkIn)));
 					
 					SpotStatusDTO spotData = new SpotStatusDTO();
@@ -217,7 +224,7 @@ public class OrderController {
 				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
 				
 			}
-			throw new IllegalArgumentException(message);
+			throw new OrderFailureException(message);
 		}
 
 		return orderData;
@@ -286,9 +293,8 @@ public class OrderController {
 		if(status != null && !status.isEmpty()) {
 			query = query.filter("status", status.toUpperCase());
 		}
-		List<Order> orders = query.list();
-		
-		return orders;
+
+		return query.list();
 	}
 	
 	public Collection<OrderDTO> getOrdersBySpotAsDto(Long businessId, Long spotId, Long checkInId) {
@@ -316,7 +322,7 @@ public class OrderController {
 		if(checkInId != null) {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
-				
+
 		return query.list();
 	}
 	
@@ -336,27 +342,31 @@ public class OrderController {
 			throw new IllegalArgumentException("Order cannot be placed, checkin not found!");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			throw new RuntimeException("Order cannot be placed, payment already requested or not checked in");
+			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
 		}
 		
 		if( orderData.getStatus() != OrderStatus.CART ) {
-			throw new IllegalArgumentException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
+			throw new OrderFailureException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
 		}
 		
 		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Order cannot be placed, business id unknown" + businessId);
-			return null;
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new IllegalArgumentException("Order cannot be placed, business id unknown", e);
 		}
+		// Check that the order will be placed at the correct business.
 		if(business.getId() != checkIn.getBusiness().getId()) {
 			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
 		}
 		
-		// Check if the product to be ordered exists
-		Product product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
-		if(product == null) {
-			throw new IllegalArgumentException("Order cannot be placed, productId unknown: "+ orderData.getProduct().getId());
+		// Check if the product to be ordered exists	
+		Product product;
+		try {
+			product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new IllegalArgumentException("Order cannot be placed, productId unknown",e);
 		}
 		Key<Product> productKey = product.getKey();
 		
@@ -595,7 +605,7 @@ public class OrderController {
 				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
 				
 			}
-			throw new RuntimeException(message);
+			throw new IllegalArgumentException(message);
 		}
 
 		return orderData; //transform.orderToDto( order );
