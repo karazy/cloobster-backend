@@ -316,16 +316,8 @@ public class OrderController {
 		if(checkInId != null) {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
-		
-		List<Order> orders = query.list();
-		
-		Collections.sort(orders, new Comparator<Order>(){
-	           public int compare (Order m1, Order m2){
-	               return m1.getOrderTime().compareTo(m2.getOrderTime());
-	           }
-	       });
-		
-		return orders;
+				
+		return query.list();
 	}
 	
 	/**
