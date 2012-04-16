@@ -139,7 +139,7 @@ public class BusinessController {
 		messages.add(new MessageDTO("request", "new", requestData));
 		
 		try {
-			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
+			channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 		} catch (Exception e) {
 			logger.error("error sending messages", e);
 		}
@@ -221,7 +221,7 @@ public class BusinessController {
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
 		try {
-			channelCtrl.sendMessagesToAllClients(request.getBusiness().getId(), messages);
+			channelCtrl.sendMessagesToAllCockpitClients(request.getBusiness().getId(), messages);
 		} catch (Exception e) {
 			logger.error("error sending messages", e);
 		}

@@ -199,7 +199,7 @@ public class BillController {
 				
 		try {
 			// Send messages to notify clients over their channel.
-			channelCtrl.sendMessagesToAllClients(businessId, messages);
+			channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -317,7 +317,7 @@ public class BillController {
 			}
 			try {
 				// Send messages to notify clients over their channel.
-				channelCtrl.sendMessagesToAllClients(businessId, messages);
+				channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
 			} catch (Exception e) {
 				logger.error("error sending messages", e);
 			}

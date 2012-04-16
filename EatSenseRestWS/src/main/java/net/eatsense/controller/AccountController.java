@@ -204,6 +204,6 @@ public class AccountController {
 		Business business = businessRepo.getById(businessId);
 		if(business == null)
 			return null;
-		return channelCtrl.createChannel(business, clientId);
+		return channelCtrl.createCockpitChannel(business, clientId);
 	}
 }

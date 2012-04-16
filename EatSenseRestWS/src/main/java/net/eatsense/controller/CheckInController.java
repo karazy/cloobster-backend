@@ -161,43 +161,26 @@ public class CheckInController {
 			for (ConstraintViolation<CheckIn> violation : constraintViolations) {
 				
 				logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
+				ErrorDTO errorDto;
 				if(violation.getPropertyPath().toString().equals("nickname")) {
-					
-					try {
-						message = mapper.writeValueAsString(new ErrorDTO("checkInErrorNickname", "3","20"));
-					} catch (JsonGenerationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (JsonMappingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					throw new RuntimeException(message);
+					errorDto = new ErrorDTO("checkInErrorNickname", "3","20");
 				}
 				else {
-					try {
-						message = mapper.writeValueAsString(new ErrorDTO("checkInError", violation.getPropertyPath().toString() + " " + violation.getMessage()));
-					} catch (JsonGenerationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (JsonMappingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					throw new RuntimeException(message);
+					errorDto = new ErrorDTO("checkInError", violation.getPropertyPath().toString() + " " + violation.getMessage());
 				}
+				
+				try {
+					message = mapper.writeValueAsString(errorDto);
+				} catch (Exception e) {
+					throw new RuntimeException("error while mapping error data",e);
+				}
+				throw new RuntimeException(message);
 					
 			}
 		}			
  		
 		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(checkIn.getSpot());
-		// at least we have the newly created checkin
+		// count checkins at spot
 		int checkInCount = 1;
 		if(checkInsAtSpot != null) {
 			Iterator<CheckIn> it = checkInsAtSpot.iterator();
@@ -209,12 +192,8 @@ public class CheckInController {
 					logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
 					try {
 						message = mapper.writeValueAsString(new ErrorDTO("checkInErrorNicknameExists", ""));
-					} catch (JsonGenerationException e) {
-						e.printStackTrace();
-					} catch (JsonMappingException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
+					} catch (Exception e) {
+						throw new RuntimeException("error while mapping error data",e);
 					}
 					//abort checkin
 					throw new RuntimeException(message);
@@ -238,7 +217,7 @@ public class CheckInController {
 		
 		// send the messages
 		try {
-			channelCtrl.sendMessagesToAllClients(business.getId(), messages);
+			channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
 		} catch (Exception e) {
 			logger.error("error sending messages",e);
 		}
@@ -301,7 +280,7 @@ public class CheckInController {
 		if(checkInUser == null )
 			throw new NotFoundException("Unknown checkInId");
 		
-		if(checkInUser.getLinkedUserId() != checkInDto.getLinkedCheckInId()) {
+		if(!checkInUser.getLinkedUserId().equals(checkInDto.getLinkedCheckInId())) {
 			CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", checkInDto.getLinkedCheckInId());
 			if(checkInLinkedUser == null )
 				throw new IllegalArgumentException("Cannot update checkin, linkedCheckInId unknown");
@@ -390,7 +369,7 @@ public class CheckInController {
 			messages.add(new MessageDTO("spot", "update", spotData));
 			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
 			try {
-				channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
+				channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 			} catch (Exception e) {
 				logger.error("error sending messages", e);
 			}
@@ -479,7 +458,7 @@ public class CheckInController {
 		
 		messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
 
-		channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
+		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 	}
 
 	/**
@@ -547,9 +526,27 @@ public class CheckInController {
 			
 			messages.add(new MessageDTO("spot", "update", spotData));
 			
-			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
+			channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 		}
 		
 		return checkInData;
+	}
+	
+	/**
+	 * Generates and returns a new channel token.
+	 * 
+	 * @param checkInUid unique identifier of the checkin
+	 * @param clientId to use for token creation 
+	 * @return the generated channel token
+	 */
+	public String requestToken (String checkInUid) {
+		String token = null;
+		try {
+			token = channelCtrl.createCustomerChannel(checkInUid);
+		} catch (IllegalArgumentException e) {
+			logger.error("Failed channel creation, Invalid checkInUid "+ checkInUid, e);
+			return null;
+		}
+		return token;
 	}
 }

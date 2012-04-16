@@ -7,7 +7,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.JsonGenerationException;
@@ -16,10 +18,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.channel.ChannelFailureException;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.inject.Inject;
+import com.googlecode.objectify.NotFoundException;
 
 /**
  * Sends push messages via the Google Channel Service.
@@ -34,11 +38,14 @@ public class ChannelController {
 	
 	ChannelService channelService;
 	private ObjectMapper mapper;
+
+	private CheckInRepository checkInRepo;
 	
 	@Inject
-	public ChannelController(BusinessRepository rr) {
+	public ChannelController(BusinessRepository rr, CheckInRepository checkInRepo) {
 		super();
 		this.businessRepo = rr;
+		this.checkInRepo = checkInRepo;
 		channelService = ChannelServiceFactory.getChannelService();	
 		mapper = new ObjectMapper();
 	}
@@ -50,8 +57,8 @@ public class ChannelController {
 	 * @param clientId
 	 * @return
 	 */
-	public String createChannel(Long businessId, String clientId) {
-		return createChannel(businessId, clientId, null);
+	public String createCockpitChannel(Long businessId, String clientId) {
+		return createCockpitChannel(businessId, clientId, null);
 	}
 	
 	/**
@@ -62,20 +69,19 @@ public class ChannelController {
 	 * @param clientId
 	 * @return the token to send to the client
 	 */
-	public String createChannel(Business business, String clientId) {
-		return createChannel(business, clientId, null);
+	public String createCockpitChannel(Business business, String clientId) {
+		return createCockpitChannel(business, clientId, null);
 	}
 	
-	
 	/**
-	 * Create a new message channel for push notification, with the given timeout.
+	 * Create a new message channel for business administration push notification, with the given timeout.
 	 * 
 	 * @param business datastore entity
 	 * @param clientId
 	 * @param timeout in minutes
 	 * @return the token to send to the client
 	 */
-	public String createChannel(Business business, String clientId , Integer timeout) {
+	public String createCockpitChannel(Business business, String clientId , Integer timeout) {
 		String token = null;
 		// create a channel id with the format "businessId|clientId"
 		clientId = business.getId() + "|" + clientId;
@@ -94,12 +100,32 @@ public class ChannelController {
 	 * @param timeout
 	 * @return the token to send to the client
 	 */
-	public String createChannel(Long businessId, String clientId , Integer timeout) {
+	public String createCockpitChannel(Long businessId, String clientId , Integer timeout) {
 		Business business = businessRepo.getById(businessId);
 		if(business == null)
 			throw new IllegalArgumentException("unknown businessId: " + businessId);
-		return createChannel(business, clientId, timeout);
+		return createCockpitChannel(business, clientId, timeout);
 	}
+	
+	public String sendMessageToCheckIn(Long checkInId, String type, String action, Object content)  {
+		MessageDTO messageData = new MessageDTO();
+		messageData.setAction(action);
+		messageData.setContent(content);
+		messageData.setType(type);
+		
+		return sendMessageToCheckIn(checkInId, messageData);
+	}
+	
+	public String sendMessageToCheckIn(Long checkInId, MessageDTO messageData) {
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getById(checkInId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("Failed to send message, unknow checkInId", e);
+		}
+		return sendMessage(checkIn.getChannelId(), messageData);
+	}
+	
 	
 	/**
 	 * Send a message to the client identified by the client id.
@@ -131,10 +157,7 @@ public class ChannelController {
 	 * @throws IOException, JsonGenerationException, JsonMappingException 
 	 */
 	public String sendMessage(String clientId, MessageDTO messageData)  {
-		ChannelMessage message = new ChannelMessage(clientId, buildJsonMessage(messageData));
-		channelService.sendMessage(message);
-		
-		return message.getMessage();
+		return sendMessageRaw(clientId, buildJsonMessage(messageData)).getMessage();
 	}
 	
 
@@ -167,6 +190,7 @@ public class ChannelController {
 	 */
 	public ChannelMessage sendMessageRaw(String clientId, String messageString) {
 		ChannelMessage message = new ChannelMessage(clientId, messageString);
+		logger.info("Sending to client {}, message: {}", clientId, message.getMessage());
 		channelService.sendMessage(message);
 		
 		return message;
@@ -183,8 +207,8 @@ public class ChannelController {
 	 * @throws JsonMappingException 
 	 * @throws JsonGenerationException 
 	 */
-	public void sendMessageToAllClients(Long businessId, String type, String action, Object content) {
-		sendJsonToAllClients(businessId, new MessageDTO(type, action, content));
+	public void sendMessageToAllCockpitClients(Long businessId, String type, String action, Object content) {
+		sendJsonToAllCockpitClients(businessId, new MessageDTO(type, action, content));
 	}
 	
 	/**
@@ -196,11 +220,11 @@ public class ChannelController {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public void sendMessagesToAllClients(Long businessId, List<MessageDTO> content)  {
-		sendJsonToAllClients(businessId, content);
+	public void sendMessagesToAllCockpitClients(Long businessId, List<MessageDTO> content)  {
+		sendJsonToAllCockpitClients(businessId, content);
 	}
 	
-	private void sendJsonToAllClients(Long businessId, Object content)  {
+	private void sendJsonToAllCockpitClients(Long businessId, Object content)  {
 		Business business = businessRepo.getById(businessId);
 		if(business == null)
 			throw new IllegalArgumentException("Unable to send message, unknown business id given.");
@@ -233,7 +257,11 @@ public class ChannelController {
 			throw new RuntimeException("could not parse presence",e);
 		}
 		logger.debug("recieved disconnected from clientId:" + clientId);
-		unsubscribeClient(clientId);
+		if(clientId.startsWith("c")) {
+			unsubscribeCheckIn(clientId);
+		}
+		else if(clientId.startsWith("b"))
+			unsubscribeFromBusiness(clientId);
 	}
 	
 	
@@ -252,16 +280,32 @@ public class ChannelController {
 			throw new RuntimeException("could not parse presence",e);
 		}
 		logger.debug("recieved connected from clientId:" + clientId);
-		subscribeToBusiness(clientId);
+		if(clientId.startsWith("c")) {
+			subscribeCheckIn(clientId);
+		}
+		else if(clientId.startsWith("b"))
+			subscribeToBusiness(clientId);
 	}
 	
+	public void subscribeCheckIn(String clientId) {
+		CheckIn checkIn = parseCheckIn(clientId);
+		checkIn.setChannelId(clientId);
+		checkInRepo.saveOrUpdate(checkIn);
+	}
+	
+	public void unsubscribeCheckIn(String clientId) {
+		CheckIn checkIn = parseCheckIn(clientId);
+		checkIn.setChannelId(null);
+		checkInRepo.saveOrUpdate(checkIn);
+	}
+
 	/**
 	 * Remove the channel from the business<br>
 	 * It doesnt recieve further messages, concerning this business.
 	 * 
 	 * @param clientId
 	 */
-	public void unsubscribeClient(String clientId) {
+	public void unsubscribeFromBusiness(String clientId) {
 		Business business = parseBusiness(clientId);
 		
 		if(business == null) {
@@ -274,8 +318,6 @@ public class ChannelController {
 			business.getChannelIds().remove(clientId);
 			businessRepo.saveOrUpdate(business);
 		}
-			
-		
 	}
 	
 	/**
@@ -286,16 +328,30 @@ public class ChannelController {
 	 */
 	private Business parseBusiness(String clientId) {
 		// retrieve the businessId appended at the front of the client id seperated with a "|"
-		Long businessId = Long.valueOf(clientId.substring(0, clientId.indexOf("|") ));
-		
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			throw new IllegalArgumentException("unknown businessId encoded in clientId: "+ clientId);
-		}
-		else
-			return business;
-	}
+		Long businessId = Long.valueOf(clientId.substring(1, clientId.indexOf("|") ));
 
+		try {
+			return businessRepo.getById(businessId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("clientId contains unknown encoded business, clientId=" + clientId, e);
+		}
+	}
+	
+	/**
+	 * Get the CheckIn entity by the encoded id.
+	 * 
+	 * @param clientId
+	 * @return CheckIn entity
+	 */
+	private CheckIn parseCheckIn(String clientId) {
+		// retrieve the id encoded after the first character in the string
+		Long checkInId = Long.valueOf(clientId.substring(1));
+		try {
+			return checkInRepo.getById(checkInId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("clientId contains unknown encoded checkIn, clientId=" + clientId, e);
+		}
+	}
 	
 	/**
 	 * Save the given client as a listener to updates for this business.
@@ -308,6 +364,41 @@ public class ChannelController {
 			business.setChannelIds(new ArrayList<String>());
 		business.getChannelIds().add(clientId);
 		businessRepo.saveOrUpdate(business);
+	}
+	
+	/**
+	 * Create a new message channel for customer push notification, with the given timeout.
+	 * 
+	 * @param checkInUid uid of the connecting checkin
+	 * @param timeout in minutes
+	 * @return the token to send to the client
+	 */
+	public String createCustomerChannel(String checkInUid, Integer timeout) {
+		String token = null;
+		if(checkInUid == null || checkInUid.isEmpty())
+			throw new IllegalArgumentException("checkInUid null or empty");
+		
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
+		if(checkIn == null)
+			throw new IllegalArgumentException("checkInUid unknown");			
+		// create a channel id with the format "c{checkInId}"
+		String clientId = "c"+ checkIn.getId().toString();
+		
+		logger.debug("creating channel for channelID: " +clientId);
+		// request a new token, with or without timeout depending if set
+		token = (timeout != null)?channelService.createChannel(clientId, timeout):channelService.createChannel(clientId);
+
+		return token;
+	}
+	
+	/**
+	 * Create a new message channel for customer push notification.
+	 * 
+	 * @param checkInUid uid of the connecting checkin
+	 * @return
+	 */
+	public String createCustomerChannel(String checkInUid) {
+		return createCustomerChannel(checkInUid, null);
 	}
 
 }

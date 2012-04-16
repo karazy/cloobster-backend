@@ -206,7 +206,7 @@ public class OrderController {
 					
 				}
 
-				channelCtrl.sendMessagesToAllClients(businessId, messages);
+				channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
 				
 			}
 		}
@@ -582,11 +582,15 @@ public class OrderController {
 			if(oldStatus != order.getStatus()) {
 				// Add a message with updated order status to the message package.
 				messages.add(new MessageDTO("order","update",orderData));
+				
+				// If we cancel the order, let the checkedin customer know.
+				if(order.getStatus() == OrderStatus.CANCELED)
+					channelCtrl.sendMessage(checkIn.getChannelId(), "order", "update", orderData);
 			}
 			// Send messages if there are any.
 			if(!messages.isEmpty()) {
 				try {
-					channelCtrl.sendMessagesToAllClients(businessId, messages);
+					channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
 				} catch (Exception e) {
 					logger.error("error while sending messages", e);
 				}

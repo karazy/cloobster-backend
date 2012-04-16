@@ -76,6 +76,8 @@ public class CheckIn extends GenericEntity{
 	private Key<Spot> spot;
 	
 	private boolean archived = false;
+	
+	private String channelId;
 
 	public String getUserId() {
 		return userId;
@@ -157,6 +159,14 @@ public class CheckIn extends GenericEntity{
 
 	public void setArchived(boolean archived) {
 		this.archived = archived;
+	}
+
+	public String getChannelId() {
+		return channelId;
+	}
+
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
 	}
 	
 	

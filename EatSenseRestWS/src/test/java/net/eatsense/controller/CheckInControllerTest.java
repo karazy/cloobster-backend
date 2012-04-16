@@ -1,7 +1,6 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -224,6 +223,32 @@ public class CheckInControllerTest {
 		assertThat(checkIn.getNickname(), is(test.getNickname()));
 		assertThat(checkIn.getUserId(), is(test.getUserId()));
 
+	}
+	
+	@Test
+	public void testRequestChannelToken() {
+		//#1 Create a checkin ...
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId("b4rc0de");
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn = ctr.createCheckIn( checkIn);
+		
+		//#2.1 Request token with bad checkinid ...
+		String result = ctr.requestToken("dafuq");
+		assertThat(result, nullValue());
+		//#2.2 Request token with null id ...
+		result = ctr.requestToken(null);
+		assertThat(result, nullValue());
+		
+		//#3.1 Request token with valid uid ...
+		result = ctr.requestToken(checkIn.getUserId());
+		assertThat(result, notNullValue());
+		assertThat(result.length(), is(greaterThan(8)));
+	
+		//#3.2 Request another token with the same uid, should create a new token ...
+		String newResult = ctr.requestToken(checkIn.getUserId());
+		assertThat(newResult, is(not(result)));
 	}
 
 }
