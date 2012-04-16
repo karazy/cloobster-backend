@@ -528,8 +528,14 @@ Ext.define('EatSense.controller.CheckIn', {
             this.models.activeCheckIn.orders().removeAll();
             orderCtr.refreshCartBadgeText();
 
-			this.showDashboard();	
+			this.showDashboard();
+
+            Karazy.channel.closeChannel();
 		}
+
+        if(status == Karazy.constants.CANCEL_ALL) {
+            Ext.Msg.alert(i18nPlugin.translate('hint'), i18nPlugin.translate('checkInCanceled'), Ext.emptyFn);
+        }
 	},
     /**
     *   Handle push notifications for checkins.

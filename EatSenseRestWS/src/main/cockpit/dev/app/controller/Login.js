@@ -186,7 +186,6 @@ Ext.define('EatSense.controller.Login', {
 
 		EatSense.model.Account.load(login, {
 			success: function(record, operation){
-				console.log('success');
 				me.setAccount(record);
 				//generate clientId for channel
 				me.getAccount().set('clientId', me.getAccount().get('login') + new Date().getTime());
@@ -195,14 +194,12 @@ Ext.define('EatSense.controller.Login', {
 				Ext.Ajax.setDefaultHeaders({
 					'login': login,
 					'passwordHash': record.get('passwordHash'),
-					'pathId' : record.get('businessId')
 				});				
 
 				me.resetAccountProxyHeaders();
 				me.showBusinesses();				
 			},
 			failure: function(record, operation){
-				console.log('failure');
 				me.resetAccountProxyHeaders();
 				me.resetDefaultAjaxHeaders();
 				if(operation.error) {
@@ -362,7 +359,11 @@ Ext.define('EatSense.controller.Login', {
 			 			loginPanel.setActiveItem(1);
 			 		} else if(records.length == 1){
 			 			account.set('businessId', records[0].get('id'));
-			 			account.set('business', records[0].get('name'));						
+			 			account.set('business', records[0].get('name'));
+
+			 			//set pathId in default Ajax headers to avoid setting it with every request
+						Ext.Ajax.getDefaultHeaders().pathId = account.get('businessId');
+
 			 			me.saveAppState();
 
 			 			Ext.Viewport.remove(Ext.Viewport.down('login'));
@@ -397,6 +398,10 @@ Ext.define('EatSense.controller.Login', {
 
 		account.set('businessId', record.get('id'));
 		account.set('business', record.get('name'));
+		
+		//set pathId in default Ajax headers to avoid setting it with every request
+		Ext.Ajax.getDefaultHeaders().pathId = account.get('businessId');
+
 		me.saveAppState();
 
 		Ext.Viewport.remove(Ext.Viewport.down('login'));
