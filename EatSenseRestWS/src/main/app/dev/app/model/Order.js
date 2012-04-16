@@ -36,8 +36,10 @@ Ext.define('EatSense.model.Order', {
 	},
 
 	calculate : function() {
-		var _amount = parseFloat(this.get('amount'));
-		return this.getProduct().calculate(_amount);
+		var _amount = parseFloat(this.get('amount')),
+			price  = this.getProduct().calculate(_amount);
+			
+		return (this.get('status') == Karazy.constants.Order.CANCELED) ? 0 : price;
 	},
 	/**
 	*	Saves the state of this order.
