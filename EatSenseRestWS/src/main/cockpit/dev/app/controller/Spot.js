@@ -83,7 +83,6 @@ Ext.define('EatSense.controller.Spot', {
 
 	init: function() {
 		console.log('initializing Spot Controller');
-
 		//add listeners for message events
 		var messageCtr = this.getApplication().getController('Message');
 		messageCtr.on('eatSense.spot', this.updateSpotIncremental, this);

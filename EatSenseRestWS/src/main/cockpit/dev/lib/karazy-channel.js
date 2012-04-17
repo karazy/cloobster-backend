@@ -25,6 +25,8 @@ Karazy.channel = (function() {
 	//indicates if the client forced a close and won't try to request a new token.
 	var timedOut;
 
+	var channelToken;
+
 	function onOpened() {
 		console.log('channel opened');
 	};
@@ -38,19 +40,33 @@ Karazy.channel = (function() {
 		console.log('channel error ' + (error && error.description) ? error.description : "");
 		if(error && error.code == '401') {
 			timedOut = true;
-		}	
+			// alert('timeout');
+		} else if (error && (error.code == '-1' || error.code == '0')) {
+			connectionLost = true;
+			// alert('reconnect ' + error.code);
+			socket.close();
+		}
 	};
 
 	function onClose() {
-		console.log('channel closed');
+		// alert('onClose ' + timedOut + '  ' + connectionLost);
 		if(timedOut === true && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			console.log('requesting new token');
+			console.log('timeout: requesting new token');
 			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-			timedOut = false;
+			timedOut = false;			
+		} else if(connectionLost) {
+			console.log('connection lost: reopen channel');
+			setupChannel(channelToken);
+			connectionLost = false;			
 		}
 	};
 
 	function setupChannel(token) {
+			if(!token) {
+				return;
+			}
+
+			channelToken = token;
 			channel = new goog.appengine.Channel(token);
 			socket = channel.open();
 			socket.onopen = onOpened;
@@ -110,6 +126,10 @@ Karazy.channel = (function() {
 		* Closes the cannel and prevents a new token request.
 		*/
 		closeChannel: function() {
+			timedOut = false;
+			connectionLost = false;	
+			channelToken = null;
+
 			if(socket) {
 				socket.close();
 			};			

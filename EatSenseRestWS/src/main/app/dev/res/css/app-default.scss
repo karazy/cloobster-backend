@@ -171,6 +171,14 @@ $base-gradient: 'matte';
 
 }
 
+.orderListItem.canceled {
+	text-decoration: line-through;
+
+	h2 {
+		text-decoration: line-through;
+	}
+}
+
 .cartoverview {
 	padding: 0.3em 0em;
 }
