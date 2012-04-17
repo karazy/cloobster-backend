@@ -102,14 +102,7 @@ public class BusinessControllerTest {
 		
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		requestData = businessCtrl.saveCustomerRequest(checkIn.getUserId(), requestData);
-		
-		// Save a call waiter request for unknown checkin
-		try {
-			businessCtrl.saveCustomerRequest("unknowncheckinid", requestData);
-		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
-		}
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
 		
 		// Save a call waiter request for null checkin
 		try {

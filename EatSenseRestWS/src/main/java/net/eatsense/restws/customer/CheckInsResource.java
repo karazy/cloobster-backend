@@ -2,6 +2,8 @@ package net.eatsense.restws.customer;
 
 import java.util.Collection;
 
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,7 +13,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,85 +27,58 @@ import com.sun.jersey.api.core.ResourceContext;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Account;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.restws.business.OrderResource;
 
 @Path("c/checkins")
 public class CheckInsResource {
 	private CheckInController checkInCtrl;
-	private BusinessController businessCtrl;
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Context
 	private ResourceContext resourceContext;
+	@Context
+	HttpServletRequest servletRequest;
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr, BusinessController businessCtrl) {
+	public CheckInsResource(CheckInController checkInCtr) {
 		super();
 		this.checkInCtrl = checkInCtr;
-		this.businessCtrl = businessCtrl;
 	}
 	
 	@POST
 	@Consumes("application/json; charset=UTF-8")
-//	@Produces("text/plain; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO createCheckIn(CheckInDTO checkIn) {
-//		String userId = checkInCtr.createCheckIn(checkIn);
-		CheckInDTO userId = checkInCtrl.createCheckIn(checkIn);
-		return userId;
+		return checkInCtrl.createCheckIn(checkIn);
 	}
-	
-	@PUT
-	@Path("{checkInId}")
-	@Consumes("application/json; charset=UTF-8")
-//	@Produces("text/plain; charset=UTF-8")
-	@Produces("application/json; charset=UTF-8")
-	public CheckInDTO updateCheckIn(@PathParam("checkInId")String checkInId, CheckInDTO checkIn) {
-		return checkInCtrl.updateCheckIn(checkInId, checkIn);
-	}
-	
+
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotId, @QueryParam("checkInId") String checkInId) { 
-		return checkInCtrl.getUsersAtSpot(spotId,checkInId);
+	@RolesAllowed({"guest"})
+	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotBarcode, @QueryParam("checkInId") String checkInId) {
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		return checkInCtrl.getOtherUsersAtSpot(checkIn, spotBarcode);
 	}
+
 	
-	@GET
-	@Path("{checkInId}")
-	@Produces("application/json; charset=UTF-8")
-	public CheckInDTO getCheckIn(@PathParam("checkInId") String checkInId) {
-		CheckInDTO checkIn = checkInCtrl.getCheckInAsDTO(checkInId);
-		if(checkIn == null)
+	@Path("{checkInUid}")
+	public CheckInResource getCheckInResource(@PathParam("checkInUid") String checkInUid) {
+		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		if(checkInFromPath == null)
 			throw new NotFoundException();
-		return checkIn;
+		boolean authenticated = checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId());
+
+		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
+		checkInResource.setCheckIn(checkInFromPath);
+		// Check that the authenticated checkin owns the entity
+		checkInResource.setAuthenticated(authenticated);
+		
+		return checkInResource;
 	}
-	
-	@DELETE
-	@Path("{checkInId}")
-	public void deleteCheckIn(@PathParam("checkInId") String checkInId) {
-		checkInCtrl.checkOut(checkInId);
-	}
-	
-	@POST
-	@Path("{checkInId}/requests")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("application/json; charset=UTF-8")
-	public CustomerRequestDTO postRequest(@PathParam("checkInId") String checkInId, CustomerRequestDTO requestData) {
-		return businessCtrl.saveCustomerRequest(checkInId, requestData);
-	}
-	
-	@POST
-	@Path("{checkInUid}/tokens")
-	@Produces("text/plain; charset=UTF-8")
-	public String requestToken(@PathParam("checkInUid") String checkInUid) {
-		try {
-			return checkInCtrl.requestToken(checkInUid);
-		} catch (IllegalArgumentException e) {
-			logger.error("Failed channel creation", e);
-			throw new NotFoundException(e.getMessage());
-		}
-	}
-	
+
 }

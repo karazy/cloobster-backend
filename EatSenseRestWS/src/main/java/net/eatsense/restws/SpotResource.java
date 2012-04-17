@@ -58,10 +58,9 @@ public class SpotResource {
 		SpotRepository sr = new SpotRepository();
 		Collection<Spot> spots = sr.getAll();
 		Collection<SpotDTO> dtos = new ArrayList<SpotDTO>();
-		
 		for (Spot s : spots) {
 			
-			dtos.add(checkInCtr.getSpotInformation(s.getBarcode()));
+			dtos.add(checkInCtr.toSpotDto(s));
 			
 		}
 		

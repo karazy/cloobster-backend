@@ -81,12 +81,11 @@ public class BusinessController {
 	 * @param requestData
 	 * @return requestData
 	 */
-	public CustomerRequestDTO saveCustomerRequest(String checkInUid, CustomerRequestDTO requestData) {
+	public CustomerRequestDTO saveCustomerRequest(CheckIn checkIn, CustomerRequestDTO requestData) {
 		if( requestData == null)
 			throw new IllegalArgumentException("Unable to post request, requestData is null");
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);		
 		if(checkIn == null)
-			throw new IllegalArgumentException("Unable to post request, checkInUid unknown");
+			throw new IllegalArgumentException("Unable to post request, checkIn is null");
 		if(checkIn.isArchived())
 			throw new IllegalArgumentException("Cant post request for archived checkin");
 		

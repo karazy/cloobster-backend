@@ -56,7 +56,7 @@ public class CheckInController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private BusinessRepository businessRepo;
 	private CheckInRepository checkInRepo;
-	private SpotRepository barcodeRepo;
+	private SpotRepository spotRepo;
 	private Transformer transform;
 	private ChannelController channelCtrl;
 	private ObjectMapper mapper;
@@ -81,16 +81,13 @@ public class CheckInController {
 		this.businessRepo = businessRepository;
 		this.checkInRepo = checkInRepository;
 		this.channelCtrl = channelController;
-		this.barcodeRepo = spotRepository;
+		this.spotRepo = spotRepository;
 		this.requestRepo = requestRepository;
 		this.orderRepo = orderRepo;
 		this.transform = transformer;
 		this.mapper = objectMapper;
 		this.validator = validator;
 	}
-	
-
-	
 
     /**
      * Get spot data for a given barcode.
@@ -102,22 +99,31 @@ public class CheckInController {
     public SpotDTO getSpotInformation(String barcode) {
     	if(barcode == null || barcode.isEmpty() )
     		return null;
-    	SpotDTO spotDto = new SpotDTO();
-    	Spot spot = barcodeRepo.getByProperty("barcode", barcode);
+    	
+    	Spot spot = spotRepo.getByProperty("barcode", barcode);
     	if(spot == null )
     		return null;
     	
-    	Business business = businessRepo.getByKey(spot.getBusiness());
-      	    	
-    	spotDto.setBarcode(barcode);
+    	SpotDTO spotDto = toSpotDto(spot);
+    	
+		return spotDto ;
+    }
+
+    public SpotDTO toSpotDto(Spot spot) {
+		Business business = businessRepo.getByKey(spot.getBusiness());
+    	SpotDTO spotDto = new SpotDTO();    	
+    	spotDto.setBarcode(spot.getBarcode());
     	spotDto.setName(spot.getName());
     	spotDto.setBusiness(business.getName());
     	spotDto.setBusinessId(business.getId());
     	spotDto.setPayments(business.getPaymentMethods());
     	spotDto.setGroupTag(spot.getGroupTag());
-    	
-		return spotDto ;
-    }
+		return spotDto;
+	}
+	
+	public CheckInDTO toDto(CheckIn checkIn) {
+		return transform.checkInToDto(checkIn);
+	}
 
 	/**
 	 * Create and save a new checkin in the store.
@@ -136,7 +142,7 @@ public class CheckInController {
 		}
 			
 		// Find spot by the given barcode
-		Spot spot = barcodeRepo.getByProperty("barcode", checkInDto.getSpotId());
+		Spot spot = spotRepo.getByProperty("barcode", checkInDto.getSpotId());
 		if(spot == null )
     		throw new IllegalArgumentException("Unable to create checkin, spot barcode unknown");
     	
@@ -229,29 +235,27 @@ public class CheckInController {
 	 * @param checkInId
 	 * @return List of user objects
 	 */
-	public List<User> getUsersAtSpot(String spotBarcode, String checkInId) {
+	public List<User> getOtherUsersAtSpot(CheckIn checkIn, String spotBarcode) {
 		List<User> usersAtSpot = new ArrayList<User>();
-		if(spotBarcode == null || spotBarcode.isEmpty()) 
+		if(checkIn == null) 
 			return usersAtSpot;
 		
-		Spot spot = barcodeRepo.getByProperty("barcode", spotBarcode);
-		
-    	if(spot == null )
-    		return usersAtSpot;
-		
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(! spot.getBarcode().equals(spotBarcode))
+			return usersAtSpot;
 		List<CheckIn> checkInsAtSpot = getCheckInsBySpot(spot.getKey());
 		
 		if (checkInsAtSpot != null && !checkInsAtSpot.isEmpty()) {
 			usersAtSpot = new ArrayList<User>();
 			
 			// Other users at this spot exist.
-			for (CheckIn checkIn : checkInsAtSpot) {
+			for (CheckIn otherCheckIn : checkInsAtSpot) {
 				
-				if(!checkIn.getUserId().equals(checkInId) && isPaymentLinkPossible(checkIn)) {
+				if(!otherCheckIn.getId().equals(checkIn.getId()) && isPaymentLinkPossible(otherCheckIn)) {
 					User user = new User();
 					
-					user.setUserId(checkIn.getUserId());
-					user.setNickname(checkIn.getNickname());
+					user.setUserId(otherCheckIn.getUserId());
+					user.setNickname(otherCheckIn.getNickname());
 					
 					usersAtSpot.add(user);
 				}
@@ -264,24 +268,23 @@ public class CheckInController {
 	/**
 	 * Update existing checkIn
 	 * 
-	 * @param checkInId
+	 * @param checkIn
 	 * @param checkInDto
 	 * @return
 	 */
-	public CheckInDTO updateCheckIn(String checkInId, CheckInDTO checkInDto) {
-		CheckIn checkInUser = checkInRepo.getByProperty("userId", checkInId);
+	public CheckInDTO updateCheckIn(CheckIn checkIn, CheckInDTO checkInDto) {
+		if(checkIn == null )
+			throw new IllegalArgumentException("checkIn is null");
 		boolean save = false;
-		if(checkInUser == null )
-			throw new IllegalArgumentException("Unknown checkInId");
 		
-		if(checkInDto.getLinkedCheckInId() != null && !checkInDto.getLinkedCheckInId().equals(checkInUser.getLinkedUserId())) {
+		if(checkInDto.getLinkedCheckInId() != null && !checkInDto.getLinkedCheckInId().equals(checkIn.getLinkedUserId())) {
 			CheckIn checkInLinkedUser = checkInRepo.getByProperty("userId", checkInDto.getLinkedCheckInId());
 			if(checkInLinkedUser == null )
 				throw new IllegalArgumentException("Cannot update checkin, linkedCheckInId unknown");
 			
-			if(checkInUser != null && checkInLinkedUser != null) {
-				if (checkInUser.getStatus() == CheckInStatus.CHECKEDIN && isPaymentLinkPossible(checkInLinkedUser)) {
-					checkInUser.setLinkedUserId(checkInLinkedUser.getUserId());
+			if(checkIn != null && checkInLinkedUser != null) {
+				if (checkIn.getStatus() == CheckInStatus.CHECKEDIN && isPaymentLinkPossible(checkInLinkedUser)) {
+					checkIn.setLinkedUserId(checkInLinkedUser.getUserId());
 					save = true;
 				}
 				else
@@ -291,7 +294,7 @@ public class CheckInController {
 		//TODO: allow updating of other fields, like nickname
 
 		if(save) {
-			checkInRepo.saveOrUpdate(checkInUser);
+			checkInRepo.saveOrUpdate(checkIn);
 		}
 
 		return checkInDto;
@@ -310,13 +313,13 @@ public class CheckInController {
 	
 	/**
 	 * Load checkin.
-	 * @param checkInId
+	 * @param checkInUid
 	 * 			Id of CheckIn to load	
 	 * @return
 	 * 		found checkin otherwise <code>null</code>
 	 */
-	public CheckIn getCheckIn(String checkInId) {
-		return checkInRepo.getByProperty("userId", checkInId);
+	public CheckIn getCheckIn(String checkInUid) {
+		return checkInRepo.getByProperty("userId", checkInUid);
 	}
 	
 	/**
@@ -534,7 +537,7 @@ public class CheckInController {
 	 * @param clientId to use for token creation 
 	 * @return the generated channel token
 	 */
-	public String requestToken (String checkInUid) {
-		return channelCtrl.createCustomerChannel(checkInUid);
+	public String requestToken (CheckIn checkIn) {
+		return channelCtrl.createCustomerChannel(checkIn);
 	}
 }

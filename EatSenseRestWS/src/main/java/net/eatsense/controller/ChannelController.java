@@ -392,14 +392,10 @@ public class ChannelController {
 	 * @param timeout in minutes
 	 * @return the token to send to the client
 	 */
-	public String createCustomerChannel(String checkInUid, Integer timeout) {
+	public String createCustomerChannel(CheckIn checkIn, Integer timeout) {
 		String token = null;
-		if(checkInUid == null || checkInUid.isEmpty())
-			throw new IllegalArgumentException("checkInUid null or empty");
-		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null)
-			throw new IllegalArgumentException("checkInUid unknown");			
+			throw new IllegalArgumentException("checkIn is null");			
 		// create a channel id with the format "c{checkInId}"
 		String clientId = "c"+ checkIn.getId().toString();
 		
@@ -416,8 +412,8 @@ public class ChannelController {
 	 * @param checkInUid uid of the connecting checkin
 	 * @return
 	 */
-	public String createCustomerChannel(String checkInUid) {
-		return createCustomerChannel(checkInUid, null);
+	public String createCustomerChannel(CheckIn checkIn) {
+		return createCustomerChannel(checkIn, null);
 	}
 
 }
