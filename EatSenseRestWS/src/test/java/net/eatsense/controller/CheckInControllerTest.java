@@ -1,7 +1,6 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -177,6 +176,9 @@ public class CheckInControllerTest {
 		assertThat(checkInData, notNullValue());
 		assertThat(checkInData.getUserId(), notNullValue());
 		
+		// Retrieve checkin entity from store.
+		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
+		
 		CheckInDTO checkInData2 = new CheckInDTO();
 		checkInData2.setSpotId("b4rc0de");
 		checkInData2.setStatus(CheckInStatus.INTENT);
@@ -187,18 +189,18 @@ public class CheckInControllerTest {
 		assertThat(checkInData2.getUserId(), notNullValue());
 		
 		//load users at same spot
-		List<User> users = ctr.getUsersAtSpot(checkInData.getSpotId(), checkInData.getUserId());
+		List<User> users = ctr.getOtherUsersAtSpot(checkIn, checkInData.getSpotId());
 		
 		assertThat(users.size(), is(1));
 		//the second checked in user should be Papa Schlumpf
 		assertThat(users.get( 0 ).getNickname(), is(checkInData2.getNickname()) );
 		//link user
 		checkInData.setLinkedCheckInId(checkInData2.getUserId());
-		CheckInDTO result = ctr.updateCheckIn(checkInData.getUserId(), checkInData);
+		CheckInDTO result = ctr.updateCheckIn(checkIn, checkInData);
 		assertThat(result, notNullValue());
 		
 		//check if user is linked
-		CheckIn checkIn = cr.getByProperty("userId", checkInData.getUserId());
+		checkIn = cr.getByProperty("userId", checkInData.getUserId());
 		assertThat(checkIn.getLinkedUserId(), is(checkInData2.getUserId()));
 	}
 	
@@ -225,5 +227,66 @@ public class CheckInControllerTest {
 		assertThat(checkIn.getUserId(), is(test.getUserId()));
 
 	}
-
+	
+	@Test
+	public void testRequestChannelToken() {
+		//#1 Create a checkin ...
+		CheckInDTO checkInData = new CheckInDTO();
+		checkInData.setSpotId("b4rc0de");
+		checkInData.setNickname("FakeNik");
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData = ctr.createCheckIn( checkInData);
+		
+		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
+				
+		String result;
+		//#2.1 Request token with null id ...
+		try {
+			result = ctr.requestToken(null);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+			
+		}
+		
+		//#3.1 Request token with valid uid ...
+		result = ctr.requestToken(checkIn);
+		assertThat(result, notNullValue());
+		assertThat(result.length(), is(greaterThan(8)));
+	
+		//#3.2 Request another token with the same uid, should create a new token ...
+		String newResult = ctr.requestToken(checkIn);
+		assertThat(newResult, is(not(result)));
+	}
+	
+	@Test
+	public void testDeleteCheckin() {
+		//#1.1 Create a checkin ...
+		CheckInDTO checkInData = new CheckInDTO();
+		checkInData.setSpotId("b4rc0de");
+		checkInData.setNickname("FakeNik");
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData = ctr.createCheckIn( checkInData);
+		//#1.2 Retrieve checkin id from the store.
+		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
+		
+		//#2.1 Delete the checkin
+		ctr.deleteCheckIn(checkIn.getId());
+		//#2.2 Check the checkin is really gone.
+		CheckIn result = ctr.getCheckIn(checkIn.getUserId());
+		assertThat(result, nullValue());
+		
+		//#2.3 Try to delete the checkin again.
+		try {
+			ctr.deleteCheckIn(checkIn.getId());
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		
+		//#2.3 Try to delete with null argument.
+		try {
+			ctr.deleteCheckIn(null);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+	}
 }

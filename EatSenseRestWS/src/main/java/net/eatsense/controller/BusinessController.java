@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Query;
-import com.sun.jersey.api.NotFoundException;
 
 
 /**
@@ -78,14 +77,15 @@ public class BusinessController {
 	/**
 	 * Save an outstanding request posted by a checkedin customer.
 	 * 
-	 * @param checkInId
+	 * @param checkInUid
 	 * @param requestData
 	 * @return requestData
 	 */
-	public CustomerRequestDTO saveCustomerRequest(String checkInId,	CustomerRequestDTO requestData) {
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);		
+	public CustomerRequestDTO saveCustomerRequest(CheckIn checkIn, CustomerRequestDTO requestData) {
+		if( requestData == null)
+			throw new IllegalArgumentException("Unable to post request, requestData is null");
 		if(checkIn == null)
-			throw new NotFoundException();
+			throw new IllegalArgumentException("Unable to post request, checkIn is null");
 		if(checkIn.isArchived())
 			throw new IllegalArgumentException("Cant post request for archived checkin");
 		
@@ -116,8 +116,7 @@ public class BusinessController {
 		request.setStatus(requestData.getType());
 		request.setType(RequestType.CUSTOM);
 		
-		if( requestRepo.saveOrUpdate(request) == null)
-			throw new RuntimeException("Error while saving request");
+		requestRepo.saveOrUpdate(request);
 		
 		requestData.setId(request.getId());
 		
@@ -138,11 +137,7 @@ public class BusinessController {
 		
 		messages.add(new MessageDTO("request", "new", requestData));
 		
-		try {
-			channelCtrl.sendMessagesToAllClients(checkIn.getBusiness().getId(), messages);
-		} catch (Exception e) {
-			logger.error("error sending messages", e);
-		}
+		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 										
 		return requestData;
 	}
@@ -153,7 +148,7 @@ public class BusinessController {
 	 * @param businessId
 	 * @param checkInId can be null
 	 * @param spotId can be null
-	 * @return request DTO
+	 * @return list of found request dtos or empty list if none found
 	 */
 	public List<CustomerRequestDTO> getCustomerRequestData(Long businessId, Long checkInId, Long spotId) {
 		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
@@ -181,10 +176,8 @@ public class BusinessController {
 			}
 				
 		}
-		if(requestDataList.isEmpty())
-			return null;
-		else
-			return requestDataList;
+		
+		return requestDataList;
 	}
 
 	/**
@@ -194,7 +187,12 @@ public class BusinessController {
 	 * @param requestId
 	 */
 	public void deleteCustomerRequest(Long businessId, Long requestId) {
-		Request request = requestRepo.getById(Business.getKey(businessId), requestId);
+		Request request;
+		try {
+			request = requestRepo.getById(Business.getKey(businessId), requestId);
+		} catch (com.googlecode.objectify.NotFoundException e1) {
+			throw new IllegalArgumentException("Unable to delete request, business or request id unknown", e1);
+		}
 		CustomerRequestDTO requestData = new CustomerRequestDTO();
 
 		requestData.setId(requestId);
@@ -220,10 +218,6 @@ public class BusinessController {
 		
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
-		try {
-			channelCtrl.sendMessagesToAllClients(request.getBusiness().getId(), messages);
-		} catch (Exception e) {
-			logger.error("error sending messages", e);
-		}
+		channelCtrl.sendMessagesToAllCockpitClients(request.getBusiness().getId(), messages);
 	}
 }

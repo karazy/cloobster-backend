@@ -1,32 +1,25 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Order;
-import net.eatsense.domain.OrderChoice;
-import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.domain.embedded.OrderStatus;
-import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.CustomerRequestDTO;
-import net.eatsense.representation.OrderDTO;
-import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
@@ -41,7 +34,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.googlecode.objectify.Key;
 import com.sun.jersey.api.NotFoundException;
 
 public class BusinessControllerTest {
@@ -110,13 +102,13 @@ public class BusinessControllerTest {
 		
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		requestData = businessCtrl.saveCustomerRequest(checkIn.getUserId(), requestData);
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
 		
-		// Save a call waiter request for unknown checkin
+		// Save a call waiter request for null checkin
 		try {
-			businessCtrl.saveCustomerRequest("unknowncheckinid", requestData);
+			businessCtrl.saveCustomerRequest(null, requestData);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(NotFoundException.class));
+			assertThat(e, instanceOf(IllegalArgumentException.class));
 		}
 		
 		assertThat(requestData.getId(), notNullValue());

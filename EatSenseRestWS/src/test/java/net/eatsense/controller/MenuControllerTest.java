@@ -43,7 +43,6 @@ public class MenuControllerTest {
 	    private ProductRepository pr;
 	    private ChoiceRepository cr;
 	    private DummyDataDumper ddd;
-
 		private SpotRepository br;
 
 	@Before

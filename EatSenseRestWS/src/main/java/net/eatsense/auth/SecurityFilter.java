@@ -129,6 +129,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 		}
 		else {
 			logger.info("Valid user request recieved from " + checkIn.getNickname());
+			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
 			// return a security context build around the checkIn
 			return new Authorizer(checkIn);
 		}
@@ -183,8 +184,8 @@ public class SecurityFilter implements ContainerRequestFilter {
         		return true;
         	
         	// only grant the restaurantadmin role if an account was authenticated and the account has the role for this business
-        	if(role.equals("restaurantadmin") && account != null && role.equals(account.getRole())){
-             		return accountCtrl.isAccountManagingBusiness(account, businessId);
+        	if(role.equals("restaurantadmin") && account != null && businessId != null && role.equals(account.getRole())){
+   				return accountCtrl.isAccountManagingBusiness(account, businessId);
         	}
         	// grant the user role, if an account was authenticated
         	if(role.equals("user") && account != null) {

@@ -1,18 +1,13 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.controller.AccountController;
-import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Account;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.ChoiceRepository;
-import net.eatsense.persistence.MenuRepository;
-import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.BusinessRepository;
-import net.eatsense.persistence.SpotRepository;
-import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
@@ -23,7 +18,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.jersey.api.NotFoundException;
 
 public class AccountControllerTest {
 	
@@ -62,7 +56,7 @@ public class AccountControllerTest {
 		 //TODO update to use restaurant id
 		account = ar.createAndSaveAccount( login, password,
 				email, role, rr.getAllKeys());
-		
+		 
 	}
 
 	@After

@@ -216,7 +216,7 @@ public class BillControllerTest {
 		Collection<Bill> bills = br.getAll();
 		
 		assertThat( bills.size(), is(1));
-		
+		 
 		for (Bill bill : bills) {
 			assertThat(bill.getId(), is(billData.getId()));
 			assertThat(bill.getCreationTime(), notNullValue());

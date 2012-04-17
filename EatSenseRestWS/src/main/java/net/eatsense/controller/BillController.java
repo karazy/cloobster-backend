@@ -18,6 +18,7 @@ import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.domain.Business;
+import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 /**
  * Handles creation of bills and price calculations.
@@ -106,25 +108,29 @@ public class BillController {
 	 */
 	public BillDTO updateBill(Long businessId, Long billId , BillDTO billData) {
 		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Bill cannot be updated, business id unknown" + businessId);
-			return null;
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (NotFoundException e1) {
+			throw new IllegalArgumentException("Bill cannot be updated, business id unknown",e1);
 		}
 		
-		Bill bill = billRepo.getById(business.getKey(), billId);
-		if(bill == null) {
-			logger.error("Bill cannot be updated, bill id unknown" + businessId);
-			return null;
+		Bill bill;
+		try {
+			bill = billRepo.getById(business.getKey(), billId);
+		} catch (NotFoundException e1) {
+			throw new IllegalArgumentException("Bill cannot be updated, bill id unknown",e1);
 		}
 		
-		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Bill cannot be updated, check in not found.");
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getByKey(bill.getCheckIn());
+		} catch (NotFoundException e1) {
+			throw new IllegalArgumentException("Bill cannot be updated, check in not found.",e1);
 		}
 		
 		if(billData.isCleared() == false) {
-			throw new IllegalArgumentException("Bill cannot be updated, cleared must be set to true");
+			throw new BillFailureException("Bill cannot be updated, cleared must be set to true");
 		}
 			
 		
@@ -135,7 +141,7 @@ public class BillController {
 		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
 			Order order = iterator.next();
 			if(order.getStatus() == OrderStatus.PLACED) {
-				throw new RuntimeException("Unconfirmed orders available.");
+				throw new BillFailureException("Bill cannot be updated, unconfirmed orders available.");
 			}
 			else if(order.getStatus().equals(OrderStatus.CANCELED) || order.getStatus().equals(OrderStatus.CART) || order.getStatus() == OrderStatus.COMPLETE ) {
 					iterator.remove();
@@ -149,9 +155,7 @@ public class BillController {
 		bill.setTotal(billTotal);
 		bill.setCleared(billData.isCleared());
 		orderRepo.saveOrUpdate(orders);
-		if(billRepo.saveOrUpdate(bill)== null) {
-			throw new RuntimeException("Bill cannot be saved");
-		}
+		billRepo.saveOrUpdate(bill);
 
 		billData.setTotal(bill.getTotal());
 		billData.setCheckInId(bill.getCheckIn().getId());
@@ -197,12 +201,8 @@ public class BillController {
 		spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot()));
 		messages.add(new MessageDTO("spot","update",spotData));
 				
-		try {
-			// Send messages to notify clients over their channel.
-			channelCtrl.sendMessagesToAllClients(businessId, messages);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// Send messages to notify cockpits over their channel.
+		channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
 		
 		return billData;
 	}
@@ -216,22 +216,24 @@ public class BillController {
 	 * @return bill DTO saved
 	 */
 	public BillDTO createBill(Long businessId, String checkInId, BillDTO billData) {
+		Business business;
+		// Try to retrieve the business entity.
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (NotFoundException e1) {
+			throw new IllegalArgumentException("Bill cannot be updated, business id unknown",e1);
+		}
+		// Find the checkin
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
 			throw new IllegalArgumentException("Bill cannot be created, checkin not found!");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			throw new IllegalArgumentException("Bill cannot be created, payment already requested or not checked in");
+			throw new BillFailureException("Bill cannot be created, payment already requested or not checked in");
 		}
-		
-		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Bill cannot be created, business id unknown" + businessId);
-			return null;
-		}
+
 		if(business.getId() != checkIn.getBusiness().getId()) {
-			throw new IllegalArgumentException("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
+			throw new BillFailureException("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
 		}
 		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
@@ -244,7 +246,9 @@ public class BillController {
 				iterator.remove();
 			}
 			else {
-				if(order.getStatus().equals(OrderStatus.CANCELED) || order.getStatus().equals(OrderStatus.CART) )
+				if (order.getStatus().equals(OrderStatus.CANCELED)
+						|| order.getStatus().equals(OrderStatus.CART)
+						|| order.getStatus() == OrderStatus.COMPLETE)
 					iterator.remove();
 			}
 		}
@@ -254,7 +258,7 @@ public class BillController {
 		}
 		else {
 			if(business.getPaymentMethods() == null || business.getPaymentMethods().isEmpty()) {
-				throw new RuntimeException("Bill cannot be created, business has no payment methods saved");
+				throw new BillFailureException("Bill cannot be created, business has no payment methods saved");
 			}
 			Bill bill = new Bill();
 			
@@ -263,18 +267,13 @@ public class BillController {
 					bill.setPaymentMethod(billData.getPaymentMethod());
 			}
 			if(bill.getPaymentMethod() == null )
-				throw new RuntimeException("Bill cannot be created, no matching payment method found for: " + billData.getPaymentMethod().getName());
+				throw new BillFailureException("Bill cannot be created, no matching payment method found for: " + billData.getPaymentMethod().getName());
 					
 			bill.setBusiness(business.getKey());
 			bill.setCheckIn(checkIn.getKey());
 			bill.setCreationTime(new Date());
 			bill.setCleared(false);
-
-			
-			Key<Bill> billKey = billRepo.saveOrUpdate(bill);
-			if(billKey == null) {
-				throw new RuntimeException("Bill cannot be created, error saving data");
-			}
+			billRepo.saveOrUpdate(bill);
 		
 			billData.setId(bill.getId());
 			billData.setCheckInId(checkIn.getId());
@@ -288,15 +287,11 @@ public class BillController {
 			request.setReceivedTime(new Date());
 			request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
 			request.setObjectId(bill.getId());
-			
 			requestRepo.saveOrUpdate(request);
 			
-			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-			
 			// Add a message with the new bill to the message package.
 			messages.add(new MessageDTO("bill","new", billData));
-			
 			
 			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
@@ -315,13 +310,9 @@ public class BillController {
 				// Add a message with updated spot status to the package.
 				messages.add(new MessageDTO("spot", "update", spotData));
 			}
-			try {
-				// Send messages to notify clients over their channel.
-				channelCtrl.sendMessagesToAllClients(businessId, messages);
-			} catch (Exception e) {
-				logger.error("error sending messages", e);
-			}
 
+			// Send messages to notify clients over their channel.
+			channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
 		}
 		return billData;
 	}
@@ -343,13 +334,14 @@ public class BillController {
 			}
 		}		
 		
-		Product product = productRepo.getByKey(order.getProduct());
-		if(product == null ) {
-			throw new RuntimeException("Product " + order.getProduct() + " not found for order with id: " + order.getId() );
+		Product product;
+		try {
+			product = productRepo.getByKey(order.getProduct());
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("Product " + order.getProduct() + " not found for order with id: " + order.getId() ,e);
 		}
 		
 		total += product.getPrice();
-		
 		return total;
 	}
 
