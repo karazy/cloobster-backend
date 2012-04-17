@@ -70,6 +70,7 @@ public class RequestIntegrationTest {
 		
 		requestData.setType("CALL_WAITER");
 		response = given().contentType("application/json")
+				.queryParam("checkInId", checkInData.getUserId())
 				.body(requestData).expect().statusCode(200)
 				.body("type", equalTo("CALL_WAITER"))
 				.body("id", notNullValue())
