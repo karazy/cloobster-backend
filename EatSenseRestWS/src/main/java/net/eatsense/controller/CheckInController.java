@@ -410,14 +410,14 @@ public class CheckInController {
 	 * @param checkInId
 	 */
 	public void deleteCheckIn(Long checkInId) {
-		Objectify ofy = checkInRepo.ofy();
-		
-		CheckIn checkIn = checkInRepo.getById(checkInId);
-		if(checkIn == null) {
-			logger.info("Cannot checkout, unknown checkin uid given.");
-			return;
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getById(checkInId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new IllegalArgumentException("unknown checkInId",e);
 		}
-			
+		Objectify ofy = checkInRepo.ofy();
+					
 		// Delete requests
 		ofy.delete(ofy.query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).listKeys());
 		
@@ -453,7 +453,8 @@ public class CheckInController {
 		
 		messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
 		// notify client
-		channelCtrl.sendMessage(checkIn.getChannelId(), "checkin", "delete", transform.checkInToDto(checkIn));
+		if(checkIn.getChannelId() != null)
+			channelCtrl.sendMessage(checkIn.getChannelId(), "checkin", "delete", transform.checkInToDto(checkIn));
 
 		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
 	}

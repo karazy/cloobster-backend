@@ -260,5 +260,36 @@ public class CheckInControllerTest {
 		String newResult = ctr.requestToken(checkIn.getUserId());
 		assertThat(newResult, is(not(result)));
 	}
-
+	
+	@Test
+	public void testDeleteCheckin() {
+		//#1.1 Create a checkin ...
+		CheckInDTO checkInData = new CheckInDTO();
+		checkInData.setSpotId("b4rc0de");
+		checkInData.setNickname("FakeNik");
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData = ctr.createCheckIn( checkInData);
+		//#1.2 Retrieve checkin id from the store.
+		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
+		
+		//#2.1 Delete the checkin
+		ctr.deleteCheckIn(checkIn.getId());
+		//#2.2 Check the checkin is really gone.
+		CheckIn result = ctr.getCheckIn(checkIn.getUserId());
+		assertThat(result, nullValue());
+		
+		//#2.3 Try to delete the checkin again.
+		try {
+			ctr.deleteCheckIn(checkIn.getId());
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		
+		//#2.3 Try to delete with null argument.
+		try {
+			ctr.deleteCheckIn(null);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+	}
 }

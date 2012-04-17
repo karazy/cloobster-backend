@@ -594,7 +594,7 @@ public class OrderController {
 				messages.add(new MessageDTO("order","update",orderData));
 				
 				// If we cancel the order, let the checkedin customer know.
-				if(order.getStatus() == OrderStatus.CANCELED)
+				if(order.getStatus() == OrderStatus.CANCELED && checkIn.getChannelId() != null)
 					channelCtrl.sendMessage(checkIn.getChannelId(), "order", "update", orderData);
 			}
 			// Send messages if there are any.
