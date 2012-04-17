@@ -320,7 +320,6 @@ public class OrderController {
 	 */
 	public List<Order> getOrdersBySpot(Long businessId, Long spotId, Long checkInId) {
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(Business.getKey(businessId))
-				.filter("spot", Spot.getKey(Business.getKey(businessId), spotId))
 				.filter("status !=", OrderStatus.CART.toString());
 		
 		if(checkInId != null) {
