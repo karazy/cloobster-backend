@@ -19,6 +19,7 @@ import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -96,10 +97,13 @@ public class OrderController {
 		try {
 			order = orderRepo.getByKey(orderKey);
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			logger.error("Failed to delete order", e);
+			throw new IllegalArgumentException("Unable to delete order, orderId unknown", e);
 		}
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
-		
+		if(checkIn == null)
+			throw new IllegalArgumentException("Unable to delete order, checkInUid unknown");
+		if(order.getCheckIn().getId() != checkIn.getId())
+			throw new OrderFailureException("Unable to delete order, checkIn does not own the order");
 		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
 		orderRepo.ofy().delete(orderKey);
 	}
@@ -246,9 +250,7 @@ public class OrderController {
 	 * @return
 	 */
 	public OrderDTO getOrderAsDTO(Long businessId, Long orderId) {
-		Order order = getOrder(businessId, orderId);
-				
-		return transform.orderToDto( order );
+		return transform.orderToDto( getOrder(businessId, orderId) );
 	}
 
 	/**
@@ -259,7 +261,12 @@ public class OrderController {
 	 * @return the Order entity, if existing
 	 */
 	public Order getOrder(Long businessId, Long orderId) {
-		return orderRepo.getById(Business.getKey(businessId), orderId);
+		try {
+			return orderRepo.getById(Business.getKey(businessId), orderId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Unable to get order, order or business id unknown", e);
+			return null;
+		}
 	}
 	
 	/**
@@ -283,22 +290,16 @@ public class OrderController {
 	 * @return
 	 */
 	public List<Order> getOrders(Long businessId, String checkInId, String status) {
-		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
-			throw new NotFoundException("Orders cannot be retrieved, business id unknown: " + businessId);
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(Business.getKey(businessId));
+		if(checkInId != null ) {
+			CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+			if(checkIn != null)
+				// Filter by checkin if found.
+				query = query.filter("checkIn", checkIn.getKey()); 
 		}
-		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
-		if(checkIn == null) {
-			logger.error("Orders cannot be retrieved, checkin not found.");
-			throw new NotFoundException("Orders cannot be retrieved, checkin not found.");
-		}
-		
-		
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
+			
 		if(status != null && !status.isEmpty()) {
+			// Filter by status if set.
 			query = query.filter("status", status.toUpperCase());
 		}
 
@@ -314,18 +315,13 @@ public class OrderController {
 	 * 
 	 * @param businessId
 	 * @param spotId
-	 * @param checkInId
+	 * @param checkInId filter by checkin if not null
 	 * @return list of the orders found
 	 */
 	public List<Order> getOrdersBySpot(Long businessId, Long spotId, Long checkInId) {
-		// Check if the business exists.
-		Business business = businessRepo.getById(businessId);
-		if(business == null) {
-			logger.error("Order cannot be retrieved, business id unknown: " + businessId);
-			throw new NotFoundException("Orders cannot be retrieved, business id unknown: " + businessId);
-		}
-		
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business).filter("status !=", OrderStatus.CART.toString());
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(Business.getKey(businessId))
+				.filter("spot", Spot.getKey(Business.getKey(businessId), spotId))
+				.filter("status !=", OrderStatus.CART.toString());
 		
 		if(checkInId != null) {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));

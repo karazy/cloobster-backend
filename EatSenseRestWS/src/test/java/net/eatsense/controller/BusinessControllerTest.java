@@ -108,7 +108,14 @@ public class BusinessControllerTest {
 		try {
 			businessCtrl.saveCustomerRequest("unknowncheckinid", requestData);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(NotFoundException.class));
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		
+		// Save a call waiter request for null checkin
+		try {
+			businessCtrl.saveCustomerRequest(null, requestData);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
 		}
 		
 		assertThat(requestData.getId(), notNullValue());

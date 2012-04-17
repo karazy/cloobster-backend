@@ -103,11 +103,12 @@ public class Transformer {
 
 	public List<ProductDTO> productsToDto(List<Product> products) {
 		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
-		 for( Product p : products)	 {
-			 ProductDTO dto = productToDto(p);
-			 
-			 productDTOs.add(dto);
-		 }
+		if(products != null) {
+			for( Product p : products) {
+				ProductDTO dto = productToDto(p);
+				productDTOs.add(dto);
+			}	
+		}
 		return productDTOs;
 	}
 
@@ -195,6 +196,9 @@ public class Transformer {
 	}
 	
 	public CheckInDTO checkInToDto(CheckIn checkIn) {
+		if(checkIn == null)
+			return null;
+		
 		CheckInDTO dto = new CheckInDTO();
 		dto.setDeviceId(checkIn.getDeviceId());
 		dto.setLinkedCheckInId(checkIn.getLinkedUserId());

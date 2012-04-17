@@ -163,11 +163,7 @@ public class AccountController {
 	 * @return AccountDTO containing the account data
 	 */
 	public AccountDTO getAccountDto(String login) {
-		Account account = accountRepo.getByProperty("login", login);
-		if(account == null)
-			return null;
-		
-		return toDto(account);
+		return toDto(accountRepo.getByProperty("login", login));
 	}
 
 	/**
@@ -201,9 +197,6 @@ public class AccountController {
 	 */
 	public String requestToken (Long businessId, String clientId) {
 		logger.debug("new token requested for "+clientId);
-		Business business = businessRepo.getById(businessId);
-		if(business == null)
-			return null;
-		return channelCtrl.createCockpitChannel(business, clientId);
+		return channelCtrl.createCockpitChannel(businessId, clientId);
 	}
 }
