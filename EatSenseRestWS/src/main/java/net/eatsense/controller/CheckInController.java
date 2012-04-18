@@ -341,10 +341,9 @@ public class CheckInController {
 	 * 
 	 * @param checkInUid
 	 */
-	public void checkOut(String checkInUid) {
-		CheckIn checkIn = getCheckIn(checkInUid);
+	public void checkOut(CheckIn checkIn) {
 		if(checkIn == null) {
-			throw new IllegalArgumentException("Unable to delete checkin, unknown checkin uid given.");
+			throw new IllegalArgumentException("Unable to delete checkin, checkin null.");
 		}
 		
 		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST) {
