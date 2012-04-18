@@ -69,8 +69,9 @@ Ext.define('EatSense.controller.Message', {
 		    url: Karazy.config.serviceUrl+'/c/checkins/'+id+'/tokens',		    
 		    method: 'POST',
 		    params: {
-		    	'checkInId' :  id,
+		    	'checkInId' :  id
 		    },
+		    jsonData: true,
 		    success: function(response){
 		       	token = response.responseText;
 		       	callback(token);

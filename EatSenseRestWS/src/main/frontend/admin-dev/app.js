@@ -95,6 +95,7 @@ Ext.application({
 																Ext.Msg.alert('Error', response.statusText);
 															}
 														});
+														
 											    }
 												}
 											});
@@ -125,7 +126,34 @@ Ext.application({
 												}
 											});
 										}
-									}
+									},
+									{
+										xtype: 'button',
+										text: 'Create Account',
+										handler: function() {
+											Ext.Msg.show({
+												title: 'ATTENTION',
+												msg: 'This will create an account for existing businesses.',
+												buttons: Ext.Msg.YESNO,
+												icon: Ext.Msg.QUESTION,
+												fn: function(btn) {
+													if (btn == 'yes'){
+														Ext.Ajax.request({
+															url : '/c/businesses/dummieusers', 
+															method : 'PUT',
+															success : function(response) {
+//																Ext.Msg.alert('Success', "Dummie user created!");
+															},
+															failure : function(response) {
+																Ext.Msg.alert('Error', response.statusText);
+															}
+														});
+														
+											    }
+												}
+											});
+										}
+									},
 						    ]
 						}]
 						

@@ -10,6 +10,11 @@
         "lang" : "DE"
     },
     {
+        "gender": "N",
+        "fragment": "lustiges",
+        "lang" : "DE"
+    },	
+    {
         "gender": "F",
         "fragment": "langsame",
         "lang" : "DE"
@@ -17,6 +22,11 @@
     {
         "gender": "M",
         "fragment": "langsamer",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "langsames",
         "lang" : "DE"
     },
     {
@@ -81,9 +91,19 @@
     },
     {
         "gender": "M",
-        "fragment": "dünner",
+        "fragment": "schlanker",
         "lang" : "DE"
     },
+	{
+        "gender": "F",
+        "fragment": "schlanke",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "schlankes",
+        "lang" : "DE"
+    },	
     {
         "gender": "M",
         "fragment": "tollwütiger",
@@ -98,7 +118,198 @@
         "gender": "N",
         "fragment": "tollwütiges",
         "lang" : "DE"
+    },    {
+        "gender": "M",
+        "fragment": "cleverer",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "clevere",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "cleveres",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "großer",
+        "lang" : "DE"
+    },    {
+        "gender": "F",
+        "fragment": "große",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "großes",
+        "lang" : "DE"
+    },    
+    {
+        "gender": "M",
+        "fragment": "zarter",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "zarte",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "zartes",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "fröhlicher",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "fröhliche",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "fröhliches",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "mutiger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "mutige",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "mutiges",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "cooler",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "coole",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "cooles",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "blinder",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "blinde",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "blindes",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "neugieriger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "neugierige",
+        "lang" : "DE"
+    },	
+    {
+        "gender": "N",
+        "fragment": "neugieriges",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "zufriedener",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "zufriedene",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "zufriedenes",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "reicher",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "reiche",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "reiches",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "hungriger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "hungrige",
+        "lang" : "DE"
+    },	
+    {
+        "gender": "N",
+        "fragment": "hungriges",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "durstiger",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "durstige",
+        "lang" : "DE"
+    },
+    {
+        "gender": "N",
+        "fragment": "durstiges",
+        "lang" : "DE"
+    },
+    {
+        "gender": "M",
+        "fragment": "blonder",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "blonde",
+        "lang" : "DE"
+    },
+    {
+        "gender": "F",
+        "fragment": "blondes",
+        "lang" : "DE"
     }
-    
-    
 ]

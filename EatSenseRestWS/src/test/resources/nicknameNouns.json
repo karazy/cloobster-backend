@@ -58,5 +58,90 @@
         "gender": "F",
         "fragment": "Katze",
         "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Elefant",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Vogel",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Delfin",
+        "lang" : "DE"
+    },
+	{
+        "gender": "N",
+        "fragment": "Meerschweinchen",
+        "lang" : "DE"
+    },
+	{
+        "gender": "N",
+        "fragment": "Erdmännchen",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Fuchs",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Pinguin",
+        "lang" : "DE"
+    },
+	{
+        "gender": "F",
+        "fragment": "Antilope",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Panda",
+        "lang" : "DE"
+    },
+	{
+        "gender": "N",
+        "fragment": "Zebra",
+        "lang" : "DE"
+    },
+	{
+        "gender": "N",
+        "fragment": "Wombat",
+        "lang" : "DE"
+    },
+	{
+        "gender": "F",
+        "fragment": "Gazelle",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Luchs",
+        "lang" : "DE"
+    },
+	{
+        "gender": "N",
+        "fragment": "Nashorn",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Luchs",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Biber",
+        "lang" : "DE"
+    },
+	{
+        "gender": "M",
+        "fragment": "Elch",
+        "lang" : "DE"
     }
  ]
