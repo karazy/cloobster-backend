@@ -55,7 +55,10 @@ public class SecurityFilter implements ContainerRequestFilter {
 	 */
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
-		String checkInId = request.getQueryParameters(true).getFirst("checkInId");
+		String checkInId = request.getHeaderValue("checkInId");
+		if(checkInId == null)
+			checkInId = request.getQueryParameters(true).getFirst("checkInId");
+					
 		String login = request.getHeaderValue("login");
 		String password = request.getHeaderValue("password");
 		String passwordHash = request.getHeaderValue("passwordHash");
