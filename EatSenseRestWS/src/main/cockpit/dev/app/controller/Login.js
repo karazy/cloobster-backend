@@ -13,7 +13,7 @@ Ext.define('EatSense.controller.Login', {
 				tap: 'showLogoutDialog'
 			},
 		 	businessList: {
-		 		itemtap: 'setBusinessId'
+		 		itemtap: 'chooseBusiness'
 		 	},
 		 	cancelLoginButton: {
 	 			tap: 'cancelLogin'
@@ -358,20 +358,7 @@ Ext.define('EatSense.controller.Login', {
 			 			//more than one assigned business exists. show chooseBusiness view
 			 			loginPanel.setActiveItem(1);
 			 		} else if(records.length == 1){
-			 			account.set('businessId', records[0].get('id'));
-			 			account.set('business', records[0].get('name'));
-
-			 			//set pathId in default Ajax headers to avoid setting it with every request
-						Ext.Ajax.getDefaultHeaders().pathId = account.get('businessId');
-
-			 			me.saveAppState();
-
-			 			Ext.Viewport.remove(Ext.Viewport.down('login'));
-			 			//show main view				
-						Ext.create('EatSense.view.Main');
-						spotCtr.loadSpots();
-
-						me.openChannel();						
+			 			me.setBusinessId(records[0]);					
 			 		} 
 
 			 	} else {
@@ -388,10 +375,10 @@ Ext.define('EatSense.controller.Login', {
 	*	Sets the businessId in account the user wants to log in for.
 	*	This Id will be used for calls to the webservice.
 	* 	e.g. /businesses/{id}/spots
+	*
 	*	
 	*/
-	setBusinessId: function(dv, index, target, record) {
-		console.log('setBusiness');
+	setBusinessId: function(record) {
 		var 	me = this,
 				account = this.getAccount(),
 				spotCtr = this.getApplication().getController('Spot'); 
@@ -409,6 +396,13 @@ Ext.define('EatSense.controller.Login', {
 		spotCtr.loadSpots();
 
 		me.openChannel();		
+	},
+	/**
+	*	Event handler for choose business list tap.
+	*	
+	*/
+	chooseBusiness: function(dv, index, target, record) {
+		this.setBusinessId(record);
 	}
 
 

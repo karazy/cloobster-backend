@@ -6,7 +6,7 @@
  */
 Ext.define('EatSense.controller.CheckIn', {
     extend: 'Ext.app.Controller',
-    requires: ['Ext.data.proxy.LocalStorage'],
+    requires: ['Ext.data.proxy.LocalStorage', 'EatSense.controller.Message'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
     	refs: {

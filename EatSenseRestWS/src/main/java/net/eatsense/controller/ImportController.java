@@ -18,6 +18,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -56,6 +57,7 @@ public class ImportController {
 	private CheckInRepository checkinRepo;
 	private OrderRepository orderRepo;
 	private RequestRepository requestRepo;
+	private AccountRepository accountRepo;
 	
 	private String returnMessage;
 	
@@ -70,7 +72,7 @@ public class ImportController {
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr) {
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr) {
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -81,6 +83,7 @@ public class ImportController {
 		this.billRepo = br;
 		this.orderChoiceRepo = ocr;
 		this.requestRepo = reqr;
+		this.accountRepo = acr;
 	}
 	
     public void setValidator(Validator validator) {
@@ -273,6 +276,7 @@ public class ImportController {
 		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
+		accountRepo.ofy().delete(accountRepo.getAllKeys());
 	};
 	
 	/**

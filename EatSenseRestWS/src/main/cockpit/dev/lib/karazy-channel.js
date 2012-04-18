@@ -24,7 +24,7 @@ Karazy.channel = (function() {
 	var scopeTokenRequestHandler;
 	//indicates if the client forced a close and won't try to request a new token.
 	var timedOut;
-
+	//token used for this channel
 	var channelToken;
 
 	function onOpened() {
@@ -40,16 +40,13 @@ Karazy.channel = (function() {
 		console.log('channel error ' + (error && error.description) ? error.description : "");
 		if(error && error.code == '401') {
 			timedOut = true;
-			// alert('timeout');
 		} else if (error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
-			// alert('reconnect ' + error.code);
 			socket.close();
 		}
 	};
 
 	function onClose() {
-		// alert('onClose ' + timedOut + '  ' + connectionLost);
 		if(timedOut === true && Karazy.util.isFunction(requestTokenHandlerFunction)) {
 			console.log('timeout: requesting new token');
 			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	

@@ -28,24 +28,27 @@ Ext.define('EatSense.model.Choice', {
 	 * Validates the choice based on min- maxOccurence etc.
 	 */
 	validateChoice: function() {
-		console.log('validate choice '+this.get('text'));
-		
 		//implement
 		//return error message;
-		var counter = 0, validationError = "";
+		var 	counter = 0, 
+				validationError = "",
+				minOccurence = this.get('minOccurence'),
+				maxOccurence = this.get('maxOccurence');
+
 		this.options().each(function(option) {
 			if(option.get('selected') === true) {
 				counter ++;
 			}
 		});
-		if(this.get('minOccurence') <= 1 && this.get('maxOccurence') == 1 && counter != 1) {
+
+		if(minOccurence == 1 && maxOccurence == 1 && counter != 1) {
 			//radio button mandatory field
 			validationError += "Bitte triff eine Wahl für "+this.get('text')+ "<br/>";
 		}
-		else if(counter < this.get('minOccurence')) {
-			validationError += "Bitte wähle mindestens " + this.get('minOccurence') + " "+this.get('text')+ " aus. <br/>";
-		}else if(counter > this.get('maxOccurence')) {
-			validationError += "Du kannst maximal " + this.get('maxOccurence') + " "+this.get('text')+" auswählen. <br/>";
+		else if(counter < minOccurence) {
+			validationError += "Bitte wähle mindestens " + minOccurence + " "+this.get('text')+ " aus. <br/>";
+		}else if(counter > maxOccurence) {
+			validationError += "Du kannst maximal " + maxOccurence + " "+this.get('text')+" auswählen. <br/>";
 		}
 		return (validationError.toString().length == 0) ? true : false;
 	},
