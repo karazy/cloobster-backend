@@ -44,15 +44,15 @@ public class MenuController {
 	/**
 	 * Return all menus with corresponding products of a given business.
 	 * 
-	 * @param businessId entity id of the business
+	 * @param business entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenus(Long businessId){
+	public Collection<MenuDTO> getMenus(Business business){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
-		if(businessId == null )
+		if(business == null )
 			return menuDTOs;
 		
-		List<Menu> menus = menuRepo.getByParent( Business.getKey(businessId) );
+		List<Menu> menus = menuRepo.getByParent( business );
 		for ( Menu menu : menus) {
 			MenuDTO menuDTO = new MenuDTO();
 			menuDTO.setTitle(menu.getTitle());
@@ -68,23 +68,25 @@ public class MenuController {
 	/**
 	 * Retrieve all products saved for the given business.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @return
 	 */
-	public Collection<ProductDTO> getAllProducts(Long businessId) {
-		return transform.productsToDto(productRepo.getByParent( Business.getKey(businessId)));
+	public Collection<ProductDTO> getAllProducts(Business business) {
+		return transform.productsToDto(productRepo.getByParent(business));
 	}
 	
 	/**
 	 * Retrieve the saved product.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param id
 	 * @return product DTO
 	 */
-	public ProductDTO getProduct(Long businessId, Long id) {
+	public ProductDTO getProduct(Business business, Long id) {
+		if(business == null)
+			return null;
 		try {
-			return transform.productToDto(productRepo.getById(Business.getKey(businessId), id));
+			return transform.productToDto(productRepo.getById(business.getKey(), id));
 		} catch (NotFoundException e) {
 			logger.error("Unable to retrieve product, no matching entity found");
 			return null;

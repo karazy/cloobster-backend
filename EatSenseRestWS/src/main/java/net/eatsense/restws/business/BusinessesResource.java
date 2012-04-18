@@ -9,32 +9,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.eatsense.controller.BusinessController;
+import net.eatsense.domain.Business;
+import net.eatsense.persistence.BusinessRepository;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 @Path("b/businesses")
 public class BusinessesResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	BusinessController businessController;
+	private BusinessRepository businessRepo;
 	
 	@Context
 	private ResourceContext resourceContext;
 	
 	@Inject
-	public BusinessesResource(BusinessController businessController) {
+	public BusinessesResource(BusinessRepository businessRepo) {
 		super();
-		this.businessController = businessController;
+		this.businessRepo = businessRepo;
 	}
 	
 	
 	@Path("{businessId}")
 	@RolesAllowed({"restaurantadmin"})
 	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
-		logger.debug("retrieving businessresource");
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new NotFoundException();
+		}
+
 		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class); 
-		businessResource.setBusinessId(businessId);
+		businessResource.setBusiness(business);
 		
 		return businessResource;
 	}

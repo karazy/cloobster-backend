@@ -3,6 +3,7 @@ package net.eatsense.restws.business;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.domain.Business;
 import net.eatsense.persistence.RequestRepository;
 
 import org.slf4j.Logger;
@@ -16,13 +17,16 @@ public class BusinessResource {
 	@Context
 	ResourceContext resourceContext;
 	
-	Long businessId;
+	private Business business;
 	
+	public void setBusiness(Business business) {
+		this.business = business;
+	}
+
 	@Path("orders")
 	public OrdersResource getOrdersResource() {
 		OrdersResource ordersResource = resourceContext.getResource(OrdersResource.class);
-		ordersResource.setBusinessId(businessId);
-		logger.debug("retrieving ordersresource");
+		ordersResource.setBusiness(business);
 		return ordersResource;
 	}
 	
@@ -30,7 +34,7 @@ public class BusinessResource {
 	public CheckInsResource getCheckInsResource() {
 		CheckInsResource checkInsResource = resourceContext.getResource(CheckInsResource.class);
 		
-		checkInsResource.setBusinessId(businessId);
+		checkInsResource.setBusiness(business);
 		
 		return checkInsResource;
 	}
@@ -39,7 +43,7 @@ public class BusinessResource {
 	public SpotsResource getSpotsResource() {
 		SpotsResource spotsResource = resourceContext.getResource(SpotsResource.class);
 		
-		spotsResource.setBusinessId(businessId);
+		spotsResource.setBusiness(business);
 		
 		return spotsResource;
 	}
@@ -48,7 +52,7 @@ public class BusinessResource {
 	public BillsResource getBillsResource() {
 		BillsResource billsResource = resourceContext.getResource(BillsResource.class);
 		
-		billsResource.setBusinessId(businessId);
+		billsResource.setBusiness(business);
 		
 		return billsResource;
 	}
@@ -57,11 +61,7 @@ public class BusinessResource {
 	public RequestsResource getRequestsResource() {
 		RequestsResource requestsResource = resourceContext.getResource(RequestsResource.class);
 		
-		requestsResource.setBusinessId(businessId);
+		requestsResource.setBusiness(business);
 		return requestsResource;
-	}
-	
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
 	}
 }

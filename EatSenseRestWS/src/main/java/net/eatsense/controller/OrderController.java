@@ -87,25 +87,20 @@ public class OrderController {
 	/**
 	 * Delete the specified order from the datastore.
 	 * 
-	 * @param businessId
-	 * @param orderId
-	 * @param checkInUid 
+	 * @param business
+	 * @param order
+	 * @param checkIn 
 	 */
-	public void deleteOrder(Long businessId, Long orderId, String checkInUid) {
-		Key<Order> orderKey = new Key<Order>(new Key<Business>(Business.class, businessId), Order.class, orderId);
-		Order order;
-		try {
-			order = orderRepo.getByKey(orderKey);
-		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Unable to delete order, orderId unknown", e);
+	public void deleteOrder(Business business, Order order, CheckIn checkIn) {
+		if(order == null) {
+			throw new IllegalArgumentException("Unable to delete order, order is null");
 		}
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null)
-			throw new IllegalArgumentException("Unable to delete order, checkInUid unknown");
+			throw new IllegalArgumentException("Unable to delete order, checkin is null");
 		if(order.getCheckIn().getId() != checkIn.getId())
 			throw new OrderFailureException("Unable to delete order, checkIn does not own the order");
-		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
-		orderRepo.ofy().delete(orderKey);
+		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
+		orderRepo.ofy().delete(order);
 	}
 	
 	/**
@@ -116,27 +111,24 @@ public class OrderController {
 	 * with new data contained in orderData.
 	 * </p>
 	 * 
-	 * @param businessId
-	 * @param orderId
+	 * @param business
+	 * @param order
 	 * @param orderData
-	 * @param checkInUid
+	 * @param checkIn
 	 * @return the updated OrderDTO
 	 */
-	public OrderDTO updateOrder(Long businessId, Long orderId, OrderDTO orderData, String checkInUid) {
+	public OrderDTO updateOrder(Business business, Order order, OrderDTO orderData, CheckIn checkIn) {
 		//
 		// Check preconditions and retrieve entities.
 		//
-		// Retrieve the order from the store.
-		Order order;
-		try {
-			order = getOrder(businessId, orderId);
-		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
+		if(business == null) {
+			throw new IllegalArgumentException("Order cannot be updated, business is null");
 		}
-		// Retrieve the checkin from the store.
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null) {
-			throw new IllegalArgumentException("Order cannot be updated, invalid checkInUid given");
+			throw new IllegalArgumentException("Order cannot be updated, checkin is null");
+		}
+		if(order == null) {
+			throw new IllegalArgumentException("Order cannot be updated, order is null.");
 		}
 		// Check if the order belongs to the specified checkin.
 		if(! checkIn.getId().equals(order.getCheckIn().getId()) ) {
@@ -199,8 +191,8 @@ public class OrderController {
 				
 				Request request = new Request();
 				request.setCheckIn(checkIn.getKey());
-				request.setBusiness(Business.getKey(businessId));
-				request.setObjectId(orderId);
+				request.setBusiness(business.getKey());
+				request.setObjectId(order.getId());
 				request.setType(RequestType.ORDER);
 				request.setReceivedTime(new Date());
 				request.setSpot(checkIn.getSpot());
@@ -225,7 +217,7 @@ public class OrderController {
 					
 				}
 
-				channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
+				channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
 				
 			}
 		}
@@ -245,24 +237,39 @@ public class OrderController {
 	/**
 	 * Get the data for a specified order of a business.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param orderId
 	 * @return
 	 */
-	public OrderDTO getOrderAsDTO(Long businessId, Long orderId) {
-		return transform.orderToDto( getOrder(businessId, orderId) );
+	public OrderDTO getOrderAsDTO(Business business, Long orderId) {
+		return transform.orderToDto( getOrder(business, orderId) );
+	}
+	
+	/**
+	 * Create data transfer object from order entity.
+	 * 
+	 * @param order
+	 * @return order data transfer object
+	 */
+	public OrderDTO toDto( Order order ) {
+		return transform.orderToDto( order );
 	}
 
 	/**
 	 * Get the order entity for a given orderId of a business.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param orderId
 	 * @return the Order entity, if existing
 	 */
-	public Order getOrder(Long businessId, Long orderId) {
+	public Order getOrder(Business business, Long orderId) {
+		if(business == null) {
+			logger.error("Unable to get order, business is null (orderId={})", orderId);
+			return null;
+		}
+			
 		try {
-			return orderRepo.getById(Business.getKey(businessId), orderId);
+			return orderRepo.getById(business.getKey(), orderId);
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			logger.error("Unable to get order, order or business id unknown", e);
 			return null;
@@ -272,32 +279,29 @@ public class OrderController {
 	/**
 	 * Get all order data 
 	 * 
-	 * @param businessId
-	 * @param checkInId
+	 * @param business
+	 * @param checkIn
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDto(Long businessId, String checkInId, String status) {
-		return transform.ordersToDto(getOrders( businessId, checkInId, status));
+	public Collection<OrderDTO> getOrdersAsDto(Business business, CheckIn checkIn, String status) {
+		return transform.ordersToDto(getOrders( business, checkIn, status));
 	}
 	
 	/**
 	 * Get orders saved for the given checkin and filter by status if set.
 	 * 
-	 * @param businessId
-	 * @param checkInId
+	 * @param business
+	 * @param checkIn
 	 * @param status 
 	 * @return
 	 */
-	public List<Order> getOrders(Long businessId, String checkInId, String status) {
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(Business.getKey(businessId));
-		if(checkInId != null ) {
-			CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
-			if(checkIn != null)
-				// Filter by checkin if found.
-				query = query.filter("checkIn", checkIn.getKey()); 
+	public List<Order> getOrders(Business business, CheckIn checkIn, String status) {
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
+		if(checkIn != null) {
+			// Filter by checkin if set.
+			query = query.filter("checkIn", checkIn.getKey()); 
 		}
-			
 		if(status != null && !status.isEmpty()) {
 			// Filter by status if set.
 			query = query.filter("status", status.toUpperCase());
@@ -306,20 +310,20 @@ public class OrderController {
 		return query.list();
 	}
 	
-	public Collection<OrderDTO> getOrdersBySpotAsDto(Long businessId, Long spotId, Long checkInId) {
-		return transform.ordersToDto(getOrdersBySpot( businessId, spotId, checkInId));
+	public Collection<OrderDTO> getOrdersBySpotAsDto(Business business, Long spotId, Long checkInId) {
+		return transform.ordersToDto(getOrdersBySpot( business, spotId, checkInId));
 	}
 	
 	/**
 	 * Return all orders not in the cart for the given spot.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param spotId
 	 * @param checkInId filter by checkin if not null
 	 * @return list of the orders found
 	 */
-	public List<Order> getOrdersBySpot(Long businessId, Long spotId, Long checkInId) {
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(Business.getKey(businessId))
+	public List<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business)
 				.filter("status !=", OrderStatus.CART.toString());
 		
 		if(checkInId != null) {
@@ -332,18 +336,19 @@ public class OrderController {
 	/**
 	 * Create a new Order entity with status CART and save in the datastore.
 	 * 
-	 * @param businessId
-	 * @param checkInUid
+	 * @param business
+	 * @param checkIn
 	 * @param orderData
 	 * @return id of the order
 	 */
-	public Long placeOrderInCart(Long businessId, String checkInUid, OrderDTO orderData) {
-		Long orderId = null;
-		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Order cannot be placed, checkin not found!");
+	public Long placeOrderInCart(Business business, CheckIn checkIn, OrderDTO orderData) {
+		if(business == null) {
+			throw new IllegalArgumentException("Order cannot be placed, business is null");
 		}
+		if(checkIn == null) {
+			throw new IllegalArgumentException("Order cannot be placed, checkin is null");
+		}
+		
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
 		}
@@ -351,14 +356,7 @@ public class OrderController {
 		if( orderData.getStatus() != OrderStatus.CART ) {
 			throw new OrderFailureException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
 		}
-		
-		// Check if the business exists.
-		Business business;
-		try {
-			business = businessRepo.getById(businessId);
-		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Order cannot be placed, business id unknown", e);
-		}
+
 		// Check that the order will be placed at the correct business.
 		if(business.getId() != checkIn.getBusiness().getId()) {
 			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
@@ -372,7 +370,7 @@ public class OrderController {
 			throw new IllegalArgumentException("Order cannot be placed, productId unknown",e);
 		}
 		Key<Product> productKey = product.getKey();
-		
+		Long orderId = null;
 		List<OrderChoice> choices = null;
 		if(orderData.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
@@ -462,10 +460,6 @@ public class OrderController {
 			throw new IllegalArgumentException(message);
 		}
 		
-		if(orderKey == null ) {
-			throw new RuntimeException("Error saving order for product: " +product.toString());
-		}
-		
 		if(choices != null) {
 			for (OrderChoice orderChoice : choices) {
 				// set parent key
@@ -499,15 +493,14 @@ public class OrderController {
 	/**
 	 * Update method for orders called by the backend.
 	 * 
-	 * @param businessId
-	 * @param orderId
+	 * @param business
+	 * @param order
 	 * @param orderData new data update
 	 * @return updated Data
 	 */
-	public OrderDTO updateOrderForBusiness(Long businessId, Long orderId, OrderDTO orderData) {
-		Order order = getOrder(businessId, orderId);
+	public OrderDTO updateOrderForBusiness(Business business, Order order, OrderDTO orderData) {
 		if(order == null) {
-			throw new IllegalArgumentException("Order cannot be updated, unknown business or order id given.");
+			throw new IllegalArgumentException("Order cannot be updated, order is null.");
 		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
@@ -525,7 +518,7 @@ public class OrderController {
 		if(violations.isEmpty()) {
 			// save order
 			if( orderRepo.saveOrUpdate(order) == null )
-				throw new RuntimeException("order could not be updated, id: " + orderId);
+				throw new RuntimeException("order could not be updated, id: " + order);
 			
 			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 			
@@ -595,7 +588,7 @@ public class OrderController {
 			// Send messages if there are any.
 			if(!messages.isEmpty()) {
 				try {
-					channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
+					channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
 				} catch (Exception e) {
 					logger.error("error while sending messages", e);
 				}

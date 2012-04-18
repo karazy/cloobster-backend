@@ -8,27 +8,21 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.BillController;
+import net.eatsense.domain.Bill;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.BillDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class BillsResource {
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	@Context
 	private ResourceContext resourceContext;
 	
 	private BillController billController;
-	private Long businessId;
-	
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
-	}
-	
+	private Business business;
+		
 	@Inject
 	public BillsResource(BillController billController) {
 		this.billController = billController;
@@ -36,8 +30,8 @@ public class BillsResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public BillDTO getOrders(@QueryParam("checkInId") Long checkInId) {
-		BillDTO billData = billController.getBillForCheckIn(businessId, checkInId);
+	public BillDTO getBills(@QueryParam("checkInId") Long checkInId) {
+		BillDTO billData = billController.getBillForCheckIn(business, checkInId);
 		if(billData == null)
 			throw new NotFoundException();
 		return billData;
@@ -45,9 +39,17 @@ public class BillsResource {
 	
 	@Path("{id}")
 	public BillResource getBillResource(@PathParam("id") Long billId) {
+		Bill bill = billController.getBill(business, billId);
+		if(bill == null)
+			throw new NotFoundException();
+		
 		BillResource billResource = resourceContext.getResource(BillResource.class);
-		billResource.setBusinessId(businessId);
-		billResource.setBillId(billId);
+		billResource.setBusiness(business);
+		billResource.setBill(bill);
 		return billResource;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 }

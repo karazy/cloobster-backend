@@ -369,12 +369,12 @@ public class CheckInController {
 	/**
 	 * Get status of all active checkins at the given spot.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param spotId
 	 * @return collection of checkin status DTOs
 	 */
-	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Long businessId, Long spotId) {
-		return transform.toStatusDtos( getCheckInsBySpot(businessId, spotId));
+	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Business business, Long spotId) {
+		return transform.toStatusDtos( getCheckInsBySpot(business, spotId));
 	}
 	
 	/**
@@ -391,12 +391,12 @@ public class CheckInController {
 	 * Retrieve active checkins at the given spot.<br>
 	 * Convenience method.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param spotId
 	 * @return
 	 */
-	private List<CheckIn> getCheckInsBySpot(Long businessId, Long spotId) {
-		return getCheckInsBySpot(Spot.getKey(Business.getKey(businessId), spotId));
+	private List<CheckIn> getCheckInsBySpot(Business business, Long spotId) {
+		return getCheckInsBySpot(Spot.getKey(business.getKey(), spotId));
 	}
 
 	/**

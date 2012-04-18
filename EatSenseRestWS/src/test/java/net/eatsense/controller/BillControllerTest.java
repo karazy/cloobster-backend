@@ -8,6 +8,8 @@ import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Bill;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.CheckInStatus;
@@ -67,6 +69,12 @@ public class BillControllerTest {
 
 		private BillRepository br;
 
+		private CheckIn checkIn;
+
+		private Business business;
+
+		private SpotDTO spotDto;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -91,7 +99,16 @@ public class BillControllerTest {
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
-		
+		CheckInDTO checkInData = new CheckInDTO();
+		spotDto = checkinCtrl.getSpotInformation("serg2011");
+		checkInData.setNickname("PlaceOrderTest");
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData.setSpotId("serg2011");
+		checkInData = checkinCtrl.createCheckIn( checkInData);
+		checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
+		checkInData.setBusinessId(spotDto.getBusinessId());
+		 
+		business = rr.getByKey(checkIn.getBusiness());
 	}
 
 	@After
@@ -100,22 +117,6 @@ public class BillControllerTest {
 	}
 	@Test
 	public void testCreateBill() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
-		
-		
-		assertThat(checkIn.getUserId(), notNullValue());
-		
-				
-		// Should be checked in
-		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
-		
 		// Get a product from the store.
 		Product frites = pr.getByProperty("name", "Pommes Frites");
 		OrderDTO orderDto = new OrderDTO();
@@ -125,20 +126,21 @@ public class BillControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrderInCart(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
+		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(frites.getId()));
 		
-		placedOrder.setStatus(OrderStatus.PLACED);
-		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), orderId, placedOrder, checkIn.getUserId());
-		placedOrder.setStatus(OrderStatus.RECEIVED);
-		placedOrder = orderCtrl.updateOrderForBusiness(checkIn.getBusinessId(), orderId, placedOrder);
+		placedOrderDto.setStatus(OrderStatus.PLACED);
+		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		placedOrderDto.setStatus(OrderStatus.RECEIVED);
+		placedOrderDto = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
 		
 		//#2 Place an order with choices
 		Product burger = pr.getByProperty("name", "Classic Burger");
@@ -162,32 +164,33 @@ public class BillControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrderInCart(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
+		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
 			}
 		}
 		// Set order to placed and confirm in restaurant.
-		placedOrder.setStatus(OrderStatus.PLACED);
-		placedOrder = orderCtrl.updateOrder(checkIn.getBusinessId(), orderId, placedOrder, checkIn.getUserId());
-		placedOrder.setStatus(OrderStatus.RECEIVED);
-		placedOrder = orderCtrl.updateOrderForBusiness(checkIn.getBusinessId(), orderId, placedOrder);
+		placedOrderDto.setStatus(OrderStatus.PLACED);
+		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		placedOrderDto.setStatus(OrderStatus.RECEIVED);
+		placedOrderDto = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
 		
 		
 		//#3 Check calculateTotalPrice
 		
-		List<Order> orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
+		List<Order> orders = orderCtrl.getOrders(business, checkIn, null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (Order order : orders) {
@@ -206,12 +209,13 @@ public class BillControllerTest {
 		PaymentMethod paymentMethod = spotDto.getPayments().iterator().next();
 		billData.setPaymentMethod(paymentMethod);
 		
-		billData = billCtrl.createBill(checkIn.getBusinessId(), checkIn.getUserId(), billData);
+		billData = billCtrl.createBill(business, checkIn, billData);
+		Bill newBill = billCtrl.getBill(business, billData.getId());
 		assertThat(billData.getId(), notNullValue());
 		billData.setCleared(true);
 		
 		
-		billCtrl.updateBill(checkIn.getBusinessId(), billData.getId(), billData);
+		billCtrl.updateBill(business, newBill, billData);
 		
 		Collection<Bill> bills = br.getAll();
 		
@@ -224,7 +228,7 @@ public class BillControllerTest {
 			assertThat(bill.getTotal(), is(11.5f));
 		}
 		// Check orders again to see if they are linked ...
-		orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
+		orders = orderCtrl.getOrders(business, checkIn, null);
 		
 		for (Order order : orders) {
 			assertThat(order.getBill().getId(), is(billData.getId()));

@@ -13,9 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.Order;
 import net.eatsense.representation.OrderDTO;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class OrdersResource {
@@ -25,10 +28,10 @@ public class OrdersResource {
 	private ResourceContext resourceContext;
 	
 	private OrderController orderController;
-	private Long businessId;
+	private Business business;
 	
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 
 	@Inject
@@ -40,15 +43,17 @@ public class OrdersResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public Collection<OrderDTO> getOrders(@QueryParam("spotId") Long spotId, @QueryParam("checkInId") Long checkInId) {
-		logger.debug("retrieving orders");
-		return orderController.getOrdersBySpotAsDto(businessId, spotId, checkInId);
+		return orderController.getOrdersBySpotAsDto(business, spotId, checkInId);
 	}
 	
 	@Path("{id}")
 	public OrderResource getOrderResource(@PathParam("id") Long orderId) {
+		Order order = orderController.getOrder(business, orderId);
+		if( order == null)
+			throw new NotFoundException();
 		OrderResource orderResource = resourceContext.getResource(OrderResource.class);
-		orderResource.setBusinessId(businessId);
-		orderResource.setOrderId(orderId);
+		orderResource.setBusiness(business);
+		orderResource.setOrder(order);
 		return orderResource;
 	}
 }

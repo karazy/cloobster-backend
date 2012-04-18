@@ -66,6 +66,10 @@ public class OrderControllerTest {
 
 		private CheckInDTO checkInData;
 
+		private CheckIn checkIn;
+
+		private Business business;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -94,6 +98,8 @@ public class OrderControllerTest {
 		checkInData.setSpotId("serg2011");
 		checkInData.setUserId(checkinCtrl.createCheckIn( checkInData).getUserId() );
 		checkInData.setBusinessId(spotDto.getBusinessId());
+		checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
+		business = rr.getByKey(checkIn.getBusiness());
 	}
 
 	@After
@@ -102,12 +108,6 @@ public class OrderControllerTest {
 	}
 	@Test
 	public void testPlaceAndUpdateOrder() {
-		
-		assertThat(checkInData.getUserId(), notNullValue());
-				
-		// Should be checked in
-		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
-		
 		// Get a product from the store.
 		Product frites = pr.getByProperty("name", "Pommes Frites");
 		OrderDTO orderDto = new OrderDTO();
@@ -117,15 +117,15 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrderInCart(checkInData.getBusinessId(), checkInData.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
+		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(frites.getId()));
 		
 		
 		//#2 Place an order with choices
@@ -140,17 +140,18 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrderInCart(checkInData.getBusinessId(), checkInData.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
+		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
@@ -159,7 +160,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkInData.getBusinessId(), checkInData.getUserId(), null);
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -167,16 +168,16 @@ public class OrderControllerTest {
 		}
 		
 		//#4.1 Update order to placed
-		placedOrder.setStatus(OrderStatus.PLACED);
-		placedOrder = orderCtrl.updateOrder(checkInData.getBusinessId(), placedOrder.getId(), placedOrder, checkInData.getUserId());
-		assertThat(placedOrder.getStatus(), is(OrderStatus.PLACED) );
+		placedOrderDto.setStatus(OrderStatus.PLACED);
+		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		assertThat(placedOrderDto.getStatus(), is(OrderStatus.PLACED) );
 		
 		//#4.2 Try to update order after status was set to PLACED
 		
 		OrderDTO result;
 		try {
-			placedOrder.setStatus(OrderStatus.CART);
-			result = orderCtrl.updateOrder(checkInData.getBusinessId(), placedOrder.getId(), placedOrder, checkInData.getUserId());
+			placedOrderDto.setStatus(OrderStatus.CART);
+			result = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
 		} catch (Exception e) {
 			assertThat(e, instanceOf(RuntimeException.class));
 		}
@@ -199,26 +200,20 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrderInCart(checkInData.getBusinessId(), checkInData.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		orderCtrl.deleteOrder(checkInData.getBusinessId(), placedOrder.getId(),checkInData.getUserId());
+		orderCtrl.deleteOrder(business, placedOrder , checkIn);
 		
-		List<Order> orders = orderCtrl.getOrders(checkInData.getBusinessId(), checkInData.getUserId(), null);
+		List<Order> orders = orderCtrl.getOrders(business, checkIn, null);
 		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
 		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.isEmpty(), is(true));
 	}
 	
 	@Test public void testGetOrdersWithStatus() {
-		assertThat(checkInData.getUserId(), notNullValue());
-		
-				
-		// Should be checked in
-		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
-		
 		// Get a product from the store.
 		Product frites = pr.getByProperty("name", "Pommes Frites");
 		OrderDTO orderDto = new OrderDTO();
@@ -228,10 +223,10 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrderInCart(checkInData.getBusinessId(), checkInData.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(business, orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -251,10 +246,10 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrderInCart(checkInData.getBusinessId(), checkInData.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(business, orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -267,9 +262,8 @@ public class OrderControllerTest {
 					assertThat(option.getSelected(), equalTo(true));
 			}
 		}
-		//#3 Check "getOrders"
-		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkInData.getBusinessId(), checkInData.getUserId(), "CART");
+		//#3 Check "getOrders" with status
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, "CART");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -304,17 +298,18 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		Long orderId = orderCtrl.placeOrderInCart(checkInData.getBusinessId(), checkInData.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
+		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
@@ -323,7 +318,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkInData.getBusinessId(), checkInData.getUserId(), null);
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, null);
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(1));
 		for (OrderDTO dto : orders) {
@@ -331,13 +326,13 @@ public class OrderControllerTest {
 		}
 		
 		//#4.1 Update order to placed
-		placedOrder.setStatus(OrderStatus.PLACED);
-		placedOrder = orderCtrl.updateOrder(checkInData.getBusinessId(), placedOrder.getId(), placedOrder, checkInData.getUserId());
-		assertThat(placedOrder.getStatus(), is(OrderStatus.PLACED) );
+		placedOrderDto.setStatus(OrderStatus.PLACED);
+		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		assertThat(placedOrderDto.getStatus(), is(OrderStatus.PLACED) );
 		
 		//#4.2 Confirm placed order
-		placedOrder.setStatus(OrderStatus.RECEIVED);
-		OrderDTO receivedOrder = orderCtrl.updateOrderForBusiness(checkInData.getBusinessId(), placedOrder.getId(), placedOrder);
+		placedOrderDto.setStatus(OrderStatus.RECEIVED);
+		OrderDTO receivedOrder = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
 		assertThat(receivedOrder.getStatus(), is(OrderStatus.RECEIVED));
 		
 		CheckIn checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
@@ -346,15 +341,15 @@ public class OrderControllerTest {
 		//#4.3 Try to set the status back to placed	
 		OrderDTO result;
 		try {
-			placedOrder.setStatus(OrderStatus.PLACED);
-			result = orderCtrl.updateOrderForBusiness(checkInData.getBusinessId(), placedOrder.getId(), placedOrder);
+			placedOrderDto.setStatus(OrderStatus.PLACED);
+			result = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
 		} catch (Exception e) {
 			assertThat(e, instanceOf(IllegalArgumentException.class));
 		}
 		
 		//#4.4 Cancel order
-		placedOrder.setStatus(OrderStatus.CANCELED);
-		result = orderCtrl.updateOrderForBusiness(checkInData.getBusinessId(), placedOrder.getId(), placedOrder);
+		placedOrderDto.setStatus(OrderStatus.CANCELED);
+		result = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
 		assertThat(result.getStatus(), is(OrderStatus.CANCELED));
 	}
 	

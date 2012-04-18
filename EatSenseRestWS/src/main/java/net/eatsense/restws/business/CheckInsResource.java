@@ -13,6 +13,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
@@ -24,7 +25,7 @@ public class CheckInsResource {
 	@Context
 	private ResourceContext resourceContext;
 	
-	private Long businessId;
+	private Business business;
 	
 	@Inject
 	public CheckInsResource(CheckInController checkInController) {
@@ -32,14 +33,10 @@ public class CheckInsResource {
 		this.checkInController = checkInController;
 	}
 
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
-	}
-	
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public Collection<CheckInStatusDTO> getCheckIns(@QueryParam("spotId") Long spotId) {
-		return checkInController.getCheckInStatusesBySpot(businessId, spotId);	
+		return checkInController.getCheckInStatusesBySpot(business, spotId);	
 	}
 	
 	@DELETE
@@ -54,6 +51,10 @@ public class CheckInsResource {
 	@Produces("application/json; charset=UTF-8")
 	public CheckInStatusDTO updateCheckin(@PathParam("checkInId") Long checkInId, CheckInStatusDTO checkInData) {
 		return checkInController.updateCheckInAsBusiness(checkInId, checkInData);
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 	
 }
