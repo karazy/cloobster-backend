@@ -174,9 +174,9 @@ Ext.define('EatSense.controller.Menu', {
 	* @param panel
 	*	Panel to add options to
 	*/
-	createOptions: function(choice, panel, parent, product) {
-		if(!choice || !panel) {
-			console.log('You have to provide options and a panel.')
+	createOptions: function(choice, panel, parent, productOrOrder) {
+		if(!choice || !panel || !productOrOrder) {
+			console.log('You have to provide options, panel and a productOrOrder.')
 			return;
 		}
 
@@ -222,7 +222,7 @@ Ext.define('EatSense.controller.Menu', {
 				 if(!parent) {
 				 	choice.isActive();
 				 }
-				 me.recalculate(product);
+				 me.recalculate(productOrOrder);
 			 },me);
 
 			 field.addListener('uncheck',function(cbox) {
@@ -233,7 +233,7 @@ Ext.define('EatSense.controller.Menu', {
 				 if(!parent) {
 				 	choice.isActive();
 				 }
-				 me.recalculate(product);								 
+				 me.recalculate(productOrOrder);								 
 			 },me);
 			 panel.getComponent('optionsPanel').add(field);
 
@@ -256,31 +256,6 @@ Ext.define('EatSense.controller.Menu', {
 		var detail = this.getProductdetail();		
 		detail.hide();
 	},
-	/**
-	 * Called when user navigates back from productdetail view to productoverview (the list of products)
-	 * @param message
-	 * 		A message to show after switching back to productoverview
-	 */
-	// backToProductOverview: function(message) {
-	// 	console.log("Menu Controller -> backToProductOverview");
-	// 	var pov = this.getProductoverview();
-
-	// 	this.models.activeProduct = null;
-
-	// 	this.getProductdetail().getComponent('choicesPanel').removeAll(false);
-
-	// 	if (message) {
-	// 		Ext.Msg.show({
-	// 			title : Karazy.i18n.translate('orderPlaced'),
-	// 			message : message,
-	// 			buttons : []
-	// 		});
-	// 		//show short alert and then hide
-	// 		Ext.defer((function() {
-	// 			Ext.Msg.hide();
-	// 		}), Karazy.config.msgboxHideTimeout, this);
-	// 	}
-	// },
 	/**
 	 * Adds the current product to card.
 	 * @param button
@@ -366,9 +341,6 @@ Ext.define('EatSense.controller.Menu', {
 	showCart: function(){		
 		this.getApplication().getController('Order').showCart();
 	},
-	
-	//Menu navigation functions
-	
 	/**
 	 * Switches to another view
 	 * @param view
@@ -386,34 +358,6 @@ Ext.define('EatSense.controller.Menu', {
     	this.getTopToolbar().setTitle(title);
     	(labelBackBt == null || labelBackBt.length == 0) ? menu.hideBackButton() : menu.showBackButton(labelBackBt);
     	menu.switchMenuview(view,direction);
-	},
-	/**
-	 * Removes the last order, if orders exist.
-	 */
-	undoOrder: function() {
-		console.log('Menu Controller -> undoOrder');
-		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(), 
-		badgeText,
-		removedOrder,
-		cartButton = this.getLoungeTabBar().getAt(2);
-		
-		if(orders.data.length > 0) {
-			removedOrder = orders.getAt(orders.data.length-1).getProduct().get('name');
-			orders.removeAt(orders.data.length - 1);
-			badgeText = (orders.data.length > 0) ? orders.data.length : "";
-			cartButton.setBadgeText(badgeText);
-			Ext.Msg.show({
-				title : Karazy.i18n.translate('orderRemoved'),
-				message : removedOrder,
-				buttons : []
-			});
-			//show short alert and then hide
-			Ext.defer((function() {
-				Ext.Msg.hide();
-			}), Karazy.config.msgboxHideTimeout, this);			
-		} else {
-			
-		}
 	},
 	/**
 	 * Recalculates the total price for the active product.

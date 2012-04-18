@@ -312,7 +312,7 @@
 
 					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
 
-					menuCtr.createOptions.apply(me, [choice, optionsDetailPanel, null, product]);
+					menuCtr.createOptions.apply(me, [choice, optionsDetailPanel, null, order]);
 					//process choices assigned to a this choice
 					product.choices().queryBy(function(rec) {
 						if(rec.get('parent') == choice.get('id')) {
@@ -321,7 +321,7 @@
 					}).each(function(memberChoice) {
 						memberChoice.setParentChoice(choice);
 						// menuCtr.createOptions(memberChoice, optionsDetailPanel, choice);
-						menuCtr.createOptions.apply(me, [memberChoice, optionsDetailPanel, choice, product]);
+						menuCtr.createOptions.apply(me, [memberChoice, optionsDetailPanel, choice, order]);
 					});
 
 					choicesPanel.add(optionsDetailPanel);
@@ -499,9 +499,9 @@
 	/**
 	 * Recalculates the total price for the active product.
 	 */
-	recalculate: function(product) {
+	recalculate: function(order) {
 		console.log('Cart Controller -> recalculate');
-		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: order.get('amount')});
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: order.getProduct(), amount: order.get('amount')});
 	},
 	/**
 	 * Refreshes the badge text on cart tab icon.
