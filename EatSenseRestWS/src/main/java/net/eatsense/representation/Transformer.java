@@ -148,6 +148,7 @@ public class Transformer {
 		dto.setMaxOccurence(choice.getMaxOccurence());
 		dto.setMinOccurence(choice.getMinOccurence());
 		dto.setOverridePrice(choice.getOverridePrice());
+		dto.setParent(choice.getParentChoice().getId());
 		
 		dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
 		dto.setText(choice.getText());
