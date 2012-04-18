@@ -21,6 +21,7 @@ import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.BusinessImportDTO;
@@ -31,6 +32,7 @@ import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
+import com.sun.jersey.api.core.ResourceContext;
 
 /**
  * Provides a restful interface to access businesses. That could be optaining
@@ -41,6 +43,8 @@ import com.sun.jersey.api.NotFoundException;
  */
 @Path("c/businesses")
 public class BusinessesResource{
+	@Context
+	private ResourceContext resourceContext;
 
 	private BusinessRepository businessRepo;
 	private DummyDataDumper ddd;
@@ -74,90 +78,23 @@ public class BusinessesResource{
 		return list;
 	}
 	
-	@GET
-	@Path("{businessId}/menus")
-	@Produces("application/json; charset=UTF-8")
-	public Collection<MenuDTO> getMenus(@PathParam("businessId") Long businessId)
-	{
-		return menuCtrl.getMenus(businessId);
-	}
-	
-
-	@GET
-	@Path("{businessId}/products")
-	@Produces("application/json; charset=UTF-8")
-	public Collection<ProductDTO> getAll(@PathParam("businessId")Long businessId) {
-		return menuCtrl.getAllProducts(businessId);
-	}
-	
-	@GET
-	@Path("{businessId}/products/{productId}")
-	@Produces("application/json; charset=UTF-8")
-	public ProductDTO getProduct(@PathParam("businessId")Long businessId, @PathParam("productId") Long productId) {
-		
-		ProductDTO product = menuCtrl.getProduct(businessId, productId);
-		
-		if(product == null)
-			throw new NotFoundException(productId + " id not found.");
-		else return product;
-	}
-	
-	@POST
-	@Path("{businessId}/orders")
-	@Produces("text/plain; charset=UTF-8")
-	@Consumes("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
-	public String placeOrder(@PathParam("businessId")Long businessId, OrderDTO order, @QueryParam("checkInId") String checkInId) {
-		Long orderId = null;
-		orderId = orderCtrl.placeOrderInCart(businessId, checkInId, order);	
-		return orderId.toString();
-	}
-	
-	
-	@GET
-	@Path("{businessId}/orders")
-	@Produces("application/json; charset=UTF-8")
-	public Collection<OrderDTO> getOrders(@PathParam("businessId")Long businessId, @QueryParam("checkInId") String checkInId, @QueryParam("status") String status) {
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(businessId, checkInId, status);
-		return orders;
-	}
-	
-	@GET
-	@Path("{businessId}/orders/{orderId}")
-	@Produces("application/json; charset=UTF-8")
-	public OrderDTO getOrder(@PathParam("businessId")Long businessId, @PathParam("orderId") Long orderId) {
-		OrderDTO order = orderCtrl.getOrderAsDTO(businessId, orderId);
-		if(order== null)
+	@Path("{businessId}")
+	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new NotFoundException();
-		return order;
+		}
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		
+		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class);
+		businessResource.setBusiness(business);
+		businessResource.setCheckIn(checkIn);
+		
+		return businessResource;
 	}
-	
-	@PUT
-	@Path("{businessId}/orders/{orderId}")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
-	public OrderDTO updateOrder(@PathParam("businessId")Long businessId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId, OrderDTO order) {
-		return orderCtrl.updateOrder(businessId, orderId, order, checkInId);
-	}
-	
-	@DELETE
-	@Path("{businessId}/orders/{orderId}")
-	@RolesAllowed({"guest"})
-	public void deleteOrder(@PathParam("businessId")Long businessId, @PathParam("orderId") Long orderId, @QueryParam("checkInId") String checkInId) {
-		orderCtrl.deleteOrder(businessId, orderId, checkInId);
-	}
-	
-	@POST
-	@Path("{businessId}/bills")
-	@Produces("application/json; charset=UTF-8")
-	@Consumes("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
-	public BillDTO createBill(@PathParam("businessId")Long businessId, BillDTO bill, @QueryParam("checkInId") String checkInId) {
-		return billCtrl.createBill(businessId, checkInId, bill);
-	}
-	
-	
+		
 	@PUT
 	@Path("dummies")
 	public void dummyData() {
@@ -169,8 +106,7 @@ public class BusinessesResource{
 	public void dummyUsers() {
 		ddd.generateDummyUsers();
 	}
-	
-	
+		
 	@PUT
 	@Path("import")
 	@Consumes("application/json; charset=UTF-8")

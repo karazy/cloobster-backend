@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
@@ -28,12 +29,8 @@ public class SpotsResource {
 	private ResourceContext resourceContext;
 	
 	private BusinessController businessController;
-	private Long businessId;
+	private Business business;
 	
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
-	}
-
 	@Inject
 	public SpotsResource(BusinessController businessController) {
 		super();
@@ -44,6 +41,10 @@ public class SpotsResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public Collection<SpotStatusDTO> getSpotCockpitInformation() throws Exception {
-		return businessController.getSpotStatusData(businessId);
+		return businessController.getSpotStatusData(business);
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 }

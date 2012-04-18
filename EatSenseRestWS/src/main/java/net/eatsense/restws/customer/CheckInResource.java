@@ -70,9 +70,9 @@ public class CheckInResource {
 	
 	@DELETE
 	@RolesAllowed({"guest"})
-	public void deleteCheckIn(@PathParam("checkInId") String checkInId) {
+	public void deleteCheckIn() {
 		if(authenticated)
-			checkInCtrl.checkOut(checkInId);
+			checkInCtrl.checkOut(checkIn);
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}

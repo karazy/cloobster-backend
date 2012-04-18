@@ -49,11 +49,11 @@ public class BusinessController {
 	 * Retrieve initial status data of all spots for the given business id.<br>
 	 * (mainly used by the Eatsense Cockpit application).
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @return List of SpotCockpitDTO objects
 	 */
-	public List<SpotStatusDTO> getSpotStatusData(Long businessId){
-		List<Spot> allSpots = spotRepo.getByParent(Business.getKey(businessId));
+	public List<SpotStatusDTO> getSpotStatusData(Business business){
+		List<Spot> allSpots = spotRepo.getByParent(business);
 		List<SpotStatusDTO> spotDtos = new ArrayList<SpotStatusDTO>();
 		
 		for (Spot spot : allSpots) {
@@ -145,17 +145,17 @@ public class BusinessController {
 	/**
 	 * Get outstanding CALL_WAITER requests for the given business and optionally checkin or spot.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param checkInId can be null
 	 * @param spotId can be null
 	 * @return list of found request dtos or empty list if none found
 	 */
-	public List<CustomerRequestDTO> getCustomerRequestData(Long businessId, Long checkInId, Long spotId) {
+	public List<CustomerRequestDTO> getCustomerRequestData(Business business, Long checkInId, Long spotId) {
 		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
-		Query<Request> query = requestRepo.ofy().query(Request.class).ancestor(Business.getKey(businessId));
+		Query<Request> query = requestRepo.ofy().query(Request.class).ancestor(business);
 
 		if( spotId != null) {
-			query = query.filter("spot", Spot.getKey(Business.getKey(businessId), spotId));
+			query = query.filter("spot", Spot.getKey(business.getKey(), spotId));
 		}
 		
 		if( checkInId != null ) {
@@ -183,13 +183,13 @@ public class BusinessController {
 	/**
 	 * Clear an outstanding request of the customer.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param requestId
 	 */
-	public void deleteCustomerRequest(Long businessId, Long requestId) {
+	public void deleteCustomerRequest(Business business, Long requestId) {
 		Request request;
 		try {
-			request = requestRepo.getById(Business.getKey(businessId), requestId);
+			request = requestRepo.getById(business.getKey(), requestId);
 		} catch (com.googlecode.objectify.NotFoundException e1) {
 			throw new IllegalArgumentException("Unable to delete request, business or request id unknown", e1);
 		}

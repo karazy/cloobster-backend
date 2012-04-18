@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.persistence.BusinessRepository;
@@ -60,6 +61,10 @@ public class BusinessControllerTest {
 
 		private BusinessController businessCtrl;
 
+		private CheckIn checkIn;
+
+		private Business business;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -88,6 +93,8 @@ public class BusinessControllerTest {
 		checkInData.setSpotId("serg2011");
 		checkInData.setUserId(checkinCtrl.createCheckIn( checkInData).getUserId() );
 		checkInData.setBusinessId(spotDto.getBusinessId());
+		checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
+		business = rr.getByKey(checkIn.getBusiness());
 	}
 
 	@After
@@ -97,8 +104,6 @@ public class BusinessControllerTest {
 	@Test
 	public void testSaveAndDeleteRequest() {
 		CustomerRequestDTO requestData = new CustomerRequestDTO();
-		CheckIn checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
-		assertThat(checkIn.getUserId(), is( checkInData.getUserId()));
 		
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
@@ -114,7 +119,7 @@ public class BusinessControllerTest {
 		assertThat(requestData.getId(), notNullValue());
 		assertThat(requestData.getCheckInId(), is(checkIn.getId()));
 		
-		List<SpotStatusDTO> spots = businessCtrl.getSpotStatusData(checkInData.getBusinessId());
+		List<SpotStatusDTO> spots = businessCtrl.getSpotStatusData(business);
 		
 		for (SpotStatusDTO spotStatusDTO : spots) {
 			if (spotStatusDTO.getId() == checkIn.getSpot().getId()) {
@@ -122,9 +127,9 @@ public class BusinessControllerTest {
 			}
 		}
 		
-		businessCtrl.deleteCustomerRequest(checkInData.getBusinessId(), requestData.getId());
+		businessCtrl.deleteCustomerRequest(business, requestData.getId());
 		
-		spots = businessCtrl.getSpotStatusData(checkInData.getBusinessId());
+		spots = businessCtrl.getSpotStatusData(business);
 		
 		for (SpotStatusDTO spotStatusDTO : spots) {
 			if (spotStatusDTO.getId() == checkIn.getSpot().getId()) {

@@ -78,13 +78,13 @@ public class BillController {
 	/**
 	 * Retrieve a bill for the given checkin.
 	 * 
-	 * @param businessId
+	 * @param business
 	 * @param checkInId entity id
 	 * @return bill DTO or null if not found 
 	 */
-	public BillDTO getBillForCheckIn(Long businessId, Long checkInId) {
+	public BillDTO getBillForCheckIn(Business business, Long checkInId) {
 		BillDTO billData = new BillDTO();
-		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(Business.getKey(businessId)).filter("checkIn", CheckIn.getKey(checkInId)).get();
+		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(business).filter("checkIn", CheckIn.getKey(checkInId)).get();
 		if(bill == null)
 			return null;
 		
@@ -101,25 +101,17 @@ public class BillController {
 	/**
 	 * Update a bill to cleared status.
 	 * 
-	 * @param businessId
-	 * @param billId
+	 * @param business
+	 * @param bill
 	 * @param billData
 	 * @return updated bill DTO
 	 */
-	public BillDTO updateBill(Long businessId, Long billId , BillDTO billData) {
-		// Check if the business exists.
-		Business business;
-		try {
-			business = businessRepo.getById(businessId);
-		} catch (NotFoundException e1) {
-			throw new IllegalArgumentException("Bill cannot be updated, business id unknown",e1);
+	public BillDTO updateBill(Business business, Bill bill , BillDTO billData) {
+		if(business == null) {
+			throw new IllegalArgumentException("Bill cannot be updated, business is null");
 		}
-		
-		Bill bill;
-		try {
-			bill = billRepo.getById(business.getKey(), billId);
-		} catch (NotFoundException e1) {
-			throw new IllegalArgumentException("Bill cannot be updated, bill id unknown",e1);
+		if( bill == null) {
+			throw new IllegalArgumentException("Bill cannot be updated, bill is null");
 		}
 		
 		CheckIn checkIn;
@@ -202,7 +194,7 @@ public class BillController {
 		messages.add(new MessageDTO("spot","update",spotData));
 				
 		// Send messages to notify cockpits over their channel.
-		channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
+		channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
 		
 		return billData;
 	}
@@ -210,23 +202,17 @@ public class BillController {
 	/**
 	 * Create a new bill and save it in the datastore with the given paymentmethod.
 	 * 
-	 * @param businessId
-	 * @param checkInId
+	 * @param business
+	 * @param checkIn
 	 * @param billData
 	 * @return bill DTO saved
 	 */
-	public BillDTO createBill(Long businessId, String checkInId, BillDTO billData) {
-		Business business;
-		// Try to retrieve the business entity.
-		try {
-			business = businessRepo.getById(businessId);
-		} catch (NotFoundException e1) {
-			throw new IllegalArgumentException("Bill cannot be updated, business id unknown",e1);
+	public BillDTO createBill(Business business, CheckIn checkIn, BillDTO billData) {
+		if(business == null) {
+			throw new IllegalArgumentException("Bill cannot be updated, business is null");
 		}
-		// Find the checkin
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
-			throw new IllegalArgumentException("Bill cannot be created, checkin not found!");
+			throw new IllegalArgumentException("Bill cannot be created, checkin not found");
 		}
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new BillFailureException("Bill cannot be created, payment already requested or not checked in");
@@ -312,7 +298,7 @@ public class BillController {
 			}
 
 			// Send messages to notify clients over their channel.
-			channelCtrl.sendMessagesToAllCockpitClients(businessId, messages);
+			channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
 		}
 		return billData;
 	}
@@ -376,5 +362,21 @@ public class BillController {
 			return orderChoice.getChoice().getPrice();
 		
 		return total;
+	}
+
+	/**
+	 * Retrieve bill from
+	 * 
+	 * @param business
+	 * @param billId
+	 * @return
+	 */
+	public Bill getBill(Business business, Long billId) {
+		try {
+			return billRepo.getById(business.getKey(), billId);
+		} catch (NotFoundException e) {
+			logger.error("Unable to get bill, unknonwn billId.", e);
+			return null;
+		}
 	}
 }

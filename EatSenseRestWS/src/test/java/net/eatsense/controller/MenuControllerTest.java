@@ -45,6 +45,8 @@ public class MenuControllerTest {
 	    private DummyDataDumper ddd;
 		private SpotRepository br;
 
+		private Business business;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -59,7 +61,7 @@ public class MenuControllerTest {
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
-		
+		business = rr.getByProperty("name", "Sergio");
 	}
 
 	@After
@@ -68,24 +70,22 @@ public class MenuControllerTest {
 	}
 	@Test
 	public void testGetProduct() {
-		Business restaurant = rr.getByProperty("name", "Sergio");
+		
 		Product product = pr.getByProperty("name", "Classic Burger");
 		
-		ProductDTO productDto = ctr.getProduct(restaurant.getId(), product.getId());
+		ProductDTO productDto = ctr.getProduct(business, product.getId());
 		
 		assertThat(productDto.getName(), is(product.getName()));
 		assertThat(productDto.getChoices().size(), is(product.getChoices().size()));
 		
-		productDto = ctr.getProduct(restaurant.getId(), new Long(123456));
+		productDto = ctr.getProduct(business, new Long(123456));
 		assertThat(productDto, equalTo(null));
 	}
 	
 	@Test
 	public void testGetMenus() {
 		// retrieve all menus saved for this restaurant
-		Business restaurant = rr.getByProperty("name", "Sergio");
-		
-		Collection<MenuDTO> menusdto = ctr.getMenus(restaurant.getId());
+		Collection<MenuDTO> menusdto = ctr.getMenus(business);
 		
 		// check if we have three menus
 		assertEquals(3 , menusdto.size() );
