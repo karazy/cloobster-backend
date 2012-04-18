@@ -773,12 +773,16 @@
 	*/
 	handleOrderMessage: function(action, updatedOrder) {
 		var 	orderStore = Ext.StoreManager.lookup('orderStore'),
-				oldOrder;
+				oldOrder,
+				total;
 
 		if(action == "update") {
 			oldOrder = orderStore.getById(updatedOrder.id);
 			if(oldOrder) {
 				oldOrder.setRawJsonData(updatedOrder, true)
+				//refresh the order list
+				total = me.calculateOrdersTotal(orderStore);
+				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 			} else {
 				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
 			}
