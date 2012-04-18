@@ -33,12 +33,12 @@ Ext.define('EatSense.view.Dashboard', {
 				},
 				items : [ {
 					cls: 'newRestaurantsButton',
-					text: i18nPlugin.translate('newRestaurantsButton'),
+					text: Karazy.i18n.translate('newRestaurantsButton'),
 					badgeText: '6',					
 
 				}, {
 					cls: 'currentDealsButton',	
-					text: i18nPlugin.translate('currentDealsButton')
+					text: Karazy.i18n.translate('currentDealsButton')
 				} ]
 			}, {
 				xtype : 'panel',
@@ -53,7 +53,7 @@ Ext.define('EatSense.view.Dashboard', {
 				}, {
 					xtype : 'dashboardbutton',
 					id : 'checkInBtn',
-					 text : i18nPlugin.translate('checkInButton'),
+					 text : Karazy.i18n.translate('checkInButton'),
 					// icon: 'res/images/checkIn_icon.png',
 //					 iconCls: 'checkInButtonIcon',
 					cls : 'checkInButton',
@@ -66,7 +66,7 @@ Ext.define('EatSense.view.Dashboard', {
 				}, 
 				// {
 				// 	xtype : 'textfield',
-				// 	label : i18nPlugin.translate('barcode'),
+				// 	label : Karazy.i18n.translate('barcode'),
 				// 	labelAlign : 'top',
 				// 	width : 100,
 				// 	name : 'barcodeTF',
@@ -86,7 +86,7 @@ Ext.define('EatSense.view.Dashboard', {
 				xtype : 'button',
 				itemId : 'settingsBtn',
 				action : 'settings',
-				// text : i18nPlugin.translate('settingsButton'),
+				// text : Karazy.i18n.translate('settingsButton'),
 				iconCls : 'settings',
 				iconMask : true,
 //				ui : 'action',
@@ -101,7 +101,7 @@ Ext.define('EatSense.view.Dashboard', {
 	showLoadScreen : function(mask) {
 		if (mask) {
 			this.setMasked({
-				message : i18nPlugin.translate('loadingMsg'),
+				message : Karazy.i18n.translate('loadingMsg'),
 				xtype : 'loadmask'
 			});
 		} else {

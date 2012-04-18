@@ -11,11 +11,11 @@ Ext.define('EatSense.view.Cart', {
 			docked : 'top',
 			xtype : 'titlebar',
 			itemId: 'cartTopBar',
-			title : i18nPlugin.translate('cartviewTitle'),
+			title : Karazy.i18n.translate('cartviewTitle'),
 			items : [ {
 				xtype : 'button',
 				itemId : 'cartBackBt',
-				text : i18nPlugin.translate('back'),
+				text : Karazy.i18n.translate('back'),
 				action : 'back',
 				ui : 'back',
 				align: 'left'
@@ -30,7 +30,7 @@ Ext.define('EatSense.view.Cart', {
 			{
 				xtype: 'button',
 				action: 'order',
-			    text: i18nPlugin.translate('submitButton'),
+			    text: Karazy.i18n.translate('submitButton'),
 			    ui: 'forward',
 			    align: 'right'
 			}]
@@ -57,7 +57,7 @@ Ext.define('EatSense.view.Cart', {
     showLoadScreen : function(mask) {
     	if(mask) {
     		this.setMasked({
-    			message : i18nPlugin.translate('submitOrderProcess'),
+    			message : Karazy.i18n.translate('submitOrderProcess'),
         		xtype: 'loadmask' 
     		});
     	} else {

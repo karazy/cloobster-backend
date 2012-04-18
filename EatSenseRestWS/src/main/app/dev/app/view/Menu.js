@@ -6,12 +6,12 @@ Ext.define('EatSense.view.Menu', {
 			docked : 'top',
 			xtype : 'titlebar',
 			itemId: 'menuTopBar',
-			title : i18nPlugin.translate('menuTitle'),
+			title : Karazy.i18n.translate('menuTitle'),
 			items : [ {
 				xtype : 'button',
 				itemId : 'menuBackBt',
 				action: 'back',
-				text : i18nPlugin.translate('back'),
+				text : Karazy.i18n.translate('back'),
 				ui : 'back',
 				align: 'left'
 			}

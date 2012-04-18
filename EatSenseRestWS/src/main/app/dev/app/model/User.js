@@ -8,7 +8,7 @@ Ext.define('EatSense.model.User', {
 		 	],
 		 	proxy: {
 		 		type: 'rest',
-		 		url: globalConf.serviceUrl+'/user/', 
+		 		url: '/user/', 
 		 		reader: {
 		 			type: 'json',
 		 		}

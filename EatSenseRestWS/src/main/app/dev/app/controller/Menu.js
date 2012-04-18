@@ -102,15 +102,16 @@ Ext.define('EatSense.controller.Menu', {
      * e. g. Beverages, Drinks, Burgers
      */
     showProductlist: function(dataview, record) {
+
     	console.log("Menu Controller -> showProductlist");
     	var pov = this.getProductoverview(),
     	prodStore = record.productsStore;
-    	
+
     	this.models.activeMenu = record;
     	this.getProductlist().setStore(prodStore);
     	this.getMenulist().refresh();
     	this.menuBackBtContext = this.showMenu;
-    	this.switchView(pov, record.data.title, i18nPlugin.translate('back'), 'left');
+    	this.switchView(pov, record.data.title, Karazy.i18n.translate('back'), 'left');
     },
     /**
      * Shows the menu. At this point the store is already filled with data.
@@ -119,7 +120,7 @@ Ext.define('EatSense.controller.Menu', {
 		console.log("Menu Controller -> showMenu");
 	
 		 this.menuBackBtContext = null;
-		 this.switchView(this.getMenuoverview(), i18nPlugin.translate('menuTitle'), null, 'right');
+		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
 	},
 	
 	loadProductDetail: function(dataview, record) {
@@ -212,7 +213,7 @@ Ext.define('EatSense.controller.Menu', {
 		 //insert comment field after options have been added so it is positioned correctly
 		 choicesPanel.add({
 			xtype: 'textareafield',
-			label: i18nPlugin.translate('orderComment'),
+			label: Karazy.i18n.translate('orderComment'),
 			labelAlign: 'top',
 			itemId: 'productComment',
 			maxRows: 4,
@@ -225,14 +226,13 @@ Ext.define('EatSense.controller.Menu', {
 		 Ext.Viewport.add(detail);
 		 detail.getScrollable().getScroller().scrollToTop();
 		 detail.show();
-		 // this.switchView(detail, record.data.name, i18nPlugin.translate('back'), 'left');
+		 // this.switchView(detail, record.data.name, Karazy.i18n.translate('back'), 'left');
 	},
 	/**
 	*	Hides Product detail.
 	*/
 	closeProductDetail: function() {
-		var 	detail = this.getProductdetail();
-
+		var 	detail = this.getProductdetail();		
 		detail.hide();
 	},
 	/**
@@ -257,17 +257,17 @@ Ext.define('EatSense.controller.Menu', {
 		this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 			
 		// this.menuBackBtContext = this.showMenu;
-		// this.switchView(pov, this.models.activeMenu.data.title, i18nPlugin.translate('back'), 'right');
+		// this.switchView(pov, this.models.activeMenu.data.title, Karazy.i18n.translate('back'), 'right');
 		if (message) {
 			Ext.Msg.show({
-				title : i18nPlugin.translate('orderPlaced'),
+				title : Karazy.i18n.translate('orderPlaced'),
 				message : message,
 				buttons : []
 			});
 			//show short alert and then hide
 			Ext.defer((function() {
 				Ext.Msg.hide();
-			}), globalConf.msgboxHideTimeout, this);
+			}), Karazy.config.msgboxHideTimeout, this);
 		}
 	},
 	/**
@@ -310,13 +310,13 @@ Ext.define('EatSense.controller.Menu', {
 			Ext.Ajax.request({				
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
 	    	    method: 'POST',    	    
-	    	    params: {
-	    	    	'checkInId' : activeCheckIn.get('userId'),
-	    	    },
 	    	    jsonData: order.getRawJsonData(),
 	    	    success: function(response, operation) {
 	    	    	order.setId(response.responseText);
 	    	    	order.phantom = false;
+	    	    },
+	    	    failure: function(response, operation) {
+	    	    	me.getApplication().handleServerError(operation.error, {403: true}); 
 	    	    }
 	    	});
 			
@@ -324,17 +324,17 @@ Ext.define('EatSense.controller.Menu', {
 			
 			detail.hide();
 
-			this.backToProductOverview(i18nPlugin.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
+			this.backToProductOverview(Karazy.i18n.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
 		} else {
 			//show validation error
-			Ext.Msg.alert(i18nPlugin.translate('orderInvalid'),validationError, Ext.emptyFn);
+			Ext.Msg.alert(Karazy.i18n.translate('orderInvalid'),validationError, Ext.emptyFn);
 		}
 		
 	},
 	/**
 	 * Switches to card view.
 	 */
-	showCart: function(){
+	showCart: function(){		
 		this.getApplication().getController('Order').showCart();
 	},
 	
@@ -374,14 +374,14 @@ Ext.define('EatSense.controller.Menu', {
 			badgeText = (orders.data.length > 0) ? orders.data.length : "";
 			cartButton.setBadgeText(badgeText);
 			Ext.Msg.show({
-				title : i18nPlugin.translate('orderRemoved'),
+				title : Karazy.i18n.translate('orderRemoved'),
 				message : removedOrder,
 				buttons : []
 			});
 			//show short alert and then hide
 			Ext.defer((function() {
 				Ext.Msg.hide();
-			}), globalConf.msgboxHideTimeout, this);			
+			}), Karazy.config.msgboxHideTimeout, this);			
 		} else {
 			
 		}

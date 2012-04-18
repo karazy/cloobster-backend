@@ -12,7 +12,7 @@ Ext.define('EatSense.view.SettingsTab', {
 		items : [ {
 			xtype : 'titlebar',
 			docked : 'top',
-			title : i18nPlugin.translate('settingsTitle'),
+			title : Karazy.i18n.translate('settingsTitle'),
 		}, 
 		{
 			xtype: 'label',
@@ -22,7 +22,7 @@ Ext.define('EatSense.view.SettingsTab', {
 		},
 		{
 			xtype : 'textfield',
-			label : i18nPlugin.translate('nickname'),
+			label : Karazy.i18n.translate('nickname'),
 			itemId : 'nickname'
 		} ]
 	}

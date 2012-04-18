@@ -7,7 +7,8 @@
 Ext.define('EatSense.controller.Message', {
 	extend: 'Ext.app.Controller',
 	config: {
-
+		//id used for channel creation		
+		channelId: ''
 	},
 	/**
 	*	Called after receiving a channel message.
@@ -68,15 +69,12 @@ Ext.define('EatSense.controller.Message', {
 		Ext.Ajax.request({
 		    url: Karazy.config.serviceUrl+'/c/checkins/'+id+'/tokens',		    
 		    method: 'POST',
-		    params: {
-		    	'checkInId' :  id
-		    },
 		    jsonData: true,
 		    success: function(response){
 		       	token = response.responseText;
 		       	callback(token);
 		    }, 
-		    failure: function(response) {
+		    failure: function(response, opts) {
 		    	console.log('request token failed ' + response);
 		    	Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('channelTokenError')); 
 		    }
@@ -91,6 +89,8 @@ Ext.define('EatSense.controller.Message', {
 	openChannel: function(id) {
 		var		me = this;
 
+		this.setChannelId(id);
+
 		this.requestNewToken(function(newToken) {
 			Karazy.channel.createChannel( {
 				token: newToken, 
@@ -100,5 +100,13 @@ Ext.define('EatSense.controller.Message', {
 				requestTokenHandlerScope: me
 			});
 		}, id);
+	},
+	/**
+	*	Closes active channel and reopens it. 
+	*	Uses the cannelId member for creation.
+	*/
+	reopenChannel: function() {
+		Karazy.channel.closeChannel();
+		this.openChannel(this.getChannelId());
 	}
 });
