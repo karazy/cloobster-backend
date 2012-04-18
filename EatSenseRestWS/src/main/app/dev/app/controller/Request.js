@@ -18,7 +18,8 @@ Ext.define('EatSense.controller.Request',{
 	*	Sends a call waiter request.
 	*/
 	sendCallWaiterRequest: function(button, event) {
-		var 	request = Ext.create('EatSense.model.Request'),
+		var 	me = this,
+				request = Ext.create('EatSense.model.Request'),
 				checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.getId();
 
 		request.set('type', Karazy.constants.Request.CALL_WAITER);
@@ -26,11 +27,8 @@ Ext.define('EatSense.controller.Request',{
 		request.setId('');
 
 		request.save({
-			params: {
-				'pathId' : checkInId
-			},
 			failure: function(record, operation) {
-				Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorRequest'), Ext.emptyFn);
+				me.getApplication().handleServerError(operation.error);
 			}
 		})
 	}

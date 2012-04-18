@@ -1,7 +1,17 @@
-var i18nPlugin = Karazy.i18n;
-i18nPlugin.setLang('DE');
-var globalConf = Karazy.config;
+Karazy.i18n.setLang('DE');
 var profile = Ext.os.deviceType.toLowerCase();
+
+//global error handler
+// window.onerror = function(message, url, lineNumber) {  
+// 	//var 	messageCtr = EatSense.controller.Message();
+
+// 	console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
+
+//   	//messageCtr.reopenChannel();
+
+//   	//prevent firing of default handler (return true)
+//   	return false;
+// };  
 
 Ext.Loader.setConfig({
 	enabled : true
@@ -36,6 +46,18 @@ Ext.application({
 	},
 	launch : function() {
 		console.log('launch');
+		var app = this;
+		window.onerror = function(message, url, lineNumber) {  
+			var 	messageCtr = app.getController('Message');
+
+			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
+
+		  	//messageCtr.reopenChannel();
+
+		  	//prevent firing of default handler (return true)
+		  	return false;
+		}; 
+
 		Ext.data.proxy.Server.timeout = 60000;
 		
     	//try to restore application state
@@ -55,7 +77,7 @@ Ext.application({
 	     
 	   	 if(appStateStore.getCount() == 1) {
 	   		 console.log('app state found');	   		 
-		   		checkInCtr.setAppState(appStateStore.getAt(0));
+		   	checkInCtr.setAppState(appStateStore.getAt(0));
 	   		restoredCheckInId = checkInCtr.getAppState().get('checkInId');
 	   	 }
 	   		
@@ -64,13 +86,15 @@ Ext.application({
 	   			 EatSense.model.CheckIn.load(restoredCheckInId, {
 	   				scope: this,
 	   				success : function(record, operation) {
-	   					console.log('found existing checkin '+record);					
-	   					if(record.get('status') == Karazy.constants.CHECKEDIN || record.get('status') == Karazy.constants.ORDER_PLACED) {	   						
-		   					checkInCtr.restoreState(record);
-	   					} else {
-	   						appStateStore.add(checkInCtr.getAppState());
-		   		   		 	checkInCtr.showDashboard();
-	   					}	   						   				
+	   					console.log('found existing checkin '+record);	
+	   					checkInCtr.restoreState(record);
+
+	   					// if(record.get('status') == Karazy.constants.CHECKEDIN || record.get('status') == Karazy.constants.ORDER_PLACED) {	   						
+		   				// 	checkInCtr.restoreState(record);
+	   					// } else {
+	   					// 	appStateStore.add(checkInCtr.getAppState());
+		   		  		//checkInCtr.showDashboard();
+	   					// }	   						   				
 	   				},
 	   				failure: function(record, operation) {
 	   					console.log('error restoring state');
@@ -90,9 +114,55 @@ Ext.application({
 		   	 } 		   		 
 	   		 appStateStore.add(checkInCtr.getAppState());
 	   		 checkInCtr.showDashboard();
-	   	 }
-		
-		
-	}
+	   	 }	
+	},
+	/**
+    *   Gloabl handler that handles all errors occuring from server requests.
+    *   @param error
+    *      error object containing status and statustext.
+    *
+    *   @param forceLogout
+    *       a critical permission error occured and the user will be logged out
+    * 		true to logout on all errors 
+    *		OR
+    *		{errorCode : true|false} e.g. {403: true, 404: false}
+    */
+    handleServerError: function(error, forceLogout, hideMessage) {
+        var    errMsg,
+               nestedError; 
+        if(error && error.status) {
+            switch(error.status) {
+                case 403:
+                    //no access
+                    errMsg = Karazy.i18n.translate('errorPermission');
+                    if(forceLogout[403] === true || forceLogout === true) {
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
+                    }
+                    break;
+                case 404:
+                    //could not load resource or server is not reachable
+                    errMsg = Karazy.i18n.translate('errorResource');
+                    if(forceLogout[404] === true || forceLogout === true) {
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
+                    }
+                    break;
+                default:
+                    try {
+                         //TODO Bug in error message handling in some browsers
+                        nestedError = Ext.JSON.decode(error.statusText);
+                        errMsg = Karazy.i18n.translate(error.errorKey,error.substitutions);                        
+                    } catch (e) {
+                        errMsg = Karazy.i18n.translate('errorMsg');
+                    }
+                    if(forceLogout[500] === true || forceLogout === true) {
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
+                    }                                         
+                    break;
+            }
+        }
+        if(!hideMessage) {
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, Ext.emptyFn);	
+        }
+    },
 });
 

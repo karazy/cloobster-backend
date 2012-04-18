@@ -18,6 +18,7 @@ Ext.define('EatSense.model.Choice', {
 			{name: 'price', type: 'number'},
 			{name: 'included', type: 'number'},
 			{name: 'overridePrice', type: 'string'},
+			{name : 'parent', type: 'number', persist: false}
 		],
 		hasMany : {
 			model : 'EatSense.model.Option',

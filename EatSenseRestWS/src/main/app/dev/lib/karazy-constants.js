@@ -30,8 +30,9 @@ Karazy.constants = (function() {
 		Currency : {
 			EURO: '$1,$2 €',
 			US_DOLLAR: '\$ $1.$2'
-		}
-
+		},
+		//Client side 
+		FORCE_LOGOUT : 'FORCE_LOGOUT'
 	};
 
 })();

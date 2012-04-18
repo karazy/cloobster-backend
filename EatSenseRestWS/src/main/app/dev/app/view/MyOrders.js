@@ -10,11 +10,11 @@ Ext.define('EatSense.view.MyOrders', {
 			docked : 'top',
 			xtype : 'titlebar',
 			itemId: 'myOrdersTopBar',
-			title : i18nPlugin.translate('myOrdersTitle'),
+			title : Karazy.i18n.translate('myOrdersTitle'),
 			items : [
 			{
 				xtype: 'button',
-				text: i18nPlugin.translate('payRequestButton'),
+				text: Karazy.i18n.translate('payRequestButton'),
 				itemId: 'payRequestBt',
 				ui: 'forward',
 				action: 'pay',
@@ -22,7 +22,7 @@ Ext.define('EatSense.view.MyOrders', {
 			},
 			{
 				xtype: 'button',
-				text: i18nPlugin.translate('leaveButton'),
+				text: Karazy.i18n.translate('leaveButton'),
 				ui: 'forward',
 				action: 'leave',
 				align: 'right'
@@ -41,7 +41,7 @@ Ext.define('EatSense.view.MyOrders', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem {[values.status.toLowerCase()]}'>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+i18nPlugin.translate('amount')+" {amount}) {[this.formatPrice(values.Product.price_calculated)]}</div>" +
+				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+Karazy.i18n.translate('amount')+" {amount}) {[this.formatPrice(values.Product.price_calculated)]}</div>" +
 				"<div style='clear: both;'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
@@ -126,7 +126,7 @@ Ext.define('EatSense.view.MyOrders', {
     showLoadScreen : function(mask) {
     	if(mask) {
     		this.setMasked({
-    			message : i18nPlugin.translate('loadingMsg'),
+    			message : Karazy.i18n.translate('loadingMsg'),
         		xtype: 'loadmask' 
     		});
     	} else {

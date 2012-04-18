@@ -118,7 +118,6 @@ Karazy.channel = (function() {
 
 			messageHandlerFunction = options.messageHandler;
 		},
-
 		/**
 		* Closes the cannel and prevents a new token request.
 		*/
