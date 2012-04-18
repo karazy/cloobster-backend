@@ -3,6 +3,7 @@
  */
 Ext.define('EatSense.view.ProductDetail', {
 	extend : 'Ext.Panel',
+	requires: ['Ext.field.Spinner', 'Ext.field.Radio', 'Ext.form.Panel', 'Ext.field.Checkbox'],
 	xtype : 'productdetail',	
 	layout : {
 		type : 'vbox',
@@ -21,14 +22,6 @@ Ext.define('EatSense.view.ProductDetail', {
 		{
 			xtype: 'titlebar',
 			docked: 'top',
-			// items: [
-			// {
-			// 		xtype: 'button',
-			// 		action: 'close',
-			// 		baseCls: 'productDetail-close',
-			// 		text: 'X',
-			// 		align: 'right'
-			// }]
 		},
 		{
 			xtype : 'panel',

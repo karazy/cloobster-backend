@@ -10,6 +10,7 @@ Ext.define('EatSense.model.Menu', {
 		proxy: {
 		   type: 'rest',
 		   url : '/c/businesses/{pathId}/menus',
+		   enablePagingParams: false,
 		   reader: {
 			   type: 'json'
 	   		}

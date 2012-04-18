@@ -278,13 +278,15 @@
 	// showOrderDetail: function(dataview, order) {
 	showOrderDetail: function(button, eventObj, eOpts) {
 		console.log("Cart Controller -> showProductDetail");		
-		 var 	detail = this.getProductdetail(), 
+		 var 	me = this,
+		 		detail = this.getProductdetail(), 
 		 		choicesPanel =  this.getChoicespanel(),
 		 		order = button.getParent().getRecord(),
 		 		product = order.getProduct();		 		
 		 		this.models.activeOrder = order,
 		 		main = this.getMain(),
-		 		titlebar = detail.down('titlebar');
+		 		titlebar = detail.down('titlebar'),
+		 		menuCtr = this.getApplication().getController('Menu');
 
 		 //save state of order to undo changes
 		 order.saveState();
@@ -300,52 +302,76 @@
 		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
 		 //dynamically add choices if present		 
 		 if(typeof product.choices() !== 'undefined' && product.choices().getCount() > 0) {
-			 product.choices().each(function(_choice) {
-				 var choice = _choice;				 			 
-				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
-				 //single choice. Create Radio buttons
-				 var optionType = '';
-				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
-					 optionType = 'Ext.field.Radio';
-				 	} 
-				 else {//multiple choice
-					 optionType = 'Ext.field.Checkbox';					 
-				 }
-				
-				choice.options().each(function(opt) {
-					var checkbox = Ext.create(optionType, {
-						name : choice.data.id,
-						labelWidth: '80%',
-						label : opt.get('name'),
-						checked: opt.get('selected'),
-						cls: 'option'
-					}, this);
-					 
-					checkbox.addListener('check',function(cbox) {
-						console.log('check');
-						if(cbox.isXType('radiofield',true)) {
-							choice.options().each(function(innerOpt) {
-								innerOpt.set('selected', false);
-							});
-						};
-						opt.set('selected', true);
-						this.recalculate(this.models.activeOrder);
-					},this);
-					checkbox.addListener('uncheck',function(cbox) {
-						console.log('uncheck');
-						if(cbox.isXType('checkboxfield',true)) {
-							 opt.set('selected', false);
-						} else {
-							 //don't allow radio buttons to be deselected
-							 cbox.setChecked(true);
+
+		 	//render all main choices
+		 	product.choices().queryBy(function(rec) {
+		 	 	if(!rec.get('parent')) {
+		 	 		return true;
+		 	 	}}).each(function(choice) {
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+
+					menuCtr.createOptions.apply(me, [choice, optionsDetailPanel, null, product]);
+					//process choices assigned to a this choice
+					product.choices().queryBy(function(rec) {
+						if(rec.get('parent') == choice.get('id')) {
+							return true;
 						}
-						 this.recalculate(this.models.activeOrder);								 
-					},this);
-					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
-				},this);	 
-				 choicesPanel.add(optionsDetailPanel);
-			},this);
+					}).each(function(memberChoice) {
+						memberChoice.setParentChoice(choice);
+						// menuCtr.createOptions(memberChoice, optionsDetailPanel, choice);
+						menuCtr.createOptions.apply(me, [memberChoice, optionsDetailPanel, choice, product]);
+					});
+
+					choicesPanel.add(optionsDetailPanel);
+		 	 });
+			//  product.choices().each(function(_choice) {
+			// 	 var choice = _choice;				 			 
+			// 	 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+			// 	 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+			// 	 //single choice. Create Radio buttons
+			// 	 var optionType = '';
+			// 	 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
+			// 		 optionType = 'Ext.field.Radio';
+			// 	 	} 
+			// 	 else {//multiple choice
+			// 		 optionType = 'Ext.field.Checkbox';					 
+			// 	 }
+				
+			// 	choice.options().each(function(opt) {
+			// 		var checkbox = Ext.create(optionType, {
+			// 			name : choice.data.id,
+			// 			labelWidth: '80%',
+			// 			label : opt.get('name'),
+			// 			checked: opt.get('selected'),
+			// 			cls: 'option'
+			// 		}, this);
+					 
+			// 		checkbox.addListener('check',function(cbox) {
+			// 			console.log('check');
+			// 			if(cbox.isXType('radiofield',true)) {
+			// 				choice.options().each(function(innerOpt) {
+			// 					innerOpt.set('selected', false);
+			// 				});
+			// 			};
+			// 			opt.set('selected', true);
+			// 			this.recalculate(this.models.activeOrder);
+			// 		},this);
+			// 		checkbox.addListener('uncheck',function(cbox) {
+			// 			console.log('uncheck');
+			// 			if(cbox.isXType('checkboxfield',true)) {
+			// 				 opt.set('selected', false);
+			// 			} else {
+			// 				 //don't allow radio buttons to be deselected
+			// 				 cbox.setChecked(true);
+			// 			}
+			// 			 this.recalculate(this.models.activeOrder);								 
+			// 		},this);
+			// 		 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
+			// 	},this);	 
+			// 	 choicesPanel.add(optionsDetailPanel);
+			// },this);
 		}
 		 
 		 
@@ -376,12 +402,16 @@
 		
 		order.getData(true);
 
+		//validate choices 
 		product.choices().each(function(choice) {
-			if(choice.validateChoice() !== true) {
-				//coice is not valid
-				productIsValid = false;
-				validationError += choice.get('text') + '<br/>';
-			}
+			//only validate dependend choices if parent choice is active!
+			if(!choice.get('parent') || choice.getParentChoice().isActive()) {
+				if(choice.validateChoice() !== true) {
+					//coice is not valid
+					productIsValid = false;
+					validationError += choice.get('text') + '<br/>';
+				}
+			};
 		});
 		
 		if(productIsValid) {
@@ -469,9 +499,9 @@
 	/**
 	 * Recalculates the total price for the active product.
 	 */
-	recalculate: function(order) {
+	recalculate: function(product) {
 		console.log('Cart Controller -> recalculate');
-		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: order.getProduct(), amount: order.get('amount')});
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: order.get('amount')});
 	},
 	/**
 	 * Refreshes the badge text on cart tab icon.

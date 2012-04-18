@@ -37,6 +37,7 @@ Ext.define('EatSense.model.Product', {
 	    proxy: {
 		   type: 'rest',
 		   url : '/c/businesses/{pathId}/products',
+		   enablePagingParams: false,
 		   reader: {
 			   type: 'json'
 	   		},

@@ -36,6 +36,7 @@ Ext.define('EatSense.model.CheckIn', {
 		proxy : {
 			type : 'rest',
 			url : '/c/checkins/',
+			enablePagingParams: false,
 			reader : {
 				type : 'json',
 			}
