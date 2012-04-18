@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.channel.ChannelFailureException;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
@@ -68,7 +69,7 @@ public class ChannelController {
 	 * @param clientId
 	 * @return the token to send to the client
 	 */
-	public String createCockpitChannel(Business business, String clientId) {
+	public String createCockpitChannel(Business business, String clientId) throws ChannelFailureException {
 		return createCockpitChannel(business, clientId, null);
 	}
 	
@@ -79,8 +80,9 @@ public class ChannelController {
 	 * @param clientId
 	 * @param timeout in minutes
 	 * @return the token to send to the client
+	 * @throws ChannelFailureException if channel creation failed
 	 */
-	public String createCockpitChannel(Business business, String clientId , Integer timeout) {
+	public String createCockpitChannel(Business business, String clientId , Integer timeout) throws ChannelFailureException {
 		String token = null;
 		// create a channel id with the format "businessId|clientId"
 		clientId = "b" + business.getId() + "|" + clientId;
@@ -98,11 +100,17 @@ public class ChannelController {
 	 * @param clientId
 	 * @param timeout
 	 * @return the token to send to the client
+	 * @throws ChannelFailureException if channel creation failed
+	 * @throws IllegalArgumentException if unknown businessId has been passed
 	 */
-	public String createCockpitChannel(Long businessId, String clientId , Integer timeout) {
-		Business business = businessRepo.getById(businessId);
-		if(business == null)
-			throw new IllegalArgumentException("unknown businessId: " + businessId);
+	public String createCockpitChannel(Long businessId, String clientId , Integer timeout) throws ChannelFailureException, IllegalArgumentException {
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("unknown businessId", e);
+		}
+		
 		return createCockpitChannel(business, clientId, timeout);
 	}
 	
@@ -115,7 +123,15 @@ public class ChannelController {
 		return sendMessageToCheckIn(checkInId, messageData);
 	}
 	
-	public String sendMessageToCheckIn(Long checkInId, MessageDTO messageData) {
+	/**
+	 * Send message to th
+	 * 
+	 * @param checkInId
+	 * @param messageData
+	 * @return message as string
+	 * @throws IllegalArgumentException if unknown checkInId has been passed
+	 */
+	public String sendMessageToCheckIn(Long checkInId, MessageDTO messageData) throws IllegalArgumentException {
 		CheckIn checkIn;
 		try {
 			checkIn = checkInRepo.getById(checkInId);
@@ -134,7 +150,6 @@ public class ChannelController {
 	 * @param action 
 	 * @param content an object for data serialization to JSON
 	 * @return the complete message string 
-	 * @throws IOException, JsonGenerationException, JsonMappingException 
 	 */
 	public String sendMessage(String clientId, String type, String action, Object content)  {
 		MessageDTO messageData = new MessageDTO();
@@ -153,16 +168,22 @@ public class ChannelController {
 	 * @param action 
 	 * @param content an object for data serialization to JSON
 	 * @return the complete message string 
-	 * @throws IOException, JsonGenerationException, JsonMappingException 
+	 * 
 	 */
-	public String sendMessage(String clientId, MessageDTO messageData)  {
+	public String sendMessage(String clientId, MessageDTO messageData) throws IllegalArgumentException {
 		return sendMessageRaw(clientId, buildJsonMessage(messageData)).getMessage();
 	}
 	
 
+	/**
+	 * Build a JSON string from the given POJO. 
+	 * 
+	 * @param object
+	 * @return JSON string representing the object
+	 */
 	private String buildJsonMessage(Object object) {
 		if(object == null) {
-			return null;
+			throw new IllegalArgumentException("object is null");
 		}
 			
 		String messageString;
@@ -173,8 +194,6 @@ public class ChannelController {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Cannot build message, error mapping object to JSON : "+ object, e);
 		}
-		if(messageString.length() > 32786)
-			throw new IllegalArgumentException("Cannot build message, data package longer than 32kB");
 		
 		return messageString;
 	}
@@ -188,6 +207,9 @@ public class ChannelController {
 	 * @return
 	 */
 	public ChannelMessage sendMessageRaw(String clientId, String messageString) {
+		if(messageString.length() > 32786)
+			throw new IllegalArgumentException("Cannot send message, data package longer than 32kB");
+
 		ChannelMessage message = new ChannelMessage(clientId, messageString);
 		logger.info("Sending to client {}, message: {}", clientId, message.getMessage());
 		channelService.sendMessage(message);
@@ -202,9 +224,6 @@ public class ChannelController {
 	 * @param type
 	 * @param action
 	 * @param content JSON model
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonGenerationException 
 	 */
 	public void sendMessageToAllCockpitClients(Long businessId, String type, String action, Object content) {
 		sendJsonToAllCockpitClients(businessId, new MessageDTO(type, action, content));
@@ -215,23 +234,24 @@ public class ChannelController {
 	 * 
 	 * @param businessId
 	 * @param messages
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws IOException
 	 */
 	public void sendMessagesToAllCockpitClients(Long businessId, List<MessageDTO> content)  {
-		sendJsonToAllCockpitClients(businessId, content);
+		if(content != null && !content.isEmpty())
+			sendJsonToAllCockpitClients(businessId, content);
 	}
 	
 	private void sendJsonToAllCockpitClients(Long businessId, Object content)  {
-		Business business = businessRepo.getById(businessId);
-		if(business == null)
-			throw new IllegalArgumentException("Unable to send message, unknown business id given.");
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("Unable to send message, unknown business id given.", e);
+		}
 		
 		String messageString = buildJsonMessage(content);
 		logger.info("sending message {} ...", messageString);
 		
-		if(business.getChannelIds() != null) {
+		if(business.getChannelIds() != null && !business.getChannelIds().isEmpty()) {
 			// Send to all clients registered to the business ...
 			for (String clientId : business.getChannelIds()) {
 				sendMessageRaw(clientId, messageString);
@@ -372,14 +392,10 @@ public class ChannelController {
 	 * @param timeout in minutes
 	 * @return the token to send to the client
 	 */
-	public String createCustomerChannel(String checkInUid, Integer timeout) {
+	public String createCustomerChannel(CheckIn checkIn, Integer timeout) {
 		String token = null;
-		if(checkInUid == null || checkInUid.isEmpty())
-			throw new IllegalArgumentException("checkInUid null or empty");
-		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 		if(checkIn == null)
-			throw new IllegalArgumentException("checkInUid unknown");			
+			throw new IllegalArgumentException("checkIn is null");			
 		// create a channel id with the format "c{checkInId}"
 		String clientId = "c"+ checkIn.getId().toString();
 		
@@ -396,8 +412,8 @@ public class ChannelController {
 	 * @param checkInUid uid of the connecting checkin
 	 * @return
 	 */
-	public String createCustomerChannel(String checkInUid) {
-		return createCustomerChannel(checkInUid, null);
+	public String createCustomerChannel(CheckIn checkIn) {
+		return createCustomerChannel(checkIn, null);
 	}
 
 }

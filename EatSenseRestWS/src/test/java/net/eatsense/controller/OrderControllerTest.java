@@ -1,6 +1,9 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
@@ -15,12 +18,12 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ChoiceDTO;
@@ -39,7 +42,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.googlecode.objectify.Key;
 
 public class OrderControllerTest {
 	
@@ -202,7 +204,7 @@ public class OrderControllerTest {
 		
 		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkInData.getBusinessId(), orderId);
 		
-		orderCtrl.deleteOrder(checkInData.getBusinessId(), placedOrder.getId());
+		orderCtrl.deleteOrder(checkInData.getBusinessId(), placedOrder.getId(),checkInData.getUserId());
 		
 		List<Order> orders = orderCtrl.getOrders(checkInData.getBusinessId(), checkInData.getUserId(), null);
 		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));

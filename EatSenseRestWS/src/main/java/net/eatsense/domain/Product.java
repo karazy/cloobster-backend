@@ -80,7 +80,7 @@ public class Product extends GenericEntity {
 
 	@Transient
 	public Key<Product> getKey() {
-		return new Key<Product>(getBusiness(), Product.class, super.getId());
+		return getKey(getBusiness(), super.getId());
 	}
 
 
@@ -101,6 +101,10 @@ public class Product extends GenericEntity {
 
 	public void setBusiness(Key<Business> business) {
 		this.business = business;
+	}
+	
+	public static Key<Product> getKey(Key<Business> parentKey, long id) {
+		return new Key<Product>(parentKey, Product.class, id);
 	}
 	
 }

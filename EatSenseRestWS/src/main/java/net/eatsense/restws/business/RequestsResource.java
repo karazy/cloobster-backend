@@ -15,7 +15,6 @@ import net.eatsense.controller.BusinessController;
 import net.eatsense.representation.CustomerRequestDTO;
 
 import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class RequestsResource {
@@ -38,12 +37,7 @@ public class RequestsResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public Collection<CustomerRequestDTO> getCustomerRequest(@QueryParam("checkInId") Long checkInId, @QueryParam("spotId") Long spotId) {
-		Collection<CustomerRequestDTO> requestData = businessCtrl.getCustomerRequestData(businessId, checkInId, spotId);
-		if( requestData == null)
-			return new ArrayList<CustomerRequestDTO>();
-//			throw new NotFoundException("No requests found");
-		else
-			return requestData;
+		return businessCtrl.getCustomerRequestData(businessId, checkInId, spotId);
 	}
 	
 	@DELETE

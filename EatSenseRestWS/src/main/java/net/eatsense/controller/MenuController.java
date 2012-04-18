@@ -48,26 +48,18 @@ public class MenuController {
 	 * @return list of menus with products
 	 */
 	public Collection<MenuDTO> getMenus(Long businessId){
-		if(businessId == null )
-			throw new IllegalArgumentException("Invalid business key specified.");
-		
-		
-		logger.info("Returning menus of business id: " + businessId);
-		Key<Business> business = new Key<Business>(Business.class, businessId);
-		
-		List<Menu> menus = menuRepo.getByParent( business);
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
+		if(businessId == null )
+			return menuDTOs;
 		
+		List<Menu> menus = menuRepo.getByParent( Business.getKey(businessId) );
 		for ( Menu menu : menus) {
-			 MenuDTO menuDTO = new MenuDTO();
-			 // Query for a list of all products associated with this menu
-			 List<Product> products = productRepo.getListByPropertyOrdered("menu", menu.getKey(), "name");
-			 
-			 List<ProductDTO> productDTOs = transform.productsToDto(products);
-			 menuDTO.setTitle(menu.getTitle());
-			 menuDTO.setProducts(productDTOs);
-			 
-			 menuDTOs.add(menuDTO);
+			MenuDTO menuDTO = new MenuDTO();
+			menuDTO.setTitle(menu.getTitle());
+			// Query for a list of all products associated with this menu
+			menuDTO.setProducts(transform.productsToDto(productRepo
+					.getListByPropertyOrdered("menu", menu.getKey(), "name"))); 
+			menuDTOs.add(menuDTO);
 		}
 		
 		return menuDTOs;
@@ -80,7 +72,7 @@ public class MenuController {
 	 * @return
 	 */
 	public Collection<ProductDTO> getAllProducts(Long businessId) {
-		return transform.productsToDto(productRepo.getByParent( new Key<Business>(Business.class, businessId)));
+		return transform.productsToDto(productRepo.getByParent( Business.getKey(businessId)));
 	}
 	
 	/**
@@ -92,7 +84,7 @@ public class MenuController {
 	 */
 	public ProductDTO getProduct(Long businessId, Long id) {
 		try {
-			return transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
+			return transform.productToDto(productRepo.getById(Business.getKey(businessId), id));
 		} catch (NotFoundException e) {
 			logger.error("Unable to retrieve product, no matching entity found");
 			return null;
