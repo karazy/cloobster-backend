@@ -7,10 +7,6 @@ Ext.define('EatSense.view.Cart', {
 		title: Karazy.i18n.translate('cartTabBt'),
 		iconMask : true,
 		itemId : 'carttab',
-		// layout : {
-		// 	type : 'vbox',
-		// 	align : 'middle'
-		// },
 		layout: 'fit',
 		items : [ 
 		          {

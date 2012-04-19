@@ -47,6 +47,7 @@ Karazy.channel = (function() {
 		console.log('channel error ' + (error && error.description) ? error.description : "");
 		if(error && error.code == '401') {
 			timedOut = true;
+			socket.close();
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
 			socket.close();
@@ -54,12 +55,16 @@ Karazy.channel = (function() {
 	};
 
 	function onClose() {
-		if(timedOut === true && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			console.log('timeout: requesting new token');
-			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-			timedOut = false;			
+		if(!Karazy.util.isFunction(requestTokenHandlerFunction)) {
+			console.los('requestTokenHandlerFunction is not of type function!');
+		};
+
+		if(timedOut === true) {
+			console.log('channel timeout');			
+			connectionStatus = 'RECONNECT';
+			repeatedConnectionTry();	
 		} else if(connectionLost && connectionStatus != 'RECONNECT') {
-			console.log('connection lost: reopen channel');
+			console.log('channel connection lost');
 			connectionStatus = 'RECONNECT';
 			repeatedConnectionTry();
 			// setupChannel(channelToken);
@@ -71,17 +76,18 @@ Karazy.channel = (function() {
 	*
 	*/
 	function repeatedConnectionTry() {
-		if(!connectionLost) {
+		if(!connectionLost || !timedOut) {
 			return;
 		}
 
-		console.log('Trying to reconnect channel.');
+		console.log('Trying to reconnect and request new token.');
 
 		var tries = 1;
 		var reconnectInterval =	window.setInterval(
 				function() {
 					console.log('Reconnect %s iteration.', tries);
-					setupChannel(channelToken);
+					// setupChannel(channelToken);
+					requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);
 					tries += 1;
 					if(!connectionLost || tries > 100) {
 						clearInterval(reconnectInterval);
