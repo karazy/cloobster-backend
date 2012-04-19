@@ -61,9 +61,6 @@
              leaveButton : {
             	 tap: 'leave'
              }, 
-             productdetail : {
-             	// hide: 'editOrder'
-             },
              closeOrderDetailBt: {
              	tap: 'closeOrderDetail'
              },
@@ -266,7 +263,7 @@
 	 */	 
 	// showOrderDetail: function(dataview, order) {
 	showOrderDetail: function(button, eventObj, eOpts) {
-		console.log("Cart Controller -> showProductDetail");		
+		console.log("Cart Controller -> showOrderDetail");		
 		 var 	me = this,
 		 		detail = this.getProductdetail(), 
 		 		choicesPanel =  this.getChoicespanel(),
