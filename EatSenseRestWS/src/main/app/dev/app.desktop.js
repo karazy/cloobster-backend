@@ -41,28 +41,28 @@ Ext.application({
 		'EatSense.model.AppState'
 	],
 	init : function() {
-		console.log('init');
+		
 	},
 	launch : function() {
 		console.log('launch');
-		var app = this;
+		var app = this,
+	   		appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+	 		checkInCtr = this.getController('CheckIn'),
+	 		restoredCheckInId;	 
+
+		//global error handler
 		window.onerror = function(message, url, lineNumber) {  
-			var 	messageCtr = app.getController('Message');
-
+			var messageCtr = app.getController('Message');
 			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
-
 		  	//messageCtr.reopenChannel();
-
 		  	//prevent firing of default handler (return true)
 		  	return false;
 		}; 
 
+		//timeout for requests
 		Ext.data.proxy.Server.timeout = 60000;
 		
     	//try to restore application state
-	   	 var 	appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
-	   	 		checkInCtr = this.getController('CheckIn'),
-	   	 		restoredCheckInId;	 
 	   	 
 	   	 //create main screen
 	   	 Ext.create('EatSense.view.Main');
@@ -106,10 +106,10 @@ Ext.application({
 	   	 }	   		 	   	 	   	 
 	   	 else {	   		 
 	   		if (appStateStore.getCount() > 1){
-		   		 console.log('Too many appStates! clear cache. this should never happen.');
+		   		 console.log('Too many appStates! Clearing cache. this should never happen.');
+		   		 appStateStore.removeAll();
 		   	 } else {
 		   		console.log('no app state found.');
-		   		appStateStore.removeAll();
 		   	 } 		   		 
 	   		 appStateStore.add(checkInCtr.getAppState());
 	   		 checkInCtr.showDashboard();

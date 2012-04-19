@@ -43,6 +43,9 @@ var translation = {
 		"menuTitle" : "Karte",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
+		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
+		"choiceValErrMin" : "Bitte wähle mindestens {0} {1} aus.",
+		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
 		//Order
 		"orderInvalid" : "Bitte überprüfe deine Auswahl",
 		"orderPlacer" : "Bestellung im Warenkorb",
