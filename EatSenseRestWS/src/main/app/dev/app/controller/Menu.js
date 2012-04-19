@@ -5,43 +5,31 @@
  * - configuring products e.g. choosing options
  */
 Ext.define('EatSense.controller.Menu', {
-    extend: 'Ext.app.Controller',
+    extend: 'Ext.app.Controller',    
     config: {
-        profile: Ext.os.deviceType.toLowerCase(),
 		refs: {
 	        main : 'mainview', 
-        	menulist :'#menulist',        	
+        	menulist :'menuoverview list',        	
         	productlist :'#menuCardPanel #productlist',        	
         	productoverview :'productoverview' ,	     
         	menuoverview :'menuoverview' ,	       
-        	// productdetail :'#menuCardPanel #menuProductDetail',
         	productdetail :{
                 selector: 'tabpanel panel[name=menu] productdetail',
                 xtype: 'productdetail',
                 autoCreate: true
-            },
-        	backToMenu :'#productOvBackBt' ,	        
-        	// prodDetailLabel :'#menuCardPanel #menuProductDetail #prodDetailLabel' ,
+            },	        
         	prodDetailLabel :'productdetail #prodDetailLabel' ,	 
         	prodPriceLabel :'productdetail #prodPriceLabel' ,    
-        	prodDetailBackBt :'#prodDetailBackBt' ,	   
-        	// amountSpinner : 'menu panel panel #productAmountSpinner',
-        	// amountSpinner : '#productAmountSpinner',
         	amountSpinner: 'productdetail spinnerfield',
         	createOrderBt :'productdetail button[action="cart"]',
         	closeProductDetailBt: 'productdetail button[action=close]',
         	cartview : 'cartview',
         	menuview: 'menu',
-        	productcomment: '#productComment',
-        	//#menutap #menu
-//        	createOrderBt :'menu #menuCardPanel #menuProductDetail #prodDetailcartBt',
-        	// createOrderBt :'menu #menuTopBar #productCartBt',
+        	productcomment: 'productdetail #productComment',
         	backBt: 'menu button[action=back]',
         	topToolbar: 'menu #menuTopBar',
-        	bottomTapToMenu : '#menuBottomBar #bottomTapToMenu',
         	loungeview: 'lounge',
-        	loungeTabBar: '#loungeTabBar',
-        	myordersview: '#myorderstab #myorders',
+        	loungeTabBar: 'lounge tabbar',
 		},
 
 		control: {
@@ -51,28 +39,14 @@ Ext.define('EatSense.controller.Menu', {
              productlist : {
             	select: 'loadProductDetail' 
              },
-             backToMenu: {
-            	 tap: 'showMenu'
-             }, 
-             prodDetailBackBt: {
-            	 tap: 'prodDetailBackBtHandler'
-             },
              createOrderBt : {
             	 tap: 'createOrder'
-             },
-             bottomTapToMenu : {
-            	 tap: 'showMenu'
              },
              closeProductDetailBt: {
              	tap: 'closeProductDetail'
              },
              backBt : {
-            	 tap: function() {
-            		 if(this.menuBackBtContext != null) {
-            			 console.log('MenuController -> menuBackBtContext');
-            			 this.menuBackBtContext();
-            		 }
-            	 }
+            	 tap: 'showMenu'
              },
              amountSpinner : {
             	 spin: 'amountChanged'
@@ -102,29 +76,35 @@ Ext.define('EatSense.controller.Menu', {
      * e. g. Beverages, Drinks, Burgers
      */
     showProductlist: function(dataview, record) {
-
     	console.log("Menu Controller -> showProductlist");
     	var pov = this.getProductoverview(),
-    	prodStore = record.productsStore;
+    		prodStore = record.productsStore;
 
     	this.models.activeMenu = record;
     	this.getProductlist().setStore(prodStore);
     	this.getMenulist().refresh();
-    	this.menuBackBtContext = this.showMenu;
-    	this.switchView(pov, record.data.title, Karazy.i18n.translate('back'), 'left');
+    	this.switchView(pov, record.get('title'), Karazy.i18n.translate('back'), 'left');
     },
     /**
      * Shows the menu. At this point the store is already filled with data.
      */
-	showMenu : function() {	
-		console.log("Menu Controller -> showMenu");
-	
-		 this.menuBackBtContext = null;
+	showMenu : function() {
 		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
 	},
-	
+	/**
+	 * Displays detailed information for a product (e.g. Burger)
+	 * @param dataview
+	 * @param record
+	 */
 	loadProductDetail: function(dataview, record) {
-		console.log('Menu Controller -> loadProductDetail '+ record.get('id'));
+		var me = this,
+			detail = this.getProductdetail(), 
+			main = this.getMain(), 
+			menu = this.getMenuview(), 
+			choicesPanel =  this.getProductdetail().getComponent('choicesPanel'),
+			titlebar = detail.down('titlebar'),
+			activeProduct;
+
 		//save original ids
 		record.set('genuineId', record.get('id'));
 		record.choices().each(function(choice) {
@@ -134,84 +114,45 @@ Ext.define('EatSense.controller.Menu', {
 			});
 		});
 		this.models.activeProduct = record.copy();
-		console.log('DEBUG Menu Controller -> loadProductDetail after copy id'+ this.models.activeProduct.get('id') + ' genuineId: '+this.models.activeProduct.get('genuineId'));
-		this.showProductDetail(dataview, this.models.activeProduct);
-	},
-	/**
-	 * Displays detailed information for a product (e.g. Burger)
-	 * @param dataview
-	 * @param record
-	 */
-	showProductDetail: function(dataview, record) {
-		console.log("Menu Controller -> showProductDetail");		//.getComponent('choicesWrapper')
-		 var detail = this.getProductdetail(), 
-		 main = this.getMain(), 
-		 menu = this.getMenuview(), 
-		 choicesPanel =  this.getProductdetail().getComponent('choicesPanel'),
-		 titlebar = detail.down('titlebar');		 
+		activeProduct = this.models.activeProduct
 
 		choicesPanel.removeAll(false);
 
-		titlebar.setTitle(record.get('name'));
+		titlebar.setTitle(activeProduct.get('name'));
 
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(1);
-		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: record, amount: this.getAmountSpinner().getValue()});
-		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: record, amount: this.getAmountSpinner().getValue()});
-		 //dynamically add choices if present		 
-		 if(typeof record.choices() !== 'undefined' && record.choices().getCount() > 0) {
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: activeProduct, amount: this.getAmountSpinner().getValue()});
+		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: activeProduct, amount: this.getAmountSpinner().getValue()});
 
-			 record.choices().each(function(_choice) {
-				 var choice = _choice;				 			 
-				 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-				 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text); //+'<hr/>');
-				 //single choice. Create Radio buttons
-				 var optionType = '';
-				 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
-					 optionType = 'Ext.field.Radio';
-				 	} 
-				 else {//multiple choice
-					 optionType = 'Ext.field.Checkbox';					 
-				 }
-				
-				 choice.options().each(function(opt) {
-					 var checkbox = Ext.create(optionType, {
-						 name : choice.get('id'),
-						 labelWidth: '80%',
-						 label : opt.get('name'),
-						 checked: opt.get('selected'),
-						 cls: 'option'
-					 }, this);							 
-					
-					 checkbox.addListener('check',function(cbox) {
-						 console.log('check');
-						 if(cbox.isXType('radiofield',true)) {
-							 choice.options().each(function(innerOpt) {
-								 innerOpt.set('selected', false);
-							 });
-						 };
-						 opt.set('selected', true);
-						 this.recalculate(this.models.activeProduct);
-					 },this);
-					 checkbox.addListener('uncheck',function(cbox) {
-						 console.log('uncheck');
-						 if(cbox.isXType('checkboxfield',true)) {
-							 opt.set('selected', false);
-						 } else {
-							 //don't allow radio buttons to be deselected
-							 cbox.setChecked(true);
-						 }
-						 this.recalculate(this.models.activeProduct);								 
-					 },this);
-					 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
-				 },this);	 
-				 choicesPanel.add(optionsDetailPanel);
-			 },this);
+		 //dynamically add choices and dependend choices if present		 
+		 if(typeof activeProduct.choices() !== 'undefined' && activeProduct.choices().getCount() > 0) {
+		 	 //render all main choices
+		 	 activeProduct.choices().queryBy(function(rec) {
+		 	 	if(!rec.get('parent')) {
+		 	 		return true;
+		 	 	}}).each(function(choice) {
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+
+					me.createOptions(choice, optionsDetailPanel, null, me.models.activeProduct);
+					//process choices assigned to a this choice
+					activeProduct.choices().queryBy(function(rec) {
+						if(rec.get('parent') == choice.get('id')) {
+							return true;
+						}
+					}).each(function(memberChoice) {
+						memberChoice.setParentChoice(choice);
+						me.createOptions(memberChoice, optionsDetailPanel, choice, me.models.activeProduct);
+					});
+
+					choicesPanel.add(optionsDetailPanel);
+		 	 });
 		 }
 		 
-		 
-		 //insert comment field after options have been added so it is positioned correctly
-		 choicesPanel.add({
+		//insert comment field after options have been added so it is positioned correctly
+		choicesPanel.add({
 			xtype: 'textareafield',
 			label: Karazy.i18n.translate('orderComment'),
 			labelAlign: 'top',
@@ -219,63 +160,107 @@ Ext.define('EatSense.controller.Menu', {
 			maxRows: 4,
 			value: '',
 			cls: 'choice'
-			}
-		);
+		});
 		 
-		 // this.menuBackBtContext = this.backToProductOverview;
-		 Ext.Viewport.add(detail);
-		 detail.getScrollable().getScroller().scrollToTop();
-		 detail.show();
-		 // this.switchView(detail, record.data.name, Karazy.i18n.translate('back'), 'left');
+		Ext.Viewport.add(detail);
+		detail.getScrollable().getScroller().scrollToTop();
+		detail.show();
+	},
+	/**
+	* @private
+	* Creates Ext.field.Radio and Ext.field.Checkbox option elements and adds them to a panel.
+	* @param choice
+	*	Choice containing options to create.
+	* @param panel
+	*	Panel to add options to
+	*/
+	createOptions: function(choice, panel, parent, productOrOrder) {
+		if(!choice || !panel || !productOrOrder) {
+			console.log('You have to provide options, panel and a productOrOrder.')
+			return;
+		}
+
+		var me = this,
+			optionType = '',
+			field,
+			isChecked;
+
+		if(choice.get('minOccurence') <= 1 && choice.get('maxOccurence') == 1) {
+			optionType = 'Ext.field.Radio';
+		} 
+		else {//multiple choice
+			optionType = 'Ext.field.Checkbox';					 
+		}
+
+		choice.options().each(function(opt) {
+			 field = Ext.create(optionType, {
+				 			name : choice.get('id'),
+				 			labelWidth: '80%',
+							label : opt.get('name'),
+							checked: opt.get('selected'),
+							cls: 'option',
+							disabled: (parent && !parent.isActive()) ? true : false
+					}, me);							 
+			//TODO this is sooo dirty
+			field.addListener('check',function(cbox, event) {
+			 	console.log('check');
+				if(cbox.isXType('radiofield',true)) {				 	
+					choice.options().each(function(innerOpt) {
+						if(innerOpt != opt) {
+					 		innerOpt.set('selected', false);	
+					 	}
+					});
+					if(choice.get('minOccurence') == 0) {
+				 	 	cbox.setChecked(!opt.get('selected'));
+				 	 	opt.set('selected', !opt.get('selected'));
+				 	} else {
+				 		opt.set('selected', true);
+				 	}
+				 } else {
+				 	opt.set('selected', true);	
+				 }
+				 if(!parent) {
+				 	choice.isActive();
+				 }
+				 me.recalculate(productOrOrder);
+			 },me);
+
+			 field.addListener('uncheck',function(cbox) {
+			 	console.log('uncheck');
+				 if(cbox.isXType('checkboxfield',true)) {
+					 opt.set('selected', false);
+				 }
+				 if(!parent) {
+				 	choice.isActive();
+				 }
+				 me.recalculate(productOrOrder);								 
+			 },me);
+			 panel.getComponent('optionsPanel').add(field);
+
+			 if(parent) {
+			 	parent.on('activeChanged', function(isActive) {			 		
+			 		field.setDisabled(!isActive);
+			 		if(!isActive) {
+				 		//TODO leave active?
+				 		field.uncheck();
+				 		opt.set('selected', false);			 		
+			 		}
+			 	});
+			 }				 
+		});
 	},
 	/**
 	*	Hides Product detail.
 	*/
 	closeProductDetail: function() {
-		var 	detail = this.getProductdetail();		
+		var detail = this.getProductdetail();		
 		detail.hide();
-	},
-	/**
-	 * Handler for prodDetailBackBt Button. Takes the user back to productoverview
-	 * without issuing an order.
-	 * @param button
-	 */
-	prodDetailBackBtHandler : function(button) {
-		this.backToProductOverview();
-	},
-	/**
-	 * Called when user navigates back from productdetail view to productoverview (the list of products)
-	 * @param message
-	 * 		A message to show after switching back to productoverview
-	 */
-	backToProductOverview: function(message) {
-		console.log("Menu Controller -> backToProductOverview");
-		var pov = this.getProductoverview();
-
-		this.models.activeProduct = null;
-
-		this.getProductdetail().getComponent('choicesPanel').removeAll(false);
-			
-		// this.menuBackBtContext = this.showMenu;
-		// this.switchView(pov, this.models.activeMenu.data.title, Karazy.i18n.translate('back'), 'right');
-		if (message) {
-			Ext.Msg.show({
-				title : Karazy.i18n.translate('orderPlaced'),
-				message : message,
-				buttons : []
-			});
-			//show short alert and then hide
-			Ext.defer((function() {
-				Ext.Msg.hide();
-			}), Karazy.config.msgboxHideTimeout, this);
-		}
 	},
 	/**
 	 * Adds the current product to card.
 	 * @param button
 	 */
 	createOrder: function(button) {
-		console.log('Menu Controller -> createOrder');
 		//get active product and set choice values
 		var 	productForCart = this.models.activeProduct,
 				order,
@@ -285,14 +270,18 @@ Ext.define('EatSense.controller.Menu', {
 				appState = this.getApplication().getController('CheckIn').getAppState(),
 				appStateStore = Ext.StoreManager.lookup('appStateStore'),
 				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
-				detail = this.getProductdetail();	
+				detail = this.getProductdetail(),
+				message;
 		
 		//validate choices 
 		productForCart.choices().each(function(choice) {
-			if(choice.validateChoice() !== true) {
-				//coice is not valid
-				productIsValid = false;
-				validationError += choice.get('text') + '<br/>';
+			//only validate dependend choices if parent choice is active!
+			if(!choice.get('parent') || choice.getParentChoice().isActive()) {
+				if(choice.validateChoice() !== true) {
+					//coice is not valid
+					productIsValid = false;
+					validationError += choice.get('text') + '<br/>';
+				}
 			};
 		});
 		
@@ -302,7 +291,7 @@ Ext.define('EatSense.controller.Menu', {
 			order.set('status','CART');
 			productForCart.getData(true);
 			order.setProduct(productForCart);
-			//comment field needed //.getComponent('choicesWrapper')
+			
 			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
 			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
@@ -323,8 +312,23 @@ Ext.define('EatSense.controller.Menu', {
 			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
 			
 			detail.hide();
+			message = Karazy.i18n.translate('productPutIntoCardMsg', this.models.activeProduct.get('name'));
+			this.models.activeProduct = null;
 
-			this.backToProductOverview(Karazy.i18n.translate('productPutIntoCardMsg', this.models.activeProduct.get('name')));
+			this.getProductdetail().getComponent('choicesPanel').removeAll(false);
+			
+
+			if (message) {
+				Ext.Msg.show({
+					title : Karazy.i18n.translate('orderPlaced'),
+					'message' : message,
+					buttons : []
+				});
+				//show short alert and then hide
+				Ext.defer((function() {
+					Ext.Msg.hide();
+				}), Karazy.config.msgboxHideTimeout, this);
+			}
 		} else {
 			//show validation error
 			Ext.Msg.alert(Karazy.i18n.translate('orderInvalid'),validationError, Ext.emptyFn);
@@ -337,9 +341,6 @@ Ext.define('EatSense.controller.Menu', {
 	showCart: function(){		
 		this.getApplication().getController('Order').showCart();
 	},
-	
-	//Menu navigation functions
-	
 	/**
 	 * Switches to another view
 	 * @param view
@@ -359,34 +360,6 @@ Ext.define('EatSense.controller.Menu', {
     	menu.switchMenuview(view,direction);
 	},
 	/**
-	 * Removes the last order, if orders exist.
-	 */
-	undoOrder: function() {
-		console.log('Menu Controller -> undoOrder');
-		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(), 
-		badgeText,
-		removedOrder,
-		cartButton = this.getLoungeTabBar().getAt(2);
-		
-		if(orders.data.length > 0) {
-			removedOrder = orders.getAt(orders.data.length-1).getProduct().get('name');
-			orders.removeAt(orders.data.length - 1);
-			badgeText = (orders.data.length > 0) ? orders.data.length : "";
-			cartButton.setBadgeText(badgeText);
-			Ext.Msg.show({
-				title : Karazy.i18n.translate('orderRemoved'),
-				message : removedOrder,
-				buttons : []
-			});
-			//show short alert and then hide
-			Ext.defer((function() {
-				Ext.Msg.hide();
-			}), Karazy.config.msgboxHideTimeout, this);			
-		} else {
-			
-		}
-	},
-	/**
 	 * Recalculates the total price for the active product.
 	 */
 	recalculate: function(product) {
@@ -404,12 +377,7 @@ Ext.define('EatSense.controller.Menu', {
 		console.log('MenuController > amountChanged (value:'+value+')');
 		this.recalculate(this.models.activeProduct);
 	},
-	
-	/**
-	 * Holds the function executed when menu back button is tapped.
-	 * The executed function depends on the current context.
-	 */
-	menuBackBtContext: null
+
      	
 });
 

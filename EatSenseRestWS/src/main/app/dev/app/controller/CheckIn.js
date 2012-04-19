@@ -25,7 +25,7 @@ Ext.define('EatSense.controller.CheckIn', {
         	userlist: '#checkinDlg2Userlist',
         	checkInDlg1Label1: '#checkInDlg1Label1',    	       
         	cancelCheckInBt: '#cancelCheckInBt',    	       
-        	menulist: 'lounge #menulist',
+        	menulist: 'lounge menuoverview list',
         	menuview: 'menu',
         	loungeview : 'lounge',
         	myorderlist: '#myorderlist',
@@ -117,15 +117,6 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	});
     	    	}
     	 };    	    
-    },
-    /**
-     * Called after init.
-     */
-    launch: function() {
-    	//for convenience that focus on barcode field on desktop version
-    	// if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
-    	// 	this.getSearchfield().focus();
-    	// }
     },
     /**
      * CheckIn Process
