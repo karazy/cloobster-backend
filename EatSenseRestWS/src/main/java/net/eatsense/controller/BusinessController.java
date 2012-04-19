@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import net.eatsense.domain.CheckIn;
@@ -198,16 +199,24 @@ public class BusinessController {
 
 		requestRepo.delete(request);
 		
+		List<Request> oldRequests = requestRepo.query().filter("spot",request.getSpot()).order("-receivedTime").limit(2).list();
+		for (Iterator<Request> iterator = oldRequests.iterator(); iterator.hasNext();) {
+			Request oldRequest = iterator.next();
+			if(request.getId().equals(oldRequest.getId())) {
+				iterator.remove();
+			}			
+		}
+		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		messages.add(new MessageDTO("request", "delete", requestData));
-		Request oldRequest = requestRepo.ofy().query(Request.class).filter("spot",request.getSpot()).order("-receivedTime").get();
+		
 		
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(request.getSpot().getId());
 		
 		// Save the status of the next request in line, if there is one.
-		if( oldRequest != null) {
-			spotData.setStatus(oldRequest.getStatus());
+		if( !oldRequests.isEmpty() ) {
+			spotData.setStatus(oldRequests.get(0).getStatus());
 		}
 		else
 			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
