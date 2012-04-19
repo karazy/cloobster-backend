@@ -304,14 +304,20 @@ public class ChannelController {
 	
 	public void subscribeCheckIn(String clientId) {
 		CheckIn checkIn = parseCheckIn(clientId);
-		checkIn.setChannelId(clientId);
-		checkInRepo.saveOrUpdate(checkIn);
+		if (!clientId.equals(checkIn.getChannelId())) {
+			checkIn.setChannelId(clientId);
+			logger.info("Subscribing channel {} to checkin {} ", clientId, checkIn.getNickname());
+			checkInRepo.saveOrUpdate(checkIn);
+		}
 	}
 	
 	public void unsubscribeCheckIn(String clientId) {
 		CheckIn checkIn = parseCheckIn(clientId);
-		checkIn.setChannelId(null);
-		checkInRepo.saveOrUpdate(checkIn);
+		if(checkIn.getChannelId() != null) {
+			checkIn.setChannelId(null);
+			logger.info("Unsubscribing channel {} from checkin {} ", clientId, checkIn.getNickname());
+			checkInRepo.saveOrUpdate(checkIn);
+		}
 	}
 
 	/**
@@ -331,6 +337,7 @@ public class ChannelController {
 				return;
 			}
 			business.getChannelIds().remove(clientId);
+			logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
 			businessRepo.saveOrUpdate(business);
 		}
 	}
@@ -377,7 +384,10 @@ public class ChannelController {
 		Business business = parseBusiness(clientId);
 		if(business.getChannelIds() == null)
 			business.setChannelIds(new ArrayList<String>());
-		business.getChannelIds().add(clientId);
+		if(!business.getChannelIds().contains(clientId)) {
+			business.getChannelIds().add(clientId);
+			logger.info("Subscribing channel {} to business {} ", clientId, business.getName());
+		}
 		businessRepo.saveOrUpdate(business);
 	}
 	
