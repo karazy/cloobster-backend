@@ -573,7 +573,7 @@
 	 */
 	choosePaymentMethod: function() {
 		console.log('Order Controller -> choosePaymentMethod');
-		var availableMethods = this.getApplication().getController('CheckIn').models.activeSpot.payments(),
+		var availableMethods = this.getApplication().getController('CheckIn').getActiveSpot().payments(),
 			orderCount = this.getMyorderlist().getStore().getCount(),
 			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 			picker,

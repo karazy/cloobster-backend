@@ -77,14 +77,17 @@ Ext.define('EatSense.controller.CheckIn', {
     	* Contains information to resume application state after the app was closed.
     	*/
     	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
-        activeCheckIn: null
+        /**
+        *   Active checkIn for this session. Used througout whole application
+        */
+        activeCheckIn: null,
+        /**
+        *   The spot the activeCheckIn is assigned to.
+        */
+        activeSpot: null
     },
     init: function() {
-    	var     models = {},
-                messageCtr = this.getApplication().getController('Message');
-
-    	this.models = models;
-
+    	var messageCtr = this.getApplication().getController('Message');
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
@@ -109,7 +112,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	var me = this;
     	        	EatSense.model.Spot.load(barcode, {
     	        		 success: function(record, operation) {
-    	        			 me.models.activeSpot = record;
+    	        			 me.setActiveSpot(record);
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
      	        	    failure: function(record, operation) {
@@ -441,7 +444,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		EatSense.model.Spot.load(checkIn.get('spotId'), {
 		scope: this,
    		 success: function(record, operation) {
-   			 this.models.activeSpot = record;   			 
+   			 this.setActiveSpot(record);
    			 this.showMenu();
    			    			
    			Ext.Viewport.add(main);
