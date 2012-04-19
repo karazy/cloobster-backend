@@ -269,7 +269,7 @@ Ext.define('EatSense.controller.Menu', {
 				productIsValid = true,
 				appState = this.getApplication().getController('CheckIn').getAppState(),
 				appStateStore = Ext.StoreManager.lookup('appStateStore'),
-				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 				detail = this.getProductdetail(),
 				message;
 		
@@ -294,7 +294,7 @@ Ext.define('EatSense.controller.Menu', {
 			
 			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
-			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
+			activeCheckIn.orders().add(order);
 			
 			Ext.Ajax.request({				
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
@@ -309,7 +309,7 @@ Ext.define('EatSense.controller.Menu', {
 	    	    }
 	    	});
 			
-			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
+			cartButton.setBadgeText(activeCheckIn.orders().data.length);
 			
 			detail.hide();
 			message = Karazy.i18n.translate('productPutIntoCardMsg', this.models.activeProduct.get('name'));

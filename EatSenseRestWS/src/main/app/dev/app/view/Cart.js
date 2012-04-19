@@ -12,14 +12,7 @@ Ext.define('EatSense.view.Cart', {
 			xtype : 'titlebar',
 			itemId: 'cartTopBar',
 			title : Karazy.i18n.translate('cartviewTitle'),
-			items : [ {
-				xtype : 'button',
-				itemId : 'cartBackBt',
-				text : Karazy.i18n.translate('back'),
-				action : 'back',
-				ui : 'back',
-				align: 'left'
-			},
+			items : [ 
 			{
 				xtype: 'button',
 				action: 'trash',

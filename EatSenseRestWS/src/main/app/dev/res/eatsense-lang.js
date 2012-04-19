@@ -38,6 +38,7 @@ var translation = {
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 		"saveNicknameToggle" : "Nickname als Standard setzen?",
 		"checkInCanceled" : "Deine Sitzung wurde durch das Restaurant beendet.",
+		"nickname" : "Nickname",
 		// Menu
 		"menuTitle" : "Karte",
 		"choicesPanelTitle" : "Optionen",

@@ -10,23 +10,18 @@
 			myordersComplete: 'myorders #myorderscompletepanel',
 			myordersCompleteButton: 'myorders button[action=complete]',
 			menutab: '#menutab',
-			// orderlist : '#cartCardPanel #orderlist',
 			orderlist : 'cartoverview #orderlist',
-			backBt : '#cartTopBar button[action="back"]',
 			cancelAllOrdersBt : '#cartTopBar button[action="trash"]',
 			submitOrderBt : '#cartTopBar button[action="order"]',
 			topToolbar : '#cartTopBar',
-			// productdetail : '#cartCardPanel #cartProductdetail',	
 			productdetail : {
                 selector: 'orderdetail',
                 xtype: 'orderdetail',
                 autoCreate: true
             },
 			choicespanel : 'orderdetail #choicesPanel',
-			// editOrderBt : 'cart #cartCardPanel #cartProductdetail #prodDetailcartBt',
 			editOrderBt : 'cartoverviewitem button[action=edit]',
 			cancelOrderBt : 'cartoverviewitem button[action=cancel]',
-			// amountSpinner: '#cartCardPanel #cartProductdetail panel #productAmountSpinner',
 			amountSpinner : 'orderdetail spinnerfield',
 			prodDetailLabel :'orderdetail #prodDetailLabel' ,
 			prodPriceLabel :'orderdetail #prodPriceLabel' ,
@@ -49,24 +44,12 @@
 			 submitOrderBt : {
 				 tap: 'submitOrders'
 			 },
-			 // orderlist : {
-				//  itemtap: 'cartItemContextMenu'
-			 // },
 			 editOrderBt : {
-				// tap: 'editOrder'
 				tap: 'showOrderDetail'
 			 },
 			 cancelOrderBt : {
 			 	tap: 'cancelOrder'
 			 },
-			 backBt : {
-            	 tap: function() {
-            		 if(this.menuBackBtContext != null) {
-            			 console.log('Cart Controller -> menuBackBtContext');
-            			 this.menuBackBtContext();
-            		 }
-            	 }
-             },
              amountSpinner : {
             	 spin: 'amountChanged'
              },
@@ -95,8 +78,8 @@
 	},
 	init: function() {
 		//store retrieved models
-		var 	models = {},
-		 		messageCtr = this.getApplication().getController('Message');
+		var	models = {},
+	 		messageCtr = this.getApplication().getController('Message');
 
     	this.models = models;
     	messageCtr.on('eatSense.order', this.handleOrderMessage, this);
@@ -109,9 +92,9 @@
 	refreshCart: function() {
 		console.log('Cart Controller -> showCart');
 		var cartview = this.getCartview(), orderlist = this.getOrderlist(),
-		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
+		orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
 		total = 0;
-		this.hideBackButton();
+		// this.hideBackButton();
     	
 		orderlist.setStore(orders);	
 		this.models.activeOrder = null;
@@ -137,17 +120,17 @@
 	 */
 	dumpCart: function() {
 		console.log('Cart Controller -> dumpCart');
-		var activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn;
+		var activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn();
 		
 		Ext.Msg.show({
 			title: Karazy.i18n.translate('hint'),
 			message: Karazy.i18n.translate('dumpCart'),
 			buttons: [{
-				text: 'Ja',
+				text: Karazy.i18n.translate('yes'),
 				itemId: 'yes',
 				ui: 'action'
 			}, {
-				text: 'Nein',
+				text:  Karazy.i18n.translate('yes'),
 				itemId: 'no',
 				ui: 'action'
 			}],
@@ -176,15 +159,15 @@
 	 */
 	submitOrders: function() {
 		console.log('Cart Controller -> submitOrders');
-		var checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn, 
-		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
-		checkInId = checkIn.get('userId'),
-		businessId = checkIn.get('businessId'),
-		errorIndicator = false,
-		cartview = this.getCartview(),
-		ajaxOrderCount = 0,
-		ordersCount = orders.getCount();
-		me = this;
+		var checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(), 
+			orders = checkIn.orders(),
+			checkInId = checkIn.get('userId'),
+			businessId = checkIn.get('businessId'),
+			errorIndicator = false,
+			cartview = this.getCartview(),
+			ajaxOrderCount = 0,
+			ordersCount = orders.getCount();
+			me = this;
 		
 		if(ordersCount > 0) {
 			Ext.Msg.show({
@@ -397,7 +380,7 @@
 		product = this.models.activeOrder.getProduct(), 
 		validationError = "", 
 		productIsValid = true,
-		activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+		activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 		detail = this.getProductdetail();
 		
 		order.getData(true);
@@ -448,7 +431,7 @@
 	*/
 	cancelOrder: function(button, eventObj, eOpts) {
 		var 	order = button.getParent().getRecord(),
-				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 				productName = order.getProduct().get('name');
 			//delete item
 			activeCheckIn.orders().remove(order);
@@ -476,7 +459,7 @@
 	},
 
 	closeOrderDetail: function() {
-		var 	detail = this.getProductdetail();
+		var detail = this.getProductdetail();
 		
 		this.models.activeOrder.restoreState();
 		//try to avoid unecessary calculation, only needed to update price after cancelation
@@ -509,8 +492,8 @@
 	 */
 	refreshCartBadgeText: function() {
 		var cartButton = this.getLoungeTabBar().getAt(1),
-		orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders(),
-		badgeText;
+			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
+			badgeText;
 		
 		badgeText = (orders.data.length > 0) ? orders.data.length : "";
 		
@@ -523,7 +506,7 @@
 		var 	me = this,
 				myorderlist = me.getMyorderlist(),
 				myordersStore = Ext.data.StoreManager.lookup('orderStore'),
-				activeCheckIn = me.getApplication().getController('CheckIn').models.activeCheckIn,
+				activeCheckIn = me.getApplication().getController('CheckIn').getActiveCheckIn(),
 				payButton = me.getPaymentButton();
 				leaveButton = me.getLeaveButton();
 		
@@ -532,8 +515,7 @@
 //		myorderlist.getStore().removeAll();
 		
 		myordersStore.load({
-			scope   : this,
-			enablePagingParams: false,
+			scope   : this,			
 			callback: function(records, operation, success) {
 				try {
 					if(success == true) {
@@ -592,11 +574,11 @@
 	choosePaymentMethod: function() {
 		console.log('Order Controller -> choosePaymentMethod');
 		var availableMethods = this.getApplication().getController('CheckIn').models.activeSpot.payments(),
-		orderCount = this.getMyorderlist().getStore().getCount(),
-		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
-		picker,
-		choosenMethod,
-		me = this;
+			orderCount = this.getMyorderlist().getStore().getCount(),
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			picker,
+			choosenMethod,
+			me = this;
 		
 		if(orderCount>0 && checkIn.get('status') !== Karazy.constants.PAYMENT_REQUEST && checkIn.get('status') !== Karazy.constants.COMPLETE) {
 			//create picker
@@ -647,11 +629,12 @@
 	 */
 	paymentRequest: function(paymentMethod) {
 		var bill = Ext.create('EatSense.model.Bill'),
-		checkInCtr = this.getApplication().getController('CheckIn'),
-		checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
-		myordersComplete = this.getMyordersComplete(),
-		payButton = this.getPaymentButton(),
-		me = this;		
+			checkInCtr = this.getApplication().getController('CheckIn'),
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			myordersComplete = this.getMyordersComplete(),
+			payButton = this.getPaymentButton(),
+			me = this;		
+
 		bill.set('paymentMethod', paymentMethod);
 		//workaround to prevent sencha from sending phantom id
 		bill.setId('');
@@ -675,7 +658,7 @@
 	 */
 	leave: function() {
 		var		me = this,
-				checkIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 				myordersStore = Ext.data.StoreManager.lookup('orderStore');	
 		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) { 
 			checkIn.erase( {
@@ -698,17 +681,6 @@
 	},	
 	//UI Actions
 	/**
-	 * Hides the back button in top toolbar.
-	 */
-	hideBackButton: function() {
-		var  cartview = this.getCartview(),
-		backBt = cartview.down('#cartTopBar button[action="back"]');
-		
-		backBt.hide();
-		
-		this.toggleCartButtons();
-	},
-	/**
 	 * Shows (cart is not empty) or hides (cart is empty) cart buttons (trash, order).
 	 */
 	toggleCartButtons: function() {
@@ -727,35 +699,12 @@
 		var payButton = this.getPayButton();
 		
 	},
-	/**
-	 * Shows the back button in top toolbar.
-	 * @param text
-	 * 		Label to display on button.
-	 */
-	showBackButton: function(text) {
-		var cartview = this.getCartview(), 
-		backBt = cartview.down('#cartTopBar button[action="back"]'),
-		trashBt = cartview.down('#cartTopBar button[action="trash"]'),
-		orderBt = cartview.down('#cartTopBar button[action="order"]');
-		
-		backBt.setText(text);
-		backBt.show();
-		trashBt.hide();
-		orderBt.hide();
-	},
-	/**
-	 * 
-	 */
-	showCompletePanel: function() {
-		
-	},
-	
 	//Utility methods
 	/**
 	 * Returns number of orders in cart.
 	 */
 	cartCount: function() {
-		var orders = this.getApplication().getController('CheckIn').models.activeCheckIn.orders();
+		var orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders();
 		
 		if(orders == null) {
 			return 0;
@@ -782,9 +731,9 @@
 	*	Handles push notifications for orders.
 	*/
 	handleOrderMessage: function(action, updatedOrder) {
-		var 	orderStore = Ext.StoreManager.lookup('orderStore'),
-				oldOrder,
-				total;
+		var orderStore = Ext.StoreManager.lookup('orderStore'),
+			oldOrder,
+			total;
 
 		if(action == "update") {
 			oldOrder = orderStore.getById(updatedOrder.id);

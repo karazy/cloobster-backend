@@ -52,26 +52,11 @@ Ext.define('EatSense.view.Dashboard', {
 					html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
 				}, {
 					xtype : 'dashboardbutton',
-					id : 'checkInBtn',
-					 text : Karazy.i18n.translate('checkInButton'),
-					// icon: 'res/images/checkIn_icon.png',
-//					 iconCls: 'checkInButtonIcon',
+					action: 'checkin',
+					text : Karazy.i18n.translate('checkInButton'),
 					cls : 'checkInButton',
 					labelCls: 'checkInButton-label'
-					
-				// baseCls: 'checkInButton',
-				// ui : 'action',
-				// height: '105px',
-				// width : '150px'
 				}, 
-				// {
-				// 	xtype : 'textfield',
-				// 	label : Karazy.i18n.translate('barcode'),
-				// 	labelAlign : 'top',
-				// 	width : 100,
-				// 	name : 'barcodeTF',
-				// 	hidden : (profile == 'phone' && window.plugins && window.plugins.barcodeScanner) ? true : false
-				// } 
 				]
 			} ]
 		},
@@ -84,14 +69,9 @@ Ext.define('EatSense.view.Dashboard', {
 			},
 			items: [{
 				xtype : 'button',
-				itemId : 'settingsBtn',
 				action : 'settings',
-				// text : Karazy.i18n.translate('settingsButton'),
 				iconCls : 'settings',
 				iconMask : true,
-//				ui : 'action',
-//				width : '90px',
-//				height : '70px'
 			} ]
 		}
 

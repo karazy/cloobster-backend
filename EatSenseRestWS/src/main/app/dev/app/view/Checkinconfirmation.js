@@ -14,7 +14,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			title : Karazy.i18n.translate('checkInTitle'),
 			items : [ {
 				xtype : 'button',
-				id : 'cancelCheckInBt',
+				action: 'cancel-checkin',
 				text : Karazy.i18n.translate('cancel'),
 				ui : 'back'
 			}, ]
@@ -31,12 +31,12 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			items : [ {
 				xtype : 'label',
 				styleHtmlContent : true,
-				id : 'checkInDlg1Label1',
+				itemId : 'checkInDlg1Label1',
 				html : Karazy.i18n.translate('checkInStep1Label1')
 			}, {
 				xtype : 'textfield',
-				id : 'nicknameTf',
-				label : 'Nickname',
+				itemId : 'nicknameTf',
+				label : Karazy.i18n.translate('nickname'),
 				width : 300,
 				labelWidth : 100,
 				labelAlign : 'top',
@@ -48,21 +48,21 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 				},
 				items : [ {
 					xtype : 'button',
-					id : 'regenerateNicknameBt',
+					action: 'regenerate-nickname',
 					iconCls : 'refresh',
 					iconMask : true,
 					style : 'margin-right:10px;',
 					ui : 'action'
 				}, {
 					xtype : 'button',
-					id : 'confirmCheckInBt',
+					action: 'confirm-checkin',
 					text : Karazy.i18n.translate('checkInStep1Button'),
 					ui : 'action'
 				} ]
 			},
 			{
 				xtype : 'togglefield',
-				name : 'nicknameToggle',
+				action : 'toggle-nickname',
 				labelAlign: 'top',
 				value : 0,
 				label : Karazy.i18n.translate('saveNicknameToggle'),

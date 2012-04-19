@@ -44,8 +44,8 @@ Ext.define('EatSense.controller.Request',{
 		//check if customer requests for this spot exist and display them
 		requestStore.load({
 			params: {
-				pathId: restaurantId,
-				spotId: spotCtr.getActiveSpot().get('id')
+				'pathId': restaurantId,
+				'spotId': spotCtr.getActiveSpot().get('id')
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 

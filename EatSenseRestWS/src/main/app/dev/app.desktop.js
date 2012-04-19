@@ -1,5 +1,4 @@
 Karazy.i18n.setLang('DE');
-var profile = Ext.os.deviceType.toLowerCase();
 
 //global error handler
 // window.onerror = function(message, url, lineNumber) {  
@@ -150,7 +149,7 @@ Ext.application({
                     try {
                          //TODO Bug in error message handling in some browsers
                         nestedError = Ext.JSON.decode(error.statusText);
-                        errMsg = Karazy.i18n.translate(error.errorKey,error.substitutions);                        
+                        errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
                     } catch (e) {
                         errMsg = Karazy.i18n.translate('errorMsg');
                     }
