@@ -121,17 +121,10 @@ public class BusinessController {
 		requestData.setId(request.getId());
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-		Request oldRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").get();
 		
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(checkIn.getSpot().getId());
-		
-		// Save the status of the next request in line, if there is one.
-		if( oldRequest != null) {
-			spotData.setStatus(oldRequest.getStatus());
-		}
-		else
-			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+		spotData.setStatus(request.getStatus());
 				
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
