@@ -26,9 +26,16 @@ Karazy.channel = (function() {
 	var timedOut;
 	//token used for this channel
 	var channelToken;
+	//timeout used when attempting to reconnect the channel
+	var channelReconnectTimeout = 10000;
+	//the status for the connection
+	var connectionStatus = 'DISCONNECTED';
 
 	function onOpened() {
 		console.log('channel opened');
+		connectionLost = false;	
+		timedOut = false;
+		connectionStatus = 'ONLINE';
 	};
 
 	function onMessage(data) {
@@ -40,7 +47,7 @@ Karazy.channel = (function() {
 		console.log('channel error ' + (error && error.description) ? error.description : "");
 		if(error && error.code == '401') {
 			timedOut = true;
-		} else if (error && (error.code == '-1' || error.code == '0')) {
+		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
 			socket.close();
 		}
@@ -51,17 +58,51 @@ Karazy.channel = (function() {
 			console.log('timeout: requesting new token');
 			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
 			timedOut = false;			
-		} else if(connectionLost) {
+		} else if(connectionLost && connectionStatus != 'RECONNECT') {
 			console.log('connection lost: reopen channel');
-			setupChannel(channelToken);
-			connectionLost = false;			
+			connectionStatus = 'RECONNECT';
+			repeatedConnectionTry();
+			// setupChannel(channelToken);
+			// connectionLost = false;			
 		}
 	};
+	/**
+	*	Repeatedly tries to reopen a channel after it has been close.
+	*
+	*/
+	function repeatedConnectionTry() {
+		if(!connectionLost) {
+			return;
+		}
 
-	function setupChannel(token) {
+		console.log('Trying to reconnect channel.');
+
+		var tries = 1;
+		var reconnectInterval =	window.setInterval(
+				function() {
+					console.log('Reconnect %s iteration.', tries);
+					setupChannel(channelToken);
+					tries += 1;
+					if(!connectionLost || tries > 100) {
+						clearInterval(reconnectInterval);
+						connectionStatus = 'ONLINE';
+					}
+				}
+			, channelReconnectTimeout);	
+	};
+
+
+	/**
+	* Creates the channel and set the handler.
+	* @param token
+	*	Token for channel generation
+	*/
+	function setupChannel(token) {			
 			if(!token) {
 				return;
 			}
+
+			console.log('setup channel for token %s', token);
 
 			channelToken = token;
 			channel = new goog.appengine.Channel(token);
