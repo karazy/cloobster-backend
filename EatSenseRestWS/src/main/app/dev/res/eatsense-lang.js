@@ -10,6 +10,8 @@ var translation = {
 		"errorTitle" : "Fehler",
 		"close" : "Schliessen",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
+		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
+		"errorPermission" : "Deine Sitzung ist ungültig.",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",

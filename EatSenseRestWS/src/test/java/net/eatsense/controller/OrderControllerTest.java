@@ -1,9 +1,6 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
@@ -18,6 +15,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -179,18 +177,72 @@ public class OrderControllerTest {
 			placedOrderDto.setStatus(OrderStatus.CART);
 			result = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(RuntimeException.class));
+			assertThat(e, instanceOf(OrderFailureException.class));
 		}
 	}
 	
 	@Test
-	public void testDeleteOrder() {
-		assertThat(checkInData.getUserId(), notNullValue());
+	public void testProductOptions() {
+		//#2 Place an order with choices
+		Product burger = pr.getByProperty("name", "Classic Burger");
+		ProductDTO burgerDto = transform.productToDto(burger);
 		
+		ProductOption selected = burgerDto.getChoices().iterator().next().getOptions().iterator().next();
+		selected.setSelected(false);
+		
+		
+		OrderDTO orderDto = new OrderDTO();
+		orderDto.setStatus(OrderStatus.CART);
+		orderDto .setId(null);
+		orderDto.setAmount(2);
+		orderDto.setProduct(burgerDto);
+		orderDto.setComment("I like my burger " + selected.getName());
+		
+		Long orderId = null;
+		try {
+			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		assertThat(orderId, nullValue());
+		selected = orderDto.getProduct().getChoices().iterator().next().getOptions().iterator().next();
+		selected.setSelected(true);
+		// Place an order with correct choices
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		// Test validation of dependent choice
+		// Select the menu item next
+		boolean menuSelected = false;
+		for(ChoiceDTO choice : orderDto.getProduct().getChoices()) {
+			if(choice.getText().equals("Menü")) {
+				menuSelected = true;
+				choice.getOptions().iterator().next().setSelected(true);
+			}
+		}
+		assertThat(menuSelected, is(true));
 				
-		// Should be checked in
-		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
+		orderDto.setId(null);
+		orderId = null;
+		try {
+			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		assertThat(orderId, nullValue());
 		
+		menuSelected = false;
+		for(ChoiceDTO choice : orderDto.getProduct().getChoices()) {
+			if(choice.getText().equals("Menü Beilage")) {
+				menuSelected = true;
+				choice.getOptions().iterator().next().setSelected(true);
+			}
+		}
+		assertThat(menuSelected, is(true));
+	}
+	
+	@Test
+	public void testDeleteOrder() {
 		// Get a product from the store.
 		Product frites = pr.getByProperty("name", "Pommes Frites");
 		OrderDTO orderDto = new OrderDTO();

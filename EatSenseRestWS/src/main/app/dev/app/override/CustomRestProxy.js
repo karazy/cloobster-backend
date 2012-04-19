@@ -1,9 +1,11 @@
 Ext.define('EatSense.override.CustomRestProxy', {
 	override: 'Ext.data.proxy.Rest',
-	   buildUrl: function(request) {		
-	        var  me = this, _serviceUrl = globalConf.serviceUrl, 
+	  buildUrl: function(request) {		
+	        var  me = this, 
+	        	_serviceUrl = Karazy.config.serviceUrl, 
 	        	url = me.getUrl(request),
-	        	params = request.getParams() || {};
+	        	params = request.getParams() || {},
+	        	defaultHeaders = Ext.Ajax.getDefaultHeaders() || {};
 
 	        if(params.pathId) {
 	        	if(url.match(/(.*){pathId}(.*)/)) {
@@ -11,16 +13,33 @@ Ext.define('EatSense.override.CustomRestProxy', {
 	        		url = url.replace(/(.*){pathId}(.*)/, replacer);
 	        		delete params.pathId;
 	        	}	        	
+	        } else if(defaultHeaders.pathId) {
+	        	if(url.match(/(.*){pathId}(.*)/)) {
+	        		var replacer = '$1'+defaultHeaders.pathId+'$2';
+	        		url = url.replace(/(.*){pathId}(.*)/, replacer);
+	        	}	
+	        }
+
+	        if(params.checkInId) {
+	        	if(url.match(/(.*){checkInId}(.*)/)) {
+	        		var replacer = '$1'+params.checkInId+'$2';
+	        		url = url.replace(/(.*){checkInId}(.*)/, replacer);
+	        	}	        	
+	        } else if(defaultHeaders.checkInId) {
+	        	if(url.match(/(.*){checkInId}(.*)/)) {
+	        		var replacer = '$1'+defaultHeaders.checkInId+'$2';
+	        		url = url.replace(/(.*){checkInId}(.*)/, replacer);
+	        	}	
 	        }
 	        	
 	        request.setUrl(_serviceUrl + url);
 
 	        return me.callParent([request]);
 	    },
-	    
+
 	    doRequest: function(operation, callback, scope) {
-	    	  var writer  = this.getWriter(),
-	            request = this.buildRequest(operation);
+	    	var writer  = this.getWriter(),
+	           	request = this.buildRequest(operation);
 
 	        request.setConfig({
 	            headers        : this.getHeaders(),

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -374,37 +375,65 @@ public class OrderController {
 		List<OrderChoice> choices = null;
 		if(orderData.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
+			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
 			
+			HashMap<Long, ChoiceDTO> activeChoiceMap = new HashMap<Long, ChoiceDTO>();
 			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
-				OrderChoice choice = new OrderChoice();
 				int selected = 0;
-				Choice originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
+				//TODO check for parent in the originalchoice
+				if(choiceDto.getParent() == null) {
+					OrderChoice choice = new OrderChoice();
+					
+					Choice originalChoice;
+					try {
+						originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
+					} catch (com.googlecode.objectify.NotFoundException e) {
+						throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
+					}
+					if(choiceDto.getOptions() != null ) {
+						selected = checkOptions(choiceDto, originalChoice);
+						
+						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
+					}
+					
+					choice.setChoice(originalChoice);
+										
+					choices.add(choice);
+				}
+				else {
+					selected = countSelected(choiceDto);
+					childChoiceDtos.add(choiceDto);
+				}
 				
-				if(originalChoice == null) {
-					throw new IllegalArgumentException("Order cannot be placed, unknown choice id="+choiceDto.getId());
+				if(!activeChoiceMap.containsKey(choiceDto.getId())) {
+					if(selected > 0)
+						activeChoiceMap.put(choiceDto.getId(), choiceDto);
 				}
-				if(choiceDto.getOptions() != null ) {
-					
-					for (ProductOption productOption : choiceDto.getOptions()) {
-						if(productOption.getSelected() != null && productOption.getSelected())
-							selected++;
-					}
-					// Validate choice selection
-					if(selected < originalChoice.getMinOccurence() ) {
-						throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
-					}
-					
-					if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
-						throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
-					}
-
-					originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
+			}
+			
+			for (ChoiceDTO choiceDto : childChoiceDtos) {
+				Choice originalChoice;
+				try {
+					originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
+				} catch (com.googlecode.objectify.NotFoundException e) {
+					throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
 				}
+				// Check that the parent choice has been selected.
+				if(activeChoiceMap.containsKey(choiceDto.getParent())) {
+					if(choiceDto.getOptions() != null ) {
+						checkOptions(choiceDto, originalChoice);
+						
+						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
+					}
+				}
+				OrderChoice choice = new OrderChoice();
+				
+				
+				
 				
 				choice.setChoice(originalChoice);
-				
-					
-				choices.add(choice);				
+									
+				choices.add(choice);
 			}
 		}
 		
@@ -416,6 +445,29 @@ public class OrderController {
 		}
 		
 		return orderId;
+	}
+
+	private int checkOptions(ChoiceDTO choiceDto, Choice originalChoice) throws IllegalArgumentException {
+		int selected = countSelected(choiceDto);
+		// Validate choice selection
+		if(selected < originalChoice.getMinOccurence() ) {
+			throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
+		}
+		
+		if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
+			throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
+		}
+		
+		return selected;
+	}
+
+	private int countSelected(ChoiceDTO choiceDto) {
+		int selected = 0;
+		for (ProductOption productOption : choiceDto.getOptions()) {
+			if(productOption.getSelected() != null && productOption.getSelected())
+				selected++;
+		}
+		return selected;
 	}
 
 	

@@ -17,7 +17,7 @@ Ext.define('EatSense.view.RequestsTab', {
 			{
 			xtype : 'titlebar',
 			docked : 'top',
-			title : i18nPlugin.translate('requestsTitle'),
+			title : Karazy.i18n.translate('requestsTitle'),
 			},
 			{
 				xtype: 'button',

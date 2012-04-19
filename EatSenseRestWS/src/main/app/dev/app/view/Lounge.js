@@ -15,7 +15,7 @@ Ext.define('EatSense.view.Lounge', {
 		},
 		activeItem : 0,
 		items : [ {
-			title : i18nPlugin.translate('menuTitle'),
+			title : Karazy.i18n.translate('menuTitle'),
 			itemId : 'menutab',
 			name: 'menu',			
 			iconCls : 'compose',
@@ -26,7 +26,7 @@ Ext.define('EatSense.view.Lounge', {
 				layout : 'fit'
 			} ]
 			}, {
-				title : i18nPlugin.translate('cartTabBt'),
+				title : Karazy.i18n.translate('cartTabBt'),
 				itemId : 'carttab',
 				iconCls : 'cart',
 				layout : 'fit',
@@ -36,7 +36,7 @@ Ext.define('EatSense.view.Lounge', {
 					layout : 'fit'
 				} ]
 			}, {
-				title : i18nPlugin.translate('myOrdersTabBt'),
+				title : Karazy.i18n.translate('myOrdersTabBt'),
 				iconCls : 'home',
 				itemId : 'myorderstab',
 				layout : 'fit',

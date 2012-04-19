@@ -148,6 +148,8 @@ public class Transformer {
 		dto.setMaxOccurence(choice.getMaxOccurence());
 		dto.setMinOccurence(choice.getMinOccurence());
 		dto.setOverridePrice(choice.getOverridePrice());
+		if(choice.getParentChoice() != null)
+			dto.setParent(choice.getParentChoice().getId());
 		
 		dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
 		dto.setText(choice.getText());
@@ -183,12 +185,7 @@ public class Transformer {
 			choiceDtos = new ArrayList<ChoiceDTO>();
 			
 			for (Choice choice : choices)  {
-				ChoiceDTO dto = new ChoiceDTO();
-				
-				dto = choiceToDto(choice);
-
-				choiceDtos.add( dto );
-				
+				choiceDtos.add( choiceToDto(choice) );
 			}
 		}
 		

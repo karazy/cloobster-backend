@@ -1,6 +1,4 @@
-var i18nPlugin = Karazy.i18n;
-i18nPlugin.setLang('DE');
-var globalConf = Karazy.config;
+Karazy.i18n.setLang('DE');
 var profile = Ext.os.deviceType.toLowerCase();
 
 Ext.Loader.setConfig({

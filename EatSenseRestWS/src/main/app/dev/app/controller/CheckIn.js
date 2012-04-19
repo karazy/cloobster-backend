@@ -83,16 +83,23 @@ Ext.define('EatSense.controller.CheckIn', {
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
-    	 
+
     	 //private functions
+
+        /*
+        *   Resets default Ajax headers.
+        */
+        this.resetDefaultAjaxHeaders = function() {
+            Ext.Ajax.setDefaultHeaders({});
+        };
     	 
-    	 //called by checkInIntent. 
+    	//called by checkInIntent. 
     	this.doCheckInIntent = function(barcode, button, deviceId) {    		 
     	    	//validate barcode field
     	    	if(barcode.length == 0) {
     	    		this.getDashboard().showLoadScreen(false);
     	    		button.enable();
-    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
+    	    		Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorBarcode'), Ext.emptyFn);
     	    	} else {
     	        	var me = this;
     	        	EatSense.model.Spot.load(barcode, {
@@ -100,12 +107,8 @@ Ext.define('EatSense.controller.CheckIn', {
     	        			 me.models.activeSpot = record;
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
-     	        	    failure: function(record, operation) {     	        	    	
-     	        	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 404) {
-     	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-     	        	    	} else {
-     	        	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-     	        	    	}     	        	    	
+     	        	    failure: function(record, operation) {
+                            me.getApplication().handleServerError(operation.error); 
      	        	    },
      	        	    callback: function() {
      	        	    	me.getDashboard().showLoadScreen(false);
@@ -214,16 +217,15 @@ Ext.define('EatSense.controller.CheckIn', {
    checkIn: function(){
 	   var     me = this,
 	           nickname = Ext.String.trim(this.getNickname().getValue()),
-	           error,
 	           nicknameToggle = this.getNicknameTogglefield(),
                messageCtr = this.getApplication().getController('Message');
 	    
 	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
-		   Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNickname',3,25), Ext.emptyFn);
+		   Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {		   
-		   this.models.activeCheckIn.set('nickname',nickname);		  	   
-			this.models.activeCheckIn.save(
+		      this.models.activeCheckIn.set('nickname',nickname);		  	   
+		      this.models.activeCheckIn.save(
 					   {
 					   	    success: function(response) {
 					   	    console.log("CheckIn Controller -> checkIn success");
@@ -231,8 +233,14 @@ Ext.define('EatSense.controller.CheckIn', {
 //					   	     me.showCheckinWithOthers();					   	    
 					   	     me.showMenu();
 					   	     me.getAppState().set('checkInId', response.get('userId'));
+
+                            //Set default headers so that always checkInId is send
+                            Ext.Ajax.setDefaultHeaders({
+                                'checkInId': response.get('userId'),
+                                'pathId' : me.models.activeCheckIn.get('businessId')
+                            });
 					   	     
-					   	     //save nickname in settings
+					   	    //save nickname in settings
 							   if(nicknameToggle.getValue() == 1) {
 								   me.getAppState().set('nickname', nickname);
 								   nicknameToggle.reset();
@@ -244,20 +252,8 @@ Ext.define('EatSense.controller.CheckIn', {
                                     console.log('could not open a channel ' + e);
                                 }
 					   	    },
-					   	    failure: function(response, operation) {
-					   	    	console.log('checkIn failure');					   	    	
-				    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
-				    	    		try {
-				    	    			//TODO Bug in error message handling in some browsers
-										error = Ext.JSON.decode(operation.getError().statusText);
-										Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(error.errorKey,error.substitutions), Ext.emptyFn);
-									} catch (e) {
-										Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorNicknameExists'), Ext.emptyFn);
-									}
-				    	    		
-				    	    	} else {
-				    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-				    	    	}
+					   	    failure: function(response, operation) {			   	    	
+                                me.getApplication().handleServerError(operation.error, {403 : true}); 
 					   	    }
 					   }	   
 			   );
@@ -268,7 +264,6 @@ Ext.define('EatSense.controller.CheckIn', {
     * Step 2 alt: cancel process
     */
    showDashboard: function(options) {
-	   console.log("CheckIn Controller -> showDashboard");
 	   var dashboardView = this.getDashboard(),
 	   main = this.getMain(),
 	   nicknameToggle = this.getNicknameTogglefield();
@@ -290,7 +285,7 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    showCheckinWithOthers: function(options) {
-	   console.log("CheckIn Controller -> showCheckinWithOthers");
+	   //TODO out of order
 	   var checkinwithothersDlg = this.getCheckinwithothers(), 
 	   main = this.getMain(),
 	   spotId = this.models.activeCheckIn.get('spotId'),
@@ -300,7 +295,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   			   model: 'EatSense.model.User',
 	   			   proxy: {
 	   				   type: 'rest',
-	   				   url : globalConf.serviceUrl+'/checkins/?spotId='+spotId+'&checkInId='+checkInId,
+	   				   url : Karazy.config.serviceUrl+'/checkins/?spotId='+spotId+'&checkInId='+checkInId,
 	   				   reader: {
 	   					   type: 'json'
 	   			   		}
@@ -327,7 +322,7 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param record
     */
    linkToUser: function(dataview, record) {
-	   console.log("CheckIn Controller -> linkToUser");
+	   //TODO out of order
 	   var checkIn = this.models.activeCheckIn,
 	   me = this;	   
 	   checkIn.set('linkedCheckInId', record.get('userId'));
@@ -340,9 +335,9 @@ Ext.define('EatSense.controller.CheckIn', {
 		   failure: function(record, operation) {
    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
    	    		var error = Ext.JSON.decode(response.statusText);
-   	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate(error.errorKey,error.substitutions), Ext.emptyFn);
+   	    		Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate(error.errorKey,error.substitutions), Ext.emptyFn);
    	    	} else {
-   	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
+   	    		Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('errorMsg'), Ext.emptyFn);
    	    	}
 		   }
 	   });
@@ -354,15 +349,12 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param record
     */
 	showMenu : function() {
-		console.log("CheckIn Controller -> showMenu");
-		
-		// this.createStores(this.models.activeCheckIn.get('businessId'));
-		
-		 var menu = this.getMenuview(), 
-		 lounge = this.getLoungeview(),
-		 main = this.getMain(), 
-		 businessId = Ext.String.trim(this.models.activeCheckIn.get('businessId')), 
-		 me = this; 
+    	var    menu = this.getMenuview(), 
+               menuCtr = this.getApplication().getController('Menu'),
+    		   lounge = this.getLoungeview(),
+    		   main = this.getMain(), 
+    		   businessId = Ext.String.trim(this.models.activeCheckIn.get('businessId')), 
+    		   me = this; 
 		 
 		 if(businessId.toString().length != 0) {
 			 this.getMenulist().getStore().load({
@@ -373,17 +365,18 @@ Ext.define('EatSense.controller.CheckIn', {
 				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-				    	 me.getApplication().getController('Menu').models.menudata = records;				    					    	 
-			    	 }
+				    	 menuCtr.models.menudata = records;		
+                        //always show menuoverview on first access
+                         //TODO schoener loesen
+                         menu.getComponent('menuCardPanel').setActiveItem(0);
+                         menu.hideBackButton();
+                         main.switchAnim('left');
+                         main.setActiveItem(lounge);		    					    	 
+			    	 } else {
+                        me.getApplication().handleServerError(operation.error, {403:true}); 
+                     }
 			     }
 			 });
-			 
-			//always show menuoverview on first access
-			 //TODO schoener loesen
-			 menu.getComponent('menuCardPanel').setActiveItem(0);
-			 menu.hideBackButton();
-	    	 main.switchAnim('left');
-	    	 main.setActiveItem(lounge);
 		 }
 	},
 	/**
@@ -391,9 +384,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * 
 	 */
 	showSettings: function() {
-		console.log('CheckIn Controller -> showSettings');
-		var main = this.getMain(),
-		settings = this.getSettingsview();
+		var   main = this.getMain(),
+		      settings = this.getSettingsview();
 		
 		this.getNicknameSettingsField().setValue(this.getAppState().get('nickname'));
 		
@@ -404,7 +396,6 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * Saves the application state in local store.
 	 */
 	saveNickname: function(component, newData, oldValue, eOpts) {
-		console.log('CheckIn Controller -> saveNickname '+newData);
 		this.getAppState().set('nickname', newData);
 	},
 	/**
@@ -438,11 +429,17 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * 		Restored checkin
 	 */
 	restoreState: function(checkIn) {
-		var   main = this.getMain(),
+		var   me = this,
+              main = this.getMain(),
 		      orderCtr = this.getApplication().getController('Order'),
               messageCtr = this.getApplication().getController('Message');
 
-		this.models.activeCheckIn = checkIn,              
+		this.models.activeCheckIn = checkIn;
+        //Set default headers so that always checkInId is send
+        Ext.Ajax.setDefaultHeaders({
+            'checkInId': checkIn.get('userId'),
+            'pathId' : checkIn.get('businessId')
+        });              
 
 		//load active spot
 		EatSense.model.Spot.load(checkIn.get('spotId'), {
@@ -459,8 +456,6 @@ Ext.define('EatSense.controller.CheckIn', {
    				scope: this,
    				params: {
    					'status': Karazy.constants.Order.CART,
-   					'checkInId': this.models.activeCheckIn.getId(),
-   					pathId: this.models.activeCheckIn.get('businessId')
    				},
    				callback: function(records, operation, success) {
    					if(success == true) {
@@ -478,21 +473,10 @@ Ext.define('EatSense.controller.CheckIn', {
 
     	    },
     	    failure: function(record, operation) {
-    	    	//TODO show error message that  restoring data failed
-    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 404) {
-    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('checkInErrorBarcode'), Ext.emptyFn);
-    	    	} else {
-    	    		Ext.Msg.alert(i18nPlugin.translate('errorTitle'), i18nPlugin.translate('errorMsg'), Ext.emptyFn);
-    	    	}     	        	    	
-    	    },
-    	    callback: function() {
-    	    	
+    	    	me.getApplication().handleServerError(operation.error);        	    	
     	    }
-		});		
-		
-		
+		});						
 	},	
-
 	/**
 	 * This method handle status changes. It checks if valid transsions are made.
 	 * E. g. You cannot directly switch from PAYMENT_REQUEST to INTENT.
@@ -514,7 +498,7 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getRequestsTab().disable();
 			
 			this.models.activeCheckIn.set('status', status);
-		} else if (status == Karazy.constants.COMPLETE || status == Karazy.constants.CANCEL_ALL) {
+		} else if (status == Karazy.constants.COMPLETE || status == Karazy.constants.CANCEL_ALL || status == Karazy.constants.FORCE_LOGOUT) {
 			this.getMenuTab().enable();
 			this.getCartTab().enable();
             this.getSettingsTab().enable();
@@ -530,11 +514,12 @@ Ext.define('EatSense.controller.CheckIn', {
 
 			this.showDashboard();
 
+            this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
 		}
 
         if(status == Karazy.constants.CANCEL_ALL) {
-            Ext.Msg.alert(i18nPlugin.translate('hint'), i18nPlugin.translate('checkInCanceled'), Ext.emptyFn);
+            Ext.Msg.alert(Karazy.i18n.translate('hint'), Karazy.i18n.translate('checkInCanceled'), Ext.emptyFn);
         }
 	},
     /**
