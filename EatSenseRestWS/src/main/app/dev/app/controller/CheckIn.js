@@ -13,7 +13,6 @@ Ext.define('EatSense.controller.CheckIn', {
             main : 'mainview',
             checkinconfirmation : 'checkinconfirmation',
         	nickname : 'checkinconfirmation #nicknameTf',
-        	menuoverview: 'menuoverview',
         	checkinwithothers: 'checkinwithothers',
         	dashboard: 'dashboard',
         	settingsBt: 'dashboard button[action=settings]',
@@ -39,10 +38,6 @@ Ext.define('EatSense.controller.CheckIn', {
         	cartTab: 'carttab',
             settingsTab: 'settingstab',
             requestsTab: 'requeststab',
-            //menu
-            menulist: 'lounge menuoverview list',
-            menuview: 'menutab'
-
     	},
     	control: {
     		checkInBtn: {
@@ -342,40 +337,12 @@ Ext.define('EatSense.controller.CheckIn', {
 	   });
    },
    /**
-    * CheckIn Process
-    * Step 5: Show menu to user 
-    * @param dataview
-    * @param record
+    *
+    * Show menu to user 
     */
-	showMenu : function() {
-    	var    menu = this.getMenuview(), 
-               menuCtr = this.getApplication().getController('Menu'),
-    		   lounge = this.getLoungeview(),
-    		   main = this.getMain(), 
-    		   businessId = Ext.String.trim(this.getActiveCheckIn().get('businessId')), 
-    		   me = this; 
-		 
-		 if(businessId.toString().length != 0) {
-			 this.getMenulist().getStore().load({
-				 scope   : this,
-				 params: {
-					 includeProducts : true,
-					 pathId: businessId
-				 },
-			     callback: function(records, operation, success) {
-			    	 if(success) {
-                        //always show menuoverview on first access
-                         //TODO schoener loesen
-                         menu.getComponent('menuCardPanel').setActiveItem(0);
-                         menu.hideBackButton();
-                         main.switchAnim('left');
-                         main.setActiveItem(lounge);		    					    	 
-			    	 } else {
-                        me.getApplication().handleServerError(operation.error, {403:true}); 
-                     }
-			     }
-			 });
-		 }
+	showMenu: function() {
+    	var menuCtr = this.getApplication().getController('Menu');
+        menuCtr.showMenu();    		   
 	},
 	/**
 	 * Show settings screen.

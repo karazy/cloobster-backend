@@ -25,7 +25,7 @@ Ext.define('EatSense.controller.Menu', {
         	closeProductDetailBt: 'productdetail button[action=close]',
         	menuview: 'menutab',
         	productcomment: 'productdetail #productComment',
-        	backBt: 'menu button[action=back]',
+        	backBt: 'menutab button[action=back]',
         	topToolbar: 'menutab #menuTopBar',
         	loungeview: 'lounge',
         	loungeTabBar: 'lounge tabbar',
@@ -45,7 +45,7 @@ Ext.define('EatSense.controller.Menu', {
              	tap: 'closeProductDetail'
              },
              backBt : {
-            	 tap: 'showMenu'
+            	 tap: 'backToMenu'
              },
              amountSpinner : {
             	 spin: 'amountChanged'
@@ -88,9 +88,43 @@ Ext.define('EatSense.controller.Menu', {
     	this.switchView(pov, record.get('title'), Karazy.i18n.translate('back'), 'left');
     },
     /**
+    *	Load menus and products and show menutab.
+    *
+    */
+    showMenu: function() {
+    	var me = this,
+    	    menu = this.getMenuview(), 
+    		lounge = this.getLoungeview(),
+    		main = this.getMain(),
+    		checkInCtr = this.getApplication().getController('CheckIn'),
+    		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId'));
+		 
+		if(businessId.toString().length != 0) {
+			this.getMenulist().getStore().load({
+				scope   : this,
+				params: {
+					'includeProducts' : true,
+					'pathId': businessId
+				},
+			    callback: function(records, operation, success) {
+			    	if(!success) { 
+                        me.getApplication().handleServerError(operation.error, {403:true}); 
+                    }
+			    }
+			 });
+
+            //always show menuoverview on first access
+            //TODO schoener loesen
+            menu.getComponent('menuCardPanel').setActiveItem(0);
+            menu.hideBackButton();
+            main.switchAnim('left');
+            main.setActiveItem(lounge);
+		}
+    },
+    /**
      * Shows the menu. At this point the store is already filled with data.
      */
-	showMenu : function() {
+	backToMenu: function() {
 		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
 	},
 	/**
