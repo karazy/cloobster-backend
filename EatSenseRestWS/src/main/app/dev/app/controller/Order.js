@@ -4,17 +4,16 @@
 	config: {
 		refs: {
 			main : 'mainview',
-			cartview : '#cart',
-			cartoverview: 'cartoverview',
-			cartoverviewTotal: 'cartoverview #carttotalpanel label',
-			myordersTotal : 'myorders #myorderstotalpanel label',
-			myordersComplete: 'myorders #myorderscompletepanel',
-			myordersCompleteButton: 'myorders button[action=complete]',
-			menutab: '#menutab',
-			orderlist : 'cartoverview #orderlist',
-			cancelAllOrdersBt : '#cartTopBar button[action="trash"]',
-			submitOrderBt : '#cartTopBar button[action="order"]',
-			topToolbar : '#cartTopBar',
+			cartview : 'carttab',
+			cartoverviewTotal: 'carttab #carttotalpanel label',
+			myordersTotal : 'myorderstab #myorderstotalpanel label',
+			myordersComplete: 'myorderstab #myorderscompletepanel',
+			myordersCompleteButton: 'myorderstab button[action=complete]',
+			menutab: 'menutab',
+			orderlist : 'carttab #orderlist',
+			cancelAllOrdersBt : 'carttab #cartTopBar button[action="trash"]',
+			submitOrderBt : 'carttab #cartTopBar button[action="order"]',
+			topToolbar : 'carttab #cartTopBar',
 			productdetail : {
                 selector: 'orderdetail',
                 xtype: 'orderdetail',
@@ -29,12 +28,11 @@
 			closeOrderDetailBt: 'orderdetail button[action=close]',
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
-			myorderlist: '#myorderlist',
-			myordersview: '#myorderstab #myorders',
-			myorderstab: '#myorderstab',
+			myorderlist: 'menutab list',
+			myordersview: 'myorderstab',
 			loungeTabBar: '#loungeTabBar',
-			paymentButton: '#myorderstab button[action="pay"]',
-			leaveButton: '#myorderstab button[action="leave"]',
+			paymentButton: 'myorderstab button[action="pay"]',
+			leaveButton: 'myorderstab button[action="leave"]',
 			confirmEditButton: 'orderdetail button[action="edit"]',
 			undoEditButton: 'orderdetail button[action="undo"]'
 		},
@@ -98,7 +96,8 @@
 	 */
 	refreshCart: function() {
 		console.log('Cart Controller -> showCart');
-		var cartview = this.getCartview(), orderlist = this.getOrderlist(),
+		var cartview = this.getCartview(), 
+			orderlist = this.getOrderlist(),
 			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
 			total = 0;
     	
@@ -117,6 +116,7 @@
 	 * Show menu.
 	 */
 	showMenu: function() {
+		//TODO not used
 		console.log('Cart Controller -> showMenu');
 		var lounge = this.getLoungeview(), menu = this.getMenutab();		
 		lounge.setActiveItem(menu);

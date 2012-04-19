@@ -35,13 +35,13 @@ Ext.define('EatSense.controller.CheckIn', {
         	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
             //loungeview and tabs
             loungeview : 'lounge',
-        	menuTab: '#menutab',
-        	cartTab: '#carttab',
+        	menuTab: 'menutab',
+        	cartTab: 'carttab',
             settingsTab: 'settingstab',
             requestsTab: 'requeststab',
             //menu
             menulist: 'lounge menuoverview list',
-            menuview: 'menu'
+            menuview: 'menutab'
 
     	},
     	control: {

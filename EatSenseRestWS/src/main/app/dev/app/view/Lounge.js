@@ -14,38 +14,18 @@ Ext.define('EatSense.view.Lounge', {
 			itemId : 'loungeTabBar',
 		},
 		activeItem : 0,
-		items : [ {
-			title : Karazy.i18n.translate('menuTitle'),
-			itemId : 'menutab',
-			name: 'menu',			
-			iconCls : 'compose',
-			layout : 'fit',
-			items : [ {
-				xtype : 'menu',
-				itemId : 'menu',
-				layout : 'fit'
-			} ]
-			}, {
-				title : Karazy.i18n.translate('cartTabBt'),
-				itemId : 'carttab',
-				iconCls : 'cart',
-				layout : 'fit',
-				items : [ {
-					xtype : 'cart',
-					itemId : 'cart',
-					layout : 'fit'
-				} ]
-			}, {
-				title : Karazy.i18n.translate('myOrdersTabBt'),
-				iconCls : 'home',
-				itemId : 'myorderstab',
-				layout : 'fit',
-				items : [ {
-					xtype : 'myorders',
-					itemId : 'myorders',
-					layout : 'fit'
-				},
-				]
+		items : [ 
+			{
+				xtype: 'menutab',
+				tabName: 'menu'	
+			},
+			{
+				xtype: 'carttab',
+				tabName: 'cart'
+			},
+			{
+				xtype: 'myorderstab',
+				tabName: 'myorders'
 			},
 			{
 				xtype: 'requeststab',

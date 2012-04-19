@@ -1,10 +1,14 @@
 Ext.define('EatSense.view.MyOrders', {
 	extend : 'Ext.Panel',
-	xtype: 'myorders',	
-	layout: {
-		type: 'fit'
-	},
+	xtype: 'myorderstab',	
 	config: {
+		layout: {
+			type: 'fit'
+		},
+		iconCls : 'home',
+		title: Karazy.i18n.translate('myOrdersTabBt'),
+		iconMask : true,
+		itemId : 'myorderstab',
 		items: [
 		{
 			docked : 'top',
@@ -31,7 +35,7 @@ Ext.define('EatSense.view.MyOrders', {
 		},
 		{
 			xtype: 'list',
-			id: 'myorderlist',
+			// id: 'myorderlist',
 			store: 'orderStore',
 			ui: 'round',
 			styleHtmlContent: true,

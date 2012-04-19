@@ -23,11 +23,10 @@ Ext.define('EatSense.controller.Menu', {
         	amountSpinner: 'productdetail spinnerfield',
         	createOrderBt :'productdetail button[action="cart"]',
         	closeProductDetailBt: 'productdetail button[action=close]',
-        	cartview : 'cartview',
-        	menuview: 'menu',
+        	menuview: 'menutab',
         	productcomment: 'productdetail #productComment',
         	backBt: 'menu button[action=back]',
-        	topToolbar: 'menu #menuTopBar',
+        	topToolbar: 'menutab #menuTopBar',
         	loungeview: 'lounge',
         	loungeTabBar: 'lounge tabbar',
 		},
@@ -54,7 +53,7 @@ Ext.define('EatSense.controller.Menu', {
              //TODO refactor general loungeview control into another controller?!
              loungeview : {
      			activeitemchange : function(container, value, oldValue, opts) {
-    				console.log('tab change');
+    				console.log('tab change for %s', value.getItemId());
     				if(value.getItemId() === 'carttab') {
     					status = this.getApplication().getController('Order').refreshCart();
     				} else if (value.getItemId() === 'myorderstab') {
@@ -265,16 +264,17 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	createOrder: function(button) {
 		//get active product and set choice values
-		var 	productForCart = this.getActiveProduct(),
-				order,
-				validationError = "",
-				cartButton = this.getLoungeTabBar().getAt(1),
-				productIsValid = true,
-				appState = this.getApplication().getController('CheckIn').getAppState(),
-				appStateStore = Ext.StoreManager.lookup('appStateStore'),
-				activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
-				detail = this.getProductdetail(),
-				message;
+		var me = this,	
+			productForCart = this.getActiveProduct(),
+			order,
+			validationError = "",
+			cartButton = this.getLoungeTabBar().getAt(1),
+			productIsValid = true,
+			appState = this.getApplication().getController('CheckIn').getAppState(),
+			appStateStore = Ext.StoreManager.lookup('appStateStore'),
+			activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			detail = this.getProductdetail(),
+			message;
 		
 		//validate choices 
 		productForCart.choices().each(function(choice) {
@@ -358,7 +358,7 @@ Ext.define('EatSense.controller.Menu', {
 	switchView: function(view, title, labelBackBt, direction) {
 		console.log('Menu Controller -> switchView');
 		var menu = this.getMenuview();
-    	this.getTopToolbar().setTitle(title);
+    		this.getTopToolbar().setTitle(title);
     	(labelBackBt == null || labelBackBt.length == 0) ? menu.hideBackButton() : menu.showBackButton(labelBackBt);
     	menu.switchMenuview(view,direction);
 	},

@@ -1,11 +1,17 @@
 Ext.define('EatSense.view.Cart', {
 	extend : 'Ext.Panel',
-	xtype : 'cart',
-	layout : {
-		type : 'vbox',
-		align : 'middle'
-	},
+	xtype : 'carttab',
+	requires: ['EatSense.view.CartOverviewItem'],
 	config : {
+		iconCls : 'cart',
+		title: Karazy.i18n.translate('cartTabBt'),
+		iconMask : true,
+		itemId : 'carttab',
+		// layout : {
+		// 	type : 'vbox',
+		// 	align : 'middle'
+		// },
+		layout: 'fit',
 		items : [ 
 		          {
 			docked : 'top',
@@ -29,19 +35,31 @@ Ext.define('EatSense.view.Cart', {
 			}]
 		}, 
 		{
-			xtype: 'panel',
-			itemId: 'cartCardPanel',
-			layout : {
-				type: 'card'
-			},
-			items: [ {
-				xtype: 'cartoverview',
-				itemId: 'cartoverview',
-				layout: 'fit'
-			}		        
-			]
-			
-		} ]
+				xtype: 'dataview',
+				itemId: 'orderlist',
+				useComponents: true,
+				cls: 'cartoverview',
+				defaultType: 'cartoverviewitem',
+				grouped: true			
+		}, 
+		{
+			type: 'panel',
+			docked: 'bottom',
+			itemId: 'carttotalpanel',
+			items: [{
+				xtype: 'label',		
+				cls: 'cartTotal',		
+				tpl: new Ext.XTemplate('<h1>Total {[this.formatPrice(values.price)]}</h1>',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+				)
+			}
+			]			
+		} 
+		]
 	},
 	/**
 	 * Show a loading screen
