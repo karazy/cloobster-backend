@@ -28,7 +28,7 @@
 			closeOrderDetailBt: 'orderdetail button[action=close]',
 			loungeview : 'lounge',
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
-			myorderlist: 'menutab list',
+			myorderlist: 'myorderstab list',
 			myordersview: 'myorderstab',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: 'myorderstab button[action="pay"]',
