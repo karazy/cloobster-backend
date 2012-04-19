@@ -180,17 +180,21 @@ public class BillController {
 			}
 		}
 		
-		String newSpotStatus = CheckInStatus.CHECKEDIN.toString();
+		String newSpotStatus = null;
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
 		// Save the status of the next request in line, if there is one.
 		if( !requests.isEmpty()) {
 			newSpotStatus = requests.get(0).getStatus();
 		}
-		
+		else {
+			if( checkInCount > 0)
+				newSpotStatus = CheckInStatus.CHECKEDIN.toString();	
+		}
 		// Add a message with updated spot status to the package.
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(checkIn.getSpot().getId());
+		spotData.setCheckInCount(checkInCount);
 		spotData.setStatus(newSpotStatus);
-		spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot()));
 		messages.add(new MessageDTO("spot","update",spotData));
 				
 		// Send messages to notify cockpits over their channel.
