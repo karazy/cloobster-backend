@@ -181,14 +181,15 @@ public class BillController {
 		}
 		
 		String newSpotStatus = null;
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
 		// Save the status of the next request in line, if there is one.
 		if( !requests.isEmpty()) {
 			newSpotStatus = requests.get(0).getStatus();
 		}
-		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
-		if( checkInCount > 0)
-			newSpotStatus = CheckInStatus.CHECKEDIN.toString();
-		
+		else {
+			if( checkInCount > 0)
+				newSpotStatus = CheckInStatus.CHECKEDIN.toString();	
+		}
 		// Add a message with updated spot status to the package.
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(checkIn.getSpot().getId());
