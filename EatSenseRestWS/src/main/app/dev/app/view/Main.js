@@ -7,7 +7,6 @@ Ext.define('EatSense.view.Main', {
 			'EatSense.view.CheckinWithOthers', 'EatSense.view.Cart', 'EatSense.view.Menu', 'EatSense.view.Lounge', 'EatSense.view.Settings' ],
 	xtype : 'mainview',
 	config : {
-		itemId : 'globalContainer',
 		layout : {
 			type : 'card',
 			animation : {
@@ -19,13 +18,15 @@ Ext.define('EatSense.view.Main', {
 		items : [ 
 		{
 			xtype : 'dashboard'
-		}, {
-			layout : 'fit',
+		}, 
+		{
 			xtype : 'checkinconfirmation'
-		}, {
-			layout : 'fit',
-			xtype : 'checkinwithothers'
-		}, {
+		}, 
+		// {
+		// 	layout : 'fit',
+		// 	xtype : 'checkinwithothers'
+		// }, 
+		{
 			xtype : 'lounge'
 		}, {
 			xtype : 'settings'

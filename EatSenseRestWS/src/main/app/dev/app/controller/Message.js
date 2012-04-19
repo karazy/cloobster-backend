@@ -8,7 +8,7 @@ Ext.define('EatSense.controller.Message', {
 	extend: 'Ext.app.Controller',
 	config: {
 		//id used for channel creation		
-		channelId: ''
+		channelId: null
 	},
 	/**
 	*	Called after receiving a channel message.
@@ -65,9 +65,14 @@ Ext.define('EatSense.controller.Message', {
 	*	@param callback
 	*		callback function to invoke on success
 	*/
-	requestNewToken: function(callback, id) {		
+	requestNewToken: function(callback) {		
+		if(!this.getChannelId()) {
+			console.log('no channel id is set');
+			return;
+		};
+
 		Ext.Ajax.request({
-		    url: Karazy.config.serviceUrl+'/c/checkins/'+id+'/tokens',		    
+		    url: Karazy.config.serviceUrl+'/c/checkins/'+this.getChannelId()+'/tokens',		    
 		    method: 'POST',
 		    jsonData: true,
 		    success: function(response){

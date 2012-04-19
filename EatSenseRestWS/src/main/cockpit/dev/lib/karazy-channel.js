@@ -76,7 +76,7 @@ Karazy.channel = (function() {
 	*
 	*/
 	function repeatedConnectionTry() {
-		if(!connectionLost || !timedOut) {
+		if(!connectionLost && !timedOut) {
 			return;
 		}
 
