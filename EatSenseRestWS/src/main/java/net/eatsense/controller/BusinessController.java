@@ -10,6 +10,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -36,12 +37,14 @@ public class BusinessController {
 	private SpotRepository spotRepo;
 	private RequestRepository requestRepo;
 	private ChannelController channelCtrl;
+	private BusinessRepository businessRepo;
 	
 	@Inject
-	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, ChannelController channelCtrl) {
+	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, ChannelController channelCtrl, BusinessRepository br) {
 		this.requestRepo = rr;
 		this.spotRepo = sr;
 		this.checkInRepo = cr;
+		this.businessRepo = br;
 		this.channelCtrl = channelCtrl;
 	}
 	
@@ -129,8 +132,8 @@ public class BusinessController {
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
 		messages.add(new MessageDTO("request", "new", requestData));
-		
-		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
+		Business business = businessRepo.getByKey(checkIn.getBusiness());
+		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 										
 		return requestData;
 	}
@@ -211,6 +214,6 @@ public class BusinessController {
 		
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
-		channelCtrl.sendMessagesToAllCockpitClients(request.getBusiness().getId(), messages);
+		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 	}
 }

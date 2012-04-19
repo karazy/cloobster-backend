@@ -146,7 +146,12 @@ public class CheckInController {
 		if(spot == null )
     		throw new IllegalArgumentException("Unable to create checkin, spot barcode unknown");
     	
-    	Business business = businessRepo.getByKey(spot.getBusiness());
+    	Business business;
+		try {
+			business = businessRepo.getByKey(spot.getBusiness());
+		} catch (com.googlecode.objectify.NotFoundException e1) {
+			throw new IllegalArgumentException("Unable to create checkin, business id unknown", e1);
+		}
     	
     	CheckIn checkIn = new CheckIn();
     	
@@ -223,7 +228,7 @@ public class CheckInController {
 		messages.add(new MessageDTO("checkin","new", transform.toStatusDto(checkIn)));
 		
 		// send the messages
-		channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
+		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 
 		return checkInDto;
 	}
@@ -362,7 +367,8 @@ public class CheckInController {
 			List<MessageDTO> messages = new ArrayList<MessageDTO>();
 			messages.add(new MessageDTO("spot", "update", spotData));
 			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
-			channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
+			
+			channelCtrl.sendMessagesToAllCockpitClients(businessRepo.getByKey(checkIn.getBusiness()), messages);
 		}			
 	}
 
@@ -401,10 +407,11 @@ public class CheckInController {
 
 	/**
 	 * Delete the checkin and all related entities.
+	 * @param business 
 	 * 
 	 * @param checkInId
 	 */
-	public void deleteCheckIn(Long checkInId) {
+	public void deleteCheckIn(Business business, Long checkInId) {
 		if(checkInId == null)
 			throw new IllegalArgumentException("Unable to delete checkIn, checkInId is null");
 		
@@ -414,6 +421,10 @@ public class CheckInController {
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new IllegalArgumentException("Unable to delete checkIn, unknown checkInId",e);
 		}
+		if(checkIn.getBusiness().getId() != business.getId()) {
+			throw new IllegalArgumentException("Unable to delete checkIn, checkIn does not belong to business");
+		}
+		
 		Objectify ofy = checkInRepo.ofy();
 					
 		// Delete requests
@@ -454,22 +465,26 @@ public class CheckInController {
 		if(checkIn.getChannelId() != null)
 			channelCtrl.sendMessage(checkIn.getChannelId(), "checkin", "delete", transform.checkInToDto(checkIn));
 
-		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
+		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 	}
 
 	/**
 	 * Update a checkin to move to a new spot.
+	 * @param business 
 	 * 
 	 * @param checkInId
 	 * @param checkInData
 	 * @return updated checkin data
 	 */
-	public CheckInStatusDTO updateCheckInAsBusiness(Long checkInId, CheckInStatusDTO checkInData) {
+	public CheckInStatusDTO updateCheckInAsBusiness(Business business, Long checkInId, CheckInStatusDTO checkInData) {
 		CheckIn checkIn;
 		try {
 			checkIn = checkInRepo.getById(checkInId);
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new IllegalArgumentException("Unable to update checkin, unknown ckeckInId",e);
+		}
+		if(checkIn.getBusiness().getId() != business.getId()) {
+			throw new IllegalArgumentException("Unable to update checkIn, checkIn does not belong to business");
 		}
 		Objectify ofy = checkInRepo.ofy();
 			
@@ -523,7 +538,7 @@ public class CheckInController {
 			
 			messages.add(new MessageDTO("spot", "update", spotData));
 			
-			channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
+			channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 		}
 		
 		return checkInData;

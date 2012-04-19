@@ -225,8 +225,8 @@ public class ChannelController {
 	 * @param action
 	 * @param content JSON model
 	 */
-	public void sendMessageToAllCockpitClients(Long businessId, String type, String action, Object content) {
-		sendJsonToAllCockpitClients(businessId, new MessageDTO(type, action, content));
+	public void sendMessageToAllCockpitClients(Business business, String type, String action, Object content) {
+		sendJsonToAllCockpitClients(business, new MessageDTO(type, action, content));
 	}
 	
 	/**
@@ -235,21 +235,17 @@ public class ChannelController {
 	 * @param businessId
 	 * @param messages
 	 */
-	public void sendMessagesToAllCockpitClients(Long businessId, List<MessageDTO> content)  {
+	public void sendMessagesToAllCockpitClients(Business business, List<MessageDTO> content)  {
 		if(content != null && !content.isEmpty())
-			sendJsonToAllCockpitClients(businessId, content);
+			sendJsonToAllCockpitClients(business, content);
 	}
 	
-	private void sendJsonToAllCockpitClients(Long businessId, Object content)  {
-		Business business;
-		try {
-			business = businessRepo.getById(businessId);
-		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("Unable to send message, unknown business id given.", e);
+	private void sendJsonToAllCockpitClients(Business business, Object content)  {
+		if(business == null) {
+			throw new IllegalArgumentException("Unable to send message, business is null");
 		}
 		
 		String messageString = buildJsonMessage(content);
-		logger.info("sending message {} ...", messageString);
 		
 		if(business.getChannelIds() != null && !business.getChannelIds().isEmpty()) {
 			// Send to all clients registered to the business ...

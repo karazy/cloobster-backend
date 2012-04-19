@@ -198,7 +198,7 @@ public class BillController {
 		messages.add(new MessageDTO("spot","update",spotData));
 				
 		// Send messages to notify cockpits over their channel.
-		channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
+		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 		
 		return billData;
 	}
@@ -302,7 +302,7 @@ public class BillController {
 			}
 
 			// Send messages to notify clients over their channel.
-			channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
+			channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 		}
 		return billData;
 	}

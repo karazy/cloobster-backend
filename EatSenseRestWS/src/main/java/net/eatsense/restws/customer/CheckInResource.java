@@ -84,7 +84,7 @@ public class CheckInResource {
 	@RolesAllowed({"guest"})
 	public CustomerRequestDTO postRequest(CustomerRequestDTO requestData) {
 		if(authenticated)
-			return businessCtrl.saveCustomerRequest(checkIn, requestData);
+			return businessCtrl.saveCustomerRequest( checkIn, requestData);
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}

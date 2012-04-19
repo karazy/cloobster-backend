@@ -42,7 +42,7 @@ public class CheckInsResource {
 	@DELETE
 	@Path("{checkInId}")
 	public void cancelAndDeleteCheckIn(@PathParam("checkInId") Long checkInId) {
-		checkInController.deleteCheckIn(checkInId);
+		checkInController.deleteCheckIn(business, checkInId);
 	}
 	
 	@PUT
@@ -50,7 +50,7 @@ public class CheckInsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInStatusDTO updateCheckin(@PathParam("checkInId") Long checkInId, CheckInStatusDTO checkInData) {
-		return checkInController.updateCheckInAsBusiness(checkInId, checkInData);
+		return checkInController.updateCheckInAsBusiness(business, checkInId, checkInData);
 	}
 
 	public void setBusiness(Business business) {
