@@ -218,7 +218,7 @@ public class OrderController {
 					
 				}
 
-				channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
+				channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 				
 			}
 		}
@@ -640,7 +640,7 @@ public class OrderController {
 			// Send messages if there are any.
 			if(!messages.isEmpty()) {
 				try {
-					channelCtrl.sendMessagesToAllCockpitClients(business.getId(), messages);
+					channelCtrl.sendMessagesToAllCockpitClients(business, messages);
 				} catch (Exception e) {
 					logger.error("error while sending messages", e);
 				}

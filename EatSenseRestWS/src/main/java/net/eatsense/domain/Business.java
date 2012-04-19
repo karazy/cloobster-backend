@@ -13,6 +13,7 @@ import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Unindexed;
 
 /**
@@ -21,6 +22,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Frederik Reifschneider
  *
  */
+@Cached
 public class Business extends GenericEntity {
  
 	/**

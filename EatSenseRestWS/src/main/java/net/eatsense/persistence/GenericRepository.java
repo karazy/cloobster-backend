@@ -311,6 +311,15 @@ public class GenericRepository<T> extends DAOBase{
 	public int countByProperty(String propFilter, Object propValue) {
 		return ofy().query(clazz).filter(propFilter, propValue).count();
 	}
+	
+	/**
+	 * Return a typesafe objectify query object.
+	 * 
+	 * @return
+	 */
+	public Query<T> query() {
+		return ofy().query(clazz);
+	}
 		
 	/**
 	 * Returns the {@link Objectify} object to directly query datastore. 
