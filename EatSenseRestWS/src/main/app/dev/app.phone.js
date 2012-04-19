@@ -1,5 +1,4 @@
 Karazy.i18n.setLang('DE');
-var profile = Ext.os.deviceType.toLowerCase();
 
 Ext.Loader.setConfig({
 	enabled : true,

@@ -64,12 +64,15 @@ Ext.define('EatSense.controller.Menu', {
     				return status;
     			}
     		},
-		}
-    },
-    init: function() {
-    	//store retrieved models
-    	var models = {};
-    	this.models = models;
+		},
+		/**
+		*	Current selected menu.
+		*/
+		activeMenu: null,
+		/**
+		*	Current selected product.
+		*/
+		activeProduct: null
     },
     /**
      * Shows the products of a menuitem
@@ -80,7 +83,7 @@ Ext.define('EatSense.controller.Menu', {
     	var pov = this.getProductoverview(),
     		prodStore = record.productsStore;
 
-    	this.models.activeMenu = record;
+    	this.setActiveMenu(record);
     	this.getProductlist().setStore(prodStore);
     	this.getMenulist().refresh();
     	this.switchView(pov, record.get('title'), Karazy.i18n.translate('back'), 'left');
@@ -113,8 +116,8 @@ Ext.define('EatSense.controller.Menu', {
 				opt.set('genuineId', opt.get('id'));
 			});
 		});
-		this.models.activeProduct = record.copy();
-		activeProduct = this.models.activeProduct
+		this.setActiveProduct(record.copy());
+		activeProduct = this.getActiveProduct()
 
 		choicesPanel.removeAll(false);
 
@@ -136,7 +139,7 @@ Ext.define('EatSense.controller.Menu', {
 
 					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
 
-					me.createOptions(choice, optionsDetailPanel, null, me.models.activeProduct);
+					me.createOptions(choice, optionsDetailPanel, null, me.getActiveProduct());
 					//process choices assigned to a this choice
 					activeProduct.choices().queryBy(function(rec) {
 						if(rec.get('parent') == choice.get('id')) {
@@ -144,7 +147,7 @@ Ext.define('EatSense.controller.Menu', {
 						}
 					}).each(function(memberChoice) {
 						memberChoice.setParentChoice(choice);
-						me.createOptions(memberChoice, optionsDetailPanel, choice, me.models.activeProduct);
+						me.createOptions(memberChoice, optionsDetailPanel, choice, me.getActiveProduct());
 					});
 
 					choicesPanel.add(optionsDetailPanel);
@@ -262,14 +265,14 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	createOrder: function(button) {
 		//get active product and set choice values
-		var 	productForCart = this.models.activeProduct,
+		var 	productForCart = this.getActiveProduct(),
 				order,
 				validationError = "",
 				cartButton = this.getLoungeTabBar().getAt(1),
 				productIsValid = true,
 				appState = this.getApplication().getController('CheckIn').getAppState(),
 				appStateStore = Ext.StoreManager.lookup('appStateStore'),
-				activeCheckIn = this.getApplication().getController('CheckIn').models.activeCheckIn,
+				activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 				detail = this.getProductdetail(),
 				message;
 		
@@ -294,7 +297,7 @@ Ext.define('EatSense.controller.Menu', {
 			
 			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
 			//if valid create order and attach to checkin
-			this.getApplication().getController('CheckIn').models.activeCheckIn.orders().add(order);
+			activeCheckIn.orders().add(order);
 			
 			Ext.Ajax.request({				
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
@@ -309,11 +312,11 @@ Ext.define('EatSense.controller.Menu', {
 	    	    }
 	    	});
 			
-			cartButton.setBadgeText(this.getApplication().getController('CheckIn').models.activeCheckIn.orders().data.length);
+			cartButton.setBadgeText(activeCheckIn.orders().data.length);
 			
 			detail.hide();
-			message = Karazy.i18n.translate('productPutIntoCardMsg', this.models.activeProduct.get('name'));
-			this.models.activeProduct = null;
+			message = Karazy.i18n.translate('productPutIntoCardMsg', this.getActiveProduct().get('name'));
+			this.setActiveProduct(null);
 
 			this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 			
@@ -375,7 +378,7 @@ Ext.define('EatSense.controller.Menu', {
 	 */
 	amountChanged: function(spinner, value, direction) {
 		console.log('MenuController > amountChanged (value:'+value+')');
-		this.recalculate(this.models.activeProduct);
+		this.recalculate(this.getActiveProduct());
 	},
 
      	

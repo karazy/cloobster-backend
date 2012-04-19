@@ -38,10 +38,14 @@ var translation = {
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 		"saveNicknameToggle" : "Nickname als Standard setzen?",
 		"checkInCanceled" : "Deine Sitzung wurde durch das Restaurant beendet.",
+		"nickname" : "Nickname",
 		// Menu
 		"menuTitle" : "Karte",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
+		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
+		"choiceValErrMin" : "Bitte wähle mindestens {0} {1} aus.",
+		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
 		//Order
 		"orderInvalid" : "Bitte überprüfe deine Auswahl",
 		"orderPlacer" : "Bestellung im Warenkorb",

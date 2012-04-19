@@ -551,14 +551,15 @@ Ext.define('EatSense.controller.Spot', {
 	*
 	*/
 	confirmPayment: function(button, eventObj, eOpts){
-		var 	me = this,
-				orderStore = Ext.StoreManager.lookup('orderStore'),
-				customerStore = Ext.StoreManager.lookup('checkInStore'),
-				unprocessedOrders,
-				loginCtr = this.getApplication().getController('Login'),
-				bill = this.getActiveBill(),
-				customerList = this.getSpotDetailCustomerList(),
-				customerIndex;
+		var	me = this,
+			orderStore = Ext.StoreManager.lookup('orderStore'),
+			customerStore = Ext.StoreManager.lookup('checkInStore'),
+			unprocessedOrders,
+			loginCtr = this.getApplication().getController('Login'),
+			requestCtr = this.getApplication().getController('Request'),
+			bill = this.getActiveBill(),
+			customerList = this.getSpotDetailCustomerList(),
+			customerIndex;
 
 		if(!bill) {
 			console.log('cannot confirm payment because no bill exists');
@@ -593,7 +594,9 @@ Ext.define('EatSense.controller.Spot', {
 						me.updateCustomerTotal();
 						me.updateCustomerPaymentMethod();
 					}
-					me.setActiveBill(null);		
+					me.setActiveBill(null);	
+					//update requests
+					requestCtr.loadRequests();		
 				},
 				failure: function(record, operation) {
 					console.log('saving bill failed');

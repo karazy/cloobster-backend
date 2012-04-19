@@ -20,7 +20,7 @@ Ext.define('EatSense.controller.Request',{
 	sendCallWaiterRequest: function(button, event) {
 		var 	me = this,
 				request = Ext.create('EatSense.model.Request'),
-				checkInId = this.getApplication().getController('CheckIn').models.activeCheckIn.getId();
+				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
 
 		request.set('type', Karazy.constants.Request.CALL_WAITER);
 		//workaround to prevent sencha from sending phantom id
