@@ -364,7 +364,6 @@ Ext.define('EatSense.controller.CheckIn', {
 				 },
 			     callback: function(records, operation, success) {
 			    	 if(success) {
-				    	 menuCtr.models.menudata = records;		
                         //always show menuoverview on first access
                          //TODO schoener loesen
                          menu.getComponent('menuCardPanel').setActiveItem(0);

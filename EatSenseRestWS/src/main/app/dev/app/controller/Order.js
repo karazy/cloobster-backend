@@ -1,5 +1,6 @@
 	Ext.define('EatSense.controller.Order', {
 	extend: 'Ext.app.Controller',
+	requires: ['Ext.picker.Picker'],
 	config: {
 		refs: {
 			main : 'mainview',
@@ -74,14 +75,20 @@
              undoEditButton: {
              	tap: 'closeOrderDetail'
              }
-		}		
+		},
+		/**
+		*	Current active order.
+		*/
+		activeOrder: null,
+		/**
+		*	Current active bill.
+		*/
+		activeBill: null	
 	},
 	init: function() {
 		//store retrieved models
-		var	models = {},
-	 		messageCtr = this.getApplication().getController('Message');
+		var	messageCtr = this.getApplication().getController('Message');
 
-    	this.models = models;
     	messageCtr.on('eatSense.order', this.handleOrderMessage, this);
 	},
 	/**
@@ -92,12 +99,11 @@
 	refreshCart: function() {
 		console.log('Cart Controller -> showCart');
 		var cartview = this.getCartview(), orderlist = this.getOrderlist(),
-		orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
-		total = 0;
-		// this.hideBackButton();
+			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
+			total = 0;
     	
 		orderlist.setStore(orders);	
-		this.models.activeOrder = null;
+		this.setActiveOrder(null);
 		orderlist.refresh();
 
 		
@@ -266,7 +272,7 @@
 		 		choicesPanel =  this.getChoicespanel(),
 		 		order = button.getParent().getRecord(),
 		 		product = order.getProduct();		 		
-		 		this.models.activeOrder = order,
+		 		this.setActiveOrder(order),
 		 		main = this.getMain(),
 		 		titlebar = detail.down('titlebar'),
 		 		menuCtr = this.getApplication().getController('Menu');
@@ -339,7 +345,7 @@
 			// 				});
 			// 			};
 			// 			opt.set('selected', true);
-			// 			this.recalculate(this.models.activeOrder);
+			// 			this.recalculate(this.getActiveOrder());
 			// 		},this);
 			// 		checkbox.addListener('uncheck',function(cbox) {
 			// 			console.log('uncheck');
@@ -349,7 +355,7 @@
 			// 				 //don't allow radio buttons to be deselected
 			// 				 cbox.setChecked(true);
 			// 			}
-			// 			 this.recalculate(this.models.activeOrder);								 
+			// 			 this.recalculate(this.getActiveOrder());								 
 			// 		},this);
 			// 		 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
 			// 	},this);	 
@@ -376,8 +382,8 @@
 	 * Edit an existing order.
 	 */
 	editOrder : function(component, eOpts) {
-		var order = this.models.activeOrder,
-		product = this.models.activeOrder.getProduct(), 
+		var order = this.getActiveOrder(),
+		product = this.getActiveOrder().getProduct(), 
 		validationError = "", 
 		productIsValid = true,
 		activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
@@ -398,7 +404,7 @@
 		});
 		
 		if(productIsValid) {
-			this.models.activeOrder.set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
+			this.getActiveOrder().set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
 		
 			Ext.Ajax.request({				
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
@@ -461,9 +467,9 @@
 	closeOrderDetail: function() {
 		var detail = this.getProductdetail();
 		
-		this.models.activeOrder.restoreState();
+		this.getActiveOrder().restoreState();
 		//try to avoid unecessary calculation, only needed to update price after cancelation
-		this.recalculate(this.models.activeOrder);
+		this.recalculate(this.getActiveOrder());
 		this.refreshCart();
 		detail.hide();		
 	},
@@ -476,8 +482,8 @@
 	 */
 	amountChanged: function(spinner, value, direction) {
 		console.log('Cart Controller > amountChanged (value:'+value+')');
-		this.models.activeOrder.set('amount', value);
-		this.recalculate(this.models.activeOrder);
+		this.getActiveOrder().set('amount', value);
+		this.recalculate(this.getActiveOrder());
 	},
 	/**
 	 * Recalculates the total price for the active product.
@@ -643,7 +649,7 @@
 		bill.save({
 			scope: this,
 			success: function(record, operation) {
-					me.models.activeBill = record;
+					me.setActiveBill(record);
 					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
 					payButton.hide();
 					myordersComplete.show();					
