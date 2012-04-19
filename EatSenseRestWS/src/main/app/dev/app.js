@@ -1,21 +1,9 @@
 Karazy.i18n.setLang('DE');
 
-//global error handler
-// window.onerror = function(message, url, lineNumber) {  
-// 	//var 	messageCtr = EatSense.controller.Message();
-
-// 	console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
-
-//   	//messageCtr.reopenChannel();
-
-//   	//prevent firing of default handler (return true)
-//   	return false;
-// };  
-
 Ext.Loader.setConfig({
 	enabled : true,
 	//WORKAORUND related to Android 3x Bug and Webview URL handling
-	// disableCaching: Karazy.config.disableCaching
+	disableCaching: Karazy.config.disableCaching
 });
 
 Ext.Loader.setPath('EatSense', 'app');

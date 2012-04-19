@@ -13,7 +13,6 @@ Karazy.config = (function() {
 		currencyFormat: 'EURO',
 		version: 0.1,
 		disableCaching: true
-		
 	};
 	
 })();

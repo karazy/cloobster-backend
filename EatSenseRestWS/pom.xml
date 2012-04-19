@@ -453,6 +453,7 @@
 									<excludes>
 										<exclude>app/**/*.phone.*</exclude>
 										<exclude>app/**/*.iphone.*</exclude>
+										<exclude>app/**/*.ignore.*</exclude>
 									</excludes>
 								</resource>
 							</resources>
@@ -502,6 +503,10 @@
 						<replacement>
 							<token>(serviceUrl :) .*</token>
 							<value>$1 '',</value>
+						</replacement>
+						<replacement>
+							<token>(disableCaching :) .*</token>
+							<value>$1 true,</value>
 						</replacement>
 					</replacements>
 				</configuration>

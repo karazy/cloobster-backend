@@ -96,9 +96,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				{
 					xtype: 'button',
 					text: Karazy.i18n.translate('putIntoCartButton'),
-					// ui: 'confirm',
-					// icon: '../app/res/images/into_cart.png',
-					// iconCls: 'cart-button',
 					action: 'cart'
 				}, 
 				{

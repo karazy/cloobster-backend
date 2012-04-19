@@ -1,3 +1,6 @@
+/**
+*	Settings section. Show when navigating from dashboard.
+*/
 Ext.define('EatSense.view.Settings', {
 	extend : 'Ext.Panel',
 	xtype : 'settings',
