@@ -292,7 +292,8 @@ public class ChannelController {
 		try {
 			clientId = channelService.parsePresence(request).clientId();		
 		} catch (IOException e) {
-			throw new RuntimeException("could not parse presence",e);
+			logger.error("could not parse presence",e);
+			return;
 		}
 		logger.debug("recieved connected from clientId:" + clientId);
 		if(clientId.startsWith("c")) {
@@ -304,14 +305,26 @@ public class ChannelController {
 	
 	public void subscribeCheckIn(String clientId) {
 		CheckIn checkIn = parseCheckIn(clientId);
-		checkIn.setChannelId(clientId);
-		checkInRepo.saveOrUpdate(checkIn);
+		if(checkIn == null)
+			return;
+		
+		if (!clientId.equals(checkIn.getChannelId())) {
+			checkIn.setChannelId(clientId);
+			logger.info("Subscribing channel {} to checkin {} ", clientId, checkIn.getNickname());
+			checkInRepo.saveOrUpdate(checkIn);
+		}
 	}
 	
 	public void unsubscribeCheckIn(String clientId) {
 		CheckIn checkIn = parseCheckIn(clientId);
-		checkIn.setChannelId(null);
-		checkInRepo.saveOrUpdate(checkIn);
+		if(checkIn == null)
+			return;
+		
+		if(checkIn.getChannelId() != null) {
+			checkIn.setChannelId(null);
+			logger.info("Unsubscribing channel {} from checkin {} ", clientId, checkIn.getNickname());
+			checkInRepo.saveOrUpdate(checkIn);
+		}
 	}
 
 	/**
@@ -322,15 +335,15 @@ public class ChannelController {
 	 */
 	public void unsubscribeFromBusiness(String clientId) {
 		Business business = parseBusiness(clientId);
-		
 		if(business == null) {
-			throw new IllegalArgumentException("unknown businessId encoded in clientId: "+ clientId);
+			return;
 		}
 		else {
 			if (business.getChannelIds() == null || business.getChannelIds().isEmpty())	{
 				return;
 			}
 			business.getChannelIds().remove(clientId);
+			logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
 			businessRepo.saveOrUpdate(business);
 		}
 	}
@@ -348,7 +361,8 @@ public class ChannelController {
 		try {
 			return businessRepo.getById(businessId);
 		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("clientId contains unknown encoded business, clientId=" + clientId, e);
+			logger.error("clientId contains unknown encoded business, clientId={}",clientId, e);
+			return null;
 		}
 	}
 	
@@ -364,7 +378,8 @@ public class ChannelController {
 		try {
 			return checkInRepo.getById(checkInId);
 		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("clientId contains unknown encoded checkIn, clientId=" + clientId, e);
+			logger.error("clientId contains unknown encoded checkIn, clientId={}", clientId, e);
+			return null;
 		}
 	}
 	
@@ -375,9 +390,14 @@ public class ChannelController {
 	 */
 	public void subscribeToBusiness( String clientId) {
 		Business business = parseBusiness(clientId);
+		if(business == null)
+			return;
 		if(business.getChannelIds() == null)
 			business.setChannelIds(new ArrayList<String>());
-		business.getChannelIds().add(clientId);
+		if(!business.getChannelIds().contains(clientId)) {
+			business.getChannelIds().add(clientId);
+			logger.info("Subscribing channel {} to business {} ", clientId, business.getName());
+		}
 		businessRepo.saveOrUpdate(business);
 	}
 	
