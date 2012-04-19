@@ -56,19 +56,18 @@ Karazy.channel = (function() {
 
 	function onClose() {
 		if(!Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			console.los('requestTokenHandlerFunction is not of type function!');
+			console.log('requestTokenHandlerFunction is not of type function!');
+			return;
 		};
 
-		if(timedOut === true) {
+		if(timedOut === true && connectionStatus != 'RECONNECT') {
 			console.log('channel timeout');			
 			connectionStatus = 'RECONNECT';
 			repeatedConnectionTry();	
-		} else if(connectionLost && connectionStatus != 'RECONNECT') {
+		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
 			console.log('channel connection lost');
 			connectionStatus = 'RECONNECT';
-			repeatedConnectionTry();
-			// setupChannel(channelToken);
-			// connectionLost = false;			
+			repeatedConnectionTry();		
 		}
 	};
 	/**
@@ -85,14 +84,21 @@ Karazy.channel = (function() {
 		var tries = 1;
 		var reconnectInterval =	window.setInterval(
 				function() {
+					if(connectionStatus == 'ONLINE') {
+						clearInterval(reconnectInterval);
+						return;
+					}
+					if(tries > 100) {
+						console.log('maximum tries reached. no more reconnect attempts.')
+						connectionStatus = 'DISCONNECTED';
+						clearInterval(reconnectInterval);
+						return;
+					}
+
 					console.log('Reconnect %s iteration.', tries);
 					// setupChannel(channelToken);
 					requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);
-					tries += 1;
-					if(!connectionLost || tries > 100) {
-						clearInterval(reconnectInterval);
-						connectionStatus = 'ONLINE';
-					}
+					tries += 1;					
 				}
 			, channelReconnectTimeout);	
 	};
@@ -174,6 +180,7 @@ Karazy.channel = (function() {
 			channelToken = null;
 
 			if(socket) {
+				connectionStatus = 'DISCONNECTED';
 				socket.close();
 			};			
 		}	
