@@ -425,10 +425,11 @@ public class ChannelController {
 	}
 	
 	/**
-	 * Create a new message channel for customer push notification.
+	 * Generates and returns a new channel token.
 	 * 
-	 * @param checkInUid uid of the connecting checkin
-	 * @return
+	 * @param checkIn entity which initiated the request
+	 * @param clientId to use for token creation 
+	 * @return the generated channel token
 	 */
 	public String createCustomerChannel(CheckIn checkIn) {
 		return createCustomerChannel(checkIn, null);

@@ -21,6 +21,7 @@ import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.representation.CheckInDTO;
@@ -38,16 +39,18 @@ public class CheckInResource {
 	private CheckInController checkInCtrl;
 
 	private BusinessController businessCtrl;
+	private ChannelController channelCtrl;
 
 	public void setCheckIn(CheckIn checkIn) {
 		this.checkIn = checkIn;
 	}
 
 	@Inject
-	public CheckInResource(CheckInController checkInController,  BusinessController businessCtrl) {
+	public CheckInResource(CheckInController checkInController,  BusinessController businessCtrl, ChannelController channelCtrl) {
 		super();
 		this.checkInCtrl = checkInController;
 		this.businessCtrl = businessCtrl;
+		this.channelCtrl = channelCtrl;
 	}
 	
 	
@@ -94,7 +97,7 @@ public class CheckInResource {
 	@Produces("text/plain; charset=UTF-8")
 	@RolesAllowed({"guest"})
 	public String requestToken() {
-		return checkInCtrl.requestToken(checkIn);
+		return channelCtrl.createCustomerChannel(checkIn);
 	}
 
 	public boolean isAuthenticated() {
