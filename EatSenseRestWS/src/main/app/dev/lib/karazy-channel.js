@@ -45,7 +45,7 @@ Karazy.channel = (function() {
 
 	function onError(error) {		
 		console.log('channel error ' + (error && error.description) ? error.description : "");
-		if(error && error.code == '401') {
+		if(error && ( error.code == '401' || error.code == '400') ) {
 			timedOut = true;
 			socket.close();
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
