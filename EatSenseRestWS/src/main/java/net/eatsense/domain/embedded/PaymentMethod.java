@@ -17,6 +17,10 @@ public class PaymentMethod {
 	@NotEmpty
 	private String name;
 	
+	@NotNull
+	@NotEmpty	
+	private Integer order;
+	
 	public String getName() {
 		return name;
 	}
@@ -24,4 +28,14 @@ public class PaymentMethod {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public Integer getOrder() {
+		return order;
+	}
+
+	public void setOrder(Integer order) {
+		this.order = order;
+	}
+	
+	
 }

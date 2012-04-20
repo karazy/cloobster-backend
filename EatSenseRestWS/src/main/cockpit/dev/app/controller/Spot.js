@@ -26,6 +26,7 @@ Ext.define('EatSense.controller.Spot', {
 		    closeSpotDetailButton: 'spotdetail button[action=close]',
 		    paidSpotDetailButton: 'spotdetail button[action=paid]',
 		    cancelAllButton: 'spotdetail button[action=cancel-all]',    
+		    confirmAllButton: 'spotdetail button[action=confirm-all]',
 		    switchSpotButton: 'spotdetail button[action=switch-spot]', 
 		    spotDetailStatistic: 'spotdetail #statistics',
 		    spotSelectionDialog: {
@@ -61,6 +62,9 @@ Ext.define('EatSense.controller.Spot', {
 		 	},
 		 	cancelAllButton: {
 		 		tap: 'cancelAll'
+		 	},
+		 	confirmAllButton: {
+		 		tap: 'confirmAll'
 		 	},
 		 	switchSpotButton: {
 		 		tap: 'showSpotSelection'
@@ -744,6 +748,72 @@ Ext.define('EatSense.controller.Spot', {
 
 	},
 	/**
+	*	Confirms all open orders for active customer.
+	*/
+	confirmAll: function(button, event) {
+		var me = this,
+			orderStore = Ext.StoreManager.lookup('orderStore'),
+			loginCtr = this.getApplication().getController('Login'),
+			unprocessedOrders;
+
+		if(!this.getActiveCustomer()) {
+			console.log('confirm all not possible: no active customer.');
+			return;
+		}
+
+				//check if all orders are processed
+		unprocessedOrders = orderStore.queryBy(function(record, id) {
+			if(record.get('status') == Karazy.constants.Order.PLACED) {
+				return true;
+			}
+		});
+
+		unprocessedOrders.each(function(order) {
+			//update order status
+			order.set('status', Karazy.constants.Order.RECEIVED);
+			order.getData(true);
+
+			//persist changes
+			// order.save({
+			// 	params: {
+			// 		pathId: loginCtr.getAccount().get('businessId'),
+			// 	},
+			// 	success: function(record, operation) {
+			// 		console.log('order confirmed');
+			// 	},
+			// 	failure: function(record, operation) {
+			// 		order.set('status', Karazy.constants.Order.PLACED);
+			// 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+			// 	}
+			// });
+
+			//same approach as in eatSense App. Magic lies in getRawJsonData()
+			//still kind of a workaround
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'PUT',    	    
+	    	    jsonData: order.getRawJsonData(),
+	    	    scope: this,
+	    	    success: function(response) {
+	    	    	console.log('order confirmed');
+	    	    },
+	    	    failure: function(response) {
+	    	    	order.set('status', prevStatus);
+	    	    	me.getApplication().handleServerError({
+							'error': {
+								'status': response.status,
+								'statusText': response.statusText
+							}, 
+							'forceLogout': {403: true}, 
+							'hideMessage':false
+							// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
+					});
+		   	    }
+			});
+		});
+
+	},
+	/**
 	*	Shows a list of all available spots.
 	*	A select triggers switchSpot.
 	*/
@@ -822,13 +892,14 @@ Ext.define('EatSense.controller.Spot', {
 				requestStore = Ext.StoreManager.lookup('requestStore');
 
 		this.getSpotDetailCustomerList().deselectAll();	
-		this.getSpotDetailOrderList().getStore().removeAll(true);
+		this.getSpotDetailOrderList().getStore().removeAll();
 		requestStore.removeAll(true);
 		this.updateCustomerStatusPanel();
 		this.updateCustomerTotal();
 		this.setActiveSpot(null);
 		this.setActiveCustomer(null);
 		this.setActiveBill(null);
+		this.getSpotDetail().fireEvent('eatSense.customer-update', false);		
 
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);

@@ -42,6 +42,7 @@ var translation = {
 		"errorSpotDetailOrderCancel" : "Bestellung {0} konnte nicht storniert werden.",
 		"switchSpotButton" : "Tisch wechseln",
 		"cancelAllOrdersButton" : "Gast entfernen",
+		"confirmAllOrdersButton" : "Alle abgearbeitet",
 		"paidButton" : "Bezahlt",
 		"spotSelectionTitle" : "Tisch auswählen",
 		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",

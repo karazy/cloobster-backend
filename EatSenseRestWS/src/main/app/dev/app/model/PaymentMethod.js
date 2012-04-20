@@ -5,6 +5,10 @@ Ext.define('EatSense.model.PaymentMethod', {
 		{
 			name : 'name',
 			type : 'string'
+		},
+		{
+			name: 'order',
+			type: 'number'
 		}]	
 	}
 });
