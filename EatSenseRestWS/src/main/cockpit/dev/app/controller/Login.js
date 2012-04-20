@@ -287,12 +287,12 @@ Ext.define('EatSense.controller.Login', {
 	*		callback function to invoke on success
 	*/
 	requestNewToken: function(callback) {		
-		console.log('request new token');
-
 		var 	account = this.getAccount(),
 				login = account.get('login'),
-				clientId = account.get('clientId');
-
+				clientId = login + new Date().getTime();
+		
+		account.set('clientId', clientId);
+		console.log('request new token. clientId: ' + clientId);
 		Ext.Ajax.request({
 		    url: Karazy.config.serviceUrl+'/accounts/'+login+'/tokens',		    
 		    method: 'POST',
