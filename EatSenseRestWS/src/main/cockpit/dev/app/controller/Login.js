@@ -82,10 +82,10 @@ Ext.define('EatSense.controller.Login', {
 	*/
 	restoreCredentials: function() {
 		console.log('restoreCredentials');
-		var 	me = this,
-				accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
-				spotCtr = this.getApplication().getController('Spot'),
-				account;
+		var me = this,
+			accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+			spotCtr = this.getApplication().getController('Spot'),
+			account;
 
 	   	 try {
 
@@ -141,7 +141,13 @@ Ext.define('EatSense.controller.Login', {
 
 						(!errorMessage || errorMessage == "") ?	errorMessage = Karazy.i18n.translate('restoreCredentialsErr') : errorMessage;
 
-						Ext.Msg.alert(Karazy.i18n.translate('error'), errorMessage); 
+
+						me.getApplication().handleServerError({
+							'error': operation.error, 
+							'forceLogout': false, 
+							'hideMessage':false, 
+							'message': errorMessage
+						}); 
 					}
 				});							   			   		 	   		
 		   	 } else {
@@ -212,7 +218,13 @@ Ext.define('EatSense.controller.Login', {
 				} 
 
 				(!errorMessage || errorMessage == "") ?	errorMessage = Karazy.i18n.translate('wrongCredentials') : errorMessage;			
-				Ext.Msg.alert(Karazy.i18n.translate('error'), errorMessage); 
+
+				me.getApplication().handleServerError({
+					'error': operation.error, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': errorMessage
+				});
 			}
 		});
 	},
@@ -305,7 +317,15 @@ Ext.define('EatSense.controller.Login', {
 		       	callback(token);
 		    }, 
 		    failure: function(response) {
-		    	Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('channelTokenError')); 
+		    	me.getApplication().handleServerError({
+					'error': {
+						'status' : response.status,
+						'statusText': response.statusText
+					}, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': Karazy.i18n.translate('channelTokenError')
+				});
 		    }
 		});
 	},

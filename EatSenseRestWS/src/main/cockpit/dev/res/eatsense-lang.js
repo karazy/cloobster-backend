@@ -9,6 +9,8 @@ var translation = {
 		"error" : "Fehler",
 		"close" : "Schliessen",
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
+		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
+		"errorPermission" : "Deine Sitzung ist ungültig.",
 		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
 		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
 		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
