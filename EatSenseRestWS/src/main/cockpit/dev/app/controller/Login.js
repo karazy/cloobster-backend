@@ -82,10 +82,10 @@ Ext.define('EatSense.controller.Login', {
 	*/
 	restoreCredentials: function() {
 		console.log('restoreCredentials');
-		var 	me = this,
-				accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
-				spotCtr = this.getApplication().getController('Spot'),
-				account;
+		var me = this,
+			accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
+			spotCtr = this.getApplication().getController('Spot'),
+			account;
 
 	   	 try {
 
@@ -141,7 +141,13 @@ Ext.define('EatSense.controller.Login', {
 
 						(!errorMessage || errorMessage == "") ?	errorMessage = Karazy.i18n.translate('restoreCredentialsErr') : errorMessage;
 
-						Ext.Msg.alert(Karazy.i18n.translate('error'), errorMessage); 
+
+						me.getApplication().handleServerError({
+							'error': operation.error, 
+							'forceLogout': false, 
+							'hideMessage':false, 
+							'message': errorMessage
+						}); 
 					}
 				});							   			   		 	   		
 		   	 } else {
@@ -212,7 +218,13 @@ Ext.define('EatSense.controller.Login', {
 				} 
 
 				(!errorMessage || errorMessage == "") ?	errorMessage = Karazy.i18n.translate('wrongCredentials') : errorMessage;			
-				Ext.Msg.alert(Karazy.i18n.translate('error'), errorMessage); 
+
+				me.getApplication().handleServerError({
+					'error': operation.error, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': errorMessage
+				});
 			}
 		});
 	},
@@ -305,7 +317,15 @@ Ext.define('EatSense.controller.Login', {
 		       	callback(token);
 		    }, 
 		    failure: function(response) {
-		    	Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('channelTokenError')); 
+		    	me.getApplication().handleServerError({
+					'error': {
+						'status' : response.status,
+						'statusText': response.statusText
+					}, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': Karazy.i18n.translate('channelTokenError')
+				});
 		    }
 		});
 	},
@@ -347,24 +367,27 @@ Ext.define('EatSense.controller.Login', {
 				pathId: account.get('login')
 			},
 			callback: function(records, operation, success) {
-			 	if(success) {
+				 	if(success) {
+				 		if(!records || records.length == 0) {
+				 			loginPanel.setActiveItem(0);
+				 			Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('noBusinessAssigned'), Ext.emptyFn);
+				 		}
 
-			 		if(!records || records.length == 0) {
-			 			loginPanel.setActiveItem(0);
-			 			Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('noBusinessAssigned'), Ext.emptyFn);
-			 		}
-
-			 		if(records.length > 1) {
-			 			//more than one assigned business exists. show chooseBusiness view
-			 			loginPanel.setActiveItem(1);
-			 		} else if(records.length == 1){
-			 			me.setBusinessId(records[0]);					
-			 		} 
-
-			 	} else {
-			 		//TODO user can't log in because he is not assigned to a business
-			 		loginPanel.setActiveItem(0);
-			 		// Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotLoading'), Ext.emptyFn);
+				 		if(records.length > 1) {
+				 			//more than one assigned business exists. show chooseBusiness view
+				 			loginPanel.setActiveItem(1);
+				 		} else if(records.length == 1) {
+				 			me.setBusinessId(records[0]);					
+				 		} 
+				 	} else {
+				 		//TODO user can't log in because he is not assigned to a business
+				 		loginPanel.setActiveItem(0);
+				 		me.getApplication().handleServerError({
+							'error': operation.error, 
+							'forceLogout': false, 
+							'hideMessage':false
+						});
+			    	}			 		
 			 	}				
 			 },
 			 scope: this

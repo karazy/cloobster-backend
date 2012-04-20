@@ -123,8 +123,12 @@ Ext.application({
     * 		true to logout on all errors 
     *		OR
     *		{errorCode : true|false} e.g. {403: true, 404: false}
+    * @param hideMessage
+    *	true if you don't want do display an error message
+    * @param message
+    *	message to show. If no message is set a default message will be displayed
     */
-    handleServerError: function(error, forceLogout, hideMessage) {
+    handleServerError: function(error, forceLogout, hideMessage, message) {
         var    errMsg,
                nestedError; 
         if(error && error.status) {
@@ -158,8 +162,8 @@ Ext.application({
             }
         }
         if(!hideMessage) {
-        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, Ext.emptyFn);	
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), (message) ? message : errMsg, Ext.emptyFn);	
         }
-    },
+    }
 });
 

@@ -786,7 +786,7 @@ Ext.define('EatSense.controller.Spot', {
 				requestStore = Ext.StoreManager.lookup('requestStore');
 
 		this.getSpotDetailCustomerList().deselectAll();	
-		this.getSpotDetailOrderList().getStore().removeAll();
+		this.getSpotDetailOrderList().getStore().removeAll(true);
 		requestStore.removeAll(true);
 		this.updateCustomerStatusPanel();
 		this.updateCustomerTotal();

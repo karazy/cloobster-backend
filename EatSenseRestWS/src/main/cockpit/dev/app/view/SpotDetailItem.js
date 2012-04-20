@@ -148,6 +148,9 @@ Ext.define('EatSense.view.SpotDetailItem', {
 	*/
 	updateRecord: function(newRecord) {
 		console.log('SpotDetailItem updateRecord');
+		if(!newRecord) {
+			return;
+		}
 		
 		//make sure prices are calculated before displaying
 		newRecord.calculate();
