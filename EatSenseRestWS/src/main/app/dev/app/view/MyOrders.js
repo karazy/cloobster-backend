@@ -81,6 +81,9 @@ Ext.define('EatSense.view.MyOrders', {
 				},
 				formatPrice: function(values) {
 					return Karazy.util.formatPrice(values.Product.price_calculated);
+				},
+				renderChoices: function(values) {
+					
 				}				
 			}),
 			listeners: {

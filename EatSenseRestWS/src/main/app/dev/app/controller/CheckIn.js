@@ -471,7 +471,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
 			//remove menu to prevent problems on reload
-			this.getMenulist().getStore().removeAll();
+			menuCtr.getMenulist().getStore().removeAll();
             menuCtr.showMenu();
             //remove all orders in cart and refresh badge text
             this.getActiveCheckIn().orders().removeAll();
