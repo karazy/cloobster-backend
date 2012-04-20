@@ -46,10 +46,10 @@ Ext.define('EatSense.view.MyOrders', {
 			"<div class='orderListItem {[values.status.toLowerCase()]}'>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+Karazy.i18n.translate('amount')+" {amount}) {[this.formatPrice(values)]}</div>" +
-				"<div style='clear: both;'>"+
-					"<tpl for='Product.choices'>" +				
+				"<div style='clear: both;'>" +
+					"<tpl for='Product.choices'>" +
 						"<tpl if='this.checkSelections(values, xindex)'>" +
-							"<h3>{text}</h3>" +
+							"<tpl if='parent == \"\"'><h3>{text}</h3></tpl>" +
 							"<ul>" +
 								"<tpl for='options'>" +
 									"<tpl if='selected === true'>" +
@@ -83,7 +83,7 @@ Ext.define('EatSense.view.MyOrders', {
 					return Karazy.util.formatPrice(values.Product.price_calculated);
 				},
 				renderChoices: function(values) {
-					
+
 				}				
 			}),
 			listeners: {

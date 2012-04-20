@@ -58,7 +58,7 @@ Ext.application({
 		}; 
 
 		//timeout for requests
-		Ext.data.proxy.Server.timeout = 60000;
+		Ext.Ajax.timeout = 1200000;
 		
     	//try to restore application state
 	   	 

@@ -39,7 +39,7 @@ Ext.define('EatSense.model.Product', {
 	validate: function() {
 		
 	},
-	/**
+		/**
 	 * Calculates total cost of this product including choices, returns it and
 	 * stores it in priceCalculated.
 	 * @param amount
@@ -54,11 +54,15 @@ Ext.define('EatSense.model.Product', {
 		if(amount) {
 			_amount = amount;
 		}
-		// _total = Math.round(_total*_amount*100)/100;
-		_total = Karazy.util.roundPrice(_total*_amount);
+		// _total = Karazy.util.roundPrice(_total*_amount);
+		_total = _total*_amount;
 		this.set('price_calculated', _total);
 		return _total;
 	},
+	/**
+	*	Returns a deep raw json representation of this product.
+	*
+	*/	
 	getRawJsonData: function() {
 		var rawJson = {};
 		
@@ -73,5 +77,28 @@ Ext.define('EatSense.model.Product', {
 			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
 		}		
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*	
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		for ( var int = 0; int < this.choices().data.length; int++) {
+			if(!this.choices().getAt(int).setRawJsonData(rawData.choices[int])) {
+				return false;
+			}
+		}
+
+		this.set('id', rawData.id);
+		this.set('name', rawData.name);
+		this.set('shortDesc', rawData.shortDesc);
+		this.set('longDesc', rawData.longDesc);
+		this.set('price', rawData.price);
+						
+		return true;
 	}
 });
