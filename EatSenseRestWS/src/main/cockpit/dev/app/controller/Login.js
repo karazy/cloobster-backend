@@ -367,27 +367,24 @@ Ext.define('EatSense.controller.Login', {
 				pathId: account.get('login')
 			},
 			callback: function(records, operation, success) {
-				 	if(success) {
-				 		if(!records || records.length == 0) {
-				 			loginPanel.setActiveItem(0);
-				 			Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('noBusinessAssigned'), Ext.emptyFn);
-				 		}
+			 	if(success) {
 
-				 		if(records.length > 1) {
-				 			//more than one assigned business exists. show chooseBusiness view
-				 			loginPanel.setActiveItem(1);
-				 		} else if(records.length == 1) {
-				 			me.setBusinessId(records[0]);					
-				 		} 
-				 	} else {
-				 		//TODO user can't log in because he is not assigned to a business
-				 		loginPanel.setActiveItem(0);
-				 		me.getApplication().handleServerError({
-							'error': operation.error, 
-							'forceLogout': false, 
-							'hideMessage':false
-						});
-			    	}			 		
+			 		if(!records || records.length == 0) {
+			 			loginPanel.setActiveItem(0);
+			 			Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('noBusinessAssigned'), Ext.emptyFn);
+			 		}
+
+			 		if(records.length > 1) {
+			 			//more than one assigned business exists. show chooseBusiness view
+			 			loginPanel.setActiveItem(1);
+			 		} else if(records.length == 1){
+			 			me.setBusinessId(records[0]);					
+			 		} 
+
+			 	} else {
+			 		//TODO user can't log in because he is not assigned to a business
+			 		loginPanel.setActiveItem(0);
+			 		// Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotLoading'), Ext.emptyFn);
 			 	}				
 			 },
 			 scope: this
