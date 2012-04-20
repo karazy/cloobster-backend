@@ -32,6 +32,17 @@ Ext.define('EatSense.controller.Request',{
 					'error': operation.error
 				});
 			}
-		})
+		});
+
+		//show success message to give user the illusion of success
+		Ext.Msg.show({
+			title : Karazy.i18n.translate('hint'),
+			message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
+			buttons : []
+		});
+		
+		Ext.defer((function() {
+			Ext.Msg.hide();
+		}), Karazy.config.msgboxHideLongTimeout, this);
 	}
 });
