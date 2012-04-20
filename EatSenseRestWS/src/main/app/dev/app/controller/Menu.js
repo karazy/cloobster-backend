@@ -171,8 +171,12 @@ Ext.define('EatSense.controller.Menu', {
 					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
 
 					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					//recalculate when selection changes
+					choice.on('recalculate', function() {
+						me.recalculate(activeProduct);
+					});
 
-					me.createOptions(choice, optionsDetailPanel, null, me.getActiveProduct());
+					me.createOptions(choice, optionsDetailPanel);
 					//process choices assigned to a this choice
 					activeProduct.choices().queryBy(function(rec) {
 						if(rec.get('parent') == choice.get('id')) {
@@ -180,7 +184,11 @@ Ext.define('EatSense.controller.Menu', {
 						}
 					}).each(function(memberChoice) {
 						memberChoice.setParentChoice(choice);
-						me.createOptions(memberChoice, optionsDetailPanel, choice, me.getActiveProduct());
+						me.createOptions(memberChoice, optionsDetailPanel, choice);
+						//recalculate when selection changes
+						memberChoice.on('recalculate', function() {
+							me.recalculate(activeProduct);
+						});
 					});
 
 					choicesPanel.add(optionsDetailPanel);
@@ -210,9 +218,9 @@ Ext.define('EatSense.controller.Menu', {
 	* @param panel
 	*	Panel to add options to
 	*/
-	createOptions: function(choice, panel, parent, productOrOrder) {
-		if(!choice || !panel || !productOrOrder) {
-			console.log('You have to provide options, panel and a productOrOrder.')
+	createOptions: function(choice, panel, parent) {
+		if(!choice || !panel) {
+			console.log('You have to provide options and panel')
 			return;
 		}
 
@@ -258,7 +266,8 @@ Ext.define('EatSense.controller.Menu', {
 				 if(!parent) {
 				 	choice.isActive();
 				 }
-				 me.recalculate(productOrOrder);
+				 choice.fireEvent('recalculate');
+				 // me.recalculate(productOrOrder);
 			 },me);
 
 			 field.addListener('uncheck',function(cbox) {
@@ -269,7 +278,8 @@ Ext.define('EatSense.controller.Menu', {
 				 if(!parent) {
 				 	choice.isActive();
 				 }
-				 me.recalculate(productOrOrder);								 
+				 choice.fireEvent('recalculate');
+				 // me.recalculate(productOrOrder);								 
 			 },me);
 			 panel.getComponent('optionsPanel').add(field);
 

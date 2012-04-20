@@ -15,7 +15,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			cls: 'spotdetailitem-flag' 
 		},
 		//label containing product details
-		name: {		
+		name: {
 			cls: 'spotdetailitem-order',	
 			tpl: new Ext.XTemplate(
 				"<h2 >{Product.name}</h2>" +
@@ -23,7 +23,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 				"<div class='choices'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
-							//"<h3>{text}</h3>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
 							"<ul>" +
 								"<tpl for='options'>" +
 									"<tpl if='selected === true'>" +

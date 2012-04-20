@@ -49,7 +49,7 @@ Ext.define('EatSense.view.MyOrders', {
 				"<div style='clear: both;'>" +
 					"<tpl for='Product.choices'>" +
 						"<tpl if='this.checkSelections(values, xindex)'>" +
-							"<tpl if='parent == \"\"'><h3>{text}</h3></tpl>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
 							"<ul>" +
 								"<tpl for='options'>" +
 									"<tpl if='selected === true'>" +

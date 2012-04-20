@@ -297,8 +297,11 @@
 					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
 
 					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
-
-					menuCtr.createOptions.apply(me, [choice, optionsDetailPanel, null, order]);
+					menuCtr.createOptions(choice, optionsDetailPanel);
+					choice.on('recalculate', function() {
+						me.recalculate(order);
+					});
+					// menuCtr.createOptions.apply(me, [choice, optionsDetailPanel, null, order]);
 					//process choices assigned to a this choice
 					product.choices().queryBy(function(rec) {
 						if(rec.get('parent') == choice.get('id')) {
@@ -306,58 +309,15 @@
 						}
 					}).each(function(memberChoice) {
 						memberChoice.setParentChoice(choice);
-						// menuCtr.createOptions(memberChoice, optionsDetailPanel, choice);
-						menuCtr.createOptions.apply(me, [memberChoice, optionsDetailPanel, choice, order]);
+						menuCtr.createOptions(memberChoice, optionsDetailPanel, choice);
+						choice.on('recalculate', function() {
+							me.recalculate(order);
+						});
+						// menuCtr.createOptions.apply(me, [memberChoice, optionsDetailPanel, choice, order]);
 					});
 
 					choicesPanel.add(optionsDetailPanel);
 		 	 });
-			//  product.choices().each(function(_choice) {
-			// 	 var choice = _choice;				 			 
-			// 	 var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
-			// 	 optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
-			// 	 //single choice. Create Radio buttons
-			// 	 var optionType = '';
-			// 	 if(choice.data.minOccurence <= 1 && choice.data.maxOccurence == 1) {
-			// 		 optionType = 'Ext.field.Radio';
-			// 	 	} 
-			// 	 else {//multiple choice
-			// 		 optionType = 'Ext.field.Checkbox';					 
-			// 	 }
-				
-			// 	choice.options().each(function(opt) {
-			// 		var checkbox = Ext.create(optionType, {
-			// 			name : choice.data.id,
-			// 			labelWidth: '80%',
-			// 			label : opt.get('name'),
-			// 			checked: opt.get('selected'),
-			// 			cls: 'option'
-			// 		}, this);
-					 
-			// 		checkbox.addListener('check',function(cbox) {
-			// 			console.log('check');
-			// 			if(cbox.isXType('radiofield',true)) {
-			// 				choice.options().each(function(innerOpt) {
-			// 					innerOpt.set('selected', false);
-			// 				});
-			// 			};
-			// 			opt.set('selected', true);
-			// 			this.recalculate(this.getActiveOrder());
-			// 		},this);
-			// 		checkbox.addListener('uncheck',function(cbox) {
-			// 			console.log('uncheck');
-			// 			if(cbox.isXType('checkboxfield',true)) {
-			// 				 opt.set('selected', false);
-			// 			} else {
-			// 				 //don't allow radio buttons to be deselected
-			// 				 cbox.setChecked(true);
-			// 			}
-			// 			 this.recalculate(this.getActiveOrder());								 
-			// 		},this);
-			// 		 optionsDetailPanel.getComponent('optionsPanel').add(checkbox);					 
-			// 	},this);	 
-			// 	 choicesPanel.add(optionsDetailPanel);
-			// },this);
 		}
 		 
 		 

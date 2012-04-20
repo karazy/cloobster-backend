@@ -101,9 +101,14 @@ Ext.define('EatSense.model.Order', {
 		this.set('comment', rawData.comment);
 		this.set('orderTime', rawData.orderTime);
 
-		return true;
-		
-			
+		return true;	
+	},
+	/**
+	*	Returns a html representation of this order.
+	*	This method is necessary becase of the very complex object relations.
+	*/
+	getHtmlRepresentation: function() {
+
 	}
 
 });

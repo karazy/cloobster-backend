@@ -174,11 +174,18 @@
 .spotdetailitem-order {
 	width: 70%;
 	margin-bottom: 20px;
+	font-size:0.8em;
 }
 
 .spotdetailitem-order h2{
 	font-weight: bold;
 	float: left;
+	font-size:1em;
+}
+
+.spotdetailitem-order h3{
+	font-weight: bold;
+	font-size:0.8em;
 }
 
 .spotdetailitem-order-cancel {

@@ -32,7 +32,30 @@ Ext.define('EatSense.model.Product', {
 	            primaryKey: 'id',
 	            name: 'choices',
 	            autoLoad: true,
-	            associationKey: 'choices' // read child data from child_groups
+	            associationKey: 'choices', // read child data from child_groups,
+	            store: {
+	            	sorters: [
+	            	{
+	            		sorterFn: function(record1, record2){
+	            			// console.log('sort choices id1: %s parent1: %s and id2: %s parent2: %s', record1.get('id'), record1.get('parent'), record2.get('id'), record2.get('parent'));
+	            			var parent1 = record1.get('parent'),
+	            				parent2 = record1.get('parent');
+	            			if(parent1) {
+	            				if(parent1 == record2.get('id')) {
+	            					return 1;
+	            				}
+	            			}
+
+	            			if(parent2) {
+	            				if(parent2 == record1.get('id')) {
+	            					return 1;
+	            				}
+	            			}
+
+	            			return 0;
+	            		}
+	            	}]
+	            }
 	    }],
 	    proxy: {
 		   type: 'rest',
