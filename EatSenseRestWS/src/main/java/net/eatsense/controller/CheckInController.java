@@ -20,6 +20,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.validation.CheckInStep2;
+import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -39,6 +40,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -63,6 +65,7 @@ public class CheckInController {
     private Validator validator;
 	private RequestRepository requestRepo;
 	private OrderRepository orderRepo;
+	private EventBus eventBus;
 
 	/**
 	 * Constructor using injection for creation.
@@ -76,9 +79,14 @@ public class CheckInController {
 	 * @param validator
 	 */
 	@Inject
-	public CheckInController(BusinessRepository businessRepository, CheckInRepository checkInRepository, SpotRepository spotRepository,
-			Transformer transformer, ChannelController channelController, ObjectMapper objectMapper, Validator validator, RequestRepository requestRepository, OrderRepository orderRepo) {
+	public CheckInController(BusinessRepository businessRepository,
+			CheckInRepository checkInRepository, SpotRepository spotRepository,
+			Transformer transformer, ChannelController channelController,
+			ObjectMapper objectMapper, Validator validator,
+			RequestRepository requestRepository, OrderRepository orderRepo,
+			EventBus eventBus) {
 		this.businessRepo = businessRepository;
+		this.eventBus = eventBus;
 		this.checkInRepo = checkInRepository;
 		this.channelCtrl = channelController;
 		this.spotRepo = spotRepository;
@@ -217,19 +225,10 @@ public class CheckInController {
 		checkInDto.setUserId(checkInId);
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(spot.getId());
-		spotData.setCheckInCount(checkInCount);
-		
-		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
-		
-		// add the messages we want to send as one package
-		messages.add(new MessageDTO("spot","update",spotData));
-		messages.add(new MessageDTO("checkin","new", transform.toStatusDto(checkIn)));
-		
 		// send the messages
-		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
-
+		NewCheckInEvent newCheckInEvent = new NewCheckInEvent(business, spot , checkIn);
+		newCheckInEvent.setCheckInCount(checkInCount);
+		eventBus.post(newCheckInEvent);
 		return checkInDto;
 	}
 

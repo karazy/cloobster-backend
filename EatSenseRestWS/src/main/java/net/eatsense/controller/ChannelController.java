@@ -254,8 +254,10 @@ public class ChannelController {
 				logger.debug("sent message to channel {} ", clientId);
 			}
 		}
-		else
-			logger.info("no open channels");
+		else {
+			logger.info("no open channels to send message: {}", messageString);
+		}
+			
 	}
 
 	/**
