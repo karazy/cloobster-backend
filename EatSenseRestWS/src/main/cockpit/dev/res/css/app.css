@@ -196,6 +196,11 @@
 	text-decoration: line-through;
 }
 
+.x-button-icon.spotdetailitem-confirm ,.x-button .x-button-icon.x-icon-mask.spotdetailitem-confirm {
+	-webkit-mask-image: url('../images/check_icon.png');
+	/*background-image: url('../images/check_icon.png');*/
+}
+
 .spotdetailitem-order div:nth-of-type(1){
 	/*position: absolute; 
 	right: 0; 
