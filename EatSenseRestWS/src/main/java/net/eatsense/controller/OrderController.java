@@ -100,6 +100,9 @@ public class OrderController {
 			throw new IllegalArgumentException("Unable to delete order, checkin is null");
 		if(order.getCheckIn().getId() != checkIn.getId())
 			throw new OrderFailureException("Unable to delete order, checkIn does not own the order");
+		if(order.getStatus() != OrderStatus.CART) {
+			throw new OrderFailureException("Unable to delete order, order already PLACED.");
+		}
 		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
 		orderRepo.ofy().delete(order);
 	}
