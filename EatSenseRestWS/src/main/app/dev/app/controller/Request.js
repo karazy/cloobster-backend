@@ -28,7 +28,9 @@ Ext.define('EatSense.controller.Request',{
 
 		request.save({
 			failure: function(record, operation) {
-				me.getApplication().handleServerError(operation.error);
+				me.getApplication().handleServerError({
+					'error': operation.error
+				});
 			}
 		})
 	}

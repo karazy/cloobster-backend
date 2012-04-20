@@ -46,6 +46,9 @@ var translation = {
 		"spotSelectionTitle" : "Tisch auswählen",
 		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",
 		"paymentMethodLabel" : "Bezahlart",
+		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
+		"choiceValErrMin" : "Bitte wähle mindestens {0} {1} aus.",
+		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
 		//requests
 		"requestMsgboxTitle" : "Kundenwünsche",
 		"requestDismiss" : "Alle Verwerfen",

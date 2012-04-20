@@ -44,18 +44,16 @@ Ext.application({
 	},
 	/**
     *   Gloabl handler that can be used to handle errors occuring from server requests.
-    *   @param error
-    *      error object containing status and statusText.
-    *
-    *   @param forceLogout
-    *       a critical permission error occured and the user will be logged out
-    * 		true to logout on all errors 
-    *		OR
-    *		{errorCode : true|false} e.g. {403: true, 404: false}
-    * @param hideMessage
-    *	true if you don't want do display an error message
-    * @param message
-    *	message to show. If no message is set a default message will be displayed
+    *   @param options
+    *       Configuration object
+    *      
+    *       error: error object containing status and statusText.
+    *       forceLogout: a critical permission error occured and the user will be logged out
+    *       true to logout on all errors 
+    *       OR
+    *       {errorCode : true|false} e.g. {403: true, 404: false}
+    *       hideMessage: true if you don't want do display an error message
+    *       message: message to show. If no message is set a default message will be displayed
     */
     handleServerError: function(options) {
         var    errMsg,

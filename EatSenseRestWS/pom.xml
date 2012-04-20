@@ -159,7 +159,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/prod</directory>
+											<directory>src/main/app/prod-desktop</directory>
 										</resource>
 									</resources>
 								</configuration>

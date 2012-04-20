@@ -77,7 +77,7 @@ Ext.define('EatSense.controller.Spot', {
 		activeSpot: null,
 		//active customer in detail spot view
 		activeCustomer: null,
-		//active Bill of active Customer
+		//active bill of active Customer
 		activeBill : null
 	},
 
@@ -108,8 +108,12 @@ Ext.define('EatSense.controller.Spot', {
 			 },
 			 callback: function(records, operation, success) {
 			 	if(!success) {
-			 		loginCtr.logout();
-			 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotLoading'), Ext.emptyFn);
+			 		me.getApplication().handleServerError({
+						'error': operation.error, 
+						'forceLogout': true, 
+						'hideMessage':false
+						// 'message': Karazy.i18n.translate('errorSpotLoading')
+					});
 			 	}				
 			 },
 			 scope: this
@@ -123,17 +127,17 @@ Ext.define('EatSense.controller.Spot', {
 	*/
 	showSpotDetails: function(button, eventObj, eOpts) {
 		console.log('showSpotDetails');
-		var		me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				messageCtr = this.getApplication().getController('Message'),
-				requestCtr = this.getApplication().getController('Request'),
-				detail = me.getSpotDetail(),
-				checkInList = detail.down('#checkInList'),
-				data = button.getParent().getRecord(),
-				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				restaurantId = loginCtr.getAccount().get('businessId'),
-				titlebar = detail.down('titlebar'),
-				requestStore = Ext.StoreManager.lookup('requestStore');
+		var	me = this,
+			loginCtr = this.getApplication().getController('Login'),
+			messageCtr = this.getApplication().getController('Message'),
+			requestCtr = this.getApplication().getController('Request'),
+			detail = me.getSpotDetail(),
+			checkInList = detail.down('#checkInList'),
+			data = button.getParent().getRecord(),
+			checkInStore = Ext.StoreManager.lookup('checkInStore'),
+			restaurantId = loginCtr.getAccount().get('businessId'),
+			titlebar = detail.down('titlebar'),
+			requestStore = Ext.StoreManager.lookup('requestStore');
 
 		//add listeners for channel messages
 		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
@@ -158,7 +162,12 @@ Ext.define('EatSense.controller.Spot', {
 			 			me.getSpotDetailCustomerList().select(0);
 			 		}
 			 	} else {
-			 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailCheckInLoading'), Ext.emptyFn);
+			 		me.getApplication().handleServerError({
+						'error': operation.error, 
+						'forceLogout': {403: true},
+						'hideMessage':false
+						// 'message': Karazy.i18n.translate('errorSpotDetailCheckInLoading')
+					});
 			 	}				
 			 },
 			 scope: this
@@ -180,14 +189,14 @@ Ext.define('EatSense.controller.Spot', {
 	*
 	*/
 	showCustomerDetail: function(dataview, record, options) {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				orderStore = Ext.StoreManager.lookup('orderStore'),
-				billStore = Ext.StoreManager.lookup('billStore'),				
-				detail = me.getSpotDetail(),
-				restaurantId = loginCtr.getAccount().get('businessId'),
-				bill,
-				paidButton = this.getPaidSpotDetailButton();
+		var me = this,
+			loginCtr = this.getApplication().getController('Login'),
+			orderStore = Ext.StoreManager.lookup('orderStore'),
+			billStore = Ext.StoreManager.lookup('billStore'),				
+			detail = me.getSpotDetail(),
+			restaurantId = loginCtr.getAccount().get('businessId'),
+			bill,
+			paidButton = this.getPaidSpotDetailButton();
 		
 		if(!record) {
 			return;
@@ -208,7 +217,12 @@ Ext.define('EatSense.controller.Spot', {
 			 		this.updateCustomerStatusPanel(record);
 			 		this.updateCustomerTotal(records);
 			 	} else {
-			 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderLoading'), Ext.emptyFn);
+			 		me.getApplication().handleServerError({
+						'error': operation.error, 
+						'forceLogout': {403: true}, 
+						'hideMessage':false
+						// 'message': Karazy.i18n.translate('errorSpotDetailOrderLoading')
+					});
 			 	}				
 			 },
 			 scope: this
@@ -225,8 +239,7 @@ Ext.define('EatSense.controller.Spot', {
 				 	if(success && records.length == 1) { 
 				 		me.setActiveBill(records[0]);
 				 		me.updateCustomerPaymentMethod(records[0].getPaymentMethod().get('name'));
-				 	} else {
-				 		console.log('could not load bill');
+				 	} else {				 		
 			    		me.updateCustomerPaymentMethod();
 				 	}				
 				 },
@@ -464,11 +477,10 @@ Ext.define('EatSense.controller.Spot', {
 				sum = Karazy.util.roundPrice(sum);
 			} catch(e) {
 				console.log('failed calculating total price ' + e);
-				sum = '0.00€'
 			}
 			totalLabel.getTpl().overwrite(totalLabel.element, {'total': sum});	
 		} else {
-			totalLabel.getTpl().overwrite(totalLabel.element, {'total': '0.00€'});
+			totalLabel.getTpl().overwrite(totalLabel.element, {'total': sum});
 		}
 	},
 	/**
@@ -542,7 +554,15 @@ Ext.define('EatSense.controller.Spot', {
     	    },
     	    failure: function(response) {
     	    	order.set('status', prevStatus);
-				Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+    	    	me.getApplication().handleServerError({
+						'error': {
+							'status': response.status,
+							'statusText': response.statusText
+						}, 
+						'forceLogout': {403: true}, 
+						'hideMessage':false
+						// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
+				});
 	   	    }
 		});
 	},
@@ -601,6 +621,11 @@ Ext.define('EatSense.controller.Spot', {
 				failure: function(record, operation) {
 					console.log('saving bill failed');
 					button.enable();
+					me.getApplication().handleServerError({
+						'error': operation.error,
+						'forceLogout': {403: true}
+						// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
+					});
 				}
 			});			
 		}
@@ -639,7 +664,13 @@ Ext.define('EatSense.controller.Spot', {
     	    },
     	    failure: function(response) {
     	    	order.set('status', prevStatus);
-				Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+    	    		me.getApplication().handleServerError({
+						'error': {
+							'status': response.status,
+							'statusText': response.statusText
+						}, 
+						'forceLogout': {403: true}, 
+				});
 	   	    }
 		});
 	},
@@ -683,11 +714,13 @@ Ext.define('EatSense.controller.Spot', {
 					me.getActiveCustomer().erase({
 						callback: function(records, operation) {
 							if(!operation.success) {
-								Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorMsg'), Ext.emptyFn);
+								me.getApplication().handleServerError({
+									'error': operation.error,
+									'forceLogout': {403: true}
+								});
 							} else {
 								//although a message will be received we update the view directly
 								checkins.remove(me.getActiveCustomer());
-
 								if(checkins.getCount() > 0) {
 									if(checkins.getAt(customerIndex)) {
 										customerList.select(customerIndex);	
@@ -756,7 +789,10 @@ Ext.define('EatSense.controller.Spot', {
 					requestCtr.loadRequests();
 				},
 				failure: function(record, operation) { 
-					Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('switchSpotError'));
+					me.getApplication().handleServerError({
+						'error': operation.error,
+						'forceLogout': {403: true}
+					});
 				}
 			})
 		}
@@ -797,19 +833,7 @@ Ext.define('EatSense.controller.Spot', {
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 		messageCtr.un('eatSense.request', requestCtr.updateSpotDetailOrderIncremental, requestCtr);
-	},
-
-	// setActiveCustomerWrapper: function(customer) {
-	// 	var 	me = this;
-
-	// 	if(customer) {
-
-	// 	} else {
-	// 		me.setActiveCustomer(null);
-	// 	}
-
-	// 	me.fireEv
-	// }
+	}
 
 	// </MISC VIEW ACTIONS>
 

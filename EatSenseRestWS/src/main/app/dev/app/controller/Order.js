@@ -240,7 +240,10 @@
 					    	    	cartview.showLoadScreen(false);
 					    	    	me.getSubmitOrderBt().enable();
 					    	    	me.getCancelOrderBt().enable();
-					    	    	me.getApplication().handleServerError({'error' : { 'status' : response.status, 'statusText' : response.statusText}}); 
+					    	    	me.getApplication().handleServerError({
+			                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+			                        	'forceLogut': {403:true}
+			                        }); 
 					    	    }
 							});			
 						}	else {
@@ -277,7 +280,7 @@
 		 //save state of order to undo changes
 		 order.saveState();
 
-		 choicesPanel.removeAll(false);
+		 choicesPanel.removeAll(false); 
 		 //reset product spinner
 		 this.getAmountSpinner().setValue(order.get('amount'));
 
@@ -368,7 +371,10 @@
 	    	    method: 'PUT',
 	    	    jsonData: order.getRawJsonData(),
 	    	    failure: function(response) {
-					me.getApplication().handleServerError({'error' : { 'status' : response.status, 'statusText' : response.statusText}}, {403: true}); 
+					me.getApplication().handleServerError({
+                    	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+                    	'forceLogut': {403:true}
+                    }); 
 				}
 			});
 
@@ -403,7 +409,10 @@
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
 	    	    method: 'DELETE',
 	    	    failure: function(response) {
-					me.getApplication().handleServerError({'error' : { 'status' : response.status, 'statusText' : response.statusText}}, {403: true}); 
+					me.getApplication().handleServerError({
+	                	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+	                	'forceLogut': {403:true}
+	                }); 
 				}
 	    	});
 			
@@ -499,7 +508,10 @@
 					} else {
 						payButton.disable();
 						leaveButton.enable();					
-						me.getApplication().handleServerError(operation.error, {403: true});
+						me.getApplication().handleServerError({
+							'error': operation.error,
+							'statusText': {403: true}
+						});
 					}	
 				} catch(e) {
 					
@@ -612,7 +624,10 @@
 					myordersComplete.show();					
 			},
 			failure: function(record, operation) {
-				me.getApplication().handleServerError(operation.error, {403: true});
+				me.getApplication().handleServerError({
+					'error': operation.error,
+					'statusText': {403: true}
+				});
 			}
 		});			
 	},
@@ -626,7 +641,10 @@
 		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) { 
 			checkIn.erase( {
 				failure: function(response, operation) {
-					me.getApplication().handleServerError(operation.error, {403: true});
+					me.getApplication().handleServerError({
+						'error': operation.error,
+						'statusText': {403: true}
+					});
 				}
 			}
 			);

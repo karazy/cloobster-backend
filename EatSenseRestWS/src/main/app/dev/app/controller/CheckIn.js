@@ -111,7 +111,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
      	        	    failure: function(record, operation) {
-                            me.getApplication().handleServerError(operation.error); 
+                            me.getApplication().handleServerError({
+                                'error': operation.error
+                            }); 
      	        	    },
      	        	    callback: function() {
      	        	    	me.getDashboard().showLoadScreen(false);
@@ -247,7 +249,10 @@ Ext.define('EatSense.controller.CheckIn', {
                                 }
 					   	    },
 					   	    failure: function(response, operation) {			   	    	
-                                me.getApplication().handleServerError(operation.error, {403 : true}); 
+                                me.getApplication().handleServerError({
+                                    'error': operation.error, 
+                                    'forceLogout':{403 : true}
+                                }); 
 					   	    }
 					   }	   
 			   );
@@ -438,7 +443,9 @@ Ext.define('EatSense.controller.CheckIn', {
 
     	    },
     	    failure: function(record, operation) {
-    	    	me.getApplication().handleServerError(operation.error);        	    	
+    	    	me.getApplication().handleServerError({
+                    'error':operation.error
+                });        	    	
     	    }
 		});						
 	},	
