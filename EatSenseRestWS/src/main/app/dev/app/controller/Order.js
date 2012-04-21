@@ -629,7 +629,19 @@
 					'statusText': {403: true}
 				});
 			}
-		});			
+		});
+
+		//show success message to give user the illusion of success ;)
+		Ext.Msg.show({
+			title : Karazy.i18n.translate('hint'),
+			message : Karazy.i18n.translate('paymentRequestSend'),
+			buttons : []
+		});
+		
+		Ext.defer((function() {
+			Ext.Msg.hide();
+		}), Karazy.config.msgboxHideLongTimeout, this);		
+
 	},
 	/**
 	 * Called when user checks in and wants to leave without issuing an order.

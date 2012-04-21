@@ -73,6 +73,7 @@ var translation = {
 		"leaveButton" : "Verlassen",
 		//Payment Request
 		"paymentPickerTitle" : "Bezahlmethode",
+		"paymentRequestSend": "Bitte warte einen Moment,</br>deine Rechnung wird vorbereitet ...",
 		//Settings
 		"settingsTitle" : "Einstellungen",
 		"nickname" : "Spitzname",

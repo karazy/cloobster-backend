@@ -282,6 +282,8 @@ Ext.define('EatSense.controller.Spot', {
 
 			if(updatedSpot.status) {
 				dirtySpot.set('status', updatedSpot.status);
+			} else if(updatedSpot.checkInCount === 0) {
+				dirtySpot.set('status', '');
 			}
 
 			if(updatedSpot.checkInCount || typeof updatedSpot.checkInCount == "number") {
@@ -389,9 +391,7 @@ Ext.define('EatSense.controller.Spot', {
 				if(action == 'new') {
 					this.setActiveBill(bill);
 					paidButton.enable();
-					me.updateSpotDetailBillIncremental(bill.getPaymentMethod());
-					// paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : bill.getPaymentMethod().get('name')});
-					// paymentLabel.show();
+					me.updateCustomerPaymentMethod(bill.getPaymentMethod().get('name'));
 				} else if (action == 'update') {
 					//currently no action needed. update occurs when a bill is cleared
 					//since we also receive a checkin delete method no further action required
@@ -845,7 +845,10 @@ Ext.define('EatSense.controller.Spot', {
 		var 	me = this,
 				activeCustomer = this.getActiveCustomer(),
 				loginCtr = this.getApplication().getController('Login'),
-				requestCtr = this.getApplication().getController('Request');
+				requestCtr = this.getApplication().getController('Request'),
+				//cache customer nickname, to prevent usage name of a new active customer
+				cusomerNickname = activeCustomer.get('nickname'),
+				spotName = record.get('name');
 
 		if(activeCustomer) {
 			//set new spot id
@@ -864,7 +867,19 @@ Ext.define('EatSense.controller.Spot', {
 						'forceLogout': {403: true}
 					});
 				}
-			})
+			});
+
+			//show success message to give user the illusion of success ;)
+			Ext.Msg.show({
+				title : Karazy.i18n.translate('hint'),
+				message : Karazy.i18n.translate('switchSpotMessage', cusomerNickname, spotName),
+				buttons : []
+			});
+			
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), Karazy.config.msgboxHideLongTimeout, this);
+
 		}
 
 		list.getParent().hide();

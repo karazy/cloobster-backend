@@ -41,6 +41,7 @@ var translation = {
 		"cancelAllOrders" : "Möchtest du alle Bestellungen stornieren und diesen Gast entfernen?",
 		"errorSpotDetailOrderCancel" : "Bestellung {0} konnte nicht storniert werden.",
 		"switchSpotButton" : "Tisch wechseln",
+		"switchSpotMessage": "{0} an {1} verschoben",
 		"cancelAllOrdersButton" : "Gast entfernen",
 		"confirmAllOrdersButton" : "Alle abgearbeitet",
 		"paidButton" : "Bezahlt",

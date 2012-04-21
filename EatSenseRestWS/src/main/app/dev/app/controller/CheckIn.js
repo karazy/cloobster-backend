@@ -403,7 +403,7 @@ Ext.define('EatSense.controller.CheckIn', {
               main = this.getMain(),
 		      orderCtr = this.getApplication().getController('Order'),
               messageCtr = this.getApplication().getController('Message');
-
+        
 		this.setActiveCheckIn(checkIn);
         //Set default headers so that always checkInId is send
         Ext.Ajax.setDefaultHeaders({
@@ -460,7 +460,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
         var     orderCtr = this.getApplication().getController('Order'),
-                menuCtr = this.getApplication().getController('Menu');
+                menuCtr = this.getApplication().getController('Menu'),
+                menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
@@ -477,9 +478,9 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getRequestsTab().enable();
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
+            menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
-			menuCtr.getMenulist().getStore().removeAll();
-            menuCtr.showMenu();
+            menuStore.removeAll();
             //remove all orders in cart and refresh badge text
             this.getActiveCheckIn().orders().removeAll();
             orderCtr.refreshCartBadgeText();

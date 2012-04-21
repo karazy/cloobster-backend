@@ -23,7 +23,7 @@ Ext.define('EatSense.controller.Message', {
 
 		if(Ext.isArray(message)) {
 				for(index = 0; index < message.length; index++) {
-				if(message[index]) {
+				if(message[index]) {					
 					this.broadcastMessage(message[index]);
 				}	
 			}
@@ -51,6 +51,8 @@ Ext.define('EatSense.controller.Message', {
 		var 	me = this,
 				evtPrefix = 'eatSense.',
 				model = message.content;
+				
+		console.log('broadcast message type %s, action %s', message.type, message.action);
 
 		if(!message) {
 			console.log('no message send');

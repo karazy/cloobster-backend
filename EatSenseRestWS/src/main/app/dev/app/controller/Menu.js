@@ -97,10 +97,11 @@ Ext.define('EatSense.controller.Menu', {
     		lounge = this.getLoungeview(),
     		main = this.getMain(),
     		checkInCtr = this.getApplication().getController('CheckIn'),
-    		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId'));
+    		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId')),
+    		menuStore = Ext.StoreManager.lookup('menuStore');
 		 
 		if(businessId.toString().length != 0) {
-			this.getMenulist().getStore().load({
+			menuStore.load({
 				scope   : this,
 				params: {
 					'includeProducts' : true,
