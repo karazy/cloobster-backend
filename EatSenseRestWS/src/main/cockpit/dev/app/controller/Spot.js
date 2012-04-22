@@ -320,6 +320,7 @@ Ext.define('EatSense.controller.Spot', {
 					//make sure to load new request so they exist
 					requestCtr.loadRequests();
 				} else if (action == 'update') {
+					console.log('update checkin id %s with status %s', updatedCheckIn.id, updatedCheckIn.status);
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					if(dirtyCheckIn) {
 						//update existing checkin
@@ -420,6 +421,7 @@ Ext.define('EatSense.controller.Spot', {
 				if(action == 'new') {
 					
 				} else if(action == 'update') {
+					console.log('order id %s update channel message received', updatedOrder.id);
 					oldOrder = store.getById(updatedOrder.id);
 					if(oldOrder) {
 						store.remove(oldOrder);
@@ -795,7 +797,7 @@ Ext.define('EatSense.controller.Spot', {
 	    	    jsonData: order.getRawJsonData(),
 	    	    scope: this,
 	    	    success: function(response) {
-	    	    	console.log('order confirmed');
+	    	    	console.log('order %s confirmed', order.getId());
 	    	    },
 	    	    failure: function(response) {
 	    	    	order.set('status', prevStatus);
