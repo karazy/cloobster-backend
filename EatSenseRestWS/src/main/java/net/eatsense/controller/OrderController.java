@@ -559,6 +559,7 @@ public class OrderController {
 		}
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
+		orderData.setCheckInId(checkIn.getId());
 		
 		if(!order.getStatus().isTransitionAllowed(orderData.getStatus())) {
 			throw new IllegalArgumentException(String.format("Order cannot be updated, change from %s to %s forbidden.",

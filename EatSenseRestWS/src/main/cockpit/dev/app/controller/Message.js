@@ -23,7 +23,7 @@ Ext.define('EatSense.controller.Message', {
 
 		if(Ext.isArray(message)) {
 				for(index = 0; index < message.length; index++) {
-				if(message[index]) {
+				if(message[index]) {					
 					this.broadcastMessage(message[index]);
 				}	
 			}
@@ -51,6 +51,8 @@ Ext.define('EatSense.controller.Message', {
 		var 	me = this,
 				evtPrefix = 'eatSense.',
 				model = message.content;
+				
+		console.log('broadcast message type %s, action %s', message.type, message.action);
 
 		if(!message) {
 			console.log('no message send');
@@ -59,6 +61,59 @@ Ext.define('EatSense.controller.Message', {
 
 		//fire event based on the message
 		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
-	
-	}
+	},
+	/**
+	*	Requests a new token from server and executes the given callback with new token as parameter.
+	*	@param callback
+	*		callback function to invoke on success
+	*/
+	requestNewToken: function(callback) {
+		var 	account = this.getApplication().getController('Login').getAccount(),
+				login = account.get('login'),
+				clientId = login + new Date().getTime();
+		
+		account.set('clientId', clientId);
+		console.log('request new token. clientId: ' + clientId);
+		Ext.Ajax.request({
+		    url: Karazy.config.serviceUrl+'/accounts/'+login+'/tokens',		    
+		    method: 'POST',
+		    params: {
+		    	'businessId' :  account.get('businessId'),
+		    	'clientId' : clientId
+		    },
+		    success: function(response){
+		       	token = response.responseText;
+		       	callback(token);
+		    }, 
+		    failure: function(response) {
+		    	me.getApplication().handleServerError({
+					'error': {
+						'status' : response.status,
+						'statusText': response.statusText
+					}, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': Karazy.i18n.translate('channelTokenError')
+				});
+		    }
+		});
+	},
+	/**
+	* 	Requests a token and
+	*	opens a channel for server side push messages.
+	*
+	*/
+	openChannel: function() {
+		var		me = this;
+
+		me.requestNewToken(function(newToken) {
+			Karazy.channel.createChannel( {
+				token: newToken, 
+				messageHandler: me.processMessages,
+				requestTokenHandler: me.requestNewToken,
+				messageHandlerScope: me,
+				requestTokenHandlerScope: me
+			});
+		});
+	}, 
 });

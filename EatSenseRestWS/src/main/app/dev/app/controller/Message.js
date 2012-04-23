@@ -81,7 +81,15 @@ Ext.define('EatSense.controller.Message', {
 		    }, 
 		    failure: function(response, opts) {
 		    	console.log('request token failed ' + response);
-		    	Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('channelTokenError')); 
+		    	me.getApplication().handleServerError({
+					'error': {
+						'status' : response.status,
+						'statusText': response.statusText
+					}, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': Karazy.i18n.translate('channelTokenError')
+				});
 		    }
 		});
 	},

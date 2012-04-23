@@ -73,6 +73,7 @@ var translation = {
 		"leaveButton" : "Verlassen",
 		//Payment Request
 		"paymentPickerTitle" : "Bezahlmethode",
+		"paymentRequestSend": "Bitte warte einen Moment,</br>deine Rechnung wird vorbereitet ...",
 		//Settings
 		"settingsTitle" : "Einstellungen",
 		"nickname" : "Spitzname",
@@ -80,7 +81,9 @@ var translation = {
 		//Request
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "Aktionen",
-		"requestsTitle" : "Aktionen"	
+		"requestsTitle" : "Aktionen",
+		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen."	
+
 
 	}
 

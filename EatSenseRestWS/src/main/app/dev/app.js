@@ -114,23 +114,26 @@ Ext.application({
 	   	 }	
 	},
 	/**
-    *   Gloabl handler that handles all errors occuring from server requests.
-    *   @param error
-    *      error object containing status and statustext.
-    *
-    *   @param forceLogout
-    *       a critical permission error occured and the user will be logged out
-    * 		true to logout on all errors 
-    *		OR
-    *		{errorCode : true|false} e.g. {403: true, 404: false}
-    * @param hideMessage
-    *	true if you don't want do display an error message
-    * @param message
-    *	message to show. If no message is set a default message will be displayed
+    *   Gloabl handler that can be used to handle errors occuring from server requests.
+    *   @param options
+    *       Configuration object
+    *      
+    *       error: error object containing status and statusText.
+    *       forceLogout: a critical permission error occured and the user will be logged out
+    *       true to logout on all errors 
+    *       OR
+    *       {errorCode : true|false} e.g. {403: true, 404: false}
+    *       hideMessage: true if you don't want do display an error message
+    *       message: message to show. If no message is set a default message will be displayed
     */
-    handleServerError: function(error, forceLogout, hideMessage, message) {
+    handleServerError: function(options) {
         var    errMsg,
-               nestedError; 
+               nestedError,
+               loginCtr = this.getController('Login'),
+               error = options.error,
+               forceLogout = options.forceLogout,
+               hideMessage = options.hideMessage,
+               message = options.message;
         if(error && error.status) {
             switch(error.status) {
                 case 403:

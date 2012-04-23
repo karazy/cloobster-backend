@@ -111,7 +111,9 @@ Ext.define('EatSense.controller.CheckIn', {
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
      	        	    failure: function(record, operation) {
-                            me.getApplication().handleServerError(operation.error); 
+                            me.getApplication().handleServerError({
+                                'error': operation.error
+                            }); 
      	        	    },
      	        	    callback: function() {
      	        	    	me.getDashboard().showLoadScreen(false);
@@ -247,7 +249,10 @@ Ext.define('EatSense.controller.CheckIn', {
                                 }
 					   	    },
 					   	    failure: function(response, operation) {			   	    	
-                                me.getApplication().handleServerError(operation.error, {403 : true}); 
+                                me.getApplication().handleServerError({
+                                    'error': operation.error, 
+                                    'forceLogout':{403 : true}
+                                }); 
 					   	    }
 					   }	   
 			   );
@@ -399,7 +404,16 @@ Ext.define('EatSense.controller.CheckIn', {
 		      orderCtr = this.getApplication().getController('Order'),
               messageCtr = this.getApplication().getController('Message');
 
-		this.setActiveCheckIn(checkIn);
+        this.setActiveCheckIn(checkIn);
+        //reload of application before hitting leave button
+        if(checkIn.get('status') == Karazy.constants.PAYMENT_REQUEST) {
+            console.log('PAYMENT_REQUEST already issued. Don\'t restore state!');
+            this.handleStatusChange(Karazy.constants.COMPLETE);
+            this.setActiveCheckIn(null);
+            return;
+        }
+
+		
         //Set default headers so that always checkInId is send
         Ext.Ajax.setDefaultHeaders({
             'checkInId': checkIn.get('userId'),
@@ -438,7 +452,9 @@ Ext.define('EatSense.controller.CheckIn', {
 
     	    },
     	    failure: function(record, operation) {
-    	    	me.getApplication().handleServerError(operation.error);        	    	
+    	    	me.getApplication().handleServerError({
+                    'error':operation.error
+                });        	    	
     	    }
 		});						
 	},	
@@ -453,7 +469,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
         var     orderCtr = this.getApplication().getController('Order'),
-                menuCtr = this.getApplication().getController('Menu');
+                menuCtr = this.getApplication().getController('Menu'),
+                menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
@@ -464,20 +481,22 @@ Ext.define('EatSense.controller.CheckIn', {
 			
 			this.getActiveCheckIn().set('status', status);
 		} else if (status == Karazy.constants.COMPLETE || status == Karazy.constants.CANCEL_ALL || status == Karazy.constants.FORCE_LOGOUT) {
-			this.getMenuTab().enable();
+			this.showDashboard();
+            this.getMenuTab().enable();
 			this.getCartTab().enable();
             this.getSettingsTab().enable();
             this.getRequestsTab().enable();
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
+            menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
-			menuCtr.getMenulist().getStore().removeAll();
-            menuCtr.showMenu();
+            menuStore.removeAll();
             //remove all orders in cart and refresh badge text
-            this.getActiveCheckIn().orders().removeAll();
-            orderCtr.refreshCartBadgeText();
-
-			this.showDashboard();
+            if(this.getActiveCheckIn())
+            {
+                this.getActiveCheckIn().orders().removeAll();  
+                orderCtr.refreshCartBadgeText();
+            }
 
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();

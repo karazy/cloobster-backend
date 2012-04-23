@@ -25,6 +25,7 @@ Ext.define('EatSense.view.SpotDetail', {
 					this.down('button[action=switch-spot]').setDisabled(!active);
 					this.down('button[action=paid]').setDisabled(!active);			
 					this.down('button[action=cancel-all]').setDisabled(!active);
+					this.down('button[action=confirm-all]').setDisabled(!active);
 				} catch(e) {
 					console.log(e);
 				}
@@ -87,10 +88,14 @@ Ext.define('EatSense.view.SpotDetail', {
 			{
 				xtype: 'panel',
 				docked: 'top',
+				layout: {
+					type: 'hbox',
+					align: 'middle'
+				},
 				height: 100,
 				items: [
 				{
-					xtype: 'panel',
+					xtype: 'panel',					
 					// itemId: 'statistics',
 					cls: 'spotdetail-statistics',
 					items: [
@@ -148,6 +153,16 @@ Ext.define('EatSense.view.SpotDetail', {
 							}
 						}
 					)
+				},
+				{
+					xtype: 'button',
+					action: 'confirm-all',
+					disabled: true,
+					text: Karazy.i18n.translate('confirmAllOrdersButton'),
+					ui: 'action',
+					// cls: 'spotdetail-toolbar-button',
+					right: 5,
+					bottom: 5
 				}]
 			},
 			 {
@@ -178,11 +193,13 @@ Ext.define('EatSense.view.SpotDetail', {
 				},
 				{
 					text: Karazy.i18n.translate('switchSpotButton'),
-					action: 'switch-spot'
+					action: 'switch-spot',
+					disabled: true
 				},
 				{
 					text: Karazy.i18n.translate('cancelAllOrdersButton'),
 					action: 'cancel-all',
+					disabled: true
 					// iconCls: 'cancel-all'
 					// icon: '../app/res/images/into_cart.png',
 					// iconAlign: 'centered',

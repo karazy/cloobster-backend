@@ -10,6 +10,7 @@ Karazy.config = (function() {
 		
 		serviceUrl : '#SERVICE_URL',
 		msgboxHideTimeout : 1000,
+		msgboxHideLongTimeout: 2500,
 		currencyFormat: 'EURO',
 		version: 0.1,
 		disableCaching: true

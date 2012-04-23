@@ -61,7 +61,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		//cancel Order
 		cancelButton: {
 			action: 'cancel',
-			iconCls: 'delete',
+			iconCls: 'trash',
 			ui: 'action',
 			iconMask: true,
 			cls: 'spotdetailitem-cancel' 
@@ -70,7 +70,8 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		confirmButton: {
 			action: 'confirm',
 			ui: 'action',
-			iconCls: 'add',
+			iconCls: 'spotdetailitem-confirm',
+			// icon: 'res/images/check_icon.png',
 			iconMask: true,
 			cls: 'spotdetailitem-confirm' 
 		},

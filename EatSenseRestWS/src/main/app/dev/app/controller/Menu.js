@@ -97,10 +97,11 @@ Ext.define('EatSense.controller.Menu', {
     		lounge = this.getLoungeview(),
     		main = this.getMain(),
     		checkInCtr = this.getApplication().getController('CheckIn'),
-    		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId'));
+    		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId')),
+    		menuStore = Ext.StoreManager.lookup('menuStore');
 		 
 		if(businessId.toString().length != 0) {
-			this.getMenulist().getStore().load({
+			menuStore.load({
 				scope   : this,
 				params: {
 					'includeProducts' : true,
@@ -108,7 +109,10 @@ Ext.define('EatSense.controller.Menu', {
 				},
 			    callback: function(records, operation, success) {
 			    	if(!success) { 
-                        me.getApplication().handleServerError(operation.error, {403:true}); 
+                        me.getApplication().handleServerError({
+                        	'error': operation.error, 
+                        	'forceLogut': {403:true}
+                        }); 
                     }
 			    }
 			 });
@@ -212,13 +216,15 @@ Ext.define('EatSense.controller.Menu', {
 	},
 	/**
 	* @private
-	* Creates Ext.field.Radio and Ext.field.Checkbox option elements and adds them to a panel.
+	* Creates Ext.field.Radio and Ext.field.Checkbox option elements and adds them to given panel.
 	* @param choice
 	*	Choice containing options to create.
 	* @param panel
 	*	Panel to add options to
+	* @param parentChoice
+	*	parent to given choice
 	*/
-	createOptions: function(choice, panel, parent) {
+	createOptions: function(choice, panel, parentChoice) {
 		if(!choice || !panel) {
 			console.log('You have to provide options and panel')
 			return;
@@ -243,7 +249,7 @@ Ext.define('EatSense.controller.Menu', {
 							label : opt.get('name'),
 							checked: opt.get('selected'),
 							cls: 'option',
-							disabled: (parent && !parent.isActive()) ? true : false
+							disabled: (parentChoice && !parentChoice.isActive()) ? true : false
 					}, me);							 
 			//TODO this is sooo dirty
 			field.addListener('check',function(cbox, event) {
@@ -263,7 +269,7 @@ Ext.define('EatSense.controller.Menu', {
 				 } else {
 				 	opt.set('selected', true);	
 				 }
-				 if(!parent) {
+				 if(!parentChoice) {
 				 	choice.isActive();
 				 }
 				 choice.fireEvent('recalculate');
@@ -275,7 +281,7 @@ Ext.define('EatSense.controller.Menu', {
 				 if(cbox.isXType('checkboxfield',true)) {
 					 opt.set('selected', false);
 				 }
-				 if(!parent) {
+				 if(!parentChoice) {
 				 	choice.isActive();
 				 }
 				 choice.fireEvent('recalculate');
@@ -283,8 +289,8 @@ Ext.define('EatSense.controller.Menu', {
 			 },me);
 			 panel.getComponent('optionsPanel').add(field);
 
-			 if(parent) {
-			 	parent.on('activeChanged', function(isActive) {			 		
+			 if(parentChoice) {
+			 	parentChoice.on('activeChanged', function(isActive) {			 		
 			 		field.setDisabled(!isActive);
 			 		if(!isActive) {
 				 		//TODO leave active?
@@ -352,7 +358,10 @@ Ext.define('EatSense.controller.Menu', {
 	    	    	order.phantom = false;
 	    	    },
 	    	    failure: function(response, operation) {
-	    	    	me.getApplication().handleServerError(operation.error, {403: true}); 
+	    	    	me.getApplication().handleServerError({
+                        	'error': operation.error, 
+                        	'forceLogut': {403:true}
+                        }); 
 	    	    }
 	    	});
 			

@@ -1,5 +1,5 @@
 /*
-* The login controller handles login, registering a new account ...
+* The login controller handles login and storing application state.
 */
 Ext.define('EatSense.controller.Login', {
 	extend: 'Ext.app.Controller',
@@ -29,8 +29,8 @@ Ext.define('EatSense.controller.Login', {
 			businessList: 'choosebusiness list',
 			cancelLoginButton: 'choosebusiness button[action=cancel]',			
 		},		
-
-		account : {} //Ext.create('EatSense.model.Account'),
+		//Logged in user
+		account : {}
 	},
 
 	init: function() {
@@ -85,6 +85,7 @@ Ext.define('EatSense.controller.Login', {
 		var me = this,
 			accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
 			spotCtr = this.getApplication().getController('Spot'),
+			messageCtr = this.getApplication().getController('Message'),
 			account;
 
 	   	 try {
@@ -114,7 +115,7 @@ Ext.define('EatSense.controller.Login', {
 
 						Ext.create('EatSense.view.Main');
 						spotCtr.loadSpots();
-						me.openChannel();
+						messageCtr.openChannel();
 					},
 					failure: function(record, operation) {					
 						//error verifying credentials, maybe account changed on server or server ist not aaccessible
@@ -122,10 +123,8 @@ Ext.define('EatSense.controller.Login', {
 						me.resetAccountProxyHeaders();
 
 						Ext.create('EatSense.view.Login');
-						//TODO handle 401 unauthorized
 
 						me.getLoginField().setValue(account.get('login'));
-
 
 						if(operation.error) {
 							//not authorized
@@ -294,61 +293,6 @@ Ext.define('EatSense.controller.Login', {
 		});
 	},
 	/**
-	*	Requests a new token from server and executes the given callback with new token as parameter.
-	*	@param callback
-	*		callback function to invoke on success
-	*/
-	requestNewToken: function(callback) {		
-		var 	account = this.getAccount(),
-				login = account.get('login'),
-				clientId = login + new Date().getTime();
-		
-		account.set('clientId', clientId);
-		console.log('request new token. clientId: ' + clientId);
-		Ext.Ajax.request({
-		    url: Karazy.config.serviceUrl+'/accounts/'+login+'/tokens',		    
-		    method: 'POST',
-		    params: {
-		    	'businessId' :  this.getAccount().get('businessId'),
-		    	'clientId' : clientId
-		    },
-		    success: function(response){
-		       	token = response.responseText;
-		       	callback(token);
-		    }, 
-		    failure: function(response) {
-		    	me.getApplication().handleServerError({
-					'error': {
-						'status' : response.status,
-						'statusText': response.statusText
-					}, 
-					'forceLogout': false, 
-					'hideMessage':false, 
-					'message': Karazy.i18n.translate('channelTokenError')
-				});
-		    }
-		});
-	},
-	/**
-	* 	Requests a token and
-	*	opens a channel for server side push messages.
-	*
-	*/
-	openChannel: function() {
-		var		me = this,
-				messageCtr = this.getApplication().getController('Message');
-
-		me.requestNewToken(function(newToken) {
-			Karazy.channel.createChannel( {
-				token: newToken, 
-				messageHandler: messageCtr.processMessages,
-				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: messageCtr,
-				requestTokenHandlerScope: me
-			});
-		});
-	}, 
-	/**
 	*	Loads all businesses (e. g. restaurants or hotels) this user account is assigned to.
 	*
 	*/
@@ -384,6 +328,11 @@ Ext.define('EatSense.controller.Login', {
 			 	} else {
 			 		//TODO user can't log in because he is not assigned to a business
 			 		loginPanel.setActiveItem(0);
+			 		me.getApplication().handleServerError({
+							'error': operation.error, 
+							'forceLogout': false, 
+							'hideMessage':false
+						}); 
 			 		// Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotLoading'), Ext.emptyFn);
 			 	}				
 			 },
@@ -395,16 +344,17 @@ Ext.define('EatSense.controller.Login', {
 	*	Sets the businessId in account the user wants to log in for.
 	*	This Id will be used for calls to the webservice.
 	* 	e.g. /businesses/{id}/spots
-	*
-	*	
+	* @param business
+	*	the business
 	*/
-	setBusinessId: function(record) {
+	setBusinessId: function(business) {
 		var 	me = this,
 				account = this.getAccount(),
-				spotCtr = this.getApplication().getController('Spot'); 
+				spotCtr = this.getApplication().getController('Spot'),
+				messageCtr = this.getApplication().getController('Message'); 
 
-		account.set('businessId', record.get('id'));
-		account.set('business', record.get('name'));
+		account.set('businessId', business.get('id'));
+		account.set('business', business.get('name'));
 		
 		//set pathId in default Ajax headers to avoid setting it with every request
 		Ext.Ajax.getDefaultHeaders().pathId = account.get('businessId');
@@ -415,7 +365,7 @@ Ext.define('EatSense.controller.Login', {
 		Ext.create('EatSense.view.Main');
 		spotCtr.loadSpots();
 
-		me.openChannel();		
+		messageCtr.openChannel();		
 	},
 	/**
 	*	Event handler for choose business list tap.
