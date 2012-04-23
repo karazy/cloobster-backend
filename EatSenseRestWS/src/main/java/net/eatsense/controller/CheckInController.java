@@ -35,8 +35,6 @@ import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
-import net.eatsense.representation.cockpit.MessageDTO;
-import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.IdHelper;
 
 import org.codehaus.jackson.map.ObjectMapper;

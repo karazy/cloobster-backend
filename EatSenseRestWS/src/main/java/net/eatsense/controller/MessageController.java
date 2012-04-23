@@ -8,11 +8,16 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
+import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.NewCheckInEvent;
+import net.eatsense.event.UpdateBillEvent;
+import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
@@ -37,7 +42,77 @@ public class MessageController {
 		this.transform = transform;
 		this.channelCtrl = channelCtrl;
 	}
+	
+	@Subscribe
+	public void sendNewBillMessages(NewBillEvent event) {
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		// Add a message with the new bill to the message package.
+		messages.add(new MessageDTO("bill","new", transform.billToDto(event.getBill())));
+		// Add a message with updated checkin status to the package.
+		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(event.getCheckIn())));
+		
+		if(event.getNewSpotStatus().isPresent()) {
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			spotData.setId(event.getCheckIn().getSpot().getId());
+			spotData.setStatus(event.getNewSpotStatus().get());
+			// Add a message with updated spot status to the package.
+			messages.add(new MessageDTO("spot", "update", spotData));
+		}
+		
+		// Send messages to notify clients over their channel.
+		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+	}
+	
+	@Subscribe
+	public void sendUpdateBillMessages(UpdateBillEvent event) {
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 
+		// Add a message with updated checkin status to the package.
+		messages.add(new MessageDTO("checkin","delete",transform.toStatusDto(event.getCheckIn())));
+		
+		// Add a message with updated bill status to the message package.
+		messages.add(new MessageDTO("bill","update",transform.billToDto(event.getBill())));
+
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(event.getCheckIn().getSpot());
+		
+		// Add a message with updated spot status to the package.
+		SpotStatusDTO spotData = new SpotStatusDTO();
+		spotData.setId(event.getCheckIn().getSpot().getId());
+		spotData.setCheckInCount(checkInCount);
+		if(checkInCount > 0)
+			spotData.setStatus(event.getNewSpotStatus().or(CheckInStatus.CHECKEDIN.toString()));
+		
+		messages.add(new MessageDTO("spot","update",spotData));
+		
+		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+	}
+	
+	@Subscribe
+	public void sendUpdateOrderMessages(UpdateOrderEvent event) {
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		
+		if(event.getNewSpotStatus().isPresent()) {
+			// Add a message with updated spot status to the package.
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			spotData.setId(event.getCheckIn().getSpot().getId());
+			spotData.setStatus(event.getNewSpotStatus().get());
+			messages.add(new MessageDTO("spot","update",spotData));
+			
+		}
+		if(event.getNewCheckInStatus().isPresent()) {
+			// ... and add a message with updated checkin status to the package.
+			messages.add(new MessageDTO("checkin","update",transform.toStatusDto(event.getCheckIn())));
+		}
+		// Use given order dto or create a new one if not present.
+		OrderDTO orderData = event.getOrderData().or(transform.orderToDto(event.getOrder()));
+		// Add a message with updated order status to the message package.
+		messages.add(new MessageDTO("order","update",orderData ));
+		// Send update messages.
+		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		// If we cancel the order, let the checkedin customer know.
+		if(event.getOrder().getStatus() == OrderStatus.CANCELED && event.getCheckIn().getChannelId() != null)
+			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), "order", "update", orderData);
+	}
 
 	@Subscribe
 	public void sendNewCheckInMessages(NewCheckInEvent event) {

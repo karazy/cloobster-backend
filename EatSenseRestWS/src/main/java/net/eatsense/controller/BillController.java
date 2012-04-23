@@ -18,6 +18,8 @@ import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.domain.Business;
+import net.eatsense.event.NewBillEvent;
+import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -34,6 +36,7 @@ import net.eatsense.representation.cockpit.SpotStatusDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -58,12 +61,14 @@ public class BillController {
 	private RequestRepository requestRepo;
 	private ChannelController channelCtrl;
 	private Transformer transform;
+	private EventBus eventBus;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, BusinessRepository businessRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, ChannelController cctrl, Transformer transformer) {
+			BillRepository billRepo, ChannelController cctrl, Transformer transformer, EventBus eventBus) {
 		super();
+		this.eventBus = eventBus;
 		this.transform = transformer;
 		this.channelCtrl = cctrl;
 		this.requestRepo = rr;
@@ -83,19 +88,9 @@ public class BillController {
 	 * @return bill DTO or null if not found 
 	 */
 	public BillDTO getBillForCheckIn(Business business, Long checkInId) {
-		BillDTO billData = new BillDTO();
 		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(business).filter("checkIn", CheckIn.getKey(checkInId)).get();
-		if(bill == null)
-			return null;
 		
-		billData.setId(bill.getId());
-		billData.setCheckInId(bill.getCheckIn().getId());
-		billData.setCleared(bill.isCleared());
-		billData.setPaymentMethod(bill.getPaymentMethod());
-		billData.setTotal(bill.getTotal());
-		billData.setTime(bill.getCreationTime());
-		
-		return billData;
+		return transform.billToDto(bill);
 	}
 	
 	/**
@@ -148,27 +143,13 @@ public class BillController {
 		bill.setCleared(billData.isCleared());
 		orderRepo.saveOrUpdate(orders);
 		billRepo.saveOrUpdate(bill);
-
-		billData.setTotal(bill.getTotal());
-		billData.setCheckInId(bill.getCheckIn().getId());
-		billData.setCleared(bill.isCleared());
-		billData.setId(bill.getId());
-		billData.setTime(bill.getCreationTime());
-		billData.setPaymentMethod(bill.getPaymentMethod());
+		
+		billData = transform.billToDto(bill);
 
 		// ...update the status of the checkIn in the datastore ...
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);
 		checkInRepo.saveOrUpdate(checkIn);
-		
-		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-
-		// ... and add a message with updated checkin status to the package.
-		messages.add(new MessageDTO("checkin","delete",transform.toStatusDto(checkIn)));
-		
-		// Add a message with updated order status to the message package.
-		messages.add(new MessageDTO("bill","update",billData));
-		
 		// Get all pending requests sorted by oldest first.
 		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 
@@ -179,26 +160,15 @@ public class BillController {
 				iterator.remove();
 			}
 		}
+		UpdateBillEvent updateEvent = new UpdateBillEvent(business, bill, checkIn);
 		
-		String newSpotStatus = null;
-		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
 		// Save the status of the next request in line, if there is one.
 		if( !requests.isEmpty()) {
-			newSpotStatus = requests.get(0).getStatus();
+			updateEvent.setNewSpotStatus(requests.get(0).getStatus());
 		}
-		else {
-			if( checkInCount > 0)
-				newSpotStatus = CheckInStatus.CHECKEDIN.toString();	
-		}
-		// Add a message with updated spot status to the package.
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(checkIn.getSpot().getId());
-		spotData.setCheckInCount(checkInCount);
-		spotData.setStatus(newSpotStatus);
-		messages.add(new MessageDTO("spot","update",spotData));
-				
-		// Send messages to notify cockpits over their channel.
-		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
+		
+		// Post update event.
+		eventBus.post(updateEvent);
 		
 		return billData;
 	}
@@ -279,30 +249,21 @@ public class BillController {
 			request.setObjectId(bill.getId());
 			requestRepo.saveOrUpdate(request);
 			
-			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-			// Add a message with the new bill to the message package.
-			messages.add(new MessageDTO("bill","new", billData));
+			if(checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
+				// Update the status of the checkIn
+				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
+				checkInRepo.saveOrUpdate(checkIn);				
+			}
+			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn);
 			
 			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
-			// If we have an older request in the database ...
-			if( oldestRequest == null || oldestRequest.getId() == request.getId() || checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST  ) {
-				// Update the status of the checkIn
-				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
-				checkInRepo.saveOrUpdate(checkIn);
-				
-				// Add a message with updated checkin status to the package.
-				messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
-				
-				SpotStatusDTO spotData = new SpotStatusDTO();
-				spotData.setId(checkIn.getSpot().getId());
-				spotData.setStatus(request.getStatus());
-				// Add a message with updated spot status to the package.
-				messages.add(new MessageDTO("spot", "update", spotData));
+			// If we have no older request in the database ...
+			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+				newEvent.setNewSpotStatus(request.getStatus());
 			}
-
-			// Send messages to notify clients over their channel.
-			channelCtrl.sendMessagesToAllCockpitClients(business, messages);
+			
+			eventBus.post(newEvent);
 		}
 		return billData;
 	}
@@ -379,7 +340,7 @@ public class BillController {
 		try {
 			return billRepo.getById(business.getKey(), billId);
 		} catch (NotFoundException e) {
-			logger.error("Unable to get bill, unknonwn billId.", e);
+			logger.error("Unable to get bill, unknown billId.", e);
 			return null;
 		}
 	}
