@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
@@ -49,6 +50,23 @@ public class Transformer {
 		this.businessRepo = businessRepo;
 		this.spotRepo = spotRepo;
 	}
+	
+	public BillDTO billToDto(Bill bill) {
+		if(bill == null)
+			return null;
+		
+		BillDTO billData = new BillDTO();
+		
+		billData.setTotal(bill.getTotal());
+		billData.setCheckInId(bill.getCheckIn().getId());
+		billData.setCleared(bill.isCleared());
+		billData.setId(bill.getId());
+		billData.setTime(bill.getCreationTime());
+		billData.setPaymentMethod(bill.getPaymentMethod());
+		
+		return billData;
+	}
+	
 
 	public List<OrderDTO> ordersToDto(List<Order> orders ) {
 		if(orders == null || orders.isEmpty()) {

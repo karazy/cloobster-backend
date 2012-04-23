@@ -20,6 +20,10 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.validation.CheckInStep2;
+import net.eatsense.event.CheckInEvent;
+import net.eatsense.event.DeleteCheckInEvent;
+import net.eatsense.event.MoveCheckInEvent;
+import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -31,14 +35,13 @@ import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
-import net.eatsense.representation.cockpit.MessageDTO;
-import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.IdHelper;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -58,11 +61,11 @@ public class CheckInController {
 	private CheckInRepository checkInRepo;
 	private SpotRepository spotRepo;
 	private Transformer transform;
-	private ChannelController channelCtrl;
 	private ObjectMapper mapper;
     private Validator validator;
 	private RequestRepository requestRepo;
 	private OrderRepository orderRepo;
+	private EventBus eventBus;
 
 	/**
 	 * Constructor using injection for creation.
@@ -76,11 +79,15 @@ public class CheckInController {
 	 * @param validator
 	 */
 	@Inject
-	public CheckInController(BusinessRepository businessRepository, CheckInRepository checkInRepository, SpotRepository spotRepository,
-			Transformer transformer, ChannelController channelController, ObjectMapper objectMapper, Validator validator, RequestRepository requestRepository, OrderRepository orderRepo) {
+	public CheckInController(BusinessRepository businessRepository,
+			CheckInRepository checkInRepository, SpotRepository spotRepository,
+			Transformer transformer,
+			ObjectMapper objectMapper, Validator validator,
+			RequestRepository requestRepository, OrderRepository orderRepo,
+			EventBus eventBus) {
 		this.businessRepo = businessRepository;
+		this.eventBus = eventBus;
 		this.checkInRepo = checkInRepository;
-		this.channelCtrl = channelController;
 		this.spotRepo = spotRepository;
 		this.requestRepo = requestRepository;
 		this.orderRepo = orderRepo;
@@ -217,19 +224,10 @@ public class CheckInController {
 		checkInDto.setUserId(checkInId);
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(spot.getId());
-		spotData.setCheckInCount(checkInCount);
-		
-		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
-		
-		// add the messages we want to send as one package
-		messages.add(new MessageDTO("spot","update",spotData));
-		messages.add(new MessageDTO("checkin","new", transform.toStatusDto(checkIn)));
-		
-		// send the messages
-		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
-
+		// send the event
+		CheckInEvent newCheckInEvent = new NewCheckInEvent(business, checkIn);
+		newCheckInEvent.setCheckInCount(checkInCount);
+		eventBus.post(newCheckInEvent);
 		return checkInDto;
 	}
 
@@ -359,16 +357,7 @@ public class CheckInController {
 			checkInRepo.ofy().delete(checkInRepo.ofy().query(Order.class).filter("status", "CART").listKeys());
 			checkInRepo.delete(checkIn);
 			
-			SpotStatusDTO spotData = new SpotStatusDTO();
-			spotData.setId(checkIn.getSpot().getId());		
-			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot()));
-			
-			// Notify cockpit clients
-			List<MessageDTO> messages = new ArrayList<MessageDTO>();
-			messages.add(new MessageDTO("spot", "update", spotData));
-			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
-			
-			channelCtrl.sendMessagesToAllCockpitClients(businessRepo.getByKey(checkIn.getBusiness()), messages);
+			eventBus.post(new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true));
 		}			
 	}
 
@@ -442,30 +431,8 @@ public class CheckInController {
 		// Finally delete the checkin.
 		checkInRepo.delete(checkIn);
 		
-		
-		List<MessageDTO> messages = new ArrayList<MessageDTO>();
-		// Create status update messages for listening channels
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		
-		Request request = ofy.query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").get();
-		// Save the status of the next request in line, if there is one.
-		if( request != null) {
-			spotData.setStatus(request.getStatus());
-		}
-		else
-			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
-		
-		spotData.setId(checkIn.getSpot().getId());
-		spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot()));
-		
-		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
-		// notify client
-		if(checkIn.getChannelId() != null)
-			channelCtrl.sendMessage(checkIn.getChannelId(), "checkin", "delete", transform.checkInToDto(checkIn));
-
-		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
+		// Send event
+		eventBus.post(new DeleteCheckInEvent(checkIn, business, false));
 	}
 
 	/**
@@ -492,10 +459,7 @@ public class CheckInController {
 		Key<Spot> newSpotKey = Spot.getKey(checkIn.getBusiness(), checkInData.getSpotId());
 		// Check if spot has changed ...
 		if(oldSpotKey.getId() != newSpotKey.getId()) {
-			List<MessageDTO> messages = new ArrayList<MessageDTO>();
 			// ... then we move the checkin to a new spot.
-			// Create status update messages for listening channels
-			messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(checkIn)));
 			
 			checkIn.setSpot(newSpotKey);
 			checkInRepo.saveOrUpdate(checkIn);
@@ -508,50 +472,10 @@ public class CheckInController {
 			}
 			requestRepo.saveOrUpdate(requests);
 			
-			SpotStatusDTO spotData = new SpotStatusDTO();
-			spotData.setId(oldSpotKey.getId());
-			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(oldSpotKey));
-					
-			Request request = ofy.query(Request.class).filter("spot",oldSpotKey).order("-receivedTime").get();
-			// Save the status of the next request in line, if there is one.
-			if( request != null) {
-				spotData.setStatus(request.getStatus());
-			}
-			else
-				spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
-			
-			messages.add(new MessageDTO("spot", "update", spotData));
-			
-			
-			messages.add(new MessageDTO("checkin","new", transform.toStatusDto(checkIn)));
-			spotData = new SpotStatusDTO();
-			spotData.setId(newSpotKey.getId());
-			spotData.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(newSpotKey));
-					
-			request = ofy.query(Request.class).filter("spot",newSpotKey).order("-receivedTime").get();
-			// Save the status of the next request in line, if there is one.
-			if( request != null) {
-				spotData.setStatus(request.getStatus());
-			}
-			else
-				spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
-			
-			messages.add(new MessageDTO("spot", "update", spotData));
-			
-			channelCtrl.sendMessagesToAllCockpitClients(business, messages);
+			// Send move event
+			eventBus.post(new MoveCheckInEvent(checkIn, business, oldSpotKey));			
 		}
 		
 		return checkInData;
-	}
-	
-	/**
-	 * Generates and returns a new channel token.
-	 * 
-	 * @param checkInUid unique identifier of the checkin
-	 * @param clientId to use for token creation 
-	 * @return the generated channel token
-	 */
-	public String requestToken (CheckIn checkIn) {
-		return channelCtrl.createCustomerChannel(checkIn);
 	}
 }

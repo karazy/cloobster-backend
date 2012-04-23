@@ -26,6 +26,7 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.domain.Business;
+import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -43,6 +44,7 @@ import net.eatsense.representation.cockpit.SpotStatusDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
@@ -66,15 +68,20 @@ public class OrderController {
 	private ChoiceRepository choiceRepo;
 	private Transformer transform;
 	private RequestRepository requestRepo;
-	private ChannelController channelCtrl;
+
+	private EventBus eventBus;
 	
 	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, BusinessRepository businessRepo, CheckInRepository checkInRepo, ChoiceRepository choiceRepo, RequestRepository rr,Transformer trans, ChannelController channelCtrl, Validator validator) {
+			OrderChoiceRepository orderChoiceRepo,
+			ProductRepository productRepo, BusinessRepository businessRepo,
+			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
+			RequestRepository rr, Transformer trans, Validator validator,
+			EventBus eventBus) {
 		super();
+		this.eventBus = eventBus;
 		this.validator = validator;
-		this.channelCtrl = channelCtrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
@@ -152,6 +159,8 @@ public class OrderController {
 		order.setStatus(orderData.getStatus());
 		order.setComment(orderData.getComment());
 		order.setAmount(orderData.getAmount());
+		
+		orderData.setCheckInId(checkIn.getId());
 		// Retrieve saved choices from the store
 		List<OrderChoice> savedChoices = orderChoiceRepo.getByParent(order.getKey());
 		if(orderData.getProduct().getChoices() != null ) {
@@ -184,13 +193,16 @@ public class OrderController {
 			// save order
 			orderRepo.saveOrUpdate(order);
 			
-			orderData = transform.orderToDto( order );
 			// only create a new request if the order status was updated
 			if(order.getStatus() != oldStatus) {
+				UpdateOrderEvent updateEvent = new UpdateOrderEvent(business, order, checkIn);
+				updateEvent.setOrderData(orderData);
 				// Update the checkin status, if there is none set.
 				if(checkIn.getStatus() == CheckInStatus.CHECKEDIN) {
 					checkIn.setStatus(CheckInStatus.ORDER_PLACED);
 					checkInRepo.saveOrUpdate(checkIn);
+					
+					updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED.toString());
 				}
 				
 				Request request = new Request();
@@ -201,28 +213,15 @@ public class OrderController {
 				request.setReceivedTime(new Date());
 				request.setSpot(checkIn.getSpot());
 				request.setStatus(CheckInStatus.ORDER_PLACED.toString());
-
 				requestRepo.saveOrUpdate(request);
-				
-				ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-				
-				messages.add(new MessageDTO("order", "update", orderData));
 				
 				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 				// If we have no older request in the database or the new request is the oldest...
 				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
-					// Send message to notify cockpit clients over their channel
-					messages.add(new MessageDTO("checkin", "update", transform.toStatusDto(checkIn)));
-					
-					SpotStatusDTO spotData = new SpotStatusDTO();
-					spotData.setId(checkIn.getSpot().getId());
-					spotData.setStatus(request.getStatus());
-					messages.add(new MessageDTO("spot","update",spotData));
-					
+					updateEvent.setNewSpotStatus(request.getStatus());
 				}
 
-				channelCtrl.sendMessagesToAllCockpitClients(business, messages);
-				
+				eventBus.post(updateEvent);
 			}
 		}
 		else {
@@ -573,10 +572,8 @@ public class OrderController {
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		if(violations.isEmpty()) {
 			// save order
-			if( orderRepo.saveOrUpdate(order) == null )
-				throw new RuntimeException("order could not be updated, id: " + order);
-			
-			ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+			orderRepo.saveOrUpdate(order);
+			UpdateOrderEvent updateOrderEvent = new UpdateOrderEvent(business, order, checkIn); 
 			
 			// Check that we actually had a placed request.
 			if(oldStatus == OrderStatus.PLACED && order.getStatus() != oldStatus) {
@@ -613,13 +610,10 @@ public class OrderController {
 				}
 				else
 					newSpotStatus = CheckInStatus.CHECKEDIN.toString();
+				
 				// If the spot status needs to be updated ...
 				if(!oldSpotStatus.equals(newSpotStatus)) {
-					// Add a message with updated spot status to the package.
-					SpotStatusDTO spotData = new SpotStatusDTO();
-					spotData.setId(checkIn.getSpot().getId());
-					spotData.setStatus(newSpotStatus);
-					messages.add(new MessageDTO("spot","update",spotData));
+					updateOrderEvent.setNewSpotStatus(newSpotStatus);
 				}	
 				
 				// If the payment hasnt already been requested and the checkin status has changed ...  
@@ -628,26 +622,14 @@ public class OrderController {
 					checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
 					checkInRepo.saveOrUpdate(checkIn);
 					
-					// ... and add a message with updated checkin status to the package.
-					messages.add(new MessageDTO("checkin","update",transform.toStatusDto(checkIn)));
+					updateOrderEvent.setNewCheckInStatus(newCheckInStatus);
+					
 				}
 			}
 			// if the order changed send a update message
 			if(oldStatus != order.getStatus()) {
-				// Add a message with updated order status to the message package.
-				messages.add(new MessageDTO("order","update",orderData));
-				
-				// If we cancel the order, let the checkedin customer know.
-				if(order.getStatus() == OrderStatus.CANCELED && checkIn.getChannelId() != null)
-					channelCtrl.sendMessage(checkIn.getChannelId(), "order", "update", orderData);
-			}
-			// Send messages if there are any.
-			if(!messages.isEmpty()) {
-				try {
-					channelCtrl.sendMessagesToAllCockpitClients(business, messages);
-				} catch (Exception e) {
-					logger.error("error while sending messages", e);
-				}
+				updateOrderEvent.setOrderData(orderData);
+				eventBus.post(updateOrderEvent);
 			}
 		}
 		else {

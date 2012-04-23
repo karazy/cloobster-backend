@@ -229,37 +229,7 @@ public class CheckInControllerTest {
 		assertThat(checkIn.getUserId(), is(test.getUserId()));
 
 	}
-	
-	@Test
-	public void testRequestChannelToken() {
-		//#1 Create a checkin ...
-		CheckInDTO checkInData = new CheckInDTO();
-		checkInData.setSpotId("b4rc0de");
-		checkInData.setNickname("FakeNik");
-		checkInData.setStatus(CheckInStatus.INTENT);
-		checkInData = ctr.createCheckIn( checkInData);
-		
-		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
-				
-		String result;
-		//#2.1 Request token with null id ...
-		try {
-			result = ctr.requestToken(null);
-		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
-			
-		}
-		
-		//#3.1 Request token with valid uid ...
-		result = ctr.requestToken(checkIn);
-		assertThat(result, notNullValue());
-		assertThat(result.length(), is(greaterThan(8)));
-	
-		//#3.2 Request another token with the same uid, should create a new token ...
-		String newResult = ctr.requestToken(checkIn);
-		assertThat(newResult, is(not(result)));
-	}
-	
+
 	@Test
 	public void testDeleteCheckin() {
 		//#1.1 Create a checkin ...
