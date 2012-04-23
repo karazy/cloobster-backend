@@ -53,30 +53,24 @@ public class BillController {
 	private ProductRepository productRepo;
 	private OrderChoiceRepository orderChoiceRepo;
 	private BillRepository billRepo;
-	
 	private CheckInRepository checkInRepo;
-
-	private BusinessRepository businessRepo;
-
 	private RequestRepository requestRepo;
-	private ChannelController channelCtrl;
 	private Transformer transform;
 	private EventBus eventBus;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
-			OrderChoiceRepository orderChoiceRepo, ProductRepository productRepo, BusinessRepository businessRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, ChannelController cctrl, Transformer transformer, EventBus eventBus) {
+			OrderChoiceRepository orderChoiceRepo,
+			ProductRepository productRepo, CheckInRepository checkInRepo,
+			BillRepository billRepo, Transformer transformer, EventBus eventBus) {
 		super();
 		this.eventBus = eventBus;
 		this.transform = transformer;
-		this.channelCtrl = cctrl;
 		this.requestRepo = rr;
 		this.orderRepo = orderRepo;
 		this.productRepo = productRepo;
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.checkInRepo = checkInRepo;
-		this.businessRepo = businessRepo;
 		this.billRepo = billRepo;
 	}
 	
