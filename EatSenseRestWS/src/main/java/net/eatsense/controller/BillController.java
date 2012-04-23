@@ -1,11 +1,14 @@
 package net.eatsense.controller;
 
-import java.util.ArrayList;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import net.eatsense.domain.Bill;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -15,9 +18,7 @@ import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.OrderStatus;
-import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
-import net.eatsense.domain.Business;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
@@ -27,11 +28,8 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
-import net.eatsense.representation.cockpit.MessageDTO;
-import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,29 +93,22 @@ public class BillController {
 	 * @param billData
 	 * @return updated bill DTO
 	 */
-	public BillDTO updateBill(Business business, Bill bill , BillDTO billData) {
-		if(business == null) {
-			throw new IllegalArgumentException("Bill cannot be updated, business is null");
-		}
-		if( bill == null) {
-			throw new IllegalArgumentException("Bill cannot be updated, bill is null");
-		}
+	public BillDTO updateBill(final Business business, Bill bill , BillDTO billData) {
+		checkNotNull(business, "Bill cannot be updated, business is null");
+		checkNotNull(business.getId(), "Bill cannot be updated, id for business is null");
+		checkNotNull(bill, "Bill cannot be updated, bill is null");
+		checkNotNull(bill.getId(), "Bill cannot be updated, id for bill is null");
+		checkNotNull(bill.getCheckIn(), "Bill cannot be updated, checkin for bill is null");
+		checkNotNull(billData, "Bill cannot be updated, billdata is null");
+		checkArgument(!bill.isCleared(), "Bill cannot be updated, bill already cleared");
+		checkArgument(billData.isCleared(), "Bill cannot be updated, cleared must be set to true");
 		
-		CheckIn checkIn;
-		try {
-			checkIn = checkInRepo.getByKey(bill.getCheckIn());
-		} catch (NotFoundException e1) {
-			throw new IllegalArgumentException("Bill cannot be updated, check in not found.",e1);
-		}
-		
-		if(billData.isCleared() == false) {
-			throw new BillFailureException("Bill cannot be updated, cleared must be set to true");
-		}
-			
-		
-		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", bill.getCheckIn()).list();
-		
+		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
+		List<Order> orders = orderRepo.query().ancestor(business).filter("checkIn", bill.getCheckIn()).list();
 		Float billTotal= 0f;
+		
+		if(orders.isEmpty())
+			throw new BillFailureException("Bill cannot be updated, no orders found.");
 		
 		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
 			Order order = iterator.next();
@@ -175,20 +166,24 @@ public class BillController {
 	 * @param billData
 	 * @return bill DTO saved
 	 */
-	public BillDTO createBill(Business business, CheckIn checkIn, BillDTO billData) {
-		if(business == null) {
-			throw new IllegalArgumentException("Bill cannot be updated, business is null");
-		}
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Bill cannot be created, checkin not found");
-		}
-		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			throw new BillFailureException("Bill cannot be created, payment already requested or not checked in");
-		}
-
-		if(business.getId() != checkIn.getBusiness().getId()) {
-			throw new BillFailureException("Bill cannot be created, checkin is not at the same business to which the request was sent: id="+checkIn.getBusiness().getId());
-		}
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+		// Check preconditions.
+		checkNotNull(business, "business is null");
+		checkNotNull(business.getId(), "id for business is null");
+		checkNotNull(checkIn, "checkin is null");
+		checkNotNull(checkIn.getId(), "id for checkin is null");
+		checkNotNull(checkIn.getSpot(), "spot for checkin is null");
+		checkNotNull(billData, "billData is null");
+		checkNotNull(billData.getPaymentMethod(), "billData must have a payment method");
+		checkNotNull(business.getPaymentMethods(), "business must have at least one payment method");
+		checkArgument(!business.getPaymentMethods().isEmpty(), "business must have at least one payment method");
+		checkArgument(business.getPaymentMethods().contains(billData.getPaymentMethod()),
+				"no matching payment method in business for %s",
+				billData.getPaymentMethod());
+		checkArgument(checkIn.getStatus() == CheckInStatus.CHECKEDIN ||	checkIn.getStatus() == CheckInStatus.ORDER_PLACED,
+				"invalid checkin status %s", checkIn.getStatus());
+		checkArgument(checkIn.getBusiness().getId() == business.getId(),
+				"checkin is not at the same business to which the request was sent: id=%s", checkIn.getBusiness().getId());
 		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
 		
@@ -200,8 +195,8 @@ public class BillController {
 				iterator.remove();
 			}
 			else {
-				if (order.getStatus().equals(OrderStatus.CANCELED)
-						|| order.getStatus().equals(OrderStatus.CART)
+				if (order.getStatus() == OrderStatus.CANCELED
+						|| order.getStatus() == OrderStatus.CART
 						|| order.getStatus() == OrderStatus.COMPLETE)
 					iterator.remove();
 			}
@@ -211,27 +206,15 @@ public class BillController {
 			billData.setId(billId);
 		}
 		else {
-			if(business.getPaymentMethods() == null || business.getPaymentMethods().isEmpty()) {
-				throw new BillFailureException("Bill cannot be created, business has no payment methods saved");
-			}
 			Bill bill = new Bill();
-			
-			for (PaymentMethod payment : business.getPaymentMethods()) {
-				if(payment.getName().equals(billData.getPaymentMethod().getName()) )
-					bill.setPaymentMethod(billData.getPaymentMethod());
-			}
-			if(bill.getPaymentMethod() == null )
-				throw new BillFailureException("Bill cannot be created, no matching payment method found for: " + billData.getPaymentMethod().getName());
-					
+			bill.setPaymentMethod(billData.getPaymentMethod());
 			bill.setBusiness(business.getKey());
 			bill.setCheckIn(checkIn.getKey());
 			bill.setCreationTime(new Date());
 			bill.setCleared(false);
 			billRepo.saveOrUpdate(bill);
 		
-			billData.setId(bill.getId());
-			billData.setCheckInId(checkIn.getId());
-			billData.setTime(bill.getCreationTime());
+			billData = transform.billToDto(bill);
 			
 			Request request = new Request();
 			request.setBusiness(business.getKey());
@@ -250,7 +233,7 @@ public class BillController {
 			}
 			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn);
 			
-			Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
+			Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have no older request in the database ...
 			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {

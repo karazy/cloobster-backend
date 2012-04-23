@@ -1,12 +1,16 @@
-package net.eatsense.controller;
+package net.eatsense.controller.bill;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.controller.BillController;
+import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -44,7 +48,13 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-public class BillControllerTest {
+/**
+ * Contains setup and all test cases for createBill method.
+ * 
+ * @author Nils Weiher
+ *
+ */
+public class CreateBillTest {
 	
 	private final LocalServiceTestHelper helper =
 	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -53,27 +63,17 @@ public class BillControllerTest {
 	    private OrderController orderCtrl;
 	    private CheckInController checkinCtrl;
 	    private BusinessRepository rr;
-	    private MenuRepository mr;
 	    private ProductRepository pr;
-	    private ChoiceRepository cr;
-	    private OrderRepository or;
 	    private DummyDataDumper ddd;
-
-		private SpotRepository sr;
-
 		private Transformer transform;
-
-		private OrderChoiceRepository ocr;
-
 		private BillController billCtrl;
-
 		private BillRepository br;
 
 		private CheckIn checkIn;
-
 		private Business business;
-
 		private SpotDTO spotDto;
+
+		private BillDTO billData;
 
 	@Before
 	public void setUp() throws Exception {
@@ -84,18 +84,8 @@ public class BillControllerTest {
 		billCtrl = injector.getInstance(BillController.class);
 		rr = injector.getInstance(BusinessRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
-		mr = injector.getInstance(MenuRepository.class);
-		cr = injector.getInstance(ChoiceRepository.class);
-		sr = injector.getInstance(SpotRepository.class);
 		br = injector.getInstance(BillRepository.class);
-		
-		or = injector.getInstance(OrderRepository.class);
-		ocr = injector.getInstance(OrderChoiceRepository.class);
-		
 		transform = injector.getInstance(Transformer.class);
-		
-		
-		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
@@ -109,14 +99,7 @@ public class BillControllerTest {
 		checkInData.setBusinessId(spotDto.getBusinessId());
 		 
 		business = rr.getByKey(checkIn.getBusiness());
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		helper.tearDown();
-	}
-	@Test
-	public void testCreateBill() {
+		
 		// Get a product from the store.
 		Product frites = pr.getByProperty("name", "Pommes Frites");
 		OrderDTO orderDto = new OrderDTO();
@@ -127,15 +110,9 @@ public class BillControllerTest {
 		
 		//#1 Place a simple order without choices...
 		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
-		assertThat(orderId, notNullValue());
 		
 		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		Order placedOrder = orderCtrl.getOrder(business, orderId);
-		
-		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrderDto.getOrderTime(), notNullValue());
-		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrderDto.getProduct().getId(), equalTo(frites.getId()));
 		
 		placedOrderDto.setStatus(OrderStatus.PLACED);
 		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
@@ -165,74 +142,95 @@ public class BillControllerTest {
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
-		assertThat(orderId, notNullValue());
 		
 		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		placedOrder = orderCtrl.getOrder(business, orderId);
-		
-		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrderDto.getOrderTime(), notNullValue());
-		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
-			for (ProductOption option : orderChoice.getOptions()) {
-				if(option.getName() == selected.getName() )
-					assertThat(option.getSelected(), equalTo(true));
-			}
-		}
+
 		// Set order to placed and confirm in restaurant.
 		placedOrderDto.setStatus(OrderStatus.PLACED);
 		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
 		placedOrderDto.setStatus(OrderStatus.RECEIVED);
 		placedOrderDto = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
 		
-		
-		//#3 Check calculateTotalPrice
-		
-		List<Order> orders = orderCtrl.getOrders(business, checkIn, null);
-		assertThat(orders, notNullValue());
-		assertThat(orders.size(), equalTo(2));
-		for (Order order : orders) {
-			assertThat(order.getStatus(), equalTo(OrderStatus.RECEIVED));
-			if(order.getProduct().getId() == frites.getId()) {
-				assertThat(billCtrl.calculateTotalPrice(order), is( 1.5f));
-			}
-			if(order.getProduct().getId() == burger.getId()) {
-				assertThat(billCtrl.calculateTotalPrice(order), is( 10f));
-			}
-		}
-		
-		//#4 Test createBill
-		BillDTO billData = new BillDTO();
+		billData = new BillDTO();
 		// select any payment method
 		PaymentMethod paymentMethod = spotDto.getPayments().iterator().next();
 		billData.setPaymentMethod(paymentMethod);
-		
-		billData = billCtrl.createBill(business, checkIn, billData);
-		Bill newBill = billCtrl.getBill(business, billData.getId());
-		assertThat(billData.getId(), notNullValue());
-		billData.setCleared(true);
-		
-		
-		billCtrl.updateBill(business, newBill, billData);
-		
-		Collection<Bill> bills = br.getAll();
-		
-		assertThat( bills.size(), is(1));
-		 
-		for (Bill bill : bills) {
-			assertThat(bill.getId(), is(billData.getId()));
-			assertThat(bill.getCreationTime(), notNullValue());
-			assertThat(bill.getPaymentMethod().getName(), is(paymentMethod.getName()));
-			assertThat(bill.getTotal(), is(11.5f));
-		}
-		// Check orders again to see if they are linked ...
-		orders = orderCtrl.getOrders(business, checkIn, null);
-		
-		for (Order order : orders) {
-			assertThat(order.getBill().getId(), is(billData.getId()));
-		}
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		helper.tearDown();
 	}
 	
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullBusiness() {
+		billCtrl.createBill(null, checkIn, billData);
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullCheckIn() {
+		billCtrl.createBill(business, null, billData);
+	}
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullCheckInId() {
+		checkIn.setId(null);
+		billCtrl.createBill(business, checkIn, billData);
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullCheckInSpot() {
+		checkIn.setSpot(null);
+		billCtrl.createBill(business, checkIn, billData);
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullBillData() {
+		billCtrl.createBill(business, checkIn, null);
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullPaymentMethod() {
+		billCtrl.createBill(business, checkIn, new BillDTO());
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testCreateBillNullBusinessPaymentMethod() {
+		business.setPaymentMethods(null);
+		billCtrl.createBill(business, checkIn, billData);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateBillEmptyBusinessPaymentMethod() {
+		business.setPaymentMethods(new ArrayList<PaymentMethod>());
+		billCtrl.createBill(business, checkIn, billData);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateBillInvalidPaymentMethod() {
+		BillDTO invalidData = new BillDTO();
+		invalidData.setPaymentMethod(new PaymentMethod());
+		billCtrl.createBill(business, checkIn, invalidData);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateBillInvalidCheckInStatus() {
+		checkIn.setStatus(null);
+		billCtrl.createBill(business, checkIn, billData);
+	}
+	
+	@Test
+	public void testCreateBillId() {
+		billData = billCtrl.createBill(business, checkIn, billData);
+		assertThat(billData.getId(), notNullValue());
+		Bill newBill = billCtrl.getBill(business, billData.getId());
+		assertThat(newBill.getId(), is(billData.getId()));
+	}
+	
+	@Test
+	public void testCreateBillPaymentMethod() {
+		billData = billCtrl.createBill(business, checkIn, billData);
+		Bill newBill = billCtrl.getBill(business, billData.getId());
+		assertThat(newBill.getPaymentMethod().getName(), is(billData.getPaymentMethod().getName()));		
+	}
 }
