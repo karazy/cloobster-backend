@@ -6,26 +6,31 @@ var Karazy = (Karazy) ? Karazy : {};
  */
 Karazy.i18n = (function() {
 	
+	if(!Karazy.config) {
+		console.log('Some functions of this class may need Karazy.config to properly work. Make sure inclusion order is correct.');
+	}
+	
+	if(!Karazy.constants) {
+		console.log('Some functions of this class may need Karazy.constants to properly work. Make sure inclusion order is correct.');
+	}
 	
 	//private members
 	/**
 	 * Singleton instance.
 	 */
-	var instance = null;
-	/**
-	 * Holds the translations.
-	 */
-	var translations = null;
-	
-	/**
-	 * default language.
-	 */
-	var defaultLang = "DE";
-	
-	/**
-	 * Chosen language.
-	 */
-	var lang = null;
+	var instance = null,
+		/**
+		 * Contains translations.
+		 */
+		translations = null,
+		/**
+		 * default language.
+		 */
+		defaultLang = "DE",
+		/**
+		 * Chosen language.
+		 */
+		lang = null;
 	
 	
 	//private functions
@@ -34,13 +39,14 @@ Karazy.i18n = (function() {
 	 * e.g. de, en
 	 */
 	function getLanguage() {
-		var userLang = (navigator.language) ? navigator.language : navigator.userLanguage; 
+		//if a language is configured use it otherwise use browser language
+		var userLang = (Karazy.config && Karazy.config.language) ? Karazy.config.language : (navigator.language) ? navigator.language : navigator.userLanguage; 
 		console.log('browser language: '+userLang);
 		if(userLang === 'undefined'|| userLang.length == 0) {
 			//use default language
 			userLang = defaultLang;
 		}
-		return userLang.substring(0,2);
+		return userLang.substring(0,2).toUpperCase();
 	}
 
 	
