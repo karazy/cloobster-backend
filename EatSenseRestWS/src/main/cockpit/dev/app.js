@@ -1,7 +1,9 @@
 Karazy.i18n.setLang('DE');
 
 Ext.Loader.setConfig({
-	enabled : true
+	enabled : true,
+    //WORKAORUND related to Android 3x Bug and Webview URL handling
+    disableCaching: Karazy.config.disableCaching
 });
 
 Ext.Loader.setPath('EatSense', 'app');

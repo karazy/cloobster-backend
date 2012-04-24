@@ -1,4 +1,4 @@
-Karazy.i18n.setLang('DE');
+// Karazy.i18n.setLang('DE');
 
 Ext.Loader.setConfig({
 	enabled : true,
@@ -32,6 +32,7 @@ Ext.application({
 	],
 	launch : function() {
 		console.log('launch');
+		Karazy.i18n.setLang('EN');
     	this.launched = true;
         this.mainLaunch();
 	},

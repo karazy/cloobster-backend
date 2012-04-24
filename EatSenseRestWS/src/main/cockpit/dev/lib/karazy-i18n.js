@@ -20,7 +20,7 @@ Karazy.i18n = (function() {
 	/**
 	 * default language.
 	 */
-	var defaultLang = "";//"de";
+	var defaultLang = "DE";
 	
 	/**
 	 * Chosen language.

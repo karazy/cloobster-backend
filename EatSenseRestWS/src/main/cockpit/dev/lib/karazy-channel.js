@@ -24,6 +24,8 @@ Karazy.channel = (function() {
 	var scopeTokenRequestHandler;
 	//indicates if the client forced a close and won't try to request a new token.
 	var timedOut;
+	//indicates if connection was lost
+	var connectionLost;
 	//token used for this channel
 	var channelToken;
 	//timeout used when attempting to reconnect the channel
