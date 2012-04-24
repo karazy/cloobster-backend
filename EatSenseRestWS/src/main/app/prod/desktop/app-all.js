@@ -29646,6 +29646,17 @@ Ext.define('Ext.TitleBar', {
     }
 });
 
+Ext.define('EatSense.view.fragment.DashboardButton', {
+	extend : 'Ext.Button',
+	xtype : 'dashboardbutton',
+	config : {
+		baseCls : 'dashboard-button',
+		labelCls : 'dashboard-button-label',
+		iconCls : 'dashboard-button-icon',
+		pressedCls: 'dashboard-button-pressed'
+	}
+
+});
 /**
  * @aside video list
  * @aside guide list
@@ -30797,6 +30808,44 @@ Ext.define('Ext.dataview.element.Container', {
 });
 
 /**
+ * @author Tommy Maintz
+ *
+ * This class is the simple default id generator for Model instances.
+ *
+ * An example of a configured simple generator would be:
+ *
+ *     Ext.define('MyApp.data.MyModel', {
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             identifier: {
+ *                 type: 'simple',
+ *                 prefix: 'ID_'
+ *             }
+ *         }
+ *     });
+ *     // assign id's of ID_1, ID_2, ID_3, etc.
+ *
+ */
+Ext.define('Ext.data.identifier.Simple', {
+    alias: 'data.identifier.simple',
+    
+    statics: {
+        AUTO_ID: 1
+    },
+
+    config: {
+        prefix: 'ext-record-'
+    },
+
+    constructor: function(config) {
+        this.initConfig(config);
+    },
+
+    generate: function(record) {
+        return this._prefix + this.self.AUTO_ID++;
+    }
+});
+/**
  * A DataItem is a container for {@link Ext.dataview.DataView} with useComponents: true. It ties together
  * {@link Ext.data.Model records} to its contained Components via a {@link #dataMap dataMap} configuration.
  *
@@ -31553,6 +31602,2700 @@ Ext.define('Ext.mixin.Filterable', {
     }
 });
 
+/**
+ * @class Ext.data.SortTypes
+ * This class defines a series of static methods that are used on a
+ * {@link Ext.data.Field} for performing sorting. The methods cast the
+ * underlying values into a data type that is appropriate for sorting on
+ * that particular field.  If a {@link Ext.data.Field#type} is specified,
+ * the sortType will be set to a sane default if the sortType is not
+ * explicitly defined on the field. The sortType will make any necessary
+ * modifications to the value and return it.
+ * <ul>
+ * <li><b>asText</b> - Removes any tags and converts the value to a string</li>
+ * <li><b>asUCText</b> - Removes any tags and converts the value to an uppercase string</li>
+ * <li><b>asUCText</b> - Converts the value to an uppercase string</li>
+ * <li><b>asDate</b> - Converts the value into Unix epoch time</li>
+ * <li><b>asFloat</b> - Converts the value to a floating point number</li>
+ * <li><b>asInt</b> - Converts the value to an integer number</li>
+ * </ul>
+ * <p>
+ * It is also possible to create a custom sortType that can be used throughout
+ * an application.
+ * <pre><code>
+Ext.apply(Ext.data.SortTypes, {
+    asPerson: function(person){
+        // expects an object with a first and last name property
+        return person.lastName.toUpperCase() + person.firstName.toLowerCase();
+    }
+});
+
+Ext.define('Employee', {
+    extend: 'Ext.data.Model',
+    config: {
+        fields: [{
+            name: 'person',
+            sortType: 'asPerson'
+        }, {
+            name: 'salary',
+            type: 'float' // sortType set to asFloat
+        }]
+    }
+});
+ * </code></pre>
+ * </p>
+ * @singleton
+ * @docauthor Evan Trimboli <evan@sencha.com>
+ */
+Ext.define('Ext.data.SortTypes', {
+    singleton: true,
+
+    /**
+     * The regular expression used to strip tags
+     * @type {RegExp}
+     * @property
+     */
+    stripTagsRE : /<\/?[^>]+>/gi,
+
+    /**
+     * Default sort that does nothing
+     * @param {Object} value The value being converted
+     * @return {Object} The comparison value
+     */
+    none : function(value) {
+        return value;
+    },
+
+    /**
+     * Strips all HTML tags to sort on text only
+     * @param {Object} value The value being converted
+     * @return {String} The comparison value
+     */
+    asText : function(value) {
+        return String(value).replace(this.stripTagsRE, "");
+    },
+
+    /**
+     * Strips all HTML tags to sort on text only - Case insensitive
+     * @param {Object} value The value being converted
+     * @return {String} The comparison value
+     */
+    asUCText : function(value) {
+        return String(value).toUpperCase().replace(this.stripTagsRE, "");
+    },
+
+    /**
+     * Case insensitive string
+     * @param {Object} value The value being converted
+     * @return {String} The comparison value
+     */
+    asUCString : function(value) {
+        return String(value).toUpperCase();
+    },
+
+    /**
+     * Date sorting
+     * @param {Object} value The value being converted
+     * @return {Number} The comparison value
+     */
+    asDate : function(value) {
+        if (!value) {
+            return 0;
+        }
+        if (Ext.isDate(value)) {
+            return value.getTime();
+        }
+        return Date.parse(String(value));
+    },
+
+    /**
+     * Float sorting
+     * @param {Object} value The value being converted
+     * @return {Number} The comparison value
+     */
+    asFloat : function(value) {
+        value = parseFloat(String(value).replace(/,/g, ""));
+        return isNaN(value) ? 0 : value;
+    },
+
+    /**
+     * Integer sorting
+     * @param {Object} value The value being converted
+     * @return {Number} The comparison value
+     */
+    asInt : function(value) {
+        value = parseInt(String(value).replace(/,/g, ""), 10);
+        return isNaN(value) ? 0 : value;
+    }
+});
+/**
+ * <p>General purpose inflector class that {@link #pluralize pluralizes}, {@link #singularize singularizes} and 
+ * {@link #ordinalize ordinalizes} words. Sample usage:</p>
+ * 
+<pre><code>
+//turning singular words into plurals
+Ext.util.Inflector.pluralize('word'); //'words'
+Ext.util.Inflector.pluralize('person'); //'people'
+Ext.util.Inflector.pluralize('sheep'); //'sheep'
+
+//turning plurals into singulars
+Ext.util.Inflector.singularize('words'); //'word'
+Ext.util.Inflector.singularize('people'); //'person'
+Ext.util.Inflector.singularize('sheep'); //'sheep'
+
+//ordinalizing numbers
+Ext.util.Inflector.ordinalize(11); //"11th"
+Ext.util.Inflector.ordinalize(21); //"21th"
+Ext.util.Inflector.ordinalize(1043); //"1043rd"
+</code></pre>
+ * 
+ * <p><u>Customization</u></p>
+ * 
+ * <p>The Inflector comes with a default set of US English pluralization rules. These can be augmented with additional
+ * rules if the default rules do not meet your application's requirements, or swapped out entirely for other languages.
+ * Here is how we might add a rule that pluralizes "ox" to "oxen":</p>
+ * 
+<pre><code>
+Ext.util.Inflector.plural(/^(ox)$/i, "$1en");
+</code></pre>
+ * 
+ * <p>Each rule consists of two items - a regular expression that matches one or more rules, and a replacement string.
+ * In this case, the regular expression will only match the string "ox", and will replace that match with "oxen". 
+ * Here's how we could add the inverse rule:</p>
+ * 
+<pre><code>
+Ext.util.Inflector.singular(/^(ox)en$/i, "$1");
+</code></pre>
+ * 
+ * <p>Note that the ox/oxen rules are present by default.</p>
+ */
+Ext.define('Ext.util.Inflector', {
+
+    /* Begin Definitions */
+
+    singleton: true,
+
+    /* End Definitions */
+
+    /**
+     * @private
+     * The registered plural tuples. Each item in the array should contain two items - the first must be a regular
+     * expression that matchers the singular form of a word, the second must be a String that replaces the matched
+     * part of the regular expression. This is managed by the {@link #plural} method.
+     * @property plurals
+     * @type Array
+     */
+    plurals: [
+        [(/(quiz)$/i),                "$1zes"  ],
+        [(/^(ox)$/i),                 "$1en"   ],
+        [(/([m|l])ouse$/i),           "$1ice"  ],
+        [(/(matr|vert|ind)ix|ex$/i),  "$1ices" ],
+        [(/(x|ch|ss|sh)$/i),          "$1es"   ],
+        [(/([^aeiouy]|qu)y$/i),       "$1ies"  ],
+        [(/(hive)$/i),                "$1s"    ],
+        [(/(?:([^f])fe|([lr])f)$/i),  "$1$2ves"],
+        [(/sis$/i),                   "ses"    ],
+        [(/([ti])um$/i),              "$1a"    ],
+        [(/(buffal|tomat|potat)o$/i), "$1oes"  ],
+        [(/(bu)s$/i),                 "$1ses"  ],
+        [(/(alias|status|sex)$/i),    "$1es"   ],
+        [(/(octop|vir)us$/i),         "$1i"    ],
+        [(/(ax|test)is$/i),           "$1es"   ],
+        [(/^person$/),                "people" ],
+        [(/^man$/),                   "men"    ],
+        [(/^(child)$/),               "$1ren"  ],
+        [(/s$/i),                     "s"      ],
+        [(/$/),                       "s"      ]
+    ],
+    
+    /**
+     * @private
+     * The set of registered singular matchers. Each item in the array should contain two items - the first must be a 
+     * regular expression that matches the plural form of a word, the second must be a String that replaces the 
+     * matched part of the regular expression. This is managed by the {@link #singular} method.
+     * @property singulars
+     * @type Array
+     */
+    singulars: [
+      [(/(quiz)zes$/i),                                                    "$1"     ],
+      [(/(matr)ices$/i),                                                   "$1ix"   ],
+      [(/(vert|ind)ices$/i),                                               "$1ex"   ],
+      [(/^(ox)en/i),                                                       "$1"     ],
+      [(/(alias|status)es$/i),                                             "$1"     ],
+      [(/(octop|vir)i$/i),                                                 "$1us"   ],
+      [(/(cris|ax|test)es$/i),                                             "$1is"   ],
+      [(/(shoe)s$/i),                                                      "$1"     ],
+      [(/(o)es$/i),                                                        "$1"     ],
+      [(/(bus)es$/i),                                                      "$1"     ],
+      [(/([m|l])ice$/i),                                                   "$1ouse" ],
+      [(/(x|ch|ss|sh)es$/i),                                               "$1"     ],
+      [(/(m)ovies$/i),                                                     "$1ovie" ],
+      [(/(s)eries$/i),                                                     "$1eries"],
+      [(/([^aeiouy]|qu)ies$/i),                                            "$1y"    ],
+      [(/([lr])ves$/i),                                                    "$1f"    ],
+      [(/(tive)s$/i),                                                      "$1"     ],
+      [(/(hive)s$/i),                                                      "$1"     ],
+      [(/([^f])ves$/i),                                                    "$1fe"   ],
+      [(/(^analy)ses$/i),                                                  "$1sis"  ],
+      [(/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i), "$1$2sis"],
+      [(/([ti])a$/i),                                                      "$1um"   ],
+      [(/(n)ews$/i),                                                       "$1ews"  ],
+      [(/people$/i),                                                       "person" ],
+      [(/s$/i),                                                            ""       ]
+    ],
+    
+    /**
+     * @private
+     * The registered uncountable words
+     * @property uncountable
+     * @type Array
+     */
+     uncountable: [
+        "sheep",
+        "fish",
+        "series",
+        "species",
+        "money",
+        "rice",
+        "information",
+        "equipment",
+        "grass",
+        "mud",
+        "offspring",
+        "deer",
+        "means"
+    ],
+    
+    /**
+     * Adds a new singularization rule to the Inflector. See the intro docs for more information
+     * @param {RegExp} matcher The matcher regex
+     * @param {String} replacer The replacement string, which can reference matches from the matcher argument
+     */
+    singular: function(matcher, replacer) {
+        this.singulars.unshift([matcher, replacer]);
+    },
+    
+    /**
+     * Adds a new pluralization rule to the Inflector. See the intro docs for more information
+     * @param {RegExp} matcher The matcher regex
+     * @param {String} replacer The replacement string, which can reference matches from the matcher argument
+     */
+    plural: function(matcher, replacer) {
+        this.plurals.unshift([matcher, replacer]);
+    },
+    
+    /**
+     * Removes all registered singularization rules
+     */
+    clearSingulars: function() {
+        this.singulars = [];
+    },
+    
+    /**
+     * Removes all registered pluralization rules
+     */
+    clearPlurals: function() {
+        this.plurals = [];
+    },
+    
+    /**
+     * Returns true if the given word is transnumeral (the word is its own singular and plural form - e.g. sheep, fish)
+     * @param {String} word The word to test
+     * @return {Boolean} True if the word is transnumeral
+     */
+    isTransnumeral: function(word) {
+        return Ext.Array.indexOf(this.uncountable, word) != -1;
+    },
+
+    /**
+     * Returns the pluralized form of a word (e.g. Ext.util.Inflector.pluralize('word') returns 'words')
+     * @param {String} word The word to pluralize
+     * @return {String} The pluralized form of the word
+     */
+    pluralize: function(word) {
+        if (this.isTransnumeral(word)) {
+            return word;
+        }
+
+        var plurals = this.plurals,
+            length  = plurals.length,
+            tuple, regex, i;
+        
+        for (i = 0; i < length; i++) {
+            tuple = plurals[i];
+            regex = tuple[0];
+            
+            if (regex == word || (regex.test && regex.test(word))) {
+                return word.replace(regex, tuple[1]);
+            }
+        }
+        
+        return word;
+    },
+    
+    /**
+     * Returns the singularized form of a word (e.g. Ext.util.Inflector.singularize('words') returns 'word')
+     * @param {String} word The word to singularize
+     * @return {String} The singularized form of the word
+     */
+    singularize: function(word) {
+        if (this.isTransnumeral(word)) {
+            return word;
+        }
+
+        var singulars = this.singulars,
+            length    = singulars.length,
+            tuple, regex, i;
+        
+        for (i = 0; i < length; i++) {
+            tuple = singulars[i];
+            regex = tuple[0];
+            
+            if (regex == word || (regex.test && regex.test(word))) {
+                return word.replace(regex, tuple[1]);
+            }
+        }
+        
+        return word;
+    },
+    
+    /**
+     * Returns the correct {@link Ext.data.Model Model} name for a given string. Mostly used internally by the data 
+     * package
+     * @param {String} word The word to classify
+     * @return {String} The classified version of the word
+     */
+    classify: function(word) {
+        return Ext.String.capitalize(this.singularize(word));
+    },
+    
+    /**
+     * Ordinalizes a given number by adding a prefix such as 'st', 'nd', 'rd' or 'th' based on the last digit of the 
+     * number. 21 -> 21st, 22 -> 22nd, 23 -> 23rd, 24 -> 24th etc
+     * @param {Number} number The number to ordinalize
+     * @return {String} The ordinalized number
+     */
+    ordinalize: function(number) {
+        var parsed = parseInt(number, 10),
+            mod10  = parsed % 10,
+            mod100 = parsed % 100;
+        
+        //11 through 13 are a special case
+        if (11 <= mod100 && mod100 <= 13) {
+            return number + "th";
+        } else {
+            switch(mod10) {
+                case 1 : return number + "st";
+                case 2 : return number + "nd";
+                case 3 : return number + "rd";
+                default: return number + "th";
+            }
+        }
+    }
+}, function() {
+    //aside from the rules above, there are a number of words that have irregular pluralization so we add them here
+    var irregulars = {
+            alumnus: 'alumni',
+            cactus : 'cacti',
+            focus  : 'foci',
+            nucleus: 'nuclei',
+            radius: 'radii',
+            stimulus: 'stimuli',
+            ellipsis: 'ellipses',
+            paralysis: 'paralyses',
+            oasis: 'oases',
+            appendix: 'appendices',
+            index: 'indexes',
+            beau: 'beaux',
+            bureau: 'bureaux',
+            tableau: 'tableaux',
+            woman: 'women',
+            child: 'children',
+            man: 'men',
+            corpus:	'corpora',
+            criterion: 'criteria',
+            curriculum:	'curricula',
+            genus: 'genera',
+            memorandum:	'memoranda',
+            phenomenon:	'phenomena',
+            foot: 'feet',
+            goose: 'geese',
+            tooth: 'teeth',
+            antenna: 'antennae',
+            formula: 'formulae',
+            nebula: 'nebulae',
+            vertebra: 'vertebrae',
+            vita: 'vitae'
+        },
+        singular;
+    
+    for (singular in irregulars) {
+        this.plural(singular, irregulars[singular]);
+        this.singular(irregulars[singular], singular);
+    }
+});
+/**
+ * @author Ed Spencer
+ * @class Ext.data.Error
+ *
+ * <p>This is used when validating a record. The validate method will return an Ext.data.Errors collection
+ * containing Ext.data.Error instances. Each error has a field and a message.</p>
+ *
+ * <p>Usually this class does not need to be instantiated directly - instances are instead created
+ * automatically when {@link Ext.data.Model#validate validate} on a model instance.</p>
+ */
+
+Ext.define('Ext.data.Error', {
+    config: {
+        /**
+         * @cfg {String} field
+         * The name of the field this error belongs to.
+         */
+        field: null,
+
+        /**
+         * @cfg {String} message
+         * The message containing the description of the error.
+         */
+        message: ''
+    },
+
+    constructor: function(config) {
+        this.initConfig(config);
+    }
+});
+
+/**
+Represents a collection of a set of key and value pairs. Each key in the HashMap must be unique, the same
+key cannot exist twice. Access to items is provided via the key only. Sample usage:
+
+    var map = Ext.create('Ext.util.HashMap');
+    map.add('key1', 1);
+    map.add('key2', 2);
+    map.add('key3', 3);
+
+    map.each(function(key, value, length){
+        console.log(key, value, length);
+    });
+
+The HashMap is an unordered class, there is no guarantee when iterating over the items that they will be in
+any particular order. If this is required, then use a {@link Ext.util.MixedCollection}.
+
+ */
+Ext.define('Ext.util.HashMap', {
+    mixins: {
+        observable: 'Ext.mixin.Observable'
+    },
+
+    /**
+     * @cfg {Function} keyFn
+     * A function that is used to retrieve a default key for a passed object.
+     * A default is provided that returns the **id** property on the object.
+     * This function is only used if the add method is called with a single argument.
+     */
+
+    /**
+     * Creates new HashMap.
+     * @param {Object} config The configuration options
+     */
+    constructor: function(config) {
+        /**
+         * @event add
+         * Fires when a new item is added to the hash
+         * @param {Ext.util.HashMap} this.
+         * @param {String} key The key of the added item.
+         * @param {Object} value The value of the added item.
+         */
+        /**
+         * @event clear
+         * Fires when the hash is cleared.
+         * @param {Ext.util.HashMap} this.
+         */
+        /**
+         * @event remove
+         * Fires when an item is removed from the hash.
+         * @param {Ext.util.HashMap} this.
+         * @param {String} key The key of the removed item.
+         * @param {Object} value The value of the removed item.
+         */
+        /**
+         * @event replace
+         * Fires when an item is replaced in the hash.
+         * @param {Ext.util.HashMap} this.
+         * @param {String} key The key of the replaced item.
+         * @param {Object} value The new value for the item.
+         * @param {Object} old The old value for the item.
+         */
+
+        this.callParent();
+
+        this.mixins.observable.constructor.call(this);
+
+        this.clear(true);
+    },
+
+    /**
+     * Gets the number of items in the hash.
+     * @return {Number} The number of items in the hash.
+     */
+    getCount: function() {
+        return this.length;
+    },
+
+    /**
+     * Implementation for being able to extract the key from an object if only
+     * a single argument is passed.
+     * @private
+     * @param {String} key The key
+     * @param {Object} value The value
+     * @return {Array} [key, value]
+     */
+    getData: function(key, value) {
+        // if we have no value, it means we need to get the key from the object
+        if (value === undefined) {
+            value = key;
+            key = this.getKey(value);
+        }
+
+        return [key, value];
+    },
+
+    /**
+     * Extracts the key from an object. This is a default implementation, it may be overridden
+     * @private
+     * @param {Object} o The object to get the key from
+     * @return {String} The key to use.
+     */
+    getKey: function(o) {
+        return o.id;
+    },
+
+    /**
+     * Add a new item to the hash. An exception will be thrown if the key already exists.
+     * @param {String} key The key of the new item.
+     * @param {Object} value The value of the new item.
+     * @return {Object} The value of the new item added.
+     */
+    add: function(key, value) {
+        var me = this,
+            data;
+
+        if (me.containsKey(key)) {
+            throw new Error('This key already exists in the HashMap');
+        }
+
+        data = this.getData(key, value);
+        key = data[0];
+        value = data[1];
+        me.map[key] = value;
+        ++me.length;
+        me.fireEvent('add', me, key, value);
+        return value;
+    },
+
+    /**
+     * Replaces an item in the hash. If the key doesn't exist, the
+     * {@link #method-add} method will be used.
+     * @param {String} key The key of the item.
+     * @param {Object} value The new value for the item.
+     * @return {Object} The new value of the item.
+     */
+    replace: function(key, value) {
+        var me = this,
+            map = me.map,
+            old;
+
+        if (!me.containsKey(key)) {
+            me.add(key, value);
+        }
+        old = map[key];
+        map[key] = value;
+        me.fireEvent('replace', me, key, value, old);
+        return value;
+    },
+
+    /**
+     * Remove an item from the hash.
+     * @param {Object} o The value of the item to remove.
+     * @return {Boolean} True if the item was successfully removed.
+     */
+    remove: function(o) {
+        var key = this.findKey(o);
+        if (key !== undefined) {
+            return this.removeByKey(key);
+        }
+        return false;
+    },
+
+    /**
+     * Remove an item from the hash.
+     * @param {String} key The key to remove.
+     * @return {Boolean} True if the item was successfully removed.
+     */
+    removeByKey: function(key) {
+        var me = this,
+            value;
+
+        if (me.containsKey(key)) {
+            value = me.map[key];
+            delete me.map[key];
+            --me.length;
+            me.fireEvent('remove', me, key, value);
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Retrieves an item with a particular key.
+     * @param {String} key The key to lookup.
+     * @return {Object} The value at that key. If it doesn't exist, <tt>undefined</tt> is returned.
+     */
+    get: function(key) {
+        return this.map[key];
+    },
+
+    /**
+     * Removes all items from the hash.
+     * @return {Ext.util.HashMap} this
+     */
+    clear: function(/* private */ initial) {
+        var me = this;
+        me.map = {};
+        me.length = 0;
+        if (initial !== true) {
+            me.fireEvent('clear', me);
+        }
+        return me;
+    },
+
+    /**
+     * Checks whether a key exists in the hash.
+     * @param {String} key The key to check for.
+     * @return {Boolean} True if they key exists in the hash.
+     */
+    containsKey: function(key) {
+        return this.map[key] !== undefined;
+    },
+
+    /**
+     * Checks whether a value exists in the hash.
+     * @param {Object} value The value to check for.
+     * @return {Boolean} True if the value exists in the dictionary.
+     */
+    contains: function(value) {
+        return this.containsKey(this.findKey(value));
+    },
+
+    /**
+     * Return all of the keys in the hash.
+     * @return {Array} An array of keys.
+     */
+    getKeys: function() {
+        return this.getArray(true);
+    },
+
+    /**
+     * Return all of the values in the hash.
+     * @return {Array} An array of values.
+     */
+    getValues: function() {
+        return this.getArray(false);
+    },
+
+    /**
+     * Gets either the keys/values in an array from the hash.
+     * @private
+     * @param {Boolean} isKey True to extract the keys, otherwise, the value
+     * @return {Array} An array of either keys/values from the hash.
+     */
+    getArray: function(isKey) {
+        var arr = [],
+            key,
+            map = this.map;
+        for (key in map) {
+            if (map.hasOwnProperty(key)) {
+                arr.push(isKey ? key : map[key]);
+            }
+        }
+        return arr;
+    },
+
+    /**
+     * Executes the specified function once for each item in the hash.
+     * Returning false from the function will cease iteration.
+     *
+     * The paramaters passed to the function are:
+     * <div class="mdetail-params"><ul>
+     * <li><b>key</b> : String<p class="sub-desc">The key of the item</p></li>
+     * <li><b>value</b> : Number<p class="sub-desc">The value of the item</p></li>
+     * <li><b>length</b> : Number<p class="sub-desc">The total number of items in the hash</p></li>
+     * </ul></div>
+     * @param {Function} fn The function to execute.
+     * @param {Object} scope The scope to execute in. Defaults to <tt>this</tt>.
+     * @return {Ext.util.HashMap} this
+     */
+    each: function(fn, scope) {
+        // copy items so they may be removed during iteration.
+        var items = Ext.apply({}, this.map),
+            key,
+            length = this.length;
+
+        scope = scope || this;
+        for (key in items) {
+            if (items.hasOwnProperty(key)) {
+                if (fn.call(scope, key, items[key], length) === false) {
+                    break;
+                }
+            }
+        }
+        return this;
+    },
+
+    /**
+     * Performs a shallow copy on this hash.
+     * @return {Ext.util.HashMap} The new hash object.
+     */
+    clone: function() {
+        var hash = new Ext.util.HashMap(),
+            map = this.map,
+            key;
+
+        hash.suspendEvents();
+        for (key in map) {
+            if (map.hasOwnProperty(key)) {
+                hash.add(key, map[key]);
+            }
+        }
+        hash.resumeEvents();
+        return hash;
+    },
+
+    /**
+     * @private
+     * Find the key for a value.
+     * @param {Object} value The value to find.
+     * @return {Object} The value of the item. Returns <tt>undefined</tt> if not found.
+     */
+    findKey: function(value) {
+        var key,
+            map = this.map;
+
+        for (key in map) {
+            if (map.hasOwnProperty(key) && map[key] === value) {
+                return key;
+            }
+        }
+        return undefined;
+    }
+});
+/**
+ * @author Ed Spencer
+ *
+ * Simple class that represents a Request that will be made by any {@link Ext.data.proxy.Server} subclass.
+ * All this class does is standardize the representation of a Request as used by any ServerProxy subclass,
+ * it does not contain any actual logic or perform the request itself.
+ */
+Ext.define('Ext.data.Request', {
+    config: {
+        /**
+         * @cfg {String} action
+         * The name of the action this Request represents. Usually one of 'create', 'read', 'update' or 'destroy'.
+         */
+        action: null,
+
+        /**
+         * @cfg {Object} params
+         * HTTP request params. The Proxy and its Writer have access to and can modify this object.
+         */
+        params: null,
+
+        /**
+         * @cfg {String} method
+         * The HTTP method to use on this Request. Should be one of 'GET', 'POST', 'PUT' or 'DELETE'.
+         */
+        method: 'GET',
+
+        /**
+         * @cfg {String} url
+         * The url to access on this Request.
+         */
+        url: null,
+
+        /**
+         * @cfg {Ext.data.Operation} operation
+         * The operation this request belongs to.
+         */
+        operation: null,
+
+        /**
+         * @cfg {Ext.data.proxy.Proxy} proxy
+         * The proxy this request belongs to.
+         */
+        proxy: null,
+
+        /**
+         * @cfg {Boolean} disableCaching
+         * Wether or not to disable caching for this request.
+         * Defaults to false.
+         */
+        disableCaching: false,
+
+        /**
+         * @cfg {Object} headers
+         * Some requests (like XMLHttpRequests) want to send additional server headers.
+         * This configuration can be set for those types of requests.
+         */
+        headers: {},
+
+        /**
+         * @cfg {String} callbackKey
+         * Some requests (like JsonP) want to send an additional key that contains
+         * the name of the callback function.
+         */
+        callbackKey: null,
+
+        /**
+         * @cfg {Ext.data.JsonP} jsonp
+         * JsonP requests return a handle that might be useful in the callback function.
+         */
+        jsonP: null,
+
+        /**
+         * @cfg {Object} jsonData
+         * This is used by some write actions to attach data to the request without encoding it
+         * as a parameter.
+         */
+        jsonData: null,
+
+        /**
+         * @cfg {Object} xmlData
+         * This is used by some write actions to attach data to the request without encoding it
+         * as a parameter, but instead sending it as XML.
+         */
+        xmlData: null,
+
+        /**
+         * @cfg {Boolean} withCredentials
+         * This field is necessary when using cross-origin resource sharing.
+         */
+        withCredentials: null,
+
+        callback: null,
+        scope: null,
+        timeout: 30000,
+        records: null,
+
+        // The following two configurations are only used by Ext.data.proxy.Direct and are just
+        // for being able to retrieve them after the request comes back from the server.
+        directFn: null,
+        args: null
+    },
+
+    /**
+     * Creates the Request object.
+     * @param {Object} [config] Config object.
+     */
+    constructor: function(config) {
+        this.initConfig(config);
+    }
+});
+/**
+ * The Connection class encapsulates a connection to the page's originating domain, allowing requests to be made either
+ * to a configured URL, or to a URL specified at request time.
+ *
+ * Requests made by this class are asynchronous, and will return immediately. No data from the server will be available
+ * to the statement immediately following the {@link #request} call. To process returned data, use a success callback
+ * in the request options object, or an {@link #requestcomplete event listener}.
+ *
+ * # File Uploads
+ *
+ * File uploads are not performed using normal "Ajax" techniques, that is they are not performed using XMLHttpRequests.
+ * Instead the form is submitted in the standard manner with the DOM &lt;form&gt; element temporarily modified to have its
+ * target set to refer to a dynamically generated, hidden &lt;iframe&gt; which is inserted into the document but removed
+ * after the return data has been gathered.
+ *
+ * The server response is parsed by the browser to create the document for the IFRAME. If the server is using JSON to
+ * send the return object, then the Content-Type header must be set to "text/html" in order to tell the browser to
+ * insert the text unchanged into the document body.
+ *
+ * Characters which are significant to an HTML parser must be sent as HTML entities, so encode `<` as `&lt;`, `&` as
+ * `&amp;` etc.
+ *
+ * The response text is retrieved from the document, and a fake XMLHttpRequest object is created containing a
+ * responseText property in order to conform to the requirements of event handlers and callbacks.
+ *
+ * Be aware that file upload packets are sent with the content type multipart/form and some server technologies
+ * (notably JEE) may require some custom processing in order to retrieve parameter names and parameter values from the
+ * packet content.
+ *
+ * Also note that it's not possible to check the response code of the hidden iframe, so the success handler will ALWAYS fire.
+ */
+Ext.define('Ext.data.Connection', {
+    mixins: {
+        observable: 'Ext.mixin.Observable'
+    },
+
+    statics: {
+        requestId: 0
+    },
+
+    config: {
+        /**
+         * @cfg {String} url
+         * The default URL to be used for requests to the server.
+         * @accessor
+         */
+        url: null,
+
+        async: true,
+
+        /**
+         * @cfg {String} [method=undefined]
+         * The default HTTP method to be used for requests. Note that this is case-sensitive and
+         * should be all caps.
+         *
+         * Defaults to undefined; if not set but params are present will use "POST", otherwise "GET".
+         */
+        method: null,
+
+        username: '',
+        password: '',
+
+        /**
+         * @cfg {Boolean} disableCaching
+         * True to add a unique cache-buster param to GET requests.
+         * @accessor
+         */
+        disableCaching: true,
+
+        /**
+         * @cfg {String} disableCachingParam
+         * Change the parameter which is sent went disabling caching through a cache buster.
+         * @accessor
+         */
+        disableCachingParam: '_dc',
+
+        /**
+         * @cfg {Number} timeout
+         * The timeout in milliseconds to be used for requests.
+         * @accessor
+         */
+        timeout : 30000,
+
+        /**
+         * @cfg {Object} extraParams
+         * Any parameters to be appended to the request.
+         * @accessor
+         */
+        extraParams: null,
+
+        /**
+         * @cfg {Object} defaultHeaders
+         * An object containing request headers which are added to each request made by this object.
+         * @accessor
+         */
+        defaultHeaders: null,
+
+        useDefaultHeader : true,
+        defaultPostHeader : 'application/x-www-form-urlencoded; charset=UTF-8',
+        useDefaultXhrHeader : true,
+        defaultXhrHeader : 'XMLHttpRequest',
+
+        autoAbort: false
+    },
+
+    textAreaRe: /textarea/i,
+    multiPartRe: /multipart\/form-data/i,
+    lineBreakRe: /\r\n/g,
+
+    constructor : function(config) {
+        this.initConfig(config);
+
+        /**
+         * @event beforerequest
+         * Fires before a network request is made to retrieve a data object.
+         * @param {Ext.data.Connection} conn This Connection object.
+         * @param {Object} options The options config object passed to the {@link #request} method.
+         */
+        /**
+         * @event requestcomplete
+         * Fires if the request was successfully completed.
+         * @param {Ext.data.Connection} conn This Connection object.
+         * @param {Object} response The XHR object containing the response data.
+         * See [The XMLHttpRequest Object](http://www.w3.org/TR/XMLHttpRequest/) for details.
+         * @param {Object} options The options config object passed to the {@link #request} method.
+         */
+        /**
+         * @event requestexception
+         * Fires if an error HTTP status was returned from the server.
+         * See [HTTP Status Code Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)
+         * for details of HTTP status codes.
+         * @param {Ext.data.Connection} conn This Connection object.
+         * @param {Object} response The XHR object containing the response data.
+         * See [The XMLHttpRequest Object](http://www.w3.org/TR/XMLHttpRequest/) for details.
+         * @param {Object} options The options config object passed to the {@link #request} method.
+         */
+        this.requests = {};
+    },
+
+    /**
+     * Sends an HTTP request to a remote server.
+     *
+     * **Important:** Ajax server requests are asynchronous, and this call will
+     * return before the response has been received. Process any returned data
+     * in a callback function.
+     *
+     *     Ext.Ajax.request({
+     *         url: 'ajax_demo/sample.json',
+     *         success: function(response, opts) {
+     *             var obj = Ext.decode(response.responseText);
+     *             console.dir(obj);
+     *         },
+     *         failure: function(response, opts) {
+     *             console.log('server-side failure with status code ' + response.status);
+     *         }
+     *     });
+     *
+     * To execute a callback function in the correct scope, use the `scope` option.
+     *
+     * @param {Object} options An object which may contain the following properties:
+     *
+     * (The options object may also contain any other property which might be needed to perform
+     * postprocessing in a callback because it is passed to callback functions.)
+     *
+     * @param {String/Function} options.url The URL to which to send the request, or a function
+     * to call which returns a URL string. The scope of the function is specified by the `scope` option.
+     * Defaults to the configured `url`.
+     *
+     * @param {Object/String/Function} options.params An object containing properties which are
+     * used as parameters to the request, a url encoded string or a function to call to get either. The scope
+     * of the function is specified by the `scope` option.
+     *
+     * @param {String} options.method The HTTP method to use
+     * for the request. Defaults to the configured method, or if no method was configured,
+     * "GET" if no parameters are being sent, and "POST" if parameters are being sent.  Note that
+     * the method name is case-sensitive and should be all caps.
+     *
+     * @param {Function} options.callback The function to be called upon receipt of the HTTP response.
+     * The callback is called regardless of success or failure and is passed the following parameters:
+     * @param {Object} options.callback.options The parameter to the request call.
+     * @param {Boolean} options.callback.success True if the request succeeded.
+     * @param {Object} options.callback.response The XMLHttpRequest object containing the response data.
+     * See [www.w3.org/TR/XMLHttpRequest/](http://www.w3.org/TR/XMLHttpRequest/) for details about
+     * accessing elements of the response.
+     *
+     * @param {Function} options.success The function to be called upon success of the request.
+     * The callback is passed the following parameters:
+     * @param {Object} options.success.response The XMLHttpRequest object containing the response data.
+     * @param {Object} options.success.options The parameter to the request call.
+     *
+     * @param {Function} options.failure The function to be called upon success of the request.
+     * The callback is passed the following parameters:
+     * @param {Object} options.failure.response The XMLHttpRequest object containing the response data.
+     * @param {Object} options.failure.options The parameter to the request call.
+     *
+     * @param {Object} options.scope The scope in which to execute the callbacks: The "this" object for
+     * the callback function. If the `url`, or `params` options were specified as functions from which to
+     * draw values, then this also serves as the scope for those function calls. Defaults to the browser
+     * window.
+     *
+     * @param {Number} options.timeout The timeout in milliseconds to be used for this request.
+     * Defaults to 30 seconds.
+     *
+     * @param {HTMLElement/HTMLElement/String} options.form The `<form>` Element or the id of the `<form>`
+     * to pull parameters from.
+     *
+     * @param {Boolean} options.isUpload **Only meaningful when used with the `form` option.**
+     *
+     * True if the form object is a file upload (will be set automatically if the form was configured
+     * with **`enctype`** `"multipart/form-data"`).
+     *
+     * File uploads are not performed using normal "Ajax" techniques, that is they are **not**
+     * performed using XMLHttpRequests. Instead the form is submitted in the standard manner with the
+     * DOM `<form>` element temporarily modified to have its [target][] set to refer to a dynamically
+     * generated, hidden `<iframe>` which is inserted into the document but removed after the return data
+     * has been gathered.
+     *
+     * The server response is parsed by the browser to create the document for the IFRAME. If the
+     * server is using JSON to send the return object, then the [Content-Type][] header must be set to
+     * "text/html" in order to tell the browser to insert the text unchanged into the document body.
+     *
+     * The response text is retrieved from the document, and a fake XMLHttpRequest object is created
+     * containing a `responseText` property in order to conform to the requirements of event handlers
+     * and callbacks.
+     *
+     * Be aware that file upload packets are sent with the content type [multipart/form][] and some server
+     * technologies (notably JEE) may require some custom processing in order to retrieve parameter names
+     * and parameter values from the packet content.
+     *
+     * [target]: http://www.w3.org/TR/REC-html40/present/frames.html#adef-target
+     * [Content-Type]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+     * [multipart/form]: http://www.faqs.org/rfcs/rfc2388.html
+     *
+     * @param {Object} options.headers Request headers to set for the request.
+     *
+     * @param {Object} options.xmlData XML document to use for the post. Note: This will be used instead
+     * of params for the post data. Any params will be appended to the URL.
+     *
+     * @param {Object/String} options.jsonData JSON data to use as the post. Note: This will be used
+     * instead of params for the post data. Any params will be appended to the URL.
+     *
+     * @param {Boolean} options.disableCaching True to add a unique cache-buster param to GET requests.
+     *
+     * @return {Object} The request object. This may be used to cancel the request.
+     */
+    request : function(options) {
+        options = options || {};
+        var me = this,
+            scope = options.scope || window,
+            username = options.username || me.getUsername(),
+            password = options.password || me.getPassword() || '',
+            async, requestOptions, request, headers, xhr;
+
+        if (me.fireEvent('beforerequest', me, options) !== false) {
+            requestOptions = me.setOptions(options, scope);
+
+            if (this.isFormUpload(options) === true) {
+                this.upload(options.form, requestOptions.url, requestOptions.data, options);
+                return null;
+            }
+
+            // if autoabort is set, cancel the current transactions
+            if (options.autoAbort === true || me.getAutoAbort()) {
+                me.abort();
+            }
+
+            // create a connection object
+            xhr = this.getXhrInstance();
+
+            async = options.async !== false ? (options.async || me.getAsync()) : false;
+
+            // open the request
+            if (username) {
+                xhr.open(requestOptions.method, requestOptions.url, async, username, password);
+            } else {
+                xhr.open(requestOptions.method, requestOptions.url, async);
+            }
+
+            headers = me.setupHeaders(xhr, options, requestOptions.data, requestOptions.params);
+
+            // create the transaction object
+            request = {
+                id: ++this.self.requestId,
+                xhr: xhr,
+                headers: headers,
+                options: options,
+                async: async,
+                timeout: setTimeout(function() {
+                    request.timedout = true;
+                    me.abort(request);
+                }, options.timeout || me.getTimeout())
+            };
+            me.requests[request.id] = request;
+
+            // bind our statechange listener
+            if (async) {
+                xhr.onreadystatechange = Ext.Function.bind(me.onStateChange, me, [request]);
+            }
+
+            // start the request!
+            xhr.send(requestOptions.data);
+            if (!async) {
+                return this.onComplete(request);
+            }
+            return request;
+        } else {
+            Ext.callback(options.callback, options.scope, [options, undefined, undefined]);
+            return null;
+        }
+    },
+
+    /**
+     * Uploads a form using a hidden iframe.
+     * @param {String/HTMLElement/Ext.Element} form The form to upload
+     * @param {String} url The url to post to
+     * @param {String} params Any extra parameters to pass
+     * @param {Object} options The initial options
+     */
+    upload: function(form, url, params, options) {
+        form = Ext.getDom(form);
+        options = options || {};
+
+        var id = Ext.id(),
+            frame = document.createElement('iframe'),
+            hiddens = [],
+            encoding = 'multipart/form-data',
+            buf = {
+                target: form.target,
+                method: form.method,
+                encoding: form.encoding,
+                enctype: form.enctype,
+                action: form.action
+            }, addField = function(name, value) {
+            hiddenItem = document.createElement('input');
+            Ext.fly(hiddenItem).set({
+                type: 'hidden',
+                value: value,
+                name: name
+            });
+            form.appendChild(hiddenItem);
+            hiddens.push(hiddenItem);
+        }, hiddenItem;
+
+        /*
+         * Originally this behaviour was modified for Opera 10 to apply the secure URL after
+         * the frame had been added to the document. It seems this has since been corrected in
+         * Opera so the behaviour has been reverted, the URL will be set before being added.
+         */
+        Ext.fly(frame).set({
+            id: id,
+            name: id,
+            cls: Ext.baseCSSPrefix + 'hide-display',
+            src: Ext.SSL_SECURE_URL
+        });
+
+        document.body.appendChild(frame);
+
+        // This is required so that IE doesn't pop the response up in a new window.
+        if (document.frames) {
+            document.frames[id].name = id;
+        }
+
+        Ext.fly(form).set({
+            target: id,
+            method: 'POST',
+            enctype: encoding,
+            encoding: encoding,
+            action: url || buf.action
+        });
+
+        // add dynamic params
+        if (params) {
+            Ext.iterate(Ext.Object.fromQueryString(params), function(name, value) {
+                if (Ext.isArray(value)) {
+                    Ext.each(value, function(v) {
+                        addField(name, v);
+                    });
+                } else {
+                    addField(name, value);
+                }
+            });
+        }
+
+        Ext.fly(frame).on('load', Ext.Function.bind(this.onUploadComplete, this, [frame, options]), null, {single: true});
+        form.submit();
+
+        Ext.fly(form).set(buf);
+        Ext.each(hiddens, function(h) {
+            Ext.removeNode(h);
+        });
+    },
+
+    onUploadComplete: function(frame, options) {
+        var me = this,
+            // bogus response object
+            response = {
+                responseText: '',
+                responseXML: null
+            }, doc, firstChild;
+
+        try {
+            doc = frame.contentWindow.document || frame.contentDocument || window.frames[id].document;
+            if (doc) {
+                if (doc.body) {
+                    if (this.textAreaRe.test((firstChild = doc.body.firstChild || {}).tagName)) { // json response wrapped in textarea
+                        response.responseText = firstChild.value;
+                    } else {
+                        response.responseText = doc.body.innerHTML;
+                    }
+                }
+                //in IE the document may still have a body even if returns XML.
+                response.responseXML = doc.XMLDocument || doc;
+            }
+        } catch (e) {
+        }
+
+        me.fireEvent('requestcomplete', me, response, options);
+
+        Ext.callback(options.success, options.scope, [response, options]);
+        Ext.callback(options.callback, options.scope, [options, true, response]);
+
+        setTimeout(function() {
+            Ext.removeNode(frame);
+        }, 100);
+    },
+
+    /**
+     * Detects whether the form is intended to be used for an upload.
+     * @private
+     */
+    isFormUpload: function(options) {
+        var form = this.getForm(options);
+        if (form) {
+            return (options.isUpload || (this.multiPartRe).test(form.getAttribute('enctype')));
+        }
+        return false;
+    },
+
+    /**
+     * Gets the form object from options.
+     * @private
+     * @param {Object} options The request options
+     * @return {HTMLElement} The form, null if not passed
+     */
+    getForm: function(options) {
+        return Ext.getDom(options.form) || null;
+    },
+
+    /**
+     * Sets various options such as the url, params for the request
+     * @param {Object} options The initial options
+     * @param {Object} scope The scope to execute in
+     * @return {Object} The params for the request
+     */
+    setOptions: function(options, scope) {
+        var me = this,
+            params = options.params || {},
+            extraParams = me.getExtraParams(),
+            urlParams = options.urlParams,
+            url = options.url || me.getUrl(),
+            jsonData = options.jsonData,
+            method,
+            disableCache,
+            data;
+
+        // allow params to be a method that returns the params object
+        if (Ext.isFunction(params)) {
+            params = params.call(scope, options);
+        }
+
+        // allow url to be a method that returns the actual url
+        if (Ext.isFunction(url)) {
+            url = url.call(scope, options);
+        }
+
+        url = this.setupUrl(options, url);
+
+
+        // check for xml or json data, and make sure json data is encoded
+        data = options.rawData || options.xmlData || jsonData || null;
+        if (jsonData && !Ext.isPrimitive(jsonData)) {
+            data = Ext.encode(data);
+        }
+
+        // make sure params are a url encoded string and include any extraParams if specified
+        if (Ext.isObject(params)) {
+            params = Ext.Object.toQueryString(params);
+        }
+
+        if (Ext.isObject(extraParams)) {
+            extraParams = Ext.Object.toQueryString(extraParams);
+        }
+
+        params = params + ((extraParams) ? ((params) ? '&' : '') + extraParams : '');
+
+        urlParams = Ext.isObject(urlParams) ? Ext.Object.toQueryString(urlParams) : urlParams;
+
+        params = this.setupParams(options, params);
+
+        // decide the proper method for this request
+        method = (options.method || me.getMethod() || ((params || data) ? 'POST' : 'GET')).toUpperCase();
+        this.setupMethod(options, method);
+
+
+        disableCache = options.disableCaching !== false ? (options.disableCaching || me.getDisableCaching()) : false;
+        // if the method is get append date to prevent caching
+        if (method === 'GET' && disableCache) {
+            url = Ext.urlAppend(url, (options.disableCachingParam || me.getDisableCachingParam()) + '=' + (new Date().getTime()));
+        }
+
+        // if the method is get or there is json/xml data append the params to the url
+        if ((method == 'GET' || data) && params) {
+            url = Ext.urlAppend(url, params);
+            params = null;
+        }
+
+        // allow params to be forced into the url
+        if (urlParams) {
+            url = Ext.urlAppend(url, urlParams);
+        }
+
+        return {
+            url: url,
+            method: method,
+            data: data || params || null
+        };
+    },
+
+    /**
+     * Template method for overriding url
+     * @private
+     * @param {Object} options
+     * @param {String} url
+     * @return {String} The modified url
+     */
+    setupUrl: function(options, url) {
+        var form = this.getForm(options);
+        if (form) {
+            url = url || form.action;
+        }
+        return url;
+    },
+
+
+    /**
+     * Template method for overriding params
+     * @private
+     * @param {Object} options
+     * @param {String} params
+     * @return {String} The modified params
+     */
+    setupParams: function(options, params) {
+        var form = this.getForm(options),
+            serializedForm;
+        if (form && !this.isFormUpload(options)) {
+            serializedForm = Ext.Element.serializeForm(form);
+            params = params ? (params + '&' + serializedForm) : serializedForm;
+        }
+        return params;
+    },
+
+    /**
+     * Template method for overriding method
+     * @private
+     * @param {Object} options
+     * @param {String} method
+     * @return {String} The modified method
+     */
+    setupMethod: function(options, method) {
+        if (this.isFormUpload(options)) {
+            return 'POST';
+        }
+        return method;
+    },
+
+    /**
+     * Setup all the headers for the request
+     * @private
+     * @param {Object} xhr The xhr object
+     * @param {Object} options The options for the request
+     * @param {Object} data The data for the request
+     * @param {Object} params The params for the request
+     */
+    setupHeaders: function(xhr, options, data, params) {
+        var me = this,
+            headers = Ext.apply({}, options.headers || {}, me.getDefaultHeaders() || {}),
+            contentType = me.getDefaultPostHeader(),
+            jsonData = options.jsonData,
+            xmlData = options.xmlData,
+            key,
+            header;
+
+        if (!headers['Content-Type'] && (data || params)) {
+            if (data) {
+                if (options.rawData) {
+                    contentType = 'text/plain';
+                } else {
+                    if (xmlData && Ext.isDefined(xmlData)) {
+                        contentType = 'text/xml';
+                    } else if (jsonData && Ext.isDefined(jsonData)) {
+                        contentType = 'application/json';
+                    }
+                }
+            }
+            headers['Content-Type'] = contentType;
+        }
+
+        if (me.getUseDefaultXhrHeader() && !headers['X-Requested-With']) {
+            headers['X-Requested-With'] = me.getDefaultXhrHeader();
+        }
+        // set up all the request headers on the xhr object
+        try {
+            for (key in headers) {
+                if (headers.hasOwnProperty(key)) {
+                    header = headers[key];
+                    xhr.setRequestHeader(key, header);
+                }
+
+            }
+        } catch(e) {
+            me.fireEvent('exception', key, header);
+        }
+
+        if (options.withCredentials) {
+            xhr.withCredentials = options.withCredentials;
+        }
+
+        return headers;
+    },
+
+    /**
+     * Creates the appropriate XHR transport for the browser.
+     * @private
+     */
+    getXhrInstance: (function() {
+        var options = [function() {
+            return new XMLHttpRequest();
+        }, function() {
+            return new ActiveXObject('MSXML2.XMLHTTP.3.0');
+        }, function() {
+            return new ActiveXObject('MSXML2.XMLHTTP');
+        }, function() {
+            return new ActiveXObject('Microsoft.XMLHTTP');
+        }], i = 0,
+            len = options.length,
+            xhr;
+
+        for (; i < len; ++i) {
+            try {
+                xhr = options[i];
+                xhr();
+                break;
+            } catch(e) {
+            }
+        }
+        return xhr;
+    })(),
+
+    /**
+     * Determines whether this object has a request outstanding.
+     * @param {Object} request The request to check
+     * @return {Boolean} True if there is an outstanding request.
+     */
+    isLoading : function(request) {
+        if (!(request && request.xhr)) {
+            return false;
+        }
+        // if there is a connection and readyState is not 0 or 4
+        var state = request.xhr.readyState;
+        return !(state === 0 || state == 4);
+    },
+
+    /**
+     * Aborts any outstanding request.
+     * @param {Object} request (Optional) defaults to the last request
+     */
+    abort : function(request) {
+        var me = this,
+            requests = me.requests,
+            id;
+
+        if (request && me.isLoading(request)) {
+            /*
+             * Clear out the onreadystatechange here, this allows us
+             * greater control, the browser may/may not fire the function
+             * depending on a series of conditions.
+             */
+            request.xhr.onreadystatechange = null;
+            request.xhr.abort();
+            me.clearTimeout(request);
+            if (!request.timedout) {
+                request.aborted = true;
+            }
+            me.onComplete(request);
+            me.cleanup(request);
+        } else if (!request) {
+            for (id in requests) {
+                if (requests.hasOwnProperty(id)) {
+                    me.abort(requests[id]);
+                }
+            }
+        }
+    },
+
+    /**
+     * Aborts all outstanding requests
+     */
+    abortAll: function() {
+        this.abort();
+    },
+
+    /**
+     * Fires when the state of the xhr changes
+     * @private
+     * @param {Object} request The request
+     */
+    onStateChange : function(request) {
+        if (request.xhr.readyState == 4) {
+            this.clearTimeout(request);
+            this.onComplete(request);
+            this.cleanup(request);
+        }
+    },
+
+    /**
+     * Clears the timeout on the request
+     * @private
+     * @param {Object} The request
+     */
+    clearTimeout: function(request) {
+        clearTimeout(request.timeout);
+        delete request.timeout;
+    },
+
+    /**
+     * Cleans up any left over information from the request
+     * @private
+     * @param {Object} The request
+     */
+    cleanup: function(request) {
+        request.xhr = null;
+        delete request.xhr;
+    },
+
+    /**
+     * To be called when the request has come back from the server
+     * @private
+     * @param {Object} request
+     * @return {Object} The response
+     */
+    onComplete : function(request) {
+        var me = this,
+            options = request.options,
+            result,
+            success,
+            response;
+
+        try {
+            result = me.parseStatus(request.xhr.status);
+
+            if (request.timedout) {
+                result.success = false;
+            }
+        } catch (e) {
+            // in some browsers we can't access the status if the readyState is not 4, so the request has failed
+            result = {
+                success : false,
+                isException : false
+            };
+        }
+        success = result.success;
+
+        if (success) {
+            response = me.createResponse(request);
+            me.fireEvent('requestcomplete', me, response, options);
+            Ext.callback(options.success, options.scope, [response, options]);
+        } else {
+            if (result.isException || request.aborted || request.timedout) {
+                response = me.createException(request);
+            } else {
+                response = me.createResponse(request);
+            }
+            me.fireEvent('requestexception', me, response, options);
+            Ext.callback(options.failure, options.scope, [response, options]);
+        }
+        Ext.callback(options.callback, options.scope, [options, success, response]);
+        delete me.requests[request.id];
+        return response;
+    },
+
+    /**
+     * Checks if the response status was successful
+     * @param {Number} status The status code
+     * @return {Object} An object containing success/status state
+     */
+    parseStatus: function(status) {
+        // see: https://prototype.lighthouseapp.com/projects/8886/tickets/129-ie-mangles-http-response-status-code-204-to-1223
+        status = status == 1223 ? 204 : status;
+
+        var success = (status >= 200 && status < 300) || status == 304 || status == 0,
+            isException = false;
+
+        if (!success) {
+            switch (status) {
+                case 12002:
+                case 12029:
+                case 12030:
+                case 12031:
+                case 12152:
+                case 13030:
+                    isException = true;
+                    break;
+            }
+        }
+        return {
+            success: success,
+            isException: isException
+        };
+    },
+
+    /**
+     * Creates the response object
+     * @private
+     * @param {Object} request
+     */
+    createResponse : function(request) {
+        var xhr = request.xhr,
+            headers = {},
+            lines, count, line, index, key, response;
+
+        //we need to make this check here because if a request times out an exception is thrown
+        //when calling getAllResponseHeaders() because the response never came back to populate it
+        if (request.timedout || request.aborted) {
+            request.success = false;
+            lines = [];
+        } else {
+            lines = xhr.getAllResponseHeaders().replace(this.lineBreakRe, '\n').split('\n');
+        }
+
+        count = lines.length;
+
+        while (count--) {
+            line = lines[count];
+            index = line.indexOf(':');
+            if (index >= 0) {
+                key = line.substr(0, index).toLowerCase();
+                if (line.charAt(index + 1) == ' ') {
+                    ++index;
+                }
+                headers[key] = line.substr(index + 1);
+            }
+        }
+
+        request.xhr = null;
+        delete request.xhr;
+
+        response = {
+            request: request,
+            requestId : request.id,
+            status : xhr.status,
+            statusText : xhr.statusText,
+            getResponseHeader : function(header) {
+                return headers[header.toLowerCase()];
+            },
+            getAllResponseHeaders : function() {
+                return headers;
+            },
+            responseText : xhr.responseText,
+            responseXML : xhr.responseXML
+        };
+
+        // If we don't explicitly tear down the xhr reference, IE6/IE7 will hold this in the closure of the
+        // functions created with getResponseHeader/getAllResponseHeaders
+        xhr = null;
+        return response;
+    },
+
+    /**
+     * Creates the exception object
+     * @private
+     * @param {Object} request
+     */
+    createException : function(request) {
+        return {
+            request : request,
+            requestId : request.id,
+            status : request.aborted ? -1 : 0,
+            statusText : request.aborted ? 'transaction aborted' : 'communication failure',
+            aborted: request.aborted,
+            timedout: request.timedout
+        };
+    }
+});
+
+/**
+ * @author Ed Spencer
+ * @class Ext.data.Batch
+ *
+ * <p>Provides a mechanism to run one or more {@link Ext.data.Operation operations} in a given order. Fires the 'operationcomplete' event
+ * after the completion of each Operation, and the 'complete' event when all Operations have been successfully executed. Fires an 'exception'
+ * event if any of the Operations encounter an exception.</p>
+ *
+ * <p>Usually these are only used internally by {@link Ext.data.proxy.Proxy} classes</p>
+ *
+ */
+Ext.define('Ext.data.Batch', {
+    mixins: {
+        observable: 'Ext.mixin.Observable'
+    },
+
+    config: {
+        /**
+         * @cfg {Boolean} autoStart true to immediately start processing the batch as soon as it is constructed (defaults to false)
+         */
+        autoStart: false,
+
+        /**
+         * @cfg {Boolean} pauseOnException true to automatically pause the execution of the batch if any operation encounters an exception (defaults to true)
+         */
+        pauseOnException: true,
+
+        /**
+         * @cfg {Ext.data.Proxy} proxy The proxy this Batch belongs to. Used to make the requests for each operation in the Batch.
+         */
+        proxy: null
+    },
+
+    /**
+     * The index of the current operation being executed
+     * @property current
+     * @type Number
+     */
+    current: -1,
+
+    /**
+     * The total number of operations in this batch. Read only
+     * @property total
+     * @type Number
+     */
+    total: 0,
+
+    /**
+     * True if the batch is currently running
+     * @property isRunning
+     * @type Boolean
+     */
+    isRunning: false,
+
+    /**
+     * True if this batch has been executed completely
+     * @property isComplete
+     * @type Boolean
+     */
+    isComplete: false,
+
+    /**
+     * True if this batch has encountered an exception. This is cleared at the start of each operation
+     * @property hasException
+     * @type Boolean
+     */
+    hasException: false,
+
+    /**
+     * @event complete
+     * Fired when all operations of this batch have been completed
+     * @param {Ext.data.Batch} batch The batch object
+     * @param {Object} operation The last operation that was executed
+     */
+
+    /**
+     * @event exception
+     * Fired when a operation encountered an exception
+     * @param {Ext.data.Batch} batch The batch object
+     * @param {Object} operation The operation that encountered the exception
+     */
+
+    /**
+     * @event operationcomplete
+     * Fired when each operation of the batch completes
+     * @param {Ext.data.Batch} batch The batch object
+     * @param {Object} operation The operation that just completed
+     */
+
+    /**
+     * Creates new Batch object.
+     * @param {Object} config (optional) Config object
+     */
+    constructor: function(config) {
+        var me = this;
+
+        me.initConfig(config);
+
+        /**
+         * Ordered array of operations that will be executed by this batch
+         * @property {Ext.data.Operation[]} operations
+         */
+        me.operations = [];
+    },
+
+    /**
+     * Adds a new operation to this batch
+     * @param {Object} operation The {@link Ext.data.Operation Operation} object
+     */
+    add: function(operation) {
+        this.total++;
+
+        operation.setBatch(this);
+
+        this.operations.push(operation);
+    },
+
+    /**
+     * Kicks off the execution of the batch, continuing from the next operation if the previous
+     * operation encountered an exception, or if execution was paused
+     */
+    start: function() {
+        this.hasException = false;
+        this.isRunning = true;
+
+        this.runNextOperation();
+    },
+
+    /**
+     * @private
+     * Runs the next operation, relative to this.current.
+     */
+    runNextOperation: function() {
+        this.runOperation(this.current + 1);
+    },
+
+    /**
+     * Pauses execution of the batch, but does not cancel the current operation
+     */
+    pause: function() {
+        this.isRunning = false;
+    },
+
+    /**
+     * Executes a operation by its numeric index
+     * @param {Number} index The operation index to run
+     */
+    runOperation: function(index) {
+        var me = this,
+            operations = me.operations,
+            operation = operations[index],
+            onProxyReturn;
+
+        if (operation === undefined) {
+            me.isRunning = false;
+            me.isComplete = true;
+            me.fireEvent('complete', me, operations[operations.length - 1]);
+        } else {
+            me.current = index;
+
+            onProxyReturn = function(operation) {
+                var hasException = operation.hasException();
+
+                if (hasException) {
+                    me.hasException = true;
+                    me.fireEvent('exception', me, operation);
+                } else {
+                    me.fireEvent('operationcomplete', me, operation);
+                }
+
+                if (hasException && me.getPauseOnException()) {
+                    me.pause();
+                } else {
+                    operation.setCompleted();
+                    me.runNextOperation();
+                }
+            };
+
+            operation.setStarted();
+
+            me.getProxy()[operation.getAction()](operation, onProxyReturn, me);
+        }
+    }
+});
+/**
+ * @author Ed Spencer
+ *
+ * Represents a single read or write operation performed by a {@link Ext.data.proxy.Proxy Proxy}. Operation objects are
+ * used to enable communication between Stores and Proxies. Application developers should rarely need to interact with
+ * Operation objects directly.
+ *
+ * Note that when you define an Operation directly, you need to specify at least the {@link #model} configuration.
+ *
+ * Several Operations can be batched together in a {@link Ext.data.Batch batch}.
+ */
+Ext.define('Ext.data.Operation', {
+    config: {
+        /**
+         * @cfg {Boolean} synchronous
+         * True if this Operation is to be executed synchronously. This property is inspected by a
+         * {@link Ext.data.Batch Batch} to see if a series of Operations can be executed in parallel or not.
+         * @accessor
+         * @private
+         */
+        synchronous: true,
+
+        /**
+         * @cfg {String} action
+         * The action being performed by this Operation. Should be one of 'create', 'read', 'update' or 'destroy'.
+         * @accessor
+         */
+        action: null,
+
+        /**
+         * @cfg {Ext.util.Filter[]} filters
+         * Optional array of filter objects. Only applies to 'read' actions.
+         * @accessor
+         * @private
+         */
+        filters: null,
+
+        /**
+         * @cfg {Ext.util.Sorter[]} sorters
+         * Optional array of sorter objects. Only applies to 'read' actions.
+         * @accessor
+         * @private
+         */
+        sorters: null,
+
+        /**
+         * @cfg {Ext.util.Grouper} grouper
+         * Optional grouping configuration. Only applies to 'read' actions where grouping is desired.
+         * @accessor
+         * @private
+         */
+        grouper: null,
+
+        /**
+         * @cfg {Number} start
+         * The start index (offset), used in paging when running a 'read' action.
+         * @accessor
+         * @private
+         */
+        start: null,
+
+        /**
+         * @cfg {Number} limit
+         * The number of records to load. Used on 'read' actions when paging is being used.
+         * @accessor
+         * @private
+         */
+        limit: null,
+
+        /**
+         * @cfg {Ext.data.Batch} batch
+         * The batch that this Operation is a part of.
+         * @accessor
+         * @private
+         */
+        batch: null,
+
+        /**
+         * @cfg {Function} callback
+         * Function to execute when operation completed.
+         * @cfg {Ext.data.Model[]} callback.records Array of records.
+         * @cfg {Ext.data.Operation} callback.operation The Operation itself.
+         * @cfg {Boolean} callback.success True when operation completed successfully.
+         * @accessor
+         * @private
+         */
+        callback: null,
+
+        /**
+         * @cfg {Object} scope
+         * Scope for the {@link #callback} function.
+         * @accessor
+         * @private
+         */
+        scope: null,
+
+        /**
+         * @cfg {Ext.data.ResultSet} resultSet
+         * The ResultSet for this operation.
+         * @accessor
+         */
+        resultSet: null,
+
+        /**
+         * @cfg {Array} records
+         * The records associated to this operation. Before an operation starts, these
+         * are the records you are updating, creating, or destroying. After an operation
+         * is completed, a Proxy usually sets these records on the Operation to become
+         * the processed records. If you don't set these records on your operation in
+         * your proxy, then the getter will return the ones defined on the {@link #resultSet}
+         * @accessor
+         */
+        records: null,
+
+        /**
+         * @cfg {Ext.data.Request} request
+         * The request used for this Operation. Operations don't usually care about Request and Response data, but in the
+         * ServerProxy and any of its subclasses they may be useful for further processing.
+         * @accessor
+         */
+        request: null,
+
+        /**
+         * @cfg {Object} response
+         * The response that was gotten from the server if there was one.
+         * @accessor
+         */
+        response: null,
+
+        /**
+         * @cfg {Boolean} withCredentials
+         * This field is necessary when using cross-origin resource sharing.
+         */
+        withCredentials: null,
+
+        /**
+         * @cfg {Object} params
+         * The params send along with this operation. These usually apply to a Server proxy if you are
+         * creating your own custom proxy,
+         * @accessor
+         */
+        params: null,
+        url: null,
+        page: null,
+        node: null,
+
+        /**
+         * @cfg {Ext.data.Model} model
+         * The Model that this Operation will be dealing with. This configuration is required when defining any Operation.
+         * Since Operations take care of creating, updating, destroying and reading records, it needs access to the Model.
+         */
+        model: undefined,
+
+        addRecords: false
+    },
+
+    /**
+     * @property {Boolean} started
+     * Read-only property tracking the start status of this Operation. Use {@link #isStarted}.
+     * @private
+     */
+    started: false,
+
+    /**
+     * @property {Boolean} running
+     * Read-only property tracking the run status of this Operation. Use {@link #isRunning}.
+     * @private
+     */
+    running: false,
+
+    /**
+     * @property {Boolean} complete
+     * Read-only property tracking the completion status of this Operation. Use {@link #isComplete}.
+     * @private
+     */
+    complete: false,
+
+    /**
+     * @property {Boolean} success
+     * Read-only property tracking whether the Operation was successful or not. This starts as undefined and is set to true
+     * or false by the Proxy that is executing the Operation. It is also set to false by {@link #setException}. Use
+     * {@link #wasSuccessful} to query success status.
+     * @private
+     */
+    success: undefined,
+
+    /**
+     * @property {Boolean} exception
+     * Read-only property tracking the exception status of this Operation. Use {@link #hasException} and see {@link #getError}.
+     * @private
+     */
+    exception: false,
+
+    /**
+     * @property {String/Object} error
+     * The error object passed when {@link #setException} was called. This could be any object or primitive.
+     * @private
+     */
+    error: undefined,
+
+    /**
+     * Creates new Operation object.
+     * @param {Object} config (optional) Config object.
+     */
+    constructor: function(config) {
+        this.initConfig(config);
+    },
+
+    applyModel: function(model) {
+        if (typeof model == 'string') {
+            model = Ext.data.ModelManager.getModel(model);
+
+            if (!model) {
+                Ext.Logger.error('Model with name ' + arguments[0] + ' doesnt exist.');
+            }
+        }
+
+        if (model && !model.prototype.isModel && Ext.isObject(model)) {
+            model = Ext.data.ModelManager.registerType(model.storeId || model.id || Ext.id(), model);
+        }
+
+
+        return model;
+    },
+
+    getRecords: function() {
+        var resultSet = this.getResultSet();
+        return this._records || (resultSet ? resultSet.getRecords() : []);
+    },
+
+    /**
+     * Marks the Operation as started.
+     */
+    setStarted: function() {
+        this.started = true;
+        this.running = true;
+    },
+
+    /**
+     * Marks the Operation as completed.
+     */
+    setCompleted: function() {
+        this.complete = true;
+        this.running  = false;
+    },
+
+    /**
+     * Marks the Operation as successful.
+     */
+    setSuccessful: function() {
+        this.success = true;
+    },
+
+    /**
+     * Marks the Operation as having experienced an exception. Can be supplied with an option error message/object.
+     * @param {String/Object} error (optional) error string/object
+     */
+    setException: function(error) {
+        this.exception = true;
+        this.success = false;
+        this.running = false;
+        this.error = error;
+    },
+
+    /**
+     * Returns true if this Operation encountered an exception (see also {@link #getError})
+     * @return {Boolean} True if there was an exception
+     */
+    hasException: function() {
+        return this.exception === true;
+    },
+
+    /**
+     * Returns the error string or object that was set using {@link #setException}
+     * @return {String/Object} The error object
+     */
+    getError: function() {
+        return this.error;
+    },
+    
+    /**
+     * Returns true if the Operation has been started. Note that the Operation may have started AND completed, see
+     * {@link #isRunning} to test if the Operation is currently running.
+     * @return {Boolean} True if the Operation has started
+     */
+    isStarted: function() {
+        return this.started === true;
+    },
+
+    /**
+     * Returns true if the Operation has been started but has not yet completed.
+     * @return {Boolean} True if the Operation is currently running
+     */
+    isRunning: function() {
+        return this.running === true;
+    },
+
+    /**
+     * Returns true if the Operation has been completed
+     * @return {Boolean} True if the Operation is complete
+     */
+    isComplete: function() {
+        return this.complete === true;
+    },
+
+    /**
+     * Returns true if the Operation has completed and was successful
+     * @return {Boolean} True if successful
+     */
+    wasSuccessful: function() {
+        return this.isComplete() && this.success === true;
+    },
+
+    /**
+     * Checks whether this operation should cause writing to occur.
+     * @return {Boolean} Whether the operation should cause a write to occur.
+     */
+    allowWrite: function() {
+        return this.getAction() != 'read';
+    },
+
+    process: function(action, resultSet, request, response) {
+        if (resultSet.getSuccess() !== false) {
+            this.setResponse(response);
+            this.setResultSet(resultSet);
+            this.setCompleted();
+            this.setSuccessful();
+        } else {
+            return false;
+        }
+
+        return this['process' + Ext.String.capitalize(action)].call(this, resultSet, request, response);
+    },
+
+    processRead: function(resultSet) {
+        var records = resultSet.getRecords(),
+            processedRecords = [],
+            Model = this.getModel(),
+            ln = records.length,
+            i, record;
+
+        for (i = 0; i < ln; i++) {
+            record = records[i];
+            processedRecords.push(new Model(record.data, record.id, record.node));
+        }
+
+        this.setRecords(processedRecords);
+        return true;
+    },
+
+    processCreate: function(resultSet) {
+        var updatedRecords = resultSet.getRecords(),
+            currentRecords = this.getRecords(),
+            ln = updatedRecords.length,
+            i, currentRecord, updatedRecord;
+
+        for (i = 0; i < ln; i++) {
+            updatedRecord = updatedRecords[i];
+
+            if (updatedRecord.clientId === null && currentRecords.length == 1 && updatedRecords.length == 1) {
+                currentRecord = currentRecords[i];
+            } else {
+                currentRecord = this.findCurrentRecord(updatedRecord.clientId);
+            }
+
+            if (currentRecord) {
+                this.updateRecord(currentRecord, updatedRecord);
+            }
+        }
+
+        return true;
+    },
+
+    processUpdate: function(resultSet) {
+        var updatedRecords = resultSet.getRecords(),
+            currentRecords = this.getRecords(),
+            ln = updatedRecords.length,
+            i, currentRecord, updatedRecord;
+
+        for (i = 0; i < ln; i++) {
+            updatedRecord = updatedRecords[i];
+            currentRecord = currentRecords[i];
+
+            if (currentRecord) {
+                this.updateRecord(currentRecord, updatedRecord);
+            }
+        }
+
+        return true;
+    },
+
+    processDestroy: function(resultSet) {
+        var updatedRecords = resultSet.getRecords(),
+            ln = updatedRecords.length,
+            i, currentRecord, updatedRecord;
+
+        for (i = 0; i < ln; i++) {
+            updatedRecord = updatedRecords[i];
+            currentRecord = this.findCurrentRecord(updatedRecord.id);
+
+            if (currentRecord) {
+                currentRecord.setIsErased(true);
+                currentRecord.notifyStores('afterErase', currentRecord);
+            }
+        }
+    },
+
+    findCurrentRecord: function(clientId) {
+        var currentRecords = this.getRecords(),
+            ln = currentRecords.length,
+            i, currentRecord;
+
+        for (i = 0; i < ln; i++) {
+            currentRecord = currentRecords[i];
+            if (currentRecord.getId() === clientId) {
+                return currentRecord;
+            }
+        }
+    },
+
+    updateRecord: function(currentRecord, updatedRecord) {
+        var recordData = updatedRecord.data,
+            recordId = updatedRecord.id;
+
+        currentRecord.beginEdit();
+
+        currentRecord.set(recordData);
+        if (recordId !== null) {
+            currentRecord.setId(recordId);
+        }
+
+        // We call endEdit with silent: true because the commit below already makes
+        // sure any store is notified of the record being updated.
+        currentRecord.endEdit(true);
+        
+        currentRecord.commit();
+    }
+    // <deprecated product=touch since=2.0>
+}, function() {
+    /**
+     * @member Ext.data.Operation
+     * @cfg {Boolean} group
+     * @inheritdoc Ext.data.Operation#grouper
+     * @deprecated 2.0.0 Please use {@link #grouper} instead.
+     */
+    Ext.deprecateProperty(this, 'group', 'grouper');
+    // </deprecated>
+});
+
+Ext.define('EatSense.override.OperationImprovement', {
+    override: 'Ext.data.Operation',
+
+    processCreate: function(resultSet) {
+    	console.log('Ext.ux.OperationImprovement');
+    	
+        var updatedRecords = resultSet.getRecords(),
+            currentRecords = this.getRecords(),
+            ln = updatedRecords.length,
+            i, currentRecord, updatedRecord;
+        
+
+        for (i = 0; i < ln; i++) {
+            updatedRecord = updatedRecords[i];
+
+            if (updatedRecord.clientId === null && currentRecords.length == 1 && updatedRecords.length == 1) {
+                currentRecord = currentRecords[i];
+            } else {
+                currentRecord = this.findCurrentRecord(updatedRecord.clientId);
+            }
+
+            if (currentRecord) {
+                this.updateRecord(currentRecord, updatedRecord);
+            }
+        }
+
+        return true;
+    }
+});
+/**
+ * @author Ed Spencer
+ *
+ * Base Writer class used by most subclasses of {@link Ext.data.proxy.Server}. This class is
+ * responsible for taking a set of {@link Ext.data.Operation} objects and a {@link Ext.data.Request}
+ * object and modifying that request based on the Operations.
+ *
+ * For example a Ext.data.writer.Json would format the Operations and their {@link Ext.data.Model}
+ * instances based on the config options passed to the JsonWriter's constructor.
+ *
+ * Writers are not needed for any kind of local storage - whether via a
+ * {@link Ext.data.proxy.WebStorage Web Storage proxy} (see {@link Ext.data.proxy.LocalStorage localStorage})
+ * or just in memory via a {@link Ext.data.proxy.Memory MemoryProxy}.
+ */
+Ext.define('Ext.data.writer.Writer', {
+    alias: 'writer.base',
+    alternateClassName: ['Ext.data.DataWriter', 'Ext.data.Writer'],
+
+    config: {
+        /**
+         * @cfg {Boolean} writeAllFields True to write all fields from the record to the server. If set to false it
+         * will only send the fields that were modified. Defaults to <tt>true</tt>. Note that any fields that have
+         * {@link Ext.data.Field#persist} set to false will still be ignored.
+         */
+        writeAllFields: true,
+
+        /**
+         * @cfg {String} nameProperty This property is used to read the key for each value that will be sent to the server.
+         * For example:
+         * <pre><code>
+    Ext.define('Person', {
+        extend: 'Ext.data.Model',
+        fields: [{
+            name: 'first',
+            mapping: 'firstName'
+        }, {
+            name: 'last',
+            mapping: 'lastName'
+        }, {
+            name: 'age'
+        }]
+    });
+    new Ext.data.writer.Writer({
+        writeAllFields: true,
+        nameProperty: 'mapping'
+    });
+
+    // This will be sent to the server
+    {
+        firstName: 'first name value',
+        lastName: 'last name value',
+        age: 1
+    }
+
+         * </code></pre>
+         * Defaults to <tt>name</tt>. If the value is not present, the field name will always be used.
+         */
+        nameProperty: 'name'
+    },
+
+    /**
+     * Creates new Writer.
+     * @param {Object} config (optional) Config object.
+     */
+    constructor: function(config) {
+        this.initConfig(config);
+    },
+
+    /**
+     * Prepares a Proxy's Ext.data.Request object
+     * @param {Ext.data.Request} request The request object
+     * @return {Ext.data.Request} The modified request object
+     */
+    write: function(request) {
+        var operation = request.getOperation(),
+            records   = operation.getRecords() || [],
+            len       = records.length,
+            i         = 0,
+            data      = [];
+
+        for (; i < len; i++) {
+            data.push(this.getRecordData(records[i]));
+        }
+        return this.writeRecords(request, data);
+    },
+
+    writeDate: function(field, date) {
+        var dateFormat = field.dateFormat || 'timestamp';
+        switch (dateFormat) {
+            case 'timestamp':
+                return date.getTime()/1000;
+            case 'time':
+                return date.getTime();
+            default:
+                return Ext.Date.format(date, dateFormat);
+        }
+    },
+
+    /**
+     * Formats the data for each record before sending it to the server. This
+     * method should be overridden to format the data in a way that differs from the default.
+     * @param {Object} record The record that we are writing to the server.
+     * @return {Object} An object literal of name/value keys to be written to the server.
+     * By default this method returns the data property on the record.
+     */
+    getRecordData: function(record) {
+        var isPhantom = record.phantom === true,
+            writeAll = this.getWriteAllFields() || isPhantom,
+            nameProperty = this.getNameProperty(),
+            fields = record.getFields(),
+            data = {},
+            changes, name, field, key, value, fieldConfig;
+
+        if (writeAll) {
+            fields.each(function(field) {
+                fieldConfig = field.config;
+                if (fieldConfig.persist) {
+                    name = fieldConfig[nameProperty] || fieldConfig.name;
+                    value = record.get(fieldConfig.name);
+                    if (fieldConfig.type.type == 'date') {
+                        value = this.writeDate(fieldConfig, value);
+                    }
+                    data[name] = value;
+                }
+            }, this);
+        } else {
+            // Only write the changes
+            changes = record.getChanges();
+            for (key in changes) {
+                if (changes.hasOwnProperty(key)) {
+                    field = fields.get(key);
+                    fieldConfig = field.config;
+                    if (fieldConfig.persist) {
+                        name = fieldConfig[nameProperty] || field.name;
+                        value = changes[key];
+                        if (fieldConfig.type.type == 'date') {
+                            value = this.writeDate(fieldConfig, value);
+                        }
+                        data[name] = value;
+                    }
+                }
+            }
+            if (!isPhantom) {
+                // always include the id for non phantoms
+                data[record.getIdProperty()] = record.getId();
+            }
+        }
+        return data;
+    }
+
+    // Convert old properties in data into a config object
+    // <deprecated product=touch since=2.0>
+    ,onClassExtended: function(cls, data, hooks) {
+        var Component = this,
+            defaultConfig = Component.prototype.config,
+            config = data.config || {},
+            key;
+
+
+        for (key in defaultConfig) {
+            if (key in data) {
+                config[key] = data[key];
+                delete data[key];
+            }
+        }
+
+        data.config = config;
+    }
+    // </deprecated>
+});
+
+/**
+ * @author Ed Spencer
+ *
+ * Simple wrapper class that represents a set of records returned by a Proxy.
+ */
+Ext.define('Ext.data.ResultSet', {
+    config: {
+        /**
+         * @cfg {Boolean} loaded
+         * True if the records have already been loaded. This is only meaningful when dealing with
+         * SQL-backed proxies.
+         */
+        loaded: true,
+
+        /**
+         * @cfg {Number} count
+         * The number of records in this ResultSet. Note that total may differ from this number.
+         */
+        count: null,
+
+        /**
+         * @cfg {Number} total
+         * The total number of records reported by the data source. This ResultSet may form a subset of
+         * those records (see {@link #count}).
+         */
+        total: null,
+
+        /**
+         * @cfg {Boolean} success
+         * True if the ResultSet loaded successfully, false if any errors were encountered.
+         */
+        success: false,
+
+        /**
+         * @cfg {Ext.data.Model[]} records (required)
+         * The array of record instances.
+         */
+        records: null,
+
+        /**
+         * @cfg {String} message
+         * The message that was read in from the data
+         */
+        message: null
+    },
+
+    /**
+     * Creates the resultSet
+     * @param {Object} [config] Config object.
+     */
+    constructor: function(config) {
+        this.initConfig(config);
+    },
+
+    applyCount: function(count) {
+        if (!count && count !== 0) {
+            return this.getRecords().length;
+        }
+        return count;
+    },
+    
+    /**
+     * @private
+     * Make sure we set the right count when new records have been sent in
+     */
+    updateRecords: function(records) {
+        this.setCount(records.length);
+    }
+});
 /**
  * @private
 */
@@ -34919,3745 +37662,6 @@ Ext.define('Ext.dataview.List', {
     }
 });
 
-Ext.define('EatSense.view.ChooseBusiness', {
-	extend: 'Ext.Panel',
-	xtype: 'choosebusiness',
-	config: {
-		layout: {
-			type: 'fit',
-			// align: 'middle',
-			// pack: 'center'
-		},
-		items: [
-		{
-			xtype: 'label',
-			html: '<h1>'+Karazy.i18n.translate('chooseStore')+'</h1>',
-			docked: 'top'
-		},
-		{
-			xtype: 'list',
-			ui: 'round',
-			store: 'businessStore',
-			itemTpl: '<h2>{name}</h2>',
-			// flex: 3
-		},
-		{
-			xtype: 'button',
-			action: 'cancel',
-			docked: 'bottom',
-			text: Karazy.i18n.translate('cancel'),
-		}]
-	}
-});
-/**
-*	This controller handles push messages send from the server
-*	and fires events when they arrive. Any component interested in those events
-* 	can listen.
-*/
-Ext.define('EatSense.controller.Message', {
-	extend: 'Ext.app.Controller',
-	config: {
-
-	},
-
-
-	/**
-	*	Called after receiving a channel message.
-	*	
-	*	@param rawMessages	
-	*		The raw string message(s) which will be parsed as JSON.
-	*		This could be a single object or an array.
-	*/
-	processMessages: function(rawMessages) {
-		var 	me = this,
-				message = Ext.JSON.decode(rawMessages, true);
-
-		if(Ext.isArray(message)) {
-				for(index = 0; index < message.length; index++) {
-				if(message[index]) {					
-					this.broadcastMessage(message[index]);
-				}	
-			}
-		}
-		else if(message) {
-			this.broadcastMessage(message);
-		}				
-	},
-	/**
-	*	Fires events to notify listeners about a new message.
-	*	Naming schmeme: eatSense.messageType
-	*   where message type can be something like spot, order ...
-	*
-	*	The fired event submits two additional parameters
-	*	1. action type (e. g. update, new , delete)
-	*	2. content - the data
-	*   
-	*	@param message	
-	*		A message consists of 3 fields
-	*			type	- a type like spot
-	*			action	- an action like update, new ... 
-	*			content - the data
-	*/
-	broadcastMessage: function(message) {
-		var 	me = this,
-				evtPrefix = 'eatSense.',
-				model = message.content;
-				
-		console.log('broadcast message type %s, action %s', message.type, message.action);
-
-		if(!message) {
-			console.log('no message send');
-			return;
-		}	
-
-		//fire event based on the message
-		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
-	},
-	/**
-	*	Requests a new token from server and executes the given callback with new token as parameter.
-	*	@param callback
-	*		callback function to invoke on success
-	*/
-	requestNewToken: function(callback) {
-		var 	account = this.getApplication().getController('Login').getAccount(),
-				login = account.get('login'),
-				clientId = login + new Date().getTime();
-		
-		account.set('clientId', clientId);
-		console.log('request new token. clientId: ' + clientId);
-		Ext.Ajax.request({
-		    url: Karazy.config.serviceUrl+'/accounts/'+login+'/tokens',		    
-		    method: 'POST',
-		    params: {
-		    	'businessId' :  account.get('businessId'),
-		    	'clientId' : clientId
-		    },
-		    success: function(response){
-		       	token = response.responseText;
-		       	callback(token);
-		    }, 
-		    failure: function(response) {
-		    	me.getApplication().handleServerError({
-					'error': {
-						'status' : response.status,
-						'statusText': response.statusText
-					}, 
-					'forceLogout': false, 
-					'hideMessage':false, 
-					'message': Karazy.i18n.translate('channelTokenError')
-				});
-		    }
-		});
-	},
-	/**
-	* 	Requests a token and
-	*	opens a channel for server side push messages.
-	*
-	*/
-	openChannel: function() {
-		var		me = this;
-
-		me.requestNewToken(function(newToken) {
-			Karazy.channel.createChannel( {
-				token: newToken, 
-				messageHandler: me.processMessages,
-				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: me,
-				requestTokenHandlerScope: me
-			});
-		});
-	}, 
-});
-/**
-*	Handles customer requests like "Call Waiter".
-*	
-*/
-Ext.define('EatSense.controller.Request',{
-	extend: 'Ext.app.Controller',
-	config: {
-		refs: {
-			spotDetail : 'spotdetail',
-			customerRequestDialog: {
-		    	selector: 'customerrequest',
-		    	xtype: 'customerrequest',
-		    	// autoCreate: true
-		    },
-			dismissRequestsButton: 'customerrequest button[action=dismiss]',
-			customerRequestList: 'customerrequest list'
-		},
-		control: {
-			dismissRequestsButton : {
-		 		tap: 'dismissCustomerRequests'
-		 	},
-		 	customerRequestList: {
-		 		itemswipe : 'dissmissCustomerRequest',
-		 		itemtap : 'dissmissCustomerRequest',
-		 	}
-		},	
-	},
-	/**
-	*	Loads all customer request for the active spot.
-	*
-	*/
-	loadRequests: function() {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				spotCtr = this.getApplication().getController('Spot'),
-				restaurantId = loginCtr.getAccount().get('businessId'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
-				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				assocCheckIn;
-
-		//empty the store
-		requestStore.removeAll();
-
-		//check if customer requests for this spot exist and display them
-		requestStore.load({
-			params: {
-				'pathId': restaurantId,
-				'spotId': spotCtr.getActiveSpot().get('id')
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 
-			 		if(records.length > 0) {
-			 			Ext.Array.each(records, function(request) {
-			 				assocCheckIn = checkInStore.getById(request.get('checkInId'));
-			 				request.setCheckIn(assocCheckIn);
-			 				//make sure data is uptodate
-			 				request.getData(true);
-			 			});
-			 			me.showCustomerRequestMessages(records);
-			 		}		
-			 	} else {
-			 		me.getApplication().handleServerError({
-						'error': operation.error, 
-						'forceLogout': {403: true}
-					});
-			 	}			
-			 }
-		});
-	},
-
-	/**
-	*	Processes the given request message and shows it when the request belongs to active spot.
-	*	@param action
-	*
-	*	@param request
-	*/
-	processCustomerRequest: function(action, request) {
-		var 	me = this,
-				detail = me.getSpotDetail(),
-				requestModel = Ext.create('EatSense.model.Request'),
-				requestStore = Ext.StoreManager.lookup('requestStore'),
-				spotCtr = this.getApplication().getController('Spot'),
-				checkInStore = Ext.StoreManager.lookup('checkInStore'),
-				assocCheckIn,
-				oldRequest;
-
-		requestModel.setData(request);
-		//this is no new object!
-		requestModel.phantom = false;
-		assocCheckIn = checkInStore.getById(requestModel.get('checkInId'));
-		requestModel.setCheckIn(assocCheckIn);
-
-		if(!detail.isHidden() && spotCtr.getActiveCustomer()) {
-			//only show if the correct spot is active
-			if(request.spotId == spotCtr.getActiveSpot().get('id')) {
-				if(action == 'new') {
-					requestStore.add(requestModel);
-					me.showCustomerRequestMessages(requestModel);
-				} else if(action == 'delete') {
-					oldRequest = requestStore.getById(requestModel.get('id'));
-					if(oldRequest) {
-						requestStore.remove(oldRequest);
-					}					
-				}
-			}
-		}
-	},
-
-	/**
-	*	Displays the given requests in a popup message.
-	*	
-	*/
-	showCustomerRequestMessages: function(requests) {
-		var 	dialog = this.getCustomerRequestDialog();
-
-		//show detail view
-		this.getCustomerRequestList().refresh();
-	},
-
-	/**
-	* Deletes all customer requests from store and sends delete requests to server.
-	*/
-	dismissCustomerRequests: function() {
-		var 	requestStore = Ext.StoreManager.lookup('requestStore');
-
-		requestStore.setSyncRemovedRecords(true);
-		requestStore.removeAll();
-		requestStore.sync();
-		requestStore.setSyncRemovedRecords(false);
-
-		// this.getCustomerRequestDialog().hide();
-	},
-	/**
-	*	Deletes a single customer request.
-	*
-	*/
-	dissmissCustomerRequest: function(dv, index, target, record) {
-		var 	requestStore = Ext.StoreManager.lookup('requestStore');
-
-		requestStore.setSyncRemovedRecords(true);
-		requestStore.remove(record);
-		requestStore.sync();
-		requestStore.setSyncRemovedRecords(false);
-	}
-
-});
-/**
- * @aside guide forms
- *
- * The Password field creates a password input and is usually created inside a form. Because it creates a password
- * field, when the user enters text it will show up as stars. Aside from that, the password field is just a normal text
- * field. Here's an example of how to use it in a form:
- *
- *     @example
- *     Ext.create('Ext.form.Panel', {
- *         fullscreen: true,
- *         items: [
- *             {
- *                 xtype: 'fieldset',
- *                 title: 'Register',
- *                 items: [
- *                     {
- *                         xtype: 'emailfield',
- *                         label: 'Email',
- *                         name: 'email'
- *                     },
- *                     {
- *                         xtype: 'passwordfield',
- *                         label: 'Password',
- *                         name: 'password'
- *                     }
- *                 ]
- *             }
- *         ]
- *     });
- *
- * Or on its own, outside of a form:
- *
- *     Ext.create('Ext.field.Password', {
- *         label: 'Password',
- *         value: 'existingPassword'
- *     });
- *
- * Because the password field inherits from {@link Ext.field.Text textfield} it gains all of the functionality that text
- * fields provide, including getting and setting the value at runtime, validations and various events that are fired as
- * the user interacts with the component. Check out the {@link Ext.field.Text} docs to see the additional functionality
- * available.
- */
-Ext.define('Ext.field.Password', {
-    extend: 'Ext.field.Text',
-    xtype: 'passwordfield',
-    alternateClassName: 'Ext.form.Password',
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        autoCapitalize: false,
-
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        component: {
-	        type: 'password'
-	    }
-    }
-});
-
-Ext.define('EatSense.view.SpotSelectionDialog', {
-	extend: 'Ext.Panel',
-	xtype: 'spotselection',
-	config: {
-		modal: true,
-		hideOnMaskTap: true,
-		layout: 'fit',
-		top: '10%',
-		right: '30%',
-		width: 200,
-		height: 300,
-		items: [
-		{
-			xtype: 'titlebar',
-			docked: 'top',
-			title: Karazy.i18n.translate('spotSelectionTitle')
-		},
-		{
-			xtype: 'list',
-			store: 'spotStore',
-			itemId: 'spotList',
-			itemTpl: '{name}',
-			allowDeselect: true,
-		}]
-	}
-});
-Ext.define('EatSense.view.CustomerRequestDialog', {
-	extend: 'Ext.Panel',
-	xtype: 'customerrequest',
-	config: {
-		// modal: true,
-		// hideOnMaskTap: true,
-		layout: 'fit',
-		// top: '30%',
-		// right: '30%',
-		// left: '30%',
-		// bottom: '30%',
-		items: [
-		{
-				xtype: 'label',
-				html: Karazy.i18n.translate('requestMsgboxTitle'),
-				docked: 'top',
-				cls: 'spotdetailitem-customer-label'
-		},
-		// {
-		// 	xtype: 'titlebar',
-		// 	docked: 'top',
-		// 	title: Karazy.i18n.translate('requestMsgboxTitle')
-		// },
-		{
-			xtype: 'list',
-			store: 'requestStore',
-			itemTpl: new Ext.XTemplate('{[this.formatMessage(values)]}', {
-				formatMessage: function(values) {
-					if(values.type == Karazy.constants.Request.CALL_WAITER) {
-						return Karazy.i18n.translate(Karazy.constants.Request.CALL_WAITER, (values.CheckIn) ? values.CheckIn.nickname : "");
-					}
-				}
-			}),
-			allowDeselect: true,
-		},{
-			xtype: 'toolbar',
-			docked: 'bottom',
-			baseCls: 'spotdetail-toolbar',
-			layout: {
-				type: 'hbox',
-				pack: 'center',
-				align: 'middle'
-			},
-			items: [
-				{
-					action: 'dismiss',
-					text: Karazy.i18n.translate('requestDismiss'),
-					ui: 'action'
-				}
-			]
-		}]
-	}
-});
-/**
- * @author Tommy Maintz
- *
- * This class is the simple default id generator for Model instances.
- *
- * An example of a configured simple generator would be:
- *
- *     Ext.define('MyApp.data.MyModel', {
- *         extend: 'Ext.data.Model',
- *         config: {
- *             identifier: {
- *                 type: 'simple',
- *                 prefix: 'ID_'
- *             }
- *         }
- *     });
- *     // assign id's of ID_1, ID_2, ID_3, etc.
- *
- */
-Ext.define('Ext.data.identifier.Simple', {
-    alias: 'data.identifier.simple',
-    
-    statics: {
-        AUTO_ID: 1
-    },
-
-    config: {
-        prefix: 'ext-record-'
-    },
-
-    constructor: function(config) {
-        this.initConfig(config);
-    },
-
-    generate: function(record) {
-        return this._prefix + this.self.AUTO_ID++;
-    }
-});
-/**
-*	A single spot in spot view.
-* 	Displays spot name and number of checkIns.
-*/
-Ext.define('EatSense.view.SpotItem', {
-	extend: 'Ext.dataview.component.DataItem',
-	xtype: 'spotitem',
-	config: {
-
-		spot : {
-			tpl: '<div><h2>{name}</h2><p>Check-ins: {checkInCount}</p></div>',
-			cls: 'spot-button',
-			baseCls: 'spotitem',
-			pressedCls: 'spotitem-pressed'
-		},
-
-		 cls: 'di-cls',
-		 baseCls: 'di-baseCls'
-	},
-
-	applySpot: function(config) {
-		var button = Ext.factory(config, Ext.Button, this.getSpot()),
-			status = this.getRecord().get('status'),
-			checkInCount = this.getRecord().get('checkInCount');
-		
-		button.getTpl().overwrite(button.element, this.getRecord().getData());
-
-			if(status == Karazy.constants.ORDER_PLACED  
-				|| status == Karazy.constants.PAYMENT_REQUEST){
-				button.addCls('spotitem-placed');
-				button.removeCls('spotitem-checkedin');
-				button.removeCls('spotitem-request');
-			}
-			else if (status == Karazy.constants.Request.CALL_WAITER) {
-				button.addCls('spotitem-request');
-				button.removeCls('spotitem-checkedin');
-				button.removeCls('spotitem-placed');
-			}
-			 else if(this.getRecord().get('checkInCount') >  0) {
-				button.addCls('spotitem-checkedin');
-				button.removeCls('spotitem-request');
-				button.removeCls('spotitem-placed');
-			}  else {
-				button.removeCls('spotitem-checkedin');
-				button.removeCls('spotitem-placed');
-				button.removeCls('spotitem-request');
-			}
-
-		return button;
-	},
-
-	updateSpot: function(newSpot, oldSpot) {
-		if(newSpot) {
-			this.add(newSpot);
-		}
-
-		if(oldSpot) {
-			this.remove(oldSpot);
-		}
-	},
-
-	updateRecord: function(newRecord) {
-		if(!newRecord) {
-			return;
-		};
-		
-		var 	button = this.getSpot(),
-				status = newRecord.get('status');
-
-			if(this.getSpot()) {						
-				if(status == Karazy.constants.ORDER_PLACED  
-					|| status == Karazy.constants.PAYMENT_REQUEST){
-					button.addCls('spotitem-placed');
-					button.removeCls('spotitem-checkedin');
-					button.removeCls('spotitem-request');
-				}
-				else if (status == Karazy.constants.Request.CALL_WAITER) {
-					button.addCls('spotitem-request');
-					button.removeCls('spotitem-checkedin');
-					button.removeCls('spotitem-placed');
-				}
-				 else if(newRecord.get('checkInCount') >  0) {
-					button.addCls('spotitem-checkedin');
-					button.removeCls('spotitem-request');
-					button.removeCls('spotitem-placed');
-				}  else {
-					button.removeCls('spotitem-checkedin');
-					button.removeCls('spotitem-placed');
-					button.removeCls('spotitem-request');
-				}
-				
-				button.getTpl().overwrite(this.getSpot().element, newRecord.getData());
-		}		
-	}
-
-
-})
-/**
- * @author Ed Spencer
- *
- * Represents a single read or write operation performed by a {@link Ext.data.proxy.Proxy Proxy}. Operation objects are
- * used to enable communication between Stores and Proxies. Application developers should rarely need to interact with
- * Operation objects directly.
- *
- * Note that when you define an Operation directly, you need to specify at least the {@link #model} configuration.
- *
- * Several Operations can be batched together in a {@link Ext.data.Batch batch}.
- */
-Ext.define('Ext.data.Operation', {
-    config: {
-        /**
-         * @cfg {Boolean} synchronous
-         * True if this Operation is to be executed synchronously. This property is inspected by a
-         * {@link Ext.data.Batch Batch} to see if a series of Operations can be executed in parallel or not.
-         * @accessor
-         * @private
-         */
-        synchronous: true,
-
-        /**
-         * @cfg {String} action
-         * The action being performed by this Operation. Should be one of 'create', 'read', 'update' or 'destroy'.
-         * @accessor
-         */
-        action: null,
-
-        /**
-         * @cfg {Ext.util.Filter[]} filters
-         * Optional array of filter objects. Only applies to 'read' actions.
-         * @accessor
-         * @private
-         */
-        filters: null,
-
-        /**
-         * @cfg {Ext.util.Sorter[]} sorters
-         * Optional array of sorter objects. Only applies to 'read' actions.
-         * @accessor
-         * @private
-         */
-        sorters: null,
-
-        /**
-         * @cfg {Ext.util.Grouper} grouper
-         * Optional grouping configuration. Only applies to 'read' actions where grouping is desired.
-         * @accessor
-         * @private
-         */
-        grouper: null,
-
-        /**
-         * @cfg {Number} start
-         * The start index (offset), used in paging when running a 'read' action.
-         * @accessor
-         * @private
-         */
-        start: null,
-
-        /**
-         * @cfg {Number} limit
-         * The number of records to load. Used on 'read' actions when paging is being used.
-         * @accessor
-         * @private
-         */
-        limit: null,
-
-        /**
-         * @cfg {Ext.data.Batch} batch
-         * The batch that this Operation is a part of.
-         * @accessor
-         * @private
-         */
-        batch: null,
-
-        /**
-         * @cfg {Function} callback
-         * Function to execute when operation completed.
-         * @cfg {Ext.data.Model[]} callback.records Array of records.
-         * @cfg {Ext.data.Operation} callback.operation The Operation itself.
-         * @cfg {Boolean} callback.success True when operation completed successfully.
-         * @accessor
-         * @private
-         */
-        callback: null,
-
-        /**
-         * @cfg {Object} scope
-         * Scope for the {@link #callback} function.
-         * @accessor
-         * @private
-         */
-        scope: null,
-
-        /**
-         * @cfg {Ext.data.ResultSet} resultSet
-         * The ResultSet for this operation.
-         * @accessor
-         */
-        resultSet: null,
-
-        /**
-         * @cfg {Array} records
-         * The records associated to this operation. Before an operation starts, these
-         * are the records you are updating, creating, or destroying. After an operation
-         * is completed, a Proxy usually sets these records on the Operation to become
-         * the processed records. If you don't set these records on your operation in
-         * your proxy, then the getter will return the ones defined on the {@link #resultSet}
-         * @accessor
-         */
-        records: null,
-
-        /**
-         * @cfg {Ext.data.Request} request
-         * The request used for this Operation. Operations don't usually care about Request and Response data, but in the
-         * ServerProxy and any of its subclasses they may be useful for further processing.
-         * @accessor
-         */
-        request: null,
-
-        /**
-         * @cfg {Object} response
-         * The response that was gotten from the server if there was one.
-         * @accessor
-         */
-        response: null,
-
-        /**
-         * @cfg {Boolean} withCredentials
-         * This field is necessary when using cross-origin resource sharing.
-         */
-        withCredentials: null,
-
-        /**
-         * @cfg {Object} params
-         * The params send along with this operation. These usually apply to a Server proxy if you are
-         * creating your own custom proxy,
-         * @accessor
-         */
-        params: null,
-        url: null,
-        page: null,
-        node: null,
-
-        /**
-         * @cfg {Ext.data.Model} model
-         * The Model that this Operation will be dealing with. This configuration is required when defining any Operation.
-         * Since Operations take care of creating, updating, destroying and reading records, it needs access to the Model.
-         */
-        model: undefined,
-
-        addRecords: false
-    },
-
-    /**
-     * @property {Boolean} started
-     * Read-only property tracking the start status of this Operation. Use {@link #isStarted}.
-     * @private
-     */
-    started: false,
-
-    /**
-     * @property {Boolean} running
-     * Read-only property tracking the run status of this Operation. Use {@link #isRunning}.
-     * @private
-     */
-    running: false,
-
-    /**
-     * @property {Boolean} complete
-     * Read-only property tracking the completion status of this Operation. Use {@link #isComplete}.
-     * @private
-     */
-    complete: false,
-
-    /**
-     * @property {Boolean} success
-     * Read-only property tracking whether the Operation was successful or not. This starts as undefined and is set to true
-     * or false by the Proxy that is executing the Operation. It is also set to false by {@link #setException}. Use
-     * {@link #wasSuccessful} to query success status.
-     * @private
-     */
-    success: undefined,
-
-    /**
-     * @property {Boolean} exception
-     * Read-only property tracking the exception status of this Operation. Use {@link #hasException} and see {@link #getError}.
-     * @private
-     */
-    exception: false,
-
-    /**
-     * @property {String/Object} error
-     * The error object passed when {@link #setException} was called. This could be any object or primitive.
-     * @private
-     */
-    error: undefined,
-
-    /**
-     * Creates new Operation object.
-     * @param {Object} config (optional) Config object.
-     */
-    constructor: function(config) {
-        this.initConfig(config);
-    },
-
-    applyModel: function(model) {
-        if (typeof model == 'string') {
-            model = Ext.data.ModelManager.getModel(model);
-
-            if (!model) {
-                Ext.Logger.error('Model with name ' + arguments[0] + ' doesnt exist.');
-            }
-        }
-
-        if (model && !model.prototype.isModel && Ext.isObject(model)) {
-            model = Ext.data.ModelManager.registerType(model.storeId || model.id || Ext.id(), model);
-        }
-
-
-        return model;
-    },
-
-    getRecords: function() {
-        var resultSet = this.getResultSet();
-        return this._records || (resultSet ? resultSet.getRecords() : []);
-    },
-
-    /**
-     * Marks the Operation as started.
-     */
-    setStarted: function() {
-        this.started = true;
-        this.running = true;
-    },
-
-    /**
-     * Marks the Operation as completed.
-     */
-    setCompleted: function() {
-        this.complete = true;
-        this.running  = false;
-    },
-
-    /**
-     * Marks the Operation as successful.
-     */
-    setSuccessful: function() {
-        this.success = true;
-    },
-
-    /**
-     * Marks the Operation as having experienced an exception. Can be supplied with an option error message/object.
-     * @param {String/Object} error (optional) error string/object
-     */
-    setException: function(error) {
-        this.exception = true;
-        this.success = false;
-        this.running = false;
-        this.error = error;
-    },
-
-    /**
-     * Returns true if this Operation encountered an exception (see also {@link #getError})
-     * @return {Boolean} True if there was an exception
-     */
-    hasException: function() {
-        return this.exception === true;
-    },
-
-    /**
-     * Returns the error string or object that was set using {@link #setException}
-     * @return {String/Object} The error object
-     */
-    getError: function() {
-        return this.error;
-    },
-    
-    /**
-     * Returns true if the Operation has been started. Note that the Operation may have started AND completed, see
-     * {@link #isRunning} to test if the Operation is currently running.
-     * @return {Boolean} True if the Operation has started
-     */
-    isStarted: function() {
-        return this.started === true;
-    },
-
-    /**
-     * Returns true if the Operation has been started but has not yet completed.
-     * @return {Boolean} True if the Operation is currently running
-     */
-    isRunning: function() {
-        return this.running === true;
-    },
-
-    /**
-     * Returns true if the Operation has been completed
-     * @return {Boolean} True if the Operation is complete
-     */
-    isComplete: function() {
-        return this.complete === true;
-    },
-
-    /**
-     * Returns true if the Operation has completed and was successful
-     * @return {Boolean} True if successful
-     */
-    wasSuccessful: function() {
-        return this.isComplete() && this.success === true;
-    },
-
-    /**
-     * Checks whether this operation should cause writing to occur.
-     * @return {Boolean} Whether the operation should cause a write to occur.
-     */
-    allowWrite: function() {
-        return this.getAction() != 'read';
-    },
-
-    process: function(action, resultSet, request, response) {
-        if (resultSet.getSuccess() !== false) {
-            this.setResponse(response);
-            this.setResultSet(resultSet);
-            this.setCompleted();
-            this.setSuccessful();
-        } else {
-            return false;
-        }
-
-        return this['process' + Ext.String.capitalize(action)].call(this, resultSet, request, response);
-    },
-
-    processRead: function(resultSet) {
-        var records = resultSet.getRecords(),
-            processedRecords = [],
-            Model = this.getModel(),
-            ln = records.length,
-            i, record;
-
-        for (i = 0; i < ln; i++) {
-            record = records[i];
-            processedRecords.push(new Model(record.data, record.id, record.node));
-        }
-
-        this.setRecords(processedRecords);
-        return true;
-    },
-
-    processCreate: function(resultSet) {
-        var updatedRecords = resultSet.getRecords(),
-            currentRecords = this.getRecords(),
-            ln = updatedRecords.length,
-            i, currentRecord, updatedRecord;
-
-        for (i = 0; i < ln; i++) {
-            updatedRecord = updatedRecords[i];
-
-            if (updatedRecord.clientId === null && currentRecords.length == 1 && updatedRecords.length == 1) {
-                currentRecord = currentRecords[i];
-            } else {
-                currentRecord = this.findCurrentRecord(updatedRecord.clientId);
-            }
-
-            if (currentRecord) {
-                this.updateRecord(currentRecord, updatedRecord);
-            }
-        }
-
-        return true;
-    },
-
-    processUpdate: function(resultSet) {
-        var updatedRecords = resultSet.getRecords(),
-            currentRecords = this.getRecords(),
-            ln = updatedRecords.length,
-            i, currentRecord, updatedRecord;
-
-        for (i = 0; i < ln; i++) {
-            updatedRecord = updatedRecords[i];
-            currentRecord = currentRecords[i];
-
-            if (currentRecord) {
-                this.updateRecord(currentRecord, updatedRecord);
-            }
-        }
-
-        return true;
-    },
-
-    processDestroy: function(resultSet) {
-        var updatedRecords = resultSet.getRecords(),
-            ln = updatedRecords.length,
-            i, currentRecord, updatedRecord;
-
-        for (i = 0; i < ln; i++) {
-            updatedRecord = updatedRecords[i];
-            currentRecord = this.findCurrentRecord(updatedRecord.id);
-
-            if (currentRecord) {
-                currentRecord.setIsErased(true);
-                currentRecord.notifyStores('afterErase', currentRecord);
-            }
-        }
-    },
-
-    findCurrentRecord: function(clientId) {
-        var currentRecords = this.getRecords(),
-            ln = currentRecords.length,
-            i, currentRecord;
-
-        for (i = 0; i < ln; i++) {
-            currentRecord = currentRecords[i];
-            if (currentRecord.getId() === clientId) {
-                return currentRecord;
-            }
-        }
-    },
-
-    updateRecord: function(currentRecord, updatedRecord) {
-        var recordData = updatedRecord.data,
-            recordId = updatedRecord.id;
-
-        currentRecord.beginEdit();
-
-        currentRecord.set(recordData);
-        if (recordId !== null) {
-            currentRecord.setId(recordId);
-        }
-
-        // We call endEdit with silent: true because the commit below already makes
-        // sure any store is notified of the record being updated.
-        currentRecord.endEdit(true);
-        
-        currentRecord.commit();
-    }
-    // <deprecated product=touch since=2.0>
-}, function() {
-    /**
-     * @member Ext.data.Operation
-     * @cfg {Boolean} group
-     * @inheritdoc Ext.data.Operation#grouper
-     * @deprecated 2.0.0 Please use {@link #grouper} instead.
-     */
-    Ext.deprecateProperty(this, 'group', 'grouper');
-    // </deprecated>
-});
-
-Ext.define('EatSense.data.proxy.OperationImprovement', {
-    override: 'Ext.data.Operation',
-
-    processCreate: function(resultSet) {
-    	console.log('Ext.ux.OperationImprovement');
-    	
-        var updatedRecords = resultSet.getRecords(),
-            currentRecords = this.getRecords(),
-            ln = updatedRecords.length,
-            i, currentRecord, updatedRecord;
-        
-
-        for (i = 0; i < ln; i++) {
-            updatedRecord = updatedRecords[i];
-
-            if (updatedRecord.clientId === null && currentRecords.length == 1 && updatedRecords.length == 1) {
-                currentRecord = currentRecords[i];
-            } else {
-                currentRecord = this.findCurrentRecord(updatedRecord.clientId);
-            }
-
-            if (currentRecord) {
-                this.updateRecord(currentRecord, updatedRecord);
-            }
-        }
-
-        return true;
-    }
-});
-/**
- * @private
- */
-Ext.define('Ext.util.Grouper', {
-
-    /* Begin Definitions */
-
-    extend: 'Ext.util.Sorter',
-
-    isGrouper: true,
-    
-    config: {
-        groupFn: null,
-
-        /**
-         * @cfg {String} sortProperty You can define this configuration if you want the groups to be sorted
-         * on something other then the group string returned by the groupFn.
-         * @param item1
-         * @param item2
-         */
-        sortProperty: null,
-
-        /**
-         * @cfg
-         * Grouper has a custom sorterFn that cannot be overriden by the user. If a property has been defined
-         * on this grouper, we use the default sorterFn, else we sort based on the returned group string.
-         * @param item1
-         * @param item2
-         * @private
-         * @hide
-         */
-        sorterFn: function(item1, item2) {
-            var property = this.getSortProperty(),
-                groupFn, group1, group2, modifier;
-
-            groupFn = this.getGroupFn();
-            group1 = groupFn.call(this, item1);
-            group2 = groupFn.call(this, item2);
-
-            if (property) {
-                if (group1 !== group2) {
-                    return this.defaultSortFn.call(this, item1, item2);
-                } else {
-                    return 0;
-                }
-            }
-            return (group1 > group2) ? 1 : ((group1 < group2) ? -1 : 0);
-        }
-    },
-
-    /**
-     * @private
-     * Basic default sorter function that just compares the defined property of each object
-     */
-    defaultSortFn: function(item1, item2) {
-        var me = this,
-            transform = me._transform,
-            root = me._root,
-            value1, value2,
-            property = me._sortProperty;
-
-        if (root !== null) {
-            item1 = item1[root];
-            item2 = item2[root];
-        }
-
-        value1 = item1[property];
-        value2 = item2[property];
-
-        if (transform) {
-            value1 = transform(value1);
-            value2 = transform(value2);
-        }
-
-        return value1 > value2 ? 1 : (value1 < value2 ? -1 : 0);
-    },
-
-    updateProperty: function(property) {
-        this.setGroupFn(this.standardGroupFn);
-    },
-
-    standardGroupFn: function(item) {
-        var root = this.getRoot(),
-            property = this.getProperty(),
-            data = item;
-
-        if (root) {
-            data = item[root];
-        }
-
-        return data[property];
-    },
-
-    getGroupString: function(item) {
-        var group = this.getGroupFn().call(this, item);
-        return typeof group != 'undefined' ? group.toString() : '';
-    }
-});
-/**
- * @class Ext.data.SortTypes
- * This class defines a series of static methods that are used on a
- * {@link Ext.data.Field} for performing sorting. The methods cast the
- * underlying values into a data type that is appropriate for sorting on
- * that particular field.  If a {@link Ext.data.Field#type} is specified,
- * the sortType will be set to a sane default if the sortType is not
- * explicitly defined on the field. The sortType will make any necessary
- * modifications to the value and return it.
- * <ul>
- * <li><b>asText</b> - Removes any tags and converts the value to a string</li>
- * <li><b>asUCText</b> - Removes any tags and converts the value to an uppercase string</li>
- * <li><b>asUCText</b> - Converts the value to an uppercase string</li>
- * <li><b>asDate</b> - Converts the value into Unix epoch time</li>
- * <li><b>asFloat</b> - Converts the value to a floating point number</li>
- * <li><b>asInt</b> - Converts the value to an integer number</li>
- * </ul>
- * <p>
- * It is also possible to create a custom sortType that can be used throughout
- * an application.
- * <pre><code>
-Ext.apply(Ext.data.SortTypes, {
-    asPerson: function(person){
-        // expects an object with a first and last name property
-        return person.lastName.toUpperCase() + person.firstName.toLowerCase();
-    }
-});
-
-Ext.define('Employee', {
-    extend: 'Ext.data.Model',
-    config: {
-        fields: [{
-            name: 'person',
-            sortType: 'asPerson'
-        }, {
-            name: 'salary',
-            type: 'float' // sortType set to asFloat
-        }]
-    }
-});
- * </code></pre>
- * </p>
- * @singleton
- * @docauthor Evan Trimboli <evan@sencha.com>
- */
-Ext.define('Ext.data.SortTypes', {
-    singleton: true,
-
-    /**
-     * The regular expression used to strip tags
-     * @type {RegExp}
-     * @property
-     */
-    stripTagsRE : /<\/?[^>]+>/gi,
-
-    /**
-     * Default sort that does nothing
-     * @param {Object} value The value being converted
-     * @return {Object} The comparison value
-     */
-    none : function(value) {
-        return value;
-    },
-
-    /**
-     * Strips all HTML tags to sort on text only
-     * @param {Object} value The value being converted
-     * @return {String} The comparison value
-     */
-    asText : function(value) {
-        return String(value).replace(this.stripTagsRE, "");
-    },
-
-    /**
-     * Strips all HTML tags to sort on text only - Case insensitive
-     * @param {Object} value The value being converted
-     * @return {String} The comparison value
-     */
-    asUCText : function(value) {
-        return String(value).toUpperCase().replace(this.stripTagsRE, "");
-    },
-
-    /**
-     * Case insensitive string
-     * @param {Object} value The value being converted
-     * @return {String} The comparison value
-     */
-    asUCString : function(value) {
-        return String(value).toUpperCase();
-    },
-
-    /**
-     * Date sorting
-     * @param {Object} value The value being converted
-     * @return {Number} The comparison value
-     */
-    asDate : function(value) {
-        if (!value) {
-            return 0;
-        }
-        if (Ext.isDate(value)) {
-            return value.getTime();
-        }
-        return Date.parse(String(value));
-    },
-
-    /**
-     * Float sorting
-     * @param {Object} value The value being converted
-     * @return {Number} The comparison value
-     */
-    asFloat : function(value) {
-        value = parseFloat(String(value).replace(/,/g, ""));
-        return isNaN(value) ? 0 : value;
-    },
-
-    /**
-     * Integer sorting
-     * @param {Object} value The value being converted
-     * @return {Number} The comparison value
-     */
-    asInt : function(value) {
-        value = parseInt(String(value).replace(/,/g, ""), 10);
-        return isNaN(value) ? 0 : value;
-    }
-});
-/**
- * <p>General purpose inflector class that {@link #pluralize pluralizes}, {@link #singularize singularizes} and 
- * {@link #ordinalize ordinalizes} words. Sample usage:</p>
- * 
-<pre><code>
-//turning singular words into plurals
-Ext.util.Inflector.pluralize('word'); //'words'
-Ext.util.Inflector.pluralize('person'); //'people'
-Ext.util.Inflector.pluralize('sheep'); //'sheep'
-
-//turning plurals into singulars
-Ext.util.Inflector.singularize('words'); //'word'
-Ext.util.Inflector.singularize('people'); //'person'
-Ext.util.Inflector.singularize('sheep'); //'sheep'
-
-//ordinalizing numbers
-Ext.util.Inflector.ordinalize(11); //"11th"
-Ext.util.Inflector.ordinalize(21); //"21th"
-Ext.util.Inflector.ordinalize(1043); //"1043rd"
-</code></pre>
- * 
- * <p><u>Customization</u></p>
- * 
- * <p>The Inflector comes with a default set of US English pluralization rules. These can be augmented with additional
- * rules if the default rules do not meet your application's requirements, or swapped out entirely for other languages.
- * Here is how we might add a rule that pluralizes "ox" to "oxen":</p>
- * 
-<pre><code>
-Ext.util.Inflector.plural(/^(ox)$/i, "$1en");
-</code></pre>
- * 
- * <p>Each rule consists of two items - a regular expression that matches one or more rules, and a replacement string.
- * In this case, the regular expression will only match the string "ox", and will replace that match with "oxen". 
- * Here's how we could add the inverse rule:</p>
- * 
-<pre><code>
-Ext.util.Inflector.singular(/^(ox)en$/i, "$1");
-</code></pre>
- * 
- * <p>Note that the ox/oxen rules are present by default.</p>
- */
-Ext.define('Ext.util.Inflector', {
-
-    /* Begin Definitions */
-
-    singleton: true,
-
-    /* End Definitions */
-
-    /**
-     * @private
-     * The registered plural tuples. Each item in the array should contain two items - the first must be a regular
-     * expression that matchers the singular form of a word, the second must be a String that replaces the matched
-     * part of the regular expression. This is managed by the {@link #plural} method.
-     * @property plurals
-     * @type Array
-     */
-    plurals: [
-        [(/(quiz)$/i),                "$1zes"  ],
-        [(/^(ox)$/i),                 "$1en"   ],
-        [(/([m|l])ouse$/i),           "$1ice"  ],
-        [(/(matr|vert|ind)ix|ex$/i),  "$1ices" ],
-        [(/(x|ch|ss|sh)$/i),          "$1es"   ],
-        [(/([^aeiouy]|qu)y$/i),       "$1ies"  ],
-        [(/(hive)$/i),                "$1s"    ],
-        [(/(?:([^f])fe|([lr])f)$/i),  "$1$2ves"],
-        [(/sis$/i),                   "ses"    ],
-        [(/([ti])um$/i),              "$1a"    ],
-        [(/(buffal|tomat|potat)o$/i), "$1oes"  ],
-        [(/(bu)s$/i),                 "$1ses"  ],
-        [(/(alias|status|sex)$/i),    "$1es"   ],
-        [(/(octop|vir)us$/i),         "$1i"    ],
-        [(/(ax|test)is$/i),           "$1es"   ],
-        [(/^person$/),                "people" ],
-        [(/^man$/),                   "men"    ],
-        [(/^(child)$/),               "$1ren"  ],
-        [(/s$/i),                     "s"      ],
-        [(/$/),                       "s"      ]
-    ],
-    
-    /**
-     * @private
-     * The set of registered singular matchers. Each item in the array should contain two items - the first must be a 
-     * regular expression that matches the plural form of a word, the second must be a String that replaces the 
-     * matched part of the regular expression. This is managed by the {@link #singular} method.
-     * @property singulars
-     * @type Array
-     */
-    singulars: [
-      [(/(quiz)zes$/i),                                                    "$1"     ],
-      [(/(matr)ices$/i),                                                   "$1ix"   ],
-      [(/(vert|ind)ices$/i),                                               "$1ex"   ],
-      [(/^(ox)en/i),                                                       "$1"     ],
-      [(/(alias|status)es$/i),                                             "$1"     ],
-      [(/(octop|vir)i$/i),                                                 "$1us"   ],
-      [(/(cris|ax|test)es$/i),                                             "$1is"   ],
-      [(/(shoe)s$/i),                                                      "$1"     ],
-      [(/(o)es$/i),                                                        "$1"     ],
-      [(/(bus)es$/i),                                                      "$1"     ],
-      [(/([m|l])ice$/i),                                                   "$1ouse" ],
-      [(/(x|ch|ss|sh)es$/i),                                               "$1"     ],
-      [(/(m)ovies$/i),                                                     "$1ovie" ],
-      [(/(s)eries$/i),                                                     "$1eries"],
-      [(/([^aeiouy]|qu)ies$/i),                                            "$1y"    ],
-      [(/([lr])ves$/i),                                                    "$1f"    ],
-      [(/(tive)s$/i),                                                      "$1"     ],
-      [(/(hive)s$/i),                                                      "$1"     ],
-      [(/([^f])ves$/i),                                                    "$1fe"   ],
-      [(/(^analy)ses$/i),                                                  "$1sis"  ],
-      [(/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i), "$1$2sis"],
-      [(/([ti])a$/i),                                                      "$1um"   ],
-      [(/(n)ews$/i),                                                       "$1ews"  ],
-      [(/people$/i),                                                       "person" ],
-      [(/s$/i),                                                            ""       ]
-    ],
-    
-    /**
-     * @private
-     * The registered uncountable words
-     * @property uncountable
-     * @type Array
-     */
-     uncountable: [
-        "sheep",
-        "fish",
-        "series",
-        "species",
-        "money",
-        "rice",
-        "information",
-        "equipment",
-        "grass",
-        "mud",
-        "offspring",
-        "deer",
-        "means"
-    ],
-    
-    /**
-     * Adds a new singularization rule to the Inflector. See the intro docs for more information
-     * @param {RegExp} matcher The matcher regex
-     * @param {String} replacer The replacement string, which can reference matches from the matcher argument
-     */
-    singular: function(matcher, replacer) {
-        this.singulars.unshift([matcher, replacer]);
-    },
-    
-    /**
-     * Adds a new pluralization rule to the Inflector. See the intro docs for more information
-     * @param {RegExp} matcher The matcher regex
-     * @param {String} replacer The replacement string, which can reference matches from the matcher argument
-     */
-    plural: function(matcher, replacer) {
-        this.plurals.unshift([matcher, replacer]);
-    },
-    
-    /**
-     * Removes all registered singularization rules
-     */
-    clearSingulars: function() {
-        this.singulars = [];
-    },
-    
-    /**
-     * Removes all registered pluralization rules
-     */
-    clearPlurals: function() {
-        this.plurals = [];
-    },
-    
-    /**
-     * Returns true if the given word is transnumeral (the word is its own singular and plural form - e.g. sheep, fish)
-     * @param {String} word The word to test
-     * @return {Boolean} True if the word is transnumeral
-     */
-    isTransnumeral: function(word) {
-        return Ext.Array.indexOf(this.uncountable, word) != -1;
-    },
-
-    /**
-     * Returns the pluralized form of a word (e.g. Ext.util.Inflector.pluralize('word') returns 'words')
-     * @param {String} word The word to pluralize
-     * @return {String} The pluralized form of the word
-     */
-    pluralize: function(word) {
-        if (this.isTransnumeral(word)) {
-            return word;
-        }
-
-        var plurals = this.plurals,
-            length  = plurals.length,
-            tuple, regex, i;
-        
-        for (i = 0; i < length; i++) {
-            tuple = plurals[i];
-            regex = tuple[0];
-            
-            if (regex == word || (regex.test && regex.test(word))) {
-                return word.replace(regex, tuple[1]);
-            }
-        }
-        
-        return word;
-    },
-    
-    /**
-     * Returns the singularized form of a word (e.g. Ext.util.Inflector.singularize('words') returns 'word')
-     * @param {String} word The word to singularize
-     * @return {String} The singularized form of the word
-     */
-    singularize: function(word) {
-        if (this.isTransnumeral(word)) {
-            return word;
-        }
-
-        var singulars = this.singulars,
-            length    = singulars.length,
-            tuple, regex, i;
-        
-        for (i = 0; i < length; i++) {
-            tuple = singulars[i];
-            regex = tuple[0];
-            
-            if (regex == word || (regex.test && regex.test(word))) {
-                return word.replace(regex, tuple[1]);
-            }
-        }
-        
-        return word;
-    },
-    
-    /**
-     * Returns the correct {@link Ext.data.Model Model} name for a given string. Mostly used internally by the data 
-     * package
-     * @param {String} word The word to classify
-     * @return {String} The classified version of the word
-     */
-    classify: function(word) {
-        return Ext.String.capitalize(this.singularize(word));
-    },
-    
-    /**
-     * Ordinalizes a given number by adding a prefix such as 'st', 'nd', 'rd' or 'th' based on the last digit of the 
-     * number. 21 -> 21st, 22 -> 22nd, 23 -> 23rd, 24 -> 24th etc
-     * @param {Number} number The number to ordinalize
-     * @return {String} The ordinalized number
-     */
-    ordinalize: function(number) {
-        var parsed = parseInt(number, 10),
-            mod10  = parsed % 10,
-            mod100 = parsed % 100;
-        
-        //11 through 13 are a special case
-        if (11 <= mod100 && mod100 <= 13) {
-            return number + "th";
-        } else {
-            switch(mod10) {
-                case 1 : return number + "st";
-                case 2 : return number + "nd";
-                case 3 : return number + "rd";
-                default: return number + "th";
-            }
-        }
-    }
-}, function() {
-    //aside from the rules above, there are a number of words that have irregular pluralization so we add them here
-    var irregulars = {
-            alumnus: 'alumni',
-            cactus : 'cacti',
-            focus  : 'foci',
-            nucleus: 'nuclei',
-            radius: 'radii',
-            stimulus: 'stimuli',
-            ellipsis: 'ellipses',
-            paralysis: 'paralyses',
-            oasis: 'oases',
-            appendix: 'appendices',
-            index: 'indexes',
-            beau: 'beaux',
-            bureau: 'bureaux',
-            tableau: 'tableaux',
-            woman: 'women',
-            child: 'children',
-            man: 'men',
-            corpus:	'corpora',
-            criterion: 'criteria',
-            curriculum:	'curricula',
-            genus: 'genera',
-            memorandum:	'memoranda',
-            phenomenon:	'phenomena',
-            foot: 'feet',
-            goose: 'geese',
-            tooth: 'teeth',
-            antenna: 'antennae',
-            formula: 'formulae',
-            nebula: 'nebulae',
-            vertebra: 'vertebrae',
-            vita: 'vitae'
-        },
-        singular;
-    
-    for (singular in irregulars) {
-        this.plural(singular, irregulars[singular]);
-        this.singular(irregulars[singular], singular);
-    }
-});
-/**
- * @author Ed Spencer
- * @class Ext.data.Error
- *
- * <p>This is used when validating a record. The validate method will return an Ext.data.Errors collection
- * containing Ext.data.Error instances. Each error has a field and a message.</p>
- *
- * <p>Usually this class does not need to be instantiated directly - instances are instead created
- * automatically when {@link Ext.data.Model#validate validate} on a model instance.</p>
- */
-
-Ext.define('Ext.data.Error', {
-    config: {
-        /**
-         * @cfg {String} field
-         * The name of the field this error belongs to.
-         */
-        field: null,
-
-        /**
-         * @cfg {String} message
-         * The message containing the description of the error.
-         */
-        message: ''
-    },
-
-    constructor: function(config) {
-        this.initConfig(config);
-    }
-});
-
-/**
- * Used in the {@link Ext.tab.Bar} component. This shouldn't be used directly, instead use
- * {@link Ext.tab.Bar} or {@link Ext.tab.Panel}.
- * @private
- */
-Ext.define('Ext.tab.Tab', {
-    extend: 'Ext.Button',
-    xtype: 'tab',
-    alternateClassName: 'Ext.Tab',
-
-    // @private
-    isTab: true,
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        baseCls: Ext.baseCSSPrefix + 'tab',
-
-        /**
-         * @cfg {String} pressedCls
-         * The CSS class to be applied to a Tab when it is pressed. Defaults to 'x-tab-pressed'.
-         * Providing your own CSS for this class enables you to customize the pressed state.
-         * @accessor
-         */
-        pressedCls: Ext.baseCSSPrefix + 'tab-pressed',
-
-        /**
-         * @cfg {String} activeCls
-         * The CSS class to be applied to a Tab when it is active. Defaults to 'x-tab-active'.
-         * Providing your own CSS for this class enables you to customize the active state.
-         * @accessor
-         */
-        activeCls: Ext.baseCSSPrefix + 'tab-active',
-
-        /**
-         * @cfg {Boolean} active
-         * Set this to true to have the tab be active by default.
-         * @accessor
-         */
-        active: false,
-
-        /**
-         * @cfg {String} title
-         * The title of the card that this tab is bound to.
-         * @accessor
-         */
-        title: '&nbsp;'
-    },
-
-    // We need to override this so the iconElement is properly hidden using visibilty
-    // when we render it.
-    template: [
-        {
-            tag: 'span',
-            reference: 'badgeElement',
-            hidden: true
-        },
-        {
-            tag: 'span',
-            className: Ext.baseCSSPrefix + 'button-icon',
-            reference: 'iconElement',
-            style: 'visibility: hidden !important'
-        },
-        {
-            tag: 'span',
-            reference: 'textElement',
-            hidden: true
-        }
-    ],
-
-    /**
-     * @event activate
-     * Fires when a tab is activated
-     * @param {Ext.tab.Tab} this
-     */
-
-    /**
-     * @event deactivate
-     * Fires when a tab is deactivated
-     * @param {Ext.tab.Tab} this
-     */
-
-    updateTitle: function(title) {
-        this.setText(title);
-    },
-
-    hideIconElement: function() {
-        this.iconElement.dom.style.setProperty('visibility', 'hidden', '!important');
-    },
-
-    showIconElement: function() {
-        this.iconElement.dom.style.setProperty('visibility', 'visible', '!important');
-    },
-
-    updateActive: function(active, oldActive) {
-        var activeCls = this.getActiveCls();
-        if (active && !oldActive) {
-            this.element.addCls(activeCls);
-            this.fireEvent('activate', this);
-        } else if (oldActive) {
-            this.element.removeCls(activeCls);
-            this.fireEvent('deactivate', this);
-        }
-    }
-}, function() {
-    this.override({
-        activate: function() {
-            this.setActive(true);
-        },
-
-        deactivate: function() {
-            this.setActive(false);
-        }
-    });
-});
-
-/**
-*	A single order item shown in SpotDetail.
-*	Displays the status, name and possible actions.
-*/
-Ext.define('EatSense.view.SpotDetailItem', {
-	extend: 'Ext.dataview.component.DataItem',
-	xtype: 'spotdetailitem',
-	requires: [
-        'Ext.Label',
-        'Ext.Button'
-    ],
-	config: {
-		//flag showing if an order is new
-		flag: {
-			cls: 'spotdetailitem-flag' 
-		},
-		//label containing product details
-		name: {
-			cls: 'spotdetailitem-order',	
-			tpl: new Ext.XTemplate(
-				"<h2 >{Product.name}</h2>" +
-				"<div class='price'>{amount} - {[this.formatPrice(values.Product.price_calculated)]}</div>" +
-				"<div class='choices'>"+
-					"<tpl for='Product.choices'>" +				
-						"<tpl if='this.checkSelections(values, xindex)'>" +
-							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
-							"<ul>" +
-								"<tpl for='options'>" +
-									"<tpl if='selected === true'>" +
-										"<li>{name}</li>" +
-									"</tpl>" +
-								"</tpl>" +
-							"</ul>" +
-						"</tpl>" +
-					"</tpl>" +
-					"<tpl if='comment!=\"\"'>" +
-					"<p>"+Karazy.i18n.translate('comment')+": {comment}</p>" +
-					"</tpl>" +
-				"</div>" 
-				, {
-				//checks if the current choice has selections. If not it will not be shown.
-				//we need to pass the product as the choices object in this context is raw data
-				checkSelections: function(values, xindex) {
-					console.log('Cart Overview -> checkSelections');				
-					var result = false;
-					Ext.each(values.options,
-							function(option) {
-						if(option.selected === true) {
-							result = true;
-						}
-					});
-					
-					return result;
-				},
-				formatPrice: function(price) {
-					return Karazy.util.formatPrice(price);
-				}
-			})
-		},
-
-		//cancel Order
-		cancelButton: {
-			action: 'cancel',
-			iconCls: 'trash',
-			ui: 'action',
-			iconMask: true,
-			cls: 'spotdetailitem-cancel' 
-		},
-		//mark order as processed
-		confirmButton: {
-			action: 'confirm',
-			ui: 'action',
-			iconCls: 'spotdetailitem-confirm',
-			// icon: 'res/images/check_icon.png',
-			iconMask: true,
-			cls: 'spotdetailitem-confirm' 
-		},
-
-		layout: {
-			type: 'hbox',
-			pack: 'end',
-			align: 'start'
-		}
-
-	},
-
-	applyName: function(config) {
-		var obj = Ext.factory(config, Ext.Label, this.getName());
-		return obj;
-	},
-
-	updateName: function(newName, oldName) {
-		if(newName) {
-			this.add(newName);
-		}
-
-		if(oldName) {
-			this.remove(oldName);
-		}
-	},
-
-	applyCancelButton: function(config) {
-		var button = Ext.factory(config, Ext.Button, this.getCancelButton());
-		return button;
-	},
-
-	updateCancelButton: function(newItem, oldItem) {		
-		if(newItem) {
-			this.add(newItem);
-		}
-
-		if(oldItem) {
-			this.remove(oldItem);
-		}
-	},
-
-	applyConfirmButton: function(config) {
-		var button = Ext.factory(config, Ext.Button, this.getConfirmButton());
-		return button;
-	},
-
-	updateConfirmButton: function(newItem, oldItem) {
-		if(newItem) {
-			this.add(newItem);
-		}
-
-		if(oldItem) {
-			this.remove(oldItem);
-		}
-	},
-
-	applyFlag: function(config) {
-		return Ext.factory(config, Ext.Label, this.getFlag());
-	},
-
-	updateFlag: function(newItem, oldItem) {
-		if(newItem) {
-			this.add(newItem);
-		}
-		if(oldItem) {
-			this.remove(oldItem);
-		}
-	}, 
-
-	/**
-	*	Overrides the private updateRecord method. Does some special actions
-	*	which could not be done in dataMap. 
-	*	 
-	*/
-	updateRecord: function(newRecord) {
-		console.log('SpotDetailItem updateRecord');
-		if(!newRecord) {
-			return;
-		}
-		
-		//make sure prices are calculated before displaying
-		newRecord.calculate();
-		// this.getName().setHtml(newRecord.raw.product.name);
-		this.getName().getTpl().overwrite(this.getName().element, newRecord.getData(true));
-
-		if(newRecord.get('status') == Karazy.constants.Order.PLACED) {
-			this.getFlag().setHtml(Karazy.i18n.translate('PLACED'));
-			this.getFlag().show();			
-			this.getConfirmButton().enable();
-			this.getCancelButton().enable();
-		} else if(newRecord.get('status') == Karazy.constants.Order.RECEIVED) {
-			this.getFlag().hide();		
-			this.getConfirmButton().disable();
-			this.getCancelButton().enable();
-		} else if(newRecord.get('status') == Karazy.constants.Order.CANCELED) {
-			// this.getName().addCls('spotdetailitem-order-cancel');
-			this.getFlag().hide();
-			this.getConfirmButton().disable();
-			this.getCancelButton().disable();
-		}
-
-		(newRecord.get('status') == Karazy.constants.Order.CANCELED) ? 
-			this.getName().addCls('spotdetailitem-order-cancel') : this.getName().removeCls('spotdetailitem-order-cancel');
-
-		//overrides the default updateRecord, so we need to call ist (perhabs we can remove this call completely?!)
-		this.callParent([newRecord]);
-	}
-
-});
-/**
-Represents a collection of a set of key and value pairs. Each key in the HashMap must be unique, the same
-key cannot exist twice. Access to items is provided via the key only. Sample usage:
-
-    var map = Ext.create('Ext.util.HashMap');
-    map.add('key1', 1);
-    map.add('key2', 2);
-    map.add('key3', 3);
-
-    map.each(function(key, value, length){
-        console.log(key, value, length);
-    });
-
-The HashMap is an unordered class, there is no guarantee when iterating over the items that they will be in
-any particular order. If this is required, then use a {@link Ext.util.MixedCollection}.
-
- */
-Ext.define('Ext.util.HashMap', {
-    mixins: {
-        observable: 'Ext.mixin.Observable'
-    },
-
-    /**
-     * @cfg {Function} keyFn
-     * A function that is used to retrieve a default key for a passed object.
-     * A default is provided that returns the **id** property on the object.
-     * This function is only used if the add method is called with a single argument.
-     */
-
-    /**
-     * Creates new HashMap.
-     * @param {Object} config The configuration options
-     */
-    constructor: function(config) {
-        /**
-         * @event add
-         * Fires when a new item is added to the hash
-         * @param {Ext.util.HashMap} this.
-         * @param {String} key The key of the added item.
-         * @param {Object} value The value of the added item.
-         */
-        /**
-         * @event clear
-         * Fires when the hash is cleared.
-         * @param {Ext.util.HashMap} this.
-         */
-        /**
-         * @event remove
-         * Fires when an item is removed from the hash.
-         * @param {Ext.util.HashMap} this.
-         * @param {String} key The key of the removed item.
-         * @param {Object} value The value of the removed item.
-         */
-        /**
-         * @event replace
-         * Fires when an item is replaced in the hash.
-         * @param {Ext.util.HashMap} this.
-         * @param {String} key The key of the replaced item.
-         * @param {Object} value The new value for the item.
-         * @param {Object} old The old value for the item.
-         */
-
-        this.callParent();
-
-        this.mixins.observable.constructor.call(this);
-
-        this.clear(true);
-    },
-
-    /**
-     * Gets the number of items in the hash.
-     * @return {Number} The number of items in the hash.
-     */
-    getCount: function() {
-        return this.length;
-    },
-
-    /**
-     * Implementation for being able to extract the key from an object if only
-     * a single argument is passed.
-     * @private
-     * @param {String} key The key
-     * @param {Object} value The value
-     * @return {Array} [key, value]
-     */
-    getData: function(key, value) {
-        // if we have no value, it means we need to get the key from the object
-        if (value === undefined) {
-            value = key;
-            key = this.getKey(value);
-        }
-
-        return [key, value];
-    },
-
-    /**
-     * Extracts the key from an object. This is a default implementation, it may be overridden
-     * @private
-     * @param {Object} o The object to get the key from
-     * @return {String} The key to use.
-     */
-    getKey: function(o) {
-        return o.id;
-    },
-
-    /**
-     * Add a new item to the hash. An exception will be thrown if the key already exists.
-     * @param {String} key The key of the new item.
-     * @param {Object} value The value of the new item.
-     * @return {Object} The value of the new item added.
-     */
-    add: function(key, value) {
-        var me = this,
-            data;
-
-        if (me.containsKey(key)) {
-            throw new Error('This key already exists in the HashMap');
-        }
-
-        data = this.getData(key, value);
-        key = data[0];
-        value = data[1];
-        me.map[key] = value;
-        ++me.length;
-        me.fireEvent('add', me, key, value);
-        return value;
-    },
-
-    /**
-     * Replaces an item in the hash. If the key doesn't exist, the
-     * {@link #method-add} method will be used.
-     * @param {String} key The key of the item.
-     * @param {Object} value The new value for the item.
-     * @return {Object} The new value of the item.
-     */
-    replace: function(key, value) {
-        var me = this,
-            map = me.map,
-            old;
-
-        if (!me.containsKey(key)) {
-            me.add(key, value);
-        }
-        old = map[key];
-        map[key] = value;
-        me.fireEvent('replace', me, key, value, old);
-        return value;
-    },
-
-    /**
-     * Remove an item from the hash.
-     * @param {Object} o The value of the item to remove.
-     * @return {Boolean} True if the item was successfully removed.
-     */
-    remove: function(o) {
-        var key = this.findKey(o);
-        if (key !== undefined) {
-            return this.removeByKey(key);
-        }
-        return false;
-    },
-
-    /**
-     * Remove an item from the hash.
-     * @param {String} key The key to remove.
-     * @return {Boolean} True if the item was successfully removed.
-     */
-    removeByKey: function(key) {
-        var me = this,
-            value;
-
-        if (me.containsKey(key)) {
-            value = me.map[key];
-            delete me.map[key];
-            --me.length;
-            me.fireEvent('remove', me, key, value);
-            return true;
-        }
-        return false;
-    },
-
-    /**
-     * Retrieves an item with a particular key.
-     * @param {String} key The key to lookup.
-     * @return {Object} The value at that key. If it doesn't exist, <tt>undefined</tt> is returned.
-     */
-    get: function(key) {
-        return this.map[key];
-    },
-
-    /**
-     * Removes all items from the hash.
-     * @return {Ext.util.HashMap} this
-     */
-    clear: function(/* private */ initial) {
-        var me = this;
-        me.map = {};
-        me.length = 0;
-        if (initial !== true) {
-            me.fireEvent('clear', me);
-        }
-        return me;
-    },
-
-    /**
-     * Checks whether a key exists in the hash.
-     * @param {String} key The key to check for.
-     * @return {Boolean} True if they key exists in the hash.
-     */
-    containsKey: function(key) {
-        return this.map[key] !== undefined;
-    },
-
-    /**
-     * Checks whether a value exists in the hash.
-     * @param {Object} value The value to check for.
-     * @return {Boolean} True if the value exists in the dictionary.
-     */
-    contains: function(value) {
-        return this.containsKey(this.findKey(value));
-    },
-
-    /**
-     * Return all of the keys in the hash.
-     * @return {Array} An array of keys.
-     */
-    getKeys: function() {
-        return this.getArray(true);
-    },
-
-    /**
-     * Return all of the values in the hash.
-     * @return {Array} An array of values.
-     */
-    getValues: function() {
-        return this.getArray(false);
-    },
-
-    /**
-     * Gets either the keys/values in an array from the hash.
-     * @private
-     * @param {Boolean} isKey True to extract the keys, otherwise, the value
-     * @return {Array} An array of either keys/values from the hash.
-     */
-    getArray: function(isKey) {
-        var arr = [],
-            key,
-            map = this.map;
-        for (key in map) {
-            if (map.hasOwnProperty(key)) {
-                arr.push(isKey ? key : map[key]);
-            }
-        }
-        return arr;
-    },
-
-    /**
-     * Executes the specified function once for each item in the hash.
-     * Returning false from the function will cease iteration.
-     *
-     * The paramaters passed to the function are:
-     * <div class="mdetail-params"><ul>
-     * <li><b>key</b> : String<p class="sub-desc">The key of the item</p></li>
-     * <li><b>value</b> : Number<p class="sub-desc">The value of the item</p></li>
-     * <li><b>length</b> : Number<p class="sub-desc">The total number of items in the hash</p></li>
-     * </ul></div>
-     * @param {Function} fn The function to execute.
-     * @param {Object} scope The scope to execute in. Defaults to <tt>this</tt>.
-     * @return {Ext.util.HashMap} this
-     */
-    each: function(fn, scope) {
-        // copy items so they may be removed during iteration.
-        var items = Ext.apply({}, this.map),
-            key,
-            length = this.length;
-
-        scope = scope || this;
-        for (key in items) {
-            if (items.hasOwnProperty(key)) {
-                if (fn.call(scope, key, items[key], length) === false) {
-                    break;
-                }
-            }
-        }
-        return this;
-    },
-
-    /**
-     * Performs a shallow copy on this hash.
-     * @return {Ext.util.HashMap} The new hash object.
-     */
-    clone: function() {
-        var hash = new Ext.util.HashMap(),
-            map = this.map,
-            key;
-
-        hash.suspendEvents();
-        for (key in map) {
-            if (map.hasOwnProperty(key)) {
-                hash.add(key, map[key]);
-            }
-        }
-        hash.resumeEvents();
-        return hash;
-    },
-
-    /**
-     * @private
-     * Find the key for a value.
-     * @param {Object} value The value to find.
-     * @return {Object} The value of the item. Returns <tt>undefined</tt> if not found.
-     */
-    findKey: function(value) {
-        var key,
-            map = this.map;
-
-        for (key in map) {
-            if (map.hasOwnProperty(key) && map[key] === value) {
-                return key;
-            }
-        }
-        return undefined;
-    }
-});
-/**
- * @author Ed Spencer
- *
- * Simple class that represents a Request that will be made by any {@link Ext.data.proxy.Server} subclass.
- * All this class does is standardize the representation of a Request as used by any ServerProxy subclass,
- * it does not contain any actual logic or perform the request itself.
- */
-Ext.define('Ext.data.Request', {
-    config: {
-        /**
-         * @cfg {String} action
-         * The name of the action this Request represents. Usually one of 'create', 'read', 'update' or 'destroy'.
-         */
-        action: null,
-
-        /**
-         * @cfg {Object} params
-         * HTTP request params. The Proxy and its Writer have access to and can modify this object.
-         */
-        params: null,
-
-        /**
-         * @cfg {String} method
-         * The HTTP method to use on this Request. Should be one of 'GET', 'POST', 'PUT' or 'DELETE'.
-         */
-        method: 'GET',
-
-        /**
-         * @cfg {String} url
-         * The url to access on this Request.
-         */
-        url: null,
-
-        /**
-         * @cfg {Ext.data.Operation} operation
-         * The operation this request belongs to.
-         */
-        operation: null,
-
-        /**
-         * @cfg {Ext.data.proxy.Proxy} proxy
-         * The proxy this request belongs to.
-         */
-        proxy: null,
-
-        /**
-         * @cfg {Boolean} disableCaching
-         * Wether or not to disable caching for this request.
-         * Defaults to false.
-         */
-        disableCaching: false,
-
-        /**
-         * @cfg {Object} headers
-         * Some requests (like XMLHttpRequests) want to send additional server headers.
-         * This configuration can be set for those types of requests.
-         */
-        headers: {},
-
-        /**
-         * @cfg {String} callbackKey
-         * Some requests (like JsonP) want to send an additional key that contains
-         * the name of the callback function.
-         */
-        callbackKey: null,
-
-        /**
-         * @cfg {Ext.data.JsonP} jsonp
-         * JsonP requests return a handle that might be useful in the callback function.
-         */
-        jsonP: null,
-
-        /**
-         * @cfg {Object} jsonData
-         * This is used by some write actions to attach data to the request without encoding it
-         * as a parameter.
-         */
-        jsonData: null,
-
-        /**
-         * @cfg {Object} xmlData
-         * This is used by some write actions to attach data to the request without encoding it
-         * as a parameter, but instead sending it as XML.
-         */
-        xmlData: null,
-
-        /**
-         * @cfg {Boolean} withCredentials
-         * This field is necessary when using cross-origin resource sharing.
-         */
-        withCredentials: null,
-
-        callback: null,
-        scope: null,
-        timeout: 30000,
-        records: null,
-
-        // The following two configurations are only used by Ext.data.proxy.Direct and are just
-        // for being able to retrieve them after the request comes back from the server.
-        directFn: null,
-        args: null
-    },
-
-    /**
-     * Creates the Request object.
-     * @param {Object} [config] Config object.
-     */
-    constructor: function(config) {
-        this.initConfig(config);
-    }
-});
-/**
- * The Connection class encapsulates a connection to the page's originating domain, allowing requests to be made either
- * to a configured URL, or to a URL specified at request time.
- *
- * Requests made by this class are asynchronous, and will return immediately. No data from the server will be available
- * to the statement immediately following the {@link #request} call. To process returned data, use a success callback
- * in the request options object, or an {@link #requestcomplete event listener}.
- *
- * # File Uploads
- *
- * File uploads are not performed using normal "Ajax" techniques, that is they are not performed using XMLHttpRequests.
- * Instead the form is submitted in the standard manner with the DOM &lt;form&gt; element temporarily modified to have its
- * target set to refer to a dynamically generated, hidden &lt;iframe&gt; which is inserted into the document but removed
- * after the return data has been gathered.
- *
- * The server response is parsed by the browser to create the document for the IFRAME. If the server is using JSON to
- * send the return object, then the Content-Type header must be set to "text/html" in order to tell the browser to
- * insert the text unchanged into the document body.
- *
- * Characters which are significant to an HTML parser must be sent as HTML entities, so encode `<` as `&lt;`, `&` as
- * `&amp;` etc.
- *
- * The response text is retrieved from the document, and a fake XMLHttpRequest object is created containing a
- * responseText property in order to conform to the requirements of event handlers and callbacks.
- *
- * Be aware that file upload packets are sent with the content type multipart/form and some server technologies
- * (notably JEE) may require some custom processing in order to retrieve parameter names and parameter values from the
- * packet content.
- *
- * Also note that it's not possible to check the response code of the hidden iframe, so the success handler will ALWAYS fire.
- */
-Ext.define('Ext.data.Connection', {
-    mixins: {
-        observable: 'Ext.mixin.Observable'
-    },
-
-    statics: {
-        requestId: 0
-    },
-
-    config: {
-        /**
-         * @cfg {String} url
-         * The default URL to be used for requests to the server.
-         * @accessor
-         */
-        url: null,
-
-        async: true,
-
-        /**
-         * @cfg {String} [method=undefined]
-         * The default HTTP method to be used for requests. Note that this is case-sensitive and
-         * should be all caps.
-         *
-         * Defaults to undefined; if not set but params are present will use "POST", otherwise "GET".
-         */
-        method: null,
-
-        username: '',
-        password: '',
-
-        /**
-         * @cfg {Boolean} disableCaching
-         * True to add a unique cache-buster param to GET requests.
-         * @accessor
-         */
-        disableCaching: true,
-
-        /**
-         * @cfg {String} disableCachingParam
-         * Change the parameter which is sent went disabling caching through a cache buster.
-         * @accessor
-         */
-        disableCachingParam: '_dc',
-
-        /**
-         * @cfg {Number} timeout
-         * The timeout in milliseconds to be used for requests.
-         * @accessor
-         */
-        timeout : 30000,
-
-        /**
-         * @cfg {Object} extraParams
-         * Any parameters to be appended to the request.
-         * @accessor
-         */
-        extraParams: null,
-
-        /**
-         * @cfg {Object} defaultHeaders
-         * An object containing request headers which are added to each request made by this object.
-         * @accessor
-         */
-        defaultHeaders: null,
-
-        useDefaultHeader : true,
-        defaultPostHeader : 'application/x-www-form-urlencoded; charset=UTF-8',
-        useDefaultXhrHeader : true,
-        defaultXhrHeader : 'XMLHttpRequest',
-
-        autoAbort: false
-    },
-
-    textAreaRe: /textarea/i,
-    multiPartRe: /multipart\/form-data/i,
-    lineBreakRe: /\r\n/g,
-
-    constructor : function(config) {
-        this.initConfig(config);
-
-        /**
-         * @event beforerequest
-         * Fires before a network request is made to retrieve a data object.
-         * @param {Ext.data.Connection} conn This Connection object.
-         * @param {Object} options The options config object passed to the {@link #request} method.
-         */
-        /**
-         * @event requestcomplete
-         * Fires if the request was successfully completed.
-         * @param {Ext.data.Connection} conn This Connection object.
-         * @param {Object} response The XHR object containing the response data.
-         * See [The XMLHttpRequest Object](http://www.w3.org/TR/XMLHttpRequest/) for details.
-         * @param {Object} options The options config object passed to the {@link #request} method.
-         */
-        /**
-         * @event requestexception
-         * Fires if an error HTTP status was returned from the server.
-         * See [HTTP Status Code Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)
-         * for details of HTTP status codes.
-         * @param {Ext.data.Connection} conn This Connection object.
-         * @param {Object} response The XHR object containing the response data.
-         * See [The XMLHttpRequest Object](http://www.w3.org/TR/XMLHttpRequest/) for details.
-         * @param {Object} options The options config object passed to the {@link #request} method.
-         */
-        this.requests = {};
-    },
-
-    /**
-     * Sends an HTTP request to a remote server.
-     *
-     * **Important:** Ajax server requests are asynchronous, and this call will
-     * return before the response has been received. Process any returned data
-     * in a callback function.
-     *
-     *     Ext.Ajax.request({
-     *         url: 'ajax_demo/sample.json',
-     *         success: function(response, opts) {
-     *             var obj = Ext.decode(response.responseText);
-     *             console.dir(obj);
-     *         },
-     *         failure: function(response, opts) {
-     *             console.log('server-side failure with status code ' + response.status);
-     *         }
-     *     });
-     *
-     * To execute a callback function in the correct scope, use the `scope` option.
-     *
-     * @param {Object} options An object which may contain the following properties:
-     *
-     * (The options object may also contain any other property which might be needed to perform
-     * postprocessing in a callback because it is passed to callback functions.)
-     *
-     * @param {String/Function} options.url The URL to which to send the request, or a function
-     * to call which returns a URL string. The scope of the function is specified by the `scope` option.
-     * Defaults to the configured `url`.
-     *
-     * @param {Object/String/Function} options.params An object containing properties which are
-     * used as parameters to the request, a url encoded string or a function to call to get either. The scope
-     * of the function is specified by the `scope` option.
-     *
-     * @param {String} options.method The HTTP method to use
-     * for the request. Defaults to the configured method, or if no method was configured,
-     * "GET" if no parameters are being sent, and "POST" if parameters are being sent.  Note that
-     * the method name is case-sensitive and should be all caps.
-     *
-     * @param {Function} options.callback The function to be called upon receipt of the HTTP response.
-     * The callback is called regardless of success or failure and is passed the following parameters:
-     * @param {Object} options.callback.options The parameter to the request call.
-     * @param {Boolean} options.callback.success True if the request succeeded.
-     * @param {Object} options.callback.response The XMLHttpRequest object containing the response data.
-     * See [www.w3.org/TR/XMLHttpRequest/](http://www.w3.org/TR/XMLHttpRequest/) for details about
-     * accessing elements of the response.
-     *
-     * @param {Function} options.success The function to be called upon success of the request.
-     * The callback is passed the following parameters:
-     * @param {Object} options.success.response The XMLHttpRequest object containing the response data.
-     * @param {Object} options.success.options The parameter to the request call.
-     *
-     * @param {Function} options.failure The function to be called upon success of the request.
-     * The callback is passed the following parameters:
-     * @param {Object} options.failure.response The XMLHttpRequest object containing the response data.
-     * @param {Object} options.failure.options The parameter to the request call.
-     *
-     * @param {Object} options.scope The scope in which to execute the callbacks: The "this" object for
-     * the callback function. If the `url`, or `params` options were specified as functions from which to
-     * draw values, then this also serves as the scope for those function calls. Defaults to the browser
-     * window.
-     *
-     * @param {Number} options.timeout The timeout in milliseconds to be used for this request.
-     * Defaults to 30 seconds.
-     *
-     * @param {HTMLElement/HTMLElement/String} options.form The `<form>` Element or the id of the `<form>`
-     * to pull parameters from.
-     *
-     * @param {Boolean} options.isUpload **Only meaningful when used with the `form` option.**
-     *
-     * True if the form object is a file upload (will be set automatically if the form was configured
-     * with **`enctype`** `"multipart/form-data"`).
-     *
-     * File uploads are not performed using normal "Ajax" techniques, that is they are **not**
-     * performed using XMLHttpRequests. Instead the form is submitted in the standard manner with the
-     * DOM `<form>` element temporarily modified to have its [target][] set to refer to a dynamically
-     * generated, hidden `<iframe>` which is inserted into the document but removed after the return data
-     * has been gathered.
-     *
-     * The server response is parsed by the browser to create the document for the IFRAME. If the
-     * server is using JSON to send the return object, then the [Content-Type][] header must be set to
-     * "text/html" in order to tell the browser to insert the text unchanged into the document body.
-     *
-     * The response text is retrieved from the document, and a fake XMLHttpRequest object is created
-     * containing a `responseText` property in order to conform to the requirements of event handlers
-     * and callbacks.
-     *
-     * Be aware that file upload packets are sent with the content type [multipart/form][] and some server
-     * technologies (notably JEE) may require some custom processing in order to retrieve parameter names
-     * and parameter values from the packet content.
-     *
-     * [target]: http://www.w3.org/TR/REC-html40/present/frames.html#adef-target
-     * [Content-Type]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
-     * [multipart/form]: http://www.faqs.org/rfcs/rfc2388.html
-     *
-     * @param {Object} options.headers Request headers to set for the request.
-     *
-     * @param {Object} options.xmlData XML document to use for the post. Note: This will be used instead
-     * of params for the post data. Any params will be appended to the URL.
-     *
-     * @param {Object/String} options.jsonData JSON data to use as the post. Note: This will be used
-     * instead of params for the post data. Any params will be appended to the URL.
-     *
-     * @param {Boolean} options.disableCaching True to add a unique cache-buster param to GET requests.
-     *
-     * @return {Object} The request object. This may be used to cancel the request.
-     */
-    request : function(options) {
-        options = options || {};
-        var me = this,
-            scope = options.scope || window,
-            username = options.username || me.getUsername(),
-            password = options.password || me.getPassword() || '',
-            async, requestOptions, request, headers, xhr;
-
-        if (me.fireEvent('beforerequest', me, options) !== false) {
-            requestOptions = me.setOptions(options, scope);
-
-            if (this.isFormUpload(options) === true) {
-                this.upload(options.form, requestOptions.url, requestOptions.data, options);
-                return null;
-            }
-
-            // if autoabort is set, cancel the current transactions
-            if (options.autoAbort === true || me.getAutoAbort()) {
-                me.abort();
-            }
-
-            // create a connection object
-            xhr = this.getXhrInstance();
-
-            async = options.async !== false ? (options.async || me.getAsync()) : false;
-
-            // open the request
-            if (username) {
-                xhr.open(requestOptions.method, requestOptions.url, async, username, password);
-            } else {
-                xhr.open(requestOptions.method, requestOptions.url, async);
-            }
-
-            headers = me.setupHeaders(xhr, options, requestOptions.data, requestOptions.params);
-
-            // create the transaction object
-            request = {
-                id: ++this.self.requestId,
-                xhr: xhr,
-                headers: headers,
-                options: options,
-                async: async,
-                timeout: setTimeout(function() {
-                    request.timedout = true;
-                    me.abort(request);
-                }, options.timeout || me.getTimeout())
-            };
-            me.requests[request.id] = request;
-
-            // bind our statechange listener
-            if (async) {
-                xhr.onreadystatechange = Ext.Function.bind(me.onStateChange, me, [request]);
-            }
-
-            // start the request!
-            xhr.send(requestOptions.data);
-            if (!async) {
-                return this.onComplete(request);
-            }
-            return request;
-        } else {
-            Ext.callback(options.callback, options.scope, [options, undefined, undefined]);
-            return null;
-        }
-    },
-
-    /**
-     * Uploads a form using a hidden iframe.
-     * @param {String/HTMLElement/Ext.Element} form The form to upload
-     * @param {String} url The url to post to
-     * @param {String} params Any extra parameters to pass
-     * @param {Object} options The initial options
-     */
-    upload: function(form, url, params, options) {
-        form = Ext.getDom(form);
-        options = options || {};
-
-        var id = Ext.id(),
-            frame = document.createElement('iframe'),
-            hiddens = [],
-            encoding = 'multipart/form-data',
-            buf = {
-                target: form.target,
-                method: form.method,
-                encoding: form.encoding,
-                enctype: form.enctype,
-                action: form.action
-            }, addField = function(name, value) {
-            hiddenItem = document.createElement('input');
-            Ext.fly(hiddenItem).set({
-                type: 'hidden',
-                value: value,
-                name: name
-            });
-            form.appendChild(hiddenItem);
-            hiddens.push(hiddenItem);
-        }, hiddenItem;
-
-        /*
-         * Originally this behaviour was modified for Opera 10 to apply the secure URL after
-         * the frame had been added to the document. It seems this has since been corrected in
-         * Opera so the behaviour has been reverted, the URL will be set before being added.
-         */
-        Ext.fly(frame).set({
-            id: id,
-            name: id,
-            cls: Ext.baseCSSPrefix + 'hide-display',
-            src: Ext.SSL_SECURE_URL
-        });
-
-        document.body.appendChild(frame);
-
-        // This is required so that IE doesn't pop the response up in a new window.
-        if (document.frames) {
-            document.frames[id].name = id;
-        }
-
-        Ext.fly(form).set({
-            target: id,
-            method: 'POST',
-            enctype: encoding,
-            encoding: encoding,
-            action: url || buf.action
-        });
-
-        // add dynamic params
-        if (params) {
-            Ext.iterate(Ext.Object.fromQueryString(params), function(name, value) {
-                if (Ext.isArray(value)) {
-                    Ext.each(value, function(v) {
-                        addField(name, v);
-                    });
-                } else {
-                    addField(name, value);
-                }
-            });
-        }
-
-        Ext.fly(frame).on('load', Ext.Function.bind(this.onUploadComplete, this, [frame, options]), null, {single: true});
-        form.submit();
-
-        Ext.fly(form).set(buf);
-        Ext.each(hiddens, function(h) {
-            Ext.removeNode(h);
-        });
-    },
-
-    onUploadComplete: function(frame, options) {
-        var me = this,
-            // bogus response object
-            response = {
-                responseText: '',
-                responseXML: null
-            }, doc, firstChild;
-
-        try {
-            doc = frame.contentWindow.document || frame.contentDocument || window.frames[id].document;
-            if (doc) {
-                if (doc.body) {
-                    if (this.textAreaRe.test((firstChild = doc.body.firstChild || {}).tagName)) { // json response wrapped in textarea
-                        response.responseText = firstChild.value;
-                    } else {
-                        response.responseText = doc.body.innerHTML;
-                    }
-                }
-                //in IE the document may still have a body even if returns XML.
-                response.responseXML = doc.XMLDocument || doc;
-            }
-        } catch (e) {
-        }
-
-        me.fireEvent('requestcomplete', me, response, options);
-
-        Ext.callback(options.success, options.scope, [response, options]);
-        Ext.callback(options.callback, options.scope, [options, true, response]);
-
-        setTimeout(function() {
-            Ext.removeNode(frame);
-        }, 100);
-    },
-
-    /**
-     * Detects whether the form is intended to be used for an upload.
-     * @private
-     */
-    isFormUpload: function(options) {
-        var form = this.getForm(options);
-        if (form) {
-            return (options.isUpload || (this.multiPartRe).test(form.getAttribute('enctype')));
-        }
-        return false;
-    },
-
-    /**
-     * Gets the form object from options.
-     * @private
-     * @param {Object} options The request options
-     * @return {HTMLElement} The form, null if not passed
-     */
-    getForm: function(options) {
-        return Ext.getDom(options.form) || null;
-    },
-
-    /**
-     * Sets various options such as the url, params for the request
-     * @param {Object} options The initial options
-     * @param {Object} scope The scope to execute in
-     * @return {Object} The params for the request
-     */
-    setOptions: function(options, scope) {
-        var me = this,
-            params = options.params || {},
-            extraParams = me.getExtraParams(),
-            urlParams = options.urlParams,
-            url = options.url || me.getUrl(),
-            jsonData = options.jsonData,
-            method,
-            disableCache,
-            data;
-
-        // allow params to be a method that returns the params object
-        if (Ext.isFunction(params)) {
-            params = params.call(scope, options);
-        }
-
-        // allow url to be a method that returns the actual url
-        if (Ext.isFunction(url)) {
-            url = url.call(scope, options);
-        }
-
-        url = this.setupUrl(options, url);
-
-
-        // check for xml or json data, and make sure json data is encoded
-        data = options.rawData || options.xmlData || jsonData || null;
-        if (jsonData && !Ext.isPrimitive(jsonData)) {
-            data = Ext.encode(data);
-        }
-
-        // make sure params are a url encoded string and include any extraParams if specified
-        if (Ext.isObject(params)) {
-            params = Ext.Object.toQueryString(params);
-        }
-
-        if (Ext.isObject(extraParams)) {
-            extraParams = Ext.Object.toQueryString(extraParams);
-        }
-
-        params = params + ((extraParams) ? ((params) ? '&' : '') + extraParams : '');
-
-        urlParams = Ext.isObject(urlParams) ? Ext.Object.toQueryString(urlParams) : urlParams;
-
-        params = this.setupParams(options, params);
-
-        // decide the proper method for this request
-        method = (options.method || me.getMethod() || ((params || data) ? 'POST' : 'GET')).toUpperCase();
-        this.setupMethod(options, method);
-
-
-        disableCache = options.disableCaching !== false ? (options.disableCaching || me.getDisableCaching()) : false;
-        // if the method is get append date to prevent caching
-        if (method === 'GET' && disableCache) {
-            url = Ext.urlAppend(url, (options.disableCachingParam || me.getDisableCachingParam()) + '=' + (new Date().getTime()));
-        }
-
-        // if the method is get or there is json/xml data append the params to the url
-        if ((method == 'GET' || data) && params) {
-            url = Ext.urlAppend(url, params);
-            params = null;
-        }
-
-        // allow params to be forced into the url
-        if (urlParams) {
-            url = Ext.urlAppend(url, urlParams);
-        }
-
-        return {
-            url: url,
-            method: method,
-            data: data || params || null
-        };
-    },
-
-    /**
-     * Template method for overriding url
-     * @private
-     * @param {Object} options
-     * @param {String} url
-     * @return {String} The modified url
-     */
-    setupUrl: function(options, url) {
-        var form = this.getForm(options);
-        if (form) {
-            url = url || form.action;
-        }
-        return url;
-    },
-
-
-    /**
-     * Template method for overriding params
-     * @private
-     * @param {Object} options
-     * @param {String} params
-     * @return {String} The modified params
-     */
-    setupParams: function(options, params) {
-        var form = this.getForm(options),
-            serializedForm;
-        if (form && !this.isFormUpload(options)) {
-            serializedForm = Ext.Element.serializeForm(form);
-            params = params ? (params + '&' + serializedForm) : serializedForm;
-        }
-        return params;
-    },
-
-    /**
-     * Template method for overriding method
-     * @private
-     * @param {Object} options
-     * @param {String} method
-     * @return {String} The modified method
-     */
-    setupMethod: function(options, method) {
-        if (this.isFormUpload(options)) {
-            return 'POST';
-        }
-        return method;
-    },
-
-    /**
-     * Setup all the headers for the request
-     * @private
-     * @param {Object} xhr The xhr object
-     * @param {Object} options The options for the request
-     * @param {Object} data The data for the request
-     * @param {Object} params The params for the request
-     */
-    setupHeaders: function(xhr, options, data, params) {
-        var me = this,
-            headers = Ext.apply({}, options.headers || {}, me.getDefaultHeaders() || {}),
-            contentType = me.getDefaultPostHeader(),
-            jsonData = options.jsonData,
-            xmlData = options.xmlData,
-            key,
-            header;
-
-        if (!headers['Content-Type'] && (data || params)) {
-            if (data) {
-                if (options.rawData) {
-                    contentType = 'text/plain';
-                } else {
-                    if (xmlData && Ext.isDefined(xmlData)) {
-                        contentType = 'text/xml';
-                    } else if (jsonData && Ext.isDefined(jsonData)) {
-                        contentType = 'application/json';
-                    }
-                }
-            }
-            headers['Content-Type'] = contentType;
-        }
-
-        if (me.getUseDefaultXhrHeader() && !headers['X-Requested-With']) {
-            headers['X-Requested-With'] = me.getDefaultXhrHeader();
-        }
-        // set up all the request headers on the xhr object
-        try {
-            for (key in headers) {
-                if (headers.hasOwnProperty(key)) {
-                    header = headers[key];
-                    xhr.setRequestHeader(key, header);
-                }
-
-            }
-        } catch(e) {
-            me.fireEvent('exception', key, header);
-        }
-
-        if (options.withCredentials) {
-            xhr.withCredentials = options.withCredentials;
-        }
-
-        return headers;
-    },
-
-    /**
-     * Creates the appropriate XHR transport for the browser.
-     * @private
-     */
-    getXhrInstance: (function() {
-        var options = [function() {
-            return new XMLHttpRequest();
-        }, function() {
-            return new ActiveXObject('MSXML2.XMLHTTP.3.0');
-        }, function() {
-            return new ActiveXObject('MSXML2.XMLHTTP');
-        }, function() {
-            return new ActiveXObject('Microsoft.XMLHTTP');
-        }], i = 0,
-            len = options.length,
-            xhr;
-
-        for (; i < len; ++i) {
-            try {
-                xhr = options[i];
-                xhr();
-                break;
-            } catch(e) {
-            }
-        }
-        return xhr;
-    })(),
-
-    /**
-     * Determines whether this object has a request outstanding.
-     * @param {Object} request The request to check
-     * @return {Boolean} True if there is an outstanding request.
-     */
-    isLoading : function(request) {
-        if (!(request && request.xhr)) {
-            return false;
-        }
-        // if there is a connection and readyState is not 0 or 4
-        var state = request.xhr.readyState;
-        return !(state === 0 || state == 4);
-    },
-
-    /**
-     * Aborts any outstanding request.
-     * @param {Object} request (Optional) defaults to the last request
-     */
-    abort : function(request) {
-        var me = this,
-            requests = me.requests,
-            id;
-
-        if (request && me.isLoading(request)) {
-            /*
-             * Clear out the onreadystatechange here, this allows us
-             * greater control, the browser may/may not fire the function
-             * depending on a series of conditions.
-             */
-            request.xhr.onreadystatechange = null;
-            request.xhr.abort();
-            me.clearTimeout(request);
-            if (!request.timedout) {
-                request.aborted = true;
-            }
-            me.onComplete(request);
-            me.cleanup(request);
-        } else if (!request) {
-            for (id in requests) {
-                if (requests.hasOwnProperty(id)) {
-                    me.abort(requests[id]);
-                }
-            }
-        }
-    },
-
-    /**
-     * Aborts all outstanding requests
-     */
-    abortAll: function() {
-        this.abort();
-    },
-
-    /**
-     * Fires when the state of the xhr changes
-     * @private
-     * @param {Object} request The request
-     */
-    onStateChange : function(request) {
-        if (request.xhr.readyState == 4) {
-            this.clearTimeout(request);
-            this.onComplete(request);
-            this.cleanup(request);
-        }
-    },
-
-    /**
-     * Clears the timeout on the request
-     * @private
-     * @param {Object} The request
-     */
-    clearTimeout: function(request) {
-        clearTimeout(request.timeout);
-        delete request.timeout;
-    },
-
-    /**
-     * Cleans up any left over information from the request
-     * @private
-     * @param {Object} The request
-     */
-    cleanup: function(request) {
-        request.xhr = null;
-        delete request.xhr;
-    },
-
-    /**
-     * To be called when the request has come back from the server
-     * @private
-     * @param {Object} request
-     * @return {Object} The response
-     */
-    onComplete : function(request) {
-        var me = this,
-            options = request.options,
-            result,
-            success,
-            response;
-
-        try {
-            result = me.parseStatus(request.xhr.status);
-
-            if (request.timedout) {
-                result.success = false;
-            }
-        } catch (e) {
-            // in some browsers we can't access the status if the readyState is not 4, so the request has failed
-            result = {
-                success : false,
-                isException : false
-            };
-        }
-        success = result.success;
-
-        if (success) {
-            response = me.createResponse(request);
-            me.fireEvent('requestcomplete', me, response, options);
-            Ext.callback(options.success, options.scope, [response, options]);
-        } else {
-            if (result.isException || request.aborted || request.timedout) {
-                response = me.createException(request);
-            } else {
-                response = me.createResponse(request);
-            }
-            me.fireEvent('requestexception', me, response, options);
-            Ext.callback(options.failure, options.scope, [response, options]);
-        }
-        Ext.callback(options.callback, options.scope, [options, success, response]);
-        delete me.requests[request.id];
-        return response;
-    },
-
-    /**
-     * Checks if the response status was successful
-     * @param {Number} status The status code
-     * @return {Object} An object containing success/status state
-     */
-    parseStatus: function(status) {
-        // see: https://prototype.lighthouseapp.com/projects/8886/tickets/129-ie-mangles-http-response-status-code-204-to-1223
-        status = status == 1223 ? 204 : status;
-
-        var success = (status >= 200 && status < 300) || status == 304 || status == 0,
-            isException = false;
-
-        if (!success) {
-            switch (status) {
-                case 12002:
-                case 12029:
-                case 12030:
-                case 12031:
-                case 12152:
-                case 13030:
-                    isException = true;
-                    break;
-            }
-        }
-        return {
-            success: success,
-            isException: isException
-        };
-    },
-
-    /**
-     * Creates the response object
-     * @private
-     * @param {Object} request
-     */
-    createResponse : function(request) {
-        var xhr = request.xhr,
-            headers = {},
-            lines, count, line, index, key, response;
-
-        //we need to make this check here because if a request times out an exception is thrown
-        //when calling getAllResponseHeaders() because the response never came back to populate it
-        if (request.timedout || request.aborted) {
-            request.success = false;
-            lines = [];
-        } else {
-            lines = xhr.getAllResponseHeaders().replace(this.lineBreakRe, '\n').split('\n');
-        }
-
-        count = lines.length;
-
-        while (count--) {
-            line = lines[count];
-            index = line.indexOf(':');
-            if (index >= 0) {
-                key = line.substr(0, index).toLowerCase();
-                if (line.charAt(index + 1) == ' ') {
-                    ++index;
-                }
-                headers[key] = line.substr(index + 1);
-            }
-        }
-
-        request.xhr = null;
-        delete request.xhr;
-
-        response = {
-            request: request,
-            requestId : request.id,
-            status : xhr.status,
-            statusText : xhr.statusText,
-            getResponseHeader : function(header) {
-                return headers[header.toLowerCase()];
-            },
-            getAllResponseHeaders : function() {
-                return headers;
-            },
-            responseText : xhr.responseText,
-            responseXML : xhr.responseXML
-        };
-
-        // If we don't explicitly tear down the xhr reference, IE6/IE7 will hold this in the closure of the
-        // functions created with getResponseHeader/getAllResponseHeaders
-        xhr = null;
-        return response;
-    },
-
-    /**
-     * Creates the exception object
-     * @private
-     * @param {Object} request
-     */
-    createException : function(request) {
-        return {
-            request : request,
-            requestId : request.id,
-            status : request.aborted ? -1 : 0,
-            statusText : request.aborted ? 'transaction aborted' : 'communication failure',
-            aborted: request.aborted,
-            timedout: request.timedout
-        };
-    }
-});
-
-/**
- * @private
- * Utility class used by Ext.slider.Slider - should never need to be used directly.
- */
-Ext.define('Ext.slider.Thumb', {
-    extend: 'Ext.Component',
-    xtype : 'thumb',
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        baseCls: Ext.baseCSSPrefix + 'thumb',
-
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        draggable: {
-            direction: 'horizontal'
-        }
-    },
-
-    elementWidth: 0,
-
-    initialize: function() {
-        this.callParent();
-
-        this.getDraggable().onBefore({
-            dragstart: 'onDragStart',
-            drag: 'onDrag',
-            dragend: 'onDragEnd',
-            scope: this
-        });
-
-        this.on('painted', 'onPainted');
-    },
-
-    onDragStart: function() {
-        if (this.isDisabled()) {
-            return false;
-        }
-
-        this.relayEvent(arguments);
-    },
-
-    onDrag: function() {
-        if (this.isDisabled()) {
-            return false;
-        }
-
-        this.relayEvent(arguments);
-    },
-
-    onDragEnd: function() {
-        if (this.isDisabled()) {
-            return false;
-        }
-
-        this.relayEvent(arguments);
-    },
-
-    onPainted: function() {
-        this.elementWidth = this.element.dom.offsetWidth;
-    },
-
-    getElementWidth: function() {
-        return this.elementWidth;
-    }
-});
-
-/**
- * @author Ed Spencer
- * @class Ext.data.Batch
- *
- * <p>Provides a mechanism to run one or more {@link Ext.data.Operation operations} in a given order. Fires the 'operationcomplete' event
- * after the completion of each Operation, and the 'complete' event when all Operations have been successfully executed. Fires an 'exception'
- * event if any of the Operations encounter an exception.</p>
- *
- * <p>Usually these are only used internally by {@link Ext.data.proxy.Proxy} classes</p>
- *
- */
-Ext.define('Ext.data.Batch', {
-    mixins: {
-        observable: 'Ext.mixin.Observable'
-    },
-
-    config: {
-        /**
-         * @cfg {Boolean} autoStart true to immediately start processing the batch as soon as it is constructed (defaults to false)
-         */
-        autoStart: false,
-
-        /**
-         * @cfg {Boolean} pauseOnException true to automatically pause the execution of the batch if any operation encounters an exception (defaults to true)
-         */
-        pauseOnException: true,
-
-        /**
-         * @cfg {Ext.data.Proxy} proxy The proxy this Batch belongs to. Used to make the requests for each operation in the Batch.
-         */
-        proxy: null
-    },
-
-    /**
-     * The index of the current operation being executed
-     * @property current
-     * @type Number
-     */
-    current: -1,
-
-    /**
-     * The total number of operations in this batch. Read only
-     * @property total
-     * @type Number
-     */
-    total: 0,
-
-    /**
-     * True if the batch is currently running
-     * @property isRunning
-     * @type Boolean
-     */
-    isRunning: false,
-
-    /**
-     * True if this batch has been executed completely
-     * @property isComplete
-     * @type Boolean
-     */
-    isComplete: false,
-
-    /**
-     * True if this batch has encountered an exception. This is cleared at the start of each operation
-     * @property hasException
-     * @type Boolean
-     */
-    hasException: false,
-
-    /**
-     * @event complete
-     * Fired when all operations of this batch have been completed
-     * @param {Ext.data.Batch} batch The batch object
-     * @param {Object} operation The last operation that was executed
-     */
-
-    /**
-     * @event exception
-     * Fired when a operation encountered an exception
-     * @param {Ext.data.Batch} batch The batch object
-     * @param {Object} operation The operation that encountered the exception
-     */
-
-    /**
-     * @event operationcomplete
-     * Fired when each operation of the batch completes
-     * @param {Ext.data.Batch} batch The batch object
-     * @param {Object} operation The operation that just completed
-     */
-
-    /**
-     * Creates new Batch object.
-     * @param {Object} config (optional) Config object
-     */
-    constructor: function(config) {
-        var me = this;
-
-        me.initConfig(config);
-
-        /**
-         * Ordered array of operations that will be executed by this batch
-         * @property {Ext.data.Operation[]} operations
-         */
-        me.operations = [];
-    },
-
-    /**
-     * Adds a new operation to this batch
-     * @param {Object} operation The {@link Ext.data.Operation Operation} object
-     */
-    add: function(operation) {
-        this.total++;
-
-        operation.setBatch(this);
-
-        this.operations.push(operation);
-    },
-
-    /**
-     * Kicks off the execution of the batch, continuing from the next operation if the previous
-     * operation encountered an exception, or if execution was paused
-     */
-    start: function() {
-        this.hasException = false;
-        this.isRunning = true;
-
-        this.runNextOperation();
-    },
-
-    /**
-     * @private
-     * Runs the next operation, relative to this.current.
-     */
-    runNextOperation: function() {
-        this.runOperation(this.current + 1);
-    },
-
-    /**
-     * Pauses execution of the batch, but does not cancel the current operation
-     */
-    pause: function() {
-        this.isRunning = false;
-    },
-
-    /**
-     * Executes a operation by its numeric index
-     * @param {Number} index The operation index to run
-     */
-    runOperation: function(index) {
-        var me = this,
-            operations = me.operations,
-            operation = operations[index],
-            onProxyReturn;
-
-        if (operation === undefined) {
-            me.isRunning = false;
-            me.isComplete = true;
-            me.fireEvent('complete', me, operations[operations.length - 1]);
-        } else {
-            me.current = index;
-
-            onProxyReturn = function(operation) {
-                var hasException = operation.hasException();
-
-                if (hasException) {
-                    me.hasException = true;
-                    me.fireEvent('exception', me, operation);
-                } else {
-                    me.fireEvent('operationcomplete', me, operation);
-                }
-
-                if (hasException && me.getPauseOnException()) {
-                    me.pause();
-                } else {
-                    operation.setCompleted();
-                    me.runNextOperation();
-                }
-            };
-
-            operation.setStarted();
-
-            me.getProxy()[operation.getAction()](operation, onProxyReturn, me);
-        }
-    }
-});
-/**
- * @author Ed Spencer
- *
- * Base Writer class used by most subclasses of {@link Ext.data.proxy.Server}. This class is
- * responsible for taking a set of {@link Ext.data.Operation} objects and a {@link Ext.data.Request}
- * object and modifying that request based on the Operations.
- *
- * For example a Ext.data.writer.Json would format the Operations and their {@link Ext.data.Model}
- * instances based on the config options passed to the JsonWriter's constructor.
- *
- * Writers are not needed for any kind of local storage - whether via a
- * {@link Ext.data.proxy.WebStorage Web Storage proxy} (see {@link Ext.data.proxy.LocalStorage localStorage})
- * or just in memory via a {@link Ext.data.proxy.Memory MemoryProxy}.
- */
-Ext.define('Ext.data.writer.Writer', {
-    alias: 'writer.base',
-    alternateClassName: ['Ext.data.DataWriter', 'Ext.data.Writer'],
-
-    config: {
-        /**
-         * @cfg {Boolean} writeAllFields True to write all fields from the record to the server. If set to false it
-         * will only send the fields that were modified. Defaults to <tt>true</tt>. Note that any fields that have
-         * {@link Ext.data.Field#persist} set to false will still be ignored.
-         */
-        writeAllFields: true,
-
-        /**
-         * @cfg {String} nameProperty This property is used to read the key for each value that will be sent to the server.
-         * For example:
-         * <pre><code>
-    Ext.define('Person', {
-        extend: 'Ext.data.Model',
-        fields: [{
-            name: 'first',
-            mapping: 'firstName'
-        }, {
-            name: 'last',
-            mapping: 'lastName'
-        }, {
-            name: 'age'
-        }]
-    });
-    new Ext.data.writer.Writer({
-        writeAllFields: true,
-        nameProperty: 'mapping'
-    });
-
-    // This will be sent to the server
-    {
-        firstName: 'first name value',
-        lastName: 'last name value',
-        age: 1
-    }
-
-         * </code></pre>
-         * Defaults to <tt>name</tt>. If the value is not present, the field name will always be used.
-         */
-        nameProperty: 'name'
-    },
-
-    /**
-     * Creates new Writer.
-     * @param {Object} config (optional) Config object.
-     */
-    constructor: function(config) {
-        this.initConfig(config);
-    },
-
-    /**
-     * Prepares a Proxy's Ext.data.Request object
-     * @param {Ext.data.Request} request The request object
-     * @return {Ext.data.Request} The modified request object
-     */
-    write: function(request) {
-        var operation = request.getOperation(),
-            records   = operation.getRecords() || [],
-            len       = records.length,
-            i         = 0,
-            data      = [];
-
-        for (; i < len; i++) {
-            data.push(this.getRecordData(records[i]));
-        }
-        return this.writeRecords(request, data);
-    },
-
-    writeDate: function(field, date) {
-        var dateFormat = field.dateFormat || 'timestamp';
-        switch (dateFormat) {
-            case 'timestamp':
-                return date.getTime()/1000;
-            case 'time':
-                return date.getTime();
-            default:
-                return Ext.Date.format(date, dateFormat);
-        }
-    },
-
-    /**
-     * Formats the data for each record before sending it to the server. This
-     * method should be overridden to format the data in a way that differs from the default.
-     * @param {Object} record The record that we are writing to the server.
-     * @return {Object} An object literal of name/value keys to be written to the server.
-     * By default this method returns the data property on the record.
-     */
-    getRecordData: function(record) {
-        var isPhantom = record.phantom === true,
-            writeAll = this.getWriteAllFields() || isPhantom,
-            nameProperty = this.getNameProperty(),
-            fields = record.getFields(),
-            data = {},
-            changes, name, field, key, value, fieldConfig;
-
-        if (writeAll) {
-            fields.each(function(field) {
-                fieldConfig = field.config;
-                if (fieldConfig.persist) {
-                    name = fieldConfig[nameProperty] || fieldConfig.name;
-                    value = record.get(fieldConfig.name);
-                    if (fieldConfig.type.type == 'date') {
-                        value = this.writeDate(fieldConfig, value);
-                    }
-                    data[name] = value;
-                }
-            }, this);
-        } else {
-            // Only write the changes
-            changes = record.getChanges();
-            for (key in changes) {
-                if (changes.hasOwnProperty(key)) {
-                    field = fields.get(key);
-                    fieldConfig = field.config;
-                    if (fieldConfig.persist) {
-                        name = fieldConfig[nameProperty] || field.name;
-                        value = changes[key];
-                        if (fieldConfig.type.type == 'date') {
-                            value = this.writeDate(fieldConfig, value);
-                        }
-                        data[name] = value;
-                    }
-                }
-            }
-            if (!isPhantom) {
-                // always include the id for non phantoms
-                data[record.getIdProperty()] = record.getId();
-            }
-        }
-        return data;
-    }
-
-    // Convert old properties in data into a config object
-    // <deprecated product=touch since=2.0>
-    ,onClassExtended: function(cls, data, hooks) {
-        var Component = this,
-            defaultConfig = Component.prototype.config,
-            config = data.config || {},
-            key;
-
-
-        for (key in defaultConfig) {
-            if (key in data) {
-                config[key] = data[key];
-                delete data[key];
-            }
-        }
-
-        data.config = config;
-    }
-    // </deprecated>
-});
-
-/**
- * @author Ed Spencer
- *
- * Simple wrapper class that represents a set of records returned by a Proxy.
- */
-Ext.define('Ext.data.ResultSet', {
-    config: {
-        /**
-         * @cfg {Boolean} loaded
-         * True if the records have already been loaded. This is only meaningful when dealing with
-         * SQL-backed proxies.
-         */
-        loaded: true,
-
-        /**
-         * @cfg {Number} count
-         * The number of records in this ResultSet. Note that total may differ from this number.
-         */
-        count: null,
-
-        /**
-         * @cfg {Number} total
-         * The total number of records reported by the data source. This ResultSet may form a subset of
-         * those records (see {@link #count}).
-         */
-        total: null,
-
-        /**
-         * @cfg {Boolean} success
-         * True if the ResultSet loaded successfully, false if any errors were encountered.
-         */
-        success: false,
-
-        /**
-         * @cfg {Ext.data.Model[]} records (required)
-         * The array of record instances.
-         */
-        records: null,
-
-        /**
-         * @cfg {String} message
-         * The message that was read in from the data
-         */
-        message: null
-    },
-
-    /**
-     * Creates the resultSet
-     * @param {Object} [config] Config object.
-     */
-    constructor: function(config) {
-        this.initConfig(config);
-    },
-
-    applyCount: function(count) {
-        if (!count && count !== 0) {
-            return this.getRecords().length;
-        }
-        return count;
-    },
-    
-    /**
-     * @private
-     * Make sure we set the right count when new records have been sent in
-     */
-    updateRecords: function(records) {
-        this.setCount(records.length);
-    }
-});
 /**
  * @author Ed Spencer
  * @class Ext.data.Errors
@@ -38727,1655 +37731,6 @@ Ext.define('Ext.data.Errors', {
     }
 });
 
-/**
- * Ext.tab.Bar is used internally by {@link Ext.tab.Panel} to create the bar of tabs that appears at the top of the tab
- * panel. It's unusual to use it directly, instead see the {@link Ext.tab.Panel tab panel docs} for usage instructions.
- *
- * Used in the {@link Ext.tab.Panel} component to display {@link Ext.tab.Tab} components.
- *
- * @private
- */
-Ext.define('Ext.tab.Bar', {
-    extend: 'Ext.Toolbar',
-    alternateClassName: 'Ext.TabBar',
-    xtype : 'tabbar',
-
-    requires: ['Ext.tab.Tab'],
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        baseCls: Ext.baseCSSPrefix + 'tabbar',
-
-        // @private
-        defaultType: 'tab',
-
-        // @private
-        layout: {
-            type: 'hbox',
-            align: 'middle'
-        }
-    },
-
-    eventedConfig: {
-        /**
-         * @cfg {Number/String/Ext.Component} activeTab
-         * The initially activated tab. Can be specified as numeric index,
-         * component ID or as the component instance itself.
-         * @accessor
-         * @evented
-         */
-        activeTab: null
-    },
-
-    /**
-     * @event tabchange
-     * Fired when active tab changes.
-     * @param {Ext.tab.Bar} this
-     * @param {Ext.tab.Tab} newTab The new Tab
-     * @param {Ext.tab.Tab} oldTab The old Tab
-     */
-
-    initialize: function() {
-        var me = this;
-        me.callParent();
-
-        me.on({
-            tap: 'onTabTap',
-
-            delegate: '> tab',
-            scope   : me
-        });
-    },
-
-    // @private
-    onTabTap: function(tab) {
-        this.setActiveTab(tab);
-    },
-
-    /**
-     * @private
-     */
-    applyActiveTab: function(activeTab, oldActiveTab) {
-        if (!activeTab && activeTab !== 0) {
-            return;
-        }
-
-        var activeTabInstance = this.parseActiveTab(activeTab);
-
-        if (!activeTabInstance) {
-            return;
-        }
-        return activeTabInstance;
-    },
-
-    /**
-     * @private
-     * When docked to the top, pack left, when on the bottom pack center
-     */
-    doSetDocked: function(newDocked) {
-        var layout = this.getLayout(),
-            pack   = newDocked == 'bottom' ? 'center' : 'left';
-
-        //layout isn't guaranteed to be instantiated so must test
-        if (layout.isLayout) {
-            layout.setPack(pack);
-        } else {
-            layout.pack = (layout && layout.pack) ? layout.pack : pack;
-        }
-    },
-
-    /**
-     * @private
-     * Sets the active tab
-     */
-    doSetActiveTab: function(newTab, oldTab) {
-        if (newTab) {
-            newTab.setActive(true);
-        }
-
-        if (oldTab) {
-            oldTab.setActive(false);
-        }
-    },
-
-    /**
-     * @private
-     * Parses the active tab, which can be a number or string
-     */
-    parseActiveTab: function(tab) {
-        //we need to call getItems to initialize the items, otherwise they will not exist yet.
-        if (typeof tab == 'number') {
-            return this.getInnerItems()[tab];
-        }
-        else if (typeof tab == 'string') {
-            tab = Ext.getCmp(tab);
-        }
-        return tab;
-    }
-});
-
-/**
- * @aside guide tabs
- * @aside video tabs-toolbars
- *
- * Tab Panels are a great way to allow the user to switch between several pages that are all full screen. Each
- * Component in the Tab Panel gets its own Tab, which shows the Component when tapped on. Tabs can be positioned at
- * the top or the bottom of the Tab Panel, and can optionally accept title and icon configurations.
- *
- * Here's how we can set up a simple Tab Panel with tabs at the bottom. Use the controls at the top left of the example
- * to toggle between code mode and live preview mode (you can also edit the code and see your changes in the live
- * preview):
- *
- *     @example miniphone preview
- *     Ext.create('Ext.TabPanel', {
- *         fullscreen: true,
- *         tabBarPosition: 'bottom',
- *
- *         defaults: {
- *             styleHtmlContent: true
- *         },
- *
- *         items: [
- *             {
- *                 title: 'Home',
- *                 iconCls: 'home',
- *                 html: 'Home Screen'
- *             },
- *             {
- *                 title: 'Contact',
- *                 iconCls: 'user',
- *                 html: 'Contact Screen'
- *             }
- *         ]
- *     });
- * One tab was created for each of the {@link Ext.Panel panels} defined in the items array. Each tab automatically uses
- * the title and icon defined on the item configuration, and switches to that item when tapped on. We can also position
- * the tab bar at the top, which makes our Tab Panel look like this:
- *
- *     @example miniphone preview
- *     Ext.create('Ext.TabPanel', {
- *         fullscreen: true,
- *
- *         defaults: {
- *             styleHtmlContent: true
- *         },
- *
- *         items: [
- *             {
- *                 title: 'Home',
- *                 html: 'Home Screen'
- *             },
- *             {
- *                 title: 'Contact',
- *                 html: 'Contact Screen'
- *             }
- *         ]
- *     });
- *
- */
-Ext.define('Ext.tab.Panel', {
-    extend: 'Ext.Container',
-    xtype : 'tabpanel',
-    alternateClassName: 'Ext.TabPanel',
-
-    requires: ['Ext.tab.Bar'],
-
-    config: {
-        /**
-         * @cfg {String} ui
-         * Sets the UI of this component.
-         * Available values are: `light` and `dark`.
-         * @accessor
-         */
-        ui: 'dark',
-
-        /**
-         * @cfg {Object} tabBar
-         * An Ext.tab.Bar configuration.
-         * @accessor
-         */
-        tabBar: true,
-
-        /**
-         * @cfg {String} tabBarPosition
-         * The docked position for the {@link #tabBar} instance.
-         * Possible values are 'top' and 'bottom'.
-         * @accessor
-         */
-        tabBarPosition: 'top',
-
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        layout: {
-            type: 'card',
-            animation: {
-                type: 'slide',
-                direction: 'left'
-            }
-        },
-
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        cls: Ext.baseCSSPrefix + 'tabpanel'
-
-        /**
-         * @cfg {Boolean/String/Object} scrollable
-         * @accessor
-         * @hide
-         */
-
-        /**
-         * @cfg {Boolean/String/Object} scroll
-         * @hide
-         */
-    },
-
-    delegateListeners: {
-        delegate: '> component',
-        centeredchange: 'onItemCenteredChange',
-        dockedchange: 'onItemDockedChange',
-        floatingchange: 'onItemFloatingChange',
-        disabledchange: 'onItemDisabledChange'
-    },
-
-    initialize: function() {
-        this.callParent();
-
-        this.on({
-            order: 'before',
-            activetabchange: 'doTabChange',
-            delegate: '> tabbar',
-            scope   : this
-        });
-
-    },
-
-    /**
-     * Tab panels should not be scrollable. Instead, you should add scrollable to any item that
-     * you want to scroll.
-     * @private
-     */
-    applyScrollable: function() {
-        return false;
-    },
-
-    /**
-     * Updates the Ui for this component and the {@link #tabBar}.
-     */
-    updateUi: function(newUi, oldUi) {
-        this.callParent(arguments);
-
-        if (this.initialized) {
-            this.getTabBar().setUi(newUi);
-        }
-    },
-
-    /**
-     * @private
-     */
-    doSetActiveItem: function(newActiveItem, oldActiveItem) {
-        if (newActiveItem) {
-            var items = this.getInnerItems(),
-                oldIndex = items.indexOf(oldActiveItem),
-                newIndex = items.indexOf(newActiveItem),
-                reverse = oldIndex > newIndex,
-                animation = this.getLayout().getAnimation(),
-                tabBar = this.getTabBar(),
-                oldTab = tabBar.parseActiveTab(oldIndex),
-                newTab = tabBar.parseActiveTab(newIndex);
-
-            if (animation && animation.setReverse) {
-                animation.setReverse(reverse);
-            }
-
-            this.callParent(arguments);
-
-            if (newIndex != -1) {
-                this.getTabBar().setActiveTab(newIndex);
-
-                if (oldTab) {
-                    oldTab.setActive(false);
-                }
-
-                if (newTab) {
-                    newTab.setActive(true);
-                }
-            }
-        }
-    },
-
-    /**
-     * Updates this container with the new active item.
-     */
-    doTabChange: function(tabBar, newTab) {
-        this.setActiveItem(tabBar.indexOf(newTab));
-    },
-
-    /**
-     * Creates a new {@link Ext.tab.Bar} instance using {@link Ext#factory}.
-     * @private
-     */
-    applyTabBar: function(config) {
-        if (config === true) {
-            config = {};
-        }
-
-        if (config) {
-            Ext.applyIf(config, {
-                ui: this.getUi(),
-                docked: this.getTabBarPosition()
-            });
-        }
-
-        return Ext.factory(config, Ext.tab.Bar, this.getTabBar());
-    },
-
-    /**
-     * Adds the new {@link Ext.tab.Bar} instance into this container.
-     * @private
-     */
-    updateTabBar: function(newTabBar) {
-        if (newTabBar) {
-            this.add(newTabBar);
-            this.setTabBarPosition(newTabBar.getDocked());
-        }
-    },
-
-    /**
-     * Updates the docked position of the {@link #tabBar}.
-     * @private
-     */
-    updateTabBarPosition: function(position) {
-        var tabBar = this.getTabBar();
-        if (tabBar) {
-            tabBar.setDocked(position);
-        }
-    },
-
-    onItemAdd: function(card) {
-        var me = this;
-
-        if (!card.isInnerItem()) {
-            return me.callParent(arguments);
-        }
-
-        var tabBar             = me.getTabBar(),
-            initialConfig      = card.getInitialConfig(),
-            tabConfig          = initialConfig.tab || {},
-            tabTitle           = initialConfig.title,
-            tabIconCls         = initialConfig.iconCls,
-            tabHidden          = initialConfig.hidden,
-            tabDisabled        = initialConfig.disabled,
-            tabBadgeText       = initialConfig.badgeText,
-            innerItems         = me.getInnerItems(),
-            index              = innerItems.indexOf(card),
-            tabs               = tabBar.getItems(),
-            cards              = me.getInnerItems(),
-            currentTabInstance = (tabs.length >= cards.length) && tabs.getAt(index),
-            tabInstance;
-
-        if (tabTitle && !tabConfig.title) {
-            tabConfig.title = tabTitle;
-        }
-
-        if (tabIconCls && !tabConfig.iconCls) {
-            tabConfig.iconCls = tabIconCls;
-        }
-
-        if (tabHidden && !tabConfig.hidden) {
-            tabConfig.hidden = tabHidden;
-        }
-
-        if (tabDisabled && !tabConfig.disabled) {
-            tabConfig.disabled = tabDisabled;
-        }
-
-        if (tabBadgeText && !tabConfig.badgeText) {
-            tabConfig.badgeText = tabBadgeText;
-        }
-
-
-        tabInstance = Ext.factory(tabConfig, Ext.tab.Tab, currentTabInstance);
-
-        if (!currentTabInstance) {
-            tabBar.insert(index, tabInstance);
-        }
-
-        card.tab = tabInstance;
-
-        me.callParent(arguments);
-    },
-
-    /**
-     * If an item gets enabled/disabled and it has an tab, we should also enable/disable that tab
-     * @private
-     */
-    onItemDisabledChange: function(item, newDisabled) {
-        if (item && item.tab) {
-            item.tab.setDisabled(newDisabled);
-        }
-    },
-
-    // @private
-    onItemRemove: function(item, index) {
-        this.getTabBar().remove(item.tab, this.getAutoDestroy());
-
-        this.callParent(arguments);
-    }
-}, function() {
-    //<deprecated product=touch since=2.0>
-    /**
-     * @cfg {Boolean} tabBarDock
-     * @inheritdoc Ext.tab.Panel#tabBarPosition
-     * @deprecated 2.0.0 Please use {@link #tabBarPosition} instead.
-     */
-    Ext.deprecateProperty(this, 'tabBarDock', 'tabBarPosition');
-    //</deprecated>
-});
-
-/**
-*	Displays details of a spot.
-*	Details are checkIns, orders and statistics.
-*/
-Ext.define('EatSense.view.SpotDetail', {
-	extend: 'Ext.Panel',
-	xtype: 'spotdetail',
-	requires: ['EatSense.view.SpotDetailItem'],
-	config: {
-		modal: true,
-		hideOnMaskTap: 'true',
-		baseCls: 'spotdetail',
-		top: '5%',
-		left: '5%',
-		right: '5%',
-		bottom: '5%',
-		layout: 'fit',
-		fullscreen: true,
-		//this should be initially hidden
-		hidden: true,
-		listeners: {
-			'eatSense.customer-update': function(active) {
-				//enable/disable action buttons depending on customer status
-				try {
-					this.down('button[action=switch-spot]').setDisabled(!active);
-					this.down('button[action=paid]').setDisabled(!active);			
-					this.down('button[action=cancel-all]').setDisabled(!active);
-					this.down('button[action=confirm-all]').setDisabled(!active);
-				} catch(e) {
-					console.log(e);
-				}
-			}
-		},
-		items: [
-		{
-			xtype: 'titlebar',
-			docked: 'top',
-			cls: 'spotdetail-titlebar',
-			items: [
-			{
-					xtype: 'button',
-					action: 'close',
-					// baseCls: 'spotdetail-close',
-					text: Karazy.i18n.translate('close'),
-					align: 'right'
-			}
-			]
-		},
-		{
-			xtype: 'customerrequest',
-			docked: 'right',
-			layout:'fit',
-			width: 200
-		},
-		{
-			xtype: 'panel',
-			layout:  {
-				type: 'fit'
-			},
-			docked: 'left',
-			width: 200,
-			items: [{
-				xtype: 'label',
-				html: Karazy.i18n.translate('spotDetailCustomerLabel'),
-				docked: 'top',
-				cls: 'spotdetailitem-customer-label'
-			},{
-				xtype: 'list',
-				itemId: 'checkInList', 
-				itemTpl: new Ext.XTemplate(
-						"<h2 class='spotdetail-customer-name'>{nickname}</h2>"+
-						"<tpl if='status == \"ORDER_PLACED\" || status == \"PAYMENT_REQUEST\"'>"+
-							"<span class='spotdetail-customer-flag'>X</span>"+
-						"</tpl>"
-						),
-				store: 'checkInStore',
-				ui: 'round'
-			}
-			]
-		},
-		{
-			xtype: 'panel',
-			layout: {
-				type: 'fit'
-			},
-			// fullscreen: true,
-			items: [
-			{
-				xtype: 'panel',
-				docked: 'top',
-				layout: {
-					type: 'hbox',
-					align: 'middle'
-				},
-				height: 100,
-				items: [
-				{
-					xtype: 'panel',					
-					// itemId: 'statistics',
-					cls: 'spotdetail-statistics',
-					items: [
-						{
-							xtype: 'label',
-							itemId: 'title',					
-							html: '<p>'+Karazy.i18n.translate('statistic')+'</p>'
-						},
-						{
-							xtype: 'label',
-							itemId: 'checkInTime',
-							tpl: new Ext.XTemplate(
-								'<p>Check-In: {[this.formatTime(values.checkInTime)]}</p>',
-								{
-									formatTime: function(time) {
-										return Ext.util.Format.date(time, 'H:i');
-									}
-								}
-							)
-						},				
-						{
-							xtype: 'label',
-							itemId: 'total',
-							tpl: new Ext.XTemplate('<p>Total: {[this.formatPrice(values.total)]}</p>',
-								{
-									formatPrice: function(price) {
-										return Karazy.util.formatPrice(price);
-									}
-								}
-							)
-						}
-					]
-				},
-				{
-					xtype: 'label',
-					itemId: 'statusLabel',
-					cls: 'spotdetail-status',
-					tpl: new Ext.XTemplate('<p>Status:</p><p class="{[values.status.toLowerCase()]}">{[this.translateStatus(values.status)]}</p>',
-						{
-							translateStatus: function(status) {
-								return Karazy.i18n.translate(status);
-							}
-						}
-					)
-				},
-				{
-					xtype: 'label',
-					itemId: 'paymentLabel',
-					cls: 'spotdetail-status',
-					hidden: true,
-					tpl: new Ext.XTemplate('<p>'+Karazy.i18n.translate('paymentMethodLabel')+':</p><p class="payment">{paymentMethod}</p>',
-						{
-							translateStatus: function(status) {
-								return Karazy.i18n.translate(status);
-							}
-						}
-					)
-				},
-				{
-					xtype: 'button',
-					action: 'confirm-all',
-					disabled: true,
-					text: Karazy.i18n.translate('confirmAllOrdersButton'),
-					ui: 'action',
-					// cls: 'spotdetail-toolbar-button',
-					right: 5,
-					bottom: 5
-				}]
-			},
-			 {
-				xtype: 'dataview',
-				itemId: 'spotDetailOrders',
-				store: 'orderStore',
-				useComponents: true,
-				defaultType: 'spotdetailitem'				
-			}, 
-			{
-				xtype: 'toolbar',
-				baseCls: 'spotdetail-toolbar',
-				docked: 'bottom',
-				layout: {
-					type: 'hbox',
-					align: 'middle',
-					pack: 'center'
-				},
-				defaults: {
-					ui: 'action',
-					cls: 'spotdetail-toolbar-button'
-				},
-				items: [
-				{
-					text: Karazy.i18n.translate('paidButton'),
-					action: 'paid',
-					disabled: true
-				},
-				{
-					text: Karazy.i18n.translate('switchSpotButton'),
-					action: 'switch-spot',
-					disabled: true
-				},
-				{
-					text: Karazy.i18n.translate('cancelAllOrdersButton'),
-					action: 'cancel-all',
-					disabled: true
-					// iconCls: 'cancel-all'
-					// icon: '../app/res/images/into_cart.png',
-					// iconAlign: 'centered',
-				}
-				]				
-			}
-			]
-		}
-		]
-	}
-});
-Ext.define('EatSense.view.Spot', {
-	extend: 'Ext.Panel',
-	requires: ['EatSense.view.SpotItem', 'EatSense.view.SpotDetail'],
-	xtype: 'spotcard',
-	config: {
-		id: 'spotcard',
-		title: 'Spots',
-		fullscreen: true,
-		layout: 'fit',
-		items: [		
-			{
-				xtype: 'dataview',
-				itemId: 'spotsview',
-				store: 'spotStore',
-				baseCls: 'dv-baseCls',
-				itemCls: 'spot',
-				useComponents: true,
-				defaultType: 'spotitem',
-			}							
-		]
-	}
-
-	
-})
-Ext.define('EatSense.view.Main', {
-	extend: 'Ext.TabPanel',
-	xtype: 'main',
-	requires: ['EatSense.view.Spot'],
-	config: {
-		fullscreen: true,
-		items: [
-		{
-			xtype: 'spotcard'
-		}, 
-		{
-			xtype: 'toolbar',
-			docked: 'bottom',
-			items: [
-			{
-			xtype: 'label',
-			itemId: 'info',
-			tpl: 'Logged in as <span>{login}</strong> at <strong>{business}</strong>'
-			},
-			{
-				xtype: 'spacer'
-			},
-			{
-				xtype: 'button',
-				iconCls: 'delete',
-    			iconMask: true,
-    			action: 'logout'
-			}]
-		}]
-	}
-});
-/**
-*	Controlls actions for the spot view.
-* 	- showing and updating status for spots (tables, rooms, ...)
-*	- processing incoming orders, payment requests ...
-*/
-Ext.define('EatSense.controller.Spot', {
-	extend: 'Ext.app.Controller',
-	requires: ['EatSense.view.Main', 'EatSense.view.SpotSelectionDialog', 'EatSense.view.CustomerRequestDialog'],
-	config: {
-		refs: {
-			spotitem: 'spotitem button',
-			spotsview: '#spotsview',
-			spotcard: 'spotcard',
-			mainview: 'main',
-			info: 'toolbar[docked=bottom] #info',
-			//<spot-detail>
-			spotDetail: {
-		        selector: 'spotdetail',
-		        xtype: 'spotdetail',
-		        autoCreate: true
-		    },
-		    spotDetailCustomerList: 'spotdetail #checkInList',
-		    spotDetailOrderList: 'spotdetail #spotDetailOrders',		    
-		    confirmOrderButton: 'spotdetail button[action=confirm]',
-		    cancelOrderButton: 'spotdetail button[action=cancel]',
-		    closeSpotDetailButton: 'spotdetail button[action=close]',
-		    paidSpotDetailButton: 'spotdetail button[action=paid]',
-		    cancelAllButton: 'spotdetail button[action=cancel-all]',    
-		    confirmAllButton: 'spotdetail button[action=confirm-all]',
-		    switchSpotButton: 'spotdetail button[action=switch-spot]', 
-		    spotDetailStatistic: 'spotdetail #statistics',
-		    spotSelectionDialog: {
-		    	selector: 'spotselection',
-		    	xtype: 'spotselection',
-		    	autoCreate: true
-		    },
-		    switchSpotList: 'spotselection list',
-		    //</spot-detail>
-		},
-
-		control : {
-			spotitem: {
-		 		tap:  'showSpotDetails'
-		 	},
-		 	spotDetailCustomerList: {
-		 		select: 'showCustomerDetail'
-		 	},
-		 	confirmOrderButton: {
-		 		tap: 'confirmOrder'
-		 	},
-		 	cancelOrderButton: {
-		 		tap: 'cancelOrder'
-		 	},
-		 	closeSpotDetailButton: {
-		 		tap: 'closeSpotDetail'
-		 	},
-		 	spotDetail: {
-		 		hide: 'hideSpotDetail'
-		 	},
-		 	paidSpotDetailButton: {
-		 		tap: 'confirmPayment'
-		 	},
-		 	cancelAllButton: {
-		 		tap: 'cancelAll'
-		 	},
-		 	confirmAllButton: {
-		 		tap: 'confirmAll'
-		 	},
-		 	switchSpotButton: {
-		 		tap: 'showSpotSelection'
-		 	}, 
-		 	switchSpotList: {
-		 		select: 'switchSpot'
-		 	},
-		 	dismissRequestsButton : {
-		 		tap: 'deleteCustomerRequests'
-		 	}
-		},
-
-		//the active spot, when spot detail view is visible
-		activeSpot: null,
-		//active customer in detail spot view
-		activeCustomer: null,
-		//active bill of active Customer
-		activeBill : null
-	},
-
-	init: function() {
-		console.log('initializing Spot Controller');
-		//add listeners for message events
-		var messageCtr = this.getApplication().getController('Message');
-		messageCtr.on('eatSense.spot', this.updateSpotIncremental, this);
-	},
-
-	// <LOAD AND SHOW DATA>
-	/**
-	*	Loads all spots and refreshes spot view.
-	*	Called after a successful login or credentials restore.
-	*	If spot loading fails user will be logged out
-	*/
-	loadSpots: function() {
-		console.log('loadSpots');
-		var 	loginCtr = this.getApplication().getController('Login'),
-				account = loginCtr.getAccount(),
-				info = this.getInfo();
-
-		info.getTpl().overwrite(info.element, account.data);
-
-		this.getSpotsview().getStore().load({
-			 params: {
-			 	pathId : account.get('businessId'),
-			 },
-			 callback: function(records, operation, success) {
-			 	if(!success) {
-			 		me.getApplication().handleServerError({
-						'error': operation.error, 
-						'forceLogout': true, 
-						'hideMessage':false
-						// 'message': Karazy.i18n.translate('errorSpotLoading')
-					});
-			 	}				
-			 },
-			 scope: this
-		});	
-	},
-
-	/**
-	*	Gets called when user taps on a spot. Shows whats going on at a particular spot.
-	*   Like incoming orders, payment requests ...
-	*
-	*/
-	showSpotDetails: function(button, eventObj, eOpts) {
-		console.log('showSpotDetails');
-		var	me = this,
-			loginCtr = this.getApplication().getController('Login'),
-			messageCtr = this.getApplication().getController('Message'),
-			requestCtr = this.getApplication().getController('Request'),
-			detail = me.getSpotDetail(),
-			checkInList = detail.down('#checkInList'),
-			data = button.getParent().getRecord(),
-			checkInStore = Ext.StoreManager.lookup('checkInStore'),
-			restaurantId = loginCtr.getAccount().get('businessId'),
-			titlebar = detail.down('titlebar'),
-			requestStore = Ext.StoreManager.lookup('requestStore');
-
-		//add listeners for channel messages
-		messageCtr.on('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
-		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
-		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
-		messageCtr.on('eatSense.request', requestCtr.processCustomerRequest, requestCtr);
-
-
-		//load checkins and orders and set lists
-		checkInStore.load({
-			params: {
-				pathId: restaurantId,
-				spotId: data.get('id')
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 		
-			 		me.setActiveSpot(data);
-			 		titlebar.setTitle(data.get('name'));
-			 		requestCtr.loadRequests();
-			 		if(records.length > 0) {			 			
-			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
-			 			me.getSpotDetailCustomerList().select(0);
-			 		}
-			 	} else {
-			 		me.getApplication().handleServerError({
-						'error': operation.error, 
-						'forceLogout': {403: true},
-						'hideMessage':false
-						// 'message': Karazy.i18n.translate('errorSpotDetailCheckInLoading')
-					});
-			 	}				
-			 },
-			 scope: this
-		});
-
-
-		//show detail view
-		Ext.Viewport.add(detail);
-		detail.show();
-	},
-
-	/**
-	*	Shows details (orders, bills, requests) of a customer.
-	*	Fired when customer in checkInList in spot detail view is tapped.
-	*	Loads all orders based on the passed checkin.
-	*
-	*	@param record
-	*			selected checkIn
-	*
-	*/
-	showCustomerDetail: function(dataview, record, options) {
-		var me = this,
-			loginCtr = this.getApplication().getController('Login'),
-			orderStore = Ext.StoreManager.lookup('orderStore'),
-			billStore = Ext.StoreManager.lookup('billStore'),				
-			detail = me.getSpotDetail(),
-			restaurantId = loginCtr.getAccount().get('businessId'),
-			bill,
-			paidButton = this.getPaidSpotDetailButton();
-		
-		if(!record) {
-			return;
-		}
-
-		me.setActiveCustomer(record);
-		me.getSpotDetail().fireEvent('eatSense.customer-update', true);
-
-		orderStore.load({
-			params: {
-				pathId: restaurantId,
-				checkInId: record.get('id'),
-				//currently not evaluated
-				// spotId: 
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 		
-			 		this.updateCustomerStatusPanel(record);
-			 		this.updateCustomerTotal(records);
-			 	} else {
-			 		me.getApplication().handleServerError({
-						'error': operation.error, 
-						'forceLogout': {403: true}, 
-						'hideMessage':false
-						// 'message': Karazy.i18n.translate('errorSpotDetailOrderLoading')
-					});
-			 	}				
-			 },
-			 scope: this
-		});
-
-		if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
-			paidButton.enable();
-			billStore.load({
-				params: {
-					pathId: restaurantId,
-					checkInId: record.get('id'),
-				},
-				 callback: function(records, operation, success) {
-				 	if(success && records.length == 1) { 
-				 		me.setActiveBill(records[0]);
-				 		me.updateCustomerPaymentMethod(records[0].getPaymentMethod().get('name'));
-				 	} else {				 		
-			    		me.updateCustomerPaymentMethod();
-				 	}				
-				 },
-				 scope: this
-			});
-		} else {
-			//make sure to hide payment method label
-			me.updateCustomerPaymentMethod();
-			paidButton.disable();
-		}
-	},
-
-	// </LOAD AND SHOW DATA>
-
-	//<PUSH MESSAGE HANDLERS>
-
-	/**
-	*	Takes a spot and refreshes the associated item in view.
-	*	
-	*	@param updatedSpot
-	*		A spot where only updated fields are set. (raw data)
-	*/
-	updateSpotIncremental: function(action, updatedSpot) {
-		console.log('updateSpotIncremental');
-		//load corresponding spot
-		var 	dirtySpot, 
-				index, 
-				spotStore = this.getSpotsview().getStore();
-				// spotData = updatedSpot.getData();
-		
-		//don't use getById, because barcode is the id
-		index = spotStore.findExact('id', updatedSpot.id);
-
-		if(index > -1) {
-			dirtySpot = spotStore.getAt(index);		
-
-			if(updatedSpot.status) {
-				dirtySpot.set('status', updatedSpot.status);
-			} else if(updatedSpot.checkInCount === 0) {
-				dirtySpot.set('status', '');
-			}
-
-			if(updatedSpot.checkInCount || typeof updatedSpot.checkInCount == "number") {
-				dirtySpot.set('checkInCount', updatedSpot.checkInCount);
-			}
-		}
-	},
-	/**
-	*	Updates spotdetail view when a checkIn change at this spot occurs.
-	*
-	*/
-	updateSpotDetailCheckInIncremental: function(action, updatedCheckIn) {
-		var		me = this,
-				detail = this.getSpotDetail(),
-				store = this.getSpotDetailCustomerList().getStore(),
-				orders = Ext.StoreManager.lookup('orderStore'),
-				customerList = this.getSpotDetailCustomerList(),
-				dirtyCheckIn,
-				index,
-				listElement,
-				updatedCheckIn = Ext.create('EatSense.model.CheckIn', updatedCheckIn),
-				requestCtr = this.getApplication().getController('Request'),
-				customerIndex;
-				
-		//check if spot detail is visible and if it is the same spot the checkin belongs to
-		if(!detail.isHidden() && me.getActiveSpot()) {
-			if(updatedCheckIn.get('spotId') == me.getActiveSpot().get('id')) {
-				if(action == 'new') {
-					store.add(updatedCheckIn);
-					if(store.getCount() == 1) {
-						//only one checkIn exists so set this checkIn as selected
-						customerList.select(0);
-					}
-					//make sure to load new request so they exist
-					requestCtr.loadRequests();
-				} else if (action == 'update') {
-					console.log('update checkin id %s with status %s', updatedCheckIn.id, updatedCheckIn.status);
-					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
-					if(dirtyCheckIn) {
-						//update existing checkin
-						dirtyCheckIn.setData(updatedCheckIn.getData());
-
-						//always refresh list to flag incoming orders on non active customers
-						me.getSpotDetailCustomerList().refresh();
-
-						if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
-							//update status only if this is the active customer
-							me.updateCustomerStatusPanel(updatedCheckIn);
-						}
-					} else {
-						Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorGeneralCommunication'), Ext.emptyFn);
-					}
-				} else if (action == "delete") {
-					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
-					if(dirtyCheckIn) {
-						customerIndex = store.indexOf(dirtyCheckIn);
-						store.remove(dirtyCheckIn);	
-						//make sure to load new request so they exist
-						requestCtr.loadRequests();					
-
-						//clear status panel if deleted checkin is activeCustomer or select another checkin
-						if(me.getActiveCustomer() && updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
-							if(store.getCount() > 0) {
-								if(store.getAt(customerIndex)) {
-									customerList.select(customerIndex);	
-								} else {
-									customerList.select(customerIndex-1);
-								}
-								
-							} else {
-								me.getSpotDetail().fireEvent('eatSense.customer-update', false);
-								orders.removeAll();
-								me.setActiveCustomer(null);
-								me.updateCustomerStatusPanel();
-								me.updateCustomerTotal();
-								me.updateCustomerPaymentMethod();
-							}
-						}						
-					} else { 
-						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
-					}
-				}
-			}
-		}
-	},
-	/**
-	*	Updates spotdetail view when a new/changed bill arrives.
-	*
-	*/
-	updateSpotDetailBillIncremental: function(action, billData) {
-		var		me = this,
-				detail = this.getSpotDetail(),
-				paymentLabel = detail.down('#paymentLabel'),
-				paidButton = this.getPaidSpotDetailButton(),
-				bill;
-
-				//check if spot detail is visible and if it is the same spot the checkin belongs to
-		if(!detail.isHidden() && me.getActiveSpot()) {
-			if(me.getActiveCustomer() && billData.checkInId == me.getActiveCustomer().get('id')) {
-				bill = Ext.create('EatSense.model.Bill');
-				bill.setData(billData);
-				bill.setId(billData.id);
-				//this is an already persistent object!
-				bill.phantom = false;
-
-				if(action == 'new') {
-					this.setActiveBill(bill);
-					paidButton.enable();
-					me.updateCustomerPaymentMethod(bill.getPaymentMethod().get('name'));
-				} else if (action == 'update') {
-					//currently no action needed. update occurs when a bill is cleared
-					//since we also receive a checkin delete method no further action required
-				}
-			}
-		}
-	},
-	/**
-	*	Updates spotdetail view when a new/changed order.
-	*
-	*/
-	updateSpotDetailOrderIncremental: function(action, updatedOrder) {
-		var		me = this,
-				detail = me.getSpotDetail(),
-				store = me.getSpotDetailOrderList().getStore(),
-				oldOrder,
-				statisticsLabel = detail.down('#total'),
-				sum = 0,
-				totalLabel = detail.down('#total');
-		//Be careful! updatedOrder is not yet a model
-
-		//check if spot detail is visible and if it is the same spot the checkin belongs to
-		//and if the order belongs to current selected checkin		
-		if(!detail.isHidden() && me.getActiveCustomer()) {
-			if(updatedOrder.checkInId == me.getActiveCustomer().get('id')) {
-				if(action == 'new') {
-					
-				} else if(action == 'update') {
-					console.log('order id %s update channel message received', updatedOrder.id);
-					oldOrder = store.getById(updatedOrder.id);
-					if(oldOrder) {
-						store.remove(oldOrder);
-					}
-					store.add(updatedOrder);
-				}
-
-				//update total sum 
-				me.updateCustomerTotal(store.getData().items);
-			}
-		}
-	},
-
-	// </PUSH MESSAGE HANDLERS>
-
-	//<VIEW UPDATE METHODS>
-
-	/**
-	*	Updates the status panel of selected customer in spotdetail view.
-	*	@param checkIn
-	*		contains the checkin information. If none provided, fields will be reseted.
-	*/
-	updateCustomerStatusPanel: function(checkIn) {
-		var 	me = this,
-				detail = me.getSpotDetail(),
-				statusLabel = detail.down('#statusLabel'),
-				checkInTimeLabel = detail.down('#checkInTime'),
-				sum = 0;
-
-		if(checkIn) {
-			//render order status					
-			statusLabel.getTpl().overwrite(statusLabel.element, checkIn.getData());
-			checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {'checkInTime': checkIn.get('checkInTime')});
-		} else {
-			//pass dummy objects with no data
-			statusLabel.getTpl().overwrite(statusLabel.element, {status: ''});
-			checkInTimeLabel.getTpl().overwrite(checkInTimeLabel.element, {'checkInTime' : ''});
-		}
-	},
-	/**
-	*	Updates the displayed total sum of selected customer in spotdetail view.
-	*	@param orders
-	*		all orders for the current checkin
-	*/
-	updateCustomerTotal: function(orders) {
-		var 	me = this,
-				detail = me.getSpotDetail(),
-				totalLabel = detail.down('#total'),
-				sum = 0;
-
-		if(orders) {
-			//if orders exist calculate total sum 
-			try {
-				Ext.each(orders, function(o) {
-					if(o.get('status') != Karazy.constants.Order.CANCELED) {
-						sum += o.calculate();
-					}					
-				});
-				sum = Karazy.util.roundPrice(sum);
-			} catch(e) {
-				console.log('failed calculating total price ' + e);
-			}
-			totalLabel.getTpl().overwrite(totalLabel.element, {'total': sum});	
-		} else {
-			totalLabel.getTpl().overwrite(totalLabel.element, {'total': sum});
-		}
-	},
-	/**
-	*	Displays the chose paymentMethod when a payment request is active.
-	*	@param paymentMethod
-	* 		if empty hides the payment label, otherwise shows the paymentMethod
-	*/
-	updateCustomerPaymentMethod: function(paymentMethod) {
-		var		me = this,
-				detail = this.getSpotDetail(),
-				paymentLabel = detail.down('#paymentLabel');
-
-				//check if spot detail is visible and if it is the same spot the checkin belongs to
-		if(paymentMethod) {
-			paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : paymentMethod});
-			paymentLabel.show();
-		} else {
-			paymentLabel.getTpl().overwrite(paymentLabel.element, {'paymentMethod' : ''});
-			paymentLabel.hide();
-		}
-	},
-	//</VIEW UPDATE METHODS>
-
-	// <ACTIONS>
-
-	/**
-	*	Marks a single order as confirmed. This indicates that the business received 
-	*	the order and starts to process it.
-	*
-	*/
-	confirmOrder: function(button, eventObj, eOpts) {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				orderStore = Ext.StoreManager.lookup('orderStore'),
-				order = button.getParent().getRecord(),
-				prevStatus = order.get('status');
-
-		if(order.get('status') == Karazy.constants.Order.RECEIVED) {
-			console.log('order already confirmed')
-			//you can confirm an order only once
-			return;
-		};
-
-		//update order status
-		order.set('status', Karazy.constants.Order.RECEIVED);
-		order.getData(true);
-
-		//persist changes
-		// order.save({
-		// 	params: {
-		// 		pathId: loginCtr.getAccount().get('businessId'),
-		// 	},
-		// 	success: function(record, operation) {
-		// 		console.log('order confirmed');
-		// 	},
-		// 	failure: function(record, operation) {
-		// 		order.set('status', Karazy.constants.Order.PLACED);
-		// 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
-		// 	}
-		// });
-
-		//same approach as in eatSense App. Magic lies in getRawJsonData()
-		//still kind of a workaround
-		Ext.Ajax.request({				
-    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
-    	    method: 'PUT',    	    
-    	    jsonData: order.getRawJsonData(),
-    	    scope: this,
-    	    success: function(response) {
-    	    	console.log('order confirmed');
-    	    },
-    	    failure: function(response) {
-    	    	order.set('status', prevStatus);
-    	    	me.getApplication().handleServerError({
-						'error': {
-							'status': response.status,
-							'statusText': response.statusText
-						}, 
-						'forceLogout': {403: true}, 
-						'hideMessage':false
-						// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
-				});
-	   	    }
-		});
-	},
-	/**
-	* Marks a bill as paid.
-	*
-	*/
-	confirmPayment: function(button, eventObj, eOpts){
-		var	me = this,
-			orderStore = Ext.StoreManager.lookup('orderStore'),
-			customerStore = Ext.StoreManager.lookup('checkInStore'),
-			unprocessedOrders,
-			loginCtr = this.getApplication().getController('Login'),
-			requestCtr = this.getApplication().getController('Request'),
-			bill = this.getActiveBill(),
-			customerList = this.getSpotDetailCustomerList(),
-			customerIndex;
-
-		if(!bill) {
-			console.log('cannot confirm payment because no bill exists');
-			return;
-		}
-
-		//check if all orders are processed
-		unprocessedOrders = orderStore.queryBy(function(record, id) {
-			if(record.get('status') == Karazy.constants.Order.PLACED) {
-				return true;
-			}
-
-		});
-
-		if(unprocessedOrders.getCount() > 0 ) {
-			Ext.Msg.alert(Karazy.i18n.translate('hint'), Karazy.i18n.translate('processOrdersFirst'), Ext.emptyFn);
-		} else {
-			bill.set('cleared', true);
-			bill.save({
-				params: {
-					pathId: loginCtr.getAccount().get('businessId')
-				},
-				success: function(record, operation) {
-					//remove customer
-					customerIndex = customerStore.indexOf(me.getActiveCustomer());
-					customerStore.remove(me.getActiveCustomer());
-					if(customerStore.getCount() > 0) {
-						customerList.select(customerIndex);
-					} else {
-						orderStore.removeAll();
-						me.updateCustomerStatusPanel();
-						me.updateCustomerTotal();
-						me.updateCustomerPaymentMethod();
-					}
-					me.setActiveBill(null);	
-					//update requests
-					requestCtr.loadRequests();		
-				},
-				failure: function(record, operation) {
-					console.log('saving bill failed');
-					button.enable();
-					me.getApplication().handleServerError({
-						'error': operation.error,
-						'forceLogout': {403: true}
-						// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
-					});
-				}
-			});			
-		}
-
-	},
-	/**
-	*	Marks a single order as canceled. 
-	*
-	*/
-	cancelOrder: function(button, event, eOpts) {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				orderStore = Ext.StoreManager.lookup('orderStore'),				
-				order = button.getParent().getRecord(),
-				prevStatus = order.get('status');
-
-		if(order.get('status') == Karazy.constants.Order.CANCELED) {
-			console.log('order already canceled')
-			//you can cancel an order only once
-			return;
-		};
-
-		//update order status
-		order.set('status', Karazy.constants.Order.CANCELED);
-
-		//same approach as in eatSense App. Magic lies in getRawJsonData()
-		//still kind of a workaround
-		Ext.Ajax.request({				
-    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
-    	    method: 'PUT',    	    
-    	    jsonData: order.getRawJsonData(),
-    	    scope: this,
-    	    success: function(response) {
-    	    	console.log('order confirmed');
-    	    	me.updateCustomerTotal(orderStore.getData().items);
-    	    },
-    	    failure: function(response) {
-    	    	order.set('status', prevStatus);
-    	    		me.getApplication().handleServerError({
-						'error': {
-							'status': response.status,
-							'statusText': response.statusText
-						}, 
-						'forceLogout': {403: true}, 
-				});
-	   	    }
-		});
-	},
-	/**
-	*	Cancels all orders and removes customer from spot.
-	*/
-	cancelAll: function(button, event) {
-		var 	me = this,
-				loginCtr = this.getApplication().getController('Login'),
-				orders = Ext.StoreManager.lookup('orderStore'),
-				checkins = Ext.StoreManager.lookup('checkInStore'),
-				customerList = this.getSpotDetailCustomerList(),
-				prevStatus,
-				customerIndex;
-
-		if(!this.getActiveCustomer()) {
-			return;
-		}
-
-		Ext.Msg.show({
-			title: Karazy.i18n.translate('hint'),
-			message: Karazy.i18n.translate('cancelAllOrders'),
-			buttons: [{
-				text: 'Ja',
-				itemId: 'yes',
-				ui: 'action'
-			}, {
-				text: 'Nein',
-				itemId: 'no',
-				ui: 'action'
-			}],
-			scope: this,
-			fn: function(btnId, value, opt) {
-				if(btnId=='yes') {
-					customerIndex = checkins.indexOf(me.getActiveCustomer());
-
-					if(customerIndex < 0) {
-						return;
-					}
-
-					me.getActiveCustomer().erase({
-						callback: function(records, operation) {
-							if(!operation.success) {
-								me.getApplication().handleServerError({
-									'error': operation.error,
-									'forceLogout': {403: true}
-								});
-							} else {
-								//although a message will be received we update the view directly
-								checkins.remove(me.getActiveCustomer());
-								if(checkins.getCount() > 0) {
-									if(checkins.getAt(customerIndex)) {
-										customerList.select(customerIndex);	
-									} else {
-										customerList.select(customerIndex-1);
-									}								
-								} else {
-									orders.removeAll();
-									me.setActiveCustomer(null);
-									me.updateCustomerStatusPanel();
-									me.updateCustomerTotal();
-									me.updateCustomerPaymentMethod();
-									me.getSpotDetail().fireEvent('eatSense.customer-update', false);
-								}
-							}					
-						}
-					});
-				}
-			}
-		});		
-
-	},
-	/**
-	*	Confirms all open orders for active customer.
-	*/
-	confirmAll: function(button, event) {
-		var me = this,
-			orderStore = Ext.StoreManager.lookup('orderStore'),
-			loginCtr = this.getApplication().getController('Login'),
-			unprocessedOrders;
-
-		if(!this.getActiveCustomer()) {
-			console.log('confirm all not possible: no active customer.');
-			return;
-		}
-
-				//check if all orders are processed
-		unprocessedOrders = orderStore.queryBy(function(record, id) {
-			if(record.get('status') == Karazy.constants.Order.PLACED) {
-				return true;
-			}
-		});
-
-		unprocessedOrders.each(function(order) {
-			//update order status
-			order.set('status', Karazy.constants.Order.RECEIVED);
-			order.getData(true);
-
-			//persist changes
-			// order.save({
-			// 	params: {
-			// 		pathId: loginCtr.getAccount().get('businessId'),
-			// 	},
-			// 	success: function(record, operation) {
-			// 		console.log('order confirmed');
-			// 	},
-			// 	failure: function(record, operation) {
-			// 		order.set('status', Karazy.constants.Order.PLACED);
-			// 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
-			// 	}
-			// });
-
-			//same approach as in eatSense App. Magic lies in getRawJsonData()
-			//still kind of a workaround
-			Ext.Ajax.request({				
-	    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
-	    	    method: 'PUT',    	    
-	    	    jsonData: order.getRawJsonData(),
-	    	    scope: this,
-	    	    success: function(response) {
-	    	    	console.log('order %s confirmed', order.getId());
-	    	    },
-	    	    failure: function(response) {
-	    	    	order.set('status', prevStatus);
-	    	    	me.getApplication().handleServerError({
-							'error': {
-								'status': response.status,
-								'statusText': response.statusText
-							}, 
-							'forceLogout': {403: true}, 
-							'hideMessage':false
-							// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
-					});
-		   	    }
-			});
-		});
-
-	},
-	/**
-	*	Shows a list of all available spots.
-	*	A select triggers switchSpot.
-	*/
-	showSpotSelection: function(button, event) {
-		var 	me = this,
-				spotStore = Ext.StoreManager.lookup('spotStore'),
-				spotSelectionDlg = this.getSpotSelectionDialog(),
-				spotList = this.getSwitchSpotList(),
-				filteredSpots;
-
-		//don't show active spot
-		// filteredSpots = spotStore.queryBy(function(record, id) {
-		// 	if(record.getId() != me.getActiveSpot().getId()) {
-		// 		return true;
-		// 	}
-		// });
-		// spotList.setData(filteredSpots);
-
-		// filteredSpots.each(function(spot) {
-		// 	spotList.add(spot);	
-		// });
-		spotSelectionDlg.showBy(button, 'br-tc?');
-	},
-	/**
-	*	Switch user to another table.	
-	*
-	*/
-	switchSpot: function(list, record, options) {
-		var 	me = this,
-				activeCustomer = this.getActiveCustomer(),
-				loginCtr = this.getApplication().getController('Login'),
-				requestCtr = this.getApplication().getController('Request'),
-				//cache customer nickname, to prevent usage name of a new active customer
-				cusomerNickname = activeCustomer.get('nickname'),
-				spotName = record.get('name');
-
-		if(activeCustomer) {
-			//set new spot id
-			activeCustomer.set('spotId', record.get('id'));
-			activeCustomer.save({
-				params: {
-					pathId: loginCtr.getAccount().get('businessId')
-				},
-				success: function(record, operation) {
-					//TODO refactor!
-					requestCtr.loadRequests();
-				},
-				failure: function(record, operation) { 
-					me.getApplication().handleServerError({
-						'error': operation.error,
-						'forceLogout': {403: true}
-					});
-				}
-			});
-
-			//show success message to give user the illusion of success ;)
-			Ext.Msg.show({
-				title : Karazy.i18n.translate('hint'),
-				message : Karazy.i18n.translate('switchSpotMessage', cusomerNickname, spotName),
-				buttons : []
-			});
-			
-			Ext.defer((function() {
-				Ext.Msg.hide();
-			}), Karazy.config.msgboxHideLongTimeout, this);
-
-		}
-
-		list.getParent().hide();
-		//prevent list selection
-		return false;
-	},
-	// </ACTIONS>
-
-	// <MISC VIEW ACTIONS>
-	/**
-	*	Close spot detail.
-	*
-	*/
-	closeSpotDetail: function(button) {
-		this.getSpotDetail().hide();
-	},
-
-	/**
-	*	Called when spotdetail panel gets hidden.
-	*	This is a place to cleanup the panel.
-	*/
-	hideSpotDetail: function(spotdetail) {
-		var		messageCtr = this.getApplication().getController('Message'),
-				requestCtr = this.getApplication().getController('Request'),
-				requestStore = Ext.StoreManager.lookup('requestStore');
-
-		this.getSpotDetailCustomerList().deselectAll();	
-		this.getSpotDetailOrderList().getStore().removeAll();
-		requestStore.removeAll(true);
-		this.updateCustomerStatusPanel();
-		this.updateCustomerTotal();
-		this.setActiveSpot(null);
-		this.setActiveCustomer(null);
-		this.setActiveBill(null);
-		this.getSpotDetail().fireEvent('eatSense.customer-update', false);		
-
-		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
-		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
-		messageCtr.un('eatSense.request', requestCtr.updateSpotDetailOrderIncremental, requestCtr);
-	}
-
-	// </MISC VIEW ACTIONS>
-
-})
 /**
  * @class Ext.data.Types
  * <p>This is s static class containing the system-supplied data types which may be given to a {@link Ext.data.Field Field}.<p/>
@@ -42773,958 +40128,6 @@ Ext.define('Ext.data.association.HasOne', {
             return assoc.getType().toLowerCase() === 'belongsto' && assoc.getAssociatedModel().modelName === ownerName;
         });
     }
-});
-
-/**
- * Utility class used by Ext.field.Slider.
- * @private
- */
-Ext.define('Ext.slider.Slider', {
-    extend: 'Ext.Container',
-    xtype: 'slider',
-
-    requires: [
-        'Ext.slider.Thumb',
-        'Ext.fx.easing.EaseOut'
-    ],
-
-    /**
-    * @event change
-    * Fires when the value changes
-    * @param {Ext.field.Slider} this
-    * @param {Ext.slider.Thumb} thumb The thumb being changed
-    * @param {Number} newValue The new value
-    * @param {Number} oldValue The old value
-    */
-
-    /**
-    * @event dragstart
-    * Fires when the slider thumb starts a drag
-    * @param {Ext.field.Slider} this
-    * @param {Ext.slider.Thumb} thumb The thumb being dragged
-    * @param {Array} value The start value
-    * @param {Ext.EventObject} e
-    */
-
-    /**
-    * @event drag
-    * Fires when the slider thumb starts a drag
-    * @param {Ext.field.Slider} this
-    * @param {Ext.slider.Thumb} thumb The thumb being dragged
-    * @param {Ext.EventObject} e
-    */
-
-    /**
-    * @event dragend
-    * Fires when the slider thumb starts a drag
-    * @param {Ext.field.Slider} this
-    * @param {Ext.slider.Thumb} thumb The thumb being dragged
-    * @param {Array} value The end value
-    * @param {Ext.EventObject} e
-    */
-    config: {
-        baseCls: 'x-slider',
-
-        /**
-         * @cfg {Object} thumbConfig The config object to factory {@link Ext.slider.Thumb} instances
-         * @accessor
-         */
-        thumbConfig: {
-            draggable: {
-                translatable: {
-                    easingX: {
-                        duration: 300,
-                        type: 'ease-out'
-                    }
-                }
-            }
-        },
-
-        /**
-         * @cfg {Number/Number[]} value The value(s) of this slider's thumbs. If you pass
-         * a number, it will assume you have just 1 thumb.
-         * @accessor
-         */
-        value: 0,
-
-        /**
-         * @cfg {Number} minValue The lowest value any thumb on this slider can be set to.
-         * @accessor
-         */
-        minValue: 0,
-
-        /**
-         * @cfg {Number} maxValue The highest value any thumb on this slider can be set to.
-         * @accessor
-         */
-        maxValue: 100,
-
-        /**
-         * @cfg {Number} increment The increment by which to snap each thumb when its value changes. Defaults to 1. Any thumb movement
-         * will be snapped to the nearest value that is a multiple of the increment (e.g. if increment is 10 and the user
-         * tries to move the thumb to 67, it will be snapped to 70 instead)
-         * @accessor
-         */
-        increment: 1,
-
-        /**
-         * @cfg {Boolean} allowThumbsOverlapping Whether or not to allow multiple thumbs to overlap each other.
-         * Setting this to true guarantees the ability to select every possible value in between {@link #minValue}
-         * and {@link #maxValue} that satisfies {@link #increment}
-         * @accessor
-         */
-        allowThumbsOverlapping: false,
-
-        /**
-         * @cfg {Boolean/Object} animation
-         * The animation to use when moving the slider. Possible properties are:
-         *
-         * - duration
-         * - easingX
-         * - easingY
-         *
-         * @accessor
-         */
-        animation: true
-    },
-
-    /**
-     * @cfg {Number/Number[]} values Alias to {@link #value}
-     */
-
-    elementWidth: 0,
-
-    offsetValueRatio: 0,
-
-    activeThumb: null,
-
-    constructor: function(config) {
-        config = config || {};
-
-        if (config.hasOwnProperty('values')) {
-            config.value = config.values;
-        }
-
-        this.callParent([config]);
-    },
-
-    // @private
-    initialize: function() {
-        var element = this.element;
-
-        this.callParent();
-
-        element.on({
-            scope: this,
-            tap: 'onTap'
-        });
-
-        this.on({
-            scope: this,
-            delegate: '> thumb',
-            dragstart: 'onThumbDragStart',
-            drag: 'onThumbDrag',
-            dragend: 'onThumbDragEnd'
-        });
-
-        this.on({
-            painted: 'refresh',
-            resize: 'refresh'
-        });
-    },
-
-    /**
-     * @private
-     */
-    factoryThumb: function() {
-        return Ext.factory(this.getThumbConfig(), Ext.slider.Thumb);
-    },
-
-    /**
-     * Returns the Thumb instances bound to this Slider
-     * @return {Ext.slider.Thumb[]} The thumb instances
-     */
-    getThumbs: function() {
-        return this.innerItems;
-    },
-
-    /**
-     * Returns the Thumb instance bound to this Slider
-     * @param {Number} [index=0] The index of Thumb to return.
-     * @return {Ext.slider.Thumb} The thumb instance
-     */
-    getThumb: function(index) {
-        if (typeof index != 'number') {
-            index = 0;
-        }
-
-        return this.innerItems[index];
-    },
-
-    refreshOffsetValueRatio: function() {
-        var valueRange = this.getMaxValue() - this.getMinValue(),
-            trackWidth = this.elementWidth - this.thumbWidth;
-
-        this.offsetValueRatio = trackWidth / valueRange;
-    },
-
-    refreshElementWidth: function() {
-        this.elementWidth = this.element.dom.offsetWidth;
-        var thumb = this.getThumb(0);
-        if (thumb) {
-            this.thumbWidth = thumb.getElementWidth();
-        }
-    },
-
-    refresh: function() {
-        this.refreshElementWidth();
-        this.refreshValue();
-    },
-
-    setActiveThumb: function(thumb) {
-        var oldActiveThumb = this.activeThumb;
-
-        if (oldActiveThumb && oldActiveThumb !== thumb) {
-            oldActiveThumb.setZIndex(null);
-        }
-
-        this.activeThumb = thumb;
-        thumb.setZIndex(2);
-
-        return this;
-    },
-
-    onThumbDragStart: function(thumb, e) {
-        if (e.absDeltaX <= e.absDeltaY) {
-            return false;
-        }
-        else {
-            e.stopPropagation();
-        }
-
-        if (this.getAllowThumbsOverlapping()) {
-            this.setActiveThumb(thumb);
-        }
-
-        this.dragStartValue = this.getValue()[this.getThumbIndex(thumb)];
-        this.fireEvent('dragstart', this, thumb, this.dragStartValue, e);
-    },
-
-    onThumbDrag: function(thumb, e, offsetX) {
-        var index = this.getThumbIndex(thumb),
-            offsetValueRatio = this.offsetValueRatio,
-            constrainedValue = this.constrainValue(offsetX / offsetValueRatio);
-
-        e.stopPropagation();
-
-        this.setIndexValue(index, constrainedValue);
-
-        this.fireEvent('drag', this, thumb, this.getValue(), e);
-
-        return false;
-    },
-
-    setIndexValue: function(index, value, animation) {
-        var thumb = this.getThumb(index),
-            values = this.getValue(),
-            offsetValueRatio = this.offsetValueRatio,
-            draggable = thumb.getDraggable();
-
-        draggable.setOffset(value * offsetValueRatio, null, animation);
-
-        values[index] = this.constrainValue(draggable.getOffset().x / offsetValueRatio);
-    },
-
-    onThumbDragEnd: function(thumb, e) {
-        this.refreshThumbConstraints(thumb);
-        var index = this.getThumbIndex(thumb),
-            newValue = this.getValue()[index],
-            oldValue = this.dragStartValue;
-
-        this.fireEvent('dragend', this, thumb, this.getValue(), e);
-        if (oldValue !== newValue) {
-            this.fireEvent('change', this, thumb, newValue, oldValue);
-        }
-    },
-
-    getThumbIndex: function(thumb) {
-        return this.getThumbs().indexOf(thumb);
-    },
-
-    refreshThumbConstraints: function(thumb) {
-        var allowThumbsOverlapping = this.getAllowThumbsOverlapping(),
-            offsetX = thumb.getDraggable().getOffset().x,
-            thumbs = this.getThumbs(),
-            index = this.getThumbIndex(thumb),
-            previousThumb = thumbs[index - 1],
-            nextThumb = thumbs[index + 1],
-            thumbWidth = this.thumbWidth;
-
-        if (previousThumb) {
-            previousThumb.getDraggable().addExtraConstraint({
-                max: {
-                    x: offsetX - ((allowThumbsOverlapping) ? 0 : thumbWidth)
-                }
-            });
-        }
-
-        if (nextThumb) {
-            nextThumb.getDraggable().addExtraConstraint({
-                min: {
-                    x: offsetX + ((allowThumbsOverlapping) ? 0 : thumbWidth)
-                }
-            });
-        }
-    },
-
-    // @private
-    onTap: function(e) {
-        if (this.isDisabled()) {
-            return;
-        }
-
-        var targetElement = Ext.get(e.target);
-
-        if (!targetElement || targetElement.hasCls('x-thumb')) {
-            return;
-        }
-
-        var touchPointX = e.touch.point.x,
-            element = this.element,
-            elementX = element.getX(),
-            offset = touchPointX - elementX - (this.thumbWidth / 2),
-            value = this.constrainValue(offset / this.offsetValueRatio),
-            values = this.getValue(),
-            minDistance = Infinity,
-            ln = values.length,
-            i, absDistance, testValue, closestIndex, oldValue, thumb;
-
-        if (ln === 1) {
-            closestIndex = 0;
-        }
-        else {
-            for (i = 0; i < ln; i++) {
-                testValue = values[i];
-                absDistance = Math.abs(testValue - value);
-
-                if (absDistance < minDistance) {
-                    minDistance = absDistance;
-                    closestIndex = i;
-                }
-            }
-        }
-
-        oldValue = values[closestIndex];
-        thumb = this.getThumb(closestIndex);
-
-        this.setIndexValue(closestIndex, value, this.getAnimation());
-        this.refreshThumbConstraints(thumb);
-
-        if (oldValue !== value) {
-            this.fireEvent('change', this, thumb, value, oldValue);
-        }
-    },
-
-    // @private
-    updateThumbs: function(newThumbs) {
-        this.add(newThumbs);
-    },
-
-    applyValue: function(value) {
-        var values = Ext.Array.from(value || 0),
-            filteredValues = [],
-            previousFilteredValue = this.getMinValue(),
-            filteredValue, i, ln;
-
-        for (i = 0,ln = values.length; i < ln; i++) {
-            filteredValue = this.constrainValue(values[i]);
-
-            if (filteredValue < previousFilteredValue) {
-                filteredValue = previousFilteredValue;
-            }
-
-            filteredValues.push(filteredValue);
-
-            previousFilteredValue = filteredValue;
-        }
-
-        return filteredValues;
-    },
-
-    /**
-     * Updates the sliders thumbs with their new value(s)
-     */
-    updateValue: function(newValue, oldValue) {
-        var thumbs = this.getThumbs(),
-            ln = newValue.length,
-            i;
-
-        this.setThumbsCount(ln);
-
-        for (i = 0; i < ln; i++) {
-            thumbs[i].getDraggable().setExtraConstraint(null)
-                                    .setOffset(newValue[i] * this.offsetValueRatio);
-        }
-
-        for (i = 0; i < ln; i++) {
-            this.refreshThumbConstraints(thumbs[i]);
-        }
-    },
-
-    /**
-     * @private
-     */
-    refreshValue: function() {
-        this.refreshOffsetValueRatio();
-
-        this.setValue(this.getValue());
-    },
-
-    /**
-     * @private
-     * Takes a desired value of a thumb and returns the nearest snap value. e.g if minValue = 0, maxValue = 100, increment = 10 and we
-     * pass a value of 67 here, the returned value will be 70. The returned number is constrained within {@link #minValue} and {@link #maxValue},
-     * so in the above example 68 would be returned if {@link #maxValue} was set to 68.
-     * @param {Number} value The value to snap
-     * @return {Number} The snapped value
-     */
-    constrainValue: function(value) {
-        var me = this,
-            minValue  = me.getMinValue(),
-            maxValue  = me.getMaxValue(),
-            increment = me.getIncrement(),
-            remainder;
-
-        value = parseFloat(value);
-
-        if (isNaN(value)) {
-            value = minValue;
-        }
-
-        remainder = value % increment;
-        value -= remainder;
-
-        if (Math.abs(remainder) >= (increment / 2)) {
-            value += (remainder > 0) ? increment : -increment;
-        }
-
-        value = Math.max(minValue, value);
-        value = Math.min(maxValue, value);
-
-        return value;
-    },
-
-    setThumbsCount: function(count) {
-        var thumbs = this.getThumbs(),
-            thumbsCount = thumbs.length,
-            i, ln, thumb;
-
-        if (thumbsCount > count) {
-            for (i = 0,ln = thumbsCount - count; i < ln; i++) {
-                thumb = thumbs[thumbs.length - 1];
-                thumb.destroy();
-            }
-        }
-        else if (thumbsCount < count) {
-            for (i = 0,ln = count - thumbsCount; i < ln; i++) {
-                this.add(this.factoryThumb());
-            }
-        }
-
-        return this;
-    },
-
-    /**
-     * Convience method. Calls {@link #setValue}
-     */
-    setValues: function(value) {
-        this.setValue(value);
-    },
-
-    /**
-     * Convience method. Calls {@link #getValue}
-     */
-    getValues: function() {
-        return this.getValue();
-    },
-
-    // Sets the {@link #increment} configuration
-    applyIncrement: function(increment) {
-        if (increment === 0) {
-            increment = 1;
-        }
-
-        return Math.abs(increment);
-    },
-
-    // @private
-    updateAllowThumbsOverlapping: function(newValue, oldValue) {
-        if (typeof oldValue != 'undefined') {
-            this.refreshValue();
-        }
-    },
-
-    // @private
-    updateMinValue: function(newValue, oldValue) {
-        if (typeof oldValue != 'undefined') {
-            this.refreshValue();
-        }
-    },
-
-    // @private
-    updateMaxValue: function(newValue, oldValue) {
-        if (typeof oldValue != 'undefined') {
-            this.refreshValue();
-        }
-    },
-
-    // @private
-    updateIncrement: function(newValue, oldValue) {
-        if (typeof oldValue != 'undefined') {
-            this.refreshValue();
-        }
-    },
-
-    doSetDisabled: function(disabled) {
-        this.callParent(arguments);
-
-        var items = this.getItems().items,
-            ln = items.length,
-            i;
-
-        for (i = 0; i < ln; i++) {
-            items[i].setDisabled(disabled);
-        }
-    }
-
-}, function() {
-    //<deprecated product=touch since=2.0>
-    /**
-     * @cfg {Boolean} animationDuration
-     * Animation duration in ms.
-     * @removed 2.0.0 Use the duration property on the animation config instead.
-     */
-    Ext.deprecateProperty(this, 'animationDuration', null, "Ext.slider.Slider.animationDuration has been removed");
-    //</deprecated>
-});
-
-/**
- * @aside guide forms
- *
- * The slider is a way to allow the user to select a value from a given numerical range. You might use it for choosing
- * a percentage, combine two of them to get min and max values, or use three of them to specify the hex values for a
- * color. Each slider contains a single 'thumb' that can be dragged along the slider's length to change the value.
- * Sliders are equally useful inside {@link Ext.form.Panel forms} and standalone. Here's how to quickly create a
- * slider in form, in this case enabling a user to choose a percentage:
- *
- *     @example
- *     Ext.create('Ext.form.Panel', {
- *         fullscreen: true,
- *         items: [
- *             {
- *                 xtype: 'sliderfield',
- *                 label: 'Percentage',
- *                 value: 50,
- *                 minValue: 0,
- *                 maxValue: 100
- *             }
- *         ]
- *     });
- *
- * In this case we set a starting value of 50%, and defined the min and max values to be 0 and 100 respectively, giving
- * us a percentage slider. Because this is such a common use case, the defaults for {@link #minValue} and
- * {@link #maxValue} are already set to 0 and 100 so in the example above they could be removed.
- *
- * It's often useful to render sliders outside the context of a form panel too. In this example we create a slider that
- * allows a user to choose the waist measurement of a pair of jeans. Let's say the online store we're making this for
- * sells jeans with waist sizes from 24 inches to 60 inches in 2 inch increments - here's how we might achieve that:
- *
- *     @example
- *     Ext.create('Ext.form.Panel', {
- *         fullscreen: true,
- *         items: [
- *             {
- *                 xtype: 'sliderfield',
- *                 label: 'Waist Measurement',
- *                 minValue: 24,
- *                 maxValue: 60,
- *                 increment: 2,
- *                 value: 32
- *             }
- *         ]
- *     });
- *
- * Now that we've got our slider, we can ask it what value it currently has and listen to events that it fires. For
- * example, if we wanted our app to show different images for different sizes, we can listen to the {@link #change}
- * event to be informed whenever the slider is moved:
- *
- *     slider.on('change', function(field, newValue) {
- *         if (newValue[0] > 40) {
- *             imgComponent.setSrc('large.png')
- *         } else {
- *             imgComponent.setSrc('small.png');
- *         }
- *     }, this);
- *
- * Here we listened to the {@link #change} event on the slider and updated the background image of an
- * {@link Ext.Img image component} based on what size the user selected. Of course, you can use any logic inside your
- * event listener.
- */
-Ext.define('Ext.field.Slider', {
-    extend  : 'Ext.field.Field',
-    xtype   : 'sliderfield',
-    requires: ['Ext.slider.Slider'],
-    alternateClassName: 'Ext.form.Slider',
-
-    /**
-     * @event change
-     * Fires when an option selection has changed.
-     * @param {Ext.field.Slider} me
-     * @param {Ext.slider.Thumb} thumb
-     * @param {Number} newValue the new value of this thumb
-     * @param {Number} oldValue the old value of this thumb
-     */
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        cls: Ext.baseCSSPrefix + 'slider-field',
-
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        tabIndex: -1
-    },
-
-    proxyConfig: {
-        /**
-         * @cfg {Number/Number[]} value See {@link Ext.slider.Slider#value}
-         * @accessor
-         */
-        value: 0,
-
-        /**
-         * @cfg {Number} minValue See {@link Ext.slider.Slider#minValue}
-         * @accessor
-         */
-        minValue: 0,
-
-        /**
-         * @cfg {Number} maxValue See {@link Ext.slider.Slider#maxValue}
-         * @accessor
-         */
-        maxValue: 100,
-
-        /**
-         * @cfg {Number} increment See {@link Ext.slider.Slider#increment}
-         * @accessor
-         */
-        increment: 1
-    },
-
-    /**
-     * @cfg {Number/Number[]} values See {@link Ext.slider.Slider#values}
-     */
-
-    constructor: function(config) {
-        config = config || {};
-
-        if (config.hasOwnProperty('values')) {
-            config.value = config.values;
-        }
-
-        this.callParent([config]);
-    },
-
-    // @private
-    initialize: function() {
-        this.callParent();
-
-        this.getComponent().on({
-            scope: this,
-            change: 'onSliderChange'
-        });
-    },
-
-    // @private
-    applyComponent: function(config) {
-        return Ext.factory(config, Ext.slider.Slider);
-    },
-
-    onSliderChange: function(me, thumb, newValue, oldValue) {
-        this.fireEvent('change', this, thumb, newValue, oldValue);
-    },
-
-    /**
-     * Convience method. Calls {@link #setValue}
-     */
-    setValues: function(value) {
-        this.setValue(value);
-    },
-
-    /**
-     * Convience method. Calls {@link #getValue}
-     */
-    getValues: function() {
-        return this.getValue();
-    },
-
-    reset: function() {
-        var config = this.config,
-            initialValue = (this.config.hasOwnProperty('values')) ? config.values : config.value;
-
-        this.setValue(initialValue);
-    },
-
-    doSetDisabled: function(disabled) {
-        this.callParent(arguments);
-
-        this.getComponent().setDisabled(disabled);
-    }
-});
-
-/**
- * @private
- */
-Ext.define('Ext.slider.Toggle', {
-    extend: 'Ext.slider.Slider',
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        baseCls: 'x-toggle',
-
-        /**
-         * @cfg {String} minValueCls CSS class added to the field when toggled to its minValue
-         * @accessor
-         */
-        minValueCls: 'x-toggle-off',
-
-        /**
-         * @cfg {String} maxValueCls CSS class added to the field when toggled to its maxValue
-         * @accessor
-         */
-        maxValueCls: 'x-toggle-on'
-    },
-
-    initialize: function() {
-        this.callParent();
-
-        this.on({
-            change: 'onChange'
-        });
-    },
-
-    applyMinValue: function() {
-        return 0;
-    },
-
-    applyMaxValue: function() {
-        return 1;
-    },
-
-    applyIncrement: function() {
-        return 1;
-    },
-
-    setValue: function(newValue, oldValue) {
-        this.callParent(arguments);
-        this.onChange(this, this.getThumbs()[0], newValue, oldValue);
-    },
-
-    onChange: function(me, thumb, newValue, oldValue) {
-        var isOn = newValue > 0,
-            onCls = me.getMaxValueCls(),
-            offCls = me.getMinValueCls();
-
-        this.element.addCls(isOn ? onCls : offCls);
-        this.element.removeCls(isOn ? offCls : onCls);
-    }
-});
-
-/**
- * @aside guide forms
- *
- * Specialized {@link Ext.field.Slider} with a single thumb which only supports two {@link #value values}.
- *
- * ## Examples
- *
- *     @example miniphone preview
- *     Ext.Viewport.add({
- *         xtype: 'togglefield',
- *         name: 'awesome',
- *         label: 'Are you awesome?',
- *         labelWidth: '40%'
- *     });
- *
- * Having a default value of 'toggled':
- *
- *     @example miniphone preview
- *     Ext.Viewport.add({
- *         xtype: 'togglefield',
- *         name: 'awesome',
- *         value: 1,
- *         label: 'Are you awesome?',
- *         labelWidth: '40%'
- *     });
- *
- * And using the {@link #value} {@link #toggle} method:
- *
- *     @example miniphone preview
- *     Ext.Viewport.add([
- *         {
- *             xtype: 'togglefield',
- *             name: 'awesome',
- *             value: 1,
- *             label: 'Are you awesome?',
- *             labelWidth: '40%'
- *         },
- *         {
- *             xtype: 'toolbar',
- *             docked: 'top',
- *             items: [
- *                 {
- *                     xtype: 'button',
- *                     text: 'Toggle',
- *                     flex: 1,
- *                     handler: function() {
- *                         Ext.ComponentQuery.query('togglefield')[0].toggle();
- *                     }
- *                 }
- *             ]
- *         }
- *     ]);
- */
-Ext.define('Ext.field.Toggle', {
-    extend: 'Ext.field.Slider',
-    xtype : 'togglefield',
-    alternateClassName: 'Ext.form.Toggle',
-    requires: ['Ext.slider.Toggle'],
-
-    config: {
-        /**
-         * @cfg
-         * @inheritdoc
-         */
-        cls: 'x-toggle-field'
-    },
-
-    proxyConfig: {
-        /**
-         * @cfg {String} minValueCls See {@link Ext.slider.Toggle#minValueCls}
-         * @accessor
-         */
-        minValueCls: 'x-toggle-off',
-
-        /**
-         * @cfg {String} maxValueCls  See {@link Ext.slider.Toggle#maxValueCls}
-         * @accessor
-         */
-        maxValueCls: 'x-toggle-on'
-    },
-
-    // @private
-    applyComponent: function(config) {
-        return Ext.factory(config, Ext.slider.Toggle);
-    },
-
-    /**
-     * Sets the value of the toggle.
-     * @param {Number} value **1** for toggled, **0** for untoggled.
-     */
-    setValue: function(newValue) {
-        if (newValue === true) {
-            newValue = 1;
-        }
-
-        this.getComponent().setValue(newValue);
-
-        return this;
-    },
-
-    /**
-     * Toggles the value of this toggle field.
-     * @return this
-     */
-    toggle: function() {
-        var value = this.getValue();
-        this.setValue((value == 1) ? 0 : 1);
-
-        return this;
-    },
-
-    getValue: function() {
-        return this.callParent()[0];
-    }
-});
-
-Ext.define('EatSense.view.Login', {
-	extend: 'Ext.Panel',
-	xtype: 'login',
-	requires: ['Ext.field.Toggle', 'Ext.field.Password'],
-	config: {
-		fullscreen: true,
-		centered: true,
-		width: 500,
-		height: 400,
-		layout: {
-			type: 'card',
-			animation: 'fade'
-		},
-		activeItem: 0,
-		// height:200,
-		floatingCls: 'loginbox',
-		// cls: 'loginbox',
-		items: [
-		{
-			xtype: 'panel',
-			padding: '15',
-			layout: {
-				type: 'vbox',
-				align: 'middle',
-				pack: 'center'
-			},
-			items: [
-					{
-					xtype: 'textfield',
-					label: 'Benutzername',
-					labelWidth: '40%',
-					width: '100%',
-					name: 'login',
-					cls: 'loginbox-field'
-				}, {
-					xtype: 'passwordfield',
-					label: 'Passwort',
-					labelWidth: '40%',
-					width: '100%',
-					name: 'password',
-					cls: 'loginbox-field'
-				}, 
-				{
-					xtype : 'togglefield',
-					name : 'savePasswordToggle',
-					value : 0,
-					labelWidth: '40%',
-					width: '100%',
-					label : Karazy.i18n.translate('savePasswordToggle'),
-				},
-				{
-					xtype: 'button',
-					text: 'Login',
-					action: 'login'
-				}
-			]
-		},
-		{
-			xtype: 'choosebusiness'
-		}
-		]
-	}
 });
 
 /**
@@ -47795,131 +44198,31 @@ Ext.define('Ext.data.Model', {
     this.cache = new Ext.util.Collection(this.generateCacheId);
 });
 
-Ext.define('EatSense.model.Product', {
+/**
+ * Contains all information to restore application state, such as which orders
+ * are in the cart. Furthermore used to store user settings.
+ * 
+ */
+Ext.define('EatSense.model.AppState', {
 	extend : 'Ext.data.Model',
 	config : {
-		idProperty : 'id',
 		fields : [ {
-			name : 'id',
-			type : 'string'
-		},
-		{
-			name : 'genuineId',
+			name : 'id'
+		}, {
+			name : 'nickname',
 			type : 'string'
 		}, {
-			name : 'name',
+			name : 'checkInId',
 			type : 'string'
-		}, {
-			name : 'shortDesc',
-			type : 'string'
-		}, {
-			name : 'longDesc',
-			type : 'string'
-		}, {
-			name : 'price',
-			type : 'number'
-		}, { //dont change, gets set automatically
-			name: 'price_calculated',
-			persist: false,
-			type: 'number'
-		}],
-		 associations: [{
-	            type: 'hasMany',
-	            model: 'EatSense.model.Choice',
-	            primaryKey: 'id',
-	            name: 'choices',
-	            autoLoad: true,
-	            associationKey: 'choices', // read child data from child_groups
-	            store: {
-	            	sorters: [
-	            	{
-	            		sorterFn: function(record1, record2){
-	            			// console.log('sort choices id1: %s parent1: %s and id2: %s parent2: %s', record1.get('id'), record1.get('parent'), record2.get('id'), record2.get('parent'));
-	            			var parent1 = record1.get('parent'),
-	            				parent2 = record1.get('parent');
-	            			if(parent1) {
-	            				if(parent1 == record2.get('id')) {
-	            					return 1;
-	            				}
-	            			}
-
-	            			if(parent2) {
-	            				if(parent2 == record1.get('id')) {
-	            					return 1;
-	            				}
-	            			}
-
-	            			return 0;
-	            		}
-	            	}]
-	            }
-	        }],
-	},
-	
-	validate: function() {
-		
-	},
-		/**
-	 * Calculates total cost of this product including choices, returns it and
-	 * stores it in priceCalculated.
-	 * @param amount
-	 * 		How often this product is ordered.
-	 * 
-	 */
-	calculate: function(amount) {
-		var _total = this.get('price'), _amount = 1;
-		this.choices().each(function(choice, index) {
-			_total += choice.calculate();
-		});
-		if(amount) {
-			_amount = amount;
-		}
-		// _total = Karazy.util.roundPrice(_total*_amount);
-		_total = _total*_amount;
-		this.set('price_calculated', _total);
-		return _total;
-	},
-	/**
-	*	Returns a deep raw json representation of this product.
-	*
-	*/	
-	getRawJsonData: function() {
-		var rawJson = {};
-		
-		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
-		rawJson.name = this.get('name');
-		rawJson.shortDesc = this.get('shortDesc');
-		rawJson.longDesc = this.get('longDesc');
-		rawJson.price = this.get('price');
-		
-		rawJson.choices = new Array(this.choices().data.length);
-		for ( var int = 0; int < this.choices().data.length; int++) {
-			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
-		}		
-		return rawJson;
-	},
-	/**
-	*	Sets the data of this object based on a raw json object.
-	*	
-	*/	
-	setRawJsonData: function(rawData) {
-		if(!rawData) {
-			return false;
-		}
-
-		for ( var int = 0; int < this.choices().data.length; int++) {
-			if(!this.choices().getAt(int).setRawJsonData(rawData.choices[int])) {
-				return false;
-			}
-		}
-
-		this.set('id', rawData.id);
-		this.set('name', rawData.name);
-		this.set('shortDesc', rawData.shortDesc);
-		this.set('longDesc', rawData.longDesc);
-		this.set('price', rawData.price);
-						
-		return true;
+		} ],
+		associations : [ {
+			type : 'hasMany',
+			model : 'EatSense.model.Order',
+			primaryKey : 'id',
+			name : 'cartOrders',
+			autoLoad : true,
+			//associationKey : 'choices' // read child data from child_groups
+		} ]
 	}
 });
 /**
@@ -48156,6 +44459,22 @@ Ext.define('EatSense.model.Option', {
 		return true;		
 	}
 });
+/**
+ * General purpose error object.
+ * - errorKey is used to get the correct translation 
+ * - substitutions contains values for placeholders in translation string
+ */
+Ext.define('EatSense.model.Error', {
+	extend: 'Ext.data.Model',
+	config : {
+		idProperty: 'errorKey',
+		fields: [
+			{name: 'errorKey', type: 'string'},
+			{name: 'substitutions'}
+		]
+	}
+
+});
 Ext.define('EatSense.model.PaymentMethod', {
 	extend : 'Ext.data.Model',
 	config : {
@@ -48170,6 +44489,2611 @@ Ext.define('EatSense.model.PaymentMethod', {
 		}]	
 	}
 });
+/**
+ * Checkin Step 4
+ * Display a list of other users located at this particular spot.
+ */
+Ext.define('EatSense.view.CheckinWithOthers', {
+    extend: 'Ext.Panel',
+    xtype: 'checkinwithothers',
+    fullscreen : true,
+    config: {
+        items : [ {
+			docked : 'top',
+			xtype : 'toolbar',
+			title : Karazy.i18n.translate('checkInTitle'),
+			items: [
+
+			       ]
+		
+		}, {
+			xtype : 'panel',
+			layout : {
+				type : 'vbox',
+				pack : 'center',
+				align : 'center'
+			},
+			defaults : {
+				margin : 5,
+				type: 'fit',
+				
+			},
+			items : [
+			{
+				xtype: 'label',
+				id : 'checkInDlg2Label2',
+				styleHtmlContent: true,  
+				html: Karazy.i18n.translate('checkInStep2Label2')
+			}, 
+			{
+				xtype : 'list',				
+				id : 'checkinDlg2Userlist',
+				flex: 6,
+				type: 'fit',
+				width: '100%',	
+				ui: 'round',
+				itemTpl: '<div><strong>{nickname}</strong></div>',
+				listeners : {
+					select : function(dv, index, target, record, e, eOpts) {					
+						Ext.defer((function() {
+							dv.deselectAll();
+						}), 100, this);					
+					}
+				}
+				
+			}, {
+				xtype : 'button',
+				id : 'checkinDlg2CancelBt',
+				text : Karazy.i18n.translate('checkInStep2OnMyOwnButton'),
+				ui : 'action'
+			}]
+		} ]
+    }
+
+});
+/**
+ * Displays the businesses menu(s).
+ * E. g.
+ * Burgers, Drinks, Steaks, Salads
+ * 
+ */
+Ext.define('EatSense.view.MenuOverview', {
+	extend : 'Ext.Container',
+	xtype : 'menuoverview',
+	config : {
+		items : [ 
+		   {
+			xtype : 'list',
+			type : 'fit',
+			ui: 'round',
+			allowDeselect: true,
+			itemTpl : '{title}',
+			store: 'menuStore',
+			listeners: {
+				select : function(dv, index, target, record, e, eOpts) {					
+					Ext.defer((function() {
+						dv.deselectAll();
+					}), 100, this);					
+				}
+			}
+			
+		} ]
+	}
+});
+
+/**
+ * Displays products belonging to a menu.
+ */
+Ext.define('EatSense.view.ProductOverview', {
+	extend : 'Ext.Container',
+	xtype : 'productoverview',
+	fullscreen : true,
+	config : {
+		items : [ 
+		{
+			xtype : 'list',
+			itemId : 'productlist',
+			ui: 'round',
+			type : 'fit',
+			allowDeselect : true,
+			itemCls: 'productListItem',
+			itemTpl : new Ext.XTemplate(
+				"<h2>{name}</h2>" +
+					"<div class='price'>{[this.formatPrice(values.price)]}</div>" +
+					"<div style='clear: both;'></div>"+
+					"<p>{shortDesc}</p>",
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+				),					
+			listeners : {
+				select : function(dv, index, target, record, e, eOpts) {					
+					Ext.defer((function() {
+						dv.deselectAll();
+					}), 100, this);					
+				}
+			}
+		} ]
+	}
+});
+/**
+ * Displays details and options of an order.
+ * Very similar to productdetail.
+ */
+Ext.define('EatSense.view.OrderDetail', {
+	extend : 'Ext.Panel',
+	xtype : 'orderdetail',	
+	layout : {
+		type : 'vbox',
+		align : 'stretch',
+	},	
+	config : {
+    	scrollable : 'vertical',
+    	modal: true,
+		// hideOnMaskTap: true,
+		top: '5%',
+		left: '3%',
+		right: '3%',
+		bottom: '3%',
+		floatingCls: 'orderdetail-floating',
+		items : [
+		{
+			xtype: 'titlebar',
+			docked: 'top'
+		},
+		{
+			xtype : 'panel',
+			cls: 'productDetailPanel',
+			layout : {
+				type : 'vbox',
+			},
+			items : [ 
+			{
+				xtype : 'label',
+				itemId : 'prodDetailLabel',
+				cls: 'productDetail',
+				tpl: '<p class="desc">{product.data.longDesc}</p>'
+			}, {
+				xtype : 'panel',
+				layout : {
+					type : 'hbox',
+					align : 'stretch',
+					pack: 'center'
+				},
+				items : [ {
+					xtype : 'spinnerfield',
+					increment : 1,
+					value : 1,
+					minValue : '1',
+					maxValue : '10',
+					cycle : true,
+				},
+				{
+					xtype: 'label',
+					cls: 'productPrice',
+					itemId : 'prodPriceLabel',
+					tpl: new Ext.XTemplate(
+					'{[this.formatPrice(values.product.calculate(values.amount))]}',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+					)
+				} 
+				]
+			}]
+		}, 
+		{
+			xtype : 'formpanel',
+			itemId : 'choicesPanel',
+			cls: 'choice-panel',
+			layout: 'vbox',
+			minHeight: '200px',
+			scrollable : false,
+		},
+		{
+			xtype: 'toolbar',
+			docked: 'bottom',
+			layout: {
+   				type: 'hbox',
+   				align: 'middle',
+   				pack: 'center'
+			},
+			items: [
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					// icon: '../app/res/images/into_cart.png',
+					// iconAlign: 'centered',
+					text: Karazy.i18n.translate('change'),
+					action: 'edit'
+				},
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					text: Karazy.i18n.translate('cancel'),
+					action: 'undo'
+				}
+			]
+		}
+		]		
+	}
+});
+/**
+ * 
+ */
+Ext.define('EatSense.view.OptionDetail', {
+	extend : 'Ext.Panel',
+	xtype : 'optiondetail',
+
+	layout : {
+		type : 'vbox',
+		 align : 'middle'
+	},
+	config : {		
+		defaults : {
+			labelWidth : '50%'
+		},
+		items : [ {
+			xtype : 'label',
+			itemId : 'choiceTextLbl',
+			cls: 'choice'
+		}, {
+			xtype : 'panel',
+			layout : {
+				type : 'vbox',
+				align : 'stretch'
+			},
+			itemId : 'optionsPanel',
+			cls: 'option-panel'			
+
+		} ]
+	}
+});
+
+Ext.define('EatSense.view.Menu', {
+	extend : 'Ext.Panel',
+	xtype : 'menutab',
+	config : {
+		layout: 'fit',
+		iconCls : 'compose',
+		title: Karazy.i18n.translate('menuTitle'),
+		iconMask : true,
+		itemId : 'menutab',
+		items : [ {
+			docked : 'top',
+			xtype : 'titlebar',
+			itemId: 'menuTopBar',
+			title : Karazy.i18n.translate('menuTitle'),
+			items : [ {
+				xtype : 'button',
+				itemId : 'menuBackBt',
+				action: 'back',
+				text : Karazy.i18n.translate('back'),
+				ui : 'back',
+				align: 'left'
+			}
+			]
+		},
+		{
+			xtype: 'panel',
+			itemId: 'menuCardPanel',
+			layout: {
+				type: 'card'
+			},
+			activeItem : 0,
+			items: [
+			        {
+			        	xtype: 'menuoverview',
+			        	layout: 'fit'
+			        },
+			        {
+			        	xtype: 'productoverview',
+			        	layout: 'fit'
+			        }
+			]
+			
+		}
+		],
+	},
+	/**
+	 * Change the direction of the slide animation.
+	 * @param direction
+	 * 			left or right
+	 */
+	switchMenuview : function(view, direction){
+		var cardpanel = this.getComponent('menuCardPanel');
+		cardpanel.getLayout().setAnimation({
+			 type: 'slide',
+	         direction: direction
+		});
+		cardpanel.setActiveItem(view);
+	},
+	/**
+	 * Shows or hides the product cart button.
+	 * @param show
+	 * 		<code>true</code> to show, <code>false</code> to hide
+	 */
+	toggleProductCartButton: function(show) {		
+		this.query('#menuTopBar #productCartBt')[0].setHidden(!show);
+	},
+	/**
+	 * Hides the back button in top toolbar.
+	 */
+	hideBackButton: function() {
+		this.query('#menuBackBt')[0].hide();
+	},
+	/**
+	 * Shows the back button in top toolbar.
+	 * @param text
+	 * 		Label to display on button.
+	 */
+	showBackButton: function(text) {
+		this.query('#menuBackBt')[0].setText(text);
+		this.query('#menuBackBt')[0].show();
+	}
+});
+/**
+ * The menu controller handles everything related to the menu.
+ * - Navigation in menu structure
+ * - choosing products and put them into the card
+ * - configuring products e.g. choosing options
+ */
+Ext.define('EatSense.controller.Menu', {
+    extend: 'Ext.app.Controller',    
+    config: {
+		refs: {
+	        main : 'mainview', 
+        	menulist :'menuoverview list',        	
+        	productlist :'#menuCardPanel #productlist',        	
+        	productoverview :'productoverview' ,	     
+        	menuoverview :'menuoverview' ,	       
+        	productdetail :{
+                selector: 'tabpanel panel[name=menu] productdetail',
+                xtype: 'productdetail',
+                autoCreate: true
+            },	        
+        	prodDetailLabel :'productdetail #prodDetailLabel' ,	 
+        	prodPriceLabel :'productdetail #prodPriceLabel' ,    
+        	amountSpinner: 'productdetail spinnerfield',
+        	createOrderBt :'productdetail button[action="cart"]',
+        	closeProductDetailBt: 'productdetail button[action=close]',
+        	menuview: 'menutab',
+        	productcomment: 'productdetail #productComment',
+        	backBt: 'menutab button[action=back]',
+        	topToolbar: 'menutab #menuTopBar',
+        	loungeview: 'lounge',
+        	loungeTabBar: 'lounge tabbar',
+		},
+
+		control: {
+			menulist: {
+             	select: 'showProductlist'
+             },
+             productlist : {
+            	select: 'loadProductDetail' 
+             },
+             createOrderBt : {
+            	 tap: 'createOrder'
+             },
+             closeProductDetailBt: {
+             	tap: 'closeProductDetail'
+             },
+             backBt : {
+            	 tap: 'backToMenu'
+             },
+             amountSpinner : {
+            	 spin: 'amountChanged'
+             },
+             //TODO refactor general loungeview control into another controller?!
+             loungeview : {
+     			activeitemchange : function(container, value, oldValue, opts) {
+    				console.log('tab change for %s', value.getItemId());
+    				if(value.getItemId() === 'carttab') {
+    					status = this.getApplication().getController('Order').refreshCart();
+    				} else if (value.getItemId() === 'myorderstab') {
+    					this.getApplication().getController('Order').refreshMyOrdersList();
+    				}
+
+    				return status;
+    			}
+    		},
+		},
+		/**
+		*	Current selected menu.
+		*/
+		activeMenu: null,
+		/**
+		*	Current selected product.
+		*/
+		activeProduct: null
+    },
+    /**
+     * Shows the products of a menuitem
+     * e. g. Beverages, Drinks, Burgers
+     */
+    showProductlist: function(dataview, record) {
+    	console.log("Menu Controller -> showProductlist");
+    	var pov = this.getProductoverview(),
+    		prodStore = record.productsStore;
+
+    	this.setActiveMenu(record);
+    	this.getProductlist().setStore(prodStore);
+    	this.getMenulist().refresh();
+    	this.switchView(pov, record.get('title'), Karazy.i18n.translate('back'), 'left');
+    },
+    /**
+    *	Load menus and products and show menutab.
+    *
+    */
+    showMenu: function() {
+    	var me = this,
+    	    menu = this.getMenuview(), 
+    		lounge = this.getLoungeview(),
+    		main = this.getMain(),
+    		checkInCtr = this.getApplication().getController('CheckIn'),
+    		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId')),
+    		menuStore = Ext.StoreManager.lookup('menuStore');
+		 
+		if(businessId.toString().length != 0) {
+			menuStore.load({
+				scope   : this,
+				params: {
+					'includeProducts' : true,
+					'pathId': businessId
+				},
+			    callback: function(records, operation, success) {
+			    	if(!success) { 
+                        me.getApplication().handleServerError({
+                        	'error': operation.error, 
+                        	'forceLogut': {403:true}
+                        }); 
+                    }
+			    }
+			 });
+
+            //always show menuoverview on first access
+            //TODO schoener loesen
+            menu.getComponent('menuCardPanel').setActiveItem(0);
+            menu.hideBackButton();
+            main.switchAnim('left');
+            main.setActiveItem(lounge);
+		}
+    },
+    /**
+     * Shows the menu. At this point the store is already filled with data.
+     */
+	backToMenu: function() {
+		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
+	},
+	/**
+	 * Displays detailed information for a product (e.g. Burger)
+	 * @param dataview
+	 * @param record
+	 */
+	loadProductDetail: function(dataview, record) {
+		var me = this,
+			detail = this.getProductdetail(), 
+			main = this.getMain(), 
+			menu = this.getMenuview(), 
+			choicesPanel =  this.getProductdetail().getComponent('choicesPanel'),
+			titlebar = detail.down('titlebar'),
+			activeProduct;
+
+		//save original ids
+		record.set('genuineId', record.get('id'));
+		record.choices().each(function(choice) {
+			choice.set('genuineId', choice.get('id'));
+			choice.options().each(function(opt) {
+				opt.set('genuineId', opt.get('id'));
+			});
+		});
+		this.setActiveProduct(record.copy());
+		activeProduct = this.getActiveProduct()
+
+		choicesPanel.removeAll(false);
+
+		titlebar.setTitle(activeProduct.get('name'));
+
+		 //reset product spinner
+		 this.getAmountSpinner().setValue(1);
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: activeProduct, amount: this.getAmountSpinner().getValue()});
+		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: activeProduct, amount: this.getAmountSpinner().getValue()});
+
+		 //dynamically add choices and dependend choices if present		 
+		 if(typeof activeProduct.choices() !== 'undefined' && activeProduct.choices().getCount() > 0) {
+		 	 //render all main choices
+		 	 activeProduct.choices().queryBy(function(rec) {
+		 	 	if(!rec.get('parent')) {
+		 	 		return true;
+		 	 	}}).each(function(choice) {
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					//recalculate when selection changes
+					choice.on('recalculate', function() {
+						me.recalculate(activeProduct);
+					});
+
+					me.createOptions(choice, optionsDetailPanel);
+					//process choices assigned to a this choice
+					activeProduct.choices().queryBy(function(rec) {
+						if(rec.get('parent') == choice.get('id')) {
+							return true;
+						}
+					}).each(function(memberChoice) {
+						memberChoice.setParentChoice(choice);
+						me.createOptions(memberChoice, optionsDetailPanel, choice);
+						//recalculate when selection changes
+						memberChoice.on('recalculate', function() {
+							me.recalculate(activeProduct);
+						});
+					});
+
+					choicesPanel.add(optionsDetailPanel);
+		 	 });
+		 }
+		 
+		//insert comment field after options have been added so it is positioned correctly
+		choicesPanel.add({
+			xtype: 'textareafield',
+			label: Karazy.i18n.translate('orderComment'),
+			labelAlign: 'top',
+			itemId: 'productComment',
+			maxRows: 4,
+			value: '',
+			cls: 'choice'
+		});
+		 
+		Ext.Viewport.add(detail);
+		detail.getScrollable().getScroller().scrollToTop();
+		detail.show();
+	},
+	/**
+	* @private
+	* Creates Ext.field.Radio and Ext.field.Checkbox option elements and adds them to given panel.
+	* @param choice
+	*	Choice containing options to create.
+	* @param panel
+	*	Panel to add options to
+	* @param parentChoice
+	*	parent to given choice
+	*/
+	createOptions: function(choice, panel, parentChoice) {
+		if(!choice || !panel) {
+			console.log('You have to provide options and panel')
+			return;
+		}
+
+		var me = this,
+			optionType = '',
+			field,
+			isChecked;
+
+		if(choice.get('minOccurence') <= 1 && choice.get('maxOccurence') == 1) {
+			optionType = 'Ext.field.Radio';
+		} 
+		else {//multiple choice
+			optionType = 'Ext.field.Checkbox';					 
+		}
+
+		choice.options().each(function(opt) {
+			 field = Ext.create(optionType, {
+				 			name : choice.get('id'),
+				 			labelWidth: '80%',
+							label : opt.get('name'),
+							checked: opt.get('selected'),
+							cls: 'option',
+							disabled: (parentChoice && !parentChoice.isActive()) ? true : false
+					}, me);							 
+			//TODO this is sooo dirty
+			field.addListener('check',function(cbox, event) {
+			 	console.log('check');
+				if(cbox.isXType('radiofield',true)) {				 	
+					choice.options().each(function(innerOpt) {
+						if(innerOpt != opt) {
+					 		innerOpt.set('selected', false);	
+					 	}
+					});
+					if(choice.get('minOccurence') == 0) {
+				 	 	cbox.setChecked(!opt.get('selected'));
+				 	 	opt.set('selected', !opt.get('selected'));
+				 	} else {
+				 		opt.set('selected', true);
+				 	}
+				 } else {
+				 	opt.set('selected', true);	
+				 }
+				 if(!parentChoice) {
+				 	choice.isActive();
+				 }
+				 choice.fireEvent('recalculate');
+				 // me.recalculate(productOrOrder);
+			 },me);
+
+			 field.addListener('uncheck',function(cbox) {
+			 	console.log('uncheck');
+				 if(cbox.isXType('checkboxfield',true)) {
+					 opt.set('selected', false);
+				 }
+				 if(!parentChoice) {
+				 	choice.isActive();
+				 }
+				 choice.fireEvent('recalculate');
+				 // me.recalculate(productOrOrder);								 
+			 },me);
+			 panel.getComponent('optionsPanel').add(field);
+
+			 if(parentChoice) {
+			 	parentChoice.on('activeChanged', function(isActive) {			 		
+			 		field.setDisabled(!isActive);
+			 		if(!isActive) {
+				 		//TODO leave active?
+				 		field.uncheck();
+				 		opt.set('selected', false);			 		
+			 		}
+			 	});
+			 }				 
+		});
+	},
+	/**
+	*	Hides Product detail.
+	*/
+	closeProductDetail: function() {
+		var detail = this.getProductdetail();		
+		detail.hide();
+	},
+	/**
+	 * Adds the current product to card.
+	 * @param button
+	 */
+	createOrder: function(button) {
+		//get active product and set choice values
+		var me = this,	
+			productForCart = this.getActiveProduct(),
+			order,
+			validationError = "",
+			cartButton = this.getLoungeTabBar().getAt(1),
+			productIsValid = true,
+			appState = this.getApplication().getController('CheckIn').getAppState(),
+			appStateStore = Ext.StoreManager.lookup('appStateStore'),
+			activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			detail = this.getProductdetail(),
+			message;
+		
+		//validate choices 
+		productForCart.choices().each(function(choice) {
+			//only validate dependend choices if parent choice is active!
+			if(!choice.get('parent') || choice.getParentChoice().isActive()) {
+				if(choice.validateChoice() !== true) {
+					//coice is not valid
+					productIsValid = false;
+					validationError += choice.get('text') + '<br/>';
+				}
+			};
+		});
+		
+		if(productIsValid === true) {
+			order = Ext.create('EatSense.model.Order');
+			order.set('amount', this.getAmountSpinner().getValue());
+			order.set('status','CART');
+			productForCart.getData(true);
+			order.setProduct(productForCart);
+			
+			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
+			//if valid create order and attach to checkin
+			activeCheckIn.orders().add(order);
+			
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
+	    	    method: 'POST',    	    
+	    	    jsonData: order.getRawJsonData(),
+	    	    success: function(response, operation) {
+	    	    	order.setId(response.responseText);
+	    	    	order.phantom = false;
+	    	    },
+	    	    failure: function(response, operation) {
+	    	    	me.getApplication().handleServerError({
+                        	'error': operation.error, 
+                        	'forceLogut': {403:true}
+                        }); 
+	    	    }
+	    	});
+			
+			cartButton.setBadgeText(activeCheckIn.orders().data.length);
+			
+			detail.hide();
+			message = Karazy.i18n.translate('productPutIntoCardMsg', this.getActiveProduct().get('name'));
+			this.setActiveProduct(null);
+
+			this.getProductdetail().getComponent('choicesPanel').removeAll(false);
+			
+
+			if (message) {
+				Ext.Msg.show({
+					title : Karazy.i18n.translate('orderPlaced'),
+					'message' : message,
+					buttons : []
+				});
+				//show short alert and then hide
+				Ext.defer((function() {
+					Ext.Msg.hide();
+				}), Karazy.config.msgboxHideTimeout, this);
+			}
+		} else {
+			//show validation error
+			Ext.Msg.alert(Karazy.i18n.translate('orderInvalid'),validationError, Ext.emptyFn);
+		}
+		
+	},
+	/**
+	 * Switches to card view.
+	 */
+	showCart: function(){		
+		this.getApplication().getController('Order').showCart();
+	},
+	/**
+	 * Switches to another view
+	 * @param view
+	 * 		new view
+	 * @param title
+	 * 			Toolbar title
+	 * @param labelBackBt
+	 * 			label of back button. If <code>null</code> back button will be hidden.
+	 * @param direction
+	 * 			Direction for switch animation.
+	 */
+	switchView: function(view, title, labelBackBt, direction) {
+		console.log('Menu Controller -> switchView');
+		var menu = this.getMenuview();
+    		this.getTopToolbar().setTitle(title);
+    	(labelBackBt == null || labelBackBt.length == 0) ? menu.hideBackButton() : menu.showBackButton(labelBackBt);
+    	menu.switchMenuview(view,direction);
+	},
+	/**
+	 * Recalculates the total price for the active product.
+	 */
+	recalculate: function(product) {
+		console.log('Menu Controller -> recalculate');
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount:  this.getAmountSpinner().getValue()});
+	},
+	/**
+	 * Called when the product spinner value changes. 
+	 * Recalculates the price.
+	 * @param spinner
+	 * @param value
+	 * @param direction
+	 */
+	amountChanged: function(spinner, value, direction) {
+		console.log('MenuController > amountChanged (value:'+value+')');
+		this.recalculate(this.getActiveProduct());
+	},
+
+     	
+});
+
+
+/**
+*	Handles save and restore of application settings.
+*
+*/
+Ext.define('EatSense.controller.Settings', {
+    extend: 'Ext.app.Controller',
+    config: {
+    	refs: {
+    		settingsTab: 'lounge settingstab[tabName=settings]',
+    		nicknameField: 'settingstab #nickname'
+    	},
+
+    	control: {
+    		settingsTab : {
+    			activate: 'loadSettings'
+    		},
+    		nicknameField : {
+    			change: 'saveNickname'
+    		}
+    	}
+    },
+    /**
+    *	Loads the settings and sets the corresponding fields.
+    */
+    loadSettings: function(tab, options) {
+    	var 	checkInCtr = this.getApplication().getController('CheckIn'),
+    			appState = checkInCtr.getAppState();
+
+    	this.getNicknameField().setValue(appState.get('nickname'));    	
+    },
+
+    /**
+	 * Saves the nickname in local store.
+	 */
+	saveNickname: function(component, newData, oldValue, eOpts) {
+    	var 	checkInCtr = this.getApplication().getController('CheckIn'),
+		appState = checkInCtr.getAppState();
+
+		appState.set('nickname', newData);
+	},
+});
+/**
+*	Handles customer requests like "Call Waiter".
+*	
+*/
+Ext.define('EatSense.controller.Request',{
+	extend: 'Ext.app.Controller',
+	config: {
+		refs: {
+			callWaiterButton: 'requeststab button[action=waiter]'
+		},
+		control: {
+			callWaiterButton: {
+				tap: 'sendCallWaiterRequest'
+			}
+		}
+	},
+	/**
+	*	Sends a call waiter request.
+	*/
+	sendCallWaiterRequest: function(button, event) {
+		var 	me = this,
+				request = Ext.create('EatSense.model.Request'),
+				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
+
+		request.set('type', Karazy.constants.Request.CALL_WAITER);
+		//workaround to prevent sencha from sending phantom id
+		request.setId('');
+
+		request.save({
+			failure: function(record, operation) {
+				me.getApplication().handleServerError({
+					'error': operation.error
+				});
+			}
+		});
+
+		//show success message to give user the illusion of success
+		Ext.Msg.show({
+			title : Karazy.i18n.translate('hint'),
+			message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
+			buttons : []
+		});
+		
+		Ext.defer((function() {
+			Ext.Msg.hide();
+		}), Karazy.config.msgboxHideLongTimeout, this);
+	}
+});
+/**
+*	This controller handles push messages send from the server
+*	and fires events when they arrive. Any component interested in those events
+* 	can listen.
+* 	It also requests tokens from the server and initiates open channel calls.
+*/
+Ext.define('EatSense.controller.Message', {
+	extend: 'Ext.app.Controller',
+	config: {
+		//id used for channel creation		
+		channelId: null
+	},
+	/**
+	*	Called after receiving a channel message.
+	*	
+	*	@param rawMessages	
+	*		The raw string message(s) which will be parsed as JSON.
+	*		This could be a single object or an array.
+	*/
+	processMessages: function(rawMessages) {
+		var 	me = this,
+				message = Ext.JSON.decode(rawMessages, true);
+
+		if(Ext.isArray(message)) {
+				for(index = 0; index < message.length; index++) {
+				if(message[index]) {
+					this.broadcastMessage(message[index]);
+				}	
+			}
+		}
+		else if(message) {
+			this.broadcastMessage(message);
+		}				
+	},
+	/**
+	*	Fires events to notify listeners about a new message.
+	*	Naming schmeme: eatSense.messageType
+	*   where message type can be something like spot, order ...
+	*
+	*	The fired event submits two additional parameters
+	*	1. action type (e. g. update, new , delete)
+	*	2. content - the data
+	*   
+	*	@param message	
+	*		A message consists of 3 fields
+	*			type	- a type like spot
+	*			action	- an action like update, new ... 
+	*			content - the data
+	*/
+	broadcastMessage: function(message) {
+		var 	me = this,
+				evtPrefix = 'eatSense.',
+				model = message.content;
+
+		if(!message) {
+			console.log('no message send');
+			return;
+		}	
+
+		//fire event based on the message
+		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
+	},
+	/**
+	*	Requests a new token from server and executes the given callback with new token as parameter.
+	*	@param callback
+	*		callback function to invoke on success
+	*/
+	requestNewToken: function(callback) {		
+		if(!this.getChannelId()) {
+			console.log('no channel id is set');
+			return;
+		};
+
+		Ext.Ajax.request({
+		    url: Karazy.config.serviceUrl+'/c/checkins/'+this.getChannelId()+'/tokens',		    
+		    method: 'POST',
+		    jsonData: true,
+		    success: function(response){
+		       	token = response.responseText;
+		       	callback(token);
+		    }, 
+		    failure: function(response, opts) {
+		    	console.log('request token failed ' + response);
+		    	me.getApplication().handleServerError({
+					'error': {
+						'status' : response.status,
+						'statusText': response.statusText
+					}, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': Karazy.i18n.translate('channelTokenError')
+				});
+		    }
+		});
+	},
+	/**
+	* 	Requests a token and
+	*	opens a channel for server side push messages.
+	*	@param id
+	*		Id to open channel for
+	*/
+	openChannel: function(id) {
+		var		me = this;
+
+		this.setChannelId(id);
+
+		this.requestNewToken(function(newToken) {
+			Karazy.channel.createChannel( {
+				token: newToken, 
+				messageHandler: me.processMessages,
+				requestTokenHandler: me.requestNewToken,
+				messageHandlerScope: me,
+				requestTokenHandlerScope: me
+			});
+		}, id);
+	},
+	/**
+	*	Closes active channel and reopens it. 
+	*	Uses the cannelId member for creation.
+	*/
+	reopenChannel: function() {
+		Karazy.channel.closeChannel();
+		this.openChannel(this.getChannelId());
+	}
+});
+/**
+ * @author Ed Spencer
+ * @aside guide proxies
+ *
+ * The Rest proxy is a specialization of the {@link Ext.data.proxy.Ajax AjaxProxy} which simply maps the four actions
+ * (create, read, update and destroy) to RESTful HTTP verbs. For example, let's set up a {@link Ext.data.Model Model}
+ * with an inline Rest proxy
+ *
+ *     Ext.define('User', {
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             fields: ['id', 'name', 'email'],
+ *
+ *             proxy: {
+ *                 type: 'rest',
+ *                 url : '/users'
+ *             }
+ *         }
+ *     });
+ *
+ * Now we can create a new User instance and save it via the Rest proxy. Doing this will cause the Proxy to send a POST
+ * request to '/users':
+ *
+ *     var user = Ext.create('User', {name: 'Ed Spencer', email: 'ed@sencha.com'});
+ *
+ *     user.save(); //POST /users
+ *
+ * Let's expand this a little and provide a callback for the {@link Ext.data.Model#save} call to update the Model once
+ * it has been created. We'll assume the creation went successfully and that the server gave this user an ID of 123:
+ *
+ *     user.save({
+ *         success: function(user) {
+ *             user.set('name', 'Khan Noonien Singh');
+ *
+ *             user.save(); //PUT /users/123
+ *         }
+ *     });
+ *
+ * Now that we're no longer creating a new Model instance, the request method is changed to an HTTP PUT, targeting the
+ * relevant url for that user. Now let's delete this user, which will use the DELETE method:
+ *
+ *         user.destroy(); //DELETE /users/123
+ *
+ * Finally, when we perform a load of a Model or Store, Rest proxy will use the GET method:
+ *
+ *     //1. Load via Store
+ *
+ *     //the Store automatically picks up the Proxy from the User model
+ *     var store = Ext.create('Ext.data.Store', {
+ *         model: 'User'
+ *     });
+ *
+ *     store.load(); //GET /users
+ *
+ *     //2. Load directly from the Model
+ *
+ *     //GET /users/123
+ *     Ext.ModelManager.getModel('User').load(123, {
+ *         success: function(user) {
+ *             console.log(user.getId()); //outputs 123
+ *         }
+ *     });
+ *
+ * # Url generation
+ *
+ * The Rest proxy is able to automatically generate the urls above based on two configuration options - {@link #appendId} and
+ * {@link #format}. If appendId is true (it is by default) then Rest proxy will automatically append the ID of the Model
+ * instance in question to the configured url, resulting in the '/users/123' that we saw above.
+ *
+ * If the request is not for a specific Model instance (e.g. loading a Store), the url is not appended with an id.
+ * The Rest proxy will automatically insert a '/' before the ID if one is not already present.
+ *
+ *     new Ext.data.proxy.Rest({
+ *         url: '/users',
+ *         appendId: true //default
+ *     });
+ *
+ *     // Collection url: /users
+ *     // Instance url  : /users/123
+ *
+ * The Rest proxy can also optionally append a format string to the end of any generated url:
+ *
+ *     new Ext.data.proxy.Rest({
+ *         url: '/users',
+ *         format: 'json'
+ *     });
+ *
+ *     // Collection url: /users.json
+ *     // Instance url  : /users/123.json
+ *
+ * If further customization is needed, simply implement the {@link #buildUrl} method and add your custom generated url
+ * onto the {@link Ext.data.Request Request} object that is passed to buildUrl. See [Rest proxy's implementation][1] for
+ * an example of how to achieve this.
+ *
+ * Note that Rest proxy inherits from {@link Ext.data.proxy.Ajax AjaxProxy}, which already injects all of the sorter,
+ * filter, group and paging options into the generated url. See the {@link Ext.data.proxy.Ajax AjaxProxy docs} for more
+ * details.
+ *
+ * [1]: source/Rest.html#Ext-data-proxy-Rest-method-buildUrl
+ */
+Ext.define('Ext.data.proxy.Rest', {
+    extend: 'Ext.data.proxy.Ajax',
+    alternateClassName: 'Ext.data.RestProxy',
+    alias : 'proxy.rest',
+
+    config: {
+        /**
+         * @cfg {Boolean} appendId
+         * True to automatically append the ID of a Model instance when performing a request based on that single instance.
+         * See Rest proxy intro docs for more details. Defaults to true.
+         */
+        appendId: true,
+
+        /**
+         * @cfg {String} format
+         * Optional data format to send to the server when making any request (e.g. 'json'). See the Rest proxy intro docs
+         * for full details. Defaults to null.
+         */
+        format: null,
+
+        /**
+         * @cfg {Boolean} batchActions
+         * True to batch actions of a particular type when synchronizing the store. Defaults to false.
+         */
+        batchActions: false,
+
+        actionMethods: {
+            create : 'POST',
+            read   : 'GET',
+            update : 'PUT',
+            destroy: 'DELETE'
+        }
+    },
+
+    /**
+     * Specialized version of buildUrl that incorporates the {@link #appendId} and {@link #format} options into the
+     * generated url. Override this to provide further customizations, but remember to call the superclass buildUrl so
+     * that additional parameters like the cache buster string are appended.
+     * @param {Object} request
+     */
+    buildUrl: function(request) {
+        var me        = this,
+            operation = request.getOperation(),
+            records   = operation.getRecords() || [],
+            record    = records[0],
+            model     = me.getModel(),
+            idProperty= model.getIdProperty(),
+            format    = me.getFormat(),
+            url       = me.getUrl(request),
+            params    = request.getParams() || {},
+            id        = (record && !record.phantom) ? record.getId() : params[idProperty];
+
+        if (me.getAppendId() && id) {
+            if (!url.match(/\/$/)) {
+                url += '/';
+            }
+            url += id;
+            delete params[idProperty];
+        }
+
+        if (format) {
+            if (!url.match(/\.$/)) {
+                url += '.';
+            }
+
+            url += format;
+        }
+
+        request.setUrl(url);
+
+        return me.callParent([request]);
+    }
+});
+
+Ext.define('EatSense.override.CustomRestProxy', {
+	override: 'Ext.data.proxy.Rest',
+	  buildUrl: function(request) {		
+	        var  me = this, 
+	        	_serviceUrl = Karazy.config.serviceUrl, 
+	        	url = me.getUrl(request),
+	        	params = request.getParams() || {},
+	        	defaultHeaders = Ext.Ajax.getDefaultHeaders() || {};
+
+	        if(params.pathId) {
+	        	if(url.match(/(.*){pathId}(.*)/)) {
+	        		var replacer = '$1'+params.pathId+'$2';
+	        		url = url.replace(/(.*){pathId}(.*)/, replacer);
+	        		delete params.pathId;
+	        	}	        	
+	        } else if(defaultHeaders.pathId) {
+	        	if(url.match(/(.*){pathId}(.*)/)) {
+	        		var replacer = '$1'+defaultHeaders.pathId+'$2';
+	        		url = url.replace(/(.*){pathId}(.*)/, replacer);
+	        	}	
+	        }
+
+	        if(params.checkInId) {
+	        	if(url.match(/(.*){checkInId}(.*)/)) {
+	        		var replacer = '$1'+params.checkInId+'$2';
+	        		url = url.replace(/(.*){checkInId}(.*)/, replacer);
+	        	}	        	
+	        } else if(defaultHeaders.checkInId) {
+	        	if(url.match(/(.*){checkInId}(.*)/)) {
+	        		var replacer = '$1'+defaultHeaders.checkInId+'$2';
+	        		url = url.replace(/(.*){checkInId}(.*)/, replacer);
+	        	}	
+	        }
+	        	
+	        request.setUrl(_serviceUrl + url);
+
+	        return me.callParent([request]);
+	    },
+
+	    doRequest: function(operation, callback, scope) {
+	    	var writer  = this.getWriter(),
+	           	request = this.buildRequest(operation);
+
+	        request.setConfig({
+	            headers        : this.getHeaders(),
+	            timeout        : this.getTimeout(),
+	            method         : this.getMethod(request),
+	            callback       : this.createRequestCallback(request, operation, callback, scope),
+	            scope          : this
+	        });
+
+	        if (operation.getWithCredentials() || this.getWithCredentials()) {
+	            request.setWithCredentials(true);
+	        }
+
+	        // We now always have the writer prepare the request
+	        request = writer.write(request);
+
+	       
+	        
+	        if(request.getMethod().toUpperCase() === 'DELETE') {
+	        	//prevent Sencha from sending payload to avoid BAD REQUEST on appengine
+	        	 delete request._jsonData;	        	
+	        }
+	        
+	        Ext.Ajax.request(request.getCurrentConfig());
+	        
+	        return request;
+	    }
+});
+/**
+*	Settings section. Show when navigating from dashboard.
+*/
+Ext.define('EatSense.view.Settings', {
+	extend : 'Ext.Panel',
+	xtype : 'settings',
+	config : {
+		layout: {
+			type: 'vbox',
+		},
+		items : [ {
+			xtype : 'titlebar',
+			docked : 'top',
+			title : Karazy.i18n.translate('settingsTitle'),
+			items : [ {
+				text: Karazy.i18n.translate('back'),
+				action: 'back',
+				ui: 'back',
+				align: 'left'
+			} ]
+		}, 
+		{
+			xtype: 'label',
+			html: Karazy.i18n.translate('nicknameDesc')
+		},
+		{
+			xtype : 'textfield',
+			label : Karazy.i18n.translate('nickname'),
+			itemId : 'nicknameSetting'
+		} ]
+	}
+});
+/**
+ * This is a simple way to add an image of any size to your application and have it participate in the layout system
+ * like any other component. This component typically takes between 1 and 3 configurations - a {@link #src}, and
+ * optionally a {@link #height} and a {@link #width}:
+ *
+ *     @example miniphone
+ *     var img = Ext.create('Ext.Img', {
+ *         src: 'http://www.sencha.com/assets/images/sencha-avatar-64x64.png',
+ *         height: 64,
+ *         width: 64
+ *     });
+ *     Ext.Viewport.add(img);
+ *
+ * It's also easy to add an image into a panel or other container using its xtype:
+ *
+ *     @example miniphone
+ *     Ext.create('Ext.Panel', {
+ *         fullscreen: true,
+ *         layout: 'hbox',
+ *         items: [
+ *             {
+ *                 xtype: 'image',
+ *                 src: 'http://www.sencha.com/assets/images/sencha-avatar-64x64.png',
+ *                 flex: 1
+ *             },
+ *             {
+ *                 xtype: 'panel',
+ *                 flex: 2,
+ *                 html: 'Sencha Inc.<br/>1700 Seaport Boulevard Suite 120, Redwood City, CA'
+ *             }
+ *         ]
+ *     });
+ *
+ * Here we created a panel which contains an image (a profile picture in this case) and a text area to allow the user
+ * to enter profile information about themselves. In this case we used an {@link Ext.layout.HBox hbox layout} and
+ * flexed the image to take up one third of the width and the text area to take two thirds of the width. See the
+ * {@link Ext.layout.HBox hbox docs} for more information on flexing items.
+ */
+Ext.define('Ext.Img', {
+    extend: 'Ext.Component',
+    xtype: ['image', 'img'],
+
+    /**
+     * @event tap
+     * Fires whenever the component is tapped
+     * @param {Ext.Img} this The Image instance
+     * @param {Ext.EventObject} e The event object
+     */
+
+    /**
+     * @event load
+     * Fires when the image is loaded
+     * @param {Ext.Img} this The Image instance
+     * @param {Ext.EventObject} e The event object
+     */
+
+    /**
+     * @event error
+     * Fires if an error occured when trying to load the image
+     * @param {Ext.Img} this The Image instance
+     * @param {Ext.EventObject} e The event object
+     */
+
+    config: {
+        /**
+         * @cfg {String} src The source of this image
+         * @accessor
+         */
+        src: null,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: Ext.baseCSSPrefix + 'img',
+
+        mode: 'background'
+    },
+
+    beforeInitialize: function() {
+        var me = this;
+        me.onLoad = Ext.Function.bind(me.onLoad, me);
+        me.onError = Ext.Function.bind(me.onError, me);
+    },
+
+    initialize: function() {
+        var me = this;
+        me.callParent();
+
+        me.relayEvents(me.renderElement, '*');
+
+        me.element.on({
+            tap: 'onTap',
+            scope: me
+        });
+    },
+
+    hide: function() {
+        this.callParent();
+        this.hiddenSrc = this.hiddenSrc || this.getSrc();
+        this.setSrc(null);
+    },
+
+    show: function() {
+        this.callParent();
+        if (this.hiddenSrc) {
+            this.setSrc(this.hiddenSrc);
+            delete this.hiddenSrc;
+        }
+    },
+
+    updateMode: function(mode) {
+        if (mode === 'background') {
+            if (this.imageElement) {
+                this.imageElement.destroy();
+                delete this.imageElement;
+                this.updateSrc(this.getSrc());
+            }
+        }
+        else {
+            this.imageElement = this.element.createChild({ tag: 'img' });
+        }
+    },
+
+    onTap: function(e) {
+        this.fireEvent('tap', this, e);
+    },
+
+    onAfterRender: function() {
+        this.updateSrc(this.getSrc());
+    },
+
+    /**
+     * @private
+     */
+    updateSrc: function(newSrc) {
+        var me = this,
+            dom;
+
+        if (me.getMode() === 'background') {
+            dom = this.imageObject || new Image();
+        }
+        else {
+            dom = me.imageElement.dom;
+        }
+
+        this.imageObject = dom;
+
+        dom.setAttribute('src', Ext.isString(newSrc) ? newSrc : '');
+        dom.addEventListener('load', me.onLoad, false);
+        dom.addEventListener('error', me.onError, false);
+    },
+
+    detachListeners: function() {
+        var dom = this.imageObject;
+
+        if (dom) {
+            dom.removeEventListener('load', this.onLoad, false);
+            dom.removeEventListener('error', this.onError, false);
+        }
+    },
+
+    onLoad : function(e) {
+        this.detachListeners();
+
+        if (this.getMode() === 'background') {
+            this.element.dom.style.backgroundImage = 'url("' + this.imageObject.src + '")';
+        }
+
+        this.fireEvent('load', this, e);
+    },
+
+    onError : function(e) {
+        this.detachListeners();
+        this.fireEvent('error', this, e);
+    },
+
+    doSetWidth: function(width) {
+        var sizingElement = (this.getMode() === 'background') ? this.element : this.imageElement;
+
+        sizingElement.setWidth(width);
+
+        this.callParent(arguments);
+    },
+
+    doSetHeight: function(height) {
+        var sizingElement = (this.getMode() === 'background') ? this.element : this.imageElement;
+
+        sizingElement.setHeight(height);
+
+        this.callParent(arguments);
+    },
+
+    destroy: function() {
+        this.detachListeners();
+
+        Ext.destroy(this.imageObject);
+        delete this.imageObject;
+
+        this.callParent();
+    }
+});
+
+/**
+ * @aside guide forms
+ *
+ * The checkbox field is an enhanced version of the native browser checkbox and is great for enabling your user to
+ * choose one or more items from a set (for example choosing toppings for a pizza order). It works like any other
+ * {@link Ext.field.Field field} and is usually found in the context of a form:
+ *
+ * ## Example
+ *
+ *     @example miniphone preview
+ *     var form = Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'checkboxfield',
+ *                 name : 'tomato',
+ *                 label: 'Tomato',
+ *                 value: 'tomato',
+ *                 checked: true
+ *             },
+ *             {
+ *                 xtype: 'checkboxfield',
+ *                 name : 'salami',
+ *                 label: 'Salami'
+ *             },
+ *             {
+ *                 xtype: 'toolbar',
+ *                 docked: 'bottom',
+ *                 items: [
+ *                     { xtype: 'spacer' },
+ *                     {
+ *                         text: 'getValues',
+ *                         handler: function() {
+ *                             var form = Ext.ComponentQuery.query('formpanel')[0],
+ *                                 values = form.getValues();
+ *
+ *                             Ext.Msg.alert(null,
+ *                                 "Tomato: " + ((values.tomato) ? "yes" : "no")
+ *                                 + "<br />Salami: " + ((values.salami) ? "yes" : "no")
+ *                             );
+ *                         }
+ *                     },
+ *                     { xtype: 'spacer' }
+ *                 ]
+ *             }
+ *         ]
+ *     });
+ *
+ *
+ * The form above contains two check boxes - one for Tomato, one for Salami. We configured the Tomato checkbox to be
+ * checked immediately on load, and the Salami checkbox to be unchecked. We also specified an optional text
+ * {@link #value} that will be sent when we submit the form. We can get this value using the Form's
+ * {@link Ext.form.Panel#getValues getValues} function, or have it sent as part of the data that is sent when the
+ * form is submitted:
+ *
+ *     form.getValues(); //contains a key called 'tomato' if the Tomato field is still checked
+ *     form.submit(); //will send 'tomato' in the form submission data
+ *
+ */
+Ext.define('Ext.field.Checkbox', {
+    extend: 'Ext.field.Field',
+    alternateClassName: 'Ext.form.Checkbox',
+
+    xtype: 'checkboxfield',
+    qsaLeftRe: /[\[]/g,
+    qsaRightRe: /[\]]/g,
+
+    isCheckbox: true,
+
+    /**
+     * @event check
+     * Fires when the checkbox is checked.
+     * @param {Ext.field.Checkbox} this This checkbox
+     * @param {Ext.EventObject} e This event object
+     */
+
+    /**
+     * @event uncheck
+     * Fires when the checkbox is unchecked.
+     * @param {Ext.field.Checkbox} this This checkbox
+     * @param {Ext.EventObject} e This event object
+     */
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        ui: 'checkbox',
+
+        /**
+         * @cfg {String} value The string value to submit if the item is in a checked state.
+         * @accessor
+         */
+        value: '',
+
+        /**
+         * @cfg {Boolean} checked <tt>true</tt> if the checkbox should render initially checked
+         * @accessor
+         */
+        checked: false,
+
+        /**
+         * @cfg {Number} tabIndex
+         * @hide
+         */
+        tabIndex: -1,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        component: {
+            xtype   : 'input',
+            type    : 'checkbox',
+            useMask : true,
+            cls     : Ext.baseCSSPrefix + 'input-checkbox'
+        }
+    },
+
+    // @private
+    initialize: function() {
+        var me = this;
+
+        me.callParent();
+
+        me.getComponent().on({
+            scope: me,
+            order: 'before',
+            masktap: 'onMaskTap'
+        });
+    },
+
+    // @private
+    doInitValue: function() {
+        var me = this,
+            initialConfig = me.getInitialConfig();
+
+        // you can have a value or checked config, but checked get priority
+        if (initialConfig.hasOwnProperty('value')) {
+            me.originalState = initialConfig.value;
+        }
+
+        if (initialConfig.hasOwnProperty('checked')) {
+            me.originalState = initialConfig.checked;
+        }
+
+        me.callParent(arguments);
+    },
+
+    // @private
+    updateInputType: function(newInputType) {
+        var component = this.getComponent();
+        if (component) {
+            component.setType(newInputType);
+        }
+    },
+
+    // @private
+    updateName: function(newName) {
+        var component = this.getComponent();
+        if (component) {
+            component.setName(newName);
+        }
+    },
+
+    /**
+     * Returns the field checked value
+     * @return {Mixed} The field value
+     */
+    getChecked: function() {
+        // we need to get the latest value from the {@link #input} and then update the value
+        this._checked = this.getComponent().getChecked();
+        return this._checked;
+    },
+
+    getValue: function() {
+        return this.getChecked();
+    },
+
+    /**
+     * Returns the submit value for the checkbox which can be used when submitting forms.
+     * @return {Boolean/String} value The value of {@link #value} or true, if {@link #checked}.
+     */
+    getSubmitValue: function() {
+        return (this.getChecked()) ? this._value || true : false;
+    },
+
+    setChecked: function(newChecked) {
+        this.updateChecked(newChecked);
+        this._checked = newChecked;
+    },
+
+    updateChecked: function(newChecked) {
+        this.getComponent().setChecked(newChecked);
+    },
+
+    // @private
+    onMaskTap: function(component, e) {
+        var me = this,
+            dom = component.input.dom;
+
+        if (me.getDisabled()) {
+            return false;
+        }
+
+        //we must manually update the input dom with the new checked value
+        dom.checked = !dom.checked;
+
+        //continue as normal, like a normal tap
+        // this.onTap(component, e);
+
+        //calling getchecked will sync the new checked value
+        if (me.getChecked()) {
+            me.fireEvent('check', me, e);
+        }
+        else {
+            me.fireEvent('uncheck', me, e);
+        }
+
+        //return false so the mask does not disappear
+        return false;
+    },
+
+    /**
+     * @method
+     * Method called when this {@link Ext.field.Checkbox} has been checked
+     */
+    doChecked: Ext.emptyFn,
+
+    /**
+     * @method
+     * Method called when this {@link Ext.field.Checkbox} has been unchecked
+     */
+    doUnChecked: Ext.emptyFn,
+
+    /**
+     * Returns the checked state of the checkbox.
+     * @return {Boolean} True if checked, else otherwise
+     */
+    isChecked: function() {
+        return this.getChecked();
+    },
+
+    /**
+     * Set the checked state of the checkbox to true
+     * @return {Ext.field.Checkbox} This checkbox
+     */
+    check: function() {
+        return this.setChecked(true);
+    },
+
+    /**
+     * Set the checked state of the checkbox to false
+     * @return {Ext.field.Checkbox} This checkbox
+     */
+    uncheck: function() {
+        return this.setChecked(false);
+    },
+
+    getSameGroupFields: function() {
+        var component = this.up('formpanel') || this.up('fieldset'),
+            name = this.getName(),
+            replaceLeft = this.qsaLeftRe,
+            replaceRight = this.qsaRightRe,
+            components = [],
+            elements, element, i, ln;
+
+
+        if (!component) {
+            return null;
+        }
+
+        // This is to handle ComponentQuery's lack of handling [name=foo[bar]] properly
+        name = name.replace(replaceLeft, '\\[');
+        name = name.replace(replaceRight, '\\]');
+
+        elements = Ext.query('[name=' + name + ']', component.element.dom);
+        ln = elements.length;
+        for (i = 0; i < ln; i++) {
+            element = elements[i];
+            element = Ext.fly(element).up('.x-field-' + element.getAttribute('type'));
+            if (element && element.id) {
+                components.push(Ext.getCmp(element.id));
+            }
+        }
+        return components;
+    },
+
+    /**
+     * Returns an array of values from the checkboxes in the group that are checked,
+     * @return {Array}
+     */
+    getGroupValues: function() {
+        var values = [];
+
+        this.getSameGroupFields().forEach(function(field) {
+            if (field.getChecked()) {
+                values.push(field.getValue());
+            }
+        });
+
+        return values;
+    },
+
+    /**
+     * Set the status of all matched checkboxes in the same group to checked
+     * @param {Array} values An array of values
+     * @return {Ext.field.Checkbox} This checkbox
+     */
+    setGroupValues: function(values) {
+        this.getSameGroupFields().forEach(function(field) {
+            field.setChecked((values.indexOf(field.getValue()) !== -1));
+        });
+
+        return this;
+    },
+
+    /**
+     * Resets the status of all matched checkboxes in the same group to checked
+     * @return {Ext.field.Checkbox} This checkbox
+     */
+    resetGroupValues: function() {
+        this.getSameGroupFields().forEach(function(field) {
+            field.setChecked(field.originalState);
+        });
+
+        return this;
+    },
+
+    reset: function() {
+        this.setChecked(this.originalState);
+        return this;
+    }
+});
+
+/**
+*	A single order item displayed in cart overview.
+*	Item displays the name of the order. As well
+*	as a button to edit and delete (remove) the order.
+*/
+Ext.define('EatSense.view.CartOverviewItem', {
+	extend: 'Ext.dataview.component.DataItem',
+	xtype: 'cartoverviewitem',
+	config: {
+
+		name : {
+			tpl: new Ext.XTemplate(
+				"{Product.name} ({amount}x) {[this.formatPrice(values.Product.price_calculated)]}",
+				{
+					formatPrice: function(price) {
+						return Karazy.util.formatPrice(price);
+					}
+				}
+				),
+			cls: 'name'
+		},
+
+		editButton : {
+			iconCls : 'compose',
+			iconMask : true,
+			action : 'edit',
+			ui: 'action',
+			cls: 'edit'
+		},
+
+		cancelButton : {
+			iconCls : 'trash',
+			iconMask : true,
+			action : 'cancel',
+			ui: 'action',
+			cls: 'cancel'
+		},
+
+		 cls: 'cartoverviewitem',
+		layout: {
+			type: 'hbox',
+			pack: 'end',
+			align: 'center'
+		}
+	},
+
+	applyName: function(config) {
+		return Ext.factory(config, Ext.Label, this.getName());
+	},
+
+	updateName: function(newItem, oldItem) {
+		if(newItem) {
+			this.add(newItem);
+		}
+
+		if(oldItem) {
+			this.remove(oldItem);
+		}
+	},
+
+	applyEditButton: function(config) {
+		return Ext.factory(config, Ext.Button, this.getEditButton());
+	},
+
+	updateEditButton: function(newItem, oldItem) {
+		if(newItem) {
+			this.add(newItem);
+		}
+
+		if(oldItem) {
+			this.remove(oldItem);
+		}
+	},
+
+	applyCancelButton: function(config) {
+		return Ext.factory(config, Ext.Button, this.getCancelButton());
+	},
+
+	updateCancelButton: function(newItem, oldItem) {
+		if(newItem) {
+			this.add(newItem);
+		}
+
+		if(oldItem) {
+			this.remove(oldItem);
+		}
+	},
+
+	updateRecord: function(newRecord) {
+		console.log('CartOverviewItem --> updateRecord');
+		if(!newRecord) {
+			return;
+		};
+
+		var		name = this.getName();
+
+		name.getTpl().overwrite(name.element, newRecord.getData(true));
+
+		this.callParent([newRecord]);	
+	}
+
+
+})
+Ext.define('EatSense.view.MyOrders', {
+	extend : 'Ext.Panel',
+	xtype: 'myorderstab',	
+	config: {
+		layout: {
+			type: 'fit'
+		},
+		iconCls : 'home',
+		title: Karazy.i18n.translate('myOrdersTabBt'),
+		iconMask : true,
+		itemId : 'myorderstab',
+		items: [
+		{
+			docked : 'top',
+			xtype : 'titlebar',
+			itemId: 'myOrdersTopBar',
+			title : Karazy.i18n.translate('myOrdersTitle'),
+			items : [
+			{
+				xtype: 'button',
+				text: Karazy.i18n.translate('payRequestButton'),
+				itemId: 'payRequestBt',
+				ui: 'forward',
+				action: 'pay',
+				align: 'right'
+			},
+			{
+				xtype: 'button',
+				text: Karazy.i18n.translate('leaveButton'),
+				ui: 'forward',
+				action: 'leave',
+				align: 'right'
+			}
+			]
+		},
+		{
+			xtype: 'list',
+			// id: 'myorderlist',
+			store: 'orderStore',
+			ui: 'round',
+			styleHtmlContent: true,
+			allowDeselect: true,
+			onItemDisclosure: this.removeItem,
+			itemCls: 'orderListItem',
+			itemTpl:  new Ext.XTemplate(
+			"<div class='orderListItem {[values.status.toLowerCase()]}'>" +
+				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
+				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+Karazy.i18n.translate('amount')+" {amount}) {[this.formatPrice(values)]}</div>" +
+				"<div style='clear: both;'>" +
+					"<tpl for='Product.choices'>" +
+						"<tpl if='this.checkSelections(values, xindex)'>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
+							"<ul>" +
+								"<tpl for='options'>" +
+									"<tpl if='selected === true'>" +
+										"<li>{name}</li>" +
+									"</tpl>" +
+								"</tpl>" +
+							"</ul>" +
+						"</tpl>" +
+					"</tpl>" +
+					"<tpl if='comment!=\"\"'>" +
+					"<p>Kommentar: {comment}</p>" +
+					"</tpl>" +
+				"</div>" +
+			"</div>"
+				, {
+				//checks if the current choice has selections. If not it will not be shown.
+				//we need to pass the product as the choices object in this context is raw data
+				checkSelections: function(values, xindex) {
+					console.log('Cart Overview -> checkSelections');				
+					var result = false;
+					Ext.each(values.options,
+							function(option) {
+						if(option.selected === true) {
+							result = true;
+						}
+					});
+					
+					return result;
+				},
+				formatPrice: function(values) {
+					return Karazy.util.formatPrice(values.Product.price_calculated);
+				},
+				renderChoices: function(values) {
+
+				}				
+			}),
+			listeners: {
+				select: function(dv, ix, item, e) {
+					Ext.defer((function() {
+						dv.deselect(ix);
+	    			}), 100, this);					
+				}
+			}
+		}, {
+			type: 'panel',
+			docked: 'bottom',
+			itemId: 'myorderstotalpanel',
+			items: [{
+				xtype: 'label',	
+				cls: 'cartTotal',		
+				tpl: new Ext.XTemplate('<h1>Total {[this.formatPrice(values.price)]}</h1>',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+				)
+			},
+			{
+				type: 'panel',
+				docked: 'bottom',
+				itemId: 'myorderscompletepanel',
+				hidden: true,
+				items: [{
+					xtype: 'button',
+					text: Karazy.i18n.translate('leave'),
+					ui: 'confirm',
+					action: 'complete',
+					height: '50px'
+				}
+				]
+			}
+			]			
+		}		
+		]
+	},
+	/**
+	 * Show a loading screen
+	 * @param mask
+	 */
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : Karazy.i18n.translate('loadingMsg'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
+    }
+});
+/*
+*	Settings Tab Displayed in Lounge view.
+*/
+Ext.define('EatSense.view.SettingsTab', {
+	extend : 'Ext.Panel',
+	xtype : 'settingstab',
+	config : {
+		layout : 'vbox',				
+		iconCls : 'settings',
+		title: Karazy.i18n.translate('settingsButton'),
+		iconMask : true,
+		items : [ {
+			xtype : 'titlebar',
+			docked : 'top',
+			title : Karazy.i18n.translate('settingsTitle'),
+		}, 
+		{
+			xtype: 'label',
+			// height: '100px',
+			// styleHtmlContent : true,
+			html: Karazy.i18n.translate('nicknameDesc')
+		},
+		{
+			xtype : 'textfield',
+			label : Karazy.i18n.translate('nickname'),
+			itemId : 'nickname'
+		} ]
+	}
+});
+/*
+*	Settings Tab Displayed in Lounge view.
+*/
+Ext.define('EatSense.view.RequestsTab', {
+	extend : 'Ext.Panel',
+	xtype : 'requeststab',
+	config : {
+		layout : {
+			type: 'vbox',
+			pack: 'center',
+			align: 'middle'
+		},				
+		iconCls : 'requests',
+		title: Karazy.i18n.translate('requestsButton'),
+		iconMask : true,
+		items : [
+			{
+			xtype : 'titlebar',
+			docked : 'top',
+			title : Karazy.i18n.translate('requestsTitle'),
+			},
+			{
+				xtype: 'button',
+				text: 'Bedienung rufen',
+				action: 'waiter',
+				ui: 'action'
+			}
+		]
+	}
+});
+/**
+ * @aside guide forms
+ *
+ * The Number field creates an HTML5 number input and is usually created inside a form. Because it creates an HTML
+ * number input field, most browsers will show a specialized virtual keyboard for entering numbers. The Number field
+ * only accepts numerical input and also provides additional spinner UI that increases or decreases the current value
+ * by a configured {@link #stepValue step value}. Here's how we might use one in a form:
+ *
+ *     @example
+ *     Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'fieldset',
+ *                 title: 'How old are you?',
+ *                 items: [
+ *                     {
+ *                         xtype: 'numberfield',
+ *                         label: 'Age',
+ *                         minValue: 18,
+ *                         maxValue: 150,
+ *                         name: 'age'
+ *                     }
+ *                 ]
+ *             }
+ *         ]
+ *     });
+ *
+ * Or on its own, outside of a form:
+ *
+ *     Ext.create('Ext.field.Number', {
+ *         label: 'Age',
+ *         value: '26'
+ *     });
+ *
+ * ## minValue, maxValue and stepValue
+ *
+ * The {@link #minValue} and {@link #maxValue} configurations are self-explanatory and simply constrain the value
+ * entered to the range specified by the configured min and max values. The other option exposed by this component
+ * is {@link #stepValue}, which enables you to set how much the value changes every time the up and down spinners
+ * are tapped on. For example, to create a salary field that ticks up and down by $1,000 each tap we can do this:
+ *
+ *     @example
+ *     Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'fieldset',
+ *                 title: 'Are you rich yet?',
+ *                 items: [
+ *                     {
+ *                         xtype: 'numberfield',
+ *                         label: 'Salary',
+ *                         value: 30000,
+ *                         minValue: 25000,
+ *                         maxValue: 50000,
+ *                         stepValue: 1000
+ *                     }
+ *                 ]
+ *             }
+ *         ]
+ *     });
+ *
+ * This creates a field that starts with a value of $30,000, steps up and down in $1,000 increments and will not go
+ * beneath $25,000 or above $50,000.
+ *
+ * Because number field inherits from {@link Ext.field.Text textfield} it gains all of the functionality that text
+ * fields provide, including getting and setting the value at runtime, validations and various events that are fired as
+ * the user interacts with the component. Check out the {@link Ext.field.Text} docs to see the additional functionality
+ * available.
+ */
+Ext.define('Ext.field.Number', {
+    extend: 'Ext.field.Text',
+    xtype: 'numberfield',
+    alternateClassName: 'Ext.form.Number',
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        component: {
+            type: 'number'
+        },
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        ui: 'number'
+    },
+
+    proxyConfig: {
+        /**
+         * @cfg {Number} minValue The minimum value that this Number field can accept
+         * @accessor
+         */
+        minValue: null,
+
+        /**
+         * @cfg {Number} maxValue The maximum value that this Number field can accept
+         * @accessor
+         */
+        maxValue: null,
+
+        /**
+         * @cfg {Number} stepValue The amount by which the field is incremented or decremented each time the spinner is tapped.
+         * Defaults to undefined, which means that the field goes up or down by 1 each time the spinner is tapped
+         * @accessor
+         */
+        stepValue: null
+    },
+
+    applyValue: function(value) {
+        var minValue = this.getMinValue(),
+            maxValue = this.getMaxValue();
+
+        if (Ext.isNumber(minValue)) {
+            value = Math.max(value, minValue);
+        }
+
+        if (Ext.isNumber(maxValue)) {
+            value = Math.min(value, maxValue);
+        }
+
+        return parseFloat(value);
+    },
+
+    getValue: function() {
+        var value = this.callParent();
+        return parseFloat(value || 0);
+    },
+
+    doClearIconTap: function(me, e) {
+        me.getComponent().setValue('');
+        me.getValue();
+        me.hideClearIcon();
+    }
+});
+
+/**
+ * A wrapper class which can be applied to any element. Fires a "tap" event while
+ * touching the device. The interval between firings may be specified in the config but
+ * defaults to 20 milliseconds.
+ */
+Ext.define('Ext.util.TapRepeater', {
+    requires: ['Ext.DateExtras'],
+
+    mixins: {
+        observable: 'Ext.mixin.Observable'
+    },
+
+    /**
+     * @event touchstart
+     * Fires when the touch is started.
+     * @param {Ext.util.TapRepeater} this
+     * @param {Ext.event.Event} e
+     */
+
+    /**
+     * @event tap
+     * Fires on a specified interval during the time the element is pressed.
+     * @param {Ext.util.TapRepeater} this
+     * @param {Ext.event.Event} e
+     */
+
+    /**
+     * @event touchend
+     * Fires when the touch is ended.
+     * @param {Ext.util.TapRepeater} this
+     * @param {Ext.event.Event} e
+     */
+
+    config: {
+        el: null,
+        accelerate: true,
+        interval: 10,
+        delay: 250,
+        preventDefault: true,
+        stopDefault: false,
+        timer: 0,
+        pressCls: null
+    },
+
+    /**
+     * Creates new TapRepeater.
+     * @param {Mixed} el The element to listen on
+     * @param {Object} config
+     */
+    constructor: function(config) {
+        var me = this;
+        me.initConfig(config);
+    },
+
+    updateEl: function(newEl, oldEl) {
+        var eventCfg = {
+                touchstart: 'onTouchStart',
+                touchend: 'onTouchEnd',
+                tap: 'eventOptions',
+                scope: this
+            };
+        if (oldEl) {
+            oldEl.un(eventCfg)
+        }
+        newEl.on(eventCfg);
+    },
+
+    // @private
+    eventOptions: function(e) {
+        if (this.getPreventDefault()) {
+            e.preventDefault();
+        }
+        if (this.getStopDefault()) {
+            e.stopEvent();
+        }
+    },
+
+    // @private
+    destroy: function() {
+        this.clearListeners();
+        Ext.destroy(this.el);
+    },
+
+    // @private
+    onTouchStart: function(e) {
+        var me = this,
+            pressCls = me.getPressCls();
+        clearTimeout(me.getTimer());
+        if (pressCls) {
+            me.getEl().addCls(pressCls);
+        }
+        me.tapStartTime = new Date();
+
+        me.fireEvent('touchstart', me, e);
+        me.fireEvent('tap', me, e);
+
+        // Do not honor delay or interval if acceleration wanted.
+        if (me.getAccelerate()) {
+            me.delay = 400;
+        }
+        me.setTimer(Ext.defer(me.tap, me.getDelay() || me.getInterval(), me, [e]));
+    },
+
+    // @private
+    tap: function(e) {
+        var me = this;
+        me.fireEvent('tap', me, e);
+        me.setTimer(Ext.defer(me.tap, me.getAccelerate() ? me.easeOutExpo(Ext.Date.getElapsed(me.tapStartTime),
+            400,
+            -390,
+            12000) : me.getInterval(), me, [e]));
+    },
+
+    // Easing calculation
+    // @private
+    easeOutExpo: function(t, b, c, d) {
+        return (t == d) ? b + c : c * ( - Math.pow(2, -10 * t / d) + 1) + b;
+    },
+
+    // @private
+    onTouchEnd: function(e) {
+        var me = this;
+        clearTimeout(me.getTimer());
+        me.getEl().removeCls(me.getPressCls());
+        me.fireEvent('touchend', me, e);
+    }
+});
+
+/**
+ * @private
+ */
+Ext.define('Ext.util.Grouper', {
+
+    /* Begin Definitions */
+
+    extend: 'Ext.util.Sorter',
+
+    isGrouper: true,
+    
+    config: {
+        groupFn: null,
+
+        /**
+         * @cfg {String} sortProperty You can define this configuration if you want the groups to be sorted
+         * on something other then the group string returned by the groupFn.
+         * @param item1
+         * @param item2
+         */
+        sortProperty: null,
+
+        /**
+         * @cfg
+         * Grouper has a custom sorterFn that cannot be overriden by the user. If a property has been defined
+         * on this grouper, we use the default sorterFn, else we sort based on the returned group string.
+         * @param item1
+         * @param item2
+         * @private
+         * @hide
+         */
+        sorterFn: function(item1, item2) {
+            var property = this.getSortProperty(),
+                groupFn, group1, group2, modifier;
+
+            groupFn = this.getGroupFn();
+            group1 = groupFn.call(this, item1);
+            group2 = groupFn.call(this, item2);
+
+            if (property) {
+                if (group1 !== group2) {
+                    return this.defaultSortFn.call(this, item1, item2);
+                } else {
+                    return 0;
+                }
+            }
+            return (group1 > group2) ? 1 : ((group1 < group2) ? -1 : 0);
+        }
+    },
+
+    /**
+     * @private
+     * Basic default sorter function that just compares the defined property of each object
+     */
+    defaultSortFn: function(item1, item2) {
+        var me = this,
+            transform = me._transform,
+            root = me._root,
+            value1, value2,
+            property = me._sortProperty;
+
+        if (root !== null) {
+            item1 = item1[root];
+            item2 = item2[root];
+        }
+
+        value1 = item1[property];
+        value2 = item2[property];
+
+        if (transform) {
+            value1 = transform(value1);
+            value2 = transform(value2);
+        }
+
+        return value1 > value2 ? 1 : (value1 < value2 ? -1 : 0);
+    },
+
+    updateProperty: function(property) {
+        this.setGroupFn(this.standardGroupFn);
+    },
+
+    standardGroupFn: function(item) {
+        var root = this.getRoot(),
+            property = this.getProperty(),
+            data = item;
+
+        if (root) {
+            data = item[root];
+        }
+
+        return data[property];
+    },
+
+    getGroupString: function(item) {
+        var group = this.getGroupFn().call(this, item);
+        return typeof group != 'undefined' ? group.toString() : '';
+    }
+});
+/**
+ * Used in the {@link Ext.tab.Bar} component. This shouldn't be used directly, instead use
+ * {@link Ext.tab.Bar} or {@link Ext.tab.Panel}.
+ * @private
+ */
+Ext.define('Ext.tab.Tab', {
+    extend: 'Ext.Button',
+    xtype: 'tab',
+    alternateClassName: 'Ext.Tab',
+
+    // @private
+    isTab: true,
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: Ext.baseCSSPrefix + 'tab',
+
+        /**
+         * @cfg {String} pressedCls
+         * The CSS class to be applied to a Tab when it is pressed. Defaults to 'x-tab-pressed'.
+         * Providing your own CSS for this class enables you to customize the pressed state.
+         * @accessor
+         */
+        pressedCls: Ext.baseCSSPrefix + 'tab-pressed',
+
+        /**
+         * @cfg {String} activeCls
+         * The CSS class to be applied to a Tab when it is active. Defaults to 'x-tab-active'.
+         * Providing your own CSS for this class enables you to customize the active state.
+         * @accessor
+         */
+        activeCls: Ext.baseCSSPrefix + 'tab-active',
+
+        /**
+         * @cfg {Boolean} active
+         * Set this to true to have the tab be active by default.
+         * @accessor
+         */
+        active: false,
+
+        /**
+         * @cfg {String} title
+         * The title of the card that this tab is bound to.
+         * @accessor
+         */
+        title: '&nbsp;'
+    },
+
+    // We need to override this so the iconElement is properly hidden using visibilty
+    // when we render it.
+    template: [
+        {
+            tag: 'span',
+            reference: 'badgeElement',
+            hidden: true
+        },
+        {
+            tag: 'span',
+            className: Ext.baseCSSPrefix + 'button-icon',
+            reference: 'iconElement',
+            style: 'visibility: hidden !important'
+        },
+        {
+            tag: 'span',
+            reference: 'textElement',
+            hidden: true
+        }
+    ],
+
+    /**
+     * @event activate
+     * Fires when a tab is activated
+     * @param {Ext.tab.Tab} this
+     */
+
+    /**
+     * @event deactivate
+     * Fires when a tab is deactivated
+     * @param {Ext.tab.Tab} this
+     */
+
+    updateTitle: function(title) {
+        this.setText(title);
+    },
+
+    hideIconElement: function() {
+        this.iconElement.dom.style.setProperty('visibility', 'hidden', '!important');
+    },
+
+    showIconElement: function() {
+        this.iconElement.dom.style.setProperty('visibility', 'visible', '!important');
+    },
+
+    updateActive: function(active, oldActive) {
+        var activeCls = this.getActiveCls();
+        if (active && !oldActive) {
+            this.element.addCls(activeCls);
+            this.fireEvent('activate', this);
+        } else if (oldActive) {
+            this.element.removeCls(activeCls);
+            this.fireEvent('deactivate', this);
+        }
+    }
+}, function() {
+    this.override({
+        activate: function() {
+            this.setActive(true);
+        },
+
+        deactivate: function() {
+            this.setActive(false);
+        }
+    });
+});
+
 /**
  * @author Ed Spencer
  *
@@ -48189,6 +47113,2691 @@ Ext.define('Ext.data.proxy.Client', {
     }
 });
 
+/**
+ * @private
+ * Utility class used by Ext.slider.Slider - should never need to be used directly.
+ */
+Ext.define('Ext.slider.Thumb', {
+    extend: 'Ext.Component',
+    xtype : 'thumb',
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: Ext.baseCSSPrefix + 'thumb',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        draggable: {
+            direction: 'horizontal'
+        }
+    },
+
+    elementWidth: 0,
+
+    initialize: function() {
+        this.callParent();
+
+        this.getDraggable().onBefore({
+            dragstart: 'onDragStart',
+            drag: 'onDrag',
+            dragend: 'onDragEnd',
+            scope: this
+        });
+
+        this.on('painted', 'onPainted');
+    },
+
+    onDragStart: function() {
+        if (this.isDisabled()) {
+            return false;
+        }
+
+        this.relayEvent(arguments);
+    },
+
+    onDrag: function() {
+        if (this.isDisabled()) {
+            return false;
+        }
+
+        this.relayEvent(arguments);
+    },
+
+    onDragEnd: function() {
+        if (this.isDisabled()) {
+            return false;
+        }
+
+        this.relayEvent(arguments);
+    },
+
+    onPainted: function() {
+        this.elementWidth = this.element.dom.offsetWidth;
+    },
+
+    getElementWidth: function() {
+        return this.elementWidth;
+    }
+});
+
+Ext.define('EatSense.model.CheckIn', {
+	extend : 'Ext.data.Model',
+	requires : [ 'EatSense.model.Error' ],
+	config : {
+		idProperty : 'userId',
+		fields : [ {
+			name : 'status',
+			type : 'string'
+		}, {
+			name : 'businessName',
+			type : 'string'
+		}, {
+			name : 'businessId',
+			type : 'string'
+		}, {
+			name : 'spot',
+			type : 'string'
+		}, {
+			name : 'spotId',
+			type : 'string'
+		}, {
+			name : 'userId',
+			type : 'string'
+		},
+		{
+			name : 'linkedCheckInId',
+			type : 'string'
+		},
+		{
+			name : 'nickname',
+			type : 'string'
+		}, {
+			name : 'deviceId',
+			type : 'string'
+		} ],
+		proxy : {
+			type : 'rest',
+			url : '/c/checkins/',
+			enablePagingParams: false,
+			reader : {
+				type : 'json',
+			}
+		},
+		hasMany : {
+			model : 'EatSense.model.Order',
+			name : 'orders'
+		}
+	}
+
+});
+Ext.define('EatSense.model.User', {
+	extend: 'Ext.data.Model',
+	config : {
+		idProperty: 'userId',
+		fields: [
+		 		{name: 'userId', type: 'string'},
+		 		{name: 'nickname', type: 'string'}
+		 	],
+		 	proxy: {
+		 		type: 'rest',
+		 		url: '/user/',
+		 		enablePagingParams: false,
+		 		reader: {
+		 			type: 'json',
+		 		}
+		 	}
+	}
+});
+Ext.define('EatSense.model.Product', {
+	extend : 'Ext.data.Model',
+	config : {
+		idProperty : 'id',
+		fields : [ {
+			name : 'id',
+			type : 'string'
+		},
+		{
+			name : 'genuineId',
+			type : 'string'
+		}, {
+			name : 'name',
+			type : 'string'
+		}, {
+			name : 'shortDesc',
+			type : 'string'
+		}, {
+			name : 'longDesc',
+			type : 'string'
+		}, {
+			name : 'price',
+			type: 'number'
+		}, { //dont change, gets set automatically
+			name: 'price_calculated',
+			persist: false,
+			type: 'number'
+		}],		
+		 associations: [{
+	            type: 'hasMany',
+	            model: 'EatSense.model.Choice',
+	            primaryKey: 'id',
+	            name: 'choices',
+	            autoLoad: true,
+	            associationKey: 'choices', // read child data from child_groups,
+	            store: {
+	            	sorters: [
+	            	{
+	            		sorterFn: function(record1, record2){
+	            			// console.log('sort choices id1: %s parent1: %s and id2: %s parent2: %s', record1.get('id'), record1.get('parent'), record2.get('id'), record2.get('parent'));
+	            			var parent1 = record1.get('parent'),
+	            				parent2 = record1.get('parent');
+	            			if(parent1) {
+	            				if(parent1 == record2.get('id')) {
+	            					return 1;
+	            				}
+	            			}
+
+	            			if(parent2) {
+	            				if(parent2 == record1.get('id')) {
+	            					return 1;
+	            				}
+	            			}
+
+	            			return 0;
+	            		}
+	            	}]
+	            }
+	    }],
+	    proxy: {
+		   type: 'rest',
+		   url : '/c/businesses/{pathId}/products',
+		   enablePagingParams: false,
+		   reader: {
+			   type: 'json'
+	   		},
+	   		writer: {
+	   			type: 'json',
+	   			writeAllFields: true
+	   		}
+	   }
+	},
+	
+	validate: function() {
+		
+	},
+	/**
+	 * Calculates total cost of this product including choices, returns it and
+	 * stores it in priceCalculated.
+	 * @param amount
+	 * 		How often this product is ordered.
+	 * 
+	 */
+	calculate: function(amount) {
+		var _total = this.get('price'), _amount = 1;
+		this.choices().each(function(choice, index) {
+			_total += choice.calculate();
+		});
+		if(amount) {
+			_amount = amount;
+		}
+		// _total = Karazy.util.roundPrice(_total*_amount);
+		_total = _total*_amount;
+		this.set('price_calculated', _total);
+		return _total;
+	},
+	/**
+	*	Returns a deep raw json representation of this product.
+	*
+	*/	
+	getRawJsonData: function() {
+		var rawJson = {};
+		
+		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
+		rawJson.name = this.get('name');
+		rawJson.shortDesc = this.get('shortDesc');
+		rawJson.longDesc = this.get('longDesc');
+		rawJson.price = this.get('price');
+		
+		rawJson.choices = new Array(this.choices().data.length);
+		for ( var int = 0; int < this.choices().data.length; int++) {
+			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
+		}		
+		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*	
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		for ( var int = 0; int < this.choices().data.length; int++) {
+			if(!this.choices().getAt(int).setRawJsonData(rawData.choices[int])) {
+				return false;
+			}
+		}
+
+		this.set('id', rawData.id);
+		this.set('name', rawData.name);
+		this.set('shortDesc', rawData.shortDesc);
+		this.set('longDesc', rawData.longDesc);
+		this.set('price', rawData.price);
+						
+		return true;
+	}
+});
+Ext.define('EatSense.model.Menu', {
+	extend: 'Ext.data.Model',
+	requires: ['EatSense.model.Product','EatSense.model.Choice','EatSense.model.Option'],
+	config : {
+		idProperty: 'id',
+		fields: [
+		    {name: 'id', type: 'string'},
+			{name: 'title', type: 'string'}
+		],
+		proxy: {
+		   type: 'rest',
+		   url : '/c/businesses/{pathId}/menus',
+		   enablePagingParams: false,
+		   reader: {
+			   type: 'json'
+	   		}
+	 	},
+		hasMany: {model: 'EatSense.model.Product', name: 'products'}
+	}
+});
+Ext.define('EatSense.model.Order', {
+	extend : 'Ext.data.Model',
+	config : {
+		idProperty : 'id',
+		fields : [ {
+			name : 'id',
+			type : 'string'
+		}, {
+			name : 'status',
+			type : 'string'
+		}, {
+			name : 'amount',
+			type : 'number'
+		}, {
+			name : 'comment',
+			type : 'string'
+		}, {
+			name : 'orderTime',
+			type : 'date',
+			dateFormat: 'time'
+		} ],
+		associations : {
+			type : 'hasOne',
+			model : 'EatSense.model.Product',
+		},
+		proxy: {
+			type: 'rest',
+			enablePagingParams: false,
+			url : '/c/businesses/{pathId}/orders',
+			reader: {
+				type: 'json'
+		   	}
+	 	},
+	 	// current state of this order. used for store and restore
+	 	state: null
+	},
+
+	calculate : function() {
+		var _amount = parseFloat(this.get('amount')),
+			price  = this.getProduct().calculate(_amount);
+			
+		return (this.get('status') == Karazy.constants.Order.CANCELED) ? 0 : price;
+	},
+	/**
+	*	Saves the state of this order.
+	*	The state can be restored after changes.
+	*	An existing state will be overriden.
+	*/
+	saveState: function() {
+		if(this.getState()) {
+			console.log('override existing order state');
+		}
+
+		this.setState(this.getRawJsonData());
+	},
+	/**
+	*	If a state exists it will be restored.
+	*/
+	restoreState: function() {
+		if(this.getState()) {
+			this.setRawJsonData(this.getState());
+			this.setState(null);
+		}
+	},
+	/**
+	*	Returns a deep raw json representation of this object.
+	*
+	*/	
+	getRawJsonData: function() {
+		var rawJson = {};
+		
+		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
+		rawJson.status = this.get('status');
+		rawJson.amount = this.get('amount');
+		rawJson.comment = this.get('comment');
+		rawJson.orderTime = this.get('orderTime');
+		
+		rawJson.product = this.getProduct().getRawJsonData();
+		console.log('Order id: ' + this.get('id') +' genuineId: '+this.get('genuineId')+ ' getRawJsonData id: ' + rawJson.id);
+		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*	@param rawData
+	*		data to set
+	*	@param shallow
+	*		don't set nested data
+	*/	
+	setRawJsonData: function(rawData, shallow) {
+		if(!rawData) {
+			return false;
+		}
+
+		if(!shallow && !this.getProduct().setRawJsonData(rawData.product)) {
+			return false;
+		}
+
+		this.set('id', rawData.id);
+		this.set('status', rawData.status);
+		this.set('amount', rawData.amount);
+		this.set('comment', rawData.comment);
+		this.set('orderTime', rawData.orderTime);
+
+		return true;
+		
+			
+	}
+
+});
+Ext.define('EatSense.model.Spot', {
+	extend : 'Ext.data.Model',
+	requires: ['EatSense.model.PaymentMethod'],
+	config : {
+		idProperty : 'barcode',
+		fields : [ {
+			name : 'barcode',
+			type : 'string'
+		}, {
+			name : 'business',
+			type : 'string'
+		}, {
+			name : 'businessId',
+			type : 'string'
+		}, {
+			name : 'name',
+			type : 'string'
+		} ],
+		 associations: [{
+	            type: 'hasMany',
+	            model: 'EatSense.model.PaymentMethod',
+	            primaryKey: 'id',
+	            name: 'payments',
+	            //autoLoad: true,
+	            associationKey: 'payments', // read child data from child_groups
+	            store: {
+	            	sorters: [
+						{
+							property: 'order',
+							direction: 'ASC'
+						}
+	            	]
+	            }
+	        }],
+		proxy : {
+			type : 'rest',
+			url : '/spots/',
+			enablePagingParams: false,
+			reader : {
+				type : 'json',
+			}
+		}
+	}
+});
+/**
+ * A bill.
+ */
+Ext.define('EatSense.model.Bill', {
+	extend : 'Ext.data.Model',
+	config : {
+		idProperty : 'id',
+		fields : [ {
+			name : 'id',
+			type : 'string'
+		}, {
+			name : 'billnumber',
+			type : 'string'
+		}, {
+			name : 'paymentMethod',
+			type : 'string'
+		}, {
+			name : 'total',
+			type : 'number',
+			defaultValue: 0
+		}, {
+			name : 'time',
+			type : 'date',
+			dateFormat : 'time'
+		}, {
+			name: 'cleared',
+			type: 'boolean'
+		}, {
+			name: 'checkInId'
+		}],
+		proxy: {
+	 		type: 'rest',
+	 		enablePagingParams: false,
+	 		url : '/c/businesses/{pathId}/bills',
+	 		reader: {
+	 			type: 'json'
+	 		}
+	 	}
+	}
+});
+/**
+*	A customer request like "Call Waiter"
+*/
+Ext.define('EatSense.model.Request', {
+	extend: 'Ext.data.Model',
+	config: {
+		fields: [
+		{
+			name: 'id',
+			type: 'number'
+		},
+		{
+			name: 'type'
+		},
+		{
+			name: 'checkInId'
+		},
+		{
+			name: 'spotId'
+		}],
+		proxy: {
+			type: 'rest',
+			url: '/c/checkins/{checkInId}/requests',
+			enablePagingParams: false
+		}
+	}
+});
+/**
+ * The dashboard represents the main screen of the application. From here the
+ * user can navigate, access his order history or change his settings.
+ */
+Ext.define('EatSense.view.Dashboard', {
+	extend : 'Ext.Panel',
+	xtype : 'dashboard',
+	requires: ['Ext.Img'],
+	config : {
+		style : 'background-color: white;',
+		layout : {
+			type : 'vbox',
+			pack : 'center',
+			align : 'middle',
+		},
+		items : [ {
+			xtype : 'image',
+			src : 'res/images/eatSenseLogo_small.png',
+			style : 'background-image: url(res/images/eatSenseLogo_small.png); background-repeat:no-repeat; background-position:center center;',
+			height : 100,
+			width : 150
+		}, {
+			xtype : 'panel',
+			layout : 'hbox',
+			items : [ {
+				xtype : 'panel',
+				layout : {
+					type : 'vbox',
+					align : 'middle'
+				},
+				defaults: {
+					xtype : 'dashboardbutton',
+				},
+				items : [ {
+					cls: 'newRestaurantsButton',
+					text: Karazy.i18n.translate('newRestaurantsButton'),
+					badgeText: '6',					
+
+				}, {
+					cls: 'currentDealsButton',	
+					text: Karazy.i18n.translate('currentDealsButton')
+				} ]
+			}, {
+				xtype : 'panel',
+				layout : {
+					type : 'vbox',
+					align : 'middle'
+				},
+				items : [ {
+					xtype : 'label',
+					height: '75px',
+					html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
+				}, {
+					xtype : 'dashboardbutton',
+					action: 'checkin',
+					text : Karazy.i18n.translate('checkInButton'),
+					cls : 'checkInButton',
+					labelCls: 'checkInButton-label'
+				}, 
+				]
+			} ]
+		},
+		{
+			xtype: 'toolbar',
+			docked: 'bottom',
+			layout: {
+				type:'hbox',
+				pack: 'center'
+			},
+			items: [{
+				xtype : 'button',
+				action : 'settings',
+				iconCls : 'settings',
+				iconMask : true,
+			} ]
+		}
+
+		]
+	},
+
+	showLoadScreen : function(mask) {
+		if (mask) {
+			this.setMasked({
+				message : Karazy.i18n.translate('loadingMsg'),
+				xtype : 'loadmask'
+			});
+		} else {
+			this.setMasked(false);
+		}
+	}
+});
+
+Ext.define('EatSense.view.Cart', {
+	extend : 'Ext.Panel',
+	xtype : 'carttab',
+	requires: ['EatSense.view.CartOverviewItem'],
+	config : {
+		iconCls : 'cart',
+		title: Karazy.i18n.translate('cartTabBt'),
+		iconMask : true,
+		itemId : 'carttab',
+		layout: 'fit',
+		items : [ 
+		          {
+			docked : 'top',
+			xtype : 'titlebar',
+			itemId: 'cartTopBar',
+			title : Karazy.i18n.translate('cartviewTitle'),
+			items : [ 
+			{
+				xtype: 'button',
+				action: 'trash',
+			    iconCls: 'trash',
+			    iconMask: true,
+			    align: 'left'
+			},
+			{
+				xtype: 'button',
+				action: 'order',
+			    text: Karazy.i18n.translate('submitButton'),
+			    ui: 'forward',
+			    align: 'right'
+			}]
+		}, 
+		{
+				xtype: 'dataview',
+				itemId: 'orderlist',
+				useComponents: true,
+				cls: 'cartoverview',
+				defaultType: 'cartoverviewitem',
+				grouped: true			
+		}, 
+		{
+			type: 'panel',
+			docked: 'bottom',
+			itemId: 'carttotalpanel',
+			items: [{
+				xtype: 'label',		
+				cls: 'cartTotal',		
+				tpl: new Ext.XTemplate('<h1>Total {[this.formatPrice(values.price)]}</h1>',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+				)
+			}
+			]			
+		} 
+		]
+	},
+	/**
+	 * Show a loading screen
+	 * @param mask
+	 */
+    showLoadScreen : function(mask) {
+    	if(mask) {
+    		this.setMasked({
+    			message : Karazy.i18n.translate('submitOrderProcess'),
+        		xtype: 'loadmask' 
+    		});
+    	} else {
+    		this.setMasked(false);
+    	}
+    }
+
+});
+/**
+ * @aside guide forms
+ *
+ * Wraps an HTML5 number field. Example usage:
+ *
+ *     @example miniphone
+ *     var spinner = Ext.create('Ext.field.Spinner', {
+ *         label: 'Spinner Field',
+ *         minValue: 0,
+ *         maxValue: 100,
+ *         increment: 2,
+ *         cycle: true
+ *     });
+ *     Ext.Viewport.add({ xtype: 'container', items: [spinner] });
+ *
+ */
+Ext.define('Ext.field.Spinner', {
+    extend: 'Ext.field.Number',
+    xtype: 'spinnerfield',
+    alternateClassName: 'Ext.form.Spinner',
+    requires: ['Ext.util.TapRepeater'],
+
+    /**
+     * @event spin
+     * Fires when the value is changed via either spinner buttons
+     * @param {Ext.field.Spinner} this
+     * @param {Number} value
+     * @param {String} direction 'up' or 'down'
+     */
+
+    /**
+     * @event spindown
+     * Fires when the value is changed via the spinner down button
+     * @param {Ext.field.Spinner} this
+     * @param {Number} value
+     */
+
+    /**
+     * @event spinup
+     * Fires when the value is changed via the spinner up button
+     * @param {Ext.field.Spinner} this
+     * @param {Number} value
+     */
+
+    /**
+     * @event change
+     * @hide
+     */
+
+    /**
+     * @event updatedata
+     * @hide
+     */
+
+    /**
+     * @event action
+     * @hide
+     */
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        cls: Ext.baseCSSPrefix + 'spinner',
+
+        /**
+         * @cfg {Number} [minValue=-infinity] The minimum allowed value.
+         * @accessor
+         */
+        minValue: Number.NEGATIVE_INFINITY,
+
+        /**
+         * @cfg {Number} [maxValue=infinity] The maximum allowed value.
+         * @accessor
+         */
+        maxValue: Number.MAX_VALUE,
+
+        /**
+         * @cfg {Number} increment Value that is added or subtracted from the current value when a spinner is used.
+         * @accessor
+         */
+        increment: 0.1,
+
+        /**
+         * @cfg {Boolean} accelerateOnTapHold True if autorepeating should start slowly and accelerate.
+         * @accessor
+         */
+        accelerateOnTapHold: true,
+
+        /**
+         * @cfg {Boolean} cycle When set to true, it will loop the values of a minimum or maximum is reached.
+         * If the maximum value is reached, the value will be set to the minimum.
+         * @accessor
+         */
+        cycle: false,
+
+        /**
+         * @cfg {Boolean} clearIcon
+         * @hide
+         * @accessor
+         */
+        clearIcon: false,
+
+        /**
+         * @cfg {Number} defaultValue The default value for this field when no value has been set. It is also used when
+         *                            the value is set to `NaN`.
+         */
+        defaultValue: 0,
+
+        /**
+         * @cfg {Number} tabIndex
+         * @hide
+         */
+        tabIndex: -1,
+
+        /**
+         * @cfg {Boolean} groupButtons
+         * True if you want to group the buttons to the right of the fields. False if you want the buttons to be at either side of the field.
+         */
+        groupButtons: true,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        component: {
+            disabled: true
+        }
+    },
+
+    constructor: function() {
+        this.callParent(arguments);
+
+        if (!this.getValue()) {
+            this.setValue(this.getDefaultValue());
+        }
+    },
+
+    syncEmptyCls: Ext.emptyFn,
+
+    /**
+     * Updates the {@link #component} configuration
+     */
+    updateComponent: function(newComponent) {
+        this.callParent(arguments);
+
+        var innerElement = this.innerElement,
+            cls = this.getCls();
+
+        if (newComponent) {
+            this.spinDownButton = Ext.Element.create({
+                cls : cls + '-button ' + cls + '-button-down',
+                html: '-'
+            });
+
+            this.spinUpButton = Ext.Element.create({
+                cls : cls + '-button ' + cls + '-button-up',
+                html: '+'
+            });
+
+            this.downRepeater = this.createRepeater(this.spinDownButton, this.onSpinDown);
+            this.upRepeater = this.createRepeater(this.spinUpButton,     this.onSpinUp);
+        }
+    },
+
+    updateGroupButtons: function(newGroupButtons, oldGroupButtons) {
+        var me = this,
+            innerElement = me.innerElement,
+            cls = me.getBaseCls() + '-grouped-buttons';
+
+        me.getComponent();
+
+        if (newGroupButtons != oldGroupButtons) {
+            if (newGroupButtons) {
+                this.addCls(cls);
+                innerElement.appendChild(me.spinDownButton);
+                innerElement.appendChild(me.spinUpButton);
+            } else {
+                this.removeCls(cls);
+                innerElement.insertFirst(me.spinDownButton);
+                innerElement.appendChild(me.spinUpButton);
+            }
+        }
+    },
+
+    applyValue: function(value) {
+        value = parseFloat(value);
+        if (isNaN(value) || value === null) {
+            value = this.getDefaultValue();
+        }
+
+        //round the value to 1 decimal
+        value = Math.round(value * 10) / 10;
+
+        return this.callParent([value]);
+    },
+
+    // @private
+    createRepeater: function(el, fn) {
+        var me = this,
+            repeater = Ext.create('Ext.util.TapRepeater', {
+                el: el,
+                accelerate: me.getAccelerateOnTapHold()
+            });
+
+        repeater.on({
+            tap: fn,
+            touchstart: 'onTouchStart',
+            touchend: 'onTouchEnd',
+            scope: me
+        });
+
+        return repeater;
+    },
+
+    // @private
+    onSpinDown: function() {
+        if (!this.getDisabled()) {
+            this.spin(true);
+        }
+    },
+
+    // @private
+    onSpinUp: function() {
+        if (!this.getDisabled()) {
+            this.spin(false);
+        }
+    },
+
+    // @private
+    onTouchStart: function(repeater) {
+        if (!this.getDisabled()) {
+            repeater.getEl().addCls(Ext.baseCSSPrefix + 'button-pressed');
+        }
+    },
+
+    // @private
+    onTouchEnd: function(repeater) {
+        repeater.getEl().removeCls(Ext.baseCSSPrefix + 'button-pressed');
+    },
+
+    // @private
+    spin: function(down) {
+        var me = this,
+            originalValue = me.getValue(),
+            increment = me.getIncrement(),
+            direction = down ? 'down' : 'up',
+            minValue = me.getMinValue(),
+            maxValue = me.getMaxValue(),
+            value;
+
+        if (down) {
+            value = originalValue - increment;
+        }
+        else {
+            value = originalValue + increment;
+        }
+
+        //if cycle is true, then we need to check fi the value hasn't changed and we cycle the value
+        if (me.getCycle()) {
+            if (originalValue == minValue && value < minValue) {
+                value = maxValue;
+            }
+
+            if (originalValue == maxValue && value > maxValue) {
+                value = minValue;
+            }
+        }
+
+        me.setValue(value);
+        value = me.getValue();
+
+        me.fireEvent('spin', me, value, direction);
+        me.fireEvent('spin' + direction, me, value);
+    },
+
+    /**
+     * @private
+     */
+    doSetDisabled: function(disabled) {
+        Ext.Component.prototype.doSetDisabled.apply(this, arguments);
+    },
+
+    /**
+     * @private
+     */
+    setDisabled: function() {
+        Ext.Component.prototype.setDisabled.apply(this, arguments);
+    },
+
+    reset: function() {
+        this.setValue(this.getDefaultValue());
+    },
+
+    // @private
+    destroy: function() {
+        var me = this;
+        Ext.destroy(me.downRepeater, me.upRepeater, me.spinDownButton, me.spinUpButton);
+        me.callParent(arguments);
+    }
+}, function() {
+    //<deprecated product=touch since=2.0>
+    this.override({
+        constructor: function(config) {
+            if (config) {
+                /**
+                 * @cfg {String} incrementValue
+                 * The increment value of this spinner field.
+                 * @deprecated 2.0.0 Please use {@link #increment} instead
+                 */
+                if (config.hasOwnProperty('incrementValue')) {
+                    config.increment = config.incrementValue;
+                    delete config.incrementValue;
+                }
+            }
+
+            this.callParent([config]);
+        }
+    });
+    //</deprecated>
+});
+
+/**
+ * @aside guide forms
+ *
+ * The radio field is an enhanced version of the native browser radio controls and is a good way of allowing your user
+ * to choose one option out of a selection of several (for example, choosing a favorite color):
+ *
+ *     @example
+ *     var form = Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'radiofield',
+ *                 name : 'color',
+ *                 value: 'red',
+ *                 label: 'Red',
+ *                 checked: true
+ *             },
+ *             {
+ *                 xtype: 'radiofield',
+ *                 name : 'color',
+ *                 value: 'green',
+ *                 label: 'Green'
+ *             },
+ *             {
+ *                 xtype: 'radiofield',
+ *                 name : 'color',
+ *                 value: 'blue',
+ *                 label: 'Blue'
+ *             }
+ *         ]
+ *     });
+ *
+ * Above we created a simple form which allows the user to pick a color from the options red, green and blue. Because
+ * we gave each of the fields above the same {@link #name}, the radio field ensures that only one of them can be
+ * checked at a time. When we come to get the values out of the form again or submit it to the server, only 1 value
+ * will be sent for each group of radio fields with the same name:
+ *
+ *     form.getValues(); //looks like {color: 'red'}
+ *     form.submit(); //sends a single field back to the server (in this case color: red)
+ *
+ */
+Ext.define('Ext.field.Radio', {
+    extend: 'Ext.field.Checkbox',
+    xtype: 'radiofield',
+    alternateClassName: 'Ext.form.Radio',
+
+    isRadio: true,
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        ui: 'radio',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        component: {
+            type: 'radio',
+            cls: Ext.baseCSSPrefix + 'input-radio'
+        }
+    },
+
+    getValue: function() {
+        return this._value;
+    },
+
+    setValue: function(value) {
+        this._value = value;
+        return this;
+    },
+
+    // @private
+    onMaskTap: function(component, e) {
+        var me = this,
+            dom = component.input.dom;
+
+        if (me.getDisabled()) {
+            return false;
+        }
+
+        //calling getchecked will sync the new checked value
+        if (me.getChecked()) {
+            me.fireEvent('check', me, e);
+        }
+        else {
+            dom.checked = true;
+            me.fireEvent('uncheck', me, e);
+        }
+
+        //return false so the mask does not disappear
+        return false;
+    },
+
+    /**
+     * Returns the selected value if this radio is part of a group (other radio fields with the same name, in the same FormPanel),
+     * @return {String}
+     */
+    getGroupValue: function() {
+        var fields = this.getSameGroupFields(),
+            ln = fields.length,
+            i = 0,
+            field;
+
+        for (; i < ln; i++) {
+            field = fields[i];
+            if (field.getChecked()) {
+                return field.getValue();
+            }
+        }
+
+        return null;
+    },
+
+    /**
+     * Set the matched radio field's status (that has the same value as the given string) to checked
+     * @param {String} value The value of the radio field to check
+     * @return {Ext.field.Radio} The field that is checked
+     */
+    setGroupValue: function(value) {
+        var fields = this.getSameGroupFields(),
+            ln = fields.length,
+            i = 0,
+            field;
+
+        for (; i < ln; i++) {
+            field = fields[i];
+            if (field.getValue() === value) {
+                field.setChecked(true);
+                return field;
+            }
+        }
+    }
+});
+
+//Fixes Problem in 2.0 FINAL of Radio Buttons not firing checked
+Ext.define('EatSense.override.RadioOverride', {
+    override: 'Ext.field.Radio',
+    onMaskTap: function(component, e) {
+        var me = this,
+            dom = component.input.dom;
+
+
+        if (me.getDisabled()) {
+            return false;
+        }
+        
+        if(!me.getChecked())
+            dom.checked = !dom.checked;
+
+
+        //calling getchecked will sync the new checked value
+        if (me.getChecked()) {
+            me.fireEvent('check', me, e);
+        }
+        else {
+            me.fireEvent('uncheck', me, e);
+        }
+
+
+        //return false so the mask does not disappear
+        return false;
+    }
+});
+/**
+ * The Form panel presents a set of form fields and provides convenient ways to load and save data. Usually a form
+ * panel just contains the set of fields you want to display, ordered inside the items configuration like this:
+ *
+ *     @example
+ *     var form = Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'textfield',
+ *                 name: 'name',
+ *                 label: 'Name'
+ *             },
+ *             {
+ *                 xtype: 'emailfield',
+ *                 name: 'email',
+ *                 label: 'Email'
+ *             },
+ *             {
+ *                 xtype: 'passwordfield',
+ *                 name: 'password',
+ *                 label: 'Password'
+ *             }
+ *         ]
+ *     });
+ *
+ * Here we just created a simple form panel which could be used as a registration form to sign up to your service. We
+ * added a plain {@link Ext.field.Text text field} for the user's Name, an {@link Ext.field.Email email field} and
+ * finally a {@link Ext.field.Password password field}. In each case we provided a {@link Ext.field.Field#name name}
+ * config on the field so that we can identify it later on when we load and save data on the form.
+ *
+ * <h2>Loading data</h2>
+ *
+ * Using the form we created above, we can load data into it in a few different ways, the easiest is to use
+ * {@link #setValues}:
+ *
+ *     form.setValues({
+ *         name: 'Ed',
+ *         email: 'ed@sencha.com',
+ *         password: 'secret'
+ *     });
+ *
+ * It's also easy to load {@link Ext.data.Model Model} instances into a form - let's say we have a User model and want
+ * to load a particular instance into our form:
+ *
+ *     Ext.define('MyApp.model.User', {
+ *         extend: 'Ext.data.Model',
+ *         config: {
+ *             fields: ['name', 'email', 'password']
+ *         }
+ *     });
+ *
+ *     var ed = Ext.create('MyApp.model.User', {
+ *         name: 'Ed',
+ *         email: 'ed@sencha.com',
+ *         password: 'secret'
+ *     });
+ *
+ *     form.setRecord(ed);
+ *
+ * <h2>Retrieving form data</h2>
+ *
+ * Getting data out of the form panel is simple and is usually achieve vai the {@link #getValues} method:
+ *
+ *     var values = form.getValues();
+ *
+ *     //values now looks like this:
+ *     {
+ *         name: 'Ed',
+ *         email: 'ed@sencha.com',
+ *         password: 'secret'
+ *     }
+ *
+ * It's also possible to listen to the change events on individual fields to get more timely notification of changes
+ * that the user is making. Here we expand on the example above with the User model, updating the model as soon as
+ * any of the fields are changed:
+ *
+ *     var form = Ext.create('Ext.form.Panel', {
+ *         listeners: {
+ *             '> field': {
+ *                 change: function(field, newValue, oldValue) {
+ *                     ed.set(field.getName(), newValue);
+ *                 }
+ *             }
+ *         },
+ *         items: //as before
+ *     });
+ *
+ * The above used a new capability of Touch 2.0, which enables you to specify listeners on child components of any
+ * container. In this case, we attached a listener to the {@link Ext.field.Text#change change} event of each form
+ * field that is a direct child of the form panel. Our listener gets the name of the field that fired the change event,
+ * and updates our {@link Ext.data.Model Model} instance with the new value. For example, changing the email field
+ * in the form will update the Model's email field.
+ *
+ * <h2>Submitting forms</h2>
+ *
+ * There are a few ways to submit form data. In our example above we have a Model instance that we have updated, giving
+ * us the option to use the Model's {@link Ext.data.Model#save save} method to persist the changes back to our server,
+ * without using a traditional form submission. Alternatively, we can send a normal browser form submit using the
+ * {@link #method} method:
+ *
+ *     form.submit({
+ *         url: 'url/to/submit/to',
+ *         method: 'POST',
+ *         success: function() {
+ *             alert('form submitted successfully!');
+ *         }
+ *     });
+ *
+ * In this case we provided the url to submit the form to inside the submit call - alternatively you can just set the
+ * {@link #url} configuration when you create the form. We can specify other parameters (see {@link #method} for a
+ * full list), including callback functions for success and failure, which are called depending on whether or not the
+ * form submission was successful. These functions are usually used to take some action in your app after your data
+ * has been saved to the server side.
+ *
+ * @aside guide forms
+ */
+Ext.define('Ext.form.Panel', {
+    alternateClassName: 'Ext.form.FormPanel',
+    extend  : 'Ext.Panel',
+    xtype   : 'formpanel',
+    requires: ['Ext.XTemplate', 'Ext.field.Checkbox', 'Ext.Ajax'],
+
+    /**
+     * @event submit
+     * @preventable doSubmit
+     * Fires upon successful (Ajax-based) form submission
+     * @param {Ext.form.Panel} this This FormPanel
+     * @param {Object} result The result object as returned by the server
+     * @param {Ext.EventObject} e The event object
+     */
+
+    /**
+     * @event beforesubmit
+     * @preventable doBeforeSubmit
+     * Fires immediately preceding any Form submit action.
+     * Implementations may adjust submitted form values or options prior to execution.
+     * A return value of <tt>false</tt> from this listener will abort the submission
+     * attempt (regardless of standardSubmit configuration)
+     * @param {Ext.form.Panel} this This FormPanel
+     * @param {Object} values A hash collection of the qualified form values about to be submitted
+     * @param {Object} options Submission options hash (only available when standardSubmit is false)
+     */
+
+    /**
+     * @event exception
+     * Fires when either the Ajax HTTP request reports a failure OR the server returns a success:false
+     * response in the result payload.
+     * @param {Ext.form.Panel} this This FormPanel
+     * @param {Object} result Either a failed Ext.data.Connection request object or a failed (logical) server
+     * response payload.
+     */
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: Ext.baseCSSPrefix + 'form',
+
+        /**
+         * @cfg {Boolean} standardSubmit
+         * Wether or not we want to perform a standard form submit.
+         * @accessor
+         */
+        standardSubmit: false,
+
+        /**
+         * @cfg {String} url
+         * The default Url for submit actions
+         * @accessor
+         */
+        url: null,
+
+        /**
+         * @cfg {Object} baseParams
+         * Optional hash of params to be sent (when standardSubmit configuration is false) on every submit.
+         * @accessor
+         */
+        baseParams : null,
+
+        /**
+         * @cfg {Object} submitOnAction
+         * When this is set to true, the form will automatically submit itself whenever the 'action'
+         * event fires on a field in this form. The action event usually fires whenever you press
+         * go or enter inside a textfield.
+         * @accessor
+         */
+        submitOnAction : true,
+
+        /**
+         * @cfg {Ext.data.Model} record The model instance of this form. Can by dynamically set at any time
+         * @accessor
+         */
+        record: null,
+
+        /**
+         * @cfg {String} method
+         * The method which this form will be submitted. `post` or `get`.
+         */
+        method: 'post',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        scrollable: {
+            translationMethod: 'scrollposition'
+        }
+    },
+
+    getElementConfig: function() {
+        var config = this.callParent();
+        config.tag = "form";
+
+        return config;
+    },
+
+    // @private
+    initialize: function() {
+        var me = this;
+        me.callParent();
+
+        me.on({
+            action: 'onFieldAction',
+            scope : me
+        });
+
+        me.element.on({
+            submit: 'onSubmit',
+            scope : me
+        });
+    },
+
+    updateRecord: function(newRecord) {
+        var fields, values, name;
+
+        if (newRecord && (fields = newRecord.fields)) {
+            values = this.getValues();
+            for (name in values) {
+                if (values.hasOwnProperty(name) && fields.containsKey(name)) {
+                    newRecord.set(name, values[name]);
+                }
+            }
+        }
+        return this;
+    },
+
+    /**
+     * Loads matching fields from a model instance into this form
+     * @param {Ext.data.Model} instance The model instance
+     * @return {Ext.form.Panel} This form
+     */
+    setRecord: function(record) {
+        var me = this;
+
+        if (record && record.data) {
+            me.setValues(record.data);
+        }
+
+        me._record = record;
+
+        return this;
+    },
+
+    // @private
+    onSubmit: function(e) {
+        var me = this;
+        if (e && !me.getStandardSubmit()) {
+            e.stopEvent();
+        }
+
+        me.fireAction('submit', [me, me.getValues(true), e], 'doSubmit');
+
+    },
+
+    doSubmit: function(me, values, e) {
+        if (e) {
+            e.stopEvent();
+        }
+    },
+
+    // @private
+    onFieldAction: function(field) {
+        if (this.getSubmitOnAction()) {
+            field.blur();
+            this.submit();
+        }
+    },
+
+    /**
+     * Performs a Ajax-based submission of form values (if standardSubmit is false) or otherwise
+     * executes a standard HTML Form submit action.
+     *
+     * @param {Object} options
+     * The configuration when submiting this form.
+     *
+     * @param {String} options.url
+     * The url for the action (defaults to the form's {@link #url}).
+     *
+     * @param {String} options.method
+     * The form method to use (defaults to the form's {@link #method}, or POST if not defined).
+     *
+     * @param {String/Object} params
+     * The params to pass when submitting this form (defaults to this forms {@link #baseParams}).
+     * Parameters are encoded as standard HTTP parameters using {@link Ext#urlEncode}.
+     *
+     * @param {Object} headers
+     * Request headers to set for the action
+     *
+     * @param {Boolean} autoAbort
+     * `true` to abort any pending Ajax request prior to submission (defaults to false)
+     * **Note:** Has no effect when {@link #standardSubmit} is enabled.
+     *
+     * @param {Boolean} options.submitDisabled
+     * `true` to submit all fields regardless of disabled state (defaults to false).
+     * Note: Has no effect when {@link #standardSubmit} is enabled.
+     *
+     * @param {String/Object} waitMsg
+     * If specified, the value which is passed to the loading {@link #masked mask}. See {@link #masked} for
+     * more information.
+     *
+     * @param {Function} options.success
+     * The callback that will be invoked after a successful response. A response is successful if
+     * a response is received from the server and is a JSON object where the success property is set
+     * to true, {"success": true}
+     *
+     * The function is passed the following parameters:
+     *
+     * @param {Ext.form.Panel} options.success.form
+     * The form that requested the action
+     *
+     * @param {Ext.form.Panel} options.success.result
+     * The result object returned by the server as a result of the submit request.
+     *
+     * @param {Function} options.failure
+     * The callback that will be invoked after a failed transaction attempt.
+     *
+     * The function is passed the following parameters:
+     *
+     * @param {Ext.form.Panel} options.failure.form
+     * The {@link Ext.form.Panel} that requested the submit.
+     *
+     * @param {Ext.form.Panel} options.failure.result
+     * The failed response or result object returned by the server which performed the operation.
+     *
+     * @param {Object} options.scope
+     * The scope in which to call the callback functions (The this reference for the callback functions).=
+     *
+     * @return {Ext.data.Connection} The request object
+     */
+    submit: function(options) {
+        var me = this,
+            form = me.element.dom || {},
+            formValues;
+
+        options = Ext.apply({
+            url : me.getUrl() || form.action,
+            submit: false,
+            method : me.getMethod() || form.method || 'post',
+            autoAbort : false,
+            params : null,
+            waitMsg : null,
+            headers : null,
+            success : null,
+            failure : null
+        }, options || {});
+
+        formValues = me.getValues(me.getStandardSubmit() || !options.submitDisabled);
+
+        return me.fireAction('beforesubmit', [me, formValues, options], 'doBeforeSubmit');
+    },
+
+    doBeforeSubmit: function(me, formValues, options) {
+        var form = me.element.dom || {};
+
+        if (me.getStandardSubmit()) {
+            if (options.url && Ext.isEmpty(form.action)) {
+                form.action = options.url;
+            }
+
+            form.method = (options.method || form.method).toLowerCase();
+            form.submit();
+        }
+        else {
+            if (options.waitMsg) {
+                me.setMasked(options.waitMsg);
+            }
+
+            return Ext.Ajax.request({
+                url: options.url,
+                method: options.method,
+                rawData: Ext.urlEncode(Ext.apply(
+                    Ext.apply({}, me.getBaseParams() || {}),
+                    options.params || {},
+                    formValues
+                )),
+                autoAbort: options.autoAbort,
+                headers: Ext.apply(
+                    {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                    options.headers || {}
+                ),
+                scope: me,
+                callback: function(callbackOptions, success, response) {
+                    var me = this,
+                        responseText = response.responseText,
+                        failureFn;
+
+                    me.setMasked(false);
+
+                    failureFn = function() {
+                        if (Ext.isFunction(options.failure)) {
+                            options.failure.call(options.scope || me, me, response, responseText);
+                        }
+                        me.fireEvent('exception', me, response);
+                    };
+
+                    if (success) {
+                        response = Ext.decode(responseText);
+                        success = !!response.success;
+                        if (success) {
+                            if (Ext.isFunction(options.success)) {
+                                options.success.call(options.scope || me, me, response, responseText);
+                            }
+                            me.fireEvent('submit', me, response);
+                        } else {
+                            failureFn();
+                        }
+                    }
+                    else {
+                        failureFn();
+                    }
+                }
+            });
+        }
+    },
+
+    /**
+     * Sets the values of form fields in bulk. Example usage:
+     *
+     *     myForm.setValues({
+     *         name: 'Ed',
+     *         crazy: true,
+     *         username: 'edspencer'
+     *     });
+     *
+     * If there groups of checkbox fields with the same name, pass their values in an array. For example:
+     *
+     *     myForm.setValues({
+     *         name: 'Jacky',
+     *         crazy: false,
+     *         hobbies: [
+     *             'reading',
+     *             'cooking',
+     *             'gaming'
+     *         ]
+     *     });
+     *
+     * @param {Object} values field name => value mapping object
+     * @return {Ext.form.Panel} This form
+     */
+    setValues: function(values) {
+        var fields = this.getFields(),
+            name, field, value;
+
+        values = values || {};
+
+        for (name in values) {
+            if (values.hasOwnProperty(name)) {
+                field = fields[name];
+                value = values[name];
+                if (field) {
+                    if (Ext.isArray(field)) {
+                        field.forEach(function(f) {
+                            if (f.isRadio) {
+                                f.setGroupValue(value);
+                            } else if (Ext.isArray(values[name])) {
+                                f.setChecked((value.indexOf(f.getValue()) != -1));
+                            } else {
+                                f.setChecked((value == f.getValue()));
+                            }
+                        });
+                    } else {
+                        if (field.setChecked) {
+                            field.setChecked(value);
+                        } else {
+                            field.setValue(value);
+                        }
+                    }
+                }
+            }
+        }
+
+        return this;
+    },
+
+    /**
+     * Returns an object containing the value of each field in the form, keyed to the field's name.
+     * For groups of checkbox fields with the same name, it will be arrays of values. For example:
+     *
+     *     {
+     *         name: "Jacky Nguyen", // From a TextField
+     *         favorites: [
+     *             'pizza',
+     *             'noodle',
+     *             'cake'
+     *         ]
+     *     }
+     *
+     * @param {Boolean} enabled <tt>true</tt> to return only enabled fields
+     * @return {Object} Object mapping field name to its value
+     */
+    getValues: function(enabled) {
+        var fields = this.getFields(),
+            values = {},
+            isArray = Ext.isArray,
+            field, value, addValue, bucket, name, ln, i;
+
+        // Function which you give a field and a name, and it will add it into the values
+        // object accordingly
+        addValue = function(field, name) {
+            if (field.isCheckbox) {
+                value = field.getSubmitValue();
+            } else {
+                value = field.getValue();
+            }
+
+
+            if (!(enabled && field.getDisabled())) {
+                // RadioField is a special case where the value returned is the fields valUE
+                // ONLY if it is checked
+                if (field.isRadio) {
+                    if (field.isChecked()) {
+                        values[name] = value;
+                    }
+                } else {
+                    // Check if the value already exists
+                    bucket = values[name];
+                    if (bucket) {
+                        // if it does and it isn't an array, we need to make it into an array
+                        // so we can push more
+                        if (!isArray(bucket)) {
+                            bucket = values[name] = [bucket];
+                        }
+
+                        // Check if it is an array
+                        if (isArray(bucket)) {
+                            // Concat it into the other values
+                            bucket = values[name] = bucket.concat(value);
+                        } else {
+                            // If it isn't an array, just pushed more values
+                            bucket.push(value);
+                        }
+                    } else {
+                        values[name] = value;
+                    }
+                }
+            }
+        };
+
+        // Loop through each of the fields, and add the values for those fields.
+        for (name in fields) {
+            if (fields.hasOwnProperty(name)) {
+                field = fields[name];
+
+                if (isArray(field)) {
+                    ln = field.length;
+                    for (i = 0; i < ln; i++) {
+                        addValue(field[i], name);
+                    }
+                } else {
+                    addValue(field, name);
+                }
+            }
+        }
+
+        return values;
+    },
+
+    /**
+     * Resets all fields in the form back to their original values
+     * @return {Ext.form.Panel} This form
+     */
+    reset: function() {
+        this.getFieldsAsArray().forEach(function(field) {
+            field.reset();
+        });
+
+        return this;
+    },
+
+    /**
+     * A convenient method to enable all fields in this forms
+     * @return {Ext.form.Panel} This form
+     */
+    enable: function() {
+        this.getFieldsAsArray().forEach(function(field) {
+            field.enable();
+        });
+
+        return this;
+    },
+
+    /**
+     * A convenient method to disable all fields in this forms
+     * @return {Ext.form.Panel} This form
+     */
+    disable: function() {
+        this.getFieldsAsArray().forEach(function(field) {
+            field.disable();
+        });
+
+        return this;
+    },
+
+    /**
+     * @private
+     */
+    getFieldsAsArray: function() {
+        var fields = [],
+            getFieldsFrom = function(item) {
+                if (item.isField) {
+                    fields.push(item);
+                }
+
+                if (item.isContainer) {
+                    item.getItems().each(getFieldsFrom);
+                }
+            };
+
+        this.getItems().each(getFieldsFrom);
+
+        return fields;
+    },
+
+    /**
+     * @private
+     * Returns all {@link Ext.field.Field field} instances inside this form
+     * @param byName return only fields that match the given name, otherwise return all fields.
+     * @return {Object/Array} All field instances, mapped by field name; or an array if byName is passed
+     */
+    getFields: function(byName) {
+        var fields = {},
+            itemName;
+
+        var getFieldsFrom = function(item) {
+            if (item.isField) {
+                itemName = item.getName();
+
+                if ((byName && itemName == byName) || typeof byName == 'undefined') {
+                    if (fields.hasOwnProperty(itemName)) {
+                        if (!Ext.isArray(fields[itemName])) {
+                            fields[itemName] = [fields[itemName]];
+                        }
+
+                        fields[itemName].push(item);
+                    } else {
+                        fields[itemName] = item;
+                    }
+                }
+
+            }
+
+            if (item.isContainer) {
+                item.items.each(getFieldsFrom);
+            }
+        };
+
+        this.getItems().each(getFieldsFrom);
+
+        return (byName) ? (fields[byName] || []) : fields;
+    },
+
+    /**
+     * Returns an array of fields in this formpanel
+     * @return {Ext.field.Field[]} An array of fields in this form panel
+     * @private
+     */
+    getFieldsArray: function() {
+        var fields = [];
+
+        var getFieldsFrom = function(item) {
+            if (item.isField) {
+                fields.push(item);
+            }
+
+            if (item.isContainer) {
+                item.items.each(getFieldsFrom);
+            }
+        };
+
+        this.items.each(getFieldsFrom);
+
+        return fields;
+    },
+
+    getFieldsFromItem: Ext.emptyFn,
+
+    /**
+     * Shows a generic/custom mask over a designated Element.
+     * @param {String/Object} cfg Either a string message or a configuration object supporting
+     * the following options:
+     *
+     *     {
+     *         message : 'Please Wait',
+     *         cls : 'form-mask'
+     *     }
+     *
+     * @return {Ext.form.Panel} This form
+     * @deprecated 2.0.0 Please use {@link #setMasked} instead.
+     */
+    showMask: function(cfg, target) {
+
+        cfg = Ext.isObject(cfg) ? cfg.message : cfg;
+
+        if (cfg) {
+            this.setMasked({
+                xtype: 'loadmask',
+                message: cfg
+            });
+        } else {
+            this.setMasked(true);
+        }
+
+        return this;
+    },
+
+    /**
+     * Hides a previously shown wait mask (See {@link #showMask})
+     * @return {Ext.form.Panel} this
+     * @deprecated 2.0.0 Please use {@link #unmask} or {@link #setMasked} instead.
+     */
+    hideMask: function() {
+        this.setMasked(false);
+        return this;
+    },
+
+    /**
+     * Returns the currently focused field
+     * @return {Ext.field.Field} The currently focused field, if one is focused or `null`.
+     * @private
+     */
+    getFocusedField: function() {
+        var fields = this.getFieldsArray(),
+            ln = fields.length,
+            field, i;
+
+        for (i = 0; i < ln; i++) {
+            field = fields[i];
+            if (field.isFocused) {
+                return field;
+            }
+        }
+
+        return null;
+    },
+
+    /**
+     * @private
+     * @return {Boolean/Ext.field.Field} The next field if one exists, or false
+     * @private
+     */
+    getNextField: function() {
+        var fields = this.getFieldsArray(),
+            focusedField = this.getFocusedField(),
+            ln = fields.length,
+            index;
+
+        if (focusedField) {
+            index = fields.indexOf(focusedField);
+
+            if (index !== fields.length - 1) {
+                index++;
+                return fields[index];
+            }
+        }
+
+        return false;
+    },
+
+    /**
+     * Tries to focus the next field in the form, if there is currently a focused field.
+     * @return {Boolean/Ext.field.Field} The next field that was focused, or false
+     * @private
+     */
+    focusNextField: function() {
+        var field = this.getNextField();
+        if (field) {
+            field.focus();
+            return field;
+        }
+
+        return false;
+    },
+
+    /**
+     * @private
+     * @return {Boolean/Ext.field.Field} The next field if one exists, or false
+     */
+    getPreviousField: function() {
+        var fields = this.getFieldsArray(),
+            focusedField = this.getFocusedField(),
+            ln = fields.length,
+            index;
+
+        if (focusedField) {
+            index = fields.indexOf(focusedField);
+
+            if (index !== 0) {
+                index--;
+                return fields[index];
+            }
+        }
+
+        return false;
+    },
+
+    /**
+     * Tries to focus the previous field in the form, if there is currently a focused field.
+     * @return {Boolean/Ext.field.Field} The previous field that was focused, or false
+     * @private
+     */
+    focusPreviousField: function() {
+        var field = this.getPreviousField();
+        if (field) {
+            field.focus();
+            return field;
+        }
+
+        return false;
+    }
+}, function() {
+
+    //<deprecated product=touch since=2.0>
+    Ext.deprecateClassMethod(this, {
+        /**
+         * @method
+         * @inheritdoc Ext.form.Panel#setRecord
+         * @deprecated 2.0.0 Please use #setRecord instead.
+         */
+        loadRecord: 'setRecord',
+        /**
+         * @method
+         * @inheritdoc Ext.form.Panel#setRecord
+         * @deprecated 2.0.0 Please use #setRecord instead.
+         */
+        loadModel: 'setRecord',
+        /**
+         * @method
+         * @inheritdoc Ext.form.Panel#setRecord
+         * @deprecated 2.0.0 Please use #setRecord instead.
+         */
+        load: 'setRecord'
+    });
+
+    this.override({
+        constructor: function(config) {
+            /**
+             * @cfg {Ext.XTemplate/String/String[]} waitTpl
+             * The defined waitMsg template.  Used for precise control over the masking agent used
+             * to mask the FormPanel (or other Element) during form Ajax/submission actions. For more options, see
+             * {@link #showMask} method.
+             * @removed 2.0.0 Please use a custom {@link Ext.LoadMask} class and the {@link #masked} configuration
+             * when {@link #method submitting} your form.
+             */
+
+            /**
+             * @cfg {Ext.dom.Element} waitMsgTarget The target of any mask shown on this form.
+             * @removed 2.0.0 There is no need to set a mask target anymore. Please see the {@link #masked} configuration instead.
+             */
+            if (config && config.hasOwnProperty('waitMsgTarget')) {
+                delete config.waitMsgTarget;
+            }
+
+            this.callParent([config]);
+        }
+    });
+    //</deprecated>
+});
+
+/**
+ * Displays details and options of a product.
+ */
+Ext.define('EatSense.view.ProductDetail', {
+	extend : 'Ext.Panel',
+	requires: ['Ext.field.Spinner', 'Ext.field.Radio', 'Ext.form.Panel', 'Ext.field.Checkbox'],
+	xtype : 'productdetail',	
+	layout : {
+		type : 'vbox',
+		align : 'stretch',
+	},	
+	config : {
+    	scrollable : 'vertical',
+    	modal: true,
+		hideOnMaskTap: true,
+		top: '5%',
+		left: '3%',
+		right: '3%',
+		bottom: '3%',
+		floatingCls: 'productdetail-floating',
+		items : [
+		{
+			xtype: 'titlebar',
+			docked: 'top',
+		},
+		{
+			xtype : 'panel',
+			cls: 'productDetailPanel',
+			layout : {
+				type : 'vbox',
+			},
+			items : [ 
+			{
+				xtype : 'label',
+				itemId : 'prodDetailLabel',
+				cls: 'productDetail',
+				tpl: new Ext.XTemplate(
+				 	// '<div class="price">{[this.formatPrice(values.product.calculate(values.amount))]}</div>'+
+				 	// '<div style="clear: both;">'+
+				 	'<p class="desc">{product.data.longDesc}</p>',
+				 	{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+				)
+			}, {
+				xtype : 'panel',
+				layout : {
+					type : 'hbox',
+					align : 'stretch',
+					pack: 'center'
+				},
+				items : [ {
+					xtype : 'spinnerfield',
+					itemId : 'productAmountSpinner',
+					increment : 1,
+					value : 1,
+					minValue : '1',
+					maxValue : '10',
+					cycle : true,
+				},
+				{
+					xtype: 'label',
+					cls: 'productPrice',
+					itemId : 'prodPriceLabel',
+					tpl: new Ext.XTemplate(
+					'{[this.formatPrice(values.product.calculate(values.amount))]}',
+					{
+						formatPrice: function(price) {
+							return Karazy.util.formatPrice(price);
+						}
+					}
+					)
+				} 
+				]
+			}]
+		}, 
+		{
+			xtype : 'formpanel',
+			itemId : 'choicesPanel',
+			cls: 'choice-panel',
+			layout: 'vbox',
+			minHeight: '200px',
+			scrollable : false,
+		},
+		{
+			xtype: 'toolbar',
+			docked: 'bottom',
+			layout: {
+   				type: 'hbox',
+   				align: 'middle',
+   				pack: 'center'
+			},
+			items: [
+				{
+					xtype: 'button',
+					text: Karazy.i18n.translate('putIntoCartButton'),
+					action: 'cart'
+				}, 
+				{
+					xtype: 'button',
+					ui: 'confirm',
+					action: 'close',
+					text: Karazy.i18n.translate('close')
+				}
+			]
+		}
+		]		
+	}
+});
+/**
+ * Ext.tab.Bar is used internally by {@link Ext.tab.Panel} to create the bar of tabs that appears at the top of the tab
+ * panel. It's unusual to use it directly, instead see the {@link Ext.tab.Panel tab panel docs} for usage instructions.
+ *
+ * Used in the {@link Ext.tab.Panel} component to display {@link Ext.tab.Tab} components.
+ *
+ * @private
+ */
+Ext.define('Ext.tab.Bar', {
+    extend: 'Ext.Toolbar',
+    alternateClassName: 'Ext.TabBar',
+    xtype : 'tabbar',
+
+    requires: ['Ext.tab.Tab'],
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: Ext.baseCSSPrefix + 'tabbar',
+
+        // @private
+        defaultType: 'tab',
+
+        // @private
+        layout: {
+            type: 'hbox',
+            align: 'middle'
+        }
+    },
+
+    eventedConfig: {
+        /**
+         * @cfg {Number/String/Ext.Component} activeTab
+         * The initially activated tab. Can be specified as numeric index,
+         * component ID or as the component instance itself.
+         * @accessor
+         * @evented
+         */
+        activeTab: null
+    },
+
+    /**
+     * @event tabchange
+     * Fired when active tab changes.
+     * @param {Ext.tab.Bar} this
+     * @param {Ext.tab.Tab} newTab The new Tab
+     * @param {Ext.tab.Tab} oldTab The old Tab
+     */
+
+    initialize: function() {
+        var me = this;
+        me.callParent();
+
+        me.on({
+            tap: 'onTabTap',
+
+            delegate: '> tab',
+            scope   : me
+        });
+    },
+
+    // @private
+    onTabTap: function(tab) {
+        this.setActiveTab(tab);
+    },
+
+    /**
+     * @private
+     */
+    applyActiveTab: function(activeTab, oldActiveTab) {
+        if (!activeTab && activeTab !== 0) {
+            return;
+        }
+
+        var activeTabInstance = this.parseActiveTab(activeTab);
+
+        if (!activeTabInstance) {
+            return;
+        }
+        return activeTabInstance;
+    },
+
+    /**
+     * @private
+     * When docked to the top, pack left, when on the bottom pack center
+     */
+    doSetDocked: function(newDocked) {
+        var layout = this.getLayout(),
+            pack   = newDocked == 'bottom' ? 'center' : 'left';
+
+        //layout isn't guaranteed to be instantiated so must test
+        if (layout.isLayout) {
+            layout.setPack(pack);
+        } else {
+            layout.pack = (layout && layout.pack) ? layout.pack : pack;
+        }
+    },
+
+    /**
+     * @private
+     * Sets the active tab
+     */
+    doSetActiveTab: function(newTab, oldTab) {
+        if (newTab) {
+            newTab.setActive(true);
+        }
+
+        if (oldTab) {
+            oldTab.setActive(false);
+        }
+    },
+
+    /**
+     * @private
+     * Parses the active tab, which can be a number or string
+     */
+    parseActiveTab: function(tab) {
+        //we need to call getItems to initialize the items, otherwise they will not exist yet.
+        if (typeof tab == 'number') {
+            return this.getInnerItems()[tab];
+        }
+        else if (typeof tab == 'string') {
+            tab = Ext.getCmp(tab);
+        }
+        return tab;
+    }
+});
+
+/**
+ * @aside guide tabs
+ * @aside video tabs-toolbars
+ *
+ * Tab Panels are a great way to allow the user to switch between several pages that are all full screen. Each
+ * Component in the Tab Panel gets its own Tab, which shows the Component when tapped on. Tabs can be positioned at
+ * the top or the bottom of the Tab Panel, and can optionally accept title and icon configurations.
+ *
+ * Here's how we can set up a simple Tab Panel with tabs at the bottom. Use the controls at the top left of the example
+ * to toggle between code mode and live preview mode (you can also edit the code and see your changes in the live
+ * preview):
+ *
+ *     @example miniphone preview
+ *     Ext.create('Ext.TabPanel', {
+ *         fullscreen: true,
+ *         tabBarPosition: 'bottom',
+ *
+ *         defaults: {
+ *             styleHtmlContent: true
+ *         },
+ *
+ *         items: [
+ *             {
+ *                 title: 'Home',
+ *                 iconCls: 'home',
+ *                 html: 'Home Screen'
+ *             },
+ *             {
+ *                 title: 'Contact',
+ *                 iconCls: 'user',
+ *                 html: 'Contact Screen'
+ *             }
+ *         ]
+ *     });
+ * One tab was created for each of the {@link Ext.Panel panels} defined in the items array. Each tab automatically uses
+ * the title and icon defined on the item configuration, and switches to that item when tapped on. We can also position
+ * the tab bar at the top, which makes our Tab Panel look like this:
+ *
+ *     @example miniphone preview
+ *     Ext.create('Ext.TabPanel', {
+ *         fullscreen: true,
+ *
+ *         defaults: {
+ *             styleHtmlContent: true
+ *         },
+ *
+ *         items: [
+ *             {
+ *                 title: 'Home',
+ *                 html: 'Home Screen'
+ *             },
+ *             {
+ *                 title: 'Contact',
+ *                 html: 'Contact Screen'
+ *             }
+ *         ]
+ *     });
+ *
+ */
+Ext.define('Ext.tab.Panel', {
+    extend: 'Ext.Container',
+    xtype : 'tabpanel',
+    alternateClassName: 'Ext.TabPanel',
+
+    requires: ['Ext.tab.Bar'],
+
+    config: {
+        /**
+         * @cfg {String} ui
+         * Sets the UI of this component.
+         * Available values are: `light` and `dark`.
+         * @accessor
+         */
+        ui: 'dark',
+
+        /**
+         * @cfg {Object} tabBar
+         * An Ext.tab.Bar configuration.
+         * @accessor
+         */
+        tabBar: true,
+
+        /**
+         * @cfg {String} tabBarPosition
+         * The docked position for the {@link #tabBar} instance.
+         * Possible values are 'top' and 'bottom'.
+         * @accessor
+         */
+        tabBarPosition: 'top',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        layout: {
+            type: 'card',
+            animation: {
+                type: 'slide',
+                direction: 'left'
+            }
+        },
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        cls: Ext.baseCSSPrefix + 'tabpanel'
+
+        /**
+         * @cfg {Boolean/String/Object} scrollable
+         * @accessor
+         * @hide
+         */
+
+        /**
+         * @cfg {Boolean/String/Object} scroll
+         * @hide
+         */
+    },
+
+    delegateListeners: {
+        delegate: '> component',
+        centeredchange: 'onItemCenteredChange',
+        dockedchange: 'onItemDockedChange',
+        floatingchange: 'onItemFloatingChange',
+        disabledchange: 'onItemDisabledChange'
+    },
+
+    initialize: function() {
+        this.callParent();
+
+        this.on({
+            order: 'before',
+            activetabchange: 'doTabChange',
+            delegate: '> tabbar',
+            scope   : this
+        });
+
+    },
+
+    /**
+     * Tab panels should not be scrollable. Instead, you should add scrollable to any item that
+     * you want to scroll.
+     * @private
+     */
+    applyScrollable: function() {
+        return false;
+    },
+
+    /**
+     * Updates the Ui for this component and the {@link #tabBar}.
+     */
+    updateUi: function(newUi, oldUi) {
+        this.callParent(arguments);
+
+        if (this.initialized) {
+            this.getTabBar().setUi(newUi);
+        }
+    },
+
+    /**
+     * @private
+     */
+    doSetActiveItem: function(newActiveItem, oldActiveItem) {
+        if (newActiveItem) {
+            var items = this.getInnerItems(),
+                oldIndex = items.indexOf(oldActiveItem),
+                newIndex = items.indexOf(newActiveItem),
+                reverse = oldIndex > newIndex,
+                animation = this.getLayout().getAnimation(),
+                tabBar = this.getTabBar(),
+                oldTab = tabBar.parseActiveTab(oldIndex),
+                newTab = tabBar.parseActiveTab(newIndex);
+
+            if (animation && animation.setReverse) {
+                animation.setReverse(reverse);
+            }
+
+            this.callParent(arguments);
+
+            if (newIndex != -1) {
+                this.getTabBar().setActiveTab(newIndex);
+
+                if (oldTab) {
+                    oldTab.setActive(false);
+                }
+
+                if (newTab) {
+                    newTab.setActive(true);
+                }
+            }
+        }
+    },
+
+    /**
+     * Updates this container with the new active item.
+     */
+    doTabChange: function(tabBar, newTab) {
+        this.setActiveItem(tabBar.indexOf(newTab));
+    },
+
+    /**
+     * Creates a new {@link Ext.tab.Bar} instance using {@link Ext#factory}.
+     * @private
+     */
+    applyTabBar: function(config) {
+        if (config === true) {
+            config = {};
+        }
+
+        if (config) {
+            Ext.applyIf(config, {
+                ui: this.getUi(),
+                docked: this.getTabBarPosition()
+            });
+        }
+
+        return Ext.factory(config, Ext.tab.Bar, this.getTabBar());
+    },
+
+    /**
+     * Adds the new {@link Ext.tab.Bar} instance into this container.
+     * @private
+     */
+    updateTabBar: function(newTabBar) {
+        if (newTabBar) {
+            this.add(newTabBar);
+            this.setTabBarPosition(newTabBar.getDocked());
+        }
+    },
+
+    /**
+     * Updates the docked position of the {@link #tabBar}.
+     * @private
+     */
+    updateTabBarPosition: function(position) {
+        var tabBar = this.getTabBar();
+        if (tabBar) {
+            tabBar.setDocked(position);
+        }
+    },
+
+    onItemAdd: function(card) {
+        var me = this;
+
+        if (!card.isInnerItem()) {
+            return me.callParent(arguments);
+        }
+
+        var tabBar             = me.getTabBar(),
+            initialConfig      = card.getInitialConfig(),
+            tabConfig          = initialConfig.tab || {},
+            tabTitle           = initialConfig.title,
+            tabIconCls         = initialConfig.iconCls,
+            tabHidden          = initialConfig.hidden,
+            tabDisabled        = initialConfig.disabled,
+            tabBadgeText       = initialConfig.badgeText,
+            innerItems         = me.getInnerItems(),
+            index              = innerItems.indexOf(card),
+            tabs               = tabBar.getItems(),
+            cards              = me.getInnerItems(),
+            currentTabInstance = (tabs.length >= cards.length) && tabs.getAt(index),
+            tabInstance;
+
+        if (tabTitle && !tabConfig.title) {
+            tabConfig.title = tabTitle;
+        }
+
+        if (tabIconCls && !tabConfig.iconCls) {
+            tabConfig.iconCls = tabIconCls;
+        }
+
+        if (tabHidden && !tabConfig.hidden) {
+            tabConfig.hidden = tabHidden;
+        }
+
+        if (tabDisabled && !tabConfig.disabled) {
+            tabConfig.disabled = tabDisabled;
+        }
+
+        if (tabBadgeText && !tabConfig.badgeText) {
+            tabConfig.badgeText = tabBadgeText;
+        }
+
+
+        tabInstance = Ext.factory(tabConfig, Ext.tab.Tab, currentTabInstance);
+
+        if (!currentTabInstance) {
+            tabBar.insert(index, tabInstance);
+        }
+
+        card.tab = tabInstance;
+
+        me.callParent(arguments);
+    },
+
+    /**
+     * If an item gets enabled/disabled and it has an tab, we should also enable/disable that tab
+     * @private
+     */
+    onItemDisabledChange: function(item, newDisabled) {
+        if (item && item.tab) {
+            item.tab.setDisabled(newDisabled);
+        }
+    },
+
+    // @private
+    onItemRemove: function(item, index) {
+        this.getTabBar().remove(item.tab, this.getAutoDestroy());
+
+        this.callParent(arguments);
+    }
+}, function() {
+    //<deprecated product=touch since=2.0>
+    /**
+     * @cfg {Boolean} tabBarDock
+     * @inheritdoc Ext.tab.Panel#tabBarPosition
+     * @deprecated 2.0.0 Please use {@link #tabBarPosition} instead.
+     */
+    Ext.deprecateProperty(this, 'tabBarDock', 'tabBarPosition');
+    //</deprecated>
+});
+
+Ext.define('EatSense.view.Lounge', {
+	extend : 'Ext.tab.Panel',
+	requires : [ 
+		'EatSense.view.MyOrders', 
+		'EatSense.view.Menu', 
+		'EatSense.view.MenuOverview', 
+		'EatSense.view.SettingsTab', 
+		'EatSense.view.RequestsTab' 
+	],
+	xtype : 'lounge',
+	config : {
+		tabBarPosition: 'bottom',
+		tabBar : {
+			itemId : 'loungeTabBar',
+		},
+		activeItem : 0,
+		items : [ 
+			{
+				xtype: 'menutab',
+				tabName: 'menu'	
+			},
+			{
+				xtype: 'carttab',
+				tabName: 'cart'
+			},
+			{
+				xtype: 'myorderstab',
+				tabName: 'myorders'
+			},
+			{
+				xtype: 'requeststab',
+				tabName: 'requests'
+			},
+			{
+				xtype: 'settingstab',
+				tabName: 'settings'
+			}
+		],
+	},
+	/**
+	 * Switch the tab.
+	 * 
+	 * @param direction
+	 *            left or right
+	 */
+	switchTab : function(view, direction) {
+		this.setActiveItem(view);
+	},
+	/**
+	 * Hides the back button in top toolbar.
+	 */
+	hideBackButton : function() {
+		this.getComponent('loungeTopBar').getComponent('loungeBackBt').hide();
+	},
+	/**
+	 * Shows the back button in top toolbar.
+	 * 
+	 * @param text
+	 *            Label to display on button.
+	 */
+	showBackButton : function(text) {
+		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(text);
+		this.getComponent('loungeTopBar').getComponent('loungeBackBt').show();
+	},
+
+});
 /**
  * @author Ed Spencer
  *
@@ -48687,6 +50296,531 @@ Ext.define('Ext.data.proxy.LocalStorage', {
         return window.localStorage;
     }
 });
+
+/**
+ * Controller handles the checkin process.
+ * This includes scanning of a barcode, chosing a nickname, checking in with others
+ * and finally navigating to the menu.
+ * 
+ */
+Ext.define('EatSense.controller.CheckIn', {
+    extend: 'Ext.app.Controller',
+    requires: ['Ext.data.proxy.LocalStorage', 'EatSense.controller.Message'],
+    config: {
+        profile: Ext.os.deviceType.toLowerCase(),
+    	refs: {
+            main : 'mainview',
+            checkinconfirmation : 'checkinconfirmation',
+        	nickname : 'checkinconfirmation #nicknameTf',
+        	checkinwithothers: 'checkinwithothers',
+        	dashboard: 'dashboard',
+        	settingsBt: 'dashboard button[action=settings]',
+        	settingsBackBt: 'settings button[action=back]',
+        	nicknameTogglefield: 'checkinconfirmation togglefield[action=toggle-nickname]',
+        	nicknameSettingsField: 'settings #nicknameSetting',
+        	settingsview: 'settings',
+        	
+        	checkInDlg1Label1: 'checkinconfirmation #checkInDlg1Label1',    	       
+        	           	
+        	checkInBtn: 'dashboard button[action=checkin]',
+            //confirm checkn view
+            cancelCheckInBt: 'checkinconfirmation button[action=cancel-checkin]',           
+        	confirmCheckInBt : 'checkinconfirmation button[action=confirm-checkin]',
+            regenerateNicknameBt : 'checkinconfirmation button[action=regenerate-nickname]',
+            //checkIn w/ others
+            userlist: '#checkinDlg2Userlist',
+        	checkinDlg2Userlist: '#checkinDlg2Userlist',
+        	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
+            //loungeview and tabs
+            loungeview : 'lounge',
+        	menuTab: 'menutab',
+        	cartTab: 'carttab',
+            settingsTab: 'settingstab',
+            requestsTab: 'requeststab',
+    	},
+    	control: {
+    		checkInBtn: {
+                tap: 'checkInIntent'
+            },
+            confirmCheckInBt: {
+            	tap: 'checkIn'
+            }, 
+            checkinDlg2Userlist: {
+            	select: 'linkToUser'
+            },
+            checkinDlg2CancelBt: {
+            	tap: 'showMenu'
+            },
+            cancelCheckInBt: {
+            	tap: 'showDashboard'
+            },
+            regenerateNicknameBt: {
+            	tap: 'generateNickname'
+            },
+            settingsBt: {
+            	tap: 'showSettings'
+            },
+            settingsBackBt: {
+            	tap: 'showDashboard'            	
+            },
+            nicknameSettingsField: {            	
+            	change: 'saveNickname'
+            }
+    	},
+        /**
+    	* Contains information to resume application state after the app was closed.
+    	*/
+    	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
+        /**
+        *   Active checkIn for this session. Used througout whole application
+        */
+        activeCheckIn: null,
+        /**
+        *   The spot the activeCheckIn is assigned to.
+        */
+        activeSpot: null
+    },
+    init: function() {
+    	var messageCtr = this.getApplication().getController('Message');
+    	 
+    	this.on('statusChanged', this.handleStatusChange, this);
+    	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
+
+    	 //private functions
+
+        /*
+        *   Resets default Ajax headers.
+        */
+        this.resetDefaultAjaxHeaders = function() {
+            Ext.Ajax.setDefaultHeaders({});
+        };
+    	 
+    	//called by checkInIntent. 
+    	this.doCheckInIntent = function(barcode, button, deviceId) {    		 
+    	    	//validate barcode field
+    	    	if(barcode.length == 0) {
+    	    		this.getDashboard().showLoadScreen(false);
+    	    		button.enable();
+    	    		Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorBarcode'), Ext.emptyFn);
+    	    	} else {
+    	        	var me = this;
+    	        	EatSense.model.Spot.load(barcode, {
+    	        		 success: function(record, operation) {
+    	        			 me.setActiveSpot(record);
+    	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
+     	        	    },
+     	        	    failure: function(record, operation) {
+                            me.getApplication().handleServerError({
+                                'error': operation.error
+                            }); 
+     	        	    },
+     	        	    callback: function() {
+     	        	    	me.getDashboard().showLoadScreen(false);
+     	        	    	button.enable();
+     	        	    }
+    	        	});
+    	    	}
+    	 };    	    
+    },
+    /**
+     * CheckIn Process
+     * Step 1: barcode is scanned and send to server
+     */    
+    checkInIntent: function(button) {
+    	console.log('CheckIn Controller -> checkIn');
+    	//disable button to prevent multiple checkins
+    	button.disable();
+    	var barcode, that = this, deviceId;
+    	if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
+            Ext.Msg.show({
+                title: Karazy.i18n.translate('barcodePromptTitle'),
+                message: Karazy.i18n.translate('barcodePromptText'),
+                buttons: [{
+                    text: Karazy.i18n.translate('yes'),
+                    itemId: 'yes',
+                    ui: 'action'
+                }, {
+                    text: Karazy.i18n.translate('no'),
+                    itemId: 'no',
+                    ui: 'action'
+                }],
+                prompt : { maxlength : 20},
+                scope: this,
+                fn: function(btnId, value, opt) {
+                    if(btnId=='yes') {
+                        barcode = Ext.String.trim(value);    
+                        deviceId = '_browser';
+                        this.getDashboard().showLoadScreen(true);
+                        this.doCheckInIntent(barcode, button, deviceId);
+                    } else {
+                        button.enable();
+                    }
+                }
+            }); 
+            // barcode = Ext.String.trim(this.getSearchfield().getValue());
+    	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
+    			window.plugins.barcodeScanner.scan(function(result, barcode) {
+    			barcode = result.text;
+    			console.log('scanned ' + barcode);
+    			that.getDashboard().showLoadScreen(true);
+    			//FR 28.03.12 apple rejects apps which track device uuid
+    			// deviceId = device.uuid;
+    			that.doCheckInIntent(barcode, button, deviceId);
+    		}, function(error) {
+    			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
+    		});
+    	} else {
+    		button.enable();
+    	}    	
+   },
+   /**
+    * CheckIn Process
+    * Step 2: User gets asked if he wants to check in. He can then choose a nickname used during his checkIn.
+    * @param options
+    */
+   checkInConfirm: function(options) {
+	   var checkInDialog = this.getCheckinconfirmation(), 
+		main = this.getMain(),
+		checkIn = Ext.create('EatSense.model.CheckIn');		
+			
+	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
+	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
+	   	 } else {
+	   		this.generateNickname();
+	   	 }
+		
+		checkIn.set('spotId', options.model.get('barcode'));
+		checkIn.set('businessName', options.model.get('business'));
+		checkIn.set('businessId', options.model.get('businessId'));
+		checkIn.set('spot', options.model.get('name'));
+		checkIn.set('status','INTENT');
+		
+		if(options.deviceId) {
+			//store device uuid
+			checkIn.set('deviceId',options.deviceId);
+		}			
+		this.setActiveCheckIn(checkIn);
+		
+		main.switchAnim('left');
+		main.setActiveItem(checkInDialog);	  			
+   },
+   /**
+    * CheckIn Process
+    * Step 3: User confirmed his wish to check in
+    * @param options
+    */
+   checkIn: function(){
+	   var     me = this,
+	           nickname = Ext.String.trim(this.getNickname().getValue()),
+	           nicknameToggle = this.getNicknameTogglefield(),
+               messageCtr = this.getApplication().getController('Message');
+	    
+	 //get CheckIn Object and save it.	   
+	   if(nickname.length < 3) {
+		   Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorNickname',3,25), Ext.emptyFn);
+	   } else {		   
+		      this.getActiveCheckIn().set('nickname',nickname);		  	   
+		      this.getActiveCheckIn().save(
+					   {
+					   	    success: function(response) {
+					   	    console.log("CheckIn Controller -> checkIn success");
+					   	    //currently disabled, will be enabled when linking to users actually makes sense
+//					   	     me.showCheckinWithOthers();					   	    
+					   	     me.showMenu();
+					   	     me.getAppState().set('checkInId', response.get('userId'));
+
+                            //Set default headers so that always checkInId is send
+                            Ext.Ajax.setDefaultHeaders({
+                                'checkInId': response.get('userId'),
+                                'pathId' : me.getActiveCheckIn().get('businessId')
+                            });
+					   	     
+					   	    //save nickname in settings
+							   if(nicknameToggle.getValue() == 1) {
+								   me.getAppState().set('nickname', nickname);
+								   nicknameToggle.reset();
+							   }
+                               //open a channel for push messags
+                               try {
+                                    messageCtr.openChannel(response.get('userId'));
+                                } catch(e) {
+                                    console.log('could not open a channel ' + e);
+                                }
+					   	    },
+					   	    failure: function(response, operation) {			   	    	
+                                me.getApplication().handleServerError({
+                                    'error': operation.error, 
+                                    'forceLogout':{403 : true}
+                                }); 
+					   	    }
+					   }	   
+			   );
+	   }
+   },
+   /**
+    * CheckIn Process
+    * Step 2 alt: cancel process
+    */
+   showDashboard: function(options) {
+	   var dashboardView = this.getDashboard(),
+	       main = this.getMain(),
+	       nicknameToggle = this.getNicknameTogglefield();
+	   
+	   this.setActiveCheckIn(null);
+	   	   
+	   main.switchAnim('right');
+	   main.setActiveItem(dashboardView);
+	   nicknameToggle.reset();
+		
+	   //ensure that main is only added once to viewport
+	   if(main.getParent() !== Ext.Viewport) {
+		   Ext.Viewport.add(main);
+	   }
+   },
+   /**
+    * CheckIn Process
+    * Step 4: List other users located at this spot
+    * @param options
+    */
+   showCheckinWithOthers: function(options) {
+	   //TODO out of order
+	   var checkinwithothersDlg = this.getCheckinwithothers(), 
+	   main = this.getMain(),
+	   spotId = this.getActiveCheckIn().get('spotId'),
+	   checkInId = this.getActiveCheckIn().get('userId');
+	   
+	    var userListStore = Ext.create('Ext.data.Store', {
+	   			   model: 'EatSense.model.User',
+	   			   proxy: {
+	   				   type: 'rest',
+	   				   url : Karazy.config.serviceUrl+'/checkins/?spotId='+spotId+'&checkInId='+checkInId,
+	   				   reader: {
+	   					   type: 'json'
+	   			   		}
+	   			   }
+	   		   });
+	     //set list content in view	  
+	  	 this.getUserlist().setStore(userListStore); 
+	  	 this.getUserlist().getStore().load({
+	  	     scope   : this,
+	  	     callback: function(records, operation, success) {	  	    	 
+			  	   main.switchAnim('left');
+				  	if(records.length > 0) {
+				  		main.setActiveItem(checkinwithothersDlg);
+				  	} else {
+				  		this.showMenu();
+				  	}
+	  	     }
+	  	 });	  		  	
+   },
+   /**
+    * CheckIn Process
+    * Step 4-I: Link user to a chosen person 
+    * @param dataview
+    * @param record
+    */
+   linkToUser: function(dataview, record) {
+	   //TODO out of order
+	   var checkIn = this.getActiveCheckIn(),
+	   me = this;	   
+	   checkIn.set('linkedCheckInId', record.get('userId'));
+	   
+	   checkIn.save({
+		  scope: this,
+		  success: function(record, operation) {
+			  me.showMenu();
+		  },
+		   failure: function(record, operation) {
+   	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
+   	    		var error = Ext.JSON.decode(response.statusText);
+   	    		Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate(error.errorKey,error.substitutions), Ext.emptyFn);
+   	    	} else {
+   	    		Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('errorMsg'), Ext.emptyFn);
+   	    	}
+		   }
+	   });
+   },
+   /**
+    *
+    * Show menu to user 
+    */
+	showMenu: function() {
+    	var menuCtr = this.getApplication().getController('Menu');
+        menuCtr.showMenu();    		   
+	},
+	/**
+	 * Show settings screen.
+	 * 
+	 */
+	showSettings: function() {
+		var   main = this.getMain(),
+		      settings = this.getSettingsview();
+		
+		this.getNicknameSettingsField().setValue(this.getAppState().get('nickname'));
+		
+		main.switchAnim('left');
+   	 	main.setActiveItem(settings);
+	},
+	/**
+	 * Saves the application state in local store.
+	 */
+	saveNickname: function(component, newData, oldValue, eOpts) {
+		this.getAppState().set('nickname', newData);
+	},
+	/**
+	 * Makes an ajax call to the server, retrieves a random nickname
+	 * and sets the nickname field.
+	 * 
+	 * ®return
+	 * 		the nickname
+	 */
+	generateNickname : function(callback) {
+		Ext.Ajax.request({
+    	    url: Karazy.config.serviceUrl+'/nicknames',
+    	    method: 'GET',
+    	    scope: this,
+    	    params: {
+    	        random: ""
+    	    },
+    	    success: function(response){
+    	    	this.getNickname().setValue(response.responseText);
+    	    }
+    	});		
+	},
+	/**
+	 * This method is called from launch function during application start 
+	 * when an existing checkin was found. This could happen when a user exits
+	 * the application during a checkin and restarts.
+	 * The method makes sure that all relevant information is restored like products in cart,
+	 * or the active spot.
+	 * 
+	 * @param checkin
+	 * 		Restored checkin
+	 */
+	restoreState: function(checkIn) {
+		var   me = this,
+              main = this.getMain(),
+		      orderCtr = this.getApplication().getController('Order'),
+              messageCtr = this.getApplication().getController('Message');
+
+        this.setActiveCheckIn(checkIn);
+        //reload of application before hitting leave button
+        if(checkIn.get('status') == Karazy.constants.PAYMENT_REQUEST) {
+            console.log('PAYMENT_REQUEST already issued. Don\'t restore state!');
+            this.handleStatusChange(Karazy.constants.COMPLETE);
+            this.setActiveCheckIn(null);
+            return;
+        }
+
+		
+        //Set default headers so that always checkInId is send
+        Ext.Ajax.setDefaultHeaders({
+            'checkInId': checkIn.get('userId'),
+            'pathId' : checkIn.get('businessId')
+        });              
+
+		//load active spot
+		EatSense.model.Spot.load(checkIn.get('spotId'), {
+		scope: this,
+   		 success: function(record, operation) {
+   			 this.setActiveSpot(record);
+   			 this.showMenu();
+   			    			
+   			Ext.Viewport.add(main);
+   			
+   			//after spot information is restored and stores are initialized load orders
+   			
+   			this.getActiveCheckIn().orders().load({
+   				scope: this,
+   				params: {
+   					'status': Karazy.constants.Order.CART,
+   				},
+   				callback: function(records, operation, success) {
+   					if(success == true) {
+   						orderCtr.refreshCart();
+   					}
+   				}						
+   			});
+
+           //open a channel for push messags
+           try {
+                messageCtr.openChannel(checkIn.get('userId'));
+            } catch(e) {
+                console.log('could not open a channel ' + e);
+            }
+
+    	    },
+    	    failure: function(record, operation) {
+    	    	me.getApplication().handleServerError({
+                    'error':operation.error
+                });        	    	
+    	    }
+		});						
+	},	
+	/**
+	 * This method handle status changes. It checks if valid transsions are made.
+	 * E. g. You cannot switch from PAYMENT_REQUEST to ORDER_PLACED.
+	 * It enables or disbales certain functionalities depending on the status.
+     * Furthermore resets ui states and does cleanups.
+	 * Always use this method to change the application status. 
+	 * @param status
+	 */
+	handleStatusChange: function(status) {
+		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
+        var     orderCtr = this.getApplication().getController('Order'),
+                menuCtr = this.getApplication().getController('Menu'),
+                menuStore = Ext.StoreManager.lookup('menuStore');
+		//TODO check status transitions, refactor     
+				
+		if(status == Karazy.constants.PAYMENT_REQUEST) {
+			this.getMenuTab().disable();
+			this.getCartTab().disable()
+            this.getSettingsTab().disable();
+            this.getRequestsTab().disable();
+			
+			this.getActiveCheckIn().set('status', status);
+		} else if (status == Karazy.constants.COMPLETE || status == Karazy.constants.CANCEL_ALL || status == Karazy.constants.FORCE_LOGOUT) {
+			this.showDashboard();
+            this.getMenuTab().enable();
+			this.getCartTab().enable();
+            this.getSettingsTab().enable();
+            this.getRequestsTab().enable();
+			this.getAppState().set('checkInId', null);
+			this.getLoungeview().setActiveItem(this.getMenuTab());
+            menuCtr.backToMenu();
+			//remove menu to prevent problems on reload
+            menuStore.removeAll();
+            //remove all orders in cart and refresh badge text
+            if(this.getActiveCheckIn())
+            {
+                this.getActiveCheckIn().orders().removeAll();  
+                orderCtr.refreshCartBadgeText();
+            }
+
+            this.resetDefaultAjaxHeaders();
+            Karazy.channel.closeChannel();
+		}
+
+        if(status == Karazy.constants.CANCEL_ALL) {
+            Ext.Msg.alert(Karazy.i18n.translate('hint'), Karazy.i18n.translate('checkInCanceled'), Ext.emptyFn);
+        }
+	},
+    /**
+    *   Handle push notifications for checkins.
+    *
+    */
+    handleCheckInMessage: function(action, updatedCheckIn) {
+        var     checkIn = this.getActiveCheckIn();
+
+        if(action == "delete") {
+            if(checkIn.get('userId') == updatedCheckIn.userId) {
+                this.fireEvent('statusChanged', Karazy.constants.CANCEL_ALL);
+            }
+        }
+    }
+
+});
+
 
 /**
  * @author Ed Spencer
@@ -50890,1026 +53024,2888 @@ Ext.define('Ext.data.Store', {
     // </deprecated>
 });
 
-Ext.define('EatSense.store.Spot', {
-	extend: 'Ext.data.Store',
-	config: {
-		model: 'EatSense.model.Spot',
-		storeId: 'spotStore',
-	}			
-});
 Ext.define('EatSense.store.CheckIn', {
-	extend: 'Ext.data.Store',
-	config: {
-		model: 'EatSense.model.CheckIn',
-		storeId: 'checkInStore',
-	}			
+    extend  : 'Ext.data.Store',    
+    requires: ['EatSense.model.CheckIn'],
+    config : {
+    	model   : 'EatSense.model.CheckIn'
+    }
 });
+Ext.define('EatSense.store.User', {
+    extend  : 'Ext.data.Store',    
+    requires: ['EatSense.model.User'],
+    config : {
+    	model   : 'EatSense.model.User'
+    }
+});
+Ext.define('EatSense.store.Spot', {
+    extend  : 'Ext.data.Store',    
+    requires: ['EatSense.model.Spot'],    
+    config : {
+    	storeId: 'spotStore',
+    	model   : 'EatSense.model.Spot'
+    }
+});
+Ext.define('EatSense.store.AppState', {
+	extend : 'Ext.data.Store',
+	requires : [ 'EatSense.model.AppState' ],
+	config : {
+		storeId : 'appStateStore',
+		model : 'EatSense.model.AppState',
+		autoSync : true,
+		proxy : {
+			type : 'localstorage',
+			id: 'eatSense_app_store'
+		},
+		//we make sure that only one appState instance is used
+		filters : [ {
+			property : 'id',
+			value : '1'
+		} ]
+	}
+});
+Ext.define('EatSense.store.Menu', {
+	extend: 'Ext.data.Store',
+	requires: ['EatSense.model.Menu'],
+	config: {		
+		model: 'EatSense.model.Menu',		
+		storeId: 'menuStore'
+	}
+});
+Ext.define('EatSense.store.Product', {
+	extend: 'Ext.data.Store',
+	requires: ['EatSense.model.Product'],
+	config: {
+		storeId: 'productStore',
+		model: 'EatSense.model.Product'
+	}
+})
 Ext.define('EatSense.store.Order', {
 	extend: 'Ext.data.Store',
+	requires: ['EatSense.model.Order'],
 	config: {
-		model: 'EatSense.model.Order',
 		storeId: 'orderStore',
-		sorters: [{
-			property: 'orderTime',
-			direction: 'DESC'
-		}]
-		//Because of Ticket #28
-		// sorters: [{
-		//   sorterFn: function(record1, record2) {
-		// 	   var status1 = record1.data.status;
-		// 	   var status2 = record2.data.status;
-		// 	   //placed orders (new ones) are sorted on top
-		// 	   if(status1 == Karazy.constants.Order.PLACED && status1 != status2) {
-		// 			return -1;
-		// 	   } else if(status1 != status2 && status2 == Karazy.constants.Order.PLACED) {
-		// 			return 1;
-		// 	   } else if(status1 != status2 && status1 == Karazy.constants.Order.CANCELED) {
-		// 			return 1;
-		// 	   } else if(status1 != status2 && status2 == Karazy.constants.Order.CANCELED) {
-		// 			return -1;
-		// 	   } else {
-		// 	   		return (status1 > status2) ? 1 : (status1 == status2 ? 0 : -1);
-		// 	   }               
-  //           }
-	 //   }]
-	}			
-});
-Ext.define('EatSense.store.Request', {
+		model: 'EatSense.model.Order',
+		filters: [
+			{ 
+				filterFn: function(record, id) {
+					return (record.get('status') == Karazy.constants.Order.PLACED 
+						|| record.get('status') == Karazy.constants.Order.RECEIVED
+						|| record.get('status') == Karazy.constants.Order.CANCELED);
+	 			}
+	 		}
+	 	],
+	 	grouper: {
+            groupFn: function(record) {
+                return record.get('status');
+            }
+        }
+	}
+})
+Ext.define('EatSense.store.Bill', {
 	extend: 'Ext.data.Store',
+	requires: ['EatSense.model.Bill'],
 	config: {
-		model: 'EatSense.model.Request',
-		storeId: 'requestStore',
-		syncRemovedRecords: false
-	}			
-});
+		storeId: 'billStore',
+		model: 'EatSense.model.Order',
+	}
+})
 /**
- * @author Ed Spencer
- * @aside guide proxies
+ * @private
  *
- * The Rest proxy is a specialization of the {@link Ext.data.proxy.Ajax AjaxProxy} which simply maps the four actions
- * (create, read, update and destroy) to RESTful HTTP verbs. For example, let's set up a {@link Ext.data.Model Model}
- * with an inline Rest proxy
+ * A general {@link Ext.picker.Picker} slot class.  Slots are used to organize multiple scrollable slots into
+ * a single {@link Ext.picker.Picker}.
  *
- *     Ext.define('User', {
- *         extend: 'Ext.data.Model',
- *         config: {
- *             fields: ['id', 'name', 'email'],
+ *     {
+ *         name : 'limit_speed',
+ *         title: 'Speed Limit',
+ *         data : [
+ *             {text: '50 KB/s', value: 50},
+ *             {text: '100 KB/s', value: 100},
+ *             {text: '200 KB/s', value: 200},
+ *             {text: '300 KB/s', value: 300}
+ *         ]
+ *     }
  *
- *             proxy: {
- *                 type: 'rest',
- *                 url : '/users'
- *             }
- *         }
- *     });
- *
- * Now we can create a new User instance and save it via the Rest proxy. Doing this will cause the Proxy to send a POST
- * request to '/users':
- *
- *     var user = Ext.create('User', {name: 'Ed Spencer', email: 'ed@sencha.com'});
- *
- *     user.save(); //POST /users
- *
- * Let's expand this a little and provide a callback for the {@link Ext.data.Model#save} call to update the Model once
- * it has been created. We'll assume the creation went successfully and that the server gave this user an ID of 123:
- *
- *     user.save({
- *         success: function(user) {
- *             user.set('name', 'Khan Noonien Singh');
- *
- *             user.save(); //PUT /users/123
- *         }
- *     });
- *
- * Now that we're no longer creating a new Model instance, the request method is changed to an HTTP PUT, targeting the
- * relevant url for that user. Now let's delete this user, which will use the DELETE method:
- *
- *         user.destroy(); //DELETE /users/123
- *
- * Finally, when we perform a load of a Model or Store, Rest proxy will use the GET method:
- *
- *     //1. Load via Store
- *
- *     //the Store automatically picks up the Proxy from the User model
- *     var store = Ext.create('Ext.data.Store', {
- *         model: 'User'
- *     });
- *
- *     store.load(); //GET /users
- *
- *     //2. Load directly from the Model
- *
- *     //GET /users/123
- *     Ext.ModelManager.getModel('User').load(123, {
- *         success: function(user) {
- *             console.log(user.getId()); //outputs 123
- *         }
- *     });
- *
- * # Url generation
- *
- * The Rest proxy is able to automatically generate the urls above based on two configuration options - {@link #appendId} and
- * {@link #format}. If appendId is true (it is by default) then Rest proxy will automatically append the ID of the Model
- * instance in question to the configured url, resulting in the '/users/123' that we saw above.
- *
- * If the request is not for a specific Model instance (e.g. loading a Store), the url is not appended with an id.
- * The Rest proxy will automatically insert a '/' before the ID if one is not already present.
- *
- *     new Ext.data.proxy.Rest({
- *         url: '/users',
- *         appendId: true //default
- *     });
- *
- *     // Collection url: /users
- *     // Instance url  : /users/123
- *
- * The Rest proxy can also optionally append a format string to the end of any generated url:
- *
- *     new Ext.data.proxy.Rest({
- *         url: '/users',
- *         format: 'json'
- *     });
- *
- *     // Collection url: /users.json
- *     // Instance url  : /users/123.json
- *
- * If further customization is needed, simply implement the {@link #buildUrl} method and add your custom generated url
- * onto the {@link Ext.data.Request Request} object that is passed to buildUrl. See [Rest proxy's implementation][1] for
- * an example of how to achieve this.
- *
- * Note that Rest proxy inherits from {@link Ext.data.proxy.Ajax AjaxProxy}, which already injects all of the sorter,
- * filter, group and paging options into the generated url. See the {@link Ext.data.proxy.Ajax AjaxProxy docs} for more
- * details.
- *
- * [1]: source/Rest.html#Ext-data-proxy-Rest-method-buildUrl
+ * See the {@link Ext.picker.Picker} documentation on how to use slots.
  */
-Ext.define('Ext.data.proxy.Rest', {
-    extend: 'Ext.data.proxy.Ajax',
-    alternateClassName: 'Ext.data.RestProxy',
-    alias : 'proxy.rest',
+Ext.define('Ext.picker.Slot', {
+    extend: 'Ext.DataView',
+    xtype : 'pickerslot',
+    alternateClassName: 'Ext.Picker.Slot',
+    requires: [
+        'Ext.XTemplate',
+        'Ext.data.Store',
+        'Ext.Component',
+        'Ext.data.StoreManager'
+    ],
+
+    /**
+     * @event slotpick
+     * Fires whenever an slot is picked
+     * @param {Ext.picker.Slot} this
+     * @param {Mixed} value The value of the pick
+     * @param {HTMLElement} node The node element of the pick
+     */
+
+    isSlot: true,
 
     config: {
         /**
-         * @cfg {Boolean} appendId
-         * True to automatically append the ID of a Model instance when performing a request based on that single instance.
-         * See Rest proxy intro docs for more details. Defaults to true.
+         * @cfg {String} title
+         * The title to use for this slot. Null for no title
+         * @accessor
          */
-        appendId: true,
+        title: null,
 
         /**
-         * @cfg {String} format
-         * Optional data format to send to the server when making any request (e.g. 'json'). See the Rest proxy intro docs
-         * for full details. Defaults to null.
+         * @private
+         * @cfg {Boolean} showTitle
+         * @accessor
          */
-        format: null,
+        showTitle: true,
 
         /**
-         * @cfg {Boolean} batchActions
-         * True to batch actions of a particular type when synchronizing the store. Defaults to false.
+         * @private
+         * @cfg {String} cls
+         * The main component class
+         * @accessor
          */
-        batchActions: false,
+        cls: Ext.baseCSSPrefix + 'picker-slot',
 
-        actionMethods: {
-            create : 'POST',
-            read   : 'GET',
-            update : 'PUT',
-            destroy: 'DELETE'
+        /**
+         * @cfg {String} name
+         * The name of this slot. This config option is required.
+         * @accessor
+         */
+        name: null,
+
+        /**
+         * @cfg {Number} value The value of this slot
+         * @accessor
+         */
+        value: null,
+
+        /**
+         * @cfg {Number} flex
+         * @accessor
+         * @hide
+         */
+        flex: 1,
+
+        /**
+         * @cfg {String} align
+         * The horizontal alignment of the slot's contents. Valid values are "left", "center",
+         * and "right". Defaults to "left".
+         * @accessor
+         */
+        align: 'left',
+
+        /**
+         * @cfg {String} displayField
+         * The display field in the store.
+         * Defaults to 'text'.
+         * @accessor
+         */
+        displayField: 'text',
+
+        /**
+         * @cfg {String} valueField
+         * The value field in the store.
+         * Defaults to 'value'.
+         * @accessor
+         */
+        valueField: 'value',
+
+        /**
+         * @cfg {Object} scrollable
+         * @accessor
+         * @hide
+         */
+        scrollable: {
+            direction: 'vertical',
+            indicators: false,
+            momentumEasing: {
+                minVelocity: 2
+            },
+            slotSnapEasing: {
+                duration: 100
+            }
+        }
+    },
+
+    constructor: function() {
+        /**
+         * @property selectedIndex
+         * @type Number
+         * The current selectedIndex of the picker slot
+         * @private
+         */
+        this.selectedIndex = 0;
+
+        /**
+         * @property picker
+         * @type Ext.picker.Picker
+         * A reference to the owner Picker
+         * @private
+         */
+
+        this.callParent(arguments);
+    },
+
+    /**
+     * Sets the title for this dataview by creating element
+     */
+    applyTitle: function(title) {
+        //check if the title isnt defined
+        if (title) {
+            //create a new title element
+            title = Ext.create('Ext.Component', {
+                cls: Ext.baseCSSPrefix + 'picker-slot-title',
+                docked      : 'top',
+                html        : title
+            });
+        }
+
+        return title;
+    },
+
+    updateTitle: function(newTitle, oldTitle) {
+        if (newTitle) {
+            this.add(newTitle);
+            this.setupBar();
+        }
+
+        if (oldTitle) {
+            this.remove(oldTitle);
+        }
+    },
+
+    updateShowTitle: function(showTitle) {
+        var title = this.getTitle();
+        if (title) {
+            title[showTitle ? 'show' : 'hide']();
+
+            this.setupBar();
+        }
+    },
+
+    updateDisplayField: function(newDisplayField) {
+        this.setItemTpl('<div class="' + Ext.baseCSSPrefix + 'picker-item {cls} <tpl if="extra">' + Ext.baseCSSPrefix + 'picker-invalid</tpl>">{' + newDisplayField + '}</div>');
+    },
+
+    /**
+     * Updates the {@link #align} configuration
+     */
+    updateAlign: function(newAlign, oldAlign) {
+        var element = this.element;
+        element.addCls(Ext.baseCSSPrefix + 'picker-' + newAlign);
+        element.removeCls(Ext.baseCSSPrefix + 'picker-' + oldAlign);
+    },
+
+    /**
+     * Looks at the {@link #data} configuration and turns it into {@link #store}
+     */
+    applyData: function(data) {
+        var parsedData = [],
+            ln = data && data.length,
+            i, item, obj;
+
+        if (data && Ext.isArray(data) && ln) {
+            for (i = 0; i < ln; i++) {
+                item = data[i];
+                obj = {};
+                if (Ext.isArray(item)) {
+                    obj[this.valueField] = item[0];
+                    obj[this.displayField] = item[1];
+                }
+                else if (Ext.isString(item)) {
+                    obj[this.valueField] = item;
+                    obj[this.displayField] = item;
+                }
+                else if (Ext.isObject(item)) {
+                    obj = item;
+                }
+                parsedData.push(obj);
+            }
+        }
+
+        return data;
+    },
+
+    updateData: function(data) {
+        this.setStore(Ext.create('Ext.data.Store', {
+            model: 'x-textvalue',
+            data : data
+        }));
+    },
+
+    // @private
+    initialize: function() {
+        this.callParent();
+
+        var scroller = this.getScrollable().getScroller();
+
+        this.on({
+            scope: this,
+            painted: 'onPainted',
+            itemtap: 'doItemTap'
+        });
+
+        scroller.on({
+            scope: this,
+            scrollend: 'onScrollEnd'
+        });
+    },
+
+    // @private
+    onPainted: function() {
+        this.setupBar();
+    },
+
+    /**
+     * Returns an instance of the owner picker
+     * @private
+     */
+    getPicker: function() {
+        if (!this.picker) {
+            this.picker = this.getParent();
+        }
+
+        return this.picker;
+    },
+
+    // @private
+    setupBar: function() {
+        if (!this.rendered) {
+            //if the component isnt rendered yet, there is no point in calculating the padding just eyt
+            return;
+        }
+
+        var element = this.element,
+            innerElement = this.innerElement,
+            picker = this.getPicker(),
+            bar = picker.bar,
+            value = this.getValue(),
+            showTitle = this.getShowTitle(),
+            title = this.getTitle(),
+            scrollable = this.getScrollable(),
+            scroller = scrollable.getScroller(),
+            titleHeight = 0,
+            barY, elY, barHeight, padding, paddingBottom;
+
+        barY = bar.getY();
+        elY = element.getY();
+
+        if (showTitle && title) {
+            elY += title.element.getHeight();
+        }
+
+        barHeight = bar.getHeight();
+
+        if (showTitle && title) {
+            titleHeight = title.element.getHeight();
+        }
+
+        padding = Math.ceil((element.getHeight() - titleHeight - barHeight) / 2);
+        this.slotPadding = padding;
+
+        innerElement.setStyle({
+            padding: padding + 'px 0 ' + (padding) + 'px'
+        });
+
+        scroller.refresh();
+        scroller.setSlotSnapSize(barHeight);
+
+        this.setValue(value);
+    },
+
+    // @private
+    doItemTap: function(list, index, item, e) {
+        var me = this;
+        me.selectedIndex = index;
+        me.selectedNode = item;
+        me.scrollToItem(item, true);
+
+        me.fireEvent('slotpick', me, me.getValue(), me.selectedNode);
+    },
+
+    // @private
+    scrollToItem: function(item, animated) {
+        var y = item.getY(),
+            parentEl = item.parent(),
+            parentY = parentEl.getY(),
+            // padding = this.slotPadding,
+            scrollView = this.getScrollable(),
+            scroller = scrollView.getScroller(),
+            difference;
+
+        difference = y - parentY;
+
+        scroller.scrollTo(0, difference, animated);
+    },
+
+    // @private
+    onScrollEnd: function(scroller, x, y) {
+        var me = this,
+            index = Math.round(y / me.picker.bar.getHeight()),
+            viewItems = me.getViewItems(),
+            item = viewItems[index];
+
+        if (item) {
+            me.selectedIndex = index;
+            me.selectedNode = item;
+
+            me.fireEvent('slotpick', me, me.getValue(), me.selectedNode);
         }
     },
 
     /**
-     * Specialized version of buildUrl that incorporates the {@link #appendId} and {@link #format} options into the
-     * generated url. Override this to provide further customizations, but remember to call the superclass buildUrl so
-     * that additional parameters like the cache buster string are appended.
-     * @param {Object} request
+     * Returns the vlaue of this slot
+     * @private
      */
-    buildUrl: function(request) {
-        var me        = this,
-            operation = request.getOperation(),
-            records   = operation.getRecords() || [],
-            record    = records[0],
-            model     = me.getModel(),
-            idProperty= model.getIdProperty(),
-            format    = me.getFormat(),
-            url       = me.getUrl(request),
-            params    = request.getParams() || {},
-            id        = (record && !record.phantom) ? record.getId() : params[idProperty];
+    getValue: function() {
+        var store = this.getStore(),
+            record, value;
 
-        if (me.getAppendId() && id) {
-            if (!url.match(/\/$/)) {
-                url += '/';
-            }
-            url += id;
-            delete params[idProperty];
+        if (!store) {
+            return;
         }
 
-        if (format) {
-            if (!url.match(/\.$/)) {
-                url += '.';
-            }
-
-            url += format;
+        if (!this.rendered) {
+            return this._value;
         }
 
-        request.setUrl(url);
+        //if the value is ever false, that means we do not want to return anything
+        if (this._value === false) {
+            return null;
+        }
 
-        return me.callParent([request]);
+        record = store.getAt(this.selectedIndex);
+
+        value = record ? record.get(this.getValueField()) : null;
+        this._value = value;
+
+        return value;
+    },
+
+    /**
+     * Sets the value of this slot
+     * @private
+     */
+    setValue: function(value) {
+        if (!Ext.isDefined(value)) {
+            return;
+        }
+
+        if (!this.rendered || !value) {
+            //we don't want to call this until the slot has been rendered
+            this._value = value;
+            return;
+        }
+
+        var store = this.getStore(),
+            viewItems = this.getViewItems(),
+            valueField = this.getValueField(),
+            index, item;
+
+        index = store.find(valueField, value);
+        if (index != -1) {
+            item = Ext.get(viewItems[index]);
+
+            this.selectedIndex = index;
+            this.scrollToItem(item);
+
+            this._value = value;
+        }
+    },
+
+    /**
+     * Sets the value of this slot
+     * @private
+     */
+    setValueAnimated: function(value) {
+        if (!value) {
+            return;
+        }
+
+        if (!this.rendered) {
+            //we don't want to call this until the slot has been rendered
+            this._value = value;
+            return;
+        }
+
+        var store = this.getStore(),
+            viewItems = this.getViewItems(),
+            valueField = this.getValueField(),
+            index, item;
+
+        index = store.find(valueField, value);
+        if (index != -1) {
+            item = Ext.get(viewItems[index]);
+
+            this.selectedIndex = index;
+            this.scrollToItem(item, {
+                duration: 100
+            });
+
+            this._value = value;
+        }
     }
 });
 
-Ext.define('EatSense.data.proxy.CustomRestProxy', {
-	override: 'Ext.data.proxy.Rest',
-	  buildUrl: function(request) {		
-	        var  me = this, _serviceUrl = Karazy.config.serviceUrl, 
-	        	url = me.getUrl(request),
-	        	params = request.getParams() || {},
-	        	defaultHeaders = Ext.Ajax.getDefaultHeaders() || {};
+/**
+A general picker class. {@link Ext.picker.Slot}s are used to organize multiple scrollable slots into a single picker. {@link #slots} is
+the only necessary configuration.
 
-	        if(params.pathId) {
-	        	if(url.match(/(.*){pathId}(.*)/)) {
-	        		var replacer = '$1'+params.pathId+'$2';
-	        		url = url.replace(/(.*){pathId}(.*)/, replacer);
-	        		delete params.pathId;
-	        	}	        	
-	        } else if(defaultHeaders.pathId) {
-	        	if(url.match(/(.*){pathId}(.*)/)) {
-	        		var replacer = '$1'+defaultHeaders.pathId+'$2';
-	        		url = url.replace(/(.*){pathId}(.*)/, replacer);
-	        	}	
-	        }
-	        	
-	        request.setUrl(_serviceUrl + url);
+The {@link #slots} configuration with a few key values:
 
-	        return me.callParent([request]);
-	    },
+ - **name:** The name of the slot (will be the key when using {@link #getValues} in this {@link Ext.picker.Picker})
+ - **title:** The title of this slot (if {@link #useTitles} is set to true)
+ - **data/store:** The data or store to use for this slot.
 
-	    doRequest: function(operation, callback, scope) {
-	    	  var writer  = this.getWriter(),
-	            request = this.buildRequest(operation);
+Remember, {@link Ext.picker.Slot} class extends from {@link Ext.dataview.DataView}.
 
-	        request.setConfig({
-	            headers        : this.getHeaders(),
-	            timeout        : this.getTimeout(),
-	            method         : this.getMethod(request),
-	            callback       : this.createRequestCallback(request, operation, callback, scope),
-	            scope          : this
-	        });
+## Examples
 
-	        if (operation.getWithCredentials() || this.getWithCredentials()) {
-	            request.setWithCredentials(true);
-	        }
+    @example miniphone preview
+    var picker = Ext.create('Ext.Picker', {
+        slots: [
+            {
+                name : 'limit_speed',
+                title: 'Speed',
+                data : [
+                    {text: '50 KB/s', value: 50},
+                    {text: '100 KB/s', value: 100},
+                    {text: '200 KB/s', value: 200},
+                    {text: '300 KB/s', value: 300}
+                ]
+            }
+        ]
+    });
+    Ext.Viewport.add(picker);
+    picker.show();
 
-	        // We now always have the writer prepare the request
-	        request = writer.write(request);
+You can also customize the top toolbar on the {@link Ext.picker.Picker} by changing the {@link #doneButton} and {@link #cancelButton} configurations:
 
-	       
-	        
-	        if(request.getMethod().toUpperCase() === 'DELETE') {
-	        	//prevent Sencha from sending payload to avoid BAD REQUEST on appengine
-	        	 delete request._jsonData;	        	
-	        }
-	        
-	        Ext.Ajax.request(request.getCurrentConfig());
-	        
-	        return request;
-	    }
+    @example miniphone preview
+    var picker = Ext.create('Ext.Picker', {
+        doneButton: 'I\'m done!',
+        cancelButton: false,
+        slots: [
+            {
+                name : 'limit_speed',
+                title: 'Speed',
+                data : [
+                    {text: '50 KB/s', value: 50},
+                    {text: '100 KB/s', value: 100},
+                    {text: '200 KB/s', value: 200},
+                    {text: '300 KB/s', value: 300}
+                ]
+            }
+        ]
+    });
+    Ext.Viewport.add(picker);
+    picker.show();
+
+Or by passing a custom {@link #toolbar} configuration:
+
+    @example miniphone preview
+    var picker = Ext.create('Ext.Picker', {
+        doneButton: false,
+        cancelButton: false,
+        toolbar: {
+            ui: 'light',
+            title: 'My Picker!'
+        },
+        slots: [
+            {
+                name : 'limit_speed',
+                title: 'Speed',
+                data : [
+                    {text: '50 KB/s', value: 50},
+                    {text: '100 KB/s', value: 100},
+                    {text: '200 KB/s', value: 200},
+                    {text: '300 KB/s', value: 300}
+                ]
+            }
+        ]
+    });
+    Ext.Viewport.add(picker);
+    picker.show();
+ */
+Ext.define('Ext.picker.Picker', {
+    extend: 'Ext.Sheet',
+    alias : 'widget.picker',
+    alternateClassName: 'Ext.Picker',
+    requires: ['Ext.picker.Slot', 'Ext.Toolbar', 'Ext.data.Model'],
+
+    isPicker: true,
+
+    /**
+     * @event pick
+     * Fired when a slot has been picked
+     * @param {Ext.Picker} this This Picker
+     * @param {Object} The values of this picker's slots, in {name:'value'} format
+     * @param {Ext.Picker.Slot} slot An instance of Ext.Picker.Slot that has been picked
+     */
+
+    /**
+     * @event change
+     * Fired when the value of this picker has changed the Done button has been pressed.
+     * @param {Ext.picker.Picker} this This Picker
+     * @param {Object} value The values of this picker's slots, in {name:'value'} format
+     */
+
+    /**
+     * @event cancel
+     * Fired when the cancel button is tapped and the values are reverted back to
+     * what they were
+     * @param {Ext.Picker} this This Picker
+     */
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        cls: Ext.baseCSSPrefix + 'picker',
+
+        /**
+         * @cfg {String/Mixed} doneButton
+         * Can be either:<ul>
+         * <li>A {String} text to be used on the Done button</li>
+         * <li>An {Object} as config for {@link Ext.Button}</li>
+         * <li>false or null to hide it</li></ul>
+         * @accessor
+         */
+        doneButton: true,
+
+        /**
+         * @cfg {String/Mixed} cancelButton
+         * Can be either:<ul>
+         * <li>A {String} text to be used on the Cancel button</li>
+         * <li>An {Object} as config for {@link Ext.Button}</li>
+         * <li>false or null to hide it</li></ul>
+         * @accessor
+         */
+        cancelButton: true,
+
+        /**
+         * @cfg {Boolean} useTitles
+         * Generate a title header for each individual slot and use
+         * the title configuration of the slot.
+         * @accessor
+         */
+        useTitles: false,
+
+        /**
+         * @cfg {Array} slots
+         * An array of slot configurations.
+         * <ul>
+         *  <li>name - {String} - Name of the slot</li>
+         *  <li>data - {Array} - An array of text/value pairs in the format {text: 'myKey', value: 'myValue'}</li>
+         *  <li>title - {String} - Title of the slot. This is used in conjunction with useTitles: true.</li>
+         * </ul>
+         * @accessor
+         */
+        slots: null,
+
+        /**
+         * @cfg {String/Number} value The value to initialize the picker with
+         * @accessor
+         */
+        value: null,
+
+        /**
+         * @cfg {Number} height
+         * The height of the picker.
+         * @accessor
+         */
+        height: 220,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        layout: {
+            type : 'hbox',
+            align: 'stretch'
+        },
+
+        /**
+         * @cfg
+         * @hide
+         */
+        centered: false,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        left : 0,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        right: 0,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        bottom: 0,
+
+        // @private
+        defaultType: 'pickerslot',
+
+        /**
+         * @cfg {Ext.TitleBar/Ext.Toolbar/Object} toolbar
+         * The toolbar which contains the {@link #doneButton} and {@link #cancelButton} buttons.
+         * You can override this if you wish, and add your own configurations. Just ensure that you take into account
+         * the {@link #doneButton} and {@link #cancelButton} configurations.
+         *
+         * The default xtype is a {@link Ext.TitleBar}:
+         *
+         *     toolbar: {
+         *         items: [
+         *             {
+         *                 xtype: 'button',
+         *                 text: 'Left',
+         *                 align: 'left'
+         *             },
+         *             {
+         *                 xtype: 'button',
+         *                 text: 'Right',
+         *                 align: 'left'
+         *             }
+         *         ]
+         *     }
+         *
+         * Or to use a {@link Ext.Toolbar instead}:
+         *
+         *     toolbar: {
+         *         xtype: 'toolbar',
+         *         items: [
+         *             {
+         *                 xtype: 'button',
+         *                 text: 'Left'
+         *             },
+         *             {
+         *                 xtype: 'button',
+         *                 text: 'Left Two'
+         *             }
+         *         ]
+         *     }
+         *
+         * @accessor
+         */
+        toolbar: true
+    },
+
+    initElement: function() {
+        this.callParent(arguments);
+
+        var me = this,
+            clsPrefix = Ext.baseCSSPrefix,
+            innerElement = this.innerElement;
+
+        //insert the mask, and the picker bar
+        this.mask = innerElement.createChild({
+            cls: clsPrefix + 'picker-mask'
+        });
+
+        this.bar = this.mask.createChild({
+            cls: clsPrefix + 'picker-bar'
+        });
+
+        me.on({
+            scope   : this,
+            delegate: 'pickerslot',
+            slotpick: 'onSlotPick'
+        });
+
+        me.on({
+            scope: this,
+            show: 'onShow'
+        });
+    },
+
+    /**
+     * @private
+     */
+    applyToolbar: function(config) {
+        if (config === true) {
+            config = {};
+        }
+
+        Ext.applyIf(config, {
+            docked: 'top'
+        });
+
+        return Ext.factory(config, 'Ext.TitleBar', this.getToolbar());
+    },
+
+    /**
+     * @private
+     */
+    updateToolbar: function(newToolbar, oldToolbar) {
+        if (newToolbar) {
+            this.add(newToolbar);
+        }
+
+        if (oldToolbar) {
+            this.remove(oldToolbar);
+        }
+    },
+
+    /**
+     * Updates the {@link #doneButton} configuration. Will change it into a button when appropriate, or just update the text if needed.
+     */
+    applyDoneButton: function(config) {
+        if (config) {
+            if (Ext.isBoolean(config)) {
+                config = {};
+            }
+
+            if (typeof config == "string") {
+                config = {
+                    text: config
+                };
+            }
+
+            Ext.applyIf(config, {
+                ui: 'action',
+                align: 'right',
+                text: 'Done'
+            });
+        }
+
+        return Ext.factory(config, 'Ext.Button', this.getDoneButton());
+    },
+
+    updateDoneButton: function(newDoneButton, oldDoneButton) {
+        var toolbar = this.getToolbar();
+
+        if (newDoneButton) {
+            toolbar.add(newDoneButton);
+            newDoneButton.on('tap', this.onDoneButtonTap, this);
+        } else if (oldDoneButton) {
+            toolbar.remove(oldDoneButton);
+        }
+    },
+
+    /**
+     * Updates the {@link #cancelButton} configuration. Will change it into a button when appropriate, or just update the text if needed.
+     */
+    applyCancelButton: function(config) {
+        if (config) {
+            if (Ext.isBoolean(config)) {
+                config = {};
+            }
+
+            if (typeof config == "string") {
+                config = {
+                    text: config
+                };
+            }
+
+            Ext.applyIf(config, {
+                align: 'left',
+                text: 'Cancel'
+            });
+        }
+
+        return Ext.factory(config, 'Ext.Button', this.getCancelButton());
+    },
+
+    updateCancelButton: function(newCancelButton, oldCancelButton) {
+        var toolbar = this.getToolbar();
+
+        if (newCancelButton) {
+            toolbar.add(newCancelButton);
+            newCancelButton.on('tap', this.onCancelButtonTap, this);
+        } else if (oldCancelButton) {
+            toolbar.remove(oldCancelButton);
+        }
+    },
+
+    /**
+     * @private
+     */
+    updateUseTitles: function(useTitles) {
+        var innerItems = this.getInnerItems(),
+            ln = innerItems.length,
+            cls = Ext.baseCSSPrefix + 'use-titles',
+            i, innerItem;
+
+        //add a cls onto the picker
+        if (useTitles) {
+            this.addCls(cls);
+        } else {
+            this.removeCls(cls);
+        }
+
+        //show the titme on each of the slots
+        for (i = 0; i < ln; i++) {
+            innerItem = innerItems[i];
+
+            if (innerItem.isSlot) {
+                innerItem.setShowTitle(useTitles);
+            }
+        }
+    },
+
+    applySlots: function(slots) {
+        //loop through each of the slots and add a referece to this picker
+        if (slots) {
+            var ln = slots.length,
+                i;
+
+            for (i = 0; i < ln; i++) {
+                slots[i].picker = this;
+            }
+        }
+
+        return slots;
+    },
+
+    /**
+     * Adds any new {@link #slots} to this picker, and removes existing {@link #slots}
+     * @private
+     */
+    updateSlots: function(newSlots) {
+        var bcss = Ext.baseCSSPrefix,
+            innerItems;
+
+        this.removeAll();
+
+        if (newSlots) {
+            this.add(newSlots);
+        }
+
+        innerItems = this.getInnerItems();
+        if (innerItems.length > 0) {
+            innerItems[0].addCls(bcss + 'first');
+            innerItems[innerItems.length - 1].addCls(bcss + 'last');
+        }
+
+        this.updateUseTitles(this.getUseTitles());
+    },
+
+    /**
+     * @private
+     * Called when the done button has been tapped.
+     */
+    onDoneButtonTap: function() {
+        var oldValue = this._value,
+            newValue = this.getValue();
+
+        if (newValue != oldValue) {
+            this.fireEvent('change', this, newValue);
+        }
+
+        this.hide();
+    },
+
+    /**
+     * @private
+     * Called when the cancel button has been tapped.
+     */
+    onCancelButtonTap: function() {
+        this.fireEvent('cancel', this);
+        this.hide();
+    },
+
+    /**
+     * @private
+     * Called when a slot has been picked.
+     */
+    onSlotPick: function(slot, value, node) {
+        this.fireEvent('pick', this, this.getValue(), slot);
+    },
+
+    onShow: function() {
+        if (!this.isHidden()) {
+            this.setValue(this._value);
+        }
+    },
+
+    /**
+     * Sets the values of the pickers slots
+     * @param {Object} values The values in a {name:'value'} format
+     * @param {Boolean} animated True to animate setting the values
+     * @return {Ext.Picker} this This picker
+     */
+    setValue: function(values, animated) {
+        var me = this,
+            slots = me.getInnerItems(),
+            ln = slots.length,
+            key, slot, loopSlot, i;
+
+        if (!values) {
+            values = {};
+            for (i = 0; i < ln; i++) {
+                //set the value to false so the slot will return null when getValue is set
+                values[slots[i].config.name] = false;
+            }
+        }
+
+        for (key in values) {
+            value = values[key];
+            for (i = 0; i < slots.length; i++) {
+                loopSlot = slots[i];
+                if (loopSlot.config.name == key) {
+                    slot = loopSlot;
+                    break;
+                }
+            }
+
+            if (slot) {
+                if (animated) {
+                    slot.setValueAnimated(value);
+                } else {
+                    slot.setValue(value);
+                }
+            }
+        }
+
+        me._value = this.getValue();
+        me._values = me._value;
+
+        return me;
+    },
+
+    setValueAnimated: function(values) {
+        this.setValue(values, true);
+    },
+
+    /**
+     * Returns the values of each of the pickers slots
+     * @return {Object} The values of the pickers slots
+     */
+    getValue: function() {
+        var values = {},
+            items = this.getItems().items,
+            ln = items.length,
+            item, i;
+
+        for (i = 0; i < ln; i++) {
+            item = items[i];
+            if (item && item.isSlot) {
+                values[item.getName()] = item.getValue();
+            }
+        }
+
+        this._values = values;
+
+        return this._values;
+    },
+
+    /**
+     * Returns the values of eaach of the pickers slots
+     * @return {Object} The values of the pickers slots
+     */
+    getValues: function() {
+        return this.getValue();
+    },
+
+    destroy: function() {
+        this.callParent();
+        Ext.destroy(this.mask, this.bar);
+    }
+}, function() {
+    //<deprecated product=touch since=2.0>
+    /**
+     * @member Ext.picker.Picker
+     * @cfg {String} activeCls
+     * CSS class to be applied to individual list items when they have been chosen.
+     * @removed 2.0.0
+     */
+    Ext.deprecateProperty(this, 'activeCls', null, "Ext.picker.Picker.activeCls has been removed");
+
+    /**
+     * @method getCard
+     * @inheritdoc Ext.picker.Picker#getActiveItem
+     * @deprecated 2.0.0 Please use {@link #getActiveItem} instead
+     */
+    Ext.deprecateClassMethod(this, 'getCard', 'getActiveItem');
+
+    /**
+     * @method setCard
+     * @inheritdoc Ext.picker.Picker#setActiveItem
+     * @deprecated 2.0.0 Please use {@link #setActiveItem} instead
+     */
+    Ext.deprecateClassMethod(this, 'setCard', 'setActiveItem');
+
+    //</deprecated>
+
+    Ext.define('x-textvalue', {
+        extend: 'Ext.data.Model',
+        config: {
+            fields: ['text', 'value']
+        }
+    });
 });
-Ext.define('EatSense.model.Account', {
-	extend: 'Ext.data.Model',
-	config: {
-		fields: [
-		{
-			name: 'login'
-		}, 
-		{
-			name: 'email'
-		},
-		{
-			name: 'passwordHash'
-		}, 
-		{
-			name: 'role'
-		}, 
-		{
-			name: 'businessId'
-		},	
-		//TODO maybe store an association?
-		{
-			name: 'business'
-		},
-		{
-			name: 'token'
-		}	
-		],
-		proxy : {
-			type : 'rest',
-			enablePagingParams: false,
-			url : '/accounts/',
-			reader : {
-				type : 'json',
-			}
-		}
-	}
-});
-/*
-* The login controller handles login and storing application state.
-*/
-Ext.define('EatSense.controller.Login', {
+
+
+	Ext.define('EatSense.controller.Order', {
 	extend: 'Ext.app.Controller',
-	requires: ['EatSense.model.Account', 'Ext.data.proxy.LocalStorage'],
+	requires: ['Ext.picker.Picker'],
 	config: {
-		control: {
-			loginButton: {
-				tap: 'login'
-			},
-			logoutButton: {
-				tap: 'showLogoutDialog'
-			},
-		 	businessList: {
-		 		itemtap: 'chooseBusiness'
-		 	},
-		 	cancelLoginButton: {
-	 			tap: 'cancelLogin'
-		 	}
-		},		
 		refs: {
-			loginPanel: 'login',
-			loginButton: 'login button[action=login]',
-			logoutButton: 'button[action=logout]',
-			loginField: 'textfield[name=login]',
-			passwordField: 'passwordfield[name=password]',
-			savePassword: 'login togglefield[name=savePasswordToggle]',
-			businessList: 'choosebusiness list',
-			cancelLoginButton: 'choosebusiness button[action=cancel]',			
-		},		
-		//Logged in user
-		account : {}
+			main : 'mainview',
+			cartview : 'carttab',
+			cartoverviewTotal: 'carttab #carttotalpanel label',
+			myordersTotal : 'myorderstab #myorderstotalpanel label',
+			myordersComplete: 'myorderstab #myorderscompletepanel',
+			myordersCompleteButton: 'myorderstab button[action=complete]',
+			menutab: 'menutab',
+			orderlist : 'carttab #orderlist',
+			cancelAllOrdersBt : 'carttab #cartTopBar button[action="trash"]',
+			submitOrderBt : 'carttab #cartTopBar button[action="order"]',
+			topToolbar : 'carttab #cartTopBar',
+			productdetail : {
+                selector: 'orderdetail',
+                xtype: 'orderdetail',
+                autoCreate: true
+            },
+			choicespanel : 'orderdetail #choicesPanel',
+			editOrderBt : 'cartoverviewitem button[action=edit]',
+			cancelOrderBt : 'cartoverviewitem button[action=cancel]',
+			amountSpinner : 'orderdetail spinnerfield',
+			prodDetailLabel :'orderdetail #prodDetailLabel' ,
+			prodPriceLabel :'orderdetail #prodPriceLabel' ,
+			closeOrderDetailBt: 'orderdetail button[action=close]',
+			loungeview : 'lounge',
+			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
+			myorderlist: 'myorderstab list',
+			myordersview: 'myorderstab',
+			loungeTabBar: '#loungeTabBar',
+			paymentButton: 'myorderstab button[action="pay"]',
+			leaveButton: 'myorderstab button[action="leave"]',
+			confirmEditButton: 'orderdetail button[action="edit"]',
+			undoEditButton: 'orderdetail button[action="undo"]'
+		},
+		control: {
+			cancelAllOrdersBt : {
+				 tap: 'dumpCart'
+			 }, 
+			 submitOrderBt : {
+				 tap: 'submitOrders'
+			 },
+			 editOrderBt : {
+				tap: 'showOrderDetail'
+			 },
+			 cancelOrderBt : {
+			 	tap: 'cancelOrder'
+			 },
+             amountSpinner : {
+            	 spin: 'amountChanged'
+             },
+             paymentButton: {
+            	 tap: 'choosePaymentMethod'
+             },
+             myordersCompleteButton : {
+            	 tap: 'completePayment'
+             },
+             leaveButton : {
+            	 tap: 'leave'
+             }, 
+             closeOrderDetailBt: {
+             	tap: 'closeOrderDetail'
+             },
+             confirmEditButton: {
+             	tap: 'editOrder'
+             },
+             undoEditButton: {
+             	tap: 'closeOrderDetail'
+             }
+		},
+		/**
+		*	Current active order.
+		*/
+		activeOrder: null,
+		/**
+		*	Current active bill.
+		*/
+		activeBill: null	
 	},
-
 	init: function() {
-		console.log('init');
-		var		me = this;
+		//store retrieved models
+		var	messageCtr = this.getApplication().getController('Message');
 
-
-		//private functions
-		/*
-		*	Resets Account proxy headers to prevent passwort from being send plain.
-		*/
-		this.resetAccountProxyHeaders =  function() {
-			console.log('resetAccountProxyHeaders');
-			EatSense.model.Account.getProxy().setHeaders({});
-	 	};
-	 	/*
-		*	Resets default Ajax headers.
-		*/
-	 	this.resetDefaultAjaxHeaders = function() {
-	 		Ext.Ajax.setDefaultHeaders({});
-	 	};
-
-	 	/*
-	 	*	Save application state by using localstorage when getSavePassword is checked.
-	 	*/
-	 	this.saveAppState = function() {
-	 		var 	accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
-
-			if(me.getSavePassword().getValue() === 1) {
-				me.getAccount().setDirty();
-				accountLocalStore.add(me.getAccount());
-				accountLocalStore.sync();
-			} else {
-				accountLocalStore.removeAll();
-				accountLocalStore.sync();
-			};
-	 	};
-	 	/*
-	 	*	Reset login fields.
-	 	*/
-	 	this.resetLoginFields = function() {
-	 		me.getLoginField().setValue("");
-	 		me.getPasswordField().setValue("");
-	 	};
+    	messageCtr.on('eatSense.order', this.handleOrderMessage, this);
 	},
 	/**
-	* 	Tries to restore saved credentials from local webstorage.
-	*	If this fails login screen is shown.
-	*/
-	restoreCredentials: function() {
-		console.log('restoreCredentials');
-		var me = this,
-			accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore'),
-			spotCtr = this.getApplication().getController('Spot'),
-			messageCtr = this.getApplication().getController('Message'),
-			account;
+	 * Load cart orders.
+	 * @return
+	 * 		<code>false</code> if cart is empty, <code>true</code> otherwise
+	 */
+	refreshCart: function() {
+		console.log('Cart Controller -> showCart');
+		var cartview = this.getCartview(), 
+			orderlist = this.getOrderlist(),
+			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
+			total = 0;
+    	
+		orderlist.setStore(orders);	
+		this.setActiveOrder(null);
+		orderlist.refresh();
 
-	   	 try {
-
-	   			accountLocalStore.load();	   	
-		   	 if(accountLocalStore.getCount() == 1) {
-		   		 console.log('app state found');
-		   		 account = accountLocalStore.first();
-		   		 this.setAccount(account);
-
-		   		 //Set default headers so that always credentials are send
-				Ext.Ajax.setDefaultHeaders({
-					'login': account.get('login'),
-					'passwordHash': account.get('passwordHash'),
-					'pathId' : account.get('businessId')
-				});
-
-				//check if saved credentials are valid
-				EatSense.model.Account.load(account.get('login'), {
-					success: function(record, operation){
-						//credentials are valid, proceed
-
-						//generate clientId for channel
-						account.set('clientId', account.get('login') + new Date().getTime());
-
-						//ToDo check if business still exists
-
-						Ext.create('EatSense.view.Main');
-						spotCtr.loadSpots();
-						messageCtr.openChannel();
-					},
-					failure: function(record, operation) {					
-						//error verifying credentials, maybe account changed on server or server ist not aaccessible
-						me.resetDefaultAjaxHeaders();
-						me.resetAccountProxyHeaders();
-
-						Ext.create('EatSense.view.Login');
-
-						me.getLoginField().setValue(account.get('login'));
-
-						if(operation.error) {
-							//not authorized
-							if(operation.error.status == "401" || operation.error.status == "403") {
-								errorMessage = Karazy.i18n.translate('restoreCredentialsErr');
-								//login data not valid. delete
-								accountLocalStore.removeAll();
-								accountLocalStore.sync();
-							} else if (operation.error.status == "404") {
-								errorMessage = Karazy.i18n.translate('resourceNotAvailable');
-							}
-						} 
-
-						(!errorMessage || errorMessage == "") ?	errorMessage = Karazy.i18n.translate('restoreCredentialsErr') : errorMessage;
-
-
-						me.getApplication().handleServerError({
-							'error': operation.error, 
-							'forceLogout': false, 
-							'hideMessage':false, 
-							'message': errorMessage
-						}); 
-					}
-				});							   			   		 	   		
-		   	 } else {
-		   	 	//more than one local account exists. That should not happen!
-		   	 	accountLocalStore.removeAll();
-		   	 	Ext.create('EatSense.view.Login');	
-		   	 }
-	   	  } catch (e) {
-	   	 	console.log('Failed restoring cockpit state.');
-	   		accountLocalStore.removeAll();	
-	   	 	Ext.create('EatSense.view.Login');	   		
-	   	 }
-	},
- 	/**
- 	*	Action called from login button.
- 	*	Reads login fields and makes an login attempt. If request is successfull,
- 	* 	main application screen is shown.
- 	*	If user sets automatic login then credentials will be saved in localstorage.
- 	*
- 	*/
-	login: function() {
-		console.log('login');
-
-		var 	me = this,
-				login = this.getLoginField().getValue(),
-				password = this.getPasswordField().getValue(),				
-				spotCtr = this.getApplication().getController('Spot'),
-				me = this,
-				errorMessage;
-
-		if(Ext.String.trim(login).length == 0 || Ext.String.trim(password).length == 0) {
-			
-			Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('needCredentials')); 
-			return;
-		}
-
-		EatSense.model.Account.getProxy().setHeaders({
-				//provide credentials, they will be added to request header
-				'login': login,
-				'password': password
-		});
-
-		EatSense.model.Account.load(login, {
-			success: function(record, operation){
-				me.setAccount(record);
-				//generate clientId for channel
-				me.getAccount().set('clientId', me.getAccount().get('login') + new Date().getTime());
-
-				//Set default headers so that always credentials are send
-				Ext.Ajax.setDefaultHeaders({
-					'login': login,
-					'passwordHash': record.get('passwordHash'),
-				});				
-
-				me.resetAccountProxyHeaders();
-				me.showBusinesses();				
-			},
-			failure: function(record, operation){
-				me.resetAccountProxyHeaders();
-				me.resetDefaultAjaxHeaders();
-				if(operation.error) {
-					//not authorized
-					if(operation.error.status == "401" || operation.error.status == "403") {
-						errorMessage = Karazy.i18n.translate('wrongCredentials');
-					} else if (operation.error.status == "404") {
-						errorMessage = Karazy.i18n.translate('resourceNotAvailable');
-					}
-				} 
-
-				(!errorMessage || errorMessage == "") ?	errorMessage = Karazy.i18n.translate('wrongCredentials') : errorMessage;			
-
-				me.getApplication().handleServerError({
-					'error': operation.error, 
-					'forceLogout': false, 
-					'hideMessage':false, 
-					'message': errorMessage
-				});
-			}
-		});
-	},
-	/**
-	*	Cancel login process in choose business view.
-	*
-	*/
-	cancelLogin: function() {
-		var		me = this,
-				loginPanel = this.getLoginPanel();
-
-		loginPanel.setActiveItem(0);
-		me.resetLoginFields();
-
-		Ext.Ajax.setDefaultHeaders({});	
-		me.setAccount({});
-		me.resetAccountProxyHeaders();		
-	},
-	/**
-	*	Logout signed in user and show login screen.
-	*	Removes credentials.
-	*	
-	*/
-	logout: function() {
-		console.log('logout');
-		var 	accountLocalStore = Ext.data.StoreManager.lookup('cockpitStateStore');
 		
-		Karazy.channel.closeChannel();
-		//remove all stored credentials
-		accountLocalStore.removeAll();
-		accountLocalStore.sync();
-
-		Ext.Ajax.setDefaultHeaders({});	
-
-		//TODO remove in a more reliable way!
-		//remove main view				
-		Ext.Viewport.remove(Ext.Viewport.down('main'));
-		//show main view				
-		Ext.create('EatSense.view.Login');		
-
+		total = this.calculateOrdersTotal(orders);			
+		this.getCartoverviewTotal().getTpl().overwrite(this.getCartoverviewTotal().element, {'price':total});
+		this.refreshCartBadgeText();
+		this.toggleCartButtons();
+		return true;
 	},
 	/**
-	*	Displays a logout dialog and logs user out if he confirms.
-	*	
-	*/
-	showLogoutDialog: function() {
-		var 	me = this;
-
+	 * Show menu.
+	 */
+	showMenu: function() {
+		//TODO not used
+		console.log('Cart Controller -> showMenu');
+		var lounge = this.getLoungeview(), menu = this.getMenutab();		
+		lounge.setActiveItem(menu);
+	},
+	/**
+	 * Remove all orders from cart and switch back to menu.
+	 */
+	dumpCart: function() {
+		console.log('Cart Controller -> dumpCart');
+		var activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn();
+		
+		Ext.Msg.show({
+			title: Karazy.i18n.translate('hint'),
+			message: Karazy.i18n.translate('dumpCart'),
+			buttons: [{
+				text: Karazy.i18n.translate('yes'),
+				itemId: 'yes',
+				ui: 'action'
+			}, {
+				text:  Karazy.i18n.translate('yes'),
+				itemId: 'no',
+				ui: 'action'
+			}],
+			scope: this,
+			fn: function(btnId, value, opt) {
+			if(btnId=='yes') {
+				//workaround, because view stays masked after switch to menu
+				Ext.Msg.hide();
+				activeCheckIn.orders().each(function(order) {
+					Ext.Ajax.request({				
+			    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+			    	    method: 'DELETE'
+			    	});
+				});
+				
+				//clear store				
+				activeCheckIn.orders().removeAll();
+				//reset badge text on cart button and switch back to menu
+				this.refreshCart();
+				}
+			}
+		});				
+	},
+	/**
+	 * Submits orders to server.
+	 */
+	submitOrders: function() {
+		console.log('Cart Controller -> submitOrders');
+		var checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(), 
+			orders = checkIn.orders(),
+			checkInId = checkIn.get('userId'),
+			businessId = checkIn.get('businessId'),
+			errorIndicator = false,
+			cartview = this.getCartview(),
+			ajaxOrderCount = 0,
+			ordersCount = orders.getCount();
+			me = this;
+		
+		if(ordersCount > 0) {
 			Ext.Msg.show({
 				title: Karazy.i18n.translate('hint'),
-				message: Karazy.i18n.translate('logoutQuestion'),
+				message: Karazy.i18n.translate('submitOrdersQuestion'),
 				buttons: [{
-					text: Karazy.i18n.translate('yes'),
+					text: 'Ja',
 					itemId: 'yes',
 					ui: 'action'
 				}, {
-					text:  Karazy.i18n.translate('no'),
+					text: 'Nein',
 					itemId: 'no',
 					ui: 'action'
 				}],
 				scope: this,
 				fn: function(btnId, value, opt) {
-					if(btnId=='yes') {
-						me.logout();	
-					};
+				if(btnId=='yes') {
+					
+					cartview.showLoadScreen(true);
+					this.getSubmitOrderBt().disable();
+					this.getCancelOrderBt().disable();
+					
+					orders.each(function(order) {
+						console.log('save order id:' + order.get('id') + ' genuineId: '+order.getProduct().get('genuineId'));
+						
+						if(!errorIndicator) {
+							order.set('status',Karazy.constants.Order.PLACED);
+							
+							Ext.Ajax.request({				
+					    	    url: Karazy.config.serviceUrl+'/c/businesses/'+businessId+'/orders/'+order.getId(),
+					    	    method: 'PUT',    
+					    	    jsonData: order.getRawJsonData(),
+					    	    scope: this,
+					    	    success: function(response) {
+					    	    	console.log('Saved order checkin.');
+					    	    	ajaxOrderCount++;					    	    	
+					    	    	orders.remove(order);
+					    	    	
+					    	    	//TODO remove orders or filter them just filter them! load orders from server?
+//					    	    	orders.each(function(order) {
+//					    	    	orderStore.add(order);
+//					    	    	});	
+//					    	    	orderStore.add(order);		    	    		    	    			    	    			    	    			    	    
+					    	    	
+					    	    	if(ajaxOrderCount == ordersCount) {		    	    					    	    	
+						    	    	me.refreshCart();
+						    	    	cartview.showLoadScreen(false);
+						    	    	me.getSubmitOrderBt().enable();
+						    	    	me.getCancelOrderBt().enable();
+						    	    	
+						    	    	//show success message
+						    			Ext.Msg.show({
+						    				title : Karazy.i18n.translate('success'),
+						    				message : Karazy.i18n.translate('orderSubmit'),
+						    				buttons : []
+						    			});
+						    			
+						    			Ext.defer((function() {
+						    				Ext.Msg.hide();
+						    			}), Karazy.config.msgboxHideTimeout, this);
+						    			
+						    			
+					    	    	}
+					    	    },
+					    	    failure: function(response) {
+					    	    	errorIndicator = true;
+					    	    	cartview.showLoadScreen(false);
+					    	    	me.getSubmitOrderBt().enable();
+					    	    	me.getCancelOrderBt().enable();
+					    	    	me.getApplication().handleServerError({
+			                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+			                        	'forceLogut': {403:true}
+			                        }); 
+					    	    }
+							});			
+						}	else {
+							me.getSubmitOrderBt().enable();
+							me.getCancelOrderBt().enable();
+							cartview.showLoadScreen(false);
+							return false;
+						};					
+					});
+
+					}
 				}
-		});
-	},
-	/**
-	*	Loads all businesses (e. g. restaurants or hotels) this user account is assigned to.
-	*
-	*/
-	showBusinesses: function() {
-		console.log('showBusinesses');
-		var 	me = this,
-				businessStore = Ext.StoreManager.lookup('businessStore'),
-				account = this.getAccount(),
-				spotCtr = this.getApplication().getController('Spot'),
-				loginPanel = this.getLoginPanel();
-
-		Ext.create('EatSense.view.ChooseBusiness');
-
-		this.getBusinessList().getStore().load({
-			params: {
-				pathId: account.get('login')
-			},
-			callback: function(records, operation, success) {
-			 	if(success) {
-
-			 		if(!records || records.length == 0) {
-			 			loginPanel.setActiveItem(0);
-			 			Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('noBusinessAssigned'), Ext.emptyFn);
-			 		}
-
-			 		if(records.length > 1) {
-			 			//more than one assigned business exists. show chooseBusiness view
-			 			loginPanel.setActiveItem(1);
-			 		} else if(records.length == 1){
-			 			me.setBusinessId(records[0]);					
-			 		} 
-
-			 	} else {
-			 		//TODO user can't log in because he is not assigned to a business
-			 		loginPanel.setActiveItem(0);
-			 		me.getApplication().handleServerError({
-							'error': operation.error, 
-							'forceLogout': false, 
-							'hideMessage':false
-						}); 
-			 		// Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotLoading'), Ext.emptyFn);
-			 	}				
-			 },
-			 scope: this
-		});
-	},
-
-	/**
-	*	Sets the businessId in account the user wants to log in for.
-	*	This Id will be used for calls to the webservice.
-	* 	e.g. /businesses/{id}/spots
-	* @param business
-	*	the business
-	*/
-	setBusinessId: function(business) {
-		var 	me = this,
-				account = this.getAccount(),
-				spotCtr = this.getApplication().getController('Spot'),
-				messageCtr = this.getApplication().getController('Message'); 
-
-		account.set('businessId', business.get('id'));
-		account.set('business', business.get('name'));
-		
-		//set pathId in default Ajax headers to avoid setting it with every request
-		Ext.Ajax.getDefaultHeaders().pathId = account.get('businessId');
-
-		me.saveAppState();
-
-		Ext.Viewport.remove(Ext.Viewport.down('login'));
-		Ext.create('EatSense.view.Main');
-		spotCtr.loadSpots();
-
-		messageCtr.openChannel();		
-	},
-	/**
-	*	Event handler for choose business list tap.
-	*	
-	*/
-	chooseBusiness: function(dv, index, target, record) {
-		this.setBusinessId(record);
+			});						
 	}
+	},
+	/**
+	 * Displays detailed information for an existing order (e.g. Burger)
+	 * @param dataview
+	 * @param order
+	 */	 
+	// showOrderDetail: function(dataview, order) {
+	showOrderDetail: function(button, eventObj, eOpts) {
+		console.log("Cart Controller -> showOrderDetail");		
+		 var 	me = this,
+		 		detail = this.getProductdetail(), 
+		 		choicesPanel =  this.getChoicespanel(),
+		 		order = button.getParent().getRecord(),
+		 		product = order.getProduct();		 		
+		 		this.setActiveOrder(order),
+		 		main = this.getMain(),
+		 		titlebar = detail.down('titlebar'),
+		 		menuCtr = this.getApplication().getController('Menu');
 
+		 //save state of order to undo changes
+		 order.saveState();
 
-});
-Ext.define('EatSense.store.Account', {
-	extend : 'Ext.data.Store',
-	requires : [ 'EatSense.model.Account' ],
-	config : {
-		storeId : 'accountStore',
-		model : 'EatSense.model.Account'
-	}
-});
-Ext.define('EatSense.store.AppState', {
-	extend : 'Ext.data.Store',
-	requires : [ 'EatSense.model.Account' ],
-	config : {
-		storeId : 'cockpitStateStore',
-		model : 'EatSense.model.Account',
-		proxy : {
-			type : 'localstorage',
-			id: 'eatSense_cockpit_store'
+		 choicesPanel.removeAll(false); 
+		 //reset product spinner
+		 this.getAmountSpinner().setValue(order.get('amount'));
+
+		 //set title
+		 titlebar.setTitle(product.get('name'));
+
+		 this.getProdDetailLabel().getTpl().overwrite(this.getProdDetailLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
+		 this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: product, amount: this.getAmountSpinner().getValue()});
+		 //dynamically add choices if present		 
+		 if(typeof product.choices() !== 'undefined' && product.choices().getCount() > 0) {
+
+		 	//render all main choices
+		 	product.choices().queryBy(function(rec) {
+		 	 	if(!rec.get('parent')) {
+		 	 		return true;
+		 	 	}}).each(function(choice) {
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					menuCtr.createOptions(choice, optionsDetailPanel);
+					choice.on('recalculate', function() {
+						me.recalculate(order);
+					});
+					// menuCtr.createOptions.apply(me, [choice, optionsDetailPanel, null, order]);
+					//process choices assigned to a this choice
+					product.choices().queryBy(function(rec) {
+						if(rec.get('parent') == choice.get('id')) {
+							return true;
+						}
+					}).each(function(memberChoice) {
+						memberChoice.setParentChoice(choice);
+						menuCtr.createOptions(memberChoice, optionsDetailPanel, choice);
+						choice.on('recalculate', function() {
+							me.recalculate(order);
+						});
+						// menuCtr.createOptions.apply(me, [memberChoice, optionsDetailPanel, choice, order]);
+					});
+
+					choicesPanel.add(optionsDetailPanel);
+		 	 });
 		}
-	}
-});
-Ext.define('EatSense.model.Spot', {
-	extend : 'Ext.data.Model',
-	// requires: ['EatSense.model.PaymentMethod'],
-	config : {
-		idProperty : 'barcode',
-		fields : [ 
-		{
-			name: 'id'
-		},
-		{
-			name : 'barcode',
-			type : 'string'
-		}, {
-			name : 'business',
-			type : 'string'
-		}, {
-			name : 'businessId',
-			type : 'string'
-		}, {
-			name : 'name',
-			type : 'string'
-		}, { //shows 
-			name: 'status',
-			type: 'string'
-		}, { 
-			name: 'checkInCount',
-			type: 'number'			
-		}, { //value of all orders
-			name: 'currentTotal',
-			type: 'number'
-		}],
-		proxy : {
-			type : 'rest',
-			enablePagingParams: false,
-			url : '/b/businesses/{pathId}/spots/'
-		}
-	}
-});
-/**
-* Reprensents a business like a Hotel or Restaurant.
-*/
-Ext.define('EatSense.model.Business', {
-	extend: 'Ext.data.Model', 
-		config: {
-			fields: [
-			{name: 'id'},
-			{name: 'name'},
-			{name: 'description'}
-			],
-			proxy: {
-				type: 'rest',
-				enablePagingParams: false,
-				url: '/accounts/{pathId}/businesses'
+		 
+		 
+		 //insert comment field after options have been added so it is positioned correctly
+		 choicesPanel.add({
+				xtype: 'textfield',
+				label: Karazy.i18n.translate('orderComment'),
+				labelAlign: 'top',
+				itemId: 'productComment',
+				value: order.get('comment'),
+				cls: 'choice'
 			}
-		}	
-});
-Ext.define('EatSense.store.Business', {
-	extend: 'Ext.data.Store',
-	requires : [ 'EatSense.model.Business' ],
-	config : {
-		storeId : 'businessStore',
-		model : 'EatSense.model.Business'
-	}
-});
-Ext.define('EatSense.model.CheckIn', {
-	extend : 'Ext.data.Model',
-	// requires: ['EatSense.model.PaymentMethod'],
-	config : {
-		idProperty : 'id',
-		fields : [ 
-		{
-			name : 'id',
-		}, 
-		{
-			name : 'nickname',
-			type : 'string'
-		}, 
-		{
-			name : 'status',
-			type : 'string'
-		}, 
-		{
-			name: 'spotId'
-		},
-		{
-			name : 'checkInTime',
-			type : 'date',
-			dateFormat : 'time'
-		},
-		{	//foreign key for checkIn. Don't send to server.
-			name: 'request_id',
-			persist: false
-		}],
-		proxy : {
-			type : 'rest',
-			enablePagingParams: false,
-			url : '/b/businesses/{pathId}/checkins/'
-		},
-		syncRemovedRecords: false
-	}
-});
-Ext.define('EatSense.model.Order', {
-	extend : 'Ext.data.Model',
-	config : {
-		idProperty : 'id',
-		fields : [ {
-			name : 'id',
-			type : 'string'
-		}, {
-			name : 'status',
-			type : 'string'
-		}, {
-			name : 'amount',
-			type : 'number'
-		}, {
-			name : 'comment',
-			type : 'string'
-		}, {
-			name : 'orderTime',
-			type : 'date',
-			dateFormat: 'time'
-		} ],
-		associations : {
-			type : 'hasOne',
-			model : 'EatSense.model.Product',
-		},
-		proxy: {
-			type: 'rest',
-			enablePagingParams: false,
-			url : '/b/businesses/{pathId}/orders',
-			reader: {
-				type: 'json'
-		   	}
-	 	},
-	 	// current state of this order. used for store and restore
-	 	state: null
+		);
+		Ext.Viewport.add(detail);
+		detail.getScrollable().getScroller().scrollToTop();
+		detail.show();
+	},
+	/**
+	 * Edit an existing order.
+	 */
+	editOrder : function(component, eOpts) {
+		var order = this.getActiveOrder(),
+		product = this.getActiveOrder().getProduct(), 
+		validationError = "", 
+		productIsValid = true,
+		activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+		detail = this.getProductdetail();
+		
+		order.getData(true);
+
+		//validate choices 
+		product.choices().each(function(choice) {
+			//only validate dependend choices if parent choice is active!
+			if(!choice.get('parent') || choice.getParentChoice().isActive()) {
+				if(choice.validateChoice() !== true) {
+					//coice is not valid
+					productIsValid = false;
+					validationError += choice.get('text') + '<br/>';
+				}
+			};
+		});
+		
+		if(productIsValid) {
+			this.getActiveOrder().set('comment', this.getChoicespanel().getComponent('productComment').getValue());	
+		
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'PUT',
+	    	    jsonData: order.getRawJsonData(),
+	    	    failure: function(response) {
+					me.getApplication().handleServerError({
+                    	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+                    	'forceLogut': {403:true}
+                    }); 
+				}
+			});
+
+			detail.hide();
+			this.refreshCart();
+			return true;
+		} else {
+			//show validation error
+			Ext.Msg.alert(Karazy.i18n.translate('orderInvalid'),validationError, Ext.emptyFn, detail);
+			if(component) {
+				//component exists if this was called by hide listener
+				component.show();
+			}
+			return false;
+		}
+		
 	},
 
-	calculate : function() {
-		var _amount = parseFloat(this.get('amount')),
-			price  = this.getProduct().calculate(_amount);
-			
-		return (this.get('status') == Karazy.constants.Order.CANCELED) ? 0 : price;
-	},
 	/**
-	*	Saves the state of this order.
-	*	The state can be restored after changes.
-	*	An existing state will be overriden.
-	*/
-	saveState: function() {
-		if(this.getState()) {
-			console.log('override existing order state');
-		}
-
-		this.setState(this.getRawJsonData());
-	},
-	/**
-	*	If a state exists it will be restored.
-	*/
-	restoreState: function() {
-		if(this.getState()) {
-			this.setRawJsonData(this.getState());
-			this.setState(null);
-		}
-	},
-	/**
-	*	Returns a deep raw json representation of this object.
+	*	Deletes a single order.
+	* 	Called by cancelButton of an individual order.
 	*
-	*/	
-	getRawJsonData: function() {
-		var rawJson = {};
-		
-		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
-		rawJson.status = this.get('status');
-		rawJson.amount = this.get('amount');
-		rawJson.comment = this.get('comment');
-		rawJson.orderTime = this.get('orderTime');
-		
-		rawJson.product = this.getProduct().getRawJsonData();
-		console.log('Order id: ' + this.get('id') +' genuineId: '+this.get('genuineId')+ ' getRawJsonData id: ' + rawJson.id);
-		return rawJson;
-	},
-	/**
-	*	Sets the data of this object based on a raw json object.
-	*	@param rawData
-	*		data to set
-	*	@param shallow
-	*		don't set nested data
-	*/	
-	setRawJsonData: function(rawData, shallow) {
-		if(!rawData) {
-			return false;
-		}
-
-		if(!shallow && !this.getProduct().setRawJsonData(rawData.product)) {
-			return false;
-		}
-
-		this.set('id', rawData.id);
-		this.set('status', rawData.status);
-		this.set('amount', rawData.amount);
-		this.set('comment', rawData.comment);
-		this.set('orderTime', rawData.orderTime);
-
-		return true;	
-	},
-	/**
-	*	Returns a html representation of this order.
-	*	This method is necessary becase of the very complex object relations.
 	*/
-	getHtmlRepresentation: function() {
+	cancelOrder: function(button, eventObj, eOpts) {
+		var 	order = button.getParent().getRecord(),
+				activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+				productName = order.getProduct().get('name');
+			//delete item
+			activeCheckIn.orders().remove(order);
+			
+			Ext.Ajax.request({
+	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+	    	    method: 'DELETE',
+	    	    failure: function(response) {
+					me.getApplication().handleServerError({
+	                	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+	                	'forceLogut': {403:true}
+	                }); 
+				}
+	    	});
+			
+			this.refreshCart();
+			
+			//show success message and switch to next view
+			Ext.Msg.show({
+				title : Karazy.i18n.translate('orderRemoved'),
+				message : productName,
+				buttons : []
+			});
+			//show short alert and then hide
+			Ext.defer((function() {
+				Ext.Msg.hide();
+			}), Karazy.config.msgboxHideTimeout, this);
+	},
 
-	}
+	closeOrderDetail: function() {
+		var detail = this.getProductdetail();
+		
+		this.getActiveOrder().restoreState();
+		//try to avoid unecessary calculation, only needed to update price after cancelation
+		this.recalculate(this.getActiveOrder());
+		this.refreshCart();
+		detail.hide();		
+	},
+	/**
+	 * Called when the product spinner value changes. 
+	 * Recalculates the price.
+	 * @param spinner
+	 * @param value
+	 * @param direction
+	 */
+	amountChanged: function(spinner, value, direction) {
+		console.log('Cart Controller > amountChanged (value:'+value+')');
+		this.getActiveOrder().set('amount', value);
+		this.recalculate(this.getActiveOrder());
+	},
+	/**
+	 * Recalculates the total price for the active product.
+	 */
+	recalculate: function(order) {
+		console.log('Cart Controller -> recalculate');
+		this.getProdPriceLabel().getTpl().overwrite(this.getProdPriceLabel().element, {product: order.getProduct(), amount: order.get('amount')});
+	},
+	/**
+	 * Refreshes the badge text on cart tab icon.
+	 * Displays the number of orders.
+	 */
+	refreshCartBadgeText: function() {
+		var cartButton = this.getLoungeTabBar().getAt(1),
+			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
+			badgeText;
+		
+		badgeText = (orders.data.length > 0) ? orders.data.length : "";
+		
+		cartButton.setBadgeText(badgeText);
+	},
+	/**
+	 * Refresh myorderlist and recalculate the total price.
+	 */
+	refreshMyOrdersList: function() {
+		var 	me = this,
+				myorderlist = me.getMyorderlist(),
+				myordersStore = Ext.data.StoreManager.lookup('orderStore'),
+				activeCheckIn = me.getApplication().getController('CheckIn').getActiveCheckIn(),
+				payButton = me.getPaymentButton();
+				leaveButton = me.getLeaveButton();
+		
+		//TODO investigate if this is a bug
+		myordersStore.removeAll();
+//		myorderlist.getStore().removeAll();
+		
+		myordersStore.load({
+			scope   : this,			
+			callback: function(records, operation, success) {
+				try {
+					if(success == true) {
+						(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
+						(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
+						
+						//WORKAROUND to make sure all data is available in data property
+						//otherwise nested choices won't be shown
+						Ext.each(records, function(order) {
+							order.getProduct().getData(true);
+						});
 
-});
-/**
- * A bill.
- */
-Ext.define('EatSense.model.Bill', {
-	extend : 'Ext.data.Model',
-	config : {
-		idProperty : 'id',
-		fields : [ {
-			name : 'id'
-		}, {
-			name : 'billnumber',
-			type : 'string'
-		}, {
-			name : 'paymentMethod',
-			type : 'string'
-		}, {
-			name : 'total',
-			type : 'number',
-			defaultValue: 0
-		}, {
-			name : 'time',
-			type : 'date',
-			dateFormat : 'time'
-		}, {
-			name: 'cleared',
-			type: 'boolean'
-		}, {
-			name: 'checkInId'
-		} ],
-		associations : {
-			type : 'hasOne',
-			model : 'EatSense.model.PaymentMethod',
-		},
-		proxy: {
-	 		type: 'rest',
-	 		enablePagingParams: false,
-	 		url : '/b/businesses/{pathId}/bills',
-	 		reader: {
-	 			type: 'json'
-	 		}
-	 	}
-	}
-});
-Ext.define('EatSense.store.Bill', {
-	extend : 'Ext.data.Store',
-	requires : [ 'EatSense.model.Bill' ],
-	config : {
-		storeId : 'billStore',
-		model : 'EatSense.model.Bill'
-	}
-});
-/**
-*	Used for incoming request like a customer calling a waiter.
-*	Those request normaly have a short lifespan and will be deleted after
-*	being processed.
-*/
-Ext.define('EatSense.model.Request', {
-	extend: 'Ext.data.Model',
-	config: {
-		fields: [
-		{
-			name: 'id',
-			type: 'number'
-		},
-		{
-			name: 'type'
-		},
-		{
-			name: 'checkInId'
-		},
-		{
-			name: 'spotId'
+						
+						//refresh the order list
+						total = me.calculateOrdersTotal(myordersStore);
+						myorderlist.refresh();
+						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
+					} else {
+						payButton.disable();
+						leaveButton.enable();					
+						me.getApplication().handleServerError({
+							'error': operation.error,
+							'statusText': {403: true}
+						});
+					}	
+				} catch(e) {
+					
+				}
+				
+				me.getMyordersview().showLoadScreen(false);
+			}
+		});
+		
+	},
+	/**
+	 * Calculates and returns the total price of all orders.
+	 * 
+	 * @param orderStore
+	 * 		An order store instance for which to calculate the total price.
+	 * 
+	 * @return
+	 * 		total price or 0 if an error occured or no orders exist.
+	 */
+	calculateOrdersTotal: function(orderStore) {
+		var total = 0;
+		
+		if(orderStore != null && orderStore !== 'undefined') {
+			orderStore.each(function(order) {
+				total += order.calculate();
+				total = Math.round(total * 100) / 100;
+			});
 		}
-		],
-		associations : {
-			type : 'hasOne',
-			model : 'EatSense.model.CheckIn',
-		},
-		proxy: {
-			type: 'rest',
-			enablePagingParams: false,
-			url: '/b/businesses/{pathId}/requests'
-		},
-		syncRemovedRecords: true
+			
+		return total;
+	},
+	/**
+	 * Choose a payment method to issue the paymentRequest.
+	 */
+	choosePaymentMethod: function() {
+		console.log('Order Controller -> choosePaymentMethod');
+		var availableMethods = this.getApplication().getController('CheckIn').getActiveSpot().payments(),
+			orderCount = this.getMyorderlist().getStore().getCount(),
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			picker,
+			choosenMethod,
+			me = this;
+		
+		if(orderCount>0 && checkIn.get('status') !== Karazy.constants.PAYMENT_REQUEST && checkIn.get('status') !== Karazy.constants.COMPLETE) {
+			//create picker
+			picker = Ext.create('Ext.Picker', {
+				doneButton: {
+					text: Karazy.i18n.translate('ok'),
+					listeners: {
+						tap: function() {
+							//TODO investigate if bug
+							choosenMethod = picker.getValue()['null'];
+							picker.hide();						
+							me.paymentRequest(choosenMethod);
+						}
+					}
+				},
+				cancelButton: {
+					text: Karazy.i18n.translate('cancel'),
+					listeners: {
+						tap: function() {
+							picker.hide();					
+						}
+					}
+				},
+			    slots: [
+			        {
+			        	align: 'center',
+			        	 valueField: 'name',
+			             displayField: 'name',
+			            title: Karazy.i18n.translate('paymentPickerTitle'),
+			            store: availableMethods
+			        }
+			    ]
+			});
+									
+			Ext.Viewport.add(picker);
+			picker.show();
+		}
+	},
+	
+	/**
+	 * Request the payment.
+	 * Creates a new bill object and sends via POST to the server. 
+	 * CheckIn gets the status PAYMENT_REQUEST and no more orders can be issued.
+	 * 
+	 * @param paymentMethod
+	 * 			The chose payment method.
+	 * 
+	 */
+	paymentRequest: function(paymentMethod) {
+		var bill = Ext.create('EatSense.model.Bill'),
+			checkInCtr = this.getApplication().getController('CheckIn'),
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			myordersComplete = this.getMyordersComplete(),
+			payButton = this.getPaymentButton(),
+			me = this;		
+
+		bill.set('paymentMethod', paymentMethod);
+		//workaround to prevent sencha from sending phantom id
+		bill.setId('');
+		//TODO show load mask to prevent users from issuing orders?!
+		
+		bill.save({
+			scope: this,
+			success: function(record, operation) {
+					me.setActiveBill(record);
+					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
+					payButton.hide();
+					myordersComplete.show();					
+			},
+			failure: function(record, operation) {
+				me.getApplication().handleServerError({
+					'error': operation.error,
+					'statusText': {403: true}
+				});
+			}
+		});
+
+		//show success message to give user the illusion of success ;)
+		Ext.Msg.show({
+			title : Karazy.i18n.translate('hint'),
+			message : Karazy.i18n.translate('paymentRequestSend'),
+			buttons : []
+		});
+		
+		Ext.defer((function() {
+			Ext.Msg.hide();
+		}), Karazy.config.msgboxHideLongTimeout, this);		
+
+	},
+	/**
+	 * Called when user checks in and wants to leave without issuing an order.
+	 */
+	leave: function() {
+		var		me = this,
+				checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+				myordersStore = Ext.data.StoreManager.lookup('orderStore');	
+		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) { 
+			checkIn.erase( {
+				failure: function(response, operation) {
+					me.getApplication().handleServerError({
+						'error': operation.error,
+						'statusText': {403: true}
+					});
+				}
+			}
+			);
+			this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
+		}				
+	},
+	/**
+	 * Marks the process as complete and returns to home menu
+	 */
+	completePayment: function() {
+		var myordersComplete = this.getMyordersComplete();
+		
+		myordersComplete.hide();
+		this.getApplication().getController('CheckIn').fireEvent('statusChanged', Karazy.constants.COMPLETE);
+	},	
+	//UI Actions
+	/**
+	 * Shows (cart is not empty) or hides (cart is empty) cart buttons (trash, order).
+	 */
+	toggleCartButtons: function() {
+		var cartview = this.getCartview(),
+			trashBt = cartview.down('#cartTopBar button[action="trash"]'),	
+			orderBt = cartview.down('#cartTopBar button[action="order"]'),
+			hidden = (this.cartCount() > 0) ? false : true;
+		
+		trashBt.setHidden(hidden);
+		orderBt.setHidden(hidden);
+	},
+	/**
+	 * Shows (issued orders are not empty) or hides (issued orders are empty) myorders buttons (pay).
+	 */
+	toggleMyordersButtons: function() {
+		var payButton = this.getPayButton();
+		
+	},
+	//Utility methods
+	/**
+	 * Returns number of orders in cart.
+	 */
+	cartCount: function() {
+		var orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders();
+		
+		if(orders == null) {
+			return 0;
+		}
+		
+		return orders.getCount();		
+	},
+	/**
+	 * Returns number of issued orders.
+	 * May not always reflect the current state!!
+	 * 
+	 * @returns
+	 */
+	myordersCount: function() {
+		var myordersStore = Ext.data.StoreManager.lookup('orderStore');
+		
+		if(myordersStore == null) {
+			return 0;
+		}
+		
+		return myordersStore.getCount();		
+	},
+	/**
+	*	Handles push notifications for orders.
+	*/
+	handleOrderMessage: function(action, updatedOrder) {
+		var orderStore = Ext.StoreManager.lookup('orderStore'),
+			oldOrder,
+			total;
+
+		if(action == "update") {
+			oldOrder = orderStore.getById(updatedOrder.id);
+			if(oldOrder) {
+				oldOrder.setRawJsonData(updatedOrder, true)
+				//refresh the order list
+				total = me.calculateOrdersTotal(orderStore);
+				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
+			} else {
+				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
+			}
+
+		}
 	}
 });
+/**
+ * Utility class used by Ext.field.Slider.
+ * @private
+ */
+Ext.define('Ext.slider.Slider', {
+    extend: 'Ext.Container',
+    xtype: 'slider',
+
+    requires: [
+        'Ext.slider.Thumb',
+        'Ext.fx.easing.EaseOut'
+    ],
+
+    /**
+    * @event change
+    * Fires when the value changes
+    * @param {Ext.field.Slider} this
+    * @param {Ext.slider.Thumb} thumb The thumb being changed
+    * @param {Number} newValue The new value
+    * @param {Number} oldValue The old value
+    */
+
+    /**
+    * @event dragstart
+    * Fires when the slider thumb starts a drag
+    * @param {Ext.field.Slider} this
+    * @param {Ext.slider.Thumb} thumb The thumb being dragged
+    * @param {Array} value The start value
+    * @param {Ext.EventObject} e
+    */
+
+    /**
+    * @event drag
+    * Fires when the slider thumb starts a drag
+    * @param {Ext.field.Slider} this
+    * @param {Ext.slider.Thumb} thumb The thumb being dragged
+    * @param {Ext.EventObject} e
+    */
+
+    /**
+    * @event dragend
+    * Fires when the slider thumb starts a drag
+    * @param {Ext.field.Slider} this
+    * @param {Ext.slider.Thumb} thumb The thumb being dragged
+    * @param {Array} value The end value
+    * @param {Ext.EventObject} e
+    */
+    config: {
+        baseCls: 'x-slider',
+
+        /**
+         * @cfg {Object} thumbConfig The config object to factory {@link Ext.slider.Thumb} instances
+         * @accessor
+         */
+        thumbConfig: {
+            draggable: {
+                translatable: {
+                    easingX: {
+                        duration: 300,
+                        type: 'ease-out'
+                    }
+                }
+            }
+        },
+
+        /**
+         * @cfg {Number/Number[]} value The value(s) of this slider's thumbs. If you pass
+         * a number, it will assume you have just 1 thumb.
+         * @accessor
+         */
+        value: 0,
+
+        /**
+         * @cfg {Number} minValue The lowest value any thumb on this slider can be set to.
+         * @accessor
+         */
+        minValue: 0,
+
+        /**
+         * @cfg {Number} maxValue The highest value any thumb on this slider can be set to.
+         * @accessor
+         */
+        maxValue: 100,
+
+        /**
+         * @cfg {Number} increment The increment by which to snap each thumb when its value changes. Defaults to 1. Any thumb movement
+         * will be snapped to the nearest value that is a multiple of the increment (e.g. if increment is 10 and the user
+         * tries to move the thumb to 67, it will be snapped to 70 instead)
+         * @accessor
+         */
+        increment: 1,
+
+        /**
+         * @cfg {Boolean} allowThumbsOverlapping Whether or not to allow multiple thumbs to overlap each other.
+         * Setting this to true guarantees the ability to select every possible value in between {@link #minValue}
+         * and {@link #maxValue} that satisfies {@link #increment}
+         * @accessor
+         */
+        allowThumbsOverlapping: false,
+
+        /**
+         * @cfg {Boolean/Object} animation
+         * The animation to use when moving the slider. Possible properties are:
+         *
+         * - duration
+         * - easingX
+         * - easingY
+         *
+         * @accessor
+         */
+        animation: true
+    },
+
+    /**
+     * @cfg {Number/Number[]} values Alias to {@link #value}
+     */
+
+    elementWidth: 0,
+
+    offsetValueRatio: 0,
+
+    activeThumb: null,
+
+    constructor: function(config) {
+        config = config || {};
+
+        if (config.hasOwnProperty('values')) {
+            config.value = config.values;
+        }
+
+        this.callParent([config]);
+    },
+
+    // @private
+    initialize: function() {
+        var element = this.element;
+
+        this.callParent();
+
+        element.on({
+            scope: this,
+            tap: 'onTap'
+        });
+
+        this.on({
+            scope: this,
+            delegate: '> thumb',
+            dragstart: 'onThumbDragStart',
+            drag: 'onThumbDrag',
+            dragend: 'onThumbDragEnd'
+        });
+
+        this.on({
+            painted: 'refresh',
+            resize: 'refresh'
+        });
+    },
+
+    /**
+     * @private
+     */
+    factoryThumb: function() {
+        return Ext.factory(this.getThumbConfig(), Ext.slider.Thumb);
+    },
+
+    /**
+     * Returns the Thumb instances bound to this Slider
+     * @return {Ext.slider.Thumb[]} The thumb instances
+     */
+    getThumbs: function() {
+        return this.innerItems;
+    },
+
+    /**
+     * Returns the Thumb instance bound to this Slider
+     * @param {Number} [index=0] The index of Thumb to return.
+     * @return {Ext.slider.Thumb} The thumb instance
+     */
+    getThumb: function(index) {
+        if (typeof index != 'number') {
+            index = 0;
+        }
+
+        return this.innerItems[index];
+    },
+
+    refreshOffsetValueRatio: function() {
+        var valueRange = this.getMaxValue() - this.getMinValue(),
+            trackWidth = this.elementWidth - this.thumbWidth;
+
+        this.offsetValueRatio = trackWidth / valueRange;
+    },
+
+    refreshElementWidth: function() {
+        this.elementWidth = this.element.dom.offsetWidth;
+        var thumb = this.getThumb(0);
+        if (thumb) {
+            this.thumbWidth = thumb.getElementWidth();
+        }
+    },
+
+    refresh: function() {
+        this.refreshElementWidth();
+        this.refreshValue();
+    },
+
+    setActiveThumb: function(thumb) {
+        var oldActiveThumb = this.activeThumb;
+
+        if (oldActiveThumb && oldActiveThumb !== thumb) {
+            oldActiveThumb.setZIndex(null);
+        }
+
+        this.activeThumb = thumb;
+        thumb.setZIndex(2);
+
+        return this;
+    },
+
+    onThumbDragStart: function(thumb, e) {
+        if (e.absDeltaX <= e.absDeltaY) {
+            return false;
+        }
+        else {
+            e.stopPropagation();
+        }
+
+        if (this.getAllowThumbsOverlapping()) {
+            this.setActiveThumb(thumb);
+        }
+
+        this.dragStartValue = this.getValue()[this.getThumbIndex(thumb)];
+        this.fireEvent('dragstart', this, thumb, this.dragStartValue, e);
+    },
+
+    onThumbDrag: function(thumb, e, offsetX) {
+        var index = this.getThumbIndex(thumb),
+            offsetValueRatio = this.offsetValueRatio,
+            constrainedValue = this.constrainValue(offsetX / offsetValueRatio);
+
+        e.stopPropagation();
+
+        this.setIndexValue(index, constrainedValue);
+
+        this.fireEvent('drag', this, thumb, this.getValue(), e);
+
+        return false;
+    },
+
+    setIndexValue: function(index, value, animation) {
+        var thumb = this.getThumb(index),
+            values = this.getValue(),
+            offsetValueRatio = this.offsetValueRatio,
+            draggable = thumb.getDraggable();
+
+        draggable.setOffset(value * offsetValueRatio, null, animation);
+
+        values[index] = this.constrainValue(draggable.getOffset().x / offsetValueRatio);
+    },
+
+    onThumbDragEnd: function(thumb, e) {
+        this.refreshThumbConstraints(thumb);
+        var index = this.getThumbIndex(thumb),
+            newValue = this.getValue()[index],
+            oldValue = this.dragStartValue;
+
+        this.fireEvent('dragend', this, thumb, this.getValue(), e);
+        if (oldValue !== newValue) {
+            this.fireEvent('change', this, thumb, newValue, oldValue);
+        }
+    },
+
+    getThumbIndex: function(thumb) {
+        return this.getThumbs().indexOf(thumb);
+    },
+
+    refreshThumbConstraints: function(thumb) {
+        var allowThumbsOverlapping = this.getAllowThumbsOverlapping(),
+            offsetX = thumb.getDraggable().getOffset().x,
+            thumbs = this.getThumbs(),
+            index = this.getThumbIndex(thumb),
+            previousThumb = thumbs[index - 1],
+            nextThumb = thumbs[index + 1],
+            thumbWidth = this.thumbWidth;
+
+        if (previousThumb) {
+            previousThumb.getDraggable().addExtraConstraint({
+                max: {
+                    x: offsetX - ((allowThumbsOverlapping) ? 0 : thumbWidth)
+                }
+            });
+        }
+
+        if (nextThumb) {
+            nextThumb.getDraggable().addExtraConstraint({
+                min: {
+                    x: offsetX + ((allowThumbsOverlapping) ? 0 : thumbWidth)
+                }
+            });
+        }
+    },
+
+    // @private
+    onTap: function(e) {
+        if (this.isDisabled()) {
+            return;
+        }
+
+        var targetElement = Ext.get(e.target);
+
+        if (!targetElement || targetElement.hasCls('x-thumb')) {
+            return;
+        }
+
+        var touchPointX = e.touch.point.x,
+            element = this.element,
+            elementX = element.getX(),
+            offset = touchPointX - elementX - (this.thumbWidth / 2),
+            value = this.constrainValue(offset / this.offsetValueRatio),
+            values = this.getValue(),
+            minDistance = Infinity,
+            ln = values.length,
+            i, absDistance, testValue, closestIndex, oldValue, thumb;
+
+        if (ln === 1) {
+            closestIndex = 0;
+        }
+        else {
+            for (i = 0; i < ln; i++) {
+                testValue = values[i];
+                absDistance = Math.abs(testValue - value);
+
+                if (absDistance < minDistance) {
+                    minDistance = absDistance;
+                    closestIndex = i;
+                }
+            }
+        }
+
+        oldValue = values[closestIndex];
+        thumb = this.getThumb(closestIndex);
+
+        this.setIndexValue(closestIndex, value, this.getAnimation());
+        this.refreshThumbConstraints(thumb);
+
+        if (oldValue !== value) {
+            this.fireEvent('change', this, thumb, value, oldValue);
+        }
+    },
+
+    // @private
+    updateThumbs: function(newThumbs) {
+        this.add(newThumbs);
+    },
+
+    applyValue: function(value) {
+        var values = Ext.Array.from(value || 0),
+            filteredValues = [],
+            previousFilteredValue = this.getMinValue(),
+            filteredValue, i, ln;
+
+        for (i = 0,ln = values.length; i < ln; i++) {
+            filteredValue = this.constrainValue(values[i]);
+
+            if (filteredValue < previousFilteredValue) {
+                filteredValue = previousFilteredValue;
+            }
+
+            filteredValues.push(filteredValue);
+
+            previousFilteredValue = filteredValue;
+        }
+
+        return filteredValues;
+    },
+
+    /**
+     * Updates the sliders thumbs with their new value(s)
+     */
+    updateValue: function(newValue, oldValue) {
+        var thumbs = this.getThumbs(),
+            ln = newValue.length,
+            i;
+
+        this.setThumbsCount(ln);
+
+        for (i = 0; i < ln; i++) {
+            thumbs[i].getDraggable().setExtraConstraint(null)
+                                    .setOffset(newValue[i] * this.offsetValueRatio);
+        }
+
+        for (i = 0; i < ln; i++) {
+            this.refreshThumbConstraints(thumbs[i]);
+        }
+    },
+
+    /**
+     * @private
+     */
+    refreshValue: function() {
+        this.refreshOffsetValueRatio();
+
+        this.setValue(this.getValue());
+    },
+
+    /**
+     * @private
+     * Takes a desired value of a thumb and returns the nearest snap value. e.g if minValue = 0, maxValue = 100, increment = 10 and we
+     * pass a value of 67 here, the returned value will be 70. The returned number is constrained within {@link #minValue} and {@link #maxValue},
+     * so in the above example 68 would be returned if {@link #maxValue} was set to 68.
+     * @param {Number} value The value to snap
+     * @return {Number} The snapped value
+     */
+    constrainValue: function(value) {
+        var me = this,
+            minValue  = me.getMinValue(),
+            maxValue  = me.getMaxValue(),
+            increment = me.getIncrement(),
+            remainder;
+
+        value = parseFloat(value);
+
+        if (isNaN(value)) {
+            value = minValue;
+        }
+
+        remainder = value % increment;
+        value -= remainder;
+
+        if (Math.abs(remainder) >= (increment / 2)) {
+            value += (remainder > 0) ? increment : -increment;
+        }
+
+        value = Math.max(minValue, value);
+        value = Math.min(maxValue, value);
+
+        return value;
+    },
+
+    setThumbsCount: function(count) {
+        var thumbs = this.getThumbs(),
+            thumbsCount = thumbs.length,
+            i, ln, thumb;
+
+        if (thumbsCount > count) {
+            for (i = 0,ln = thumbsCount - count; i < ln; i++) {
+                thumb = thumbs[thumbs.length - 1];
+                thumb.destroy();
+            }
+        }
+        else if (thumbsCount < count) {
+            for (i = 0,ln = count - thumbsCount; i < ln; i++) {
+                this.add(this.factoryThumb());
+            }
+        }
+
+        return this;
+    },
+
+    /**
+     * Convience method. Calls {@link #setValue}
+     */
+    setValues: function(value) {
+        this.setValue(value);
+    },
+
+    /**
+     * Convience method. Calls {@link #getValue}
+     */
+    getValues: function() {
+        return this.getValue();
+    },
+
+    // Sets the {@link #increment} configuration
+    applyIncrement: function(increment) {
+        if (increment === 0) {
+            increment = 1;
+        }
+
+        return Math.abs(increment);
+    },
+
+    // @private
+    updateAllowThumbsOverlapping: function(newValue, oldValue) {
+        if (typeof oldValue != 'undefined') {
+            this.refreshValue();
+        }
+    },
+
+    // @private
+    updateMinValue: function(newValue, oldValue) {
+        if (typeof oldValue != 'undefined') {
+            this.refreshValue();
+        }
+    },
+
+    // @private
+    updateMaxValue: function(newValue, oldValue) {
+        if (typeof oldValue != 'undefined') {
+            this.refreshValue();
+        }
+    },
+
+    // @private
+    updateIncrement: function(newValue, oldValue) {
+        if (typeof oldValue != 'undefined') {
+            this.refreshValue();
+        }
+    },
+
+    doSetDisabled: function(disabled) {
+        this.callParent(arguments);
+
+        var items = this.getItems().items,
+            ln = items.length,
+            i;
+
+        for (i = 0; i < ln; i++) {
+            items[i].setDisabled(disabled);
+        }
+    }
+
+}, function() {
+    //<deprecated product=touch since=2.0>
+    /**
+     * @cfg {Boolean} animationDuration
+     * Animation duration in ms.
+     * @removed 2.0.0 Use the duration property on the animation config instead.
+     */
+    Ext.deprecateProperty(this, 'animationDuration', null, "Ext.slider.Slider.animationDuration has been removed");
+    //</deprecated>
+});
+
+/**
+ * @aside guide forms
+ *
+ * The slider is a way to allow the user to select a value from a given numerical range. You might use it for choosing
+ * a percentage, combine two of them to get min and max values, or use three of them to specify the hex values for a
+ * color. Each slider contains a single 'thumb' that can be dragged along the slider's length to change the value.
+ * Sliders are equally useful inside {@link Ext.form.Panel forms} and standalone. Here's how to quickly create a
+ * slider in form, in this case enabling a user to choose a percentage:
+ *
+ *     @example
+ *     Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'sliderfield',
+ *                 label: 'Percentage',
+ *                 value: 50,
+ *                 minValue: 0,
+ *                 maxValue: 100
+ *             }
+ *         ]
+ *     });
+ *
+ * In this case we set a starting value of 50%, and defined the min and max values to be 0 and 100 respectively, giving
+ * us a percentage slider. Because this is such a common use case, the defaults for {@link #minValue} and
+ * {@link #maxValue} are already set to 0 and 100 so in the example above they could be removed.
+ *
+ * It's often useful to render sliders outside the context of a form panel too. In this example we create a slider that
+ * allows a user to choose the waist measurement of a pair of jeans. Let's say the online store we're making this for
+ * sells jeans with waist sizes from 24 inches to 60 inches in 2 inch increments - here's how we might achieve that:
+ *
+ *     @example
+ *     Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'sliderfield',
+ *                 label: 'Waist Measurement',
+ *                 minValue: 24,
+ *                 maxValue: 60,
+ *                 increment: 2,
+ *                 value: 32
+ *             }
+ *         ]
+ *     });
+ *
+ * Now that we've got our slider, we can ask it what value it currently has and listen to events that it fires. For
+ * example, if we wanted our app to show different images for different sizes, we can listen to the {@link #change}
+ * event to be informed whenever the slider is moved:
+ *
+ *     slider.on('change', function(field, newValue) {
+ *         if (newValue[0] > 40) {
+ *             imgComponent.setSrc('large.png')
+ *         } else {
+ *             imgComponent.setSrc('small.png');
+ *         }
+ *     }, this);
+ *
+ * Here we listened to the {@link #change} event on the slider and updated the background image of an
+ * {@link Ext.Img image component} based on what size the user selected. Of course, you can use any logic inside your
+ * event listener.
+ */
+Ext.define('Ext.field.Slider', {
+    extend  : 'Ext.field.Field',
+    xtype   : 'sliderfield',
+    requires: ['Ext.slider.Slider'],
+    alternateClassName: 'Ext.form.Slider',
+
+    /**
+     * @event change
+     * Fires when an option selection has changed.
+     * @param {Ext.field.Slider} me
+     * @param {Ext.slider.Thumb} thumb
+     * @param {Number} newValue the new value of this thumb
+     * @param {Number} oldValue the old value of this thumb
+     */
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        cls: Ext.baseCSSPrefix + 'slider-field',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        tabIndex: -1
+    },
+
+    proxyConfig: {
+        /**
+         * @cfg {Number/Number[]} value See {@link Ext.slider.Slider#value}
+         * @accessor
+         */
+        value: 0,
+
+        /**
+         * @cfg {Number} minValue See {@link Ext.slider.Slider#minValue}
+         * @accessor
+         */
+        minValue: 0,
+
+        /**
+         * @cfg {Number} maxValue See {@link Ext.slider.Slider#maxValue}
+         * @accessor
+         */
+        maxValue: 100,
+
+        /**
+         * @cfg {Number} increment See {@link Ext.slider.Slider#increment}
+         * @accessor
+         */
+        increment: 1
+    },
+
+    /**
+     * @cfg {Number/Number[]} values See {@link Ext.slider.Slider#values}
+     */
+
+    constructor: function(config) {
+        config = config || {};
+
+        if (config.hasOwnProperty('values')) {
+            config.value = config.values;
+        }
+
+        this.callParent([config]);
+    },
+
+    // @private
+    initialize: function() {
+        this.callParent();
+
+        this.getComponent().on({
+            scope: this,
+            change: 'onSliderChange'
+        });
+    },
+
+    // @private
+    applyComponent: function(config) {
+        return Ext.factory(config, Ext.slider.Slider);
+    },
+
+    onSliderChange: function(me, thumb, newValue, oldValue) {
+        this.fireEvent('change', this, thumb, newValue, oldValue);
+    },
+
+    /**
+     * Convience method. Calls {@link #setValue}
+     */
+    setValues: function(value) {
+        this.setValue(value);
+    },
+
+    /**
+     * Convience method. Calls {@link #getValue}
+     */
+    getValues: function() {
+        return this.getValue();
+    },
+
+    reset: function() {
+        var config = this.config,
+            initialValue = (this.config.hasOwnProperty('values')) ? config.values : config.value;
+
+        this.setValue(initialValue);
+    },
+
+    doSetDisabled: function(disabled) {
+        this.callParent(arguments);
+
+        this.getComponent().setDisabled(disabled);
+    }
+});
+
+/**
+ * @private
+ */
+Ext.define('Ext.slider.Toggle', {
+    extend: 'Ext.slider.Slider',
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: 'x-toggle',
+
+        /**
+         * @cfg {String} minValueCls CSS class added to the field when toggled to its minValue
+         * @accessor
+         */
+        minValueCls: 'x-toggle-off',
+
+        /**
+         * @cfg {String} maxValueCls CSS class added to the field when toggled to its maxValue
+         * @accessor
+         */
+        maxValueCls: 'x-toggle-on'
+    },
+
+    initialize: function() {
+        this.callParent();
+
+        this.on({
+            change: 'onChange'
+        });
+    },
+
+    applyMinValue: function() {
+        return 0;
+    },
+
+    applyMaxValue: function() {
+        return 1;
+    },
+
+    applyIncrement: function() {
+        return 1;
+    },
+
+    setValue: function(newValue, oldValue) {
+        this.callParent(arguments);
+        this.onChange(this, this.getThumbs()[0], newValue, oldValue);
+    },
+
+    onChange: function(me, thumb, newValue, oldValue) {
+        var isOn = newValue > 0,
+            onCls = me.getMaxValueCls(),
+            offCls = me.getMinValueCls();
+
+        this.element.addCls(isOn ? onCls : offCls);
+        this.element.removeCls(isOn ? offCls : onCls);
+    }
+});
+
+/**
+ * @aside guide forms
+ *
+ * Specialized {@link Ext.field.Slider} with a single thumb which only supports two {@link #value values}.
+ *
+ * ## Examples
+ *
+ *     @example miniphone preview
+ *     Ext.Viewport.add({
+ *         xtype: 'togglefield',
+ *         name: 'awesome',
+ *         label: 'Are you awesome?',
+ *         labelWidth: '40%'
+ *     });
+ *
+ * Having a default value of 'toggled':
+ *
+ *     @example miniphone preview
+ *     Ext.Viewport.add({
+ *         xtype: 'togglefield',
+ *         name: 'awesome',
+ *         value: 1,
+ *         label: 'Are you awesome?',
+ *         labelWidth: '40%'
+ *     });
+ *
+ * And using the {@link #value} {@link #toggle} method:
+ *
+ *     @example miniphone preview
+ *     Ext.Viewport.add([
+ *         {
+ *             xtype: 'togglefield',
+ *             name: 'awesome',
+ *             value: 1,
+ *             label: 'Are you awesome?',
+ *             labelWidth: '40%'
+ *         },
+ *         {
+ *             xtype: 'toolbar',
+ *             docked: 'top',
+ *             items: [
+ *                 {
+ *                     xtype: 'button',
+ *                     text: 'Toggle',
+ *                     flex: 1,
+ *                     handler: function() {
+ *                         Ext.ComponentQuery.query('togglefield')[0].toggle();
+ *                     }
+ *                 }
+ *             ]
+ *         }
+ *     ]);
+ */
+Ext.define('Ext.field.Toggle', {
+    extend: 'Ext.field.Slider',
+    xtype : 'togglefield',
+    alternateClassName: 'Ext.form.Toggle',
+    requires: ['Ext.slider.Toggle'],
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        cls: 'x-toggle-field'
+    },
+
+    proxyConfig: {
+        /**
+         * @cfg {String} minValueCls See {@link Ext.slider.Toggle#minValueCls}
+         * @accessor
+         */
+        minValueCls: 'x-toggle-off',
+
+        /**
+         * @cfg {String} maxValueCls  See {@link Ext.slider.Toggle#maxValueCls}
+         * @accessor
+         */
+        maxValueCls: 'x-toggle-on'
+    },
+
+    // @private
+    applyComponent: function(config) {
+        return Ext.factory(config, Ext.slider.Toggle);
+    },
+
+    /**
+     * Sets the value of the toggle.
+     * @param {Number} value **1** for toggled, **0** for untoggled.
+     */
+    setValue: function(newValue) {
+        if (newValue === true) {
+            newValue = 1;
+        }
+
+        this.getComponent().setValue(newValue);
+
+        return this;
+    },
+
+    /**
+     * Toggles the value of this toggle field.
+     * @return this
+     */
+    toggle: function() {
+        var value = this.getValue();
+        this.setValue((value == 1) ? 0 : 1);
+
+        return this;
+    },
+
+    getValue: function() {
+        return this.callParent()[0];
+    }
+});
+
+/**
+ * Checkin Step 2 User has to confirm that he wants to checkin and has to choose
+ * a nickname.
+ */
+Ext.define('EatSense.view.Checkinconfirmation', {
+	extend : 'Ext.Panel',
+	xtype : 'checkinconfirmation',
+	fullscreen : false,
+	requires: ['Ext.field.Toggle'],
+	config : {
+		layout : {
+			type : 'vbox',
+			pack : 'center',
+			align : 'center'
+		},
+		items : [ {
+			docked : 'top',
+			xtype : 'toolbar',
+			title : Karazy.i18n.translate('checkInTitle'),
+			items : [ {
+				xtype : 'button',
+				action: 'cancel-checkin',
+				text : Karazy.i18n.translate('cancel'),
+				ui : 'back'
+			}, ]
+		}, 
+		{
+			xtype : 'label',
+			styleHtmlContent : true,
+			itemId : 'checkInDlg1Label1',
+			html : Karazy.i18n.translate('checkInStep1Label1'),
+			margin : 5
+		}, 
+		{
+			xtype : 'textfield',
+			itemId : 'nicknameTf',
+			label : Karazy.i18n.translate('nickname'),
+			width : 300,
+			labelWidth : 100,
+			labelAlign : 'top',
+			required : true,
+			margin : 5
+		},  
+		{
+			xtype : 'panel',
+			layout : {
+				type : 'hbox'
+			},
+			items : [ {
+				xtype : 'button',
+				action: 'regenerate-nickname',
+				iconCls : 'refresh',
+				iconMask : true,
+				style : 'margin-right:10px;',
+				ui : 'action',
+				margin : 5
+			},
+			{
+				xtype : 'button',
+				action: 'confirm-checkin',
+				text : Karazy.i18n.translate('checkInStep1Button'),
+				ui : 'action',
+				margin : 5
+			} ]
+		},
+		{
+			xtype : 'togglefield',
+			action : 'toggle-nickname',
+			labelAlign: 'top',
+			value : 0,
+			label : Karazy.i18n.translate('saveNicknameToggle'),
+			margin : 5
+		}
+		]
+	}
+});
+/**
+ * The viewport. Defining the global layout for the application.
+ */
+Ext.define('EatSense.view.Main', {
+	extend : 'Ext.Container',
+	requires : [ 'EatSense.view.Dashboard', 'EatSense.view.MenuOverview', 'EatSense.view.Checkinconfirmation', 'EatSense.view.ProductOverview',
+			'EatSense.view.CheckinWithOthers', 'EatSense.view.Cart', 'EatSense.view.Menu', 'EatSense.view.Lounge', 'EatSense.view.Settings' ],
+	xtype : 'mainview',
+	config : {
+		layout : {
+			type : 'card',
+			animation : {
+				type : 'slide',
+				direction : 'left'
+			}
+		},
+		activeItem : 0,
+		items : [ 
+		{
+			xtype : 'dashboard'
+		}, 
+		{
+			xtype : 'checkinconfirmation'
+		}, 
+		// {
+		// 	layout : 'fit',
+		// 	xtype : 'checkinwithothers'
+		// }, 
+		{
+			xtype : 'lounge'
+		}, {
+			xtype : 'settings'
+		} ]
+	},
+	/**
+	 * Change the direction of the slide animation.
+	 * 
+	 * @param direction
+	 *            left or right
+	 */
+	switchAnim : function(direction) {
+		this.getLayout().setAnimation({
+			type : 'slide',
+			direction : direction
+		});
+	}
+});
+
 /**
  * @author Ed Spencer
  * @aside guide stores
@@ -52060,17 +56056,21 @@ Ext.define('Ext.data.reader.Array', {
 Karazy.i18n.setLang('DE');
 
 Ext.Loader.setConfig({
-	enabled : true
+	enabled : true,
+	//WORKAORUND related to Android 3x Bug and Webview URL handling
+	disableCaching: Karazy.config.disableCaching
 });
 
 Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
 	name : 'EatSense',
-	controllers : ['Login','Spot', 'Message', 'Request'],
-	models : ['Account','Spot', 'Business', 'CheckIn', 'Order', 'Product', 'Choice', 'Option', 'Bill', 'PaymentMethod', 'Request'],
-	views : ['Login', 'ChooseBusiness', 'Main'], 
-	stores : ['Account', 'AppState',  'Spot', 'Business', 'CheckIn', 'Order', 'Bill', 'Request' ],
+	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
+	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge'], 
+	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill'],
+	phoneStartupScreen: 'res/images/startup.png',
+	tabletStartupScreen: 'res/images/startup.png',
 	requires: [
 		//require most common types
 		'Ext.Container',
@@ -52079,27 +56079,94 @@ Ext.application({
 		'Ext.Label',
 		'Ext.TitleBar',
 		//require custom types
-		'EatSense.data.proxy.CustomRestProxy',
-		'EatSense.data.proxy.OperationImprovement'],
-	icon: {
-		//used on iOS devices for homescreen
-		57: 'res/images/icon.png',
-   		72: 'res/images/icon-72.png',
-   		114: 'res/images/icon-114.png'
-	},
-	glossOnIcon: false,
-
-	init : function() {
-		
-	},
+		'EatSense.override.CustomRestProxy',
+		'EatSense.override.OperationImprovement', 
+		'EatSense.view.fragment.DashboardButton', 
+		'EatSense.override.RadioOverride', 
+		'EatSense.model.AppState'
+	],
 	launch : function() {
-		console.log('launch cockpit ...');
+		console.log('launch');
+    	this.launched = true;
+        this.mainLaunch();
+	},
+	mainLaunch : function() {
+		if (cordovaInit == false || !this.launched) {
+        	return;
+        }
 
-	   	var loginCtr = this.getController('Login');
+		console.log('mainLaunch');
+		
+		var app = this,
+	   		appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+	 		checkInCtr = this.getController('CheckIn'),
+	 		restoredCheckInId,
+	 		profile = Ext.os.deviceType.toLowerCase();	 
 
-	   	//try to restore credentials
-	   	//if it fails will display the login mask
-	   	loginCtr.restoreCredentials();
+		//global error handler
+		window.onerror = function(message, url, lineNumber) {  
+			var messageCtr = app.getController('Message');
+			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
+		  	//messageCtr.reopenChannel();
+		  	//prevent firing of default handler (return true)
+		  	return false;
+		}; 
+
+		//timeout for requests
+		Ext.Ajax.timeout = 1200000;
+		
+    	//try to restore application state
+	   	 
+	   	 //create main screen
+	   	 Ext.create('EatSense.view.Main');
+	   	 
+	   	 try {
+	   		appStateStore.load();
+	   	 } catch (e) {
+	   		appStateStore.removeAll();
+	   	 }
+	     
+	     
+	   	 if(appStateStore.getCount() == 1) {
+	   		 console.log('app state found');	   		 
+		   	checkInCtr.setAppState(appStateStore.getAt(0));
+	   		restoredCheckInId = checkInCtr.getAppState().get('checkInId');
+	   	 }
+	   		
+	   	 if(restoredCheckInId) {
+	   			 //reload old state
+	   			 EatSense.model.CheckIn.load(restoredCheckInId, {
+	   				scope: this,
+	   				success : function(record, operation) {
+	   					console.log('found existing checkin '+record);	
+	   					checkInCtr.restoreState(record);
+
+	   					// if(record.get('status') == Karazy.constants.CHECKEDIN || record.get('status') == Karazy.constants.ORDER_PLACED) {	   						
+		   				// 	checkInCtr.restoreState(record);
+	   					// } else {
+	   					// 	appStateStore.add(checkInCtr.getAppState());
+		   		  		//checkInCtr.showDashboard();
+	   					// }	   						   				
+	   				},
+	   				failure: function(record, operation) {
+	   					console.log('error restoring state');
+	   					appStateStore.removeAll();
+	   					appStateStore.sync();
+	   					appStateStore.add(checkInCtr.getAppState());
+	   		   		 	checkInCtr.showDashboard();
+	   				}
+	   			 });	   			 
+	   	 }	   		 	   	 	   	 
+	   	 else {	   		 
+	   		if (appStateStore.getCount() > 1){
+		   		 console.log('Too many appStates! Clearing cache. this should never happen.');
+		   		 appStateStore.removeAll();
+		   	 } else {
+		   		console.log('no app state found.');
+		   	 } 		   		 
+	   		 appStateStore.add(checkInCtr.getAppState());
+	   		 checkInCtr.showDashboard();
+	   	 }	
 	},
 	/**
     *   Gloabl handler that can be used to handle errors occuring from server requests.
@@ -52122,21 +56189,20 @@ Ext.application({
                forceLogout = options.forceLogout,
                hideMessage = options.hideMessage,
                message = options.message;
-
         if(error && error.status) {
             switch(error.status) {
                 case 403:
                     //no access
                     errMsg = Karazy.i18n.translate('errorPermission');
                     if(forceLogout[403] === true || forceLogout === true) {
-                        loginCtr.logout();
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }
                     break;
                 case 404:
                     //could not load resource or server is not reachable
                     errMsg = Karazy.i18n.translate('errorResource');
                     if(forceLogout[404] === true || forceLogout === true) {
-                        loginCtr.logout();
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }
                     break;
                 default:
@@ -52148,13 +56214,13 @@ Ext.application({
                         errMsg = Karazy.i18n.translate('errorMsg');
                     }
                     if(forceLogout[500] === true || forceLogout === true) {
-                        loginCtr.logout();
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }                                         
                     break;
             }
         }
         if(!hideMessage) {
-        	Ext.Msg.alert(Karazy.i18n.translate('error'), (message) ? message : errMsg, Ext.emptyFn);	
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), (message) ? message : errMsg, Ext.emptyFn);	
         }
     }
 });
