@@ -13,12 +13,15 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.representation.cockpit.CheckInStatusDTO;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,19 +45,25 @@ public class BasicIntegrationTest {
 	private long businessId;
 	private ObjectMapper jsonMapper;
 
+	
 	@Before
 	public void setUp() throws Exception {
 		barcode = "hup001";
+<<<<<<< HEAD
 //		RestAssured.baseURI = "http://eatsense-test.appspot.com";
 //		RestAssured.port = 80;
 		
 		RestAssured.baseURI = "http://localhost";
 		RestAssured.port = 8888;
 		
+=======
+		RestAssured.baseURI = "http://localhost";
+		RestAssured.port = 8080;
+>>>>>>> 105d4711529b8c2f9052d9fc5eaa174c47e89f7f
 		
 		this.jsonMapper = new ObjectMapper();
 	}
-
+	
 	/**
 	 * 1.1 Testing a basic checkin.
 	 */
@@ -79,13 +88,13 @@ public class BasicIntegrationTest {
 		response = given().contentType("application/json").body(checkInData)
 				.expect().statusCode(200).body("userId", notNullValue())
 				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-				.when().post("/checkins");
+				.when().post("/c/checkins");
 		checkInData = response.as(CheckInDTO.class);
 		checkInId = checkInData.getUserId();
 
 		// #3 Check if we can retrieve the same data by user id
 		expect().statusCode(200).body("userId", is(checkInId)).when()
-				.get("/checkins/{userId}", checkInId);
+				.get("/c/checkins/{userId}", checkInId);
 
 	}
 
@@ -114,7 +123,7 @@ public class BasicIntegrationTest {
 				.body(checkInData).expect().statusCode(200)
 				.body("userId", notNullValue())
 				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-				.when().post("/checkins");
+				.when().post("/c/checkins");
 		checkInData = response.as(CheckInDTO.class);
 		checkInId = checkInData.getUserId();
 		
@@ -133,11 +142,7 @@ public class BasicIntegrationTest {
 		menu.setRoot("products");
 		
 		// Find Coca Cola
-		Map<String, String> productMap = menu.get("find {p -> p.name == 'Coca-Cola'}");
-		productMap.put("choices", "[]");
-		logger.info("Ordering product {}", productMap.toString());
-		
-		ProductDTO productData= jsonMapper.convertValue(productMap, ProductDTO.class);
+		ProductDTO productData = menu.getObject("find {p -> p.name == 'Coca-Cola'}",ProductDTO.class);
 		
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
@@ -157,11 +162,7 @@ public class BasicIntegrationTest {
 		menu.setRoot("products");
 
 		// Find "Die Knusprigen"
-		productMap = menu.get("find {p -> p.name == 'Die Knusprigen'}");
-		productMap.put("choices", "[]");
-		logger.info("Ordering product {}", productMap.toString());
-		
-		ProductDTO productData2= jsonMapper.convertValue(productMap, ProductDTO.class);
+		ProductDTO productData2 = menu.getObject("find {p -> p.name == 'Die Knusprigen'}", ProductDTO.class);
 		
 		OrderDTO orderData2 = new OrderDTO();
 		orderData2.setAmount(1);
@@ -276,7 +277,7 @@ public class BasicIntegrationTest {
 					.body(checkIns[i]).expect().statusCode(200)
 					.body("userId", notNullValue())
 					.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-					.when().post("/checkins");
+					.when().post("/c/checkins");
 			checkIns[i] = response.as(CheckInDTO.class);
 		}
 
@@ -372,7 +373,7 @@ public class BasicIntegrationTest {
 					.body(checkIns[i]).expect().statusCode(200)
 					.body("userId", notNullValue())
 					.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
-					.when().post("/checkins");
+					.when().post("/c/checkins");
 			checkIns[i] = response.as(CheckInDTO.class);
 		}
 
@@ -422,7 +423,7 @@ public class BasicIntegrationTest {
 
 			response = given().contentType("application/json")
 						.body(orders1[i])
-						.queryParam("checkInId",checkIns[0].getUserId())
+						.queryParam("checkInId",checkInId)
 						.expect().statusCode(200).when().put("/c/businesses/{id}/orders/{order}", businessId, orders1[i].getId());		
 
 		}
@@ -442,6 +443,133 @@ public class BasicIntegrationTest {
 				.expect().statusCode(200)
 				.body("$.size()", is(6))
 				.when().get("/b/businesses/{id}/orders", businessId);
+	}
+	
+	/**
+	 * 6
+	 */
+	@Test
+	public void testDeleteCheckin() {
+		// #1 Get spot information
+		Response response = expect().statusCode(200)
+				.body("name", equalTo("Tisch 1"))
+				.body("business", equalTo("Heidi und Paul")).when()
+				.get("/spots/{barcode}", barcode);
+
+		businessId = response.getBody().jsonPath().getLong("businessId");
+
+		// Create checkin data to send to server ...
+		CheckInDTO checkInData = new CheckInDTO();
+		checkInData.setSpotId(barcode);
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData.setNickname("TestNils");
+
+		// #2.1 Do a checkin and check for correctness, update the checkin data
+		// from the response.
+		response = given().contentType("application/json")
+				.body(checkInData).expect().statusCode(200)
+				.body("userId", notNullValue())
+				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
+				.when().post("/c/checkins");
+		checkInData = response.as(CheckInDTO.class);
+		checkInId = checkInData.getUserId();
+		
+
+		// Check the checkincount at "Tisch 1"
+		response = given().contentType("application/json")
+				.headers("login","admin","password","test")
+				.expect().statusCode(200)
+				.body("find {p -> p.name == 'Tisch 1'}.checkInCount", is(1))
+				.when().get("/b/businesses/{id}/spots", businessId);
+
+		// Get the menu from the restaurant
+		JsonPath menus = expect().statusCode(200).when()
+				.get("/c/businesses/{id}/menus", businessId).jsonPath();
+		JsonPath menu = with(menus.get("find {m -> m.title == 'Getränke'}").toString());
+		menu.setRoot("products");
+		
+		// Find Coca Cola
+		ProductDTO productData = menu.getObject("find {p -> p.name == 'Coca-Cola'}",ProductDTO.class);
+		
+		OrderDTO orderData = new OrderDTO();
+		orderData.setAmount(1);
+		orderData.setProduct(productData);
+		orderData.setStatus(OrderStatus.CART);
+		// Place Order in Cart
+		response = given().contentType("application/json")
+				.body(orderData)
+				.queryParam("checkInId",checkInId)
+				.expect().statusCode(200).when().post("/c/businesses/{id}/orders", businessId);
+		String orderId = response.asString();
+		assertThat(orderId , notNullValue());
+		// Save the returned order id.
+		orderData.setId(Long.valueOf(orderId));
+		
+		menu = with(menus.get("find {m -> m.title == 'Unser Fingerfood'}").toString());
+		menu.setRoot("products");
+
+		// Find "Die Knusprigen"
+		ProductDTO productData2 = menu.getObject("find {p -> p.name == 'Die Knusprigen'}", ProductDTO.class);
+		
+		OrderDTO orderData2 = new OrderDTO();
+		orderData2.setAmount(1);
+		orderData2.setProduct(productData2);
+		orderData2.setStatus(OrderStatus.CART);
+		
+		// Place Order in Cart
+		response = given().contentType("application/json")
+				.body(orderData2)
+				.queryParam("checkInId",checkInId)
+				.expect().statusCode(200).when().post("/c/businesses/{id}/orders", businessId);
+		orderId = response.asString();
+		assertThat(orderId , notNullValue());
+		// Save the returned order id.
+		orderData2.setId(Long.valueOf(orderId));
+		
+		orderData.setStatus(OrderStatus.PLACED);
+		orderData2.setStatus(OrderStatus.PLACED);
+		
+		// Sent Order to restaurant( update status to PLACED)
+		response = given().contentType("application/json")
+					.body(orderData)
+					.queryParam("checkInId",checkInId)
+					.expect().statusCode(200).when().put("/c/businesses/{id}/orders/{order}", businessId, orderData.getId());
+		
+		// Sent Order #2 to restaurant( update status to PLACED)
+		response = given().contentType("application/json")
+					.body(orderData)
+					.queryParam("checkInId",checkInId)
+					.expect().statusCode(200).when().put("/c/businesses/{id}/orders/{order}", businessId, orderData2.getId());
+		
+		// Retrieve spot status and check that status is ORDER_PLACED for "Tisch 1"
+		response = given().contentType("application/json")
+				.headers("login","admin","password","test")
+				.expect().statusCode(200)
+				.body("find {p -> p.name == 'Tisch 1'}.status", is("ORDER_PLACED"))
+				.when().get("/b/businesses/{id}/spots", businessId);
+		SpotStatusDTO spotStatus = response.jsonPath().getObject("find {p -> p.name == 'Tisch 1'}", SpotStatusDTO.class);
+		
+		// Get checkin status information
+		response = given().contentType("application/json")
+				.headers("login","admin","password","test")
+				.queryParam("spotId", spotStatus.getId())
+				.expect().statusCode(200)
+				.body("$.size()", is(1))
+				.when().get("/b/businesses/{id}/checkins", businessId);
+		CheckInStatusDTO checkInStatus = response.jsonPath().getObject("find { c -> c.nickname = 'TestNils'}", CheckInStatusDTO.class);
+		// Delete checkin.
+		response = given().contentType("application/json")
+				.headers("login","admin","password","test")
+				.expect().statusCode(204)
+				.when().delete("/b/businesses/{id}/checkins/{cId}", businessId, checkInStatus.getId());
+		// Get checkin status information
+		response = given().contentType("application/json")
+				.headers("login","admin","password","test")
+				.queryParam("spotId", spotStatus.getId())
+				.expect().statusCode(200)
+				.body("$.size()", is(0))
+				.when().get("/b/businesses/{id}/checkins", businessId);
+				
 	}
 
 	@After

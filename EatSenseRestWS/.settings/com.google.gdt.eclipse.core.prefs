@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 #Tue Apr 24 13:59:28 CEST 2012
 =\=\=\=\=\=\=
 <<<<<<<=HEAD
 >>>>>>>=master
+=======
+#Wed Apr 04 18:41:26 CEST 2012
+>>>>>>> 105d4711529b8c2f9052d9fc5eaa174c47e89f7f
 eclipse.preferences.version=1
 jarsExcludedFromWebInfLib=
 lastWarOutDir=/Users/fred/karazy/eatsense_code/EatSenseRestWS/target/EatSenseRestWS-1.0-SNAPSHOT
