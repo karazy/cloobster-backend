@@ -1,23 +1,27 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
+import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ChoiceDTO;
@@ -58,6 +62,12 @@ public class OrderControllerTest {
 
 		private OrderChoiceRepository ocr;
 
+		private CheckInDTO checkInData;
+
+		private CheckIn checkIn;
+
+		private Business business;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -78,7 +88,16 @@ public class OrderControllerTest {
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
-		
+		// Do a checkin ...
+		checkInData = new CheckInDTO();
+		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
+		checkInData.setNickname("PlaceOrderTest");
+		checkInData.setStatus(CheckInStatus.INTENT);
+		checkInData.setSpotId("serg2011");
+		checkInData.setUserId(checkinCtrl.createCheckIn( checkInData).getUserId() );
+		checkInData.setBusinessId(spotDto.getBusinessId());
+		checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
+		business = rr.getByKey(checkIn.getBusiness());
 	}
 
 	@After
@@ -86,23 +105,7 @@ public class OrderControllerTest {
 		helper.tearDown();
 	}
 	@Test
-	public void testPlaceOrder() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
-		
-		
-		assertThat(checkIn.getUserId(), notNullValue());
-		
-				
-		// Should be checked in
-		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
-		
+	public void testPlaceAndUpdateOrder() {
 		// Get a product from the store.
 		Product frites = pr.getByProperty("name", "Pommes Frites");
 		OrderDTO orderDto = new OrderDTO();
@@ -112,10 +115,187 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
+		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(frites.getId()));
+		
+		
+		//#2 Place an order with choices
+		Product burger = pr.getByProperty("name", "Classic Burger");
+		ProductDTO burgerDto = transform.productToDto(burger);
+		
+		ProductOption selected = burgerDto.getChoices().iterator().next().getOptions().iterator().next();
+		selected.setSelected(true);
+		
+		orderDto.setId(null);
+		orderDto.setAmount(2);
+		orderDto.setProduct(burgerDto);
+		orderDto.setComment("I like my burger " + selected.getName());
+		
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
+		
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
+			for (ProductOption option : orderChoice.getOptions()) {
+				if(option.getName() == selected.getName() )
+					assertThat(option.getSelected(), equalTo(true));
+			}
+		}
+		
+		//#3 Check "getOrders"
+		
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, null);
+		assertThat(orders, notNullValue());
+		assertThat(orders.size(), equalTo(2));
+		for (OrderDTO dto : orders) {
+			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
+		}
+		
+		//#4.1 Update order to placed
+		placedOrderDto.setStatus(OrderStatus.PLACED);
+		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		assertThat(placedOrderDto.getStatus(), is(OrderStatus.PLACED) );
+		
+		//#4.2 Try to update order after status was set to PLACED
+		
+		OrderDTO result;
+		try {
+			placedOrderDto.setStatus(OrderStatus.CART);
+			result = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(OrderFailureException.class));
+		}
+	}
+	
+	@Test
+	public void testProductOptions() {
+		//#2 Place an order with choices
+		Product burger = pr.getByProperty("name", "Classic Burger");
+		ProductDTO burgerDto = transform.productToDto(burger);
+		
+		ProductOption selected = burgerDto.getChoices().iterator().next().getOptions().iterator().next();
+		selected.setSelected(false);
+		
+		
+		OrderDTO orderDto = new OrderDTO();
+		orderDto.setStatus(OrderStatus.CART);
+		orderDto .setId(null);
+		orderDto.setAmount(2);
+		orderDto.setProduct(burgerDto);
+		orderDto.setComment("I like my burger " + selected.getName());
+		
+		Long orderId = null;
+		try {
+			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		assertThat(orderId, nullValue());
+		selected = orderDto.getProduct().getChoices().iterator().next().getOptions().iterator().next();
+		selected.setSelected(true);
+		// Place an order with correct choices
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		// Test validation of dependent choice
+		// Select the menu item next
+		boolean menuSelected = false;
+		for(ChoiceDTO choice : orderDto.getProduct().getChoices()) {
+			if(choice.getText().equals("Menü")) {
+				menuSelected = true;
+				choice.getOptions().iterator().next().setSelected(true);
+			}
+		}
+		assertThat(menuSelected, is(true));
+				
+		orderDto.setId(null);
+		orderId = null;
+		try {
+			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		assertThat(orderId, nullValue());
+		
+		menuSelected = false;
+		for(ChoiceDTO choice : orderDto.getProduct().getChoices()) {
+			if(choice.getText().equals("Menü Beilage")) {
+				menuSelected = true;
+				choice.getOptions().iterator().next().setSelected(true);
+			}
+		}
+		assertThat(menuSelected, is(true));
+	}
+	
+	@Test
+	public void testDeleteOrder() {
+		// Get a product from the store.
+		Product frites = pr.getByProperty("name", "Pommes Frites");
+		OrderDTO orderDto = new OrderDTO();
+		orderDto.setAmount(1);
+		orderDto.setComment("I like fries!");
+		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setStatus(OrderStatus.CART);
+		
+		//#1 Place a simple order without choices...
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
+		
+		orderCtrl.deleteOrder(business, placedOrder , checkIn);
+		
+		List<Order> orders = orderCtrl.getOrders(business, checkIn, null);
+		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
+		assertThat(choices.isEmpty(), is(true));
+		assertThat(orders.isEmpty(), is(true));
+		
+		//#2.1 Place a simple order without choices...
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		placedOrder = orderCtrl.getOrder(business, orderId);
+		
+		//#2.2 Update the order to PLACED
+		orderDto.setStatus(OrderStatus.PLACED);
+		orderDto = orderCtrl.updateOrder(business, placedOrder, orderDto, checkIn);
+		
+		//#2.3 Try to delete the order, it should fail.
+		try {
+			orderCtrl.deleteOrder(business, placedOrder , checkIn);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(OrderFailureException.class));
+		}				
+	}
+	
+	@Test public void testGetOrdersWithStatus() {
+		// Get a product from the store.
+		Product frites = pr.getByProperty("name", "Pommes Frites");
+		OrderDTO orderDto = new OrderDTO();
+		orderDto.setAmount(1);
+		orderDto.setComment("I like fries!");
+		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setStatus(OrderStatus.CART);
+		
+		//#1 Place a simple order without choices...
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(business, orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -135,10 +315,10 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
+		placedOrder = orderCtrl.getOrderAsDTO(business, orderId);
 		
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
@@ -151,10 +331,8 @@ public class OrderControllerTest {
 					assertThat(option.getSelected(), equalTo(true));
 			}
 		}
-		
-		//#3 Check "getOrders"
-		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getBusinessId(), checkIn.getUserId(), null);
+		//#3 Check "getOrders" with status
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, "CART");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -163,20 +341,9 @@ public class OrderControllerTest {
 	}
 	
 	@Test
-	public void testDeleteOrder() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
+	public void testUpdateOrderAsBusiness() {
+		assertThat(checkInData.getUserId(), notNullValue());
 		
-		
-		assertThat(checkIn.getUserId(), notNullValue());
-		
-				
 		// Should be checked in
 		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
 		
@@ -187,55 +354,6 @@ public class OrderControllerTest {
 		orderDto.setComment("I like fries!");
 		orderDto.setProduct(transform.productToDto(frites));
 		orderDto.setStatus(OrderStatus.CART);
-		
-		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
-		assertThat(orderId, notNullValue());
-		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
-		
-		orderCtrl.deleteOrder(checkIn.getBusinessId(), placedOrder.getId());
-		
-		List<Order> orders = orderCtrl.getOrders(checkIn.getBusinessId(), checkIn.getUserId(), null);
-		assertThat(orders.isEmpty(), is(true));
-	}
-	
-	@Test public void testGetOrdersWithStatus() {
-		// Do a checkin ...
-		CheckInDTO checkIn = new CheckInDTO();
-		SpotDTO spotDto = checkinCtrl.getSpotInformation("serg2011");
-		checkIn.setNickname("PlaceOrderTest");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn.setSpotId("serg2011");
-		checkIn.setUserId(checkinCtrl.createCheckIn( checkIn).getUserId() );
-		checkIn.setBusinessId(spotDto.getBusinessId());
-		
-		
-		assertThat(checkIn.getUserId(), notNullValue());
-		
-				
-		// Should be checked in
-		//assertThat(checkIn.getStatus(), equalTo(CheckInStatus.CHECKEDIN.toString()) );
-		
-		// Get a product from the store.
-		Product frites = pr.getByProperty("name", "Pommes Frites");
-		OrderDTO orderDto = new OrderDTO();
-		orderDto.setAmount(1);
-		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
-		orderDto.setStatus(OrderStatus.CART);
-		
-		//#1 Place a simple order without choices...
-		Long orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
-		assertThat(orderId, notNullValue());
-		
-		OrderDTO placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
-		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
-		
 		
 		//#2 Place an order with choices
 		Product burger = pr.getByProperty("name", "Classic Burger");
@@ -249,30 +367,59 @@ public class OrderControllerTest {
 		orderDto.setProduct(burgerDto);
 		orderDto.setComment("I like my burger " + selected.getName());
 		
-		orderId = orderCtrl.placeOrder(checkIn.getBusinessId(), checkIn.getUserId(), orderDto);
+		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		assertThat(orderId, notNullValue());
 		
-		placedOrder = orderCtrl.getOrderAsDTO(checkIn.getBusinessId(), orderId);
+		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
+		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
-		assertThat(placedOrder.getOrderTime(), notNullValue());
-		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
+		assertThat(placedOrderDto.getOrderTime(), notNullValue());
+		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
+		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
 			}
 		}
+		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(checkIn.getBusinessId(), checkIn.getUserId(), "CART");
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, null);
 		assertThat(orders, notNullValue());
-		assertThat(orders.size(), equalTo(2));
+		assertThat(orders.size(), equalTo(1));
 		for (OrderDTO dto : orders) {
 			assertThat(dto.getStatus(), equalTo(OrderStatus.CART));
 		}
+		
+		//#4.1 Update order to placed
+		placedOrderDto.setStatus(OrderStatus.PLACED);
+		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
+		assertThat(placedOrderDto.getStatus(), is(OrderStatus.PLACED) );
+		
+		//#4.2 Confirm placed order
+		placedOrderDto.setStatus(OrderStatus.RECEIVED);
+		OrderDTO receivedOrder = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
+		assertThat(receivedOrder.getStatus(), is(OrderStatus.RECEIVED));
+		
+		CheckIn checkIn = checkinCtrl.getCheckIn(checkInData.getUserId());
+		assertThat(checkIn.getStatus(), is(CheckInStatus.CHECKEDIN));
+		
+		//#4.3 Try to set the status back to placed	
+		OrderDTO result;
+		try {
+			placedOrderDto.setStatus(OrderStatus.PLACED);
+			result = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}
+		
+		//#4.4 Cancel order
+		placedOrderDto.setStatus(OrderStatus.CANCELED);
+		result = orderCtrl.updateOrderForBusiness(business, placedOrder, placedOrderDto);
+		assertThat(result.getStatus(), is(OrderStatus.CANCELED));
 	}
 	
 }

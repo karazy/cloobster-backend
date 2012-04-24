@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
-	<property name="appDir" value="../EatSenseRestWS/src/main/webapp/app" />
+	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod-android" />
 	<property name="config" value="assets/www/lib/karazy-config.js" />
 
 	<target name="copySenchaApp" depends="">
@@ -8,6 +8,8 @@
 		<copy todir="assets/www">
 			<fileset dir="${appDir}">
 				<exclude name="**/*.desktop.*" />
+				<exclude name="**/*.iphone.*" />
+				<exclude name="**/*.ignore.*" />
 			</fileset>
 		</copy>
 	</target>
@@ -31,6 +33,8 @@
 		<echo message="Setting config values" />
 		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://karazy-eatsense.appspot.com'," byline="true">
 		</replaceregexp>
+		<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 false," byline="true">
+			</replaceregexp>
 	</target>
 
 	<!-- Only run this from within eclipse. Make sure in external tools configuration "Run in the same JRE as workspace" is selected.-->

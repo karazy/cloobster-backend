@@ -826,7 +826,7 @@ namespace zxing {
 namespace zxing {
     using namespace std;
     
-    static unsigned int logDigits_15(unsigned digits) {
+    unsigned int logDigits_15(unsigned digits) {
         unsigned log = 0;
         unsigned val = 1;
         while (val < digits) {

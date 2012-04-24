@@ -11,13 +11,16 @@ import net.eatsense.domain.Business;
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 public class RestaurantRepositoryTest {
 	
@@ -28,6 +31,9 @@ public class RestaurantRepositoryTest {
     private Injector injector;
     private BusinessRepository rr;
     private SpotRepository br;
+    
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void setUp() throws Exception {
@@ -45,8 +51,8 @@ public class RestaurantRepositoryTest {
 	@Test
 	public void testSave() {
 		
+		exception.expect(NotFoundException.class);
 		Business found = rr.getById(1l);
-		assertNull(found);
 		
 		Business r = new Business();
 		r.setName("Heidi und Paul");
@@ -61,6 +67,7 @@ public class RestaurantRepositoryTest {
 
 	@Test
 	public void testUpdate() {
+		exception.expect(NotFoundException.class);
 		Business found = rr.getById(1l);
 		Assert.assertNull(found);
 		
@@ -93,7 +100,7 @@ public class RestaurantRepositoryTest {
 		assertNotNull(found);
 		
 		rr.delete(r);
-		
+		exception.expect(NotFoundException.class);
 		found = rr.getById(1l);
 		assertNull(found);
 	}

@@ -80,5 +80,4 @@ public class Spot extends GenericEntity{
 	public static Key<Spot> getKey(Key<Business> business, Long spotId) {
 		return new Key<Spot>(business ,Spot.class,spotId);
 	}
-	
 }

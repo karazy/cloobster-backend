@@ -1,5 +1,7 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,11 +50,15 @@ public class AccountController {
 	 * @return
 	 */
 	public boolean isAccountManagingBusiness(final Account account, long businessId){
+		checkNotNull(account, "Unable to check account, was null");
 		
-		for (Key<Business> businessKey : account.getBusinesses()) {
-			if(businessKey.getId() == businessId) 
-				return true;
+		if(account.getBusinesses() != null) {
+			for (Key<Business> businessKey : account.getBusinesses()) {
+				if(businessKey.getId() == businessId) 
+					return true;
+			}
 		}
+		
 		return false;
 	}
 	
@@ -66,7 +72,7 @@ public class AccountController {
 	public Account authenticateHashed(String login, String hashedPassword) {	
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
-			return null;   
+			return null;
 		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
 			// Reset failed attempts counter
@@ -106,7 +112,7 @@ public class AccountController {
 				account.setFailedLoginAttempts(0);
 				accountRepo.saveOrUpdate(account);
 			}
-		
+			
 			return account;
 		}			
 		else {
@@ -118,11 +124,6 @@ public class AccountController {
 			return null;
 		}
 			
-	}
-	
-	public AccountDTO updateAccount(AccountDTO accountData) {
-		//TODO Validate and save new data for the given account
-		return null;
 	}
 	
 	/**
@@ -137,8 +138,10 @@ public class AccountController {
 	 */
 	public Account createAndSaveAccount(String login, String password, String email, String role, List<Long> businessIds) {
 		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
-		for (Long businessId : businessIds) {
-			businessKeys.add( new Key<Business>(Business.class,businessId));
+		if(businessIds != null) {
+			for (Long businessId : businessIds) {
+				businessKeys.add( new Key<Business>(Business.class,businessId));
+			}
 		}
 		return accountRepo.createAndSaveAccount(login, password, email, role, businessKeys);
 	}
@@ -155,37 +158,6 @@ public class AccountController {
 		return accountData;
 	}
 	
-	/**
-	 * Get the account data for the given login and authenticate with the given password.
-	 * 
-	 * @param login
-	 * @param password
-	 * @return AccountDTO containing the account data
-	 */
-	public AccountDTO getAccountDto(String login) {
-		Account account = accountRepo.getByProperty("login", login);
-		if(account == null)
-			return null;
-		
-		return toDto(account);
-	}
-	
-	/**
-	 * Get the account data for the given login and authenticate with the given password.
-	 * 
-	 * @param login
-	 * @param password
-	 * @return AccountDTO containing the account data
-	 */
-	public AccountDTO getAccount(String login) {
-		Account account = accountRepo.getByProperty("login", login);
-		if(account == null)
-			return null;
-		
-		return toDto(account);
-	}
-
-
 	/**
 	 * Get a list of businesses the given account manages.
 	 * 
@@ -217,7 +189,6 @@ public class AccountController {
 	 */
 	public String requestToken (Long businessId, String clientId) {
 		logger.debug("new token requested for "+clientId);
-		Business business = businessRepo.getById(businessId);
-		return channelCtrl.createChannel(business, clientId);
+		return channelCtrl.createCockpitChannel(businessId, clientId);
 	}
 }

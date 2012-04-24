@@ -8,6 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.Order;
 import net.eatsense.representation.OrderDTO;
 
 import org.slf4j.Logger;
@@ -28,21 +30,22 @@ public class OrderResource {
 	private ResourceContext resourceContext;
 	
 	private OrderController orderController;
-	private Long businessId;
-	private Long orderId;
 	
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
+	private Order order;
+	private Business business;
+
+	public void setOrder(Order order) {
+		this.order = order;
 	}
 
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public OrderDTO updateOrder(OrderDTO orderData) {
-		return orderController.updateOrderForBusiness(businessId, orderId, orderData);
+		return orderController.updateOrderForBusiness(business, order, orderData);
 	}
 }

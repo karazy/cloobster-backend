@@ -4,30 +4,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Bill;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.googlecode.objectify.NotFoundException;
-import com.sun.jersey.api.container.MappableContainerException;
 
 /**
  * Class for transforming from/to Data Transfer Objects (DTOs)
@@ -54,6 +50,23 @@ public class Transformer {
 		this.businessRepo = businessRepo;
 		this.spotRepo = spotRepo;
 	}
+	
+	public BillDTO billToDto(Bill bill) {
+		if(bill == null)
+			return null;
+		
+		BillDTO billData = new BillDTO();
+		
+		billData.setTotal(bill.getTotal());
+		billData.setCheckInId(bill.getCheckIn().getId());
+		billData.setCleared(bill.isCleared());
+		billData.setId(bill.getId());
+		billData.setTime(bill.getCreationTime());
+		billData.setPaymentMethod(bill.getPaymentMethod());
+		
+		return billData;
+	}
+	
 
 	public List<OrderDTO> ordersToDto(List<Order> orders ) {
 		if(orders == null || orders.isEmpty()) {
@@ -108,11 +121,12 @@ public class Transformer {
 
 	public List<ProductDTO> productsToDto(List<Product> products) {
 		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
-		 for( Product p : products)	 {
-			 ProductDTO dto = productToDto(p);
-			 
-			 productDTOs.add(dto);
-		 }
+		if(products != null) {
+			for( Product p : products) {
+				ProductDTO dto = productToDto(p);
+				productDTOs.add(dto);
+			}	
+		}
 		return productDTOs;
 	}
 
@@ -152,6 +166,8 @@ public class Transformer {
 		dto.setMaxOccurence(choice.getMaxOccurence());
 		dto.setMinOccurence(choice.getMinOccurence());
 		dto.setOverridePrice(choice.getOverridePrice());
+		if(choice.getParentChoice() != null)
+			dto.setParent(choice.getParentChoice().getId());
 		
 		dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
 		dto.setText(choice.getText());
@@ -187,12 +203,7 @@ public class Transformer {
 			choiceDtos = new ArrayList<ChoiceDTO>();
 			
 			for (Choice choice : choices)  {
-				ChoiceDTO dto = new ChoiceDTO();
-				
-				dto = choiceToDto(choice);
-
-				choiceDtos.add( dto );
-				
+				choiceDtos.add( choiceToDto(choice) );
 			}
 		}
 		
@@ -200,6 +211,9 @@ public class Transformer {
 	}
 	
 	public CheckInDTO checkInToDto(CheckIn checkIn) {
+		if(checkIn == null)
+			return null;
+		
 		CheckInDTO dto = new CheckInDTO();
 		dto.setDeviceId(checkIn.getDeviceId());
 		dto.setLinkedCheckInId(checkIn.getLinkedUserId());

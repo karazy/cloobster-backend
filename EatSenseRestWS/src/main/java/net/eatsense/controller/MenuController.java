@@ -44,53 +44,53 @@ public class MenuController {
 	/**
 	 * Return all menus with corresponding products of a given business.
 	 * 
-	 * @param businessId entity id of the business
+	 * @param business entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenus(Long businessId){
-		if(businessId == null )
-			throw new IllegalArgumentException("Invalid business key specified.");
-		
-		
-		logger.info("Returning menus of business id: " + businessId);
-		Key<Business> business = new Key<Business>(Business.class, businessId);
-		
-		List<Menu> menus = menuRepo.getByParent( business);
+	public Collection<MenuDTO> getMenus(Business business){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
+		if(business == null )
+			return menuDTOs;
 		
+		List<Menu> menus = menuRepo.getByParent( business );
 		for ( Menu menu : menus) {
-			 MenuDTO menuDTO = new MenuDTO();
-			 // Query for a list of all products associated with this menu
-			 List<Product> products = productRepo.getListByPropertyOrdered("menu", menu.getKey(), "name");
-			 
-			 List<ProductDTO> productDTOs = transform.productsToDto(products);
-			 menuDTO.setTitle(menu.getTitle());
-			 menuDTO.setProducts(productDTOs);
-			 
-			 menuDTOs.add(menuDTO);
+			MenuDTO menuDTO = new MenuDTO();
+			menuDTO.setTitle(menu.getTitle());
+			// Query for a list of all products associated with this menu
+			menuDTO.setProducts(transform.productsToDto(productRepo
+					.getListByPropertyOrdered("menu", menu.getKey(), "name"))); 
+			menuDTOs.add(menuDTO);
 		}
 		
 		return menuDTOs;
 	}
 
-	public Collection<ProductDTO> getAllProducts(Long businessId) {
-		
-		return transform.productsToDto(productRepo.getByParent( new Key<Business>(Business.class, businessId)));
+	/**
+	 * Retrieve all products saved for the given business.
+	 * 
+	 * @param business
+	 * @return
+	 */
+	public Collection<ProductDTO> getAllProducts(Business business) {
+		return transform.productsToDto(productRepo.getByParent(business));
 	}
 	
-	public ProductDTO getProduct(Long businessId, Long id) {
-		logger.info("Trying to get product id : " + id + " for business : id");
-		ProductDTO productDto = new ProductDTO(); 
-		
+	/**
+	 * Retrieve the saved product.
+	 * 
+	 * @param business
+	 * @param id
+	 * @return product DTO
+	 */
+	public ProductDTO getProduct(Business business, Long id) {
+		if(business == null)
+			return null;
 		try {
-			productDto = transform.productToDto(productRepo.getById(new Key<Business>(Business.class ,businessId), id));
-			
+			return transform.productToDto(productRepo.getById(business.getKey(), id));
 		} catch (NotFoundException e) {
-			logger.error("Product not found with id "+id, e);
+			logger.error("Unable to retrieve product, no matching entity found");
 			return null;
 		}
-			
-		return productDto;
 	}
 
 }

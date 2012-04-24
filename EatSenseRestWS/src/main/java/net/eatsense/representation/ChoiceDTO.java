@@ -35,6 +35,30 @@ public class ChoiceDTO {
 	
 	Collection<ProductOption> selected;
 	
+	Long parent;
+	
+	public Long getParent() {
+		return parent;
+	}
+	public void setParent(Long parent) {
+		this.parent = parent;
+	}
+	String group;
+	
+	boolean groupParent = false;
+	
+	public String getGroup() {
+		return group;
+	}
+	public void setGroup(String group) {
+		this.group = group;
+	}
+	public boolean isGroupParent() {
+		return groupParent;
+	}
+	public void setGroupParent(boolean groupParent) {
+		this.groupParent = groupParent;
+	}
 	public Long getId() {
 		return id;
 	}

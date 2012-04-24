@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
@@ -103,18 +104,29 @@ public class GenericRepository<T> extends DAOBase{
 		logger.info("delete {} ", obj);
 		ofy().delete(obj);
 	}
+	
+	/**
+	 * Delete object by key
+	 * @param obj
+	 * 		Key of object to delete.
+	 */
+	public void delete(Key<T> obj) {
+		logger.info("delete {} ", obj);
+		ofy().delete(obj);
+	}
 
 	/**
 	 * Finds an object by id. ONLY WORKING WITH OBJECTS WITH NO PARENT ANNOTATION
 	 * @param id
 	 * 		Id of entity to find.
 	 * @return
-	 * 		Found entity. <code>null</code> if no entity with this id exists.
+	 * 		Found entity.
+	 * @throws NotFoundException if no entity with the given id was found
 	 */
-	public T getById(long id) {
+	public T getById(long id) throws NotFoundException {
 		logger.info("findByKey {} ", id);
 		
-		return ofy().find(clazz, id);
+		return ofy().get(clazz, id);
 	}
 
 	/**
@@ -126,8 +138,9 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		Id of entity to load
 	 * @return
 	 * 		Found entity
+	 * @throws NotFoundException if no entity with the given id and parent was found
 	 */
-	public <V> T getById(Key<V> owner, long id) {
+	public <V> T getById(Key<V> owner, long id) throws NotFoundException {
 		logger.info("getByKey {} ", id); 
 		return ofy().get(new Key<T>(owner, clazz, id));
 	}
@@ -140,7 +153,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 * 		Found entity
 	 */
-	public <V> T getByKey(Key<T> key) {
+	public <V> T getByKey(Key<T> key) throws NotFoundException {
 		logger.info("getByKey {} ", key); 
 		return ofy().get(key);
 	}
@@ -153,7 +166,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 * 		Found entity
 	 */
-	public Collection<T> getByKeys(List<Key<T>> keys) {
+	public Collection<T> getByKeys(List<Key<T>> keys) throws NotFoundException {
 		
 		return ofy().get(keys).values();
 	}
@@ -170,6 +183,20 @@ public class GenericRepository<T> extends DAOBase{
 	public <V> List<T> getByParent( Key<V> parentKey) {
 		logger.info("getChildren for {} ", parentKey);
 		return ofy().query(clazz).ancestor(parentKey).list();
+	}
+	
+	/**
+	 * Returns children of a parent entity.
+	 * Performs an ancestor query.
+	 * 
+	 * @param parent
+	 * 			parent entity. Doesn't have to be the direct parent.
+	 * @return
+	 * 		List with children of given parent
+	 */
+	public <V> List<T> getByParent( V parent) {
+		logger.info("getChildren for {} ", parent);
+		return ofy().query(clazz).ancestor(parent).list();
 	}
 
 	/**
@@ -283,6 +310,15 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public int countByProperty(String propFilter, Object propValue) {
 		return ofy().query(clazz).filter(propFilter, propValue).count();
+	}
+	
+	/**
+	 * Return a typesafe objectify query object.
+	 * 
+	 * @return
+	 */
+	public Query<T> query() {
+		return ofy().query(clazz);
 	}
 		
 	/**

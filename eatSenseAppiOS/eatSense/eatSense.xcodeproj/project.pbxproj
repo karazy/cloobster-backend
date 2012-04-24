@@ -7,7 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B63F670715361C2000F76817 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B640151731B200EE035F /* AssetsLibrary.framework */; };
+		B63F670815361C2C00F76817 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B644151731CC00EE035F /* libiconv.dylib */; };
+		B63F670915361C3600F76817 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B642151731B900EE035F /* CoreVideo.framework */; };
 		B645109015162E60009D2AE3 /* www in Resources */ = {isa = PBXBuildFile; fileRef = B645108F15162E60009D2AE3 /* www */; };
+		B6D87B501536ECB500557AE6 /* 57.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B4F1536ECB500557AE6 /* 57.png */; };
+		B6D87B531536ECBA00557AE6 /* 72.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B521536ECBA00557AE6 /* 72.png */; };
+		B6D87B551536ECCE00557AE6 /* 144.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B541536ECCE00557AE6 /* 144.png */; };
+		B6D87B571536ECF100557AE6 /* 114.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B561536ECF100557AE6 /* 114.png */; };
 		B6EC7B2315162C5000DF3484 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6EC7B2215162C5000DF3484 /* Foundation.framework */; };
 		B6EC7B2515162C5000DF3484 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6EC7B2415162C5000DF3484 /* UIKit.framework */; };
 		B6EC7B2715162C5000DF3484 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6EC7B2615162C5000DF3484 /* CoreGraphics.framework */; };
@@ -49,6 +56,10 @@
 
 /* Begin PBXFileReference section */
 		B645108F15162E60009D2AE3 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
+		B6D87B4F1536ECB500557AE6 /* 57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 57.png; sourceTree = "<group>"; };
+		B6D87B521536ECBA00557AE6 /* 72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 72.png; sourceTree = "<group>"; };
+		B6D87B541536ECCE00557AE6 /* 144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 144.png; sourceTree = "<group>"; };
+		B6D87B561536ECF100557AE6 /* 114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 114.png; sourceTree = "<group>"; };
 		B6EC7B1E15162C5000DF3484 /* eatSense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = eatSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6EC7B2215162C5000DF3484 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B6EC7B2415162C5000DF3484 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -123,6 +134,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B63F670915361C3600F76817 /* CoreVideo.framework in Frameworks */,
+				B63F670815361C2C00F76817 /* libiconv.dylib in Frameworks */,
+				B63F670715361C2000F76817 /* AssetsLibrary.framework in Frameworks */,
 				B6F5B63E151731A500EE035F /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -133,6 +147,10 @@
 		B6EC7B1015162C5000DF3484 = {
 			isa = PBXGroup;
 			children = (
+				B6D87B561536ECF100557AE6 /* 114.png */,
+				B6D87B541536ECCE00557AE6 /* 144.png */,
+				B6D87B521536ECBA00557AE6 /* 72.png */,
+				B6D87B4F1536ECB500557AE6 /* 57.png */,
 				B6F5B644151731CC00EE035F /* libiconv.dylib */,
 				B6F5B642151731B900EE035F /* CoreVideo.framework */,
 				B6F5B640151731B200EE035F /* AssetsLibrary.framework */,
@@ -355,6 +373,10 @@
 				B6EC7B7015162C5000DF3484 /* MainViewController.xib in Resources */,
 				B6EC7B7415162C5000DF3484 /* verify.sh in Resources */,
 				B645109015162E60009D2AE3 /* www in Resources */,
+				B6D87B501536ECB500557AE6 /* 57.png in Resources */,
+				B6D87B531536ECBA00557AE6 /* 72.png in Resources */,
+				B6D87B551536ECCE00557AE6 /* 144.png in Resources */,
+				B6D87B571536ECF100557AE6 /* 114.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3,7 +3,9 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -18,6 +20,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -56,6 +59,7 @@ public class ImportController {
 	private CheckInRepository checkinRepo;
 	private OrderRepository orderRepo;
 	private RequestRepository requestRepo;
+	private AccountRepository accountRepo;
 	
 	private String returnMessage;
 	
@@ -70,7 +74,7 @@ public class ImportController {
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr) {
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr) {
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -81,6 +85,7 @@ public class ImportController {
 		this.billRepo = br;
 		this.orderChoiceRepo = ocr;
 		this.requestRepo = reqr;
+		this.accountRepo = acr;
 	}
 	
     public void setValidator(Validator validator) {
@@ -118,15 +123,37 @@ public class ImportController {
 					if(kP != null) {
 						if(productData.getChoices() != null) {
 							List<Key<Choice>> choices = new ArrayList<Key<Choice>>();
-												
+							Map<String, List<ChoiceDTO>> groupMap = new HashMap<String, List<ChoiceDTO>>();
+							Map<String, ChoiceDTO> parentMap = new HashMap<String, ChoiceDTO>();
+							
 							for(ChoiceDTO choiceData : productData.getChoices()) {
-								Key<Choice> kC = createAndSaveChoice(kP,kR, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
-										choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions());
-								if(kC == null) {
-									logger.info("Error while saving choice with text: " +choiceData.getText());
+								if(choiceData.getGroup() != null && !choiceData.getGroup().isEmpty()) {
+									if(!groupMap.containsKey(choiceData.getGroup())) {
+										groupMap.put(choiceData.getGroup(), new ArrayList<ChoiceDTO>());
+									}
+									if(choiceData.isGroupParent()) {
+										parentMap.put(choiceData.getGroup(), choiceData);
+									}
+									else
+										groupMap.get(choiceData.getGroup()).add(choiceData);
 								}
-								else
-									choices.add(kC);
+								else {
+									// no group name set, just save the choice
+									Key<Choice> choiceKey = createAndSaveChoice(kP,kR, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
+											choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions(), null);
+									choices.add(choiceKey);
+								}
+							}
+							
+							for (ChoiceDTO parentChoice : parentMap.values()) {
+								Key<Choice> parentKey = createAndSaveChoice(kP,kR, parentChoice.getText(), parentChoice.getPrice(), parentChoice.getOverridePrice(),
+										parentChoice.getMinOccurence(), parentChoice.getMaxOccurence(), parentChoice.getIncluded(), parentChoice.getOptions(), null);
+								choices.add(parentKey);
+								for (ChoiceDTO childChoice : groupMap.get(parentChoice.getGroup())) {
+									Key<Choice> childKey = createAndSaveChoice(kP,kR, childChoice.getText(), childChoice.getPrice(), childChoice.getOverridePrice(),
+											childChoice.getMinOccurence(), childChoice.getMaxOccurence(), childChoice.getIncluded(), childChoice.getOptions(), parentKey);
+									choices.add(childKey);
+								} 
 							}
 						
 							newProduct.setChoices(choices);
@@ -209,7 +236,12 @@ public class ImportController {
 		return product;
 	}
 	
-	private Key<Choice> createAndSaveChoice(Key<Product> productKey, Key<Business> businessKey, String text, float price, ChoiceOverridePrice overridePrice, int minOccurence, int maxOccurence, int includedChoices, Collection<ProductOption> availableOptions) {
+	private Key<Choice> createAndSaveChoice(Key<Product> productKey,
+			Key<Business> businessKey, String text, float price,
+			ChoiceOverridePrice overridePrice, int minOccurence,
+			int maxOccurence, int includedChoices,
+			Collection<ProductOption> availableOptions,
+			Key<Choice> parentChoice) {
 		if(productKey == null)
 			throw new NullPointerException("productKey was not set");
 		logger.info("Creating new choice for product ("+ productKey.getId() + ") with text: " +text);
@@ -223,6 +255,7 @@ public class ImportController {
 		choice.setMinOccurence(minOccurence);
 		choice.setMaxOccurence(maxOccurence);
 		choice.setIncludedChoices(includedChoices);
+		choice.setParentChoice(parentChoice);
 	
 		if(availableOptions != null)
 			choice.setOptions(new ArrayList<ProductOption>(availableOptions));
@@ -273,6 +306,7 @@ public class ImportController {
 		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
+		accountRepo.ofy().delete(accountRepo.getAllKeys());
 	};
 	
 	/**

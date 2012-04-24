@@ -69,6 +69,16 @@ public class Choice extends GenericEntity {
 	 * Number of options that are free with choice. 
 	 */
 	int includedChoices;
+	
+	Key<Choice> parentChoice;
+
+	public Key<Choice> getParentChoice() {
+		return parentChoice;
+	}
+
+	public void setParentChoice(Key<Choice> parentChoice) {
+		this.parentChoice = parentChoice;
+	}
 
 	public Key<Business> getBusiness() {
 		return business;

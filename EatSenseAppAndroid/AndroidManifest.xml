@@ -32,7 +32,7 @@
     <uses-sdk android:minSdkVersion="8" />
 
     <application
-        android:icon="@drawable/icon"
+        android:icon="@drawable/icon96"
         android:label="@string/eatsense_app_name" >
         <activity
             android:name=".EatSenseApp"

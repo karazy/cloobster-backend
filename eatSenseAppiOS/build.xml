@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
+	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod-ios" />
+	<property name="config" value="eatSense/www/lib/karazy-config.js" />
+
+	<target name="copySenchaApp" depends="">
+		<echo message="Copy App" />
+		<copy todir="eatSense/www" overwrite="true">
+			<fileset dir="${appDir}">
+				<exclude name="**/*.desktop.*" />
+                <exclude name="**/*.phone.*" />
+                <exclude name="**/*.ignore.*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="renameFiles" depends="copySenchaApp">
+		<echo message="Rename files" />
+		<move todir="." includeemptydirs="false">
+			<fileset dir=".">
+			</fileset>
+			<regexpmapper from="^(.+)\.iphone\.(.+)$$" to="\1.\2" />
+		</move>
+	</target>
+
+	<target name="replaceConfigTest" depends="renameFiles">
+		<echo message="Setting config values" />
+		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'http://192.168.1.103:8888'," byline="true">
+		</replaceregexp>
+	</target>
+
+	<target name="replaceConfigProduction" depends="renameFiles">
+		<echo message="Setting config values" />
+		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://karazy-eatsense.appspot.com'," byline="true">
+		</replaceregexp>
+	</target>
+
+</project>

@@ -6,6 +6,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.BillController;
+import net.eatsense.domain.Bill;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.BillDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,21 +28,22 @@ public class BillResource {
 	private ResourceContext resourceContext;
 	
 	private BillController billController;
-	private Long businessId;
-	private Long billId;
-	
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
-	}
+	private Business business;
 
-	public void setBillId(Long billId) {
-		this.billId = billId;
-	}
-	
+	private Bill bill;
+
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public BillDTO updateBill(BillDTO billData) {
-		return billController.updateBill(businessId, billId, billData);
+		return billController.updateBill(business, bill, billData);
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
+	}
+
+	public void setBill(Bill bill) {
+		this.bill = bill;
 	}
 }

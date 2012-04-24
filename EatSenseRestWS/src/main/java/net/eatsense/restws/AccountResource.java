@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 @Path("accounts")
 public class AccountResource {
@@ -44,19 +45,9 @@ public class AccountResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"user"})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
-		Account account = null;
-		AccountDTO accountData = null;
-		if( (account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account")) != null ) {
-			accountData = accountCtr.toDto(account);
-		}
-		else {
-			accountData = accountCtr.getAccountDto(login);
-			if(accountData == null )
-				throw new WebApplicationException(401);
-		}
-		
-		logger.info("Authenticated request from user :" + accountData.getLogin());
-		return accountData;
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		logger.info("Authenticated request from user :" + account.getLogin());
+		return accountCtr.toDto(account);
 	}
 	
 	@GET
@@ -73,7 +64,10 @@ public class AccountResource {
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") Long businessId, @FormParam("clientId") String clientId) {
-		return accountCtr.requestToken(businessId, clientId);
+		String token = accountCtr.requestToken(businessId, clientId);
+		if(token == null)
+			throw new NotFoundException();
+		return token;
 	};
 	
 }
