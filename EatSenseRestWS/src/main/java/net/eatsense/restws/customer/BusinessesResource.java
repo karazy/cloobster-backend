@@ -2,32 +2,24 @@ package net.eatsense.restws.customer;
 
 import java.util.Collection;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
-import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.persistence.BusinessRepository;
-import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.BusinessImportDTO;
-import net.eatsense.representation.MenuDTO;
-import net.eatsense.representation.OrderDTO;
-import net.eatsense.representation.ProductDTO;
 import net.eatsense.util.DummyDataDumper;
 
 import com.google.inject.Inject;

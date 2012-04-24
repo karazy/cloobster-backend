@@ -3,20 +3,19 @@ package net.eatsense.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.SpotRepository;
-import net.eatsense.persistence.BusinessRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

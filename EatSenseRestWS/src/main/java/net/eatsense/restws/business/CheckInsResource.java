@@ -14,7 +14,6 @@ import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Business;
-import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
 import com.google.inject.Inject;
