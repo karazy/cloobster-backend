@@ -6,6 +6,6 @@ EatSenseAppAndroid/assets/www/*
 EatSenseAppiOS/eatSense/www/*
 Misc/SenchaTests/touch/*
 .sass-cache
+EatSenseRestWS/src/main/app/prod/*/lib/*
+EatSenseRestWS/src/main/app/prod/*/res/*
 *.jsb3
-**/prod/*/lib/**
-**/prod/*/res/**
