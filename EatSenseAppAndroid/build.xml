@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
-	<property name="appDir" value="../EatSenseRestWS/src/main/app/dev" />
+	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod-android" />
 	<property name="config" value="assets/www/lib/karazy-config.js" />
 
 	<target name="copySenchaApp" depends="">
