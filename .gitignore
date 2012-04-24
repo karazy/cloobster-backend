@@ -7,5 +7,5 @@ EatSenseAppiOS/eatSense/www/*
 Misc/SenchaTests/touch/*
 .sass-cache
 *.jsb3
-**/prod-*/lib/*
-**/prod-*/res/*
+**/prod/*/lib/**
+**/prod/*/res/**
