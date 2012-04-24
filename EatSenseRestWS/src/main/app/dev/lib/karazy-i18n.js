@@ -35,15 +35,14 @@ Karazy.i18n = (function() {
 	 */
 	function getLanguage() {
 		var userLang = (navigator.language) ? navigator.language : navigator.userLanguage; 
-		//console.log('browser language: '+userLang);
+		console.log('browser language: '+userLang);
 		if(userLang === 'undefined'|| userLang.length == 0) {
 			//use default language
 			userLang = defaultLang;
 		}
-		return userLang.substring(0,2).toUpperCase();
+		return userLang.substring(0,2);
 	}
-	
-	
+
 	
 	/**
 	 * 
@@ -53,7 +52,7 @@ Karazy.i18n = (function() {
 		//get browser/system locale 
 		lang = getLanguage();
 		translations = translation;
-	
+
 		/*public methods*/
 		return {
 			/**
@@ -66,9 +65,10 @@ Karazy.i18n = (function() {
 			 * 			2. an array containing placeholders
 			 * 			can be submited
 			 * @returns
-			 * 		Translation.
+			 * 		Translation or key if none was found
 			 */
 			 translate: function(key) {
+				 //alternativ with custom object and no sencha store
 				 var value = "";
 				 if (translations[lang] && translations[lang][key] && translations[lang][key] !== '') {
 					 value = translations[lang][key];
@@ -92,15 +92,16 @@ Karazy.i18n = (function() {
 						 value = Ext.String.format.apply(this, _array);
 					 }
 				 }
-				 return value;
+				 return (value == "") ? key : value;
 			 },
 			 /**
 			  * Set the language.
 			  */
 			 setLang: function(language){
-				 console.log('i18n set lang %s', lang);
 				 lang = language;
 			 },
+
+			
 		};
 		
 	}
