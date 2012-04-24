@@ -1,5 +1,8 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -57,6 +60,8 @@ public class BusinessController {
 	 * @return List of SpotCockpitDTO objects
 	 */
 	public List<SpotStatusDTO> getSpotStatusData(Business business){
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
 		List<Spot> allSpots = spotRepo.getByParent(business);
 		List<SpotStatusDTO> spotDtos = new ArrayList<SpotStatusDTO>();
 		
@@ -86,15 +91,14 @@ public class BusinessController {
 	 * @return requestData
 	 */
 	public CustomerRequestDTO saveCustomerRequest(CheckIn checkIn, CustomerRequestDTO requestData) {
-		if( requestData == null)
-			throw new IllegalArgumentException("Unable to post request, requestData is null");
-		if(checkIn == null)
-			throw new IllegalArgumentException("Unable to post request, checkIn is null");
-		if(checkIn.isArchived())
-			throw new IllegalArgumentException("Cant post request for archived checkin");
-		
-		if( ! "CALL_WAITER".equals(requestData.getType()))
-			throw new IllegalArgumentException("Unrecognized request type: " + requestData.getType());
+		checkNotNull(checkIn, "checkin cannot be null");
+		checkNotNull(checkIn.getId(), "checkin id cannot be null");
+		checkNotNull(checkIn.getBusiness(), "business for checkin cannot be null");
+		checkNotNull(checkIn.getSpot(), "spot for checkin cannot be null");
+		checkNotNull(requestData, "requestData cannot be null");
+		checkNotNull(requestData.getType(), "requestData type cannot be null");
+		checkArgument("CALL_WAITER".equals(requestData.getType()), "invalid request type %s", requestData.getType());
+		checkArgument(!checkIn.isArchived(), "checkin cannot be archived entity");
 		
 		requestData.setCheckInId(checkIn.getId());
 		requestData.setSpotId(checkIn.getSpot().getId());
@@ -108,8 +112,7 @@ public class BusinessController {
 				requestData.setId(oldRequest.getId());
 				requestRepo.saveOrUpdate(oldRequest);
 				return requestData;
-			}
-				
+			}	
 		}
 		
 		Request request = new Request();
@@ -148,6 +151,9 @@ public class BusinessController {
 	 * @return list of found request dtos or empty list if none found
 	 */
 	public List<CustomerRequestDTO> getCustomerRequestData(Business business, Long checkInId, Long spotId) {
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
+		
 		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
 		Query<Request> query = requestRepo.ofy().query(Request.class).ancestor(business);
 
@@ -183,12 +189,16 @@ public class BusinessController {
 	 * @param business
 	 * @param requestId
 	 */
-	public void deleteCustomerRequest(Business business, Long requestId) {
+	public void deleteCustomerRequest(Business business, long requestId) {
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
+		checkArgument(requestId != 0, "requestId cannot be 0");
+		
 		Request request;
 		try {
 			request = requestRepo.getById(business.getKey(), requestId);
 		} catch (com.googlecode.objectify.NotFoundException e1) {
-			throw new IllegalArgumentException("Unable to delete request, business or request id unknown", e1);
+			throw new IllegalArgumentException("request not found", e1);
 		}
 		CustomerRequestDTO requestData = new CustomerRequestDTO();
 

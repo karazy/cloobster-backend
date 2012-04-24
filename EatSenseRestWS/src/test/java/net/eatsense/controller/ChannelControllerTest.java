@@ -1,29 +1,22 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-
-import java.io.IOException;
-import java.util.List;
-
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.ErrorDTO;
-import net.eatsense.representation.SpotDTO;
 
 import org.apache.bval.guice.ValidationModule;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -79,6 +72,8 @@ public class ChannelControllerTest {
 	public void tearDown() throws Exception {
 		helper.tearDown();
 	}
+	
+	
 	
 	@Test
 	public void testRequestChannelToken() {

@@ -4,7 +4,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.domain.Business;
-import net.eatsense.persistence.RequestRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

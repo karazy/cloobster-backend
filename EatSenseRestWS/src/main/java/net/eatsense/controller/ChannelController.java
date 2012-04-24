@@ -1,5 +1,8 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +15,6 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +125,7 @@ public class ChannelController {
 	}
 	
 	/**
-	 * Send message to th
+	 * Send message to open channel of the checkin.
 	 * 
 	 * @param checkInId
 	 * @param messageData
@@ -132,13 +133,26 @@ public class ChannelController {
 	 * @throws IllegalArgumentException if unknown checkInId has been passed
 	 */
 	public String sendMessageToCheckIn(Long checkInId, MessageDTO messageData) throws IllegalArgumentException {
+		checkNotNull(checkInId, "checkInId cannot be null");
+		checkNotNull(messageData, "messageData cannot be null");
+		checkNotNull(messageData.getType(), "message type cannot be null");
+		checkNotNull(messageData.getAction(), "message action cannot be null");
+		checkArgument(!messageData.getType().isEmpty(), "message type cannot be empty");
+		checkArgument(!messageData.getAction().isEmpty(), "message action cannot be empty");
+		
 		CheckIn checkIn;
 		try {
 			checkIn = checkInRepo.getById(checkInId);
 		} catch (NotFoundException e) {
 			throw new IllegalArgumentException("Failed to send message, unknow checkInId", e);
 		}
-		return sendMessage(checkIn.getChannelId(), messageData);
+		if(checkIn.getChannelId() != null)
+			return sendMessage(checkIn.getChannelId(), messageData);
+		else {
+			String buildJsonMessage = buildJsonMessage(messageData);
+			logger.info("no channel connected for checkin {}\nSkipping message: {}", checkInId, buildJsonMessage);
+			return buildJsonMessage;
+		}
 	}
 	
 	
@@ -152,6 +166,13 @@ public class ChannelController {
 	 * @return the complete message string 
 	 */
 	public String sendMessage(String clientId, String type, String action, Object content)  {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		checkNotNull(type, "type cannot be null");
+		checkNotNull(action, "action cannot be null");
+		checkArgument(!type.isEmpty(), "type cannot be empty");
+		checkArgument(!action.isEmpty(), "action cannot be empty");
+		
 		MessageDTO messageData = new MessageDTO();
 		messageData.setAction(action);
 		messageData.setType(type);
@@ -171,6 +192,14 @@ public class ChannelController {
 	 * 
 	 */
 	public String sendMessage(String clientId, MessageDTO messageData) throws IllegalArgumentException {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		checkNotNull(messageData, "messageData cannot be null");
+		checkNotNull(messageData.getType(), "message type cannot be null");
+		checkNotNull(messageData.getAction(), "message action cannot be null");
+		checkArgument(!messageData.getType().isEmpty(), "message type cannot be empty");
+		checkArgument(!messageData.getAction().isEmpty(), "message action cannot be empty");
+		
 		return sendMessageRaw(clientId, buildJsonMessage(messageData)).getMessage();
 	}
 	
@@ -182,10 +211,7 @@ public class ChannelController {
 	 * @return JSON string representing the object
 	 */
 	private String buildJsonMessage(Object object) {
-		if(object == null) {
-			throw new IllegalArgumentException("object is null");
-		}
-			
+		checkNotNull(object, "object cannot be null");
 		String messageString;
 		
 		try {
@@ -207,6 +233,11 @@ public class ChannelController {
 	 * @return
 	 */
 	public ChannelMessage sendMessageRaw(String clientId, String messageString) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		checkNotNull(messageString, "messageString cannot be null");
+		checkArgument(!messageString.isEmpty(), "messageString cannot be empty");
+		
 		if(messageString.length() > 32786)
 			throw new IllegalArgumentException("Cannot send message, data package longer than 32kB");
 
@@ -226,6 +257,12 @@ public class ChannelController {
 	 * @param content JSON model
 	 */
 	public void sendMessageToAllCockpitClients(Business business, String type, String action, Object content) {
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(type, "type cannot be null");
+		checkNotNull(action, "action cannot be null");
+		checkArgument(!type.isEmpty(), "type cannot be empty");
+		checkArgument(!action.isEmpty(), "action cannot be empty");
+	
 		sendJsonToAllCockpitClients(business, new MessageDTO(type, action, content));
 	}
 	
@@ -236,14 +273,14 @@ public class ChannelController {
 	 * @param messages
 	 */
 	public void sendMessagesToAllCockpitClients(Business business, List<MessageDTO> content)  {
+		checkNotNull(business, "business cannot be null");
 		if(content != null && !content.isEmpty())
 			sendJsonToAllCockpitClients(business, content);
 	}
 	
 	private void sendJsonToAllCockpitClients(Business business, Object content)  {
-		if(business == null) {
-			throw new IllegalArgumentException("Unable to send message, business is null");
-		}
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(content, "content cannot be null");
 		
 		String messageString = buildJsonMessage(content);
 		
@@ -305,7 +342,13 @@ public class ChannelController {
 			subscribeToBusiness(clientId);
 	}
 	
+	/**
+	 * @param clientId
+	 */
 	public void subscribeCheckIn(String clientId) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		
 		CheckIn checkIn = parseCheckIn(clientId);
 		if(checkIn == null)
 			return;
@@ -318,6 +361,9 @@ public class ChannelController {
 	}
 	
 	public void unsubscribeCheckIn(String clientId) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		
 		CheckIn checkIn = parseCheckIn(clientId);
 		if(checkIn == null)
 			return;
@@ -336,6 +382,9 @@ public class ChannelController {
 	 * @param clientId
 	 */
 	public void unsubscribeFromBusiness(String clientId) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+
 		Business business = parseBusiness(clientId);
 		if(business == null) {
 			return;
@@ -357,6 +406,9 @@ public class ChannelController {
 	 * @return Business entity
 	 */
 	private Business parseBusiness(String clientId) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		
 		// retrieve the businessId appended at the front of the client id seperated with a "|"
 		Long businessId = Long.valueOf(clientId.substring(1, clientId.indexOf("|") ));
 
@@ -375,6 +427,9 @@ public class ChannelController {
 	 * @return CheckIn entity
 	 */
 	private CheckIn parseCheckIn(String clientId) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		
 		// retrieve the id encoded after the first character in the string
 		Long checkInId = Long.valueOf(clientId.substring(1));
 		try {
@@ -391,6 +446,9 @@ public class ChannelController {
 	 * @param clientId
 	 */
 	public void subscribeToBusiness( String clientId) {
+		checkNotNull(clientId, "clientId cannot be null");
+		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
+		
 		Business business = parseBusiness(clientId);
 		if(business == null)
 			return;
@@ -411,17 +469,15 @@ public class ChannelController {
 	 * @return the token to send to the client
 	 */
 	public String createCustomerChannel(CheckIn checkIn, Integer timeout) {
-		String token = null;
-		if(checkIn == null)
-			throw new IllegalArgumentException("checkIn is null");			
+		checkNotNull(checkIn, "checkIn cannot be null");
+		checkNotNull(checkIn.getId(), "checkIn id cannot be null");
+		
 		// create a channel id with the format "c{checkInId}"
 		String clientId = "c"+ checkIn.getId().toString();
 		
 		logger.debug("creating channel for channelID: " +clientId);
 		// request a new token, with or without timeout depending if set
-		token = (timeout != null)?channelService.createChannel(clientId, timeout):channelService.createChannel(clientId);
-
-		return token;
+		return (timeout != null)?channelService.createChannel(clientId, timeout):channelService.createChannel(clientId);
 	}
 	
 	/**
@@ -432,6 +488,8 @@ public class ChannelController {
 	 * @return the generated channel token
 	 */
 	public String createCustomerChannel(CheckIn checkIn) {
+		checkNotNull(checkIn, "checkIn cannot be null");
+		
 		return createCustomerChannel(checkIn, null);
 	}
 

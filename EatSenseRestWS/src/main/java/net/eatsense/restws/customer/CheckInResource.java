@@ -7,18 +7,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
-import com.sun.jersey.api.core.ResourceContext;
 
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
@@ -26,6 +18,12 @@ import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
+import com.sun.jersey.api.core.ResourceContext;
 
 public class CheckInResource {
 	

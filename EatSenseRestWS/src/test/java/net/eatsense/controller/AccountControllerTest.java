@@ -55,8 +55,7 @@ public class AccountControllerTest {
 		 role = "admin";
 		 //TODO update to use restaurant id
 		account = ar.createAndSaveAccount( login, password,
-				email, role, rr.getAllKeys());
-		 
+				email, role, rr.getAllKeys());		 
 	}
 
 	@After
@@ -65,8 +64,7 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void simpleAuthenticationTest() {
-		
+	public void testAuthenticate() {
 		//#1 Test correct password
 		Account test = ctr.authenticate(login, password);
 		
@@ -74,48 +72,54 @@ public class AccountControllerTest {
 		assertThat(test.getHashedPassword(), notNullValue());
 		assertThat(test.getRole(), is(role));
 		assertThat(test.getEmail(), is(email));
-
-		//#2.1 Test wrong password
-
-		test = ctr.authenticate(login, "wrongpassword");
-		assertThat(test, nullValue());
-		
-		//#2.2 Test null password
-		test = ctr.authenticate(login, null);
-		assertThat(test, nullValue());
-		
-		//#2.3 Test null login.
-		test = ctr.authenticate(null, password);
-		assertThat(test, nullValue());
-		
-		//#2.4 Test wrong login.
-		test = ctr.authenticate("notexistinglogin", password);
-		assertThat(test, nullValue());
 	}
 	
 	@Test
-	public void hashedAuthenticationTest() {
+	public void testAuthenticateWrongPassword() {
+		assertThat(ctr.authenticate(login, "wrongpassword"), nullValue());
+	}
+	
+	public void testAuthenticateNullPassword() {
+		assertThat(ctr.authenticate(login, null), nullValue());
+	}
+	
+	@Test
+	public void testAuthenticateNullLogin() {
+		assertThat(ctr.authenticate(null, password), nullValue());
+	}
+	
+	@Test
+	public void testAuthenticateUnknownLogin() {
+		assertThat(ctr.authenticate("notexistinglogin", password), nullValue());
+	}
+	
+	@Test
+	public void testAuthenticateHashed() {
 		//#1 Test correct hash
 		Account test = ctr.authenticateHashed(login, account.getHashedPassword());
+		
 		assertThat(test.getLogin(), is(login));
 		assertThat(test.getHashedPassword(), notNullValue());
 		assertThat(test.getRole(), is(role));
 		assertThat(test.getEmail(), is(email));
-		
-		//#2 Test null hash
-		test = ctr.authenticateHashed(login, null);
-		assertThat(test, nullValue());
-		
-		//#2.1 Test null login
-		test = ctr.authenticateHashed(null, account.getHashedPassword());
-		assertThat(test, nullValue());
-		
-		//#2.2 Test wrong hash
-		test = ctr.authenticateHashed(login, "thisisnotabcrypthash");
-		assertThat(test, nullValue());
-		
-		//#2.2 Test wrong login
-		test = ctr.authenticateHashed("probablynotavalidaccount", account.getHashedPassword());
-		assertThat(test, nullValue());
+	}
+	
+	@Test
+	public void testAuthenticateHashedWrongHash() {
+		assertThat(ctr.authenticateHashed(login, "wrongpasswordhash"), nullValue());
+	}
+	
+	public void testAuthenticateHashedNullHash() {
+		assertThat(ctr.authenticateHashed(login, null), nullValue());
+	}
+	
+	@Test
+	public void testAuthenticateHashedNullLogin() {
+		assertThat(ctr.authenticateHashed(null, password), nullValue());
+	}
+	
+	@Test
+	public void testAuthenticateHashedUnknownLogin() {
+		assertThat(ctr.authenticateHashed("notexistinglogin", password), nullValue());
 	}
 }

@@ -1,11 +1,10 @@
 package net.eatsense.controller.bill;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.controller.BillController;
@@ -20,14 +19,8 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
-import net.eatsense.persistence.BillRepository;
-import net.eatsense.persistence.ChoiceRepository;
-import net.eatsense.persistence.MenuRepository;
-import net.eatsense.persistence.OrderChoiceRepository;
-import net.eatsense.persistence.OrderRepository;
-import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.BusinessRepository;
-import net.eatsense.persistence.SpotRepository;
+import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ChoiceDTO;
@@ -38,7 +31,6 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
-import org.hamcrest.core.IsNot;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +59,6 @@ public class CreateBillTest {
 	    private DummyDataDumper ddd;
 		private Transformer transform;
 		private BillController billCtrl;
-		private BillRepository br;
 
 		private CheckIn checkIn;
 		private Business business;
@@ -84,7 +75,6 @@ public class CreateBillTest {
 		billCtrl = injector.getInstance(BillController.class);
 		rr = injector.getInstance(BusinessRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
-		br = injector.getInstance(BillRepository.class);
 		transform = injector.getInstance(Transformer.class);
 		ddd= injector.getInstance(DummyDataDumper.class);
 		

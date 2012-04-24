@@ -2,8 +2,6 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,32 +12,29 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
-import net.eatsense.domain.Business;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
-import net.eatsense.representation.cockpit.MessageDTO;
-import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +43,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
-import com.sun.jersey.api.NotFoundException;
 
 /**
  * Manages order creation, update and retrieval.
@@ -64,7 +58,6 @@ public class OrderController {
 	private OrderChoiceRepository orderChoiceRepo;
 	private Validator validator;
 	private CheckInRepository checkInRepo;
-	private BusinessRepository businessRepo;
 	private ChoiceRepository choiceRepo;
 	private Transformer transform;
 	private RequestRepository requestRepo;
@@ -88,7 +81,6 @@ public class OrderController {
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.choiceRepo = choiceRepo;
 		this.checkInRepo = checkInRepo;
-		this.businessRepo = businessRepo;
 		this.transform = trans;
 	}
 

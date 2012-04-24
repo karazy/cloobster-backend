@@ -1,11 +1,13 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
+import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
@@ -35,7 +37,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.jersey.api.NotFoundException;
 
 public class BusinessControllerTest {
 	
@@ -101,23 +102,19 @@ public class BusinessControllerTest {
 	public void tearDown() throws Exception {
 		helper.tearDown();
 	}
+	
 	@Test
-	public void testSaveAndDeleteRequest() {
+	public void testSaveCustomerRequest() {
 		CustomerRequestDTO requestData = new CustomerRequestDTO();
 		
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
 		
-		// Save a call waiter request for null checkin
-		try {
-			businessCtrl.saveCustomerRequest(null, requestData);
-		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
-		}
-		
-		assertThat(requestData.getId(), notNullValue());
-		assertThat(requestData.getCheckInId(), is(checkIn.getId()));
+		assertThat(result.getCheckInId(), is(checkIn.getId()));
+		assertThat(result.getSpotId(), is(checkIn.getSpot().getId()));
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getType(), is(requestData.getType()));
 		
 		List<SpotStatusDTO> spots = businessCtrl.getSpotStatusData(business);
 		
@@ -126,16 +123,237 @@ public class BusinessControllerTest {
 				assertThat(spotStatusDTO.getStatus(), is("CALL_WAITER"));
 			}
 		}
+	}
+	
+	@Test(expected= NullPointerException.class)
+	public void testSaveCustomerRequestNullCheckIn() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		businessCtrl.saveCustomerRequest(null, requestData);
+	}
+	
+	@Test(expected= NullPointerException.class)
+	public void testSaveCustomerRequestNullData() {
+		businessCtrl.saveCustomerRequest(checkIn, null);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSaveCustomerRequestInvalidType() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("NOTCALL_WAITER");
+		businessCtrl.saveCustomerRequest(checkIn, requestData);
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testSaveCustomerRequestNullType() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType(null);
+		businessCtrl.saveCustomerRequest(checkIn, requestData);
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testSaveCustomerRequestNullCheckInId() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		checkIn.setId(null);
+		businessCtrl.saveCustomerRequest(checkIn, requestData);
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testSaveCustomerRequestNullCheckInSpot() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		checkIn.setSpot(null);
+		businessCtrl.saveCustomerRequest(checkIn, requestData);
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testSaveCustomerRequestNullCheckInBusiness() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		checkIn.setBusiness(null);
+		businessCtrl.saveCustomerRequest(checkIn, requestData);
+	}
+	
+	@Test(expected= NullPointerException.class)
+	public void testDeleteRequestNullBusiness() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+
+		businessCtrl.deleteCustomerRequest(null, result.getId());
+
+	}
+	
+	@Test(expected= NullPointerException.class)
+	public void testDeleteRequestNullBusinessId() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		business.setId(null);
+		businessCtrl.deleteCustomerRequest(business, result.getId());
+	}
+	
+	@Test(expected= IllegalArgumentException.class)
+	public void testDeleteRequestZeroId() {
+		businessCtrl.deleteCustomerRequest(business, 0);
+	}
+	
+	@Test(expected= IllegalArgumentException.class)
+	public void testDeleteRequestUnknownId() {
+		businessCtrl.deleteCustomerRequest(business, 1234l);
+	}
+
+	@Test
+	public void testDeleteRequest() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+
+		businessCtrl.deleteCustomerRequest(business, result.getId());
 		
-		businessCtrl.deleteCustomerRequest(business, requestData.getId());
-		
-		spots = businessCtrl.getSpotStatusData(business);
+		List<SpotStatusDTO> spots = businessCtrl.getSpotStatusData(business);
 		
 		for (SpotStatusDTO spotStatusDTO : spots) {
 			if (spotStatusDTO.getId() == checkIn.getSpot().getId()) {
 				assertThat(spotStatusDTO.getStatus(), nullValue());
 			}
 		}
+	}
+	
+	@Test
+	public void testGetRequestDataForCheckIn() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+
+		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, checkIn.getId(), null);
+		assertThat(result, hasSize(1));
+		for (CustomerRequestDTO customerRequestDTO : result) {
+			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
+			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
+			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
+		}
+	}
+	
+	@Test
+	public void testGetRequestDataForSpot() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+
+		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, null, checkIn.getSpot().getId());
+		assertThat(result, hasSize(1));
+		for (CustomerRequestDTO customerRequestDTO : result) {
+			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
+			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
+			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
+		}
+	}
+	
+	@Test
+	public void testGetRequestDataForSpotAndCheckIn() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+
+		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, checkIn.getId(), checkIn.getSpot().getId());
+		assertThat(result, hasSize(1));
+		for (CustomerRequestDTO customerRequestDTO : result) {
+			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
+			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
+			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
+		}
+	}
+	
+	@Test
+	public void testGetRequestDataAll() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+
+		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, null, null);
 		
+		assertThat(result, hasSize(1));
+		for (CustomerRequestDTO customerRequestDTO : result) {
+			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
+			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
+			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
+		}
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testGetRequestNullBusiness() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		businessCtrl.getCustomerRequestData(null, null, null);
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testGetRequestNullBusinessId() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		business.setId(null);
+		businessCtrl.getCustomerRequestData(business, null, null);
+	}
+	
+	@Test
+	public void testGetSpotStatus() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		
+		List<SpotStatusDTO> spots = businessCtrl.getSpotStatusData(business);
+		assertThat(spots, hasSize(1));
+		
+		for (SpotStatusDTO spotStatusDTO : spots) {
+			assertThat(spotStatusDTO.getStatus(), is("CALL_WAITER"));
+		}
+	}
+	
+	@Test(expected= NullPointerException.class)
+	public void testGetSpotStatusNullBusiness() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		
+		businessCtrl.getSpotStatusData(null);
+
+	}
+	
+	@Test(expected= NullPointerException.class)
+	public void testGetSpotStatusNullBusinessId() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		business.setId(null);
+		businessCtrl.getSpotStatusData(business);
+		
+	}
+	
+	@Test
+	public void testGetSpotStatusUnknownBusiness() {
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setType("CALL_WAITER");
+		// Save a call waiter request.
+		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		business.setId(12345l);
+		Collection<SpotStatusDTO> result = businessCtrl.getSpotStatusData(business);
+		
+		assertThat(result.isEmpty(), is(true));
 	}
 }

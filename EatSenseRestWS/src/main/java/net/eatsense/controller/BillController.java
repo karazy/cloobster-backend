@@ -79,7 +79,10 @@ public class BillController {
 	 * @param checkInId entity id
 	 * @return bill DTO or null if not found 
 	 */
-	public BillDTO getBillForCheckIn(Business business, Long checkInId) {
+	public BillDTO getBillForCheckIn(Business business, long checkInId) {
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
+		checkArgument(checkInId != 0 , "checkInId cannot be zero");
 		Bill bill = orderRepo.getOfy().query(Bill.class).ancestor(business).filter("checkIn", CheckIn.getKey(checkInId)).get();
 		
 		return transform.billToDto(bill);
@@ -252,6 +255,10 @@ public class BillController {
 	 * @return total price of the order
 	 */
 	public Float calculateTotalPrice(Order order) {
+		checkNotNull(order, "order is null");
+		checkNotNull(order.getId(), "id for order is null");
+		checkNotNull(order.getProduct(), "product for oder is null");
+		
 		Float total = 0f;
 		
 		List<OrderChoice> choices = orderChoiceRepo.getByParent(order.getKey());
@@ -270,7 +277,8 @@ public class BillController {
 		}
 		
 		total += product.getPrice();
-		return total;
+		
+		return total * order.getAmount();
 	}
 
 	/**
@@ -280,11 +288,10 @@ public class BillController {
 	 * @return
 	 */
 	private Float calculateTotalPrice(OrderChoice orderChoice) {
-		if( orderChoice.getChoice() == null)
-			throw new IllegalArgumentException("no saved choice for orderChoice with id: " + orderChoice.getId());
-		
-		if(orderChoice.getChoice().getOptions() == null || orderChoice.getChoice().getOptions().isEmpty())
-			throw new IllegalArgumentException("no saved options for choice with id: " + orderChoice.getChoice().getId());
+		checkNotNull(orderChoice, "orderchoice is null");
+		checkNotNull(orderChoice.getChoice(), "choice is null for orderChoice with id %s",orderChoice.getId());
+		checkNotNull(orderChoice.getChoice().getOptions(), "options are null for choice with id %s",orderChoice.getChoice().getId());
+		checkArgument(!orderChoice.getChoice().getOptions().isEmpty(), "options are empty for choice with id %s", orderChoice.getChoice().getId());
 		
 		int selected = 0;
 		Float total = 0f;
@@ -313,7 +320,10 @@ public class BillController {
 	 * @param billId
 	 * @return
 	 */
-	public Bill getBill(Business business, Long billId) {
+	public Bill getBill(Business business, long billId) {
+		checkNotNull(business, "business is null");
+		checkArgument(billId != 0, "billid must be different from 0");
+		
 		try {
 			return billRepo.getById(business.getKey(), billId);
 		} catch (NotFoundException e) {
