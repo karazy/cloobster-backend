@@ -91,7 +91,7 @@ public class ChannelControllerTest {
 		try {
 			result = ctr.createCustomerChannel(null);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
+			assertThat(e, instanceOf(NullPointerException.class));
 			
 		}
 		
