@@ -394,9 +394,11 @@ public class ChannelController {
 			if (business.getChannelIds() == null || business.getChannelIds().isEmpty())	{
 				return;
 			}
-			business.getChannelIds().remove(clientId);
-			logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
-			businessRepo.saveOrUpdate(business);
+			if(business.getChannelIds().contains(clientId)) {
+				business.getChannelIds().remove(clientId);
+				logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
+				businessRepo.saveOrUpdate(business);
+			}
 		}
 	}
 	

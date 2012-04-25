@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
+
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Account;
 import net.eatsense.persistence.AccountRepository;
@@ -27,6 +29,7 @@ public class AccountControllerTest {
 	    private Injector injector;
 	    private AccountController ctr;
 	    private BusinessRepository rr;
+	    private ChannelController channelController;
 
 		private String password;
 
@@ -44,9 +47,11 @@ public class AccountControllerTest {
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-		ctr = injector.getInstance(AccountController.class);
+		channelController = mock(ChannelController.class);
 		rr = injector.getInstance(BusinessRepository.class);
 		ar = injector.getInstance(AccountRepository.class);
+		
+		ctr = new AccountController(ar, rr, channelController);
 		
 		
 		 password = "diesisteintestpasswort";
