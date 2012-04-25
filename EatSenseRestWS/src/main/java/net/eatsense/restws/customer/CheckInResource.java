@@ -97,6 +97,13 @@ public class CheckInResource {
 	public String requestToken() {
 		return channelCtrl.createCustomerChannel(checkIn);
 	}
+	
+	@PUT
+	@Path("cart")
+	@RolesAllowed({"guest"}) 
+	public void updateAllCartOrders() {
+		
+	}
 
 	public boolean isAuthenticated() {
 		return authenticated;

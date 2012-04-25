@@ -225,7 +225,7 @@ public class CheckInController {
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
 		// send the event
-		CheckInEvent newCheckInEvent = new NewCheckInEvent(business, checkIn);
+		CheckInEvent newCheckInEvent = new NewCheckInEvent(checkIn, business);
 		newCheckInEvent.setCheckInCount(checkInCount);
 		eventBus.post(newCheckInEvent);
 		return checkInDto;

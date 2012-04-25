@@ -14,7 +14,9 @@ import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.UpdateBillEvent;
+import net.eatsense.event.UpdateCartEvent;
 import net.eatsense.event.UpdateOrderEvent;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.representation.CustomerRequestDTO;
@@ -36,15 +38,22 @@ public class MessageController {
 	private Transformer transform;
 	private CheckInRepository checkInRepo;
 	private RequestRepository requestRepo;
+	private BusinessRepository businessRepo;
 	
 	@Inject
 	public MessageController(ChannelController channelCtrl, Transformer transform, CheckInRepository checkInRepo,
-			RequestRepository requestRepo) {
+			RequestRepository requestRepo, BusinessRepository businessRepo) {
 		super();
 		this.requestRepo = requestRepo;
+		this.businessRepo = businessRepo;
 		this.checkInRepo = checkInRepo;
 		this.transform = transform;
 		this.channelCtrl = channelCtrl;
+	}
+	
+	@Subscribe
+	public void sendUpdateCartMessages(UpdateCartEvent event) {
+		
 	}
 	
 	@Subscribe

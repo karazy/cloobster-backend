@@ -1,5 +1,8 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -23,6 +26,7 @@ import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.event.UpdateCartEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.BusinessRepository;
@@ -32,6 +36,7 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.representation.OrderCartDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -104,6 +109,29 @@ public class OrderController {
 		}
 		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
 		orderRepo.ofy().delete(order);
+	}
+	
+	public void updateOrderStatusOfCheckIn(CheckIn checkIn, OrderStatus fromStatus , OrderStatus toStatus) {
+		checkNotNull(checkIn, "checkIn was null");
+		checkNotNull(checkIn.getId(), "checkIn id was null");
+		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
+		checkNotNull(fromStatus, "fromStatus was null");
+		checkNotNull(toStatus, "toStatus was null");
+		checkArgument(fromStatus.isTransitionAllowed(toStatus), "not allowed to update from %s to %s", fromStatus, toStatus);
+		checkArgument(fromStatus != toStatus, "fromStatus expected to be different from toStatus, but was %s", fromStatus);
+		
+		List<Order> orders = orderRepo.query().ancestor(checkIn.getBusiness())
+				.filter("checkIn", checkIn.getKey())
+				.filter("status", fromStatus.toString()).list();
+		
+		for (Order order : orders) {
+			order.setStatus(toStatus);
+		}
+		
+		
+		
+		orderRepo.saveOrUpdate(orders);
+		eventBus.post(new UpdateCartEvent(checkIn));
 	}
 	
 	/**

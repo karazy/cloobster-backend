@@ -8,12 +8,18 @@ import net.eatsense.domain.Spot;
 
 public class MoveCheckInEvent extends CheckInEvent {
 
+	protected final Business business;
 	private Key<Spot> oldSpot;
 
 	public MoveCheckInEvent(CheckIn checkIn, Business business, Key<Spot> oldSpot) {
-		super(checkIn, business);
+		super(checkIn);
+		this.business = business;
 		this.oldSpot = oldSpot;
 		// TODO Auto-generated constructor stub
+	}
+
+	public Business getBusiness() {
+		return business;
 	}
 
 	public Key<Spot> getOldSpot() {
