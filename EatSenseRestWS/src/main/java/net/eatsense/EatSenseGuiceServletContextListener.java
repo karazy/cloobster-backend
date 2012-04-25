@@ -19,9 +19,12 @@ import net.eatsense.restws.customer.CheckInsResource;
 
 import org.apache.bval.guice.ValidationModule;
 
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
@@ -64,6 +67,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(Menu.class);
 						bind(GenericRepository.class);
 						bind(EventBus.class).in(Singleton.class);
+						
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
@@ -74,7 +78,10 @@ public class EatSenseGuiceServletContextListener extends
 						serveRegex("(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
-
+					@Provides
+					public ChannelService providesChannelService() {
+						return ChannelServiceFactory.getChannelService();
+					}
 				}, new ValidationModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);

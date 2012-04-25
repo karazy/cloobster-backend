@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import net.eatsense.domain.Business;
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import com.google.appengine.api.channel.ChannelFailureException;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.googlecode.objectify.NotFoundException;
@@ -46,13 +44,12 @@ public class ChannelController {
 	private CheckInRepository checkInRepo;
 	
 	@Inject
-	public ChannelController(BusinessRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper) {
+	public ChannelController(BusinessRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService) {
 		super();
 		this.businessRepo = rr;
 		this.checkInRepo = checkInRepo;
 		this.mapper = mapper;
-		channelService = ChannelServiceFactory.getChannelService();	
-		
+		this.channelService = channelService;
 	}
 	
 	/**
