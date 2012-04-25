@@ -1,27 +1,31 @@
 package net.eatsense.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.DeleteCheckInEvent;
+import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.NewCheckInEvent;
+import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
@@ -41,6 +45,63 @@ public class MessageController {
 		this.checkInRepo = checkInRepo;
 		this.transform = transform;
 		this.channelCtrl = channelCtrl;
+	}
+	
+	@Subscribe
+	public void sendDeleteCustomerRequestMessages(DeleteCustomerRequestEvent event) {
+
+		List<Request> oldRequests = requestRepo.query().filter("spot",event.getRequest().getSpot()).order("-receivedTime").limit(2).list();
+		for (Iterator<Request> iterator = oldRequests.iterator(); iterator.hasNext();) {
+			Request oldRequest = iterator.next();
+			if(event.getRequest().getId().equals(oldRequest.getId())) {
+				iterator.remove();
+			}			
+		}
+		
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setCheckInId(event.getRequest().getCheckIn().getId());
+		requestData.setId(event.getRequest().getId());
+		requestData.setType(event.getRequest().getStatus());
+		requestData.setSpotId(event.getRequest().getSpot().getId());
+		messages.add(new MessageDTO("request", "delete", requestData));
+		
+		
+		SpotStatusDTO spotData = new SpotStatusDTO();
+		spotData.setId(event.getRequest().getSpot().getId());
+		
+		// Save the status of the next request in line, if there is one.
+		if( !oldRequests.isEmpty() ) {
+			spotData.setStatus(oldRequests.get(0).getStatus());
+		}
+		else
+			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+		
+		messages.add(new MessageDTO("spot", "update", spotData));
+		
+		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+	}
+	
+	@Subscribe
+	public void sendNewCustomerRequestMessages(NewCustomerRequestEvent event ) {
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		
+		SpotStatusDTO spotData = new SpotStatusDTO();
+		spotData.setId(event.getCheckIn().getSpot().getId());
+		spotData.setStatus(event.getRequest().getStatus());
+				
+		messages.add(new MessageDTO("spot", "update", spotData));
+		
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setCheckInId(event.getCheckIn().getId());
+		requestData.setId(event.getRequest().getId());
+		requestData.setType(event.getRequest().getStatus());
+		requestData.setSpotId(event.getCheckIn().getSpot().getId());
+		
+		messages.add(new MessageDTO("request", "new", requestData ));
+		
+		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
 	}
 	
 	@Subscribe

@@ -5,26 +5,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
-import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.Spot;
+import net.eatsense.event.DeleteCustomerRequestEvent;
+import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CustomerRequestDTO;
-import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Query;
 
@@ -40,16 +40,16 @@ public class BusinessController {
 	private CheckInRepository checkInRepo;
 	private SpotRepository spotRepo;
 	private RequestRepository requestRepo;
-	private ChannelController channelCtrl;
 	private BusinessRepository businessRepo;
+	private EventBus eventBus;
 	
 	@Inject
-	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, ChannelController channelCtrl, BusinessRepository br) {
+	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, BusinessRepository br, EventBus eventBus) {
+		this.eventBus = eventBus;
 		this.requestRepo = rr;
 		this.spotRepo = sr;
 		this.checkInRepo = cr;
 		this.businessRepo = br;
-		this.channelCtrl = channelCtrl;
 	}
 	
 	/**
@@ -127,18 +127,7 @@ public class BusinessController {
 		
 		requestData.setId(request.getId());
 		
-		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-		
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(checkIn.getSpot().getId());
-		spotData.setStatus(request.getStatus());
-				
-		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		messages.add(new MessageDTO("request", "new", requestData));
-		Business business = businessRepo.getByKey(checkIn.getBusiness());
-		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
-										
+		eventBus.post(new NewCustomerRequestEvent(businessRepo.getByKey(checkIn.getBusiness()), checkIn, request));								
 		return requestData;
 	}
 	
@@ -209,30 +198,6 @@ public class BusinessController {
 
 		requestRepo.delete(request);
 		
-		List<Request> oldRequests = requestRepo.query().filter("spot",request.getSpot()).order("-receivedTime").limit(2).list();
-		for (Iterator<Request> iterator = oldRequests.iterator(); iterator.hasNext();) {
-			Request oldRequest = iterator.next();
-			if(request.getId().equals(oldRequest.getId())) {
-				iterator.remove();
-			}			
-		}
-		
-		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-		messages.add(new MessageDTO("request", "delete", requestData));
-		
-		
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(request.getSpot().getId());
-		
-		// Save the status of the next request in line, if there is one.
-		if( !oldRequests.isEmpty() ) {
-			spotData.setStatus(oldRequests.get(0).getStatus());
-		}
-		else
-			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
-		
-		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		channelCtrl.sendMessagesToAllCockpitClients(business, messages);
+		eventBus.post(new DeleteCustomerRequestEvent(business, request));
 	}
 }
