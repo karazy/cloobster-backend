@@ -48,7 +48,9 @@
 	<profiles>
 		<profile>
 			<id>dev</id>
-
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>	
 			<build>
 				<plugins>
 					<plugin>
@@ -110,11 +112,8 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
+			<id>prod</id>		
+			<build>			
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>

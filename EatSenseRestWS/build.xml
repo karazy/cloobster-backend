@@ -1,14 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseRestWS" default="default" basedir=".">
+	<property name="appDir" value="src/main/app/dev/" />
+	<property name="senchaBuild" location="/Applications/SenchaSDKTools-2.0.0-Beta/command"/>
+	
 	<target name="default">
 		<echo message="Executing rename task from build.xml" />
 		<move todir="target" includeemptydirs="false">
 			<fileset dir="target">
 			</fileset>
-			
+
 			<regexpmapper from="^(.+)\.desktop\.(.+)$$" to="\1.\2" />
 			<!--<regexpmapper from="^(.*)\.java$$" to="\1.java.bak"/>  -->
-			
+
 		</move>
 	</target>
+	
+	<target name="createDesktopProduction">
+		<echo message="Executing createDesktopProduction task from build.xml" />
+		<exec executable="sencha" >
+		
+			<arg line="create jsb -a ${appDir}index.desktop.html -p ${appDir}app.desktop.jsb3" />
+		</exec>
+		<exec executable="sencha">
+			
+			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
+		</exec>
+		<move file="${appDir}/app-all.js" todir="${appDir}/../prod/desktop/">
+		</move>
+	</target>
+	
+	<target name="createAndroidProduction" depends="createDesktopProduction">
+		<echo message="Executing createAndroidProduction task from build.xml" />
+		<exec executable="sencha" >		
+			<arg line="create jsb -a ${appDir}index.phone.html -p ${appDir}app.android.jsb3" />
+		</exec>
+		<exec executable="sencha">			
+			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
+		</exec>
+		<move file="${appDir}/app-all.js" todir="${appDir}/../prod/android/">
+		</move>
+	</target>
+
+	<target name="createIOSProduction" depends="createAndroidProduction">
+		<echo message="Executing createIOSProduction task from build.xml" />
+		<exec executable="sencha" >		
+			<arg line="create jsb -a ${appDir}index.iphone.html -p ${appDir}app.ios.jsb3" />
+		</exec>
+		<exec executable="sencha">
+			
+			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
+		</exec>
+		<move file="${appDir}/app-all.js" todir="${appDir}/../prod/ios/">
+		</move>
+	</target>
+	
+	<target name="cleanUpProductionFiles" depends="createIOSProduction">
+		<delete file="${appDir}app.desktop.jsb3"></delete>
+		<delete file="${appDir}app.android.jsb3"></delete>
+		<delete file="${appDir}app.ios.jsb3"></delete>
+		<delete file="${appDir}all-classes.js"></delete>
+	</target>
+	
+	<target name="production" depends="cleanUpProductionFiles"></target>
 </project>
