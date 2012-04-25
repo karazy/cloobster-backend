@@ -80,7 +80,7 @@ public class MessageController {
 		
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	
 	@Subscribe
@@ -101,7 +101,7 @@ public class MessageController {
 		
 		messages.add(new MessageDTO("request", "new", requestData ));
 		
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	
 	@Subscribe
@@ -121,7 +121,7 @@ public class MessageController {
 		}
 		
 		// Send messages to notify clients over their channel.
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	
 	@Subscribe
@@ -145,7 +145,7 @@ public class MessageController {
 		
 		messages.add(new MessageDTO("spot","update",spotData));
 		
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	
 	@Subscribe
@@ -169,7 +169,7 @@ public class MessageController {
 		// Add a message with updated order status to the message package.
 		messages.add(new MessageDTO("order","update",orderData ));
 		// Send update messages.
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 		// If we cancel the order, let the checkedin customer know.
 		if(event.getOrder().getStatus() == OrderStatus.CANCELED && event.getCheckIn().getChannelId() != null)
 			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), "order", "update", orderData);
@@ -188,7 +188,7 @@ public class MessageController {
 		List<MessageDTO> messages = new ArrayList<MessageDTO>();		
 		messages.add(new MessageDTO("spot","update",spotData));
 		messages.add(new MessageDTO("checkin","new", transform.toStatusDto(event.getCheckIn())));
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	
 	@Subscribe
@@ -220,7 +220,7 @@ public class MessageController {
 		List<MessageDTO> messages = new ArrayList<MessageDTO>();
 		messages.add(new MessageDTO("spot", "update", spotData));
 		messages.add(new MessageDTO("checkin","delete", transform.toStatusDto(event.getCheckIn())));
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	
 	@Subscribe
@@ -262,6 +262,6 @@ public class MessageController {
 		
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
-		channelCtrl.sendMessagesToAllCockpitClients(event.getBusiness(), messages);
+		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 }
