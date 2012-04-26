@@ -7,10 +7,7 @@ Ext.define('EatSense.model.Choice', {
 	config : {
 		idProperty: 'id',
 		fields: [
-			{
-				name : 'genuineId',
-				type : 'string'
-			},
+			{name : 'genuineId', type : 'string'},
 		    {name: 'id', type: 'string'},
 			{name: 'text', type: 'string'},
 			{name: 'minOccurence', type: 'number'},
@@ -18,36 +15,62 @@ Ext.define('EatSense.model.Choice', {
 			{name: 'price', type: 'number'},
 			{name: 'included', type: 'number'},
 			{name: 'overridePrice', type: 'string'},
+			{name : 'parent', type: 'number'},
+			{name : 'active', type: 'boolean', persist: false, defaultValue: false}
 		],
 		hasMany : {
 			model : 'EatSense.model.Option',
 			name : 'options'
+		},
+		associations : {
+			type : 'hasOne',
+			model : 'EatSense.model.Choice',
+			associatedName: 'parentChoice'
 		}
 	},	
 	/**
-	 * Validates the choice based on min- maxOccurence etc.
+	 * Validates the choice based on min- maxOccurence etc. 
 	 */
 	validateChoice: function() {
-		console.log('validate choice '+this.get('text'));
-		
-		//implement
-		//return error message;
-		var counter = 0, validationError = "";
+		console.log('validateChoide ' + this.get('text'));
+		var 	counter = 0, 
+				validationError = "",
+				minOccurence = this.get('minOccurence'),
+				maxOccurence = this.get('maxOccurence');
+
 		this.options().each(function(option) {
 			if(option.get('selected') === true) {
 				counter ++;
 			}
 		});
-		if(this.get('minOccurence') <= 1 && this.get('maxOccurence') == 1 && counter != 1) {
+
+		if(minOccurence == 1 && maxOccurence == 1 && counter != 1) {
 			//radio button mandatory field
-			validationError += "Bitte triff eine Wahl für "+this.get('text')+ "<br/>";
+			validationError += Karazy.i18n.translate('choiceValErrMandatory', this.get('text')) + "<br/>";
 		}
-		else if(counter < this.get('minOccurence')) {
-			validationError += "Bitte wähle mindestens " + this.get('minOccurence') + " "+this.get('text')+ " aus. <br/>";
-		}else if(counter > this.get('maxOccurence')) {
-			validationError += "Du kannst maximal " + this.get('maxOccurence') + " "+this.get('text')+" auswählen. <br/>";
+		else if(counter < minOccurence) {
+			validationError += Karazy.i18n.translate('choiceValErrMin', minOccurence, this.get('text')) + "<br/>";
+		}else if(counter > maxOccurence && maxOccurence > 0) {
+			validationError += Karazy.i18n.translate('choiceValErrMin', maxOccurence, this.get('text')) + "<br/>";
 		}
 		return (validationError.toString().length == 0) ? true : false;
+	},
+	/**
+	* If a choice has selected options it is considered active.
+	* @return 
+	* 	true if active
+	*/
+	isActive: function() {
+		var result = false;
+		this.options().each(function(option) {
+			if(option.get('selected') === true) {
+				result = true;
+				//stop iteration
+				return false;
+			}
+		});
+		this.fireEvent('activeChanged', result);
+		return result;
 	},
 	/**
 	 * Caluclates the price for this choice.
@@ -122,7 +145,9 @@ Ext.define('EatSense.model.Choice', {
 			option.set('selected', false);
 		});
 	},
-	
+	/**
+	*	Returns a raw json representation of this objects data.
+	*/
 	getRawJsonData: function() {
 		var rawJson = {};		
 		
@@ -139,6 +164,31 @@ Ext.define('EatSense.model.Choice', {
 			rawJson.options[int] = this.options().getAt(int).getRawJsonData();
 		}		
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		for ( var int = 0; int < this.options().data.length; int++) {
+			if(!this.options().getAt(int).setRawJsonData(rawData.options[int])) {
+				return false;
+			}
+		}	
+		
+		this.set('id', rawData.id);
+		this.set('text', rawData.text);
+		this.set('maxOccurence', rawData.maxOccurence);
+		this.set('minOccurence', rawData.minOccurence);
+		this.set('price', rawData.price);
+		this.set('included', rawData.included);
+		this.set('overridePrice', rawData.overridePrice);	
+
+		return true;			
 	}
 
 });

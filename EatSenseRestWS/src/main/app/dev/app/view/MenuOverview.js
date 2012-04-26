@@ -7,12 +7,10 @@
 Ext.define('EatSense.view.MenuOverview', {
 	extend : 'Ext.Container',
 	xtype : 'menuoverview',
-	fullscreen : false,
 	config : {
 		items : [ 
 		   {
 			xtype : 'list',
-			id : 'menulist',
 			type : 'fit',
 			ui: 'round',
 			allowDeselect: true,

@@ -8,7 +8,7 @@ Ext.define('EatSense.controller.Message', {
 	extend: 'Ext.app.Controller',
 	config: {
 		//id used for channel creation		
-		channelId: ''
+		channelId: null
 	},
 	/**
 	*	Called after receiving a channel message.
@@ -65,9 +65,16 @@ Ext.define('EatSense.controller.Message', {
 	*	@param callback
 	*		callback function to invoke on success
 	*/
-	requestNewToken: function(callback, id) {		
+	requestNewToken: function(callback) {	
+		var me = this;
+			
+		if(!this.getChannelId()) {
+			console.log('no channel id is set');
+			return;
+		};
+
 		Ext.Ajax.request({
-		    url: Karazy.config.serviceUrl+'/c/checkins/'+id+'/tokens',		    
+		    url: Karazy.config.serviceUrl+'/c/checkins/'+this.getChannelId()+'/tokens',		    
 		    method: 'POST',
 		    jsonData: true,
 		    success: function(response){
@@ -76,7 +83,15 @@ Ext.define('EatSense.controller.Message', {
 		    }, 
 		    failure: function(response, opts) {
 		    	console.log('request token failed ' + response);
-		    	Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('channelTokenError')); 
+		    	me.getApplication().handleServerError({
+					'error': {
+						'status' : response.status,
+						'statusText': response.statusText
+					}, 
+					'forceLogout': false, 
+					'hideMessage':false, 
+					'message': Karazy.i18n.translate('channelTokenError')
+				});
 		    }
 		});
 	},

@@ -263,6 +263,23 @@ public class OrderControllerTest {
 		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
 		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.isEmpty(), is(true));
+		
+		//#2.1 Place a simple order without choices...
+		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
+		assertThat(orderId, notNullValue());
+		
+		placedOrder = orderCtrl.getOrder(business, orderId);
+		
+		//#2.2 Update the order to PLACED
+		orderDto.setStatus(OrderStatus.PLACED);
+		orderDto = orderCtrl.updateOrder(business, placedOrder, orderDto, checkIn);
+		
+		//#2.3 Try to delete the order, it should fail.
+		try {
+			orderCtrl.deleteOrder(business, placedOrder , checkIn);
+		} catch (Exception e) {
+			assertThat(e, instanceOf(IllegalArgumentException.class));
+		}				
 	}
 	
 	@Test public void testGetOrdersWithStatus() {

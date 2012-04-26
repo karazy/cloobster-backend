@@ -44,8 +44,8 @@ Ext.define('EatSense.controller.Request',{
 		//check if customer requests for this spot exist and display them
 		requestStore.load({
 			params: {
-				pathId: restaurantId,
-				spotId: spotCtr.getActiveSpot().get('id')
+				'pathId': restaurantId,
+				'spotId': spotCtr.getActiveSpot().get('id')
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 
@@ -58,7 +58,12 @@ Ext.define('EatSense.controller.Request',{
 			 			});
 			 			me.showCustomerRequestMessages(records);
 			 		}		
-			 	}				
+			 	} else {
+			 		me.getApplication().handleServerError({
+						'error': operation.error, 
+						'forceLogout': {403: true}
+					});
+			 	}			
 			 }
 		});
 	},
@@ -95,9 +100,6 @@ Ext.define('EatSense.controller.Request',{
 					oldRequest = requestStore.getById(requestModel.get('id'));
 					if(oldRequest) {
 						requestStore.remove(oldRequest);
-						// if(requestStore.getCount() == 0) {
-						// 	this.getCustomerRequestDialog().hide();
-						// }
 					}					
 				}
 			}
@@ -113,8 +115,6 @@ Ext.define('EatSense.controller.Request',{
 
 		//show detail view
 		this.getCustomerRequestList().refresh();
-		// Ext.Viewport.add(dialog);
-		// dialog.show();
 	},
 
 	/**

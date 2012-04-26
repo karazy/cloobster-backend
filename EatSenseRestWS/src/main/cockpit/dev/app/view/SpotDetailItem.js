@@ -15,7 +15,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 			cls: 'spotdetailitem-flag' 
 		},
 		//label containing product details
-		name: {		
+		name: {
 			cls: 'spotdetailitem-order',	
 			tpl: new Ext.XTemplate(
 				"<h2 >{Product.name}</h2>" +
@@ -23,7 +23,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 				"<div class='choices'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
-							//"<h3>{text}</h3>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
 							"<ul>" +
 								"<tpl for='options'>" +
 									"<tpl if='selected === true'>" +
@@ -61,7 +61,7 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		//cancel Order
 		cancelButton: {
 			action: 'cancel',
-			iconCls: 'delete',
+			iconCls: 'trash',
 			ui: 'action',
 			iconMask: true,
 			cls: 'spotdetailitem-cancel' 
@@ -70,7 +70,8 @@ Ext.define('EatSense.view.SpotDetailItem', {
 		confirmButton: {
 			action: 'confirm',
 			ui: 'action',
-			iconCls: 'add',
+			iconCls: 'spotdetailitem-confirm',
+			// icon: 'res/images/check_icon.png',
 			iconMask: true,
 			cls: 'spotdetailitem-confirm' 
 		},
@@ -148,6 +149,9 @@ Ext.define('EatSense.view.SpotDetailItem', {
 	*/
 	updateRecord: function(newRecord) {
 		console.log('SpotDetailItem updateRecord');
+		if(!newRecord) {
+			return;
+		}
 		
 		//make sure prices are calculated before displaying
 		newRecord.calculate();

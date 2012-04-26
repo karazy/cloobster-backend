@@ -1,7 +1,12 @@
 Ext.define('EatSense.view.Menu', {
 	extend : 'Ext.Panel',
-	xtype : 'menu',
+	xtype : 'menutab',
 	config : {
+		layout: 'fit',
+		iconCls : 'compose',
+		title: Karazy.i18n.translate('menuTitle'),
+		iconMask : true,
+		itemId : 'menutab',
 		items : [ {
 			docked : 'top',
 			xtype : 'titlebar',

@@ -1,11 +1,11 @@
 package net.eatsense.representation.cockpit;
 
+import com.google.common.base.Objects;
+
 public class MessageDTO {
 	String type;
 	String action;
 	Object content;
-	
-	
 	
 	/**
 	 * 
@@ -42,5 +42,14 @@ public class MessageDTO {
 	}
 	public void setContent(Object content) {
 		this.content = content;
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("type", type)
+				.add("action", action)
+				.add("content", content)
+				.toString();
 	}
 }

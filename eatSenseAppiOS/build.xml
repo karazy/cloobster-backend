@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
-	<property name="appDir" value="../EatSenseRestWS/src/main/app" />
+	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod-ios" />
 	<property name="config" value="eatSense/www/lib/karazy-config.js" />
 
 	<target name="copySenchaApp" depends="">
@@ -9,6 +9,7 @@
 			<fileset dir="${appDir}">
 				<exclude name="**/*.desktop.*" />
                 <exclude name="**/*.phone.*" />
+                <exclude name="**/*.ignore.*" />
 			</fileset>
 		</copy>
 	</target>

@@ -48,6 +48,8 @@ public class CheckInControllerTest {
 
 		private ObjectMapper mapper;
 
+		private Business business;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -58,10 +60,10 @@ public class CheckInControllerTest {
 		cr = injector.getInstance(CheckInRepository.class);
 		mapper = injector.getInstance(ObjectMapper.class);
 		//create necessary data in datastore
-		Business r = new Business();
-		r.setName("Heidi und Paul");
-		r.setDescription("Geiles Bio Burger Restaurant.");
-		Key<Business> kR = rr.saveOrUpdate(r);
+		business = new Business();
+		business.setName("Heidi und Paul");
+		business.setDescription("Geiles Bio Burger Restaurant.");
+		Key<Business> kR = rr.saveOrUpdate(business);
 		
 		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
@@ -227,37 +229,7 @@ public class CheckInControllerTest {
 		assertThat(checkIn.getUserId(), is(test.getUserId()));
 
 	}
-	
-	@Test
-	public void testRequestChannelToken() {
-		//#1 Create a checkin ...
-		CheckInDTO checkInData = new CheckInDTO();
-		checkInData.setSpotId("b4rc0de");
-		checkInData.setNickname("FakeNik");
-		checkInData.setStatus(CheckInStatus.INTENT);
-		checkInData = ctr.createCheckIn( checkInData);
-		
-		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
-				
-		String result;
-		//#2.1 Request token with null id ...
-		try {
-			result = ctr.requestToken(null);
-		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
-			
-		}
-		
-		//#3.1 Request token with valid uid ...
-		result = ctr.requestToken(checkIn);
-		assertThat(result, notNullValue());
-		assertThat(result.length(), is(greaterThan(8)));
-	
-		//#3.2 Request another token with the same uid, should create a new token ...
-		String newResult = ctr.requestToken(checkIn);
-		assertThat(newResult, is(not(result)));
-	}
-	
+
 	@Test
 	public void testDeleteCheckin() {
 		//#1.1 Create a checkin ...
@@ -270,21 +242,21 @@ public class CheckInControllerTest {
 		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
 		
 		//#2.1 Delete the checkin
-		ctr.deleteCheckIn(checkIn.getId());
+		ctr.deleteCheckIn(business, checkIn.getId());
 		//#2.2 Check the checkin is really gone.
 		CheckIn result = ctr.getCheckIn(checkIn.getUserId());
 		assertThat(result, nullValue());
 		
 		//#2.3 Try to delete the checkin again.
 		try {
-			ctr.deleteCheckIn(checkIn.getId());
+			ctr.deleteCheckIn(business, checkIn.getId());
 		} catch (Exception e) {
 			assertThat(e, instanceOf(IllegalArgumentException.class));
 		}
 		
 		//#2.3 Try to delete with null argument.
 		try {
-			ctr.deleteCheckIn(null);
+			ctr.deleteCheckIn(business, null);
 		} catch (Exception e) {
 			assertThat(e, instanceOf(IllegalArgumentException.class));
 		}

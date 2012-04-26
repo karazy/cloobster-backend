@@ -1,10 +1,14 @@
 Ext.define('EatSense.view.MyOrders', {
 	extend : 'Ext.Panel',
-	xtype: 'myorders',	
-	layout: {
-		type: 'fit'
-	},
+	xtype: 'myorderstab',	
 	config: {
+		layout: {
+			type: 'fit'
+		},
+		iconCls : 'home',
+		title: Karazy.i18n.translate('myOrdersTabBt'),
+		iconMask : true,
+		itemId : 'myorderstab',
 		items: [
 		{
 			docked : 'top',
@@ -31,7 +35,7 @@ Ext.define('EatSense.view.MyOrders', {
 		},
 		{
 			xtype: 'list',
-			id: 'myorderlist',
+			// id: 'myorderlist',
 			store: 'orderStore',
 			ui: 'round',
 			styleHtmlContent: true,
@@ -41,11 +45,11 @@ Ext.define('EatSense.view.MyOrders', {
 			itemTpl:  new Ext.XTemplate(
 			"<div class='orderListItem {[values.status.toLowerCase()]}'>" +
 				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+Karazy.i18n.translate('amount')+" {amount}) {[this.formatPrice(values.Product.price_calculated)]}</div>" +
-				"<div style='clear: both;'>"+
-					"<tpl for='Product.choices'>" +				
+				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+Karazy.i18n.translate('amount')+" {amount}) {[this.formatPrice(values)]}</div>" +
+				"<div style='clear: both;'>" +
+					"<tpl for='Product.choices'>" +
 						"<tpl if='this.checkSelections(values, xindex)'>" +
-							"<h3>{text}</h3>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
 							"<ul>" +
 								"<tpl for='options'>" +
 									"<tpl if='selected === true'>" +
@@ -75,8 +79,11 @@ Ext.define('EatSense.view.MyOrders', {
 					
 					return result;
 				},
-				formatPrice: function(price) {
-					return Karazy.util.formatPrice(price);
+				formatPrice: function(values) {
+					return Karazy.util.formatPrice(values.Product.price_calculated);
+				},
+				renderChoices: function(values) {
+
 				}				
 			}),
 			listeners: {

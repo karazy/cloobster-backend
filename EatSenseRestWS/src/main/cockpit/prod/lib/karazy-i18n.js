@@ -40,7 +40,7 @@ Karazy.i18n = (function() {
 			//use default language
 			userLang = defaultLang;
 		}
-		return userLang.substring(0,2);
+		return userLang.substring(0,2).toUpperCase();
 	}
 
 	

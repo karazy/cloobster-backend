@@ -22,11 +22,20 @@ Ext.define('EatSense.model.Spot', {
 	            primaryKey: 'id',
 	            name: 'payments',
 	            //autoLoad: true,
-	            associationKey: 'payments' // read child data from child_groups
+	            associationKey: 'payments', // read child data from child_groups
+	            store: {
+	            	sorters: [
+						{
+							property: 'order',
+							direction: 'ASC'
+						}
+	            	]
+	            }
 	        }],
 		proxy : {
 			type : 'rest',
 			url : '/spots/',
+			enablePagingParams: false,
 			reader : {
 				type : 'json',
 			}

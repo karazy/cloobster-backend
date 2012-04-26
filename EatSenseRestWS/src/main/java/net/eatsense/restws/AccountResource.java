@@ -12,7 +12,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.AccountController;
@@ -45,19 +44,9 @@ public class AccountResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"user"})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
-		Account account = null;
-		AccountDTO accountData = null;
-		if( (account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account")) != null ) {
-			accountData = accountCtr.toDto(account);
-		}
-		else {
-			accountData = accountCtr.getAccountDto(login);
-			if(accountData == null )
-				throw new WebApplicationException(401);
-		}
-		
-		logger.info("Authenticated request from user :" + accountData.getLogin());
-		return accountData;
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		logger.info("Authenticated request from user :" + account.getLogin());
+		return accountCtr.toDto(account);
 	}
 	
 	@GET

@@ -1,20 +1,9 @@
 Karazy.i18n.setLang('DE');
-var profile = Ext.os.deviceType.toLowerCase();
-
-//global error handler
-// window.onerror = function(message, url, lineNumber) {  
-// 	//var 	messageCtr = EatSense.controller.Message();
-
-// 	console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
-
-//   	//messageCtr.reopenChannel();
-
-//   	//prevent firing of default handler (return true)
-//   	return false;
-// };  
 
 Ext.Loader.setConfig({
-	enabled : true
+	enabled : true,
+	//WORKAORUND related to Android 3x Bug and Webview URL handling
+	disableCaching: Karazy.config.disableCaching
 });
 
 Ext.Loader.setPath('EatSense', 'app');
@@ -23,7 +12,7 @@ Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
 	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
-	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'CartOverview', 'Lounge'], 
+	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge'], 
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
@@ -41,29 +30,37 @@ Ext.application({
 		'EatSense.override.RadioOverride', 
 		'EatSense.model.AppState'
 	],
-	init : function() {
-		console.log('init');
-	},
 	launch : function() {
 		console.log('launch');
-		var app = this;
+    	this.launched = true;
+        this.mainLaunch();
+	},
+	mainLaunch : function() {
+		if (cordovaInit == false || !this.launched) {
+        	return;
+        }
+
+		console.log('mainLaunch');
+		
+		var app = this,
+	   		appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+	 		checkInCtr = this.getController('CheckIn'),
+	 		restoredCheckInId,
+	 		profile = Ext.os.deviceType.toLowerCase();	 
+
+		//global error handler
 		window.onerror = function(message, url, lineNumber) {  
-			var 	messageCtr = app.getController('Message');
-
+			var messageCtr = app.getController('Message');
 			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
-
 		  	//messageCtr.reopenChannel();
-
 		  	//prevent firing of default handler (return true)
 		  	return false;
 		}; 
 
-		Ext.data.proxy.Server.timeout = 60000;
+		//timeout for requests
+		Ext.Ajax.timeout = 1200000;
 		
     	//try to restore application state
-	   	 var 	appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
-	   	 		checkInCtr = this.getController('CheckIn'),
-	   	 		restoredCheckInId;	 
 	   	 
 	   	 //create main screen
 	   	 Ext.create('EatSense.view.Main');
@@ -107,29 +104,36 @@ Ext.application({
 	   	 }	   		 	   	 	   	 
 	   	 else {	   		 
 	   		if (appStateStore.getCount() > 1){
-		   		 console.log('Too many appStates! clear cache. this should never happen.');
+		   		 console.log('Too many appStates! Clearing cache. this should never happen.');
+		   		 appStateStore.removeAll();
 		   	 } else {
 		   		console.log('no app state found.');
-		   		appStateStore.removeAll();
 		   	 } 		   		 
 	   		 appStateStore.add(checkInCtr.getAppState());
 	   		 checkInCtr.showDashboard();
 	   	 }	
 	},
 	/**
-    *   Gloabl handler that handles all errors occuring from server requests.
-    *   @param error
-    *      error object containing status and statustext.
-    *
-    *   @param forceLogout
-    *       a critical permission error occured and the user will be logged out
-    * 		true to logout on all errors 
-    *		OR
-    *		{errorCode : true|false} e.g. {403: true, 404: false}
+    *   Gloabl handler that can be used to handle errors occuring from server requests.
+    *   @param options
+    *       Configuration object
+    *      
+    *       error: error object containing status and statusText.
+    *       forceLogout: a critical permission error occured and the user will be logged out
+    *       true to logout on all errors 
+    *       OR
+    *       {errorCode : true|false} e.g. {403: true, 404: false}
+    *       hideMessage: true if you don't want do display an error message
+    *       message: message to show. If no message is set a default message will be displayed
     */
-    handleServerError: function(error, forceLogout, hideMessage) {
+    handleServerError: function(options) {
         var    errMsg,
-               nestedError; 
+               nestedError,
+               loginCtr = this.getController('Login'),
+               error = options.error,
+               forceLogout = options.forceLogout,
+               hideMessage = options.hideMessage,
+               message = options.message;
         if(error && error.status) {
             switch(error.status) {
                 case 403:
@@ -150,7 +154,7 @@ Ext.application({
                     try {
                          //TODO Bug in error message handling in some browsers
                         nestedError = Ext.JSON.decode(error.statusText);
-                        errMsg = Karazy.i18n.translate(error.errorKey,error.substitutions);                        
+                        errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
                     } catch (e) {
                         errMsg = Karazy.i18n.translate('errorMsg');
                     }
@@ -161,8 +165,8 @@ Ext.application({
             }
         }
         if(!hideMessage) {
-        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, Ext.emptyFn);	
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), (message) ? message : errMsg, Ext.emptyFn);	
         }
-    },
+    }
 });
 

@@ -37,7 +37,8 @@
         <activity
             android:name=".EatSenseApp"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/eatsense_app_name" >
+            android:label="@string/eatsense_app_name" 
+    		android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

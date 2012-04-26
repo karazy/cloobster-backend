@@ -1,25 +1,30 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
-import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.Spot;
+import net.eatsense.event.DeleteCustomerRequestEvent;
+import net.eatsense.event.NewCustomerRequestEvent;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CustomerRequestDTO;
-import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Query;
 
@@ -35,14 +40,16 @@ public class BusinessController {
 	private CheckInRepository checkInRepo;
 	private SpotRepository spotRepo;
 	private RequestRepository requestRepo;
-	private ChannelController channelCtrl;
+	private BusinessRepository businessRepo;
+	private EventBus eventBus;
 	
 	@Inject
-	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, ChannelController channelCtrl) {
+	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, BusinessRepository br, EventBus eventBus) {
+		this.eventBus = eventBus;
 		this.requestRepo = rr;
 		this.spotRepo = sr;
 		this.checkInRepo = cr;
-		this.channelCtrl = channelCtrl;
+		this.businessRepo = br;
 	}
 	
 	/**
@@ -53,6 +60,8 @@ public class BusinessController {
 	 * @return List of SpotCockpitDTO objects
 	 */
 	public List<SpotStatusDTO> getSpotStatusData(Business business){
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
 		List<Spot> allSpots = spotRepo.getByParent(business);
 		List<SpotStatusDTO> spotDtos = new ArrayList<SpotStatusDTO>();
 		
@@ -82,15 +91,14 @@ public class BusinessController {
 	 * @return requestData
 	 */
 	public CustomerRequestDTO saveCustomerRequest(CheckIn checkIn, CustomerRequestDTO requestData) {
-		if( requestData == null)
-			throw new IllegalArgumentException("Unable to post request, requestData is null");
-		if(checkIn == null)
-			throw new IllegalArgumentException("Unable to post request, checkIn is null");
-		if(checkIn.isArchived())
-			throw new IllegalArgumentException("Cant post request for archived checkin");
-		
-		if( ! "CALL_WAITER".equals(requestData.getType()))
-			throw new IllegalArgumentException("Unrecognized request type: " + requestData.getType());
+		checkNotNull(checkIn, "checkin cannot be null");
+		checkNotNull(checkIn.getId(), "checkin id cannot be null");
+		checkNotNull(checkIn.getBusiness(), "business for checkin cannot be null");
+		checkNotNull(checkIn.getSpot(), "spot for checkin cannot be null");
+		checkNotNull(requestData, "requestData cannot be null");
+		checkNotNull(requestData.getType(), "requestData type cannot be null");
+		checkArgument("CALL_WAITER".equals(requestData.getType()), "invalid request type %s", requestData.getType());
+		checkArgument(!checkIn.isArchived(), "checkin cannot be archived entity");
 		
 		requestData.setCheckInId(checkIn.getId());
 		requestData.setSpotId(checkIn.getSpot().getId());
@@ -104,8 +112,7 @@ public class BusinessController {
 				requestData.setId(oldRequest.getId());
 				requestRepo.saveOrUpdate(oldRequest);
 				return requestData;
-			}
-				
+			}	
 		}
 		
 		Request request = new Request();
@@ -120,18 +127,7 @@ public class BusinessController {
 		
 		requestData.setId(request.getId());
 		
-		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-		
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(checkIn.getSpot().getId());
-		spotData.setStatus(request.getStatus());
-				
-		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		messages.add(new MessageDTO("request", "new", requestData));
-		
-		channelCtrl.sendMessagesToAllCockpitClients(checkIn.getBusiness().getId(), messages);
-										
+		eventBus.post(new NewCustomerRequestEvent(businessRepo.getByKey(checkIn.getBusiness()), checkIn, request));								
 		return requestData;
 	}
 	
@@ -144,6 +140,9 @@ public class BusinessController {
 	 * @return list of found request dtos or empty list if none found
 	 */
 	public List<CustomerRequestDTO> getCustomerRequestData(Business business, Long checkInId, Long spotId) {
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
+		
 		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
 		Query<Request> query = requestRepo.ofy().query(Request.class).ancestor(business);
 
@@ -179,12 +178,16 @@ public class BusinessController {
 	 * @param business
 	 * @param requestId
 	 */
-	public void deleteCustomerRequest(Business business, Long requestId) {
+	public void deleteCustomerRequest(Business business, long requestId) {
+		checkNotNull(business, "business cannot be null");
+		checkNotNull(business.getId(), "business id cannot be null");
+		checkArgument(requestId != 0, "requestId cannot be 0");
+		
 		Request request;
 		try {
 			request = requestRepo.getById(business.getKey(), requestId);
 		} catch (com.googlecode.objectify.NotFoundException e1) {
-			throw new IllegalArgumentException("Unable to delete request, business or request id unknown", e1);
+			throw new IllegalArgumentException("request not found", e1);
 		}
 		CustomerRequestDTO requestData = new CustomerRequestDTO();
 
@@ -195,22 +198,6 @@ public class BusinessController {
 
 		requestRepo.delete(request);
 		
-		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
-		messages.add(new MessageDTO("request", "delete", requestData));
-		Request oldRequest = requestRepo.ofy().query(Request.class).filter("spot",request.getSpot()).order("-receivedTime").get();
-		
-		SpotStatusDTO spotData = new SpotStatusDTO();
-		spotData.setId(request.getSpot().getId());
-		
-		// Save the status of the next request in line, if there is one.
-		if( oldRequest != null) {
-			spotData.setStatus(oldRequest.getStatus());
-		}
-		else
-			spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
-		
-		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		channelCtrl.sendMessagesToAllCockpitClients(request.getBusiness().getId(), messages);
+		eventBus.post(new DeleteCustomerRequestEvent(business, request));
 	}
 }

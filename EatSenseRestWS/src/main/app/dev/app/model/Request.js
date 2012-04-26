@@ -20,7 +20,8 @@ Ext.define('EatSense.model.Request', {
 		}],
 		proxy: {
 			type: 'rest',
-			url: '/c/checkins/{checkInId}/requests'
+			url: '/c/checkins/{checkInId}/requests',
+			enablePagingParams: false
 		}
 	}
 });

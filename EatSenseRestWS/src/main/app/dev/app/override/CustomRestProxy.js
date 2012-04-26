@@ -1,6 +1,6 @@
 Ext.define('EatSense.override.CustomRestProxy', {
 	override: 'Ext.data.proxy.Rest',
-	  buildUrl: function(request) {		
+	  buildUrl: function(request) {	
 	        var  me = this, 
 	        	_serviceUrl = Karazy.config.serviceUrl, 
 	        	url = me.getUrl(request),
@@ -29,6 +29,18 @@ Ext.define('EatSense.override.CustomRestProxy', {
 	        	if(url.match(/(.*){checkInId}(.*)/)) {
 	        		var replacer = '$1'+defaultHeaders.checkInId+'$2';
 	        		url = url.replace(/(.*){checkInId}(.*)/, replacer);
+	        	}	
+	        }
+
+	        if(params.businessId) {
+	        	if(url.match(/(.*){businessId}(.*)/)) {
+	        		var replacer = '$1'+params.businessId+'$2';
+	        		url = url.replace(/(.*){businessId}(.*)/, replacer);
+	        	}	        	
+	        } else if(defaultHeaders.businessId) {
+	        	if(url.match(/(.*){businessId}(.*)/)) {
+	        		var replacer = '$1'+defaultHeaders.businessId+'$2';
+	        		url = url.replace(/(.*){businessId}(.*)/, replacer);
 	        	}	
 	        }
 	        	

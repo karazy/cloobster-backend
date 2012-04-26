@@ -11,34 +11,33 @@ Ext.define('EatSense.controller.CheckIn', {
         profile: Ext.os.deviceType.toLowerCase(),
     	refs: {
             main : 'mainview',
-            // searchfield : 'dashboard textfield',
             checkinconfirmation : 'checkinconfirmation',
-        	nickname : '#nicknameTf',
-        	menuoverview: 'menuoverview',   
+        	nickname : 'checkinconfirmation #nicknameTf',
         	checkinwithothers: 'checkinwithothers',
         	dashboard: 'dashboard',
         	settingsBt: 'dashboard button[action=settings]',
         	settingsBackBt: 'settings button[action=back]',
-        	nicknameTogglefield: 'checkinconfirmation togglefield[name=nicknameToggle]',
+        	nicknameTogglefield: 'checkinconfirmation togglefield[action=toggle-nickname]',
         	nicknameSettingsField: 'settings #nicknameSetting',
         	settingsview: 'settings',
-        	userlist: '#checkinDlg2Userlist',
-        	checkInDlg1Label1: '#checkInDlg1Label1',    	       
-        	cancelCheckInBt: '#cancelCheckInBt',    	       
-        	menulist: 'lounge #menulist',
-        	menuview: 'menu',
-        	loungeview : 'lounge',
-        	myorderlist: '#myorderlist',
-        	checkInBtn: '#checkInBtn',
-        	confirmCheckInBt : '#confirmCheckInBt',
+        	
+        	checkInDlg1Label1: 'checkinconfirmation #checkInDlg1Label1',    	       
+        	           	
+        	checkInBtn: 'dashboard button[action=checkin]',
+            //confirm checkn view
+            cancelCheckInBt: 'checkinconfirmation button[action=cancel-checkin]',           
+        	confirmCheckInBt : 'checkinconfirmation button[action=confirm-checkin]',
+            regenerateNicknameBt : 'checkinconfirmation button[action=regenerate-nickname]',
+            //checkIn w/ others
+            userlist: '#checkinDlg2Userlist',
         	checkinDlg2Userlist: '#checkinDlg2Userlist',
         	checkinDlg2CancelBt : '#checkinDlg2CancelBt',
-        	cancelCheckInBt : '#cancelCheckInBt',
-        	regenerateNicknameBt : '#regenerateNicknameBt',
-        	menuTab: '#menutab',
-        	cartTab: '#carttab',
+            //loungeview and tabs
+            loungeview : 'lounge',
+        	menuTab: 'menutab',
+        	cartTab: 'carttab',
             settingsTab: 'settingstab',
-            requestsTab: 'requeststab'    	        		
+            requestsTab: 'requeststab',
     	},
     	control: {
     		checkInBtn: {
@@ -72,14 +71,18 @@ Ext.define('EatSense.controller.CheckIn', {
         /**
     	* Contains information to resume application state after the app was closed.
     	*/
-    	appState : Ext.create('EatSense.model.AppState', {id: '1'})
+    	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
+        /**
+        *   Active checkIn for this session. Used througout whole application
+        */
+        activeCheckIn: null,
+        /**
+        *   The spot the activeCheckIn is assigned to.
+        */
+        activeSpot: null
     },
     init: function() {
-    	var     models = {},
-                messageCtr = this.getApplication().getController('Message');
-
-    	this.models = models;
-
+    	var messageCtr = this.getApplication().getController('Message');
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
@@ -104,11 +107,16 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	var me = this;
     	        	EatSense.model.Spot.load(barcode, {
     	        		 success: function(record, operation) {
-    	        			 me.models.activeSpot = record;
+    	        			 me.setActiveSpot(record);
     	        			 me.checkInConfirm({model:record, deviceId : deviceId}); 	        	    	
      	        	    },
      	        	    failure: function(record, operation) {
-                            me.getApplication().handleServerError(operation.error); 
+                            me.getApplication().handleServerError({
+                                'error': operation.error,
+                                'message': {
+                                    404: Karazy.i18n.translate('checkInErrorBarcode')
+                                } 
+                            }); 
      	        	    },
      	        	    callback: function() {
      	        	    	me.getDashboard().showLoadScreen(false);
@@ -117,15 +125,6 @@ Ext.define('EatSense.controller.CheckIn', {
     	        	});
     	    	}
     	 };    	    
-    },
-    /**
-     * Called after init.
-     */
-    launch: function() {
-    	//for convenience that focus on barcode field on desktop version
-    	// if(this.getProfile() == 'desktop' || !window.plugins || !window.plugins.barcodeScanner) {
-    	// 	this.getSearchfield().focus();
-    	// }
     },
     /**
      * CheckIn Process
@@ -204,7 +203,7 @@ Ext.define('EatSense.controller.CheckIn', {
 			//store device uuid
 			checkIn.set('deviceId',options.deviceId);
 		}			
-		this.models.activeCheckIn = checkIn;
+		this.setActiveCheckIn(checkIn);
 		
 		main.switchAnim('left');
 		main.setActiveItem(checkInDialog);	  			
@@ -224,8 +223,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {		   
-		      this.models.activeCheckIn.set('nickname',nickname);		  	   
-		      this.models.activeCheckIn.save(
+		      this.getActiveCheckIn().set('nickname',nickname);		  	   
+		      this.getActiveCheckIn().save(
 					   {
 					   	    success: function(response) {
 					   	    console.log("CheckIn Controller -> checkIn success");
@@ -237,7 +236,7 @@ Ext.define('EatSense.controller.CheckIn', {
                             //Set default headers so that always checkInId is send
                             Ext.Ajax.setDefaultHeaders({
                                 'checkInId': response.get('userId'),
-                                'pathId' : me.models.activeCheckIn.get('businessId')
+                                'pathId' : me.getActiveCheckIn().get('businessId')
                             });
 					   	     
 					   	    //save nickname in settings
@@ -253,7 +252,10 @@ Ext.define('EatSense.controller.CheckIn', {
                                 }
 					   	    },
 					   	    failure: function(response, operation) {			   	    	
-                                me.getApplication().handleServerError(operation.error, {403 : true}); 
+                                me.getApplication().handleServerError({
+                                    'error': operation.error, 
+                                    'forceLogout':{403 : true}
+                                }); 
 					   	    }
 					   }	   
 			   );
@@ -265,10 +267,10 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    showDashboard: function(options) {
 	   var dashboardView = this.getDashboard(),
-	   main = this.getMain(),
-	   nicknameToggle = this.getNicknameTogglefield();
+	       main = this.getMain(),
+	       nicknameToggle = this.getNicknameTogglefield();
 	   
-	   this.models.activeCheckIn = null;
+	   this.setActiveCheckIn(null);
 	   	   
 	   main.switchAnim('right');
 	   main.setActiveItem(dashboardView);
@@ -288,8 +290,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	   //TODO out of order
 	   var checkinwithothersDlg = this.getCheckinwithothers(), 
 	   main = this.getMain(),
-	   spotId = this.models.activeCheckIn.get('spotId'),
-	   checkInId = this.models.activeCheckIn.get('userId');
+	   spotId = this.getActiveCheckIn().get('spotId'),
+	   checkInId = this.getActiveCheckIn().get('userId');
 	   
 	    var userListStore = Ext.create('Ext.data.Store', {
 	   			   model: 'EatSense.model.User',
@@ -323,7 +325,7 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    linkToUser: function(dataview, record) {
 	   //TODO out of order
-	   var checkIn = this.models.activeCheckIn,
+	   var checkIn = this.getActiveCheckIn(),
 	   me = this;	   
 	   checkIn.set('linkedCheckInId', record.get('userId'));
 	   
@@ -343,41 +345,12 @@ Ext.define('EatSense.controller.CheckIn', {
 	   });
    },
    /**
-    * CheckIn Process
-    * Step 5: Show menu to user 
-    * @param dataview
-    * @param record
+    *
+    * Show menu to user 
     */
-	showMenu : function() {
-    	var    menu = this.getMenuview(), 
-               menuCtr = this.getApplication().getController('Menu'),
-    		   lounge = this.getLoungeview(),
-    		   main = this.getMain(), 
-    		   businessId = Ext.String.trim(this.models.activeCheckIn.get('businessId')), 
-    		   me = this; 
-		 
-		 if(businessId.toString().length != 0) {
-			 this.getMenulist().getStore().load({
-				 scope   : this,
-				 params: {
-					 includeProducts : true,
-					 pathId: businessId
-				 },
-			     callback: function(records, operation, success) {
-			    	 if(success) {
-				    	 menuCtr.models.menudata = records;		
-                        //always show menuoverview on first access
-                         //TODO schoener loesen
-                         menu.getComponent('menuCardPanel').setActiveItem(0);
-                         menu.hideBackButton();
-                         main.switchAnim('left');
-                         main.setActiveItem(lounge);		    					    	 
-			    	 } else {
-                        me.getApplication().handleServerError(operation.error, {403:true}); 
-                     }
-			     }
-			 });
-		 }
+	showMenu: function() {
+    	var menuCtr = this.getApplication().getController('Menu');
+        menuCtr.showMenu();    		   
 	},
 	/**
 	 * Show settings screen.
@@ -434,7 +407,16 @@ Ext.define('EatSense.controller.CheckIn', {
 		      orderCtr = this.getApplication().getController('Order'),
               messageCtr = this.getApplication().getController('Message');
 
-		this.models.activeCheckIn = checkIn;
+        this.setActiveCheckIn(checkIn);
+        //reload of application before hitting leave button
+        if(checkIn.get('status') == Karazy.constants.PAYMENT_REQUEST) {
+            console.log('PAYMENT_REQUEST already issued. Don\'t restore state!');
+            this.handleStatusChange(Karazy.constants.COMPLETE);
+            this.setActiveCheckIn(null);
+            return;
+        }
+
+		
         //Set default headers so that always checkInId is send
         Ext.Ajax.setDefaultHeaders({
             'checkInId': checkIn.get('userId'),
@@ -445,14 +427,14 @@ Ext.define('EatSense.controller.CheckIn', {
 		EatSense.model.Spot.load(checkIn.get('spotId'), {
 		scope: this,
    		 success: function(record, operation) {
-   			 this.models.activeSpot = record;   			 
+   			 this.setActiveSpot(record);
    			 this.showMenu();
    			    			
    			Ext.Viewport.add(main);
    			
    			//after spot information is restored and stores are initialized load orders
    			
-   			this.models.activeCheckIn.orders().load({
+   			this.getActiveCheckIn().orders().load({
    				scope: this,
    				params: {
    					'status': Karazy.constants.Order.CART,
@@ -473,13 +455,15 @@ Ext.define('EatSense.controller.CheckIn', {
 
     	    },
     	    failure: function(record, operation) {
-    	    	me.getApplication().handleServerError(operation.error);        	    	
+    	    	me.getApplication().handleServerError({
+                    'error':operation.error
+                });        	    	
     	    }
 		});						
 	},	
 	/**
 	 * This method handle status changes. It checks if valid transsions are made.
-	 * E. g. You cannot directly switch from PAYMENT_REQUEST to INTENT.
+	 * E. g. You cannot switch from PAYMENT_REQUEST to ORDER_PLACED.
 	 * It enables or disbales certain functionalities depending on the status.
      * Furthermore resets ui states and does cleanups.
 	 * Always use this method to change the application status. 
@@ -488,7 +472,8 @@ Ext.define('EatSense.controller.CheckIn', {
 	handleStatusChange: function(status) {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
         var     orderCtr = this.getApplication().getController('Order'),
-                menuCtr = this.getApplication().getController('Menu');
+                menuCtr = this.getApplication().getController('Menu'),
+                menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
 		if(status == Karazy.constants.PAYMENT_REQUEST) {
@@ -497,22 +482,24 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getSettingsTab().disable();
             this.getRequestsTab().disable();
 			
-			this.models.activeCheckIn.set('status', status);
+			this.getActiveCheckIn().set('status', status);
 		} else if (status == Karazy.constants.COMPLETE || status == Karazy.constants.CANCEL_ALL || status == Karazy.constants.FORCE_LOGOUT) {
-			this.getMenuTab().enable();
+			this.showDashboard();
+            this.getMenuTab().enable();
 			this.getCartTab().enable();
             this.getSettingsTab().enable();
             this.getRequestsTab().enable();
 			this.getAppState().set('checkInId', null);
 			this.getLoungeview().setActiveItem(this.getMenuTab());
+            menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
-			this.getMenulist().getStore().removeAll();
-            menuCtr.showMenu();
+            menuStore.removeAll();
             //remove all orders in cart and refresh badge text
-            this.models.activeCheckIn.orders().removeAll();
-            orderCtr.refreshCartBadgeText();
-
-			this.showDashboard();
+            if(this.getActiveCheckIn())
+            {
+                this.getActiveCheckIn().orders().removeAll();  
+                orderCtr.refreshCartBadgeText();
+            }
 
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
@@ -527,7 +514,7 @@ Ext.define('EatSense.controller.CheckIn', {
     *
     */
     handleCheckInMessage: function(action, updatedCheckIn) {
-        var     checkIn = this.models.activeCheckIn;
+        var     checkIn = this.getActiveCheckIn();
 
         if(action == "delete") {
             if(checkIn.get('userId') == updatedCheckIn.userId) {

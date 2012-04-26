@@ -32,14 +32,37 @@ Ext.define('EatSense.model.Product', {
 	            primaryKey: 'id',
 	            name: 'choices',
 	            autoLoad: true,
-	            associationKey: 'choices' // read child data from child_groups
+	            associationKey: 'choices', // read child data from child_groups
+	            store: {
+	            	sorters: [
+	            	{
+	            		sorterFn: function(record1, record2){
+	            			// console.log('sort choices id1: %s parent1: %s and id2: %s parent2: %s', record1.get('id'), record1.get('parent'), record2.get('id'), record2.get('parent'));
+	            			var parent1 = record1.get('parent'),
+	            				parent2 = record1.get('parent');
+	            			if(parent1) {
+	            				if(parent1 == record2.get('id')) {
+	            					return 1;
+	            				}
+	            			}
+
+	            			if(parent2) {
+	            				if(parent2 == record1.get('id')) {
+	            					return 1;
+	            				}
+	            			}
+
+	            			return 0;
+	            		}
+	            	}]
+	            }
 	        }],
 	},
 	
 	validate: function() {
 		
 	},
-	/**
+		/**
 	 * Calculates total cost of this product including choices, returns it and
 	 * stores it in priceCalculated.
 	 * @param amount
@@ -54,11 +77,15 @@ Ext.define('EatSense.model.Product', {
 		if(amount) {
 			_amount = amount;
 		}
-		// _total = Math.round(_total*_amount*100)/100;
-		_total = Karazy.util.roundPrice(_total*_amount);
+		// _total = Karazy.util.roundPrice(_total*_amount);
+		_total = _total*_amount;
 		this.set('price_calculated', _total);
 		return _total;
 	},
+	/**
+	*	Returns a deep raw json representation of this product.
+	*
+	*/	
 	getRawJsonData: function() {
 		var rawJson = {};
 		
@@ -73,5 +100,28 @@ Ext.define('EatSense.model.Product', {
 			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
 		}		
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*	
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+
+		for ( var int = 0; int < this.choices().data.length; int++) {
+			if(!this.choices().getAt(int).setRawJsonData(rawData.choices[int])) {
+				return false;
+			}
+		}
+
+		this.set('id', rawData.id);
+		this.set('name', rawData.name);
+		this.set('shortDesc', rawData.shortDesc);
+		this.set('longDesc', rawData.longDesc);
+		this.set('price', rawData.price);
+						
+		return true;
 	}
 });

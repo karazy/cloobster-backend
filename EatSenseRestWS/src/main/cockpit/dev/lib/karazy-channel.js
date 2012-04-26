@@ -24,11 +24,20 @@ Karazy.channel = (function() {
 	var scopeTokenRequestHandler;
 	//indicates if the client forced a close and won't try to request a new token.
 	var timedOut;
+	//indicates if connection was lost
+	var connectionLost;
 	//token used for this channel
 	var channelToken;
+	//timeout used when attempting to reconnect the channel
+	var channelReconnectTimeout = 10000;
+	//the status for the connection
+	var connectionStatus = 'DISCONNECTED';
 
 	function onOpened() {
 		console.log('channel opened');
+		connectionLost = false;	
+		timedOut = false;
+		connectionStatus = 'ONLINE';
 	};
 
 	function onMessage(data) {
@@ -38,30 +47,76 @@ Karazy.channel = (function() {
 
 	function onError(error) {		
 		console.log('channel error ' + (error && error.description) ? error.description : "");
-		if(error && error.code == '401') {
+		if(error && ( error.code == '401' || error.code == '400') ) {
 			timedOut = true;
-		} else if (error && (error.code == '-1' || error.code == '0')) {
+			socket.close();
+		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
 			socket.close();
 		}
 	};
 
 	function onClose() {
-		if(timedOut === true && Karazy.util.isFunction(requestTokenHandlerFunction)) {
-			console.log('timeout: requesting new token');
-			requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);	
-			timedOut = false;			
-		} else if(connectionLost) {
-			console.log('connection lost: reopen channel');
-			setupChannel(channelToken);
-			connectionLost = false;			
+		if(!Karazy.util.isFunction(requestTokenHandlerFunction)) {
+			console.log('requestTokenHandlerFunction is not of type function!');
+			return;
+		};
+
+		if(timedOut === true && connectionStatus != 'RECONNECT') {
+			console.log('channel timeout');			
+			connectionStatus = 'RECONNECT';
+			repeatedConnectionTry();	
+		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
+			console.log('channel connection lost');
+			connectionStatus = 'RECONNECT';
+			repeatedConnectionTry();		
 		}
 	};
+	/**
+	*	Repeatedly tries to reopen a channel after it has been close.
+	*
+	*/
+	function repeatedConnectionTry() {
+		if(!connectionLost && !timedOut) {
+			return;
+		}
 
-	function setupChannel(token) {
+		console.log('Trying to reconnect and request new token.');
+
+		var tries = 1;
+		var reconnectInterval =	window.setInterval(
+				function() {
+					if(connectionStatus == 'ONLINE') {
+						clearInterval(reconnectInterval);
+						return;
+					}
+					if(tries > 100) {
+						console.log('maximum tries reached. no more reconnect attempts.')
+						connectionStatus = 'DISCONNECTED';
+						clearInterval(reconnectInterval);
+						return;
+					}
+
+					console.log('Reconnect %s iteration.', tries);
+					// setupChannel(channelToken);
+					requestTokenHandlerFunction.apply(scopeTokenRequestHandler, [setupChannel]);
+					tries += 1;					
+				}
+			, channelReconnectTimeout);	
+	};
+
+
+	/**
+	* Creates the channel and set the handler.
+	* @param token
+	*	Token for channel generation
+	*/
+	function setupChannel(token) {			
 			if(!token) {
 				return;
 			}
+
+			console.log('setup channel for token %s', token);
 
 			channelToken = token;
 			channel = new goog.appengine.Channel(token);
@@ -118,7 +173,6 @@ Karazy.channel = (function() {
 
 			messageHandlerFunction = options.messageHandler;
 		},
-
 		/**
 		* Closes the cannel and prevents a new token request.
 		*/
@@ -128,6 +182,7 @@ Karazy.channel = (function() {
 			channelToken = null;
 
 			if(socket) {
+				connectionStatus = 'DISCONNECTED';
 				socket.close();
 			};			
 		}	

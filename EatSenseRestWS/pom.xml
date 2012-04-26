@@ -50,7 +50,7 @@
 			<id>dev</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
-			</activation>
+			</activation>	
 			<build>
 				<plugins>
 					<plugin>
@@ -112,8 +112,8 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>
-			<build>
+			<id>prod</id>		
+			<build>			
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -159,7 +159,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/prod</directory>
+											<directory>src/main/app/prod/desktop</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -185,6 +185,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+    		<groupId>com.google.guava</groupId>
+    		<artifactId>guava</artifactId>
+    		<version>10.0.1</version>
+		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>jsr250-api</artifactId>
@@ -336,18 +341,24 @@
 		<!-- Unit tests -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-integration</artifactId>
 			<version>1.2.1</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+  			<artifactId>mockito-core</artifactId>  
+  			<version>1.9.0</version> 
+  			<scope>test</scope>
+  		</dependency>
+		</dependencies>
 
 	<build>
 		<!-- Generate compiled stuff in the folder used for development mode -->
@@ -459,6 +470,7 @@
 									<excludes>
 										<exclude>app/**/*.phone.*</exclude>
 										<exclude>app/**/*.iphone.*</exclude>
+										<exclude>app/**/*.ignore.*</exclude>
 									</excludes>
 								</resource>
 							</resources>
@@ -508,6 +520,10 @@
 						<replacement>
 							<token>(serviceUrl :) .*</token>
 							<value>$1 '',</value>
+						</replacement>
+						<replacement>
+							<token>(disableCaching :) .*</token>
+							<value>$1 true,</value>
 						</replacement>
 					</replacements>
 				</configuration>
@@ -600,4 +616,13 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-core</artifactId>
+				<version>1.2.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

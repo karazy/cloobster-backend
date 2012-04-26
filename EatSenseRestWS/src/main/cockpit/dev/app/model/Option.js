@@ -14,7 +14,6 @@ Ext.define('EatSense.model.Option', {
 			defaultValue: false
 		} ]
 	},
-
 	getRawJsonData : function() {
 		var rawJson = {};
 		rawJson.name = this.get('name');
@@ -22,5 +21,20 @@ Ext.define('EatSense.model.Option', {
 		rawJson.selected = this.get('selected');
 
 		return rawJson;
+	},
+	/**
+	*	Sets the data of this object based on a raw json object.
+	*
+	*/	
+	setRawJsonData: function(rawData) {
+		if(!rawData) {
+			return false;
+		}
+		
+		this.set('name', rawData.name);
+		this.set('price', rawData.price);
+		this.set('selected', rawData.selected);	
+
+		return true;		
 	}
 });

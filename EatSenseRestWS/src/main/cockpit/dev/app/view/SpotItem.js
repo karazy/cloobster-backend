@@ -19,8 +19,9 @@ Ext.define('EatSense.view.SpotItem', {
 	},
 
 	applySpot: function(config) {
-		var 	button = Ext.factory(config, Ext.Button, this.getSpot()),
-				status = this.getRecord().get('status');
+		var button = Ext.factory(config, Ext.Button, this.getSpot()),
+			status = this.getRecord().get('status'),
+			checkInCount = this.getRecord().get('checkInCount');
 		
 		button.getTpl().overwrite(button.element, this.getRecord().getData());
 
