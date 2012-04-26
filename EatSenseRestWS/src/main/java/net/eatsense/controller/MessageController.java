@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -53,12 +54,27 @@ public class MessageController {
 	
 	@Subscribe
 	public void sendUpdateCartMessages(UpdateCartEvent event) {
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		
+		if(event.getNewSpotStatus().isPresent()) {
+			// Add a message with updated spot status to the package.
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			spotData.setId(event.getCheckIn().getSpot().getId());
+			spotData.setStatus(event.getNewSpotStatus().get());
+			messages.add(new MessageDTO("spot","update",spotData));
+		}
+		CheckInStatusDTO statusDto = transform.toStatusDto(event.getCheckIn());
+		if(event.getNewCheckInStatus().isPresent()) {
+			// ... and add a message with updated checkin status to the package.
+			messages.add(new MessageDTO("checkin","update",statusDto));
+		}
+		messages.add(new MessageDTO("checkin","update-orders",statusDto));
+		// Send update messages.
+		channelCtrl.sendMessages(businessRepo.getByKey(event.getCheckIn().getBusiness()), messages);
 	}
 	
 	@Subscribe
 	public void sendDeleteCustomerRequestMessages(DeleteCustomerRequestEvent event) {
-
 		List<Request> oldRequests = requestRepo.query().filter("spot",event.getRequest().getSpot()).order("-receivedTime").limit(2).list();
 		for (Iterator<Request> iterator = oldRequests.iterator(); iterator.hasNext();) {
 			Request oldRequest = iterator.next();
