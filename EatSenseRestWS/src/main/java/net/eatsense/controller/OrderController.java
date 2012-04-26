@@ -164,7 +164,7 @@ public class OrderController {
 		// If we have no older request in the database ...
 		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn);
 		if( oldestRequest == null ) {
-			updateEvent.setNewSpotStatus(OrderStatus.PLACED.toString());
+			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}
 		
 		List<Request> requests = new ArrayList<Request>();
