@@ -123,7 +123,8 @@
 	 */
 	dumpCart: function() {
 		console.log('Cart Controller -> dumpCart');
-		var activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn();
+		var me = this,
+			activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn();
 		
 		Ext.Msg.show({
 			title: Karazy.i18n.translate('hint'),
@@ -142,17 +143,30 @@
 			if(btnId=='yes') {
 				//workaround, because view stays masked after switch to menu
 				Ext.Msg.hide();
-				activeCheckIn.orders().each(function(order) {
-					Ext.Ajax.request({				
-			    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-			    	    method: 'DELETE'
-			    	});
-				});
-				
-				//clear store				
-				activeCheckIn.orders().removeAll();
-				//reset badge text on cart button and switch back to menu
-				this.refreshCart();
+
+				// activeCheckIn.orders().each(function(order) {
+				// 	Ext.Ajax.request({				
+			 //    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
+			 //    	    method: 'DELETE'
+			 //    	});
+				// });
+
+				Ext.Ajax.request({				
+			    	    url: Karazy.config.serviceUrl+'/c/checkins/'+activeCheckIn.get('userId')+'/cart/',
+			    	    method: 'DELETE',
+			    	    success: function(response) {
+			    	    	//clear store				
+							activeCheckIn.orders().removeAll();
+							//reset badge text on cart button and switch back to menu
+							me.refreshCart();
+			    	    },
+			    	    failure: function(response) {
+							me.getApplication().handleServerError({
+								'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+			                    'forceLogout': {403:true}
+			                }); 
+						}
+			    });				
 				}
 			}
 		});				
