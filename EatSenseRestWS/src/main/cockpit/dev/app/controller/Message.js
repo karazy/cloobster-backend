@@ -68,9 +68,10 @@ Ext.define('EatSense.controller.Message', {
 	*		callback function to invoke on success
 	*/
 	requestNewToken: function(callback) {
-		var 	account = this.getApplication().getController('Login').getAccount(),
-				login = account.get('login'),
-				clientId = login + new Date().getTime();
+		var me = this,
+			account = this.getApplication().getController('Login').getAccount(),
+			login = account.get('login'),
+			clientId = login + new Date().getTime();
 		
 		account.set('clientId', clientId);
 		console.log('request new token. clientId: ' + clientId);
