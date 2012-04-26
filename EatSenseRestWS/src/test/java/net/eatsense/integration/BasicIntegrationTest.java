@@ -49,8 +49,17 @@ public class BasicIntegrationTest {
 	@Before
 	public void setUp() throws Exception {
 		barcode = "hup001";
+<<<<<<< HEAD
+//		RestAssured.baseURI = "http://eatsense-test.appspot.com";
+//		RestAssured.port = 80;
+		
+		RestAssured.baseURI = "http://localhost";
+		RestAssured.port = 8888;
+		
+=======
 		RestAssured.baseURI = "http://localhost";
 		RestAssured.port = 8080;
+>>>>>>> 105d4711529b8c2f9052d9fc5eaa174c47e89f7f
 		
 		this.jsonMapper = new ObjectMapper();
 	}
