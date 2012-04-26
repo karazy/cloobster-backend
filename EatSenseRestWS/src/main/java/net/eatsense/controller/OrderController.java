@@ -516,6 +516,7 @@ public class OrderController {
 	}
 
 	private int countSelected(ChoiceDTO choiceDto) {
+		checkNotNull(choiceDto, "choiceDto was null");
 		int selected = 0;
 		for (ProductOption productOption : choiceDto.getOptions()) {
 			if(productOption.getSelected() != null && productOption.getSelected())
@@ -523,8 +524,6 @@ public class OrderController {
 		}
 		return selected;
 	}
-
-	
 
 	/**
 	 * Create a new Order entity with the given data and save it in the datastore;

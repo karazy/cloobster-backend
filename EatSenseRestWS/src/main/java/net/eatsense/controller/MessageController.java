@@ -192,12 +192,13 @@ public class MessageController {
 		// Use given order dto or create a new one if not present.
 		OrderDTO orderData = event.getOrderData().or(transform.orderToDto(event.getOrder()));
 		// Add a message with updated order status to the message package.
-		messages.add(new MessageDTO("order","update",orderData ));
+		MessageDTO orderMessage = new MessageDTO("order","update",orderData );
+		messages.add(orderMessage);
 		// Send update messages.
 		channelCtrl.sendMessages(event.getBusiness(), messages);
 		// If we cancel the order, let the checkedin customer know.
 		if(event.getOrder().getStatus() == OrderStatus.CANCELED && event.getCheckIn().getChannelId() != null)
-			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), "order", "update", orderData);
+			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), orderMessage);
 	}
 
 	@Subscribe
@@ -237,8 +238,8 @@ public class MessageController {
 			}
 			// notify client
 			if(event.getCheckIn().getChannelId() != null)
-				channelCtrl.sendMessage(event.getCheckIn().getChannelId(), 
-						"checkin", "delete", transform.checkInToDto(event.getCheckIn()));
+				channelCtrl.sendMessage(event.getCheckIn().getChannelId(),
+						new MessageDTO("checkin", "delete", transform.checkInToDto(event.getCheckIn())));
 		}
 		
 		// Notify cockpit clients
