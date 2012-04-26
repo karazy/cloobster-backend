@@ -111,7 +111,7 @@ Ext.define('EatSense.controller.Menu', {
 			    	if(!success) { 
                         me.getApplication().handleServerError({
                         	'error': operation.error, 
-                        	'forceLogut': {403:true}
+                        	'forceLogout': {403:true}
                         }); 
                     }
 			    }
@@ -360,7 +360,7 @@ Ext.define('EatSense.controller.Menu', {
 	    	    failure: function(response, operation) {
 	    	    	me.getApplication().handleServerError({
                         	'error': operation.error, 
-                        	'forceLogut': {403:true}
+                        	'forceLogout': {403:true}
                         }); 
 	    	    }
 	    	});

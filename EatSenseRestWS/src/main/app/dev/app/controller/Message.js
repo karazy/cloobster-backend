@@ -65,7 +65,9 @@ Ext.define('EatSense.controller.Message', {
 	*	@param callback
 	*		callback function to invoke on success
 	*/
-	requestNewToken: function(callback) {		
+	requestNewToken: function(callback) {	
+		var me = this;
+			
 		if(!this.getChannelId()) {
 			console.log('no channel id is set');
 			return;

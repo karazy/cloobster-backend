@@ -56053,8 +56053,6 @@ Ext.define('Ext.data.reader.Array', {
 
 
 
-Karazy.i18n.setLang('DE');
-
 Ext.Loader.setConfig({
 	enabled : true,
 	//WORKAORUND related to Android 3x Bug and Webview URL handling
@@ -56086,7 +56084,7 @@ Ext.application({
 		'EatSense.model.AppState'
 	],
 	launch : function() {
-		console.log('launch');
+		console.log('launch');		
     	this.launched = true;
         this.mainLaunch();
 	},

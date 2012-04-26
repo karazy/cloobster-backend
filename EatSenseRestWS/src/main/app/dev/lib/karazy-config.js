@@ -13,7 +13,8 @@ Karazy.config = (function() {
 		msgboxHideLongTimeout: 2500,
 		currencyFormat: 'EURO',
 		version: 0.1,
-		disableCaching: true
+		disableCaching: true,
+		language: 'DE'
 	};
 	
 })();

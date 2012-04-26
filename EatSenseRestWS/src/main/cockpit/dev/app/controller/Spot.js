@@ -209,28 +209,30 @@ Ext.define('EatSense.controller.Spot', {
 		me.setActiveCustomer(record);
 		me.getSpotDetail().fireEvent('eatSense.customer-update', true);
 
-		orderStore.load({
-			params: {
-				pathId: restaurantId,
-				checkInId: record.get('id'),
-				//currently not evaluated
-				// spotId: 
-			},
-			 callback: function(records, operation, success) {
-			 	if(success) { 		
-			 		this.updateCustomerStatusPanel(record);
-			 		this.updateCustomerTotal(records);
-			 	} else {
-			 		me.getApplication().handleServerError({
-						'error': operation.error, 
-						'forceLogout': {403: true}, 
-						'hideMessage':false
-						// 'message': Karazy.i18n.translate('errorSpotDetailOrderLoading')
-					});
-			 	}				
-			 },
-			 scope: this
-		});
+		this.refreshActiveCustomerOrders();
+
+		// orderStore.load({
+		// 	params: {
+		// 		pathId: restaurantId,
+		// 		checkInId: record.get('id'),
+		// 		//currently not evaluated
+		// 		// spotId: 
+		// 	},
+		// 	 callback: function(records, operation, success) {
+		// 	 	if(success) { 		
+		// 	 		this.updateCustomerStatusPanel(record);
+		// 	 		this.updateCustomerTotal(records);
+		// 	 	} else {
+		// 	 		me.getApplication().handleServerError({
+		// 				'error': operation.error, 
+		// 				'forceLogout': {403: true}, 
+		// 				'hideMessage':false
+		// 				// 'message': Karazy.i18n.translate('errorSpotDetailOrderLoading')
+		// 			});
+		// 	 	}				
+		// 	 },
+		// 	 scope: this
+		// });
 
 		if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
 			paidButton.enable();
@@ -254,6 +256,42 @@ Ext.define('EatSense.controller.Spot', {
 			me.updateCustomerPaymentMethod();
 			paidButton.disable();
 		}
+	},
+	/**
+	* @private
+	*
+	*/
+	refreshActiveCustomerOrders: function() {
+		var me = this,
+			orderStore = Ext.StoreManager.lookup('orderStore');
+
+		if(!me.getActiveCustomer()) {
+			console.log('no active customer');
+			return;
+		}
+
+		orderStore.load({
+			params: {
+				// pathId: restaurantId,
+				// checkInId: record.get('id'),
+				//currently not evaluated
+				// spotId: 
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) { 		
+			 		me.updateCustomerStatusPanel(me.getActiveCustomer());
+			 		me.updateCustomerTotal(records);
+			 	} else {
+			 		me.getApplication().handleServerError({
+						'error': operation.error, 
+						'forceLogout': {403: true}, 
+						'hideMessage':false
+						// 'message': Karazy.i18n.translate('errorSpotDetailOrderLoading')
+					});
+			 	}				
+			 }
+		});			
+
 	},
 
 	// </LOAD AND SHOW DATA>
@@ -364,6 +402,13 @@ Ext.define('EatSense.controller.Spot', {
 						}						
 					} else { 
 						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
+					}
+				} else if(action = 'update-orders') {
+					//update all orders
+					if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
+							//select customer whos osrders where updated							
+							// me.getSpotDetailCustomerList().select(me.getActiveCustomer());
+							me.refreshActiveCustomerOrders();
 					}
 				}
 			}

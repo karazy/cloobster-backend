@@ -169,7 +169,8 @@
 			errorIndicator = false,
 			cartview = this.getCartview(),
 			ajaxOrderCount = 0,
-			ordersCount = orders.getCount();
+			ordersCount = orders.getCount(),
+			// cart = Ext.create('EatSense.model.Cart'),
 			me = this;
 		
 		if(ordersCount > 0) {
@@ -187,18 +188,59 @@
 				}],
 				scope: this,
 				fn: function(btnId, value, opt) {
-				if(btnId=='yes') {
-					
+				if(btnId=='yes') {					
+					// me.getOrderlist().removeAll();
+
+					// cart.set('status', Karazy.constants.Order.PLACED);
+					// cart.phantom = false;
+
 					cartview.showLoadScreen(true);
 					this.getSubmitOrderBt().disable();
 					this.getCancelOrderBt().disable();
 					
+					Ext.Ajax.request({
+						url: Karazy.config.serviceUrl+'/c/checkins/'+checkInId+'/cart',
+						method: 'PUT',
+						success: function(response) {
+			    	    	cartview.showLoadScreen(false);
+			    	    	me.getSubmitOrderBt().enable();
+			    	    	me.getCancelOrderBt().enable();
+							orders.removeAll();
+							me.refreshCart();
+							//show success message
+							Ext.Msg.show({
+								title : Karazy.i18n.translate('success'),
+								message : Karazy.i18n.translate('orderSubmit'),
+								buttons : []
+							});
+							
+							Ext.defer((function() {
+								Ext.Msg.hide();
+							}), Karazy.config.msgboxHideTimeout, this);
+						},
+						failure: function(response) {
+							cartview.showLoadScreen(false);
+			    	    	me.getSubmitOrderBt().enable();
+			    	    	me.getCancelOrderBt().enable();
+							// me.getOrderlist().setStore(orders);
+							me.getApplication().handleServerError({
+								'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+			                    'forceLogout': {403:true}
+			                }); 
+						}
+					});
+					/*
+					cartview.showLoadScreen(true);
+					this.getSubmitOrderBt().disable();
+					this.getCancelOrderBt().disable();
+
 					orders.each(function(order) {
 						console.log('save order id:' + order.get('id') + ' genuineId: '+order.getProduct().get('genuineId'));
 						
 						if(!errorIndicator) {
-							order.set('status',Karazy.constants.Order.PLACED);
-							
+
+							order.set('status',Karazy.constants.Order.PLACED);														
+
 							Ext.Ajax.request({				
 					    	    url: Karazy.config.serviceUrl+'/c/businesses/'+businessId+'/orders/'+order.getId(),
 					    	    method: 'PUT',    
@@ -242,7 +284,7 @@
 					    	    	me.getCancelOrderBt().enable();
 					    	    	me.getApplication().handleServerError({
 			                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-			                        	'forceLogut': {403:true}
+			                        	'forceLogout': {403:true}
 			                        }); 
 					    	    }
 							});			
@@ -253,7 +295,7 @@
 							return false;
 						};					
 					});
-
+					*/
 					}
 				}
 			});						
@@ -373,7 +415,7 @@
 	    	    failure: function(response) {
 					me.getApplication().handleServerError({
                     	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-                    	'forceLogut': {403:true}
+                    	'forceLogout': {403:true}
                     }); 
 				}
 			});
@@ -411,7 +453,7 @@
 	    	    failure: function(response) {
 					me.getApplication().handleServerError({
 	                	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-	                	'forceLogut': {403:true}
+	                	'forceLogout': {403:true}
 	                }); 
 				}
 	    	});

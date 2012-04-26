@@ -50,7 +50,7 @@
 			<id>dev</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
-			</activation>
+			</activation>	
 			<build>
 				<plugins>
 					<plugin>
@@ -112,8 +112,8 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>
-			<build>
+			<id>prod</id>		
+			<build>			
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
