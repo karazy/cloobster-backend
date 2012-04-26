@@ -34,7 +34,7 @@ var translation = {
 		"checkInStep2Label2" : "Willst du mit jemand Anderem einchecken?",
 		"checkInStep2OnMyOwnButton" : "Ich bin alleine hier",
 		"checkInErrorBarcode" : "Der Barcode ist nicht valide oder leer!",
-		"checkInErrorNickname" : "Wähle einen Nickname oder nimm den Generierten.<br/>Der Nickname muss zwischen {0} und {1} Zeichen lang sein.",
+		"checkInErrorNickname" : "Der Nickname muss zwischen {0} und {1} Zeichen lang sein.",
 		"checkInErrorNicknameExists" : "Der Nickname wird an diesem Spot bereits benutzt.",
 		"saveNicknameToggle" : "Nickname als Standard setzen?",
 		"checkInCanceled" : "Deine Sitzung wurde durch das Restaurant beendet.",
@@ -76,7 +76,7 @@ var translation = {
 		"paymentRequestSend": "Bitte warte einen Moment,</br>deine Rechnung wird vorbereitet ...",
 		//Settings
 		"settingsTitle" : "Einstellungen",
-		"nickname" : "Spitzname",
+		"nickname" : "Nickname",
 		"nicknameDesc" : "Mit deinem Spitznamen wirst du im Restaurant angezeigt.</br>Änderungen wirken sich erst auf den nächsten CheckIn aus.",
 		//Request
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",

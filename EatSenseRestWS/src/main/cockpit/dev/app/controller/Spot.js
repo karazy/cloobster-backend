@@ -333,7 +333,7 @@ Ext.define('EatSense.controller.Spot', {
 					}
 					//make sure to load new request so they exist
 					requestCtr.loadRequests();
-				} else if (action == 'update' || action = 'confirm-orders') {
+				} else if (action == 'update' || action == 'confirm-orders') {
 					console.log('update checkin id %s with status %s', updatedCheckIn.id, updatedCheckIn.status);
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					if(dirtyCheckIn) {
@@ -796,23 +796,25 @@ Ext.define('EatSense.controller.Spot', {
 			}
 		});
 
-		Ext.Ajax.request({				
-    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/checkins/'+this.getActiveCustomer().getId()+'/cart',
-    	    method: 'PUT',
-    	    success: function(response) {
-    	    	console.log('all orders confirmed');
-    	    },
-    	    failure: function(response) {
-    	    	me.getApplication().handleServerError({
-						'error': {
-							'status': response.status,
-							'statusText': response.statusText
-						}, 
-						'forceLogout': {403: true}, 
-						'hideMessage':false
-				});
-	   	    }
-		});
+		if(unprocessedOrders.getCount() > 0) {
+			Ext.Ajax.request({				
+	    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/checkins/'+this.getActiveCustomer().getId()+'/cart',
+	    	    method: 'PUT',
+	    	    success: function(response) {
+	    	    	console.log('all orders confirmed');
+	    	    },
+	    	    failure: function(response) {
+	    	    	me.getApplication().handleServerError({
+							'error': {
+								'status': response.status,
+								'statusText': response.statusText
+							}, 
+							'forceLogout': {403: true}, 
+							'hideMessage':false
+					});
+		   	    }
+			});
+		}
 
 		// unprocessedOrders.each(function(order) {
 		// 	//update order status
