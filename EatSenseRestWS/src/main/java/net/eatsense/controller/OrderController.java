@@ -111,27 +111,59 @@ public class OrderController {
 		orderRepo.ofy().delete(order);
 	}
 	
-	public void updateOrderStatusOfCheckIn(CheckIn checkIn, OrderStatus fromStatus , OrderStatus toStatus) {
+	/**
+	 * @param checkIn
+	 */
+	public void updateCartOrdersToPlaced(CheckIn checkIn) {
 		checkNotNull(checkIn, "checkIn was null");
 		checkNotNull(checkIn.getId(), "checkIn id was null");
 		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
-		checkNotNull(fromStatus, "fromStatus was null");
-		checkNotNull(toStatus, "toStatus was null");
-		checkArgument(fromStatus.isTransitionAllowed(toStatus), "not allowed to update from %s to %s", fromStatus, toStatus);
-		checkArgument(fromStatus != toStatus, "fromStatus expected to be different from toStatus, but was %s", fromStatus);
+		checkArgument(checkIn.getStatus() == CheckInStatus.CHECKEDIN ||
+				checkIn.getStatus() == CheckInStatus.ORDER_PLACED, "" );
 		
 		List<Order> orders = orderRepo.query().ancestor(checkIn.getBusiness())
 				.filter("checkIn", checkIn.getKey())
-				.filter("status", fromStatus.toString()).list();
+				.filter("status", OrderStatus.CART.toString()).list();
 		
-		for (Order order : orders) {
-			order.setStatus(toStatus);
+		if(orders.isEmpty()) {
+			logger.info("No orders in cart, returning.");
+			return;
 		}
 		
+		Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
+		// If we have no older request in the database ...
+		UpdateCartEvent updateEvent = new UpdateCartEvent(checkIn);
+		if( oldestRequest == null ) {
+			updateEvent.setNewSpotStatus(OrderStatus.PLACED.toString());
+		}
 		
-		
+		List<Request> requests = new ArrayList<Request>();
+		for (Order order : orders) {
+			order.setStatus(OrderStatus.PLACED);
+			
+			Request request = new Request();
+			request.setCheckIn(checkIn.getKey());
+			request.setBusiness(checkIn.getBusiness());
+			request.setObjectId(order.getId());
+			request.setType(RequestType.ORDER);
+			request.setReceivedTime(new Date());
+			request.setSpot(checkIn.getSpot());
+			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
+			
+			requests.add(request);
+		}
 		orderRepo.saveOrUpdate(orders);
-		eventBus.post(new UpdateCartEvent(checkIn));
+		requestRepo.saveOrUpdate(requests);
+	
+		// Update the checkin status, if there is none set.
+		if(checkIn.getStatus() == CheckInStatus.CHECKEDIN) {
+			checkIn.setStatus(CheckInStatus.ORDER_PLACED);
+			checkInRepo.saveOrUpdate(checkIn);
+			
+			updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED.toString());
+		}
+		
+		eventBus.post(updateEvent);
 	}
 	
 	/**
@@ -484,6 +516,7 @@ public class OrderController {
 	}
 
 	private int countSelected(ChoiceDTO choiceDto) {
+		checkNotNull(choiceDto, "choiceDto was null");
 		int selected = 0;
 		for (ProductOption productOption : choiceDto.getOptions()) {
 			if(productOption.getSelected() != null && productOption.getSelected())
@@ -491,8 +524,6 @@ public class OrderController {
 		}
 		return selected;
 	}
-
-	
 
 	/**
 	 * Create a new Order entity with the given data and save it in the datastore;
