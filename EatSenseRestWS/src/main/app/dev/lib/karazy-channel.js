@@ -1,5 +1,8 @@
 /*Karazy namespace. Create if not exists.*/
-var Karazy = (Karazy) ? Karazy : {};
+var Karazy = (Karazy) ? Karazy : {},
+	requires = {
+		'Karazy.util': Karazy.util
+	};
 
 /**
 *
@@ -8,30 +11,36 @@ var Karazy = (Karazy) ? Karazy : {};
 */
 Karazy.channel = (function() {
 
+	for(precondition in requires) {
+		if(!requires[precondition]) {
+			console.log('Some functions of this class may need %s to properly work. Make sure inclusion order is correct.', precondition);
+		}
+	}
+
 	//private members
 
 	//holds a reference to the channel
-	var channel;	
+	var channel,	
 	//socket used for communication
-	var socket;
+		socket,
 	//function called when a message is received
-	var messageHandlerFunction;
+		messageHandlerFunction,
 	//function called to request a new token when an error occurs or channel is closed
-	var requestTokenHandlerFunction;
+		requestTokenHandlerFunction,
 	//scope in which to execute messageHandler function
-	var scopeMessageHandler;
+		scopeMessageHandler,
 	//scope in which to execute tokenRequestHandler function
-	var scopeTokenRequestHandler;
+		scopeTokenRequestHandler,
 	//indicates if the client forced a close and won't try to request a new token.
-	var timedOut;
+		timedOut,
 	//indicates if connection was lost
-	var connectionLost;
+		connectionLost,
 	//token used for this channel
-	var channelToken;
+		channelToken,
 	//timeout used when attempting to reconnect the channel
-	var channelReconnectTimeout = 10000;
+		channelReconnectTimeout = Karazy.config.channelReconnectTimeout,
 	//the status for the connection
-	var connectionStatus = 'DISCONNECTED';
+		connectionStatus = 'DISCONNECTED';
 
 	function onOpened() {
 		console.log('channel opened');

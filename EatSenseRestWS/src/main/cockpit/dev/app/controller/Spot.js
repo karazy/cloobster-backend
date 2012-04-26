@@ -211,29 +211,6 @@ Ext.define('EatSense.controller.Spot', {
 
 		this.refreshActiveCustomerOrders();
 
-		// orderStore.load({
-		// 	params: {
-		// 		pathId: restaurantId,
-		// 		checkInId: record.get('id'),
-		// 		//currently not evaluated
-		// 		// spotId: 
-		// 	},
-		// 	 callback: function(records, operation, success) {
-		// 	 	if(success) { 		
-		// 	 		this.updateCustomerStatusPanel(record);
-		// 	 		this.updateCustomerTotal(records);
-		// 	 	} else {
-		// 	 		me.getApplication().handleServerError({
-		// 				'error': operation.error, 
-		// 				'forceLogout': {403: true}, 
-		// 				'hideMessage':false
-		// 				// 'message': Karazy.i18n.translate('errorSpotDetailOrderLoading')
-		// 			});
-		// 	 	}				
-		// 	 },
-		// 	 scope: this
-		// });
-
 		if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
 			paidButton.enable();
 			billStore.load({
@@ -259,7 +236,7 @@ Ext.define('EatSense.controller.Spot', {
 	},
 	/**
 	* @private
-	*
+	* Loads all orders for selected customer.
 	*/
 	refreshActiveCustomerOrders: function() {
 		var me = this,
@@ -272,8 +249,7 @@ Ext.define('EatSense.controller.Spot', {
 
 		orderStore.load({
 			params: {
-				// pathId: restaurantId,
-				// checkInId: record.get('id'),
+				checkInId: me.getActiveCustomer().getId(),
 				//currently not evaluated
 				// spotId: 
 			},
@@ -357,7 +333,7 @@ Ext.define('EatSense.controller.Spot', {
 					}
 					//make sure to load new request so they exist
 					requestCtr.loadRequests();
-				} else if (action == 'update') {
+				} else if (action == 'update' || action = 'confirm-orders') {
 					console.log('update checkin id %s with status %s', updatedCheckIn.id, updatedCheckIn.status);
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 					if(dirtyCheckIn) {
@@ -370,6 +346,11 @@ Ext.define('EatSense.controller.Spot', {
 						if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
 							//update status only if this is the active customer
 							me.updateCustomerStatusPanel(updatedCheckIn);
+							if(action = 'confirm-orders') {
+								orders.each(function(order) {
+									order.set('status', Karazy.constants.Order.RECEIVED);
+								});
+							}
 						}
 					} else {
 						Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorGeneralCommunication'), Ext.emptyFn);
@@ -410,7 +391,7 @@ Ext.define('EatSense.controller.Spot', {
 							// me.getSpotDetailCustomerList().select(me.getActiveCustomer());
 							me.refreshActiveCustomerOrders();
 					}
-				}
+				} 
 			}
 		}
 	},
@@ -815,49 +796,67 @@ Ext.define('EatSense.controller.Spot', {
 			}
 		});
 
-		unprocessedOrders.each(function(order) {
-			//update order status
-			order.set('status', Karazy.constants.Order.RECEIVED);
-			order.getData(true);
-
-			//persist changes
-			// order.save({
-			// 	params: {
-			// 		pathId: loginCtr.getAccount().get('businessId'),
-			// 	},
-			// 	success: function(record, operation) {
-			// 		console.log('order confirmed');
-			// 	},
-			// 	failure: function(record, operation) {
-			// 		order.set('status', Karazy.constants.Order.PLACED);
-			// 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
-			// 	}
-			// });
-
-			//same approach as in eatSense App. Magic lies in getRawJsonData()
-			//still kind of a workaround
-			Ext.Ajax.request({				
-	    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
-	    	    method: 'PUT',    	    
-	    	    jsonData: order.getRawJsonData(),
-	    	    scope: this,
-	    	    success: function(response) {
-	    	    	console.log('order %s confirmed', order.getId());
-	    	    },
-	    	    failure: function(response) {
-	    	    	order.set('status', prevStatus);
-	    	    	me.getApplication().handleServerError({
-							'error': {
-								'status': response.status,
-								'statusText': response.statusText
-							}, 
-							'forceLogout': {403: true}, 
-							'hideMessage':false
-							// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
-					});
-		   	    }
-			});
+		Ext.Ajax.request({				
+    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/checkins/'+this.getActiveCustomer().getId()+'/cart',
+    	    method: 'PUT',
+    	    success: function(response) {
+    	    	console.log('all orders confirmed');
+    	    },
+    	    failure: function(response) {
+    	    	me.getApplication().handleServerError({
+						'error': {
+							'status': response.status,
+							'statusText': response.statusText
+						}, 
+						'forceLogout': {403: true}, 
+						'hideMessage':false
+				});
+	   	    }
 		});
+
+		// unprocessedOrders.each(function(order) {
+		// 	//update order status
+		// 	order.set('status', Karazy.constants.Order.RECEIVED);
+		// 	order.getData(true);
+
+		// 	//persist changes
+		// 	// order.save({
+		// 	// 	params: {
+		// 	// 		pathId: loginCtr.getAccount().get('businessId'),
+		// 	// 	},
+		// 	// 	success: function(record, operation) {
+		// 	// 		console.log('order confirmed');
+		// 	// 	},
+		// 	// 	failure: function(record, operation) {
+		// 	// 		order.set('status', Karazy.constants.Order.PLACED);
+		// 	// 		Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('errorSpotDetailOrderSave'), Ext.emptyFn);
+		// 	// 	}
+		// 	// });
+
+		// 	//same approach as in eatSense App. Magic lies in getRawJsonData()
+		// 	//still kind of a workaround
+		// 	Ext.Ajax.request({				
+	 //    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/orders/'+order.getId(),
+	 //    	    method: 'PUT',    	    
+	 //    	    jsonData: order.getRawJsonData(),
+	 //    	    scope: this,
+	 //    	    success: function(response) {
+	 //    	    	console.log('order %s confirmed', order.getId());
+	 //    	    },
+	 //    	    failure: function(response) {
+	 //    	    	order.set('status', prevStatus);
+	 //    	    	me.getApplication().handleServerError({
+		// 					'error': {
+		// 						'status': response.status,
+		// 						'statusText': response.statusText
+		// 					}, 
+		// 					'forceLogout': {403: true}, 
+		// 					'hideMessage':false
+		// 					// 'message': Karazy.i18n.translate('errorSpotDetailOrderSave')
+		// 			});
+		//    	    }
+		// 	});
+		// });
 
 	},
 	/**

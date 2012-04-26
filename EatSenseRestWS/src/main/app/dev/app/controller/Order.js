@@ -143,14 +143,6 @@
 			if(btnId=='yes') {
 				//workaround, because view stays masked after switch to menu
 				Ext.Msg.hide();
-
-				// activeCheckIn.orders().each(function(order) {
-				// 	Ext.Ajax.request({				
-			 //    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-			 //    	    method: 'DELETE'
-			 //    	});
-				// });
-
 				Ext.Ajax.request({				
 			    	    url: Karazy.config.serviceUrl+'/c/checkins/'+activeCheckIn.get('userId')+'/cart/',
 			    	    method: 'DELETE',
