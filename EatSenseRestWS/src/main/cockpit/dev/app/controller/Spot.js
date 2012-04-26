@@ -346,7 +346,7 @@ Ext.define('EatSense.controller.Spot', {
 						if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
 							//update status only if this is the active customer
 							me.updateCustomerStatusPanel(updatedCheckIn);
-							if(action = 'confirm-orders') {
+							if(action == 'confirm-orders') {
 								orders.each(function(order) {
 									order.set('status', Karazy.constants.Order.RECEIVED);
 								});
@@ -427,7 +427,7 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 	/**
-	*	Updates spotdetail view when a new/changed order.
+	*	Updates spotdetail view with a new/changed order.
 	*
 	*/
 	updateSpotDetailOrderIncremental: function(action, updatedOrder) {
@@ -449,12 +449,13 @@ Ext.define('EatSense.controller.Spot', {
 				} else if(action == 'update') {
 					console.log('order id %s update channel message received', updatedOrder.id);
 					oldOrder = store.getById(updatedOrder.id);
+					//TODO set data and don't remove would be a better way. Test it!
 					if(oldOrder) {
-						store.   (oldOrder);
-					}
-					store.add(updatedOrder);
+						// oldOrder.setData(updatedOrder);
+						store.remove(oldOrder);
+					} 
+					store.add(updatedOrder);										
 				}
-
 				//update total sum 
 				me.updateCustomerTotal(store.getData().items);
 			}
