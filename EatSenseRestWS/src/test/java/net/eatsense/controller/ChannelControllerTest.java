@@ -638,7 +638,7 @@ public class ChannelControllerTest {
 		Optional<Integer> timeout = Optional.of(100);
 		when(business.getId()).thenReturn(businessId);
 		when(channelService.createChannel(ctr.buildCockpitClientId(businessId, clientId), timeout.get())).thenReturn("newclienttoken");
-				
+		
 		//#2 Request token with valid uid ...
 		
 		String result = ctr.createCockpitChannel(business, clientId, timeout);

@@ -60,8 +60,7 @@ public class ChannelController {
 	 * @return
 	 */
 	public String createCockpitChannel(long businessId, String clientId) {
-		checkArgument(businessId != 0, "businessId was 0");
-		return createCockpitChannel(businessId, clientId, null);
+		return createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
 	}
 	
 	/**
@@ -73,7 +72,7 @@ public class ChannelController {
 	 * @return the token to send to the client
 	 */
 	public String createCockpitChannel(Business business, String clientId) throws ChannelFailureException {
-		return createCockpitChannel(business, clientId, null);
+		return createCockpitChannel(business, clientId, Optional.<Integer>absent());
 	}
 	
 	/**

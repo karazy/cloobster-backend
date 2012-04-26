@@ -40,22 +40,16 @@ public class BusinessesResource{
 
 	private BusinessRepository businessRepo;
 	private DummyDataDumper ddd;
-	private MenuController menuCtrl;
 	private ImportController importCtrl;
-	private OrderController orderCtrl;
-	private BillController billCtrl;
 
 	@Context
 	HttpServletRequest servletRequest;
 	
 	@Inject
-	public BusinessesResource(BusinessRepository repo, DummyDataDumper ddd, MenuController menuCtr, ImportController importCtr, OrderController orderCtr, BillController billCtr) {
+	public BusinessesResource(BusinessRepository repo, DummyDataDumper ddd, ImportController importCtr) {
 		this.businessRepo = repo;
-		this.menuCtrl = menuCtr;
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
-		this.orderCtrl = orderCtr;
-		this.billCtrl = billCtr;
 	}
 
 	/**

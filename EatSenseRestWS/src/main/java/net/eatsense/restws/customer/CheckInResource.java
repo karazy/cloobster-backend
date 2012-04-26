@@ -56,8 +56,7 @@ public class CheckInResource {
 		this.businessCtrlProvider = businessCtrl;
 		this.channelCtrlProvider = channelCtrl;
 	}
-	
-	
+
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
