@@ -220,8 +220,11 @@ public class MessageController {
 		// Send update messages.
 		channelCtrl.sendMessages(event.getBusiness(), messages);
 		// If we cancel the order, let the checkedin customer know.
-		if(event.getOrder().getStatus() == OrderStatus.CANCELED && event.getCheckIn().getChannelId() != null)
+		if(event.getOrder().getStatus() == OrderStatus.CANCELED && event.getCheckIn().getChannelId() != null) {
+			orderMessage = new MessageDTO("order","delete",orderData );
 			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), orderMessage);
+		}
+			
 	}
 
 	@Subscribe
