@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +27,9 @@ import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
-import net.eatsense.event.UpdateCartEvent;
+import net.eatsense.event.ConfirmAllOrdersEvent;
+import net.eatsense.event.MultiUpdateEvent;
+import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.BusinessRepository;
@@ -44,9 +47,11 @@ import net.eatsense.representation.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
 
@@ -98,18 +103,17 @@ public class OrderController {
 	 * @param checkIn 
 	 */
 	public void deleteOrder(Business business, Order order, CheckIn checkIn) {
-		if(order == null) {
-			throw new IllegalArgumentException("Unable to delete order, order is null");
-		}
-		if(checkIn == null)
-			throw new IllegalArgumentException("Unable to delete order, checkin is null");
-		if(order.getCheckIn().getId() != checkIn.getId())
-			throw new OrderFailureException("Unable to delete order, checkIn does not own the order");
-		if(order.getStatus() != OrderStatus.CART) {
-			throw new OrderFailureException("Unable to delete order, order already PLACED.");
-		}
-		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
-		orderRepo.ofy().delete(order);
+		checkNotNull(order, "order was null");
+		checkNotNull(order.getId(), "order id was null");
+		checkNotNull(checkIn, "checkIn was null");
+		checkNotNull(checkIn.getId(), "checkIn id was null");
+		checkArgument(order.getStatus() == OrderStatus.CART, "order status expected to be cart");
+		checkArgument(order.getCheckIn().getId() == checkIn.getId(), "order expected to belong to checkin");
+
+		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
+		keysToDelete.addAll(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
+		keysToDelete.add(order.getKey());
+		orderRepo.ofy().delete(keysToDelete);
 	}
 	
 	/**
@@ -158,7 +162,7 @@ public class OrderController {
 		
 		Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 		// If we have no older request in the database ...
-		UpdateCartEvent updateEvent = new UpdateCartEvent(checkIn);
+		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn);
 		if( oldestRequest == null ) {
 			updateEvent.setNewSpotStatus(OrderStatus.PLACED.toString());
 		}
@@ -692,7 +696,7 @@ public class OrderController {
 				// If the spot status needs to be updated ...
 				if(!oldSpotStatus.equals(newSpotStatus)) {
 					updateOrderEvent.setNewSpotStatus(newSpotStatus);
-				}	
+				}
 				
 				// If the payment hasnt already been requested and the checkin status has changed ...  
 				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
@@ -721,5 +725,67 @@ public class OrderController {
 		}
 
 		return orderData; //transform.orderToDto( order );
+	}
+
+	public void confirmPlacedOrdersForCheckIn(Business business, long checkInId) {
+		checkNotNull(business, "business was null");
+		checkNotNull(business.getId(), "business id was null");
+		checkArgument(checkInId != 0, "checkInId was 0");
+		
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getById(checkInId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("unknown checkInId", e);
+		}
+		
+		List<Order> orders = orderRepo.query().ancestor(business.getKey())
+				.filter("checkIn", checkIn.getKey())
+				.filter("status", OrderStatus.PLACED.toString()).list();
+		
+		if(orders.isEmpty()) {
+			logger.info("No orders placed for checkIn {}, returning.", checkInId);
+			return;
+		}
+		// Update status of all orders.
+		for (Order order : orders) {
+			order.setStatus(OrderStatus.RECEIVED);
+		}
+		
+		// Get all pending requests sorted by oldest first.
+		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
+		List<Key<Request>> requestsToDelete = new ArrayList<Key<Request>>();
+		// Save the current assumed spot status for reference.
+		String oldSpotStatus = requests.get(0).getStatus();
+		
+		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
+			Request request = iterator.next();
+			if(request.getType() == RequestType.ORDER &&  request.getCheckIn().getId() == checkIn.getId().longValue()) {
+				requestsToDelete.add(request.getKey());
+				iterator.remove();
+			}
+		}
+		ConfirmAllOrdersEvent confirmAllEvent = new ConfirmAllOrdersEvent(checkIn);
+		
+		String newSpotStatus;
+		// Save the status of the next request in line, if there is one.
+		if( !requests.isEmpty()) {
+			newSpotStatus = requests.get(0).getStatus();
+		}
+		else
+			newSpotStatus = CheckInStatus.CHECKEDIN.toString();
+		
+		// If the spot status needs to be updated ...
+		if(!oldSpotStatus.equals(newSpotStatus)) {
+			confirmAllEvent.setNewSpotStatus(newSpotStatus);
+		}
+		confirmAllEvent.setNewCheckInStatus(CheckInStatus.CHECKEDIN.toString());
+		checkIn.setStatus(CheckInStatus.CHECKEDIN);
+		checkInRepo.saveOrUpdate(checkIn);
+		
+		requestRepo.ofy().delete(requestsToDelete);
+		orderRepo.saveOrUpdate(orders);
+		
+		eventBus.post(confirmAllEvent);
 	}
 }

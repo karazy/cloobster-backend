@@ -278,7 +278,7 @@ public class OrderControllerTest {
 		try {
 			orderCtrl.deleteOrder(business, placedOrder , checkIn);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(OrderFailureException.class));
+			assertThat(e, instanceOf(IllegalArgumentException.class));
 		}				
 	}
 	

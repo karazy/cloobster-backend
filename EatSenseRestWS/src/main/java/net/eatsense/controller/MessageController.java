@@ -8,14 +8,16 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.event.ConfirmAllOrdersEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
+import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateBillEvent;
-import net.eatsense.event.UpdateCartEvent;
+import net.eatsense.event.MultiUpdateEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -53,7 +55,28 @@ public class MessageController {
 	}
 	
 	@Subscribe
-	public void sendUpdateCartMessages(UpdateCartEvent event) {
+	public void sendConfirmAllOrdersMessages(ConfirmAllOrdersEvent event) {
+		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
+		
+		if(event.getNewSpotStatus().isPresent()) {
+			// Add a message with updated spot status to the package.
+			SpotStatusDTO spotData = new SpotStatusDTO();
+			spotData.setId(event.getCheckIn().getSpot().getId());
+			spotData.setStatus(event.getNewSpotStatus().get());
+			messages.add(new MessageDTO("spot","update",spotData));
+		}
+		CheckInStatusDTO statusDto = transform.toStatusDto(event.getCheckIn());
+		if(event.getNewCheckInStatus().isPresent()) {
+			// ... and add a message with updated checkin status to the package.
+			messages.add(new MessageDTO("checkin","update",statusDto));
+		}
+		messages.add(new MessageDTO("checkin","confirm-orders",statusDto));
+		// Send update messages.
+		channelCtrl.sendMessages(businessRepo.getByKey(event.getCheckIn().getBusiness()), messages);
+	}
+	
+	@Subscribe
+	public void sendPlaceAllOrdersMessages(PlaceAllOrdersEvent event) {
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		
 		if(event.getNewSpotStatus().isPresent()) {

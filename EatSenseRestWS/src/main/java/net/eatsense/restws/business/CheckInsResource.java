@@ -13,10 +13,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class CheckInsResource {
@@ -25,10 +27,12 @@ public class CheckInsResource {
 	private ResourceContext resourceContext;
 	
 	private Business business;
+	private final Provider<OrderController> orderCtrlProvider;
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInController) {
+	public CheckInsResource(CheckInController checkInController, Provider<OrderController> orderControllerProvider) {
 		super();
+		this.orderCtrlProvider = orderControllerProvider;
 		this.checkInController = checkInController;
 	}
 
@@ -50,6 +54,12 @@ public class CheckInsResource {
 	@Produces("application/json; charset=UTF-8")
 	public CheckInStatusDTO updateCheckin(@PathParam("checkInId") Long checkInId, CheckInStatusDTO checkInData) {
 		return checkInController.updateCheckInAsBusiness(business, checkInId, checkInData);
+	}
+	
+	@PUT
+	@Path("{checkInId}/cart")
+	public void updateCheckInOrders(@PathParam("checkInId") long checkInId) {
+		orderCtrlProvider.get().confirmPlacedOrdersForCheckIn(business, checkInId);
 	}
 
 	public void setBusiness(Business business) {
