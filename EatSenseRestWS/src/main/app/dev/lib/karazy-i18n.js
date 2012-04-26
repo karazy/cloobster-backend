@@ -1,17 +1,19 @@
 /*Karazy namespace. Create if not exists.*/
-var Karazy = (Karazy) ? Karazy : {};
+var Karazy = (Karazy) ? Karazy : {},
+	requires = {
+		'Karazy.config': Karazy.config, 
+		'Karazy.constants': Karazy.constants
+	};
 
 /**
  *  Karazy LocaleManager Singleton 
  */
 Karazy.i18n = (function() {
-	
-	if(!Karazy.config) {
-		console.log('Some functions of this class may need Karazy.config to properly work. Make sure inclusion order is correct.');
-	}
-	
-	if(!Karazy.constants) {
-		console.log('Some functions of this class may need Karazy.constants to properly work. Make sure inclusion order is correct.');
+
+	for(precondition in requires) {
+		if(!requires[precondition]) {
+			console.log('Some functions of this class may need %s to properly work. Make sure inclusion order is correct.', precondition);
+		}
 	}
 	
 	//private members

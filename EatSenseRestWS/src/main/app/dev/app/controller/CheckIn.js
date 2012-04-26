@@ -112,7 +112,10 @@ Ext.define('EatSense.controller.CheckIn', {
      	        	    },
      	        	    failure: function(record, operation) {
                             me.getApplication().handleServerError({
-                                'error': operation.error
+                                'error': operation.error,
+                                'message': {
+                                    404: Karazy.i18n.translate('checkInErrorBarcode')
+                                } 
                             }); 
      	        	    },
      	        	    callback: function() {
