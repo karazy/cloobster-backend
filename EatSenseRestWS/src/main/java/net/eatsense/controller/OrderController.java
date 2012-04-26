@@ -7,6 +7,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -347,7 +348,11 @@ public class OrderController {
 			// Filter by status if set.
 			query = query.filter("status", status.toUpperCase());
 		}
-
+		else {
+			// Only retrieve placed or retrieved orders.
+			query.filter("status in", new ArrayList<OrderStatus>(EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED, OrderStatus.CART)));
+		}
+		
 		return query.list();
 	}
 	
