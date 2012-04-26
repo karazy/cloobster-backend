@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
 
 /**
@@ -109,6 +110,31 @@ public class OrderController {
 		}
 		orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
 		orderRepo.ofy().delete(order);
+	}
+	
+	/**
+	 * Delete all orders in the cart for the checkin.
+	 * 
+	 * @param checkIn
+	 */
+	public void deleteCartOrders(CheckIn checkIn) {
+		checkNotNull(checkIn, "checkIn was null");
+		checkNotNull(checkIn.getId(), "checkIn id was null");
+		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
+		Objectify ofy = orderRepo.ofy();
+
+		List<Key<Order>> orderKeys = ofy.query(Order.class).ancestor(checkIn.getBusiness())
+				.filter("checkIn", checkIn.getKey())
+				.filter("status", OrderStatus.CART.toString()).listKeys();
+		
+		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
+		for (Key<Order> orderKey : orderKeys) {
+			keysToDelete.addAll(orderChoiceRepo.query().ancestor(orderKey).listKeys());
+		}
+		
+		keysToDelete.addAll(orderKeys);
+		
+		ofy.delete(keysToDelete);
 	}
 	
 	/**
@@ -610,6 +636,7 @@ public class OrderController {
 	
 		CheckIn checkIn = checkInRepo.getByKey(order.getCheckIn());
 		orderData.setCheckInId(checkIn.getId());
+		orderData.setOrderTime(order.getOrderTime());
 		
 		if(!order.getStatus().isTransitionAllowed(orderData.getStatus())) {
 			throw new IllegalArgumentException(String.format("Order cannot be updated, change from %s to %s forbidden.",

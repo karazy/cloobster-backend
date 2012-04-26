@@ -112,6 +112,16 @@ public class CheckInResource {
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}
+	
+	@DELETE
+	@Path("cart")
+	@RolesAllowed({"guest"}) 
+	public void deleteAllCartOrders() {
+		if(authenticated)
+			orderCtrlProvider.get().deleteCartOrders(checkIn);
+		else
+			throw new WebApplicationException(Status.FORBIDDEN);
+	}
 
 	public boolean isAuthenticated() {
 		return authenticated;

@@ -59,7 +59,7 @@ public class ChannelController {
 	 * @param clientId
 	 * @return
 	 */
-	public String createCockpitChannel(long businessId, String clientId) {
+	public String createCockpitChannel(long businessId, String clientId) throws ChannelFailureException {
 		return createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
 	}
 	
