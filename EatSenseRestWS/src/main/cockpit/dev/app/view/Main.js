@@ -21,6 +21,14 @@ Ext.define('EatSense.view.Main', {
 				xtype: 'spacer'
 			},
 			{
+				xtype: 'label',
+				itemId: 'connectionStatus',
+				tpl: 'Status: {0}'
+			},
+			{
+				xtype: 'spacer'
+			},
+			{
 				xtype: 'button',
 				iconCls: 'delete',
     			iconMask: true,

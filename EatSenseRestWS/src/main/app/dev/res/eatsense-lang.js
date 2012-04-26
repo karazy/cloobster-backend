@@ -48,7 +48,7 @@ var translation = {
 		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
 		//Order
 		"orderInvalid" : "Bitte überprüfe deine Auswahl",
-		"orderPlacer" : "Bestellung im Warenkorb",
+		"orderPlaced" : "Bestellung im Warenkorb",
 		"cartEmpty" : "Du hast noch keine Bestellung getätigt.",
 		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
 		"orderRemoved" : "Bestellung entfernt",

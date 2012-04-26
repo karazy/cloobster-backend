@@ -6,7 +6,10 @@
 Ext.define('EatSense.controller.Message', {
 	extend: 'Ext.app.Controller',
 	config: {
-
+		refs: 
+		{
+			connectionStatus: 'toolbar[docked=bottom] #connectionStatus'
+		}
 	},
 
 
@@ -113,8 +116,19 @@ Ext.define('EatSense.controller.Message', {
 				messageHandler: me.processMessages,
 				requestTokenHandler: me.requestNewToken,
 				messageHandlerScope: me,
-				requestTokenHandlerScope: me
+				requestTokenHandlerScope: me,
+				statusHandler: me.handleStatus
 			});
 		});
 	}, 
+	/**
+	*	Called when the connection status changes.
+	*
+	*/
+	handleStatus: function(connectionStatus) {
+		var statusLabel = this.getConnectionStatus();
+		//render status in UI
+		console.log('connection status changed to %s', connectionStatus);
+		statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
+	}
 });
