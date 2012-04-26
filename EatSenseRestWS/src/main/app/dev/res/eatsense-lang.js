@@ -56,6 +56,7 @@ var translation = {
 		"amount" : "Menge",
 		"orderSubmit" : "Bestellung abgeschickt ...<br/> Guten Appetit!",
 		"productCartBt" : "In den Warenkorb",
+		"orderCanceled" : "{0} wurde storniert.",
 		//Cart
 		"cartviewTitle" : "Warenkorb",
 		"cartTabBt" : "Warenkorb",

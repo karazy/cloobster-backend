@@ -786,6 +786,23 @@
 			} else {
 				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
 			}
+		} else if(action == 'delete') {
+			console.log('delete order with id %s', updatedOrder.id);
+
+			oldOrder = orderStore.getById(updatedOrder.id);
+			if(oldOrder) {
+				orderStore.remove(oldOrder);
+
+				Ext.Msg.show({
+					title : Karazy.i18n.translate('hint'),
+					message : Karazy.i18n.translate('orderCanceled', oldOrder.getProduct().get('name')),
+					buttons : []
+				});
+				
+				Ext.defer((function() {
+					Ext.Msg.hide();
+				}), Karazy.config.msgboxHideTimeout, this);
+			}
 
 		}
 	}
