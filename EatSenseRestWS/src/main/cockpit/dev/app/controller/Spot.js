@@ -450,7 +450,7 @@ Ext.define('EatSense.controller.Spot', {
 					console.log('order id %s update channel message received', updatedOrder.id);
 					oldOrder = store.getById(updatedOrder.id);
 					if(oldOrder) {
-						store.remove(oldOrder);
+						store.   (oldOrder);
 					}
 					store.add(updatedOrder);
 				}
@@ -691,7 +691,7 @@ Ext.define('EatSense.controller.Spot', {
     	    jsonData: order.getRawJsonData(),
     	    scope: this,
     	    success: function(response) {
-    	    	console.log('order confirmed');
+    	    	console.log('order %s canceled', order.getId());
     	    	me.updateCustomerTotal(orderStore.getData().items);
     	    },
     	    failure: function(response) {

@@ -493,13 +493,6 @@ Ext.define('EatSense.controller.CheckIn', {
             menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
-            //remove all orders in cart and refresh badge text
-            // if(this.getActiveCheckIn())
-            // {
-            //     this.getActiveCheckIn().orders().removeAll();  
-                
-            // }
-
             orderCtr.refreshCartBadgeText();
 
             this.getAppState().set('checkInId', null);
