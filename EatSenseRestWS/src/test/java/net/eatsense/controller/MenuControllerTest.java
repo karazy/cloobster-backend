@@ -101,10 +101,10 @@ public class MenuControllerTest {
 				
 				for(ProductDTO p : menu.getProducts()) {
 					assertThat(p.getName(), is("Classic Burger") );
-					assertThat(p.getChoices().size(), is(2));
+					assertThat(p.getChoices().size(), is(4));
 					
 					for(ChoiceDTO c : p.getChoices())  {
-						assertThat(c.getText(), anyOf(is("Wählen sie einen Gargrad:"), is("Extras")));
+						assertThat(c.getText(), anyOf(is("Wählen sie einen Gargrad:"), is("Extras"), is("Menü"), is("Menü Beilage")));
 						assertThat(c.getOverridePrice(), is(ChoiceOverridePrice.NONE));
 						
 						if(c.getText().equals("Wählen sie einen Gargrad:")) {

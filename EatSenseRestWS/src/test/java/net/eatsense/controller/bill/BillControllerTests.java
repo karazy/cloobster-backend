@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ CreateBillTest.class, CalculateTotalPriceTest.class, UpdateBillTest.class })
+@SuiteClasses({ CreateBillTest.class, CalculateTotalPriceTest.class, UpdateBillTest.class, GetBillTest.class })
 public class BillControllerTests {
 
 }
