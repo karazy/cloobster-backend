@@ -423,7 +423,7 @@ public class CheckInController {
 		List<Key<Order>> orderKeys = ofy.query(Order.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).listKeys();
 		for (Key<Order> orderKey : orderKeys) {
 			// ... , delete the choices for the order ...
-			orderRepo.ofy().delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
+			ofy.delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
 		}
 		// ... and delete all orders for the checkin.
 		ofy.delete(orderKeys);
