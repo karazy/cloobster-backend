@@ -95,25 +95,160 @@ public class OrderController {
 		this.transform = trans;
 	}
 
+	private int checkOptions(ChoiceDTO choiceDto, Choice originalChoice) throws IllegalArgumentException {
+		int selected = countSelected(choiceDto);
+		// Validate choice selection
+		if(selected < originalChoice.getMinOccurence() ) {
+			throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
+		}
+		
+		if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
+			throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
+		}
+		
+		return selected;
+	}
+	
+	public void confirmPlacedOrdersForCheckIn(Business business, long checkInId) {
+		checkNotNull(business, "business was null");
+		checkNotNull(business.getId(), "business id was null");
+		checkArgument(checkInId != 0, "checkInId was 0");
+		
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getById(checkInId);
+		} catch (NotFoundException e) {
+			throw new IllegalArgumentException("unknown checkInId", e);
+		}
+		
+		List<Order> orders = orderRepo.query().ancestor(business.getKey())
+				.filter("checkIn", checkIn.getKey())
+				.filter("status", OrderStatus.PLACED.toString()).list();
+		
+		if(orders.isEmpty()) {
+			logger.info("No orders placed for checkIn {}, returning.", checkInId);
+			return;
+		}
+		// Update status of all orders.
+		for (Order order : orders) {
+			order.setStatus(OrderStatus.RECEIVED);
+		}
+		
+		// Get all pending requests sorted by oldest first.
+		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
+		List<Key<Request>> requestsToDelete = new ArrayList<Key<Request>>();
+		// Save the current assumed spot status for reference.
+		String oldSpotStatus = requests.get(0).getStatus();
+		
+		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
+			Request request = iterator.next();
+			if(request.getType() == RequestType.ORDER &&  request.getCheckIn().getId() == checkIn.getId().longValue()) {
+				requestsToDelete.add(request.getKey());
+				iterator.remove();
+			}
+		}
+		ConfirmAllOrdersEvent confirmAllEvent = new ConfirmAllOrdersEvent(checkIn);
+		
+		String newSpotStatus;
+		// Save the status of the next request in line, if there is one.
+		if( !requests.isEmpty()) {
+			newSpotStatus = requests.get(0).getStatus();
+		}
+		else
+			newSpotStatus = CheckInStatus.CHECKEDIN.toString();
+		
+		// If the spot status needs to be updated ...
+		if(!oldSpotStatus.equals(newSpotStatus)) {
+			confirmAllEvent.setNewSpotStatus(newSpotStatus);
+		}
+		confirmAllEvent.setNewCheckInStatus(CheckInStatus.CHECKEDIN.toString());
+		checkIn.setStatus(CheckInStatus.CHECKEDIN);
+		checkInRepo.saveOrUpdate(checkIn);
+		
+		requestRepo.ofy().delete(requestsToDelete);
+		orderRepo.saveOrUpdate(orders);
+		
+		eventBus.post(confirmAllEvent);
+	}
+	
+	private int countSelected(ChoiceDTO choiceDto) {
+		checkNotNull(choiceDto, "choiceDto was null");
+		int selected = 0;
+		for (ProductOption productOption : choiceDto.getOptions()) {
+			if(productOption.getSelected() != null && productOption.getSelected())
+				selected++;
+		}
+		return selected;
+	}
+	
 	/**
-	 * Delete the specified order from the datastore.
+	 * Create a new Order entity with the given data and save it in the datastore;
 	 * 
 	 * @param business
-	 * @param order
-	 * @param checkIn 
+	 * @param checkIn
+	 * @param product
+	 * @param amount
+	 * @param choices
+	 * @param comment
+	 * @return key of the new entity
 	 */
-	public void deleteOrder(Business business, Order order, CheckIn checkIn) {
-		checkNotNull(order, "order was null");
-		checkNotNull(order.getId(), "order id was null");
-		checkNotNull(checkIn, "checkIn was null");
-		checkNotNull(checkIn.getId(), "checkIn id was null");
-		checkArgument(order.getStatus() == OrderStatus.CART, "order status expected to be cart");
-		checkArgument(order.getCheckIn().getId() == checkIn.getId(), "order expected to belong to checkin");
-
-		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
-		keysToDelete.addAll(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
-		keysToDelete.add(order.getKey());
-		orderRepo.ofy().delete(keysToDelete);
+	public Key<Order> createAndSaveOrder(Key<Business> business, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
+		Key<Order> orderKey = null;
+		Order order = new Order();
+		order.setAmount(amount);
+		order.setBusiness(business);
+		order.setCheckIn(checkIn);
+		order.setComment(comment);
+		order.setStatus(OrderStatus.CART);
+		order.setProduct(product);
+		order.setOrderTime(new Date());
+		
+		// validate order object
+		Set<ConstraintViolation<Order>> violations = validator.validate(order);
+		
+		if(violations.isEmpty()) {
+			orderKey = orderRepo.saveOrUpdate(order);
+		}
+		else { /// handle validation errors ...
+			StringBuilder sb = new StringBuilder();
+			sb.append("Order validation failed:\n");
+			//build an error message containing all violation messages
+			for (ConstraintViolation<Order> violation : violations) {
+				sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
+			}
+			String message = sb.toString();
+			logger.error(message);
+			throw new IllegalArgumentException(message);
+		}
+		
+		if(choices != null) {
+			for (OrderChoice orderChoice : choices) {
+				// set parent key
+				orderChoice.setOrder(orderKey);
+				
+				// validate choices
+				Set<ConstraintViolation<OrderChoice>> choiceViolations = validator.validate(orderChoice);
+				
+				if(choiceViolations.isEmpty()) {
+					if ( orderChoiceRepo.saveOrUpdate(orderChoice) == null ) {
+						throw new RuntimeException("Error saving choices for order: " +orderKey.toString());
+					}
+				}
+				else { // handle validation errors ...
+					StringBuilder sb = new StringBuilder();
+					sb.append("Choice validation failed:\n");
+					
+					//build an error message containing all violation messages
+					for (ConstraintViolation<OrderChoice> violation : choiceViolations) {
+						sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
+					}
+					String message = sb.toString();
+					throw new IllegalArgumentException(message);
+				}	
+			}
+		}
+		
+		return orderKey;
 	}
 	
 	/**
@@ -141,6 +276,239 @@ public class OrderController {
 		ofy.delete(keysToDelete);
 	}
 	
+	/**
+	 * Delete the specified order from the datastore.
+	 * 
+	 * @param business
+	 * @param order
+	 * @param checkIn 
+	 */
+	public void deleteOrder(Business business, Order order, CheckIn checkIn) {
+		checkNotNull(order, "order was null");
+		checkNotNull(order.getId(), "order id was null");
+		checkNotNull(checkIn, "checkIn was null");
+		checkNotNull(checkIn.getId(), "checkIn id was null");
+		checkArgument(order.getStatus() == OrderStatus.CART, "order status expected to be cart");
+		checkArgument(order.getCheckIn().getId() == checkIn.getId(), "order expected to belong to checkin");
+
+		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
+		keysToDelete.addAll(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
+		keysToDelete.add(order.getKey());
+		orderRepo.ofy().delete(keysToDelete);
+	}
+
+	/**
+	 * Get the order entity for a given orderId of a business.
+	 * 
+	 * @param business
+	 * @param orderId
+	 * @return the Order entity, if existing
+	 */
+	public Order getOrder(Business business, Long orderId) {
+		if(business == null) {
+			logger.error("Unable to get order, business is null (orderId={})", orderId);
+			return null;
+		}
+			
+		try {
+			return orderRepo.getById(business.getKey(), orderId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Unable to get order, order or business id unknown", e);
+			return null;
+		}
+	}
+	
+	/**
+	 * Get the data for a specified order of a business.
+	 * 
+	 * @param business
+	 * @param orderId
+	 * @return
+	 */
+	public OrderDTO getOrderAsDTO(Business business, Long orderId) {
+		return transform.orderToDto( getOrder(business, orderId) );
+	}
+	
+	/**
+	 * Get orders saved for the given checkin and filter by status if set.
+	 * 
+	 * @param business
+	 * @param checkIn
+	 * @param status 
+	 * @return
+	 */
+	public List<Order> getOrders(Business business, CheckIn checkIn, String status) {
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
+		if(checkIn != null) {
+			// Filter by checkin if set.
+			query = query.filter("checkIn", checkIn.getKey()); 
+		}
+		if(status != null && !status.isEmpty()) {
+			// Filter by status if set.
+			query = query.filter("status", status.toUpperCase());
+		}
+
+		return query.list();
+	}
+	
+	/**
+	 * Get all order data 
+	 * 
+	 * @param business
+	 * @param checkIn
+	 * @param status
+	 * @return
+	 */
+	public Collection<OrderDTO> getOrdersAsDto(Business business, CheckIn checkIn, String status) {
+		return transform.ordersToDto(getOrders( business, checkIn, status));
+	}
+	
+	/**
+	 * Return all orders not in the cart for the given spot.
+	 * 
+	 * @param business
+	 * @param spotId
+	 * @param checkInId filter by checkin if not null
+	 * @return list of the orders found
+	 */
+	public List<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
+		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business)
+				.filter("status !=", OrderStatus.CART.toString());
+		
+		if(checkInId != null) {
+			query = query.filter("checkIn", CheckIn.getKey(checkInId));
+		}
+
+		return query.list();
+	}
+	
+	public Collection<OrderDTO> getOrdersBySpotAsDto(Business business, Long spotId, Long checkInId) {
+		return transform.ordersToDto(getOrdersBySpot( business, spotId, checkInId));
+	}
+
+	/**
+	 * Create a new Order entity with status CART and save in the datastore.
+	 * 
+	 * @param business
+	 * @param checkIn
+	 * @param orderData
+	 * @return id of the order
+	 */
+	public Long placeOrderInCart(Business business, CheckIn checkIn, OrderDTO orderData) {
+		if(business == null) {
+			throw new IllegalArgumentException("Order cannot be placed, business is null");
+		}
+		if(checkIn == null) {
+			throw new IllegalArgumentException("Order cannot be placed, checkin is null");
+		}
+		
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
+			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
+		}
+		
+		if( orderData.getStatus() != OrderStatus.CART ) {
+			throw new OrderFailureException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
+		}
+
+		// Check that the order will be placed at the correct business.
+		if(business.getId() != checkIn.getBusiness().getId()) {
+			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
+		}
+		
+		// Check if the product to be ordered exists	
+		Product product;
+		try {
+			product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new IllegalArgumentException("Order cannot be placed, productId unknown",e);
+		}
+		Key<Product> productKey = product.getKey();
+		Long orderId = null;
+		List<OrderChoice> choices = null;
+		if(orderData.getProduct().getChoices() != null) {
+			choices = new ArrayList<OrderChoice>();
+			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
+			
+			HashMap<Long, ChoiceDTO> activeChoiceMap = new HashMap<Long, ChoiceDTO>();
+			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
+				int selected = 0;
+				//TODO check for parent in the originalchoice
+				if(choiceDto.getParent() == null) {
+					OrderChoice choice = new OrderChoice();
+					
+					Choice originalChoice;
+					try {
+						originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
+					} catch (com.googlecode.objectify.NotFoundException e) {
+						throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
+					}
+					if(choiceDto.getOptions() != null ) {
+						selected = checkOptions(choiceDto, originalChoice);
+						
+						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
+					}
+					
+					choice.setChoice(originalChoice);
+										
+					choices.add(choice);
+				}
+				else {
+					selected = countSelected(choiceDto);
+					childChoiceDtos.add(choiceDto);
+				}
+				
+				if(!activeChoiceMap.containsKey(choiceDto.getId())) {
+					if(selected > 0)
+						activeChoiceMap.put(choiceDto.getId(), choiceDto);
+				}
+			}
+			
+			for (ChoiceDTO choiceDto : childChoiceDtos) {
+				Choice originalChoice;
+				try {
+					originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
+				} catch (com.googlecode.objectify.NotFoundException e) {
+					throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
+				}
+				// Check that the parent choice has been selected.
+				if(activeChoiceMap.containsKey(choiceDto.getParent())) {
+					if(choiceDto.getOptions() != null ) {
+						checkOptions(choiceDto, originalChoice);
+						
+						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
+					}
+				}
+				OrderChoice choice = new OrderChoice();
+				
+				
+				
+				
+				choice.setChoice(originalChoice);
+									
+				choices.add(choice);
+			}
+		}
+		
+
+		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());		
+		if(orderKey != null) {
+			// order successfully saved
+			orderId = orderKey.getId();
+		}
+		
+		return orderId;
+	}
+
+	/**
+	 * Create data transfer object from order entity.
+	 * 
+	 * @param order
+	 * @return order data transfer object
+	 */
+	public OrderDTO toDto( Order order ) {
+		return transform.orderToDto( order );
+	}
+
 	/**
 	 * @param checkIn
 	 */
@@ -195,7 +563,7 @@ public class OrderController {
 		
 		eventBus.post(updateEvent);
 	}
-	
+
 	/**
 	 * <p>
 	 * Updates a specific order (identified by orderId)<br>
@@ -318,312 +686,6 @@ public class OrderController {
 
 		return orderData;
 	}
-	
-	/**
-	 * Get the data for a specified order of a business.
-	 * 
-	 * @param business
-	 * @param orderId
-	 * @return
-	 */
-	public OrderDTO getOrderAsDTO(Business business, Long orderId) {
-		return transform.orderToDto( getOrder(business, orderId) );
-	}
-	
-	/**
-	 * Create data transfer object from order entity.
-	 * 
-	 * @param order
-	 * @return order data transfer object
-	 */
-	public OrderDTO toDto( Order order ) {
-		return transform.orderToDto( order );
-	}
-
-	/**
-	 * Get the order entity for a given orderId of a business.
-	 * 
-	 * @param business
-	 * @param orderId
-	 * @return the Order entity, if existing
-	 */
-	public Order getOrder(Business business, Long orderId) {
-		if(business == null) {
-			logger.error("Unable to get order, business is null (orderId={})", orderId);
-			return null;
-		}
-			
-		try {
-			return orderRepo.getById(business.getKey(), orderId);
-		} catch (com.googlecode.objectify.NotFoundException e) {
-			logger.error("Unable to get order, order or business id unknown", e);
-			return null;
-		}
-	}
-	
-	/**
-	 * Get all order data 
-	 * 
-	 * @param business
-	 * @param checkIn
-	 * @param status
-	 * @return
-	 */
-	public Collection<OrderDTO> getOrdersAsDto(Business business, CheckIn checkIn, String status) {
-		return transform.ordersToDto(getOrders( business, checkIn, status));
-	}
-	
-	/**
-	 * Get orders saved for the given checkin and filter by status if set.
-	 * 
-	 * @param business
-	 * @param checkIn
-	 * @param status 
-	 * @return
-	 */
-	public List<Order> getOrders(Business business, CheckIn checkIn, String status) {
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
-		if(checkIn != null) {
-			// Filter by checkin if set.
-			query = query.filter("checkIn", checkIn.getKey()); 
-		}
-		if(status != null && !status.isEmpty()) {
-			// Filter by status if set.
-			query = query.filter("status", status.toUpperCase());
-		}
-
-		return query.list();
-	}
-	
-	public Collection<OrderDTO> getOrdersBySpotAsDto(Business business, Long spotId, Long checkInId) {
-		return transform.ordersToDto(getOrdersBySpot( business, spotId, checkInId));
-	}
-	
-	/**
-	 * Return all orders not in the cart for the given spot.
-	 * 
-	 * @param business
-	 * @param spotId
-	 * @param checkInId filter by checkin if not null
-	 * @return list of the orders found
-	 */
-	public List<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business)
-				.filter("status !=", OrderStatus.CART.toString());
-		
-		if(checkInId != null) {
-			query = query.filter("checkIn", CheckIn.getKey(checkInId));
-		}
-
-		return query.list();
-	}
-	
-	/**
-	 * Create a new Order entity with status CART and save in the datastore.
-	 * 
-	 * @param business
-	 * @param checkIn
-	 * @param orderData
-	 * @return id of the order
-	 */
-	public Long placeOrderInCart(Business business, CheckIn checkIn, OrderDTO orderData) {
-		if(business == null) {
-			throw new IllegalArgumentException("Order cannot be placed, business is null");
-		}
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Order cannot be placed, checkin is null");
-		}
-		
-		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
-			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
-		}
-		
-		if( orderData.getStatus() != OrderStatus.CART ) {
-			throw new OrderFailureException("Order cannot be placed, unexpected order status: "+orderData.getStatus());
-		}
-
-		// Check that the order will be placed at the correct business.
-		if(business.getId() != checkIn.getBusiness().getId()) {
-			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
-		}
-		
-		// Check if the product to be ordered exists	
-		Product product;
-		try {
-			product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
-		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Order cannot be placed, productId unknown",e);
-		}
-		Key<Product> productKey = product.getKey();
-		Long orderId = null;
-		List<OrderChoice> choices = null;
-		if(orderData.getProduct().getChoices() != null) {
-			choices = new ArrayList<OrderChoice>();
-			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
-			
-			HashMap<Long, ChoiceDTO> activeChoiceMap = new HashMap<Long, ChoiceDTO>();
-			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
-				int selected = 0;
-				//TODO check for parent in the originalchoice
-				if(choiceDto.getParent() == null) {
-					OrderChoice choice = new OrderChoice();
-					
-					Choice originalChoice;
-					try {
-						originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
-					} catch (com.googlecode.objectify.NotFoundException e) {
-						throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
-					}
-					if(choiceDto.getOptions() != null ) {
-						selected = checkOptions(choiceDto, originalChoice);
-						
-						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
-					}
-					
-					choice.setChoice(originalChoice);
-										
-					choices.add(choice);
-				}
-				else {
-					selected = countSelected(choiceDto);
-					childChoiceDtos.add(choiceDto);
-				}
-				
-				if(!activeChoiceMap.containsKey(choiceDto.getId())) {
-					if(selected > 0)
-						activeChoiceMap.put(choiceDto.getId(), choiceDto);
-				}
-			}
-			
-			for (ChoiceDTO choiceDto : childChoiceDtos) {
-				Choice originalChoice;
-				try {
-					originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
-				} catch (com.googlecode.objectify.NotFoundException e) {
-					throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
-				}
-				// Check that the parent choice has been selected.
-				if(activeChoiceMap.containsKey(choiceDto.getParent())) {
-					if(choiceDto.getOptions() != null ) {
-						checkOptions(choiceDto, originalChoice);
-						
-						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
-					}
-				}
-				OrderChoice choice = new OrderChoice();
-				
-				
-				
-				
-				choice.setChoice(originalChoice);
-									
-				choices.add(choice);
-			}
-		}
-		
-
-		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());		
-		if(orderKey != null) {
-			// order successfully saved
-			orderId = orderKey.getId();
-		}
-		
-		return orderId;
-	}
-
-	private int checkOptions(ChoiceDTO choiceDto, Choice originalChoice) throws IllegalArgumentException {
-		int selected = countSelected(choiceDto);
-		// Validate choice selection
-		if(selected < originalChoice.getMinOccurence() ) {
-			throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
-		}
-		
-		if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
-			throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
-		}
-		
-		return selected;
-	}
-
-	private int countSelected(ChoiceDTO choiceDto) {
-		checkNotNull(choiceDto, "choiceDto was null");
-		int selected = 0;
-		for (ProductOption productOption : choiceDto.getOptions()) {
-			if(productOption.getSelected() != null && productOption.getSelected())
-				selected++;
-		}
-		return selected;
-	}
-
-	/**
-	 * Create a new Order entity with the given data and save it in the datastore;
-	 * 
-	 * @param business
-	 * @param checkIn
-	 * @param product
-	 * @param amount
-	 * @param choices
-	 * @param comment
-	 * @return key of the new entity
-	 */
-	public Key<Order> createAndSaveOrder(Key<Business> business, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
-		Key<Order> orderKey = null;
-		Order order = new Order();
-		order.setAmount(amount);
-		order.setBusiness(business);
-		order.setCheckIn(checkIn);
-		order.setComment(comment);
-		order.setStatus(OrderStatus.CART);
-		order.setProduct(product);
-		order.setOrderTime(new Date());
-		
-		// validate order object
-		Set<ConstraintViolation<Order>> violations = validator.validate(order);
-		
-		if(violations.isEmpty()) {
-			orderKey = orderRepo.saveOrUpdate(order);
-		}
-		else { /// handle validation errors ...
-			StringBuilder sb = new StringBuilder();
-			sb.append("Order validation failed:\n");
-			//build an error message containing all violation messages
-			for (ConstraintViolation<Order> violation : violations) {
-				sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
-			}
-			String message = sb.toString();
-			logger.error(message);
-			throw new IllegalArgumentException(message);
-		}
-		
-		if(choices != null) {
-			for (OrderChoice orderChoice : choices) {
-				// set parent key
-				orderChoice.setOrder(orderKey);
-				
-				// validate choices
-				Set<ConstraintViolation<OrderChoice>> choiceViolations = validator.validate(orderChoice);
-				
-				if(choiceViolations.isEmpty()) {
-					if ( orderChoiceRepo.saveOrUpdate(orderChoice) == null ) {
-						throw new RuntimeException("Error saving choices for order: " +orderKey.toString());
-					}
-				}
-				else { // handle validation errors ...
-					StringBuilder sb = new StringBuilder();
-					sb.append("Choice validation failed:\n");
-					
-					//build an error message containing all violation messages
-					for (ConstraintViolation<OrderChoice> violation : choiceViolations) {
-						sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
-					}
-					String message = sb.toString();
-					throw new IllegalArgumentException(message);
-				}	
-			}
-		}
-		
-		return orderKey;
-	}
 
 	/**
 	 * Update method for orders called by the backend.
@@ -725,67 +787,5 @@ public class OrderController {
 		}
 
 		return orderData; //transform.orderToDto( order );
-	}
-
-	public void confirmPlacedOrdersForCheckIn(Business business, long checkInId) {
-		checkNotNull(business, "business was null");
-		checkNotNull(business.getId(), "business id was null");
-		checkArgument(checkInId != 0, "checkInId was 0");
-		
-		CheckIn checkIn;
-		try {
-			checkIn = checkInRepo.getById(checkInId);
-		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("unknown checkInId", e);
-		}
-		
-		List<Order> orders = orderRepo.query().ancestor(business.getKey())
-				.filter("checkIn", checkIn.getKey())
-				.filter("status", OrderStatus.PLACED.toString()).list();
-		
-		if(orders.isEmpty()) {
-			logger.info("No orders placed for checkIn {}, returning.", checkInId);
-			return;
-		}
-		// Update status of all orders.
-		for (Order order : orders) {
-			order.setStatus(OrderStatus.RECEIVED);
-		}
-		
-		// Get all pending requests sorted by oldest first.
-		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
-		List<Key<Request>> requestsToDelete = new ArrayList<Key<Request>>();
-		// Save the current assumed spot status for reference.
-		String oldSpotStatus = requests.get(0).getStatus();
-		
-		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
-			Request request = iterator.next();
-			if(request.getType() == RequestType.ORDER &&  request.getCheckIn().getId() == checkIn.getId().longValue()) {
-				requestsToDelete.add(request.getKey());
-				iterator.remove();
-			}
-		}
-		ConfirmAllOrdersEvent confirmAllEvent = new ConfirmAllOrdersEvent(checkIn);
-		
-		String newSpotStatus;
-		// Save the status of the next request in line, if there is one.
-		if( !requests.isEmpty()) {
-			newSpotStatus = requests.get(0).getStatus();
-		}
-		else
-			newSpotStatus = CheckInStatus.CHECKEDIN.toString();
-		
-		// If the spot status needs to be updated ...
-		if(!oldSpotStatus.equals(newSpotStatus)) {
-			confirmAllEvent.setNewSpotStatus(newSpotStatus);
-		}
-		confirmAllEvent.setNewCheckInStatus(CheckInStatus.CHECKEDIN.toString());
-		checkIn.setStatus(CheckInStatus.CHECKEDIN);
-		checkInRepo.saveOrUpdate(checkIn);
-		
-		requestRepo.ofy().delete(requestsToDelete);
-		orderRepo.saveOrUpdate(orders);
-		
-		eventBus.post(confirmAllEvent);
 	}
 }
