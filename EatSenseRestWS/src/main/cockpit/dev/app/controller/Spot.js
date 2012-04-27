@@ -346,8 +346,12 @@ Ext.define('EatSense.controller.Spot', {
 						if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
 							//update status only if this is the active customer
 							me.updateCustomerStatusPanel(updatedCheckIn);
-							if(action = 'confirm-orders') {
-								orders.each(function(order) {
+							if(action == 'confirm-orders') {
+								orders.queryBy(function(order){
+									if(order.get('status') == Karazy.constants.Order.PLACED) {
+										return true;
+									}
+								}).each(function(order) {
 									order.set('status', Karazy.constants.Order.RECEIVED);
 								});
 							}
@@ -357,11 +361,13 @@ Ext.define('EatSense.controller.Spot', {
 					}
 				} else if (action == "delete") {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
+
 					if(dirtyCheckIn) {
+						console.log('delete checkin with id ' + updatedCheckIn.get('id'));
 						customerIndex = store.indexOf(dirtyCheckIn);
 						store.remove(dirtyCheckIn);	
 						//make sure to load new request so they exist
-						requestCtr.loadRequests();					
+						requestCtr.loadRequests();			
 
 						//clear status panel if deleted checkin is activeCustomer or select another checkin
 						if(me.getActiveCustomer() && updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
@@ -381,8 +387,6 @@ Ext.define('EatSense.controller.Spot', {
 								me.updateCustomerPaymentMethod();
 							}
 						}						
-					} else { 
-						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
 					}
 				} else if(action = 'update-orders') {
 					//update all orders
@@ -427,7 +431,7 @@ Ext.define('EatSense.controller.Spot', {
 		}
 	},
 	/**
-	*	Updates spotdetail view when a new/changed order.
+	*	Updates spotdetail view with a new/changed order.
 	*
 	*/
 	updateSpotDetailOrderIncremental: function(action, updatedOrder) {
@@ -449,12 +453,13 @@ Ext.define('EatSense.controller.Spot', {
 				} else if(action == 'update') {
 					console.log('order id %s update channel message received', updatedOrder.id);
 					oldOrder = store.getById(updatedOrder.id);
+					//TODO set data and don't remove would be a better way. Test it!
 					if(oldOrder) {
+						// oldOrder.setData(updatedOrder);
 						store.remove(oldOrder);
-					}
-					store.add(updatedOrder);
+					} 
+					store.add(updatedOrder);										
 				}
-
 				//update total sum 
 				me.updateCustomerTotal(store.getData().items);
 			}
@@ -691,7 +696,7 @@ Ext.define('EatSense.controller.Spot', {
     	    jsonData: order.getRawJsonData(),
     	    scope: this,
     	    success: function(response) {
-    	    	console.log('order confirmed');
+    	    	console.log('order %s canceled', order.getId());
     	    	me.updateCustomerTotal(orderStore.getData().items);
     	    },
     	    failure: function(response) {
@@ -712,6 +717,7 @@ Ext.define('EatSense.controller.Spot', {
 	cancelAll: function(button, event) {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
+				requestCtr = this.getApplication().getController('Request'),
 				orders = Ext.StoreManager.lookup('orderStore'),
 				checkins = Ext.StoreManager.lookup('checkInStore'),
 				customerList = this.getSpotDetailCustomerList(),
@@ -751,6 +757,7 @@ Ext.define('EatSense.controller.Spot', {
 									'forceLogout': {403: true}
 								});
 							} else {
+								requestCtr.removeRequestsForCustomerById(me.getActiveCustomer());
 								//although a message will be received we update the view directly
 								checkins.remove(me.getActiveCustomer());
 								if(checkins.getCount() > 0) {

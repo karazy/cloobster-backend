@@ -512,10 +512,10 @@
 	 */
 	refreshCartBadgeText: function() {
 		var cartButton = this.getLoungeTabBar().getAt(1),
-			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 			badgeText;
 		
-		badgeText = (orders.data.length > 0) ? orders.data.length : "";
+		badgeText = (!checkIn) ? "" : (checkIn.orders().getCount() > 0) ? checkIn.orders().getCount() : "";
 		
 		cartButton.setBadgeText(badgeText);
 	},
@@ -695,9 +695,10 @@
 	 * Called when user checks in and wants to leave without issuing an order.
 	 */
 	leave: function() {
-		var		me = this,
-				checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
-				myordersStore = Ext.data.StoreManager.lookup('orderStore');	
+		var	me = this,
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			myordersStore = Ext.data.StoreManager.lookup('orderStore');	
+
 		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) { 
 			checkIn.erase( {
 				failure: function(response, operation) {
@@ -785,6 +786,23 @@
 				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 			} else {
 				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
+			}
+		} else if(action == 'delete') {
+			console.log('delete order with id %s', updatedOrder.id);
+
+			oldOrder = orderStore.getById(updatedOrder.id);
+			if(oldOrder) {
+				orderStore.remove(oldOrder);
+
+				Ext.Msg.show({
+					title : Karazy.i18n.translate('hint'),
+					message : Karazy.i18n.translate('orderCanceled', oldOrder.getProduct().get('name')),
+					buttons : []
+				});
+				
+				Ext.defer((function() {
+					Ext.Msg.hide();
+				}), Karazy.config.msgboxHideTimeout, this);
 			}
 
 		}

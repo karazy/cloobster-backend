@@ -69,16 +69,16 @@ public class Transformer {
 	
 
 	public List<OrderDTO> ordersToDto(List<Order> orders ) {
-		if(orders == null || orders.isEmpty()) {
-			logger.error("orders list is null or empty");
-		}
-			
 		List<OrderDTO> dtos = new ArrayList<OrderDTO>();
-		for (Order order : orders) {
-			dtos.add(orderToDto( order ));
+		if(orders == null || orders.isEmpty()) {
+			logger.info("orders are null or empty");
 		}
-		
-		return dtos;
+		else {
+			for (Order order : orders) {
+				dtos.add(orderToDto( order ));
+			}	
+		}
+		return dtos;	
 	}
 	
 	public OrderDTO orderToDto(Order order) {

@@ -5,10 +5,11 @@ import com.google.common.base.Optional;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
+import net.eatsense.domain.embedded.CheckInStatus;
 
 public class UpdateOrderEvent extends OrderEvent {
 	
-	private Optional<String> newCheckInStatus;
+	private Optional<CheckInStatus> newCheckInStatus;
 	private Optional<String> newSpotStatus;
 
 	public UpdateOrderEvent(Business business, Order order, CheckIn checkIn) {
@@ -17,11 +18,11 @@ public class UpdateOrderEvent extends OrderEvent {
 		newSpotStatus = Optional.absent();
 	}
 
-	public Optional<String> getNewCheckInStatus() {
+	public Optional<CheckInStatus> getNewCheckInStatus() {
 		return newCheckInStatus;
 	}
 
-	public void setNewCheckInStatus(String newCheckInStatus) {
+	public void setNewCheckInStatus(CheckInStatus newCheckInStatus) {
 		this.newCheckInStatus = Optional.fromNullable(newCheckInStatus);
 	}
 

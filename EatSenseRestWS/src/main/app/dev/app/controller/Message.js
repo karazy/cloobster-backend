@@ -105,23 +105,23 @@ Ext.define('EatSense.controller.Message', {
 		var		me = this;
 
 		this.setChannelId(id);
-
 		this.requestNewToken(function(newToken) {
 			Karazy.channel.createChannel( {
 				token: newToken, 
 				messageHandler: me.processMessages,
 				requestTokenHandler: me.requestNewToken,
 				messageHandlerScope: me,
-				requestTokenHandlerScope: me
+				requestTokenHandlerScope: me,
+				statusHandler: me.handleStatus
 			});
 		}, id);
 	},
 	/**
-	*	Closes active channel and reopens it. 
-	*	Uses the cannelId member for creation.
+	*	Called when the connection status changes.
+	*
 	*/
-	reopenChannel: function() {
-		Karazy.channel.closeChannel();
-		this.openChannel(this.getChannelId());
+	handleStatus: function(connectionStatus) {
+		//render status in UI
+		console.log('connection status changed to %s', connectionStatus);
 	}
 });

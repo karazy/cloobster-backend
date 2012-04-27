@@ -1,5 +1,8 @@
 /*Karazy namespace. Create if not exists.*/
-var Karazy = (Karazy) ? Karazy : {};
+var Karazy = (Karazy) ? Karazy : {},
+	requires = {
+		'Karazy.util': Karazy.util
+	};
 
 /**
 *
@@ -8,36 +11,48 @@ var Karazy = (Karazy) ? Karazy : {};
 */
 Karazy.channel = (function() {
 
+	for(precondition in requires) {
+		if(!requires[precondition]) {
+			console.log('Some functions of this class may need %s to properly work. Make sure inclusion order is correct.', precondition);
+		}
+	}
+
 	//private members
 
 	//holds a reference to the channel
-	var channel;	
-	//socket used for communication
-	var socket;
-	//function called when a message is received
-	var messageHandlerFunction;
-	//function called to request a new token when an error occurs or channel is closed
-	var requestTokenHandlerFunction;
-	//scope in which to execute messageHandler function
-	var scopeMessageHandler;
-	//scope in which to execute tokenRequestHandler function
-	var scopeTokenRequestHandler;
-	//indicates if the client forced a close and won't try to request a new token.
-	var timedOut;
-	//indicates if connection was lost
-	var connectionLost;
-	//token used for this channel
-	var channelToken;
-	//timeout used when attempting to reconnect the channel
-	var channelReconnectTimeout = 10000;
-	//the status for the connection
-	var connectionStatus = 'DISCONNECTED';
+	var channel,	
+		//socket used for communication
+		socket,
+		//function called when a message is received
+		messageHandlerFunction,
+		//function called to request a new token when an error occurs or channel is closed
+		requestTokenHandlerFunction,
+		//scope in which to execute messageHandler function
+		scopeMessageHandler,
+		//scope in which to execute tokenRequestHandler function
+		scopeTokenRequestHandler,
+		//called whenever connection status changes
+		statusHandlerFunction,
+		//indicates if the client forced a close and won't try to request a new token.
+		timedOut,
+		//indicates if connection was lost
+		connectionLost,
+		//token used for this channel
+		channelToken,
+		//timeout used when attempting to reconnect the channel
+		channelReconnectTimeout = Karazy.config.channelReconnectTimeout,
+		//the status for the connection
+		connectionStatus = 'DISCONNECTED';
 
 	function onOpened() {
 		console.log('channel opened');
 		connectionLost = false;	
 		timedOut = false;
 		connectionStatus = 'ONLINE';
+
+		if(Karazy.util.isFunction(statusHandlerFunction)) {
+			statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+		}
 	};
 
 	function onMessage(data) {
@@ -65,11 +80,22 @@ Karazy.channel = (function() {
 		if(timedOut === true && connectionStatus != 'RECONNECT') {
 			console.log('channel timeout');			
 			connectionStatus = 'RECONNECT';
-			repeatedConnectionTry();	
+			repeatedConnectionTry();
+			if(Karazy.util.isFunction(statusHandlerFunction)) {
+				statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+			}
 		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
 			console.log('channel connection lost');
 			connectionStatus = 'RECONNECT';
-			repeatedConnectionTry();		
+			repeatedConnectionTry();
+			if(Karazy.util.isFunction(statusHandlerFunction)) {
+				statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+			}
+		} else {
+			connectionStatus = 'DISCONNECTED';	
+			if(Karazy.util.isFunction(statusHandlerFunction)) {
+				statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+			}
 		}
 	};
 	/**
@@ -93,6 +119,9 @@ Karazy.channel = (function() {
 					if(tries > 100) {
 						console.log('maximum tries reached. no more reconnect attempts.')
 						connectionStatus = 'DISCONNECTED';
+					if(Karazy.util.isFunction(statusHandlerFunction)) {
+						statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+					}
 						clearInterval(reconnectInterval);
 						return;
 					}
@@ -153,6 +182,10 @@ Karazy.channel = (function() {
 				requestTokenHandlerFunction = options.requestTokenHandler;
 				(options.requestTokenHandlerScope) ? scopeTokenRequestHandler = options.requestTokenHandlerScope : this;
 			};
+
+			if(options.statusHandler) {
+				statusHandlerFunction = options.statusHandler;
+			}
 
 			timedOut = false;
 

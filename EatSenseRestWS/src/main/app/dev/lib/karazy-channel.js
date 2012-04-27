@@ -21,25 +21,27 @@ Karazy.channel = (function() {
 
 	//holds a reference to the channel
 	var channel,	
-	//socket used for communication
+		//socket used for communication
 		socket,
-	//function called when a message is received
+		//function called when a message is received
 		messageHandlerFunction,
-	//function called to request a new token when an error occurs or channel is closed
+		//function called to request a new token when an error occurs or channel is closed
 		requestTokenHandlerFunction,
-	//scope in which to execute messageHandler function
+		//scope in which to execute messageHandler function
 		scopeMessageHandler,
-	//scope in which to execute tokenRequestHandler function
+		//scope in which to execute tokenRequestHandler function
 		scopeTokenRequestHandler,
-	//indicates if the client forced a close and won't try to request a new token.
+		//called whenever connection status changes
+		statusHandlerFunction,
+		//indicates if the client forced a close and won't try to request a new token.
 		timedOut,
-	//indicates if connection was lost
+		//indicates if connection was lost
 		connectionLost,
-	//token used for this channel
+		//token used for this channel
 		channelToken,
-	//timeout used when attempting to reconnect the channel
+		//timeout used when attempting to reconnect the channel
 		channelReconnectTimeout = Karazy.config.channelReconnectTimeout,
-	//the status for the connection
+		//the status for the connection
 		connectionStatus = 'DISCONNECTED';
 
 	function onOpened() {
@@ -47,6 +49,10 @@ Karazy.channel = (function() {
 		connectionLost = false;	
 		timedOut = false;
 		connectionStatus = 'ONLINE';
+
+		if(Karazy.util.isFunction(statusHandlerFunction)) {
+			statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+		}
 	};
 
 	function onMessage(data) {
@@ -74,11 +80,22 @@ Karazy.channel = (function() {
 		if(timedOut === true && connectionStatus != 'RECONNECT') {
 			console.log('channel timeout');			
 			connectionStatus = 'RECONNECT';
-			repeatedConnectionTry();	
+			repeatedConnectionTry();
+			if(Karazy.util.isFunction(statusHandlerFunction)) {
+				statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+			}
 		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
 			console.log('channel connection lost');
 			connectionStatus = 'RECONNECT';
-			repeatedConnectionTry();		
+			repeatedConnectionTry();
+			if(Karazy.util.isFunction(statusHandlerFunction)) {
+				statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+			}
+		} else {
+			connectionStatus = 'DISCONNECTED';	
+			if(Karazy.util.isFunction(statusHandlerFunction)) {
+				statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+			}
 		}
 	};
 	/**
@@ -102,6 +119,9 @@ Karazy.channel = (function() {
 					if(tries > 100) {
 						console.log('maximum tries reached. no more reconnect attempts.')
 						connectionStatus = 'DISCONNECTED';
+					if(Karazy.util.isFunction(statusHandlerFunction)) {
+						statusHandlerFunction.apply(scopeMessageHandler, [connectionStatus]);
+					}
 						clearInterval(reconnectInterval);
 						return;
 					}
@@ -162,6 +182,10 @@ Karazy.channel = (function() {
 				requestTokenHandlerFunction = options.requestTokenHandler;
 				(options.requestTokenHandlerScope) ? scopeTokenRequestHandler = options.requestTokenHandlerScope : this;
 			};
+
+			if(options.statusHandler) {
+				statusHandlerFunction = options.statusHandler;
+			}
 
 			timedOut = false;
 

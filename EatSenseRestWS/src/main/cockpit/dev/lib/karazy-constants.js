@@ -9,6 +9,7 @@ Karazy.constants = (function() {
 		INTENT : 'INTENT',
 		CHECKEDIN : 'CHECKEDIN',
 		ORDER_PLACED: 'ORDER_PLACED',
+		SERVED: 'SERVED',
 		PAYMENT_REQUEST : 'PAYMENT_REQUEST',
 		COMPLETE : 'COMPLETE',
 		Order : {
@@ -16,7 +17,7 @@ Karazy.constants = (function() {
 			PLACED : 'PLACED',
 			CANCELED : 'CANCELED',
 			RECEIVED: 'RECEIVED',
-			COMPLETE : 'COMPLETE'
+			COMPLETE : 'COMPLETE'			
 		},
 		Request : {
 			CALL_WAITER : 'CALL_WAITER'

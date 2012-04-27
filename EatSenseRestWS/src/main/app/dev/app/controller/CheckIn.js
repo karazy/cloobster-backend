@@ -488,19 +488,14 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getMenuTab().enable();
 			this.getCartTab().enable();
             this.getSettingsTab().enable();
-            this.getRequestsTab().enable();
-			this.getAppState().set('checkInId', null);
+            this.getRequestsTab().enable();			
 			this.getLoungeview().setActiveItem(this.getMenuTab());
             menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
-            //remove all orders in cart and refresh badge text
-            if(this.getActiveCheckIn())
-            {
-                this.getActiveCheckIn().orders().removeAll();  
-                orderCtr.refreshCartBadgeText();
-            }
+            orderCtr.refreshCartBadgeText();
 
+            this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
 		}
