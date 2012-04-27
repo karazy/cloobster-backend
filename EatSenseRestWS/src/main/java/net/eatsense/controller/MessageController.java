@@ -249,8 +249,7 @@ public class MessageController {
 		
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(event.getCheckIn().getSpot().getId());		
-		spotData.setCheckInCount(event.getCheckInCount().or(
-				checkInRepo.countActiveCheckInsAtSpot(event.getCheckIn().getSpot())));
+		spotData.setCheckInCount(event.getCheckInCount().orNull());
 		// If the customer didn't check out himself.
 		if(!event.isCheckOut()) {
 			if ( spotData.getCheckInCount() > 0) {
