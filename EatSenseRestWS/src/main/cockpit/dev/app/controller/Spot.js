@@ -810,6 +810,7 @@ Ext.define('EatSense.controller.Spot', {
 			Ext.Ajax.request({				
 	    	    url: Karazy.config.serviceUrl+'/b/businesses/'+loginCtr.getAccount().get('businessId')+'/checkins/'+this.getActiveCustomer().getId()+'/cart',
 	    	    method: 'PUT',
+	    	    jsonData: {}, //empty object needed, otherwise 411 gets thrown
 	    	    success: function(response) {
 	    	    	console.log('all orders confirmed');
 	    	    },

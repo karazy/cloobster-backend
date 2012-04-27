@@ -207,6 +207,7 @@
 					Ext.Ajax.request({
 						url: Karazy.config.serviceUrl+'/c/checkins/'+checkInId+'/cart',
 						method: 'PUT',
+						jsonData: {}, //empty object needed, otherwise 411 gets thrown
 						success: function(response) {
 			    	    	cartview.showLoadScreen(false);
 			    	    	me.getSubmitOrderBt().enable();

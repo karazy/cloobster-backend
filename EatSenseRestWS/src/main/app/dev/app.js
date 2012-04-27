@@ -127,12 +127,12 @@ Ext.application({
     handleServerError: function(options) {
         var    errMsg,
                nestedError,
-               loginCtr = this.getController('Login'),
                error = options.error,
                forceLogout = options.forceLogout,
                hideMessage = options.hideMessage,
                message = options.message;
         if(error && error.status) {
+        	console.log('error '+ error.status + ' ' + error.statusText);
             switch(error.status) {
                 case 403:
                     //no access
