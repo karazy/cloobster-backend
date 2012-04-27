@@ -9,3 +9,4 @@ Misc/SenchaTests/touch/*
 EatSenseRestWS/src/main/app/prod/**/*
 *.jsb3
 *.jar
+xcuserdata
