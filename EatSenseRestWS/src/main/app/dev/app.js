@@ -48,8 +48,7 @@ Ext.application({
 
 		//global error handler
 		window.onerror = function(message, url, lineNumber) {  
-			var messageCtr = app.getController('Message');
-			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
+			console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
 		  	//prevent firing of default handler (return true)
 		  	return false;
 		}; 
@@ -128,12 +127,12 @@ Ext.application({
     handleServerError: function(options) {
         var    errMsg,
                nestedError,
-               loginCtr = this.getController('Login'),
                error = options.error,
                forceLogout = options.forceLogout,
                hideMessage = options.hideMessage,
                message = options.message;
         if(error && error.status) {
+        	console.log('error '+ error.status + ' ' + error.statusText);
             switch(error.status) {
                 case 403:
                     //no access

@@ -339,11 +339,12 @@ public class OrderController {
 	 * @return
 	 */
 	public List<Order> getOrdersByCheckInOrStatus(Business business, CheckIn checkIn, String status) {
+		//Return empty list if we have no checkin
+		if(checkIn == null ||checkIn.getId() == null)
+			return new ArrayList<Order>();
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
-		if(checkIn != null) {
-			// Filter by checkin if set.
-			query = query.filter("checkIn", checkIn.getKey()); 
-		}
+		query = query.filter("checkIn", checkIn.getKey()); 
+		
 		if(status != null && !status.isEmpty()) {
 			// Filter by status if set.
 			query = query.filter("status", status.toUpperCase());

@@ -207,6 +207,7 @@
 					Ext.Ajax.request({
 						url: Karazy.config.serviceUrl+'/c/checkins/'+checkInId+'/cart',
 						method: 'PUT',
+						jsonData: {}, //empty object needed, otherwise 411 gets thrown
 						success: function(response) {
 			    	    	cartview.showLoadScreen(false);
 			    	    	me.getSubmitOrderBt().enable();
@@ -558,7 +559,7 @@
 						leaveButton.enable();					
 						me.getApplication().handleServerError({
 							'error': operation.error,
-							'statusText': {403: true}
+							'forceLogout': {403: true}
 						});
 					}	
 				} catch(e) {
@@ -674,7 +675,7 @@
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
 					'error': operation.error,
-					'statusText': {403: true}
+					'forceLogout': {403: true}
 				});
 			}
 		});
@@ -704,7 +705,7 @@
 				failure: function(response, operation) {
 					me.getApplication().handleServerError({
 						'error': operation.error,
-						'statusText': {403: true}
+						'forceLogout': {403: true}
 					});
 				}
 			}
