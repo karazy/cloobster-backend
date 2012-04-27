@@ -24,7 +24,7 @@
 			
 			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
 		</exec>
-		<move file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/desktop/lib" overwrite="true"></move>
+		<copyfile src="${appDir}/touch/sencha-touch.js" dest="${prodDir}/android/lib" forceoverwrite="true"/>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
 		<copy todir="${prodDir}/desktop/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -48,7 +48,7 @@
 		<exec executable="sencha">			
 			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
 		</exec>
-		<move file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></move>
+		<copyfile src="${appDir}/touch/sencha-touch.js" dest="${prodDir}/android/lib" forceoverwrite="true"/>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
 		<copy todir="${prodDir}/android/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -73,7 +73,7 @@
 			
 			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
 		</exec>
-		<move file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/ios/lib" overwrite="true"></move>
+		<copyfile src="${appDir}/touch/sencha-touch.js" dest="${prodDir}/android/lib" forceoverwrite="true"/>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/ios/" overwrite="true"></move>
 		<copy todir="${prodDir}/ios/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
