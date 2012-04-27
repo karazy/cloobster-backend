@@ -79,7 +79,8 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		// #3 Check if we can retrieve the same data by user id
 		expect().statusCode(200).body("userId", is(checkInId)).when()
 				.get("/c/checkins/{userId}", checkInId);
-
+		
+		response = given().header("checkInId",checkInId).expect().statusCode(204).when().delete("c/checkins/{id}", checkInId);
 	}
 
 	/**
