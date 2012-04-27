@@ -48,8 +48,7 @@ Ext.application({
 
 		//global error handler
 		window.onerror = function(message, url, lineNumber) {  
-			var messageCtr = app.getController('Message');
-			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
+			console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
 		  	//prevent firing of default handler (return true)
 		  	return false;
 		}; 

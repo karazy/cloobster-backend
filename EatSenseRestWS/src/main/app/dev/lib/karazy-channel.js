@@ -148,7 +148,12 @@ Karazy.channel = (function() {
 			console.log('setup channel for token %s', token);
 
 			channelToken = token;
-			channel = new goog.appengine.Channel(token);
+			try {
+				channel = new goog.appengine.Channel(token);	
+			} catch(e) {
+				console.log('failed to open channel! reason '+ e);
+			}
+			
 			socket = channel.open();
 			socket.onopen = onOpened;
 		    socket.onmessage = onMessage;

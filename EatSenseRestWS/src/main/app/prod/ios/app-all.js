@@ -44949,7 +44949,7 @@ Ext.define('EatSense.controller.Menu', {
 			    	if(!success) { 
                         me.getApplication().handleServerError({
                         	'error': operation.error, 
-                        	'forceLogut': {403:true}
+                        	'forceLogout': {403:true}
                         }); 
                     }
 			    }
@@ -45198,7 +45198,7 @@ Ext.define('EatSense.controller.Menu', {
 	    	    failure: function(response, operation) {
 	    	    	me.getApplication().handleServerError({
                         	'error': operation.error, 
-                        	'forceLogut': {403:true}
+                        	'forceLogout': {403:true}
                         }); 
 	    	    }
 	    	});
@@ -45432,7 +45432,9 @@ Ext.define('EatSense.controller.Message', {
 	*	@param callback
 	*		callback function to invoke on success
 	*/
-	requestNewToken: function(callback) {		
+	requestNewToken: function(callback) {	
+		var me = this;
+			
 		if(!this.getChannelId()) {
 			console.log('no channel id is set');
 			return;
@@ -45470,24 +45472,24 @@ Ext.define('EatSense.controller.Message', {
 		var		me = this;
 
 		this.setChannelId(id);
-
 		this.requestNewToken(function(newToken) {
 			Karazy.channel.createChannel( {
 				token: newToken, 
 				messageHandler: me.processMessages,
 				requestTokenHandler: me.requestNewToken,
 				messageHandlerScope: me,
-				requestTokenHandlerScope: me
+				requestTokenHandlerScope: me,
+				statusHandler: me.handleStatus
 			});
 		}, id);
 	},
 	/**
-	*	Closes active channel and reopens it. 
-	*	Uses the cannelId member for creation.
+	*	Called when the connection status changes.
+	*
 	*/
-	reopenChannel: function() {
-		Karazy.channel.closeChannel();
-		this.openChannel(this.getChannelId());
+	handleStatus: function(connectionStatus) {
+		//render status in UI
+		console.log('connection status changed to %s', connectionStatus);
 	}
 });
 /**
@@ -45666,7 +45668,7 @@ Ext.define('Ext.data.proxy.Rest', {
 
 Ext.define('EatSense.override.CustomRestProxy', {
 	override: 'Ext.data.proxy.Rest',
-	  buildUrl: function(request) {		
+	  buildUrl: function(request) {	
 	        var  me = this, 
 	        	_serviceUrl = Karazy.config.serviceUrl, 
 	        	url = me.getUrl(request),
@@ -45695,6 +45697,18 @@ Ext.define('EatSense.override.CustomRestProxy', {
 	        	if(url.match(/(.*){checkInId}(.*)/)) {
 	        		var replacer = '$1'+defaultHeaders.checkInId+'$2';
 	        		url = url.replace(/(.*){checkInId}(.*)/, replacer);
+	        	}	
+	        }
+
+	        if(params.businessId) {
+	        	if(url.match(/(.*){businessId}(.*)/)) {
+	        		var replacer = '$1'+params.businessId+'$2';
+	        		url = url.replace(/(.*){businessId}(.*)/, replacer);
+	        	}	        	
+	        } else if(defaultHeaders.businessId) {
+	        	if(url.match(/(.*){businessId}(.*)/)) {
+	        		var replacer = '$1'+defaultHeaders.businessId+'$2';
+	        		url = url.replace(/(.*){businessId}(.*)/, replacer);
 	        	}	
 	        }
 	        	
@@ -47521,6 +47535,27 @@ Ext.define('EatSense.model.Order', {
 	}
 
 });
+/**
+* Represents a customers cart.
+* This is just a representation for all orders issued by the customer.
+* It can be used to apply mass updates to orders.	
+*/
+Ext.define('EatSense.model.Cart', {
+	extend: 'Ext.data.Model',
+	config: {
+		fields:[
+			{
+				name: 'status',
+				type: 'string'
+			}
+		],
+		proxy: {
+			type: 'rest',
+			url: '/c/checkins/{checkInId}/cart',
+			enablePagingParams: false,
+		}
+	}
+});
 Ext.define('EatSense.model.Spot', {
 	extend : 'Ext.data.Model',
 	requires: ['EatSense.model.PaymentMethod'],
@@ -47734,7 +47769,7 @@ Ext.define('EatSense.view.Cart', {
 		iconMask : true,
 		itemId : 'carttab',
 		layout: 'fit',
-		items : [ 
+		items : [
 		          {
 			docked : 'top',
 			xtype : 'titlebar',
@@ -50411,7 +50446,10 @@ Ext.define('EatSense.controller.CheckIn', {
      	        	    },
      	        	    failure: function(record, operation) {
                             me.getApplication().handleServerError({
-                                'error': operation.error
+                                'error': operation.error,
+                                'message': {
+                                    404: Karazy.i18n.translate('checkInErrorBarcode')
+                                } 
                             }); 
      	        	    },
      	        	    callback: function() {
@@ -50784,19 +50822,14 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getMenuTab().enable();
 			this.getCartTab().enable();
             this.getSettingsTab().enable();
-            this.getRequestsTab().enable();
-			this.getAppState().set('checkInId', null);
+            this.getRequestsTab().enable();			
 			this.getLoungeview().setActiveItem(this.getMenuTab());
             menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
-            //remove all orders in cart and refresh badge text
-            if(this.getActiveCheckIn())
-            {
-                this.getActiveCheckIn().orders().removeAll();  
-                orderCtr.refreshCartBadgeText();
-            }
+            orderCtr.refreshCartBadgeText();
 
+            this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
 		}
@@ -54275,7 +54308,8 @@ Ext.define('Ext.picker.Picker', {
 	 */
 	dumpCart: function() {
 		console.log('Cart Controller -> dumpCart');
-		var activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn();
+		var me = this,
+			activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn();
 		
 		Ext.Msg.show({
 			title: Karazy.i18n.translate('hint'),
@@ -54294,17 +54328,22 @@ Ext.define('Ext.picker.Picker', {
 			if(btnId=='yes') {
 				//workaround, because view stays masked after switch to menu
 				Ext.Msg.hide();
-				activeCheckIn.orders().each(function(order) {
-					Ext.Ajax.request({				
-			    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/'+order.getId(),
-			    	    method: 'DELETE'
-			    	});
-				});
-				
-				//clear store				
-				activeCheckIn.orders().removeAll();
-				//reset badge text on cart button and switch back to menu
-				this.refreshCart();
+				Ext.Ajax.request({				
+			    	    url: Karazy.config.serviceUrl+'/c/checkins/'+activeCheckIn.get('userId')+'/cart/',
+			    	    method: 'DELETE',
+			    	    success: function(response) {
+			    	    	//clear store				
+							activeCheckIn.orders().removeAll();
+							//reset badge text on cart button and switch back to menu
+							me.refreshCart();
+			    	    },
+			    	    failure: function(response) {
+							me.getApplication().handleServerError({
+								'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+			                    'forceLogout': {403:true}
+			                }); 
+						}
+			    });				
 				}
 			}
 		});				
@@ -54321,7 +54360,8 @@ Ext.define('Ext.picker.Picker', {
 			errorIndicator = false,
 			cartview = this.getCartview(),
 			ajaxOrderCount = 0,
-			ordersCount = orders.getCount();
+			ordersCount = orders.getCount(),
+			// cart = Ext.create('EatSense.model.Cart'),
 			me = this;
 		
 		if(ordersCount > 0) {
@@ -54339,18 +54379,59 @@ Ext.define('Ext.picker.Picker', {
 				}],
 				scope: this,
 				fn: function(btnId, value, opt) {
-				if(btnId=='yes') {
-					
+				if(btnId=='yes') {					
+					// me.getOrderlist().removeAll();
+
+					// cart.set('status', Karazy.constants.Order.PLACED);
+					// cart.phantom = false;
+
 					cartview.showLoadScreen(true);
 					this.getSubmitOrderBt().disable();
 					this.getCancelOrderBt().disable();
 					
+					Ext.Ajax.request({
+						url: Karazy.config.serviceUrl+'/c/checkins/'+checkInId+'/cart',
+						method: 'PUT',
+						success: function(response) {
+			    	    	cartview.showLoadScreen(false);
+			    	    	me.getSubmitOrderBt().enable();
+			    	    	me.getCancelOrderBt().enable();
+							orders.removeAll();
+							me.refreshCart();
+							//show success message
+							Ext.Msg.show({
+								title : Karazy.i18n.translate('success'),
+								message : Karazy.i18n.translate('orderSubmit'),
+								buttons : []
+							});
+							
+							Ext.defer((function() {
+								Ext.Msg.hide();
+							}), Karazy.config.msgboxHideTimeout, this);
+						},
+						failure: function(response) {
+							cartview.showLoadScreen(false);
+			    	    	me.getSubmitOrderBt().enable();
+			    	    	me.getCancelOrderBt().enable();
+							// me.getOrderlist().setStore(orders);
+							me.getApplication().handleServerError({
+								'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+			                    'forceLogout': {403:true}
+			                }); 
+						}
+					});
+					/*
+					cartview.showLoadScreen(true);
+					this.getSubmitOrderBt().disable();
+					this.getCancelOrderBt().disable();
+
 					orders.each(function(order) {
 						console.log('save order id:' + order.get('id') + ' genuineId: '+order.getProduct().get('genuineId'));
 						
 						if(!errorIndicator) {
-							order.set('status',Karazy.constants.Order.PLACED);
-							
+
+							order.set('status',Karazy.constants.Order.PLACED);														
+
 							Ext.Ajax.request({				
 					    	    url: Karazy.config.serviceUrl+'/c/businesses/'+businessId+'/orders/'+order.getId(),
 					    	    method: 'PUT',    
@@ -54394,7 +54475,7 @@ Ext.define('Ext.picker.Picker', {
 					    	    	me.getCancelOrderBt().enable();
 					    	    	me.getApplication().handleServerError({
 			                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-			                        	'forceLogut': {403:true}
+			                        	'forceLogout': {403:true}
 			                        }); 
 					    	    }
 							});			
@@ -54405,7 +54486,7 @@ Ext.define('Ext.picker.Picker', {
 							return false;
 						};					
 					});
-
+					*/
 					}
 				}
 			});						
@@ -54525,7 +54606,7 @@ Ext.define('Ext.picker.Picker', {
 	    	    failure: function(response) {
 					me.getApplication().handleServerError({
                     	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-                    	'forceLogut': {403:true}
+                    	'forceLogout': {403:true}
                     }); 
 				}
 			});
@@ -54563,7 +54644,7 @@ Ext.define('Ext.picker.Picker', {
 	    	    failure: function(response) {
 					me.getApplication().handleServerError({
 	                	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-	                	'forceLogut': {403:true}
+	                	'forceLogout': {403:true}
 	                }); 
 				}
 	    	});
@@ -54616,10 +54697,10 @@ Ext.define('Ext.picker.Picker', {
 	 */
 	refreshCartBadgeText: function() {
 		var cartButton = this.getLoungeTabBar().getAt(1),
-			orders = this.getApplication().getController('CheckIn').getActiveCheckIn().orders(),
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 			badgeText;
 		
-		badgeText = (orders.data.length > 0) ? orders.data.length : "";
+		badgeText = (!checkIn) ? "" : (checkIn.orders().getCount() > 0) ? checkIn.orders().getCount() : "";
 		
 		cartButton.setBadgeText(badgeText);
 	},
@@ -54662,7 +54743,7 @@ Ext.define('Ext.picker.Picker', {
 						leaveButton.enable();					
 						me.getApplication().handleServerError({
 							'error': operation.error,
-							'statusText': {403: true}
+							'forceLogout': {403: true}
 						});
 					}	
 				} catch(e) {
@@ -54778,7 +54859,7 @@ Ext.define('Ext.picker.Picker', {
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
 					'error': operation.error,
-					'statusText': {403: true}
+					'forceLogout': {403: true}
 				});
 			}
 		});
@@ -54799,15 +54880,16 @@ Ext.define('Ext.picker.Picker', {
 	 * Called when user checks in and wants to leave without issuing an order.
 	 */
 	leave: function() {
-		var		me = this,
-				checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
-				myordersStore = Ext.data.StoreManager.lookup('orderStore');	
+		var	me = this,
+			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			myordersStore = Ext.data.StoreManager.lookup('orderStore');	
+
 		if(checkIn.get('status') != Karazy.constants.PAYMENT_REQUEST && myordersStore.getCount() ==  0) { 
 			checkIn.erase( {
 				failure: function(response, operation) {
 					me.getApplication().handleServerError({
 						'error': operation.error,
-						'statusText': {403: true}
+						'forceLogout': {403: true}
 					});
 				}
 			}
@@ -54889,6 +54971,23 @@ Ext.define('Ext.picker.Picker', {
 				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 			} else {
 				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
+			}
+		} else if(action == 'delete') {
+			console.log('delete order with id %s', updatedOrder.id);
+
+			oldOrder = orderStore.getById(updatedOrder.id);
+			if(oldOrder) {
+				orderStore.remove(oldOrder);
+
+				Ext.Msg.show({
+					title : Karazy.i18n.translate('hint'),
+					message : Karazy.i18n.translate('orderCanceled', oldOrder.getProduct().get('name')),
+					buttons : []
+				});
+				
+				Ext.defer((function() {
+					Ext.Msg.hide();
+				}), Karazy.config.msgboxHideTimeout, this);
 			}
 
 		}
@@ -56064,7 +56163,7 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge'], 
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill'],
 	phoneStartupScreen: 'res/images/startup.png',
@@ -56103,9 +56202,7 @@ Ext.application({
 
 		//global error handler
 		window.onerror = function(message, url, lineNumber) {  
-			var messageCtr = app.getController('Message');
-			console.error('unhandled error > %s in %s at %s', message, url, lineNumber);
-		  	//messageCtr.reopenChannel();
+			console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
 		  	//prevent firing of default handler (return true)
 		  	return false;
 		}; 
@@ -56177,7 +56274,9 @@ Ext.application({
     *       OR
     *       {errorCode : true|false} e.g. {403: true, 404: false}
     *       hideMessage: true if you don't want do display an error message
-    *       message: message to show. If no message is set a default message will be displayed
+    *       message: message to show. If no message is set a default message will be displayed.
+    *		can be either a common message for all status codes or a specialized message
+    *		{403: 'message 1', 404: 'message 2'}
     */
     handleServerError: function(options) {
         var    errMsg,
@@ -56191,34 +56290,59 @@ Ext.application({
             switch(error.status) {
                 case 403:
                     //no access
-                    errMsg = Karazy.i18n.translate('errorPermission');
-                    if(forceLogout[403] === true || forceLogout === true) {
+                    if(message) {
+                    	if(message[403]) {
+                    		errMsg = message[403];
+                    	} else {
+                    		errMsg = message;
+                    	}
+                    } else {
+                    	errMsg = Karazy.i18n.translate('errorPermission');
+                    }
+                    
+                    if(forceLogout && (forceLogout[403] === true || forceLogout === true)) {
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }
                     break;
                 case 404:
                     //could not load resource or server is not reachable
-                    errMsg = Karazy.i18n.translate('errorResource');
-                    if(forceLogout[404] === true || forceLogout === true) {
+                    if(message) {
+                    	if(message[404]) {
+                    		errMsg = message[404];
+                    	} else {
+                    		errMsg = message;
+                    	}
+                    } else {
+                    	errMsg = Karazy.i18n.translate('errorResource');
+                    }
+                    if(forceLogout && (forceLogout[404] === true || forceLogout === true)) {
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }
                     break;
                 default:
-                    try {
+                    if(message) {
+                    	if(message[500]) {
+	                    	errMsg = message[500];
+	                    } else {
+	                    	errMsg = message;
+	                    }	                    
+                    } else {
+                    	try {
                          //TODO Bug in error message handling in some browsers
                         nestedError = Ext.JSON.decode(error.statusText);
-                        errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
-                    } catch (e) {
-                        errMsg = Karazy.i18n.translate('errorMsg');
+	                    errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
+	                    } catch (e) {
+	                        errMsg = Karazy.i18n.translate('errorMsg');
+	                    }
                     }
-                    if(forceLogout[500] === true || forceLogout === true) {
+                    if(forceLogout && (forceLogout[500] === true || forceLogout === true)) {
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }                                         
                     break;
             }
         }
         if(!hideMessage) {
-        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), (message) ? message : errMsg, Ext.emptyFn);	
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, Ext.emptyFn);	
         }
     }
 });
