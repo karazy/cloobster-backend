@@ -211,10 +211,6 @@
 			<artifactId>xercesImpl</artifactId>
 			<version>2.10.0</version>
 		</dependency>
-<<<<<<< HEAD
-=======
-            
->>>>>>> 105d4711529b8c2f9052d9fc5eaa174c47e89f7f
 		<!-- Apache Bean Validation dependencies -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
