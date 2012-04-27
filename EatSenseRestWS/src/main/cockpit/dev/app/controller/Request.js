@@ -146,20 +146,20 @@ Ext.define('EatSense.controller.Request',{
 	* Removes all existing requests which belong to given customer.
 	*
 	*/
-	removeRequestsForCustomerById: function(checkIn) {
+	removeRequestsForCustomerById: function(checkInId) {
 		var me = this,
 			requestStore = Ext.StoreManager.lookup('requestStore'),
 			filtered;
 
-		if(!checkIn) {
-			console.log('no checkin provided');
+		if(!checkInId) {
+			console.log('no checkInId provided');
 			return;
 		}
 
-		console.log('removeRequestsForCustomerById for %s', checkIn.getId());
+		console.log('removeRequestsForCustomerById for %s', checkInId);
 
 		filtered = requestStore.queryBy(function(request){
-			if(request.getCheckIn() && request.getCheckIn().getId() == checkIn.getId()) {
+			if(request.getCheckIn() && request.getCheckIn().getId() == checkInId) {
 				return true;
 			}
 		});

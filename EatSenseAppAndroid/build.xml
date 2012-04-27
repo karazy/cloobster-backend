@@ -31,7 +31,7 @@
 
 	<target name="replaceConfigProduction" depends="renameFiles">
 		<echo message="Setting config values" />
-		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://karazy-eatsense.appspot.com'," byline="true">
+		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://eatsense-test.appspot.com'," byline="true">
 		</replaceregexp>
 		<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 false," byline="true">
 			</replaceregexp>

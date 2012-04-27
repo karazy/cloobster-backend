@@ -96,8 +96,8 @@ Ext.define('EatSense.controller.Message', {
 						'statusText': response.statusText
 					}, 
 					'forceLogout': false, 
-					'hideMessage':false, 
-					'message': Karazy.i18n.translate('channelTokenError')
+					'hideMessage':true, 
+					// 'message': Karazy.i18n.translate('channelTokenError')
 				});
 		    }
 		});

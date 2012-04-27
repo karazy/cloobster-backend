@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
-	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod-ios" />
+	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod/ios" />
 	<property name="config" value="eatSense/www/lib/karazy-config.js" />
 
 	<target name="copySenchaApp" depends="">
@@ -16,7 +16,7 @@
 
 	<target name="renameFiles" depends="copySenchaApp">
 		<echo message="Rename files" />
-		<move todir="." includeemptydirs="false">
+		<move todir="." includeemptydirs="false" overwrite="true">
 			<fileset dir=".">
 			</fileset>
 			<regexpmapper from="^(.+)\.iphone\.(.+)$$" to="\1.\2" />
@@ -31,7 +31,7 @@
 
 	<target name="replaceConfigProduction" depends="renameFiles">
 		<echo message="Setting config values" />
-		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://karazy-eatsense.appspot.com'," byline="true">
+		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://eatsense-test.appspot.com'," byline="true">
 		</replaceregexp>
 	</target>
 
