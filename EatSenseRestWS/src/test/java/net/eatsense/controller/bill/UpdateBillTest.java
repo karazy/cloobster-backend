@@ -255,7 +255,7 @@ public class UpdateBillTest {
 			assertThat(bill.isCleared(), is(true));
 		}
 		// Check orders again to see if they are linked ...
-		List<Order> orders = orderCtrl.getOrders(business, checkIn, null);
+		List<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn, null);
 		
 		for (Order order : orders) {
 			assertThat(order.getBill().getId(), is(billData.getId()));

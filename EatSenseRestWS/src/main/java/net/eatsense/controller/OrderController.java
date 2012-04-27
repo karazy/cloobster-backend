@@ -338,7 +338,7 @@ public class OrderController {
 	 * @param status 
 	 * @return
 	 */
-	public List<Order> getOrders(Business business, CheckIn checkIn, String status) {
+	public List<Order> getOrdersByCheckInOrStatus(Business business, CheckIn checkIn, String status) {
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
 		if(checkIn != null) {
 			// Filter by checkin if set.
@@ -365,7 +365,7 @@ public class OrderController {
 	 * @return
 	 */
 	public Collection<OrderDTO> getOrdersAsDto(Business business, CheckIn checkIn, String status) {
-		return transform.ordersToDto(getOrders( business, checkIn, status));
+		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkIn, status));
 	}
 	
 	/**
