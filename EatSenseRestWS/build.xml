@@ -2,7 +2,6 @@
 <project name="EatSenseRestWS" default="default" basedir=".">
 	<property name="appDir" value="src/main/app/dev/" />
 	<property name="prodDir" value="src/main/app/prod/" />
-	<property name="senchaBuild" location="/Applications/SenchaSDKTools-2.0.0-Beta/command"/>
 	
 	<target name="default">
 		<echo message="Executing rename task from build.xml" />
@@ -16,15 +15,15 @@
 	
 	<target name="createDesktopProduction">
 		<echo message="Executing createDesktopProduction task from build.xml" />
-		<exec executable="sencha" >
+		<exec executable="${sencha.cmd}" >
 		
 			<arg line="create jsb -a ${appDir}index.desktop.html -p ${appDir}app.desktop.jsb3" />
 		</exec>
-		<exec executable="sencha">
+		<exec executable="${sencha.cmd}">
 			
 			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
 		</exec>
-		<copyfile src="${appDir}/touch/sencha-touch.js" dest="${prodDir}/android/lib" forceoverwrite="true"/>
+		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
 		<copy todir="${prodDir}/desktop/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -42,13 +41,13 @@
 	
 	<target name="createAndroidProduction">
 		<echo message="Executing createAndroidProduction task from build.xml" />
-		<exec executable="${sencha.home}\sencha.bat" >		
+		<exec executable="${sencha.cmd}" >		
 			<arg line="create jsb -a ${appDir}index.phone.html -p ${appDir}app.android.jsb3" />
 		</exec>
-		<exec executable="${sencha.home}\sencha.bat">			
+		<exec executable="${sencha.cmd}">			
 			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
 		</exec>
-		<copyfile src="${appDir}/touch/sencha-touch.js" dest="${prodDir}/android/lib" forceoverwrite="true"/>
+		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
 		<copy todir="${prodDir}/android/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -66,14 +65,14 @@
 
 	<target name="createIOSProduction">
 		<echo message="Executing createIOSProduction task from build.xml" />
-		<exec executable="sencha" >		
+		<exec executable="${sencha.cmd}" >		
 			<arg line="create jsb -a ${appDir}index.iphone.html -p ${appDir}app.ios.jsb3" />
 		</exec>
-		<exec executable="sencha">
+		<exec executable="${sencha.cmd}">
 			
 			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
 		</exec>
-		<copyfile src="${appDir}/touch/sencha-touch.js" dest="${prodDir}/android/lib" forceoverwrite="true"/>
+		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/ios/" overwrite="true"></move>
 		<copy todir="${prodDir}/ios/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
