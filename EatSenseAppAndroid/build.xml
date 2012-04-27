@@ -5,7 +5,7 @@
 
 	<target name="copySenchaApp" depends="">
 		<echo message="Copy App" />
-		<copy todir="assets/www">
+		<copy todir="assets/www" overwrite="true">
 			<fileset dir="${appDir}">
 				<exclude name="**/*.desktop.*" />
 				<exclude name="**/*.iphone.*" />
