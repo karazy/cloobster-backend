@@ -177,8 +177,9 @@ public class BusinessController {
 	 * 
 	 * @param business
 	 * @param requestId
+	 * @throws IllegalArgumentException if the request was not found
 	 */
-	public void deleteCustomerRequest(Business business, long requestId) {
+	public void deleteCustomerRequest(Business business, long requestId)  throws IllegalArgumentException{
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
 		checkArgument(requestId != 0, "requestId cannot be 0");
