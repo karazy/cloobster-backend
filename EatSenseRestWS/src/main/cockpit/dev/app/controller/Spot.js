@@ -347,7 +347,11 @@ Ext.define('EatSense.controller.Spot', {
 							//update status only if this is the active customer
 							me.updateCustomerStatusPanel(updatedCheckIn);
 							if(action == 'confirm-orders') {
-								orders.each(function(order) {
+								orders.queryBy(function(order){
+									if(order.get('status') == Karazy.constants.Order.PLACED) {
+										return true;
+									}
+								}).each(function(order) {
 									order.set('status', Karazy.constants.Order.RECEIVED);
 								});
 							}
