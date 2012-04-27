@@ -131,11 +131,11 @@ Ext.application({
                forceLogout = options.forceLogout,
                hideMessage = options.hideMessage,
                message = options.message;
-        if(error && error.status) {
+        if(error && typeof error.status == 'number') {
         	console.log('error '+ error.status + ' ' + error.statusText);
             switch(error.status) {
                 case 403:
-                    //no access
+                    //no permission
                     if(message) {
                     	if(message[403]) {
                     		errMsg = message[403];
@@ -165,6 +165,21 @@ Ext.application({
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }
                     break;
+                case 0:
+                	//communication failure, could not contact server
+                	if(message) {
+                    	if(message[0]) {
+                    		errMsg = message[0];
+                    	} else {
+                    		errMsg = message;
+                    	}
+                    } else {
+                    	errMsg = Karazy.i18n.translate('errorCommunication');
+                    }
+                    if(forceLogout && (forceLogout[0] === true || forceLogout === true)) {
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
+                    }
+                	break;
                 default:
                     if(message) {
                     	if(message[500]) {

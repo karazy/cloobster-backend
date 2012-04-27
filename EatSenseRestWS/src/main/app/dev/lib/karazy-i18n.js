@@ -57,9 +57,15 @@ Karazy.i18n = (function() {
 	 * Constructor used for initialization.
 	 */
 	function constructor() {
+
 		//get browser/system locale 
 		lang = getLanguage();
-		translations = translation;
+		try {
+			translations = translationData || {};
+		} catch(e) {
+			console.log('translation data not loaded');
+			translations = {};
+		}
 
 		/*public methods*/
 		return {

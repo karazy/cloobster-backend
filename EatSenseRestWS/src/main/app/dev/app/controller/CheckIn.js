@@ -163,13 +163,18 @@ Ext.define('EatSense.controller.CheckIn', {
             }); 
             // barcode = Ext.String.trim(this.getSearchfield().getValue());
     	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
-    			window.plugins.barcodeScanner.scan(function(result, barcode) {
-    			barcode = result.text;
-    			console.log('scanned ' + barcode);
-    			that.getDashboard().showLoadScreen(true);
-    			//FR 28.03.12 apple rejects apps which track device uuid
-    			// deviceId = device.uuid;
-    			that.doCheckInIntent(barcode, button, deviceId);
+    			window.plugins.barcodeScanner.scan(function(result) {
+            if(!result.cancelled) {
+              barcode = result.text;
+              console.log('scanned ' + barcode);
+              that.getDashboard().showLoadScreen(true);
+              //FR 28.03.12 apple rejects apps which track device uuid
+              // deviceId = device.uuid;
+              that.doCheckInIntent(barcode, button, deviceId);
+            } else {
+              console.log('user cancelled scan');
+              button.enable();
+            }
     		}, function(error) {
     			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
     		});
