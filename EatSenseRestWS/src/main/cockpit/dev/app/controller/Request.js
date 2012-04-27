@@ -159,7 +159,7 @@ Ext.define('EatSense.controller.Request',{
 		console.log('removeRequestsForCustomerById for %s', checkIn.getId());
 
 		filtered = requestStore.queryBy(function(request){
-			if(request.getCheckIn() == checkIn) {
+			if(request.getCheckIn() && request.getCheckIn().getId() == checkIn.getId()) {
 				return true;
 			}
 		});

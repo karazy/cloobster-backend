@@ -363,7 +363,7 @@ Ext.define('EatSense.controller.Spot', {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
 
 					if(dirtyCheckIn) {
-						console.log('delete checkin with id ' + updatedCheckIn.get('id') + ' exist');
+						console.log('delete checkin with id ' + updatedCheckIn.get('id'));
 						customerIndex = store.indexOf(dirtyCheckIn);
 						store.remove(dirtyCheckIn);	
 						//make sure to load new request so they exist
