@@ -353,11 +353,14 @@ public class CheckInController {
 			throw new CheckInFailureException("Unable to delete checkin, order or payment in progress");
 		}
 		else {
-			
+			Integer checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
 			checkInRepo.ofy().delete(checkInRepo.ofy().query(Order.class).filter("status", "CART").listKeys());
 			checkInRepo.delete(checkIn);
 			
-			eventBus.post(new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true));
+			DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
+			
+			event.setCheckInCount(checkInCount -1 );
+			eventBus.post(event);
 		}			
 	}
 
@@ -413,7 +416,7 @@ public class CheckInController {
 		if(checkIn.getBusiness().getId() != business.getId()) {
 			throw new IllegalArgumentException("Unable to delete checkIn, checkIn does not belong to business");
 		}
-		
+		Integer checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
 		Objectify ofy = checkInRepo.ofy();
 					
 		// Delete requests
@@ -432,7 +435,10 @@ public class CheckInController {
 		checkInRepo.delete(checkIn);
 		
 		// Send event
-		eventBus.post(new DeleteCheckInEvent(checkIn, business, false));
+		DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, business, false);
+		
+		event.setCheckInCount(checkInCount-1);
+		eventBus.post(event);
 	}
 
 	/**
