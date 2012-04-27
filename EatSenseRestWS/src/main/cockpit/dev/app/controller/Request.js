@@ -141,6 +141,33 @@ Ext.define('EatSense.controller.Request',{
 		requestStore.remove(record);
 		requestStore.sync();
 		requestStore.setSyncRemovedRecords(false);
+	},
+	/**
+	* Removes all existing requests which belong to given customer.
+	*
+	*/
+	removeRequestsForCustomerById: function(checkIn) {
+		var me = this,
+			requestStore = Ext.StoreManager.lookup('requestStore'),
+			filtered;
+
+		if(!checkIn) {
+			console.log('no checkin provided');
+			return;
+		}
+
+		console.log('removeRequestsForCustomerById for %s', checkIn.getId());
+
+		filtered = requestStore.queryBy(function(request){
+			if(request.getCheckIn() == checkIn) {
+				return true;
+			}
+		});
+
+		filtered.each(function(requestToRemove) {
+			requestStore.remove(requestToRemove);
+		});
+
 	}
 
 });

@@ -361,11 +361,13 @@ Ext.define('EatSense.controller.Spot', {
 					}
 				} else if (action == "delete") {
 					dirtyCheckIn = store.getById(updatedCheckIn.get('id'));
+
 					if(dirtyCheckIn) {
+						console.log('delete checkin with id ' + updatedCheckIn.get('id') + ' exist');
 						customerIndex = store.indexOf(dirtyCheckIn);
 						store.remove(dirtyCheckIn);	
 						//make sure to load new request so they exist
-						requestCtr.loadRequests();					
+						requestCtr.loadRequests();			
 
 						//clear status panel if deleted checkin is activeCustomer or select another checkin
 						if(me.getActiveCustomer() && updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
@@ -385,8 +387,6 @@ Ext.define('EatSense.controller.Spot', {
 								me.updateCustomerPaymentMethod();
 							}
 						}						
-					} else { 
-						console.log('delete failed: no checkin with id ' + updatedCheckIn.get('id') + ' exist');
 					}
 				} else if(action = 'update-orders') {
 					//update all orders
@@ -717,6 +717,7 @@ Ext.define('EatSense.controller.Spot', {
 	cancelAll: function(button, event) {
 		var 	me = this,
 				loginCtr = this.getApplication().getController('Login'),
+				requestCtr = this.getApplication().getController('Request'),
 				orders = Ext.StoreManager.lookup('orderStore'),
 				checkins = Ext.StoreManager.lookup('checkInStore'),
 				customerList = this.getSpotDetailCustomerList(),
@@ -756,6 +757,7 @@ Ext.define('EatSense.controller.Spot', {
 									'forceLogout': {403: true}
 								});
 							} else {
+								requestCtr.removeRequestsForCustomerById(me.getActiveCustomer());
 								//although a message will be received we update the view directly
 								checkins.remove(me.getActiveCustomer());
 								if(checkins.getCount() > 0) {
