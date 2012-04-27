@@ -657,7 +657,7 @@ public class OrderController {
 					checkIn.setStatus(CheckInStatus.ORDER_PLACED);
 					checkInRepo.saveOrUpdate(checkIn);
 					
-					updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED.toString());
+					updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED);
 				}
 				
 				Request request = new Request();
@@ -729,7 +729,7 @@ public class OrderController {
 				// Get all pending requests sorted by oldest first.
 				List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 				
-				String newCheckInStatus = null;
+				CheckInStatus newCheckInStatus = null;
 				// Save the current assumed spot status for reference.
 				String oldSpotStatus = requests.get(0).getStatus();
 				
@@ -740,16 +740,16 @@ public class OrderController {
 						iterator.remove();
 					}
 					// Look for other order requests for the current checkin as long as we have no new status or there are no more requests ...
-					else if( newCheckInStatus == null && request.getType() == RequestType.ORDER && request.getCheckIn().getId() == checkIn.getId()) {
+					else if( newCheckInStatus == null && request.getType() == RequestType.ORDER && checkIn.getId().equals(request.getCheckIn().getId())) {
 						// ... set the status to the new found one.
-						newCheckInStatus = request.getStatus();
+						newCheckInStatus = CheckInStatus.valueOf(request.getStatus());
 					}
 				}
 				
 				// No other requests for the current checkin were found ...
 				if(newCheckInStatus == null) {
 					// ... set the status back to CHECKEDIN.
-					newCheckInStatus = CheckInStatus.CHECKEDIN.toString();
+					newCheckInStatus = CheckInStatus.CHECKEDIN;
 				}
 				
 				String newSpotStatus;
@@ -768,7 +768,7 @@ public class OrderController {
 				// If the payment hasnt already been requested and the checkin status has changed ...  
 				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
 					// ...update the status of the checkIn in the datastore ...
-					checkIn.setStatus(CheckInStatus.valueOf(newCheckInStatus));
+					checkIn.setStatus(newCheckInStatus);
 					checkInRepo.saveOrUpdate(checkIn);
 					
 					updateOrderEvent.setNewCheckInStatus(newCheckInStatus);
