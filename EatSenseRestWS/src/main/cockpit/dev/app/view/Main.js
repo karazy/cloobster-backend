@@ -23,10 +23,8 @@ Ext.define('EatSense.view.Main', {
 			{
 				xtype: 'label',
 				itemId: 'connectionStatus',
-				tpl: 'Status: {0}'
-			},
-			{
-				xtype: 'spacer'
+				cls: 'status-indicator',
+				tpl: '<span>Status:</span><span class="{0}"></span>'
 			},
 			{
 				xtype: 'button',

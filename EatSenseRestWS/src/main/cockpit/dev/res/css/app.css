@@ -231,3 +231,32 @@
 .cancel-all {
 	-webkit-mask-image: url('res/images/forbidden.png');
 }
+
+/* connections status indicator in bottom toolbar */
+
+.status-indicator .ONLINE {
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	float: right;
+	margin: 0px 0.5em;
+	background-color: green;
+}
+
+.status-indicator .RECONNECT {
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	float: right;
+	margin: 0px 0.5em;
+	background-color: yellow;
+}
+
+.status-indicator .DISCONNECTED {
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	float: right;
+	margin: 0px 0.5em;
+	background-color: red;
+}
