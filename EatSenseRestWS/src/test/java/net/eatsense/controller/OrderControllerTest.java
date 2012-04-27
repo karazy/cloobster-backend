@@ -259,7 +259,7 @@ public class OrderControllerTest {
 		
 		orderCtrl.deleteOrder(business, placedOrder , checkIn);
 		
-		List<Order> orders = orderCtrl.getOrders(business, checkIn, null);
+		List<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn, null);
 		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
 		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.isEmpty(), is(true));

@@ -15,6 +15,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.representation.CustomerRequestDTO;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class RequestsResource {
@@ -39,7 +40,11 @@ public class RequestsResource {
 	@DELETE
 	@Path("{requestId}")
 	public void deleteCustomerRequest(@PathParam("requestId") Long requestId) {
-		businessCtrl.deleteCustomerRequest(business, requestId);
+		try {
+			businessCtrl.deleteCustomerRequest(business, requestId);
+		} catch (IllegalArgumentException e) {
+			throw new NotFoundException();
+		}
 	}
 
 	public void setBusiness(Business business) {
