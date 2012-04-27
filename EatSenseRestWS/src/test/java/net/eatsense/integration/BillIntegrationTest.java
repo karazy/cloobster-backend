@@ -5,11 +5,8 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-
-import java.util.List;
-
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
@@ -17,35 +14,31 @@ import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
-import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
-public class BillIntegrationTest {
+public class BillIntegrationTest  extends RestIntegrationTest{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	String barcode;
 	String server;
-	private String checkInId;
 	private long businessId;
-	private ObjectMapper jsonMapper;
+	
+	public BillIntegrationTest() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	@Before
 	public void setUp() throws Exception {
 		barcode = "hup001";
-		RestAssured.baseURI = "http://localhost";
-		RestAssured.port = 8080;
-		
-		this.jsonMapper = new ObjectMapper();
 	}
 	
 	@Test
@@ -72,7 +65,7 @@ public class BillIntegrationTest {
 				.body("status", equalTo(CheckInStatus.CHECKEDIN.toString()))
 				.when().post("/c/checkins");
 		checkInData = response.as(CheckInDTO.class);
-		checkInId = checkInData.getUserId();
+		checkInData.getUserId();
 		
 		// Get the menu from the restaurant
 		JsonPath menus = expect().statusCode(200).when()
@@ -181,12 +174,5 @@ public class BillIntegrationTest {
 				.when().get("/b/businesses/{id}/spots", businessId);
 		SpotStatusDTO spotStatus = response.jsonPath().getObject("find {p -> p.name == 'Tisch 1'}", SpotStatusDTO.class);
 		assertThat(spotStatus.getStatus(), nullValue());
-	}
-	
-	
-	@After
-	public void tearDown() throws Exception {
-		// delete live data
-		expect().statusCode(204).when().delete("/c/businesses/livedata");
 	}
 }

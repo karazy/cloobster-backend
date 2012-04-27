@@ -4,39 +4,36 @@ import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-
-
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 
-public class RequestIntegrationTest {
+public class RequestIntegrationTest extends RestIntegrationTest {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	String barcode;
 	String server;
 	private String checkInId;
 	private long businessId;
-	private ObjectMapper jsonMapper;
+
+	
+	
+	public RequestIntegrationTest() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	@Before
 	public void setUp() throws Exception {
 		barcode = "hup001";
-		RestAssured.baseURI = "http://localhost";
-		RestAssured.port = 8080;
-		
-		this.jsonMapper = new ObjectMapper();
 	}
 	
 	@Test
@@ -94,12 +91,5 @@ public class RequestIntegrationTest {
 				.expect().statusCode(204)
 				.when().delete("/b/businesses/{id}/requests/{requestid}", businessId, requestData.getId());
 		
-	}
-	
-	
-	@After
-	public void tearDown() throws Exception {
-		// delete live data
-		expect().statusCode(204).when().delete("/c/businesses/livedata");
 	}
 }
