@@ -9,3 +9,4 @@ Misc/SenchaTests/touch/*
 EatSenseRestWS/src/main/app/prod/*/lib/*
 EatSenseRestWS/src/main/app/prod/*/res/*
 *.jsb3
+.xcuserstate
