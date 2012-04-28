@@ -85,7 +85,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	var messageCtr = this.getApplication().getController('Message');
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
-      this.getApplication().on('statusChanged', this.handleStatusChange, this);
+      this.on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
 
     	 //private functions
@@ -190,7 +190,7 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    checkInConfirm: function(options) {
 	   var checkInDialog = this.getCheckinconfirmation(), 
-		main = this.getMain(),
+		    main = this.getMain(),
 		checkIn = Ext.create('EatSense.model.CheckIn');		
 			
 	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
@@ -223,16 +223,19 @@ Ext.define('EatSense.controller.CheckIn', {
 	   var     me = this,
 	           nickname = Ext.String.trim(this.getNickname().getValue()),
 	           nicknameToggle = this.getNicknameTogglefield(),
-               messageCtr = this.getApplication().getController('Message');
-	    
+             messageCtr = this.getApplication().getController('Message'),
+             checkInDialog = this.getCheckinconfirmation();
+
 	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {		   
+          checkInDialog.showLoadScreen(true);
 		      this.getActiveCheckIn().set('nickname',nickname);		  	   
 		      this.getActiveCheckIn().save(
 					   {
 					   	    success: function(response) {
+                    checkInDialog.showLoadScreen(false);
 					   	    console.log("CheckIn Controller -> checkIn success");
 					   	    //currently disabled, will be enabled when linking to users actually makes sense
 //					   	     me.showCheckinWithOthers();					   	    
@@ -258,6 +261,7 @@ Ext.define('EatSense.controller.CheckIn', {
                                 }
 					   	    },
 					   	    failure: function(response, operation) {			   	    	
+                    checkInDialog.showLoadScreen(false);
                                 me.getApplication().handleServerError({
                                     'error': operation.error, 
                                     'forceLogout':{403 : true}
