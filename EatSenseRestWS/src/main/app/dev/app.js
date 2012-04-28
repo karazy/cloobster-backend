@@ -159,7 +159,7 @@ Ext.application({
                     break;
                 case 0:
                 	//communication failure, could not contact server
-                	if(typeof message == "object" && message[0])) {
+                	if(typeof message == "object" && message[0]) {
                 		errMsg = message[0];
                     } else {
                     	errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorCommunication');
@@ -169,7 +169,7 @@ Ext.application({
                     }
                 	break;
                 default:
-                    if(typeof message == "object" && message[500])) {
+                    if(typeof message == "object" && message[500]) {
                     	errMsg = message[500];                    
                     } else {
                     	try {

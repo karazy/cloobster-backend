@@ -774,7 +774,8 @@
 	*	Handles push notifications for orders.
 	*/
 	handleOrderMessage: function(action, updatedOrder) {
-		var orderStore = Ext.StoreManager.lookup('orderStore'),
+		var me = this,
+			orderStore = Ext.StoreManager.lookup('orderStore'),
 			oldOrder,
 			total;
 
@@ -794,6 +795,8 @@
 			oldOrder = orderStore.getById(updatedOrder.id);
 			if(oldOrder) {
 				orderStore.remove(oldOrder);
+				total = me.calculateOrdersTotal(orderStore);
+				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),
