@@ -359,9 +359,9 @@ Ext.define('EatSense.controller.Menu', {
 	    	    },
 	    	    failure: function(response, operation) {
 	    	    	me.getApplication().handleServerError({
-                        	'error': operation.error, 
+                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
                         	'forceLogout': {403:true}
-                        }); 
+                    }); 
 	    	    }
 	    	});
 			

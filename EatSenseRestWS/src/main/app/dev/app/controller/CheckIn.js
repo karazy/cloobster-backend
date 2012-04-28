@@ -85,7 +85,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	var messageCtr = this.getApplication().getController('Message');
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
-      this.on('statusChanged', this.handleStatusChange, this);
+      this.getApplication().on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
 
     	 //private functions
@@ -236,36 +236,36 @@ Ext.define('EatSense.controller.CheckIn', {
 					   {
 					   	    success: function(response) {
                     checkInDialog.showLoadScreen(false);
-					   	    console.log("CheckIn Controller -> checkIn success");
-					   	    //currently disabled, will be enabled when linking to users actually makes sense
-//					   	     me.showCheckinWithOthers();					   	    
-					   	     me.showMenu();
-					   	     me.getAppState().set('checkInId', response.get('userId'));
+  					   	    console.log("CheckIn Controller -> checkIn success");
+  					   	    //currently disabled, will be enabled when linking to users actually makes sense
+                    //me.showCheckinWithOthers();					   	    
+  					   	     me.showMenu();
+  					   	     me.getAppState().set('checkInId', response.get('userId'));
 
-                            //Set default headers so that always checkInId is send
-                            Ext.Ajax.setDefaultHeaders({
-                                'checkInId': response.get('userId'),
-                                'pathId' : me.getActiveCheckIn().get('businessId')
-                            });
-					   	     
-					   	    //save nickname in settings
-							   if(nicknameToggle.getValue() == 1) {
-								   me.getAppState().set('nickname', nickname);
-								   nicknameToggle.reset();
-							   }
-                               //open a channel for push messags
-                               try {
-                                    messageCtr.openChannel(response.get('userId'));
-                                } catch(e) {
-                                    console.log('could not open a channel ' + e);
-                                }
+                    //Set default headers so that always checkInId is send
+                    Ext.Ajax.setDefaultHeaders({
+                        'checkInId': response.get('userId'),
+                        'pathId' : me.getActiveCheckIn().get('businessId')
+                    });
+  					   	     
+  					   	    //save nickname in settings
+  							   if(nicknameToggle.getValue() == 1) {
+  								   me.getAppState().set('nickname', nickname);
+  								   nicknameToggle.reset();
+  							   }
+                   //open a channel for push messags
+                   try {
+                        messageCtr.openChannel(response.get('userId'));
+                    } catch(e) {
+                        console.log('could not open a channel ' + e);
+                    }
 					   	    },
-					   	    failure: function(response, operation) {			   	    	
+					   	    failure: function(response, operation) {
                     checkInDialog.showLoadScreen(false);
-                                me.getApplication().handleServerError({
-                                    'error': operation.error, 
-                                    'forceLogout':{403 : true}
-                                }); 
+                    me.getApplication().handleServerError({
+                      'error': operation.error, 
+                      'forceLogout':{403 : true}
+                    }); 
 					   	    }
 					   }	   
 			   );
@@ -504,7 +504,6 @@ Ext.define('EatSense.controller.CheckIn', {
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
             orderCtr.refreshCartBadgeText();
-
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
