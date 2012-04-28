@@ -29,7 +29,8 @@ Ext.define('EatSense.controller.Request',{
 		request.save({
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
-					'error': operation.error
+					'error': operation.error,
+					forceLogout: {403: true}
 				});
 			}
 		});

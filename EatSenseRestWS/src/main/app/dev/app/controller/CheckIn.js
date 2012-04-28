@@ -85,6 +85,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	var messageCtr = this.getApplication().getController('Message');
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
+      this.getApplication().on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
 
     	 //private functions
