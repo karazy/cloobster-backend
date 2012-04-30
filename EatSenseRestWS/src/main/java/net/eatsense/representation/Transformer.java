@@ -3,6 +3,7 @@ package net.eatsense.representation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.googlecode.objectify.Key;
 
 /**
  * Class for transforming from/to Data Transfer Objects (DTOs)
@@ -74,9 +76,37 @@ public class Transformer {
 			logger.info("orders are null or empty");
 		}
 		else {
+			List<Key<Product>> productKeys = new ArrayList<Key<Product>>(orders.size());
+			List<Key<OrderChoice>> choiceKeys = new ArrayList<Key<OrderChoice>>();
 			for (Order order : orders) {
-				dtos.add(orderToDto( order ));
-			}	
+				// Add keys to lists for loading.
+				productKeys.add(order.getProduct());
+				choiceKeys.addAll(order.getChoices());
+			}
+			Map<Key<Product>, Product> productMap = productRepo.getByKeysAsMap(productKeys);
+			Map<Key<OrderChoice>, OrderChoice> choicesMap = orderChoiceRepo.getByKeysAsMap(choiceKeys);
+			
+			for (Order order : orders) {
+				OrderDTO orderDto = new OrderDTO();
+				orderDto.setId(order.getId());
+				orderDto.setAmount(order.getAmount());
+				orderDto.setOrderTime(order.getOrderTime());
+				orderDto.setStatus(order.getStatus());
+				orderDto.setComment(order.getComment());
+				orderDto.setCheckInId(order.getCheckIn().getId());
+				orderDto.setProduct(productToDtoOmitChoices(productMap.get(order.getProduct())));
+				
+				if( !order.getChoices().isEmpty() ) {
+					ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
+					
+					for (Key<OrderChoice> choiceKey : order.getChoices()) {
+						choiceDtos.add(choiceToDto( choicesMap.get(choiceKey).getChoice()));
+					}
+					orderDto.getProduct().setChoices(choiceDtos);
+				}
+					
+				dtos.add( orderDto );
+			}
 		}
 		return dtos;	
 	}
