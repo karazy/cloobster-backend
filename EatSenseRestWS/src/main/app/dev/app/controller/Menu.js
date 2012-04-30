@@ -349,9 +349,9 @@ Ext.define('EatSense.controller.Menu', {
 			//if valid create order and attach to checkin
 			activeCheckIn.orders().add(order);
 			
-			Ext.Ajax.request({				
+			Ext.Ajax.request({
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
-	    	    method: 'POST',    	    
+	    	    method: 'POST',
 	    	    jsonData: order.getRawJsonData(),
 	    	    success: function(response, operation) {
 	    	    	order.setId(response.responseText);
@@ -359,9 +359,9 @@ Ext.define('EatSense.controller.Menu', {
 	    	    },
 	    	    failure: function(response, operation) {
 	    	    	me.getApplication().handleServerError({
-                        	'error': operation.error, 
+                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
                         	'forceLogout': {403:true}
-                        }); 
+                    }); 
 	    	    }
 	    	});
 			
@@ -382,7 +382,9 @@ Ext.define('EatSense.controller.Menu', {
 				});
 				//show short alert and then hide
 				Ext.defer((function() {
-					Ext.Msg.hide();
+					if(!Karazy.util.getAlertActive()) {
+						Ext.Msg.hide();
+					}					
 				}), Karazy.config.msgboxHideTimeout, this);
 			}
 		} else {

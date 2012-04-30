@@ -29,7 +29,8 @@ Ext.define('EatSense.controller.Request',{
 		request.save({
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
-					'error': operation.error
+					'error': operation.error,
+					forceLogout: {403: true}
 				});
 			}
 		});
@@ -42,7 +43,9 @@ Ext.define('EatSense.controller.Request',{
 		});
 		
 		Ext.defer((function() {
-			Ext.Msg.hide();
+			if(!Karazy.util.getAlertActive()) {
+				Ext.Msg.hide();
+			}
 		}), Karazy.config.msgboxHideLongTimeout, this);
 	}
 });

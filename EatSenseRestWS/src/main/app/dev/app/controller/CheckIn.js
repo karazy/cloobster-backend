@@ -85,6 +85,7 @@ Ext.define('EatSense.controller.CheckIn', {
     	var messageCtr = this.getApplication().getController('Message');
     	 
     	this.on('statusChanged', this.handleStatusChange, this);
+      this.getApplication().on('statusChanged', this.handleStatusChange, this);
     	messageCtr.on('eatSense.checkin', this.handleCheckInMessage, this);
 
     	 //private functions
@@ -163,13 +164,18 @@ Ext.define('EatSense.controller.CheckIn', {
             }); 
             // barcode = Ext.String.trim(this.getSearchfield().getValue());
     	} else if(this.getProfile() == 'phone' || this.getProfile() == 'tablet') {
-    			window.plugins.barcodeScanner.scan(function(result, barcode) {
-    			barcode = result.text;
-    			console.log('scanned ' + barcode);
-    			that.getDashboard().showLoadScreen(true);
-    			//FR 28.03.12 apple rejects apps which track device uuid
-    			// deviceId = device.uuid;
-    			that.doCheckInIntent(barcode, button, deviceId);
+    			window.plugins.barcodeScanner.scan(function(result) {
+            if(!result.cancelled) {
+              barcode = result.text;
+              console.log('scanned ' + barcode);
+              that.getDashboard().showLoadScreen(true);
+              //FR 28.03.12 apple rejects apps which track device uuid
+              // deviceId = device.uuid;
+              that.doCheckInIntent(barcode, button, deviceId);
+            } else {
+              console.log('user cancelled scan');
+              button.enable();
+            }
     		}, function(error) {
     			Ext.Msg.alert("Scanning failed: " + error, Ext.emptyFn);
     		});
@@ -184,7 +190,7 @@ Ext.define('EatSense.controller.CheckIn', {
     */
    checkInConfirm: function(options) {
 	   var checkInDialog = this.getCheckinconfirmation(), 
-		main = this.getMain(),
+		    main = this.getMain(),
 		checkIn = Ext.create('EatSense.model.CheckIn');		
 			
 	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
@@ -217,45 +223,49 @@ Ext.define('EatSense.controller.CheckIn', {
 	   var     me = this,
 	           nickname = Ext.String.trim(this.getNickname().getValue()),
 	           nicknameToggle = this.getNicknameTogglefield(),
-               messageCtr = this.getApplication().getController('Message');
-	    
+             messageCtr = this.getApplication().getController('Message'),
+             checkInDialog = this.getCheckinconfirmation();
+
 	 //get CheckIn Object and save it.	   
 	   if(nickname.length < 3) {
 		   Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), Karazy.i18n.translate('checkInErrorNickname',3,25), Ext.emptyFn);
 	   } else {		   
+          checkInDialog.showLoadScreen(true);
 		      this.getActiveCheckIn().set('nickname',nickname);		  	   
 		      this.getActiveCheckIn().save(
 					   {
 					   	    success: function(response) {
-					   	    console.log("CheckIn Controller -> checkIn success");
-					   	    //currently disabled, will be enabled when linking to users actually makes sense
-//					   	     me.showCheckinWithOthers();					   	    
-					   	     me.showMenu();
-					   	     me.getAppState().set('checkInId', response.get('userId'));
+                    checkInDialog.showLoadScreen(false);
+  					   	    console.log("CheckIn Controller -> checkIn success");
+  					   	    //currently disabled, will be enabled when linking to users actually makes sense
+                    //me.showCheckinWithOthers();					   	    
+  					   	     me.showMenu();
+  					   	     me.getAppState().set('checkInId', response.get('userId'));
 
-                            //Set default headers so that always checkInId is send
-                            Ext.Ajax.setDefaultHeaders({
-                                'checkInId': response.get('userId'),
-                                'pathId' : me.getActiveCheckIn().get('businessId')
-                            });
-					   	     
-					   	    //save nickname in settings
-							   if(nicknameToggle.getValue() == 1) {
-								   me.getAppState().set('nickname', nickname);
-								   nicknameToggle.reset();
-							   }
-                               //open a channel for push messags
-                               try {
-                                    messageCtr.openChannel(response.get('userId'));
-                                } catch(e) {
-                                    console.log('could not open a channel ' + e);
-                                }
+                    //Set default headers so that always checkInId is send
+                    Ext.Ajax.setDefaultHeaders({
+                        'checkInId': response.get('userId'),
+                        'pathId' : me.getActiveCheckIn().get('businessId')
+                    });
+  					   	     
+  					   	    //save nickname in settings
+  							   if(nicknameToggle.getValue() == 1) {
+  								   me.getAppState().set('nickname', nickname);
+  								   nicknameToggle.reset();
+  							   }
+                   //open a channel for push messags
+                   try {
+                        messageCtr.openChannel(response.get('userId'));
+                    } catch(e) {
+                        console.log('could not open a channel ' + e);
+                    }
 					   	    },
-					   	    failure: function(response, operation) {			   	    	
-                                me.getApplication().handleServerError({
-                                    'error': operation.error, 
-                                    'forceLogout':{403 : true}
-                                }); 
+					   	    failure: function(response, operation) {
+                    checkInDialog.showLoadScreen(false);
+                    me.getApplication().handleServerError({
+                      'error': operation.error, 
+                      'forceLogout':{403 : true}
+                    }); 
 					   	    }
 					   }	   
 			   );
@@ -494,7 +504,6 @@ Ext.define('EatSense.controller.CheckIn', {
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
             orderCtr.refreshCartBadgeText();
-
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();

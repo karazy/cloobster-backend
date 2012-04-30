@@ -8,13 +8,18 @@ var Karazy = (Karazy) ? Karazy : {},
 /**
  * Contains convenient functions.
  */
-Karazy.util = (function() {
+Karazy.util = (function() {	
 
 	for(precondition in requires) {
 		if(!requires[precondition]) {
 			console.log('Some functions of this class may need %s to properly work. Make sure inclusion order is correct.', precondition);
 		}
 	}
+
+	/**
+	* Indicates if an alert message is active.
+	*/
+	var alertActive = false;
 	
 	return {
 		
@@ -86,7 +91,19 @@ Karazy.util = (function() {
 
 
 			return (formattedPrice != "") ? formattedPrice : price;
-
+		},
+		/**
+		* True to indicate that an alert message is active.
+		* Can be used to prevent automatic message box hiding.
+		*/
+		toggleAlertActive: function(active) {
+			alertActive = active;
+		},
+		/**
+		* Get status of alertActive.
+		*/
+		getAlertActive: function() {
+			return alertActive;
 		}
 		
 	};
