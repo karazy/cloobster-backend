@@ -2,8 +2,6 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,7 +27,6 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.event.ConfirmAllOrdersEvent;
-import net.eatsense.event.MultiUpdateEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.OrderFailureException;
@@ -40,7 +37,6 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.representation.OrderCartDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -48,7 +44,6 @@ import net.eatsense.representation.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
