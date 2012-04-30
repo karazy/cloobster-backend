@@ -222,7 +222,9 @@
 							});
 							
 							Ext.defer((function() {
-								Ext.Msg.hide();
+								if(!Karazy.util.getAlertActive()) {
+									Ext.Msg.hide();
+								}
 							}), Karazy.config.msgboxHideTimeout, this);
 						},
 						failure: function(response) {
@@ -475,7 +477,9 @@
 			});
 			//show short alert and then hide
 			Ext.defer((function() {
-				Ext.Msg.hide();
+				if(!Karazy.util.getAlertActive()) {
+						Ext.Msg.hide();
+				}
 			}), Karazy.config.msgboxHideTimeout, this);
 	},
 
@@ -688,7 +692,9 @@
 		});
 		
 		Ext.defer((function() {
-			Ext.Msg.hide();
+			if(!Karazy.util.getAlertActive()) {
+				Ext.Msg.hide();
+			}
 		}), Karazy.config.msgboxHideLongTimeout, this);		
 
 	},
@@ -774,7 +780,8 @@
 	*	Handles push notifications for orders.
 	*/
 	handleOrderMessage: function(action, updatedOrder) {
-		var orderStore = Ext.StoreManager.lookup('orderStore'),
+		var me = this,
+			orderStore = Ext.StoreManager.lookup('orderStore'),
 			oldOrder,
 			total;
 
@@ -794,6 +801,8 @@
 			oldOrder = orderStore.getById(updatedOrder.id);
 			if(oldOrder) {
 				orderStore.remove(oldOrder);
+				total = me.calculateOrdersTotal(orderStore);
+				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),
@@ -802,7 +811,9 @@
 				});
 				
 				Ext.defer((function() {
-					Ext.Msg.hide();
+					if(!Karazy.util.getAlertActive()) {
+						Ext.Msg.hide();
+					}
 				}), Karazy.config.msgboxHideTimeout, this);
 			}
 

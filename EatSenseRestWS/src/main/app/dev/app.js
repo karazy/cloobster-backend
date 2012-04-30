@@ -109,6 +109,8 @@ Ext.application({
 	   		 checkInCtr.showDashboard();
 	   	 }	
 	},
+
+	//Global utility methods
 	/**
     *   Gloabl handler that can be used to handle errors occuring from server requests.
     *   @param options
@@ -131,19 +133,16 @@ Ext.application({
                forceLogout = options.forceLogout,
                hideMessage = options.hideMessage,
                message = options.message;
-        if(error && error.status) {
+        if(error && typeof error.status == 'number') {
         	console.log('error '+ error.status + ' ' + error.statusText);
+        	Karazy.util.toggleAlertActive(true);
             switch(error.status) {
                 case 403:
-                    //no access
-                    if(message) {
-                    	if(message[403]) {
-                    		errMsg = message[403];
-                    	} else {
-                    		errMsg = message;
-                    	}
+                    //no permission
+                    if(typeof message == "object" && message[403]) {
+                    	errMsg = message[403];
                     } else {
-                    	errMsg = Karazy.i18n.translate('errorPermission');
+                    	errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorPermission');
                     }
                     
                     if(forceLogout && (forceLogout[403] === true || forceLogout === true)) {
@@ -152,33 +151,36 @@ Ext.application({
                     break;
                 case 404:
                     //could not load resource or server is not reachable
-                    if(message) {
-                    	if(message[404]) {
-                    		errMsg = message[404];
-                    	} else {
-                    		errMsg = message;
-                    	}
+                    if(typeof message == "object" && message[404]) {
+                    	errMsg =  message[404];
                     } else {
-                    	errMsg = Karazy.i18n.translate('errorResource');
+                    	errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorResource');
                     }
                     if(forceLogout && (forceLogout[404] === true || forceLogout === true)) {
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
                     }
                     break;
+                case 0:
+                	//communication failure, could not contact server
+                	if(typeof message == "object" && message[0]) {
+                		errMsg = message[0];
+                    } else {
+                    	errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorCommunication');
+                    }
+                    if(forceLogout && (forceLogout[0] === true || forceLogout === true)) {
+                        this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
+                    }
+                	break;
                 default:
-                    if(message) {
-                    	if(message[500]) {
-	                    	errMsg = message[500];
-	                    } else {
-	                    	errMsg = message;
-	                    }	                    
+                    if(typeof message == "object" && message[500]) {
+                    	errMsg = message[500];                    
                     } else {
                     	try {
                          //TODO Bug in error message handling in some browsers
                         nestedError = Ext.JSON.decode(error.statusText);
 	                    errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
 	                    } catch (e) {
-	                        errMsg = Karazy.i18n.translate('errorMsg');
+	                        errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorMsg');
 	                    }
                     }
                     if(forceLogout && (forceLogout[500] === true || forceLogout === true)) {
@@ -188,7 +190,9 @@ Ext.application({
             }
         }
         if(!hideMessage) {
-        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, Ext.emptyFn);	
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, function() {
+        		Karazy.util.toggleAlertActive(false);
+        	});	
         }
     }
 });

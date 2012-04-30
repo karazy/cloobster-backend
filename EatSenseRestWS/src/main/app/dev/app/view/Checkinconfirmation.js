@@ -72,5 +72,16 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			margin : 5
 		}
 		]
+	},
+	
+	showLoadScreen : function(mask) {
+		if (mask) {
+			this.setMasked({
+				message : Karazy.i18n.translate('loadingMsg'),
+				xtype : 'loadmask'
+			});
+		} else {
+			this.setMasked(false);
+		}
 	}
 });

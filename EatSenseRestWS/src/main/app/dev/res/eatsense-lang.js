@@ -1,4 +1,4 @@
-var translation = {
+var translationData = {
 	"DE" : {
 
 		// General translations
@@ -7,11 +7,7 @@ var translation = {
 		"back" : "zurück",
 		"change" : "Ändern",
 		"barcode" : "Barcode",
-		"errorTitle" : "Fehler",
 		"close" : "Schliessen",
-		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
-		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
-		"errorPermission" : "Deine Sitzung ist ungültig.",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
@@ -83,9 +79,13 @@ var translation = {
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "Aktionen",
 		"requestsTitle" : "Aktionen",
-		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen."	
-
-
+		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen.",	
+		//general errors
+		"errorTitle" : "Fehler",		
+		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
+		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
+		"errorPermission" : "Deine Sitzung ist ungültig.",
+		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!"
 	}
 
 };
