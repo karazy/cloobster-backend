@@ -152,10 +152,30 @@ public class Transformer {
 	public List<ProductDTO> productsToDto(List<Product> products) {
 		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
 		if(products != null) {
+			List<Key<Choice>> choiceKeys = new ArrayList<Key<Choice>>();
+			//Collect all choices for a batch load.
 			for( Product p : products) {
-				ProductDTO dto = productToDto(p);
-				productDTOs.add(dto);
-			}	
+				if(p.getChoices() != null && !p.getChoices().isEmpty() ) {
+					choiceKeys.addAll(p.getChoices());
+				}
+			}
+			//Load all choices with one query.
+			Map<Key<Choice>, Choice> choiceMap = choiceRepo.getByKeysAsMap(choiceKeys);
+			
+			//Build dto objects.
+			for( Product p : products) {
+				ProductDTO productDto = productToDtoOmitChoices(p);
+				if( p.getChoices() != null && !p.getChoices().isEmpty() ) {
+					ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
+					
+					for (Key<Choice> choiceKey : p.getChoices())  {
+						choiceDtos.add( choiceToDto( choiceMap.get(choiceKey)) );
+					}
+					
+					productDto.setChoices(choiceDtos);
+				}
+				productDTOs.add(productDto);
+			}
 		}
 		return productDTOs;
 	}
