@@ -3,7 +3,9 @@
  */
 package net.eatsense.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
@@ -16,6 +18,7 @@ import net.eatsense.domain.embedded.OrderStatus;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 /**
  * @author Nils Weiher
@@ -52,7 +55,8 @@ public class Order extends GenericEntity {
 	@NotNull
 	OrderStatus status;
 	
-	
+	@Unindexed
+	private List<Key<OrderChoice>> choices = new ArrayList<Key<OrderChoice>>();
 
 	public int getAmount() {
 		return amount;
@@ -151,6 +155,16 @@ public class Order extends GenericEntity {
 
 	public void setStatus(OrderStatus status) {
 		this.status = status;
+	}
+
+
+	public List<Key<OrderChoice>> getChoices() {
+		return choices;
+	}
+
+
+	public void setChoices(List<Key<OrderChoice>> choices) {
+		this.choices = choices;
 	}
 
 }
