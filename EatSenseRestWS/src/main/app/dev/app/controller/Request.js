@@ -43,7 +43,9 @@ Ext.define('EatSense.controller.Request',{
 		});
 		
 		Ext.defer((function() {
-			Ext.Msg.hide();
+			if(!Karazy.util.getAlertActive()) {
+				Ext.Msg.hide();
+			}
 		}), Karazy.config.msgboxHideLongTimeout, this);
 	}
 });

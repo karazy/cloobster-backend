@@ -109,6 +109,8 @@ Ext.application({
 	   		 checkInCtr.showDashboard();
 	   	 }	
 	},
+
+	//Global utility methods
 	/**
     *   Gloabl handler that can be used to handle errors occuring from server requests.
     *   @param options
@@ -133,6 +135,7 @@ Ext.application({
                message = options.message;
         if(error && typeof error.status == 'number') {
         	console.log('error '+ error.status + ' ' + error.statusText);
+        	Karazy.util.toggleAlertActive(true);
             switch(error.status) {
                 case 403:
                     //no permission
@@ -187,7 +190,9 @@ Ext.application({
             }
         }
         if(!hideMessage) {
-        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, Ext.emptyFn);	
+        	Ext.Msg.alert(Karazy.i18n.translate('errorTitle'), errMsg, function() {
+        		Karazy.util.toggleAlertActive(false);
+        	});	
         }
     }
 });

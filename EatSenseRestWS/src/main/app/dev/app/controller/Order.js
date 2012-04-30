@@ -222,7 +222,9 @@
 							});
 							
 							Ext.defer((function() {
-								Ext.Msg.hide();
+								if(!Karazy.util.getAlertActive()) {
+									Ext.Msg.hide();
+								}
 							}), Karazy.config.msgboxHideTimeout, this);
 						},
 						failure: function(response) {
@@ -475,7 +477,9 @@
 			});
 			//show short alert and then hide
 			Ext.defer((function() {
-				Ext.Msg.hide();
+				if(!Karazy.util.getAlertActive()) {
+						Ext.Msg.hide();
+				}
 			}), Karazy.config.msgboxHideTimeout, this);
 	},
 
@@ -688,7 +692,9 @@
 		});
 		
 		Ext.defer((function() {
-			Ext.Msg.hide();
+			if(!Karazy.util.getAlertActive()) {
+				Ext.Msg.hide();
+			}
 		}), Karazy.config.msgboxHideLongTimeout, this);		
 
 	},
@@ -805,7 +811,9 @@
 				});
 				
 				Ext.defer((function() {
-					Ext.Msg.hide();
+					if(!Karazy.util.getAlertActive()) {
+						Ext.Msg.hide();
+					}
 				}), Karazy.config.msgboxHideTimeout, this);
 			}
 
