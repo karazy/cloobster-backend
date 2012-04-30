@@ -21,10 +21,11 @@ Ext.define('EatSense.view.RequestsTab', {
 			},
 			{
 				xtype: 'button',
-				text: 'Bedienung rufen',
+				text: Karazy.i18n.translate('callWaiterButton'),
 				action: 'waiter',
 				ui: 'action'
-			}
+				// badgeCls: 'call-waiter-badge'
+			},
 		]
 	}
 });

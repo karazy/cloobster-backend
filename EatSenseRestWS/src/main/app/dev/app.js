@@ -11,7 +11,7 @@ Ext.application({
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
 	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge'], 
-	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill'],
+	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill', 'Request'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
 	requires: [
@@ -134,8 +134,10 @@ Ext.application({
                hideMessage = options.hideMessage,
                message = options.message;
         if(error && typeof error.status == 'number') {
-        	console.log('error '+ error.status + ' ' + error.statusText);
-        	Karazy.util.toggleAlertActive(true);
+        	console.log('handle error: '+ error.status + ' ' + error.statusText);
+        	if(!hideMessage) {
+        		Karazy.util.toggleAlertActive(true);
+        	}
             switch(error.status) {
                 case 403:
                     //no permission
