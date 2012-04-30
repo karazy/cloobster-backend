@@ -159,6 +159,4 @@ public class CheckInResource {
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;
 	}
-	
-	
 }
