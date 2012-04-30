@@ -79,7 +79,9 @@ var translationData = {
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "Aktionen",
 		"requestsTitle" : "Aktionen",
-		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen.",	
+		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen.",
+		"callWaiterButton" : "Bedienung rufen",
+		"callWaiterRequestBadge" : "Kellner gerufen",	
 		//general errors
 		"errorTitle" : "Fehler",		
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",

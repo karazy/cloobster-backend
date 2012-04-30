@@ -412,10 +412,11 @@ Ext.define('EatSense.controller.CheckIn', {
 	 * 		Restored checkin
 	 */
 	restoreState: function(checkIn) {
-		var   me = this,
-              main = this.getMain(),
-		      orderCtr = this.getApplication().getController('Order'),
-              messageCtr = this.getApplication().getController('Message');
+		var me = this,
+        main = this.getMain(),
+		    orderCtr = this.getApplication().getController('Order'),
+        messageCtr = this.getApplication().getController('Message'),
+        requestCtr = this.getApplication().getController('Request');
 
         this.setActiveCheckIn(checkIn);
         //reload of application before hitting leave button
@@ -456,20 +457,21 @@ Ext.define('EatSense.controller.CheckIn', {
    				}						
    			});
 
-           //open a channel for push messags
-           try {
-                messageCtr.openChannel(checkIn.get('userId'));
-            } catch(e) {
-                console.log('could not open a channel ' + e);
-            }
-
-    	    },
-    	    failure: function(record, operation) {
-    	    	me.getApplication().handleServerError({
-                    'error':operation.error
-                });        	    	
-    	    }
-		});						
+         //open a channel for push messags
+         try {
+              messageCtr.openChannel(checkIn.get('userId'));
+          } catch(e) {
+              console.log('could not open a channel ' + e);
+          }
+  	    },
+  	    failure: function(record, operation) {
+  	    	me.getApplication().handleServerError({
+                  'error':operation.error
+              });        	    	
+  	    }
+		});	
+    //restore existing requests
+    requestCtr.loadRequests();					
 	},	
 	/**
 	 * This method handle status changes. It checks if valid transsions are made.
