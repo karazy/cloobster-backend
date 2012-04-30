@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -225,10 +226,8 @@ public class OrderController {
 				// validate choices
 				Set<ConstraintViolation<OrderChoice>> choiceViolations = validator.validate(orderChoice);
 				
-				if(choiceViolations.isEmpty()) {
-					order.getChoices().add(orderChoiceRepo.saveOrUpdate(orderChoice));
-				}
-				else { // handle validation errors ...
+				if ( !choiceViolations.isEmpty()) {
+					// handle validation errors ...
 					StringBuilder sb = new StringBuilder();
 					sb.append("Choice validation failed:\n");
 					
@@ -238,8 +237,9 @@ public class OrderController {
 					}
 					String message = sb.toString();
 					throw new IllegalArgumentException(message);
-				}	
+				}
 			}
+			order.getChoices().addAll(orderChoiceRepo.saveOrUpdate(choices).keySet());
 			
 			if(!order.getChoices().isEmpty())
 				orderRepo.saveOrUpdate(order);
@@ -429,6 +429,7 @@ public class OrderController {
 		if(orderData.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
 			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
+			Map<Key<Choice>, Choice> originalChoiceMap = choiceRepo.getByKeysAsMap(product.getChoices());
 			
 			HashMap<Long, ChoiceDTO> activeChoiceMap = new HashMap<Long, ChoiceDTO>();
 			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
@@ -437,12 +438,10 @@ public class OrderController {
 				if(choiceDto.getParent() == null) {
 					OrderChoice choice = new OrderChoice();
 					
-					Choice originalChoice;
-					try {
-						originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
-					} catch (com.googlecode.objectify.NotFoundException e) {
-						throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
-					}
+					Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
+					if(originalChoice == null)
+						throw new IllegalArgumentException("Order cannot be placed, unknown choice id " + choiceDto.getId());
+					
 					if(choiceDto.getOptions() != null ) {
 						selected = checkOptions(choiceDto, originalChoice);
 						
@@ -465,12 +464,10 @@ public class OrderController {
 			}
 			
 			for (ChoiceDTO choiceDto : childChoiceDtos) {
-				Choice originalChoice;
-				try {
-					originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
-				} catch (com.googlecode.objectify.NotFoundException e) {
-					throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
-				}
+				Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
+				if(originalChoice == null)
+					throw new IllegalArgumentException("Order cannot be placed, unknown choice id " + choiceDto.getId());
+				
 				// Check that the parent choice has been selected.
 				if(activeChoiceMap.containsKey(choiceDto.getParent())) {
 					if(choiceDto.getOptions() != null ) {
