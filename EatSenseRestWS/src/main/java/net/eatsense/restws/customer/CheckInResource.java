@@ -1,5 +1,7 @@
 package net.eatsense.restws.customer;
 
+import java.util.Collection;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -7,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -17,6 +20,7 @@ import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 
@@ -83,6 +87,17 @@ public class CheckInResource {
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}
 	
+	@GET
+	@Path("requests")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
+	public Collection<CustomerRequestDTO> getRequests() {
+		if(authenticated)
+			return businessCtrlProvider.get().getCustomerRequestsForCheckIn(checkIn);
+		else
+			throw new WebApplicationException(Status.FORBIDDEN);
+	}
+	
 	@POST
 	@Path("requests")
 	@Consumes("application/json; charset=UTF-8")
@@ -91,6 +106,20 @@ public class CheckInResource {
 	public CustomerRequestDTO postRequest(CustomerRequestDTO requestData) {
 		if(authenticated)
 			return businessCtrlProvider.get().saveCustomerRequest( checkIn, requestData);
+		else
+			throw new WebApplicationException(Status.FORBIDDEN);
+	}
+	
+	@DELETE
+	@RolesAllowed({"guest"})
+	@Path("requests/{requestId}")
+	public void deleteRequest(@PathParam("requestId") long requestId) {
+		if(authenticated)
+			try {
+				businessCtrlProvider.get().deleteCustomerRequestForCheckIn(checkIn, requestId);
+			} catch (IllegalAccessException e) {
+				throw new WebApplicationException(e, Status.FORBIDDEN);
+			}
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}
