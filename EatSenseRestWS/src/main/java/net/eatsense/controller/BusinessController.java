@@ -209,7 +209,7 @@ public class BusinessController {
 		checkNotNull(checkIn.getBusiness(), "checkIn business cannot be null");
 		
 		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
-		List<Request> requests = requestRepo.query().ancestor(checkIn.getBusiness()).filter("checkin", checkIn).list();
+		List<Request> requests = requestRepo.query().ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();
 		
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {

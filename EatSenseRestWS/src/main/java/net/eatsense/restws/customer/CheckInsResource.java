@@ -58,11 +58,12 @@ public class CheckInsResource {
 	public CheckInResource getCheckInResource(@PathParam("checkInUid") String checkInUid) {
 		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		// Check that the authenticated checkin owns the entity
 		boolean authenticated = checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId());
 
 		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
 		checkInResource.setCheckIn(checkInFromPath);
-		// Check that the authenticated checkin owns the entity
+
 		checkInResource.setAuthenticated(authenticated);
 		
 		return checkInResource;
