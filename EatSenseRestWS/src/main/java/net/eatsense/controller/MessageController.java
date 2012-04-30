@@ -128,6 +128,11 @@ public class MessageController {
 		
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
+		if(!event.isFromCheckIn()) {
+			channelCtrl.sendMessageToCheckIn(event.getRequest().getCheckIn().getId(),
+					new MessageDTO("request", "delete", requestData));
+		}
+		
 		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
 	

@@ -14,6 +14,7 @@ import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
@@ -190,15 +191,69 @@ public class BusinessController {
 		} catch (com.googlecode.objectify.NotFoundException e1) {
 			throw new IllegalArgumentException("request not found", e1);
 		}
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
-
-		requestData.setId(requestId);
-		requestData.setType(request.getStatus());
-		requestData.setCheckInId(request.getCheckIn().getId());
-		requestData.setSpotId(request.getSpot().getId());
 
 		requestRepo.delete(request);
 		
-		eventBus.post(new DeleteCustomerRequestEvent(business, request));
+		eventBus.post(new DeleteCustomerRequestEvent(business, request, false));
+	}
+	
+	/**
+	 * Get outstanding CALL_WAITER requests for the given checkin.
+	 * 
+	 * @param checkIn
+	 * @return list of found request dtos or empty list if none found
+	 */
+	public List<CustomerRequestDTO> getCustomerRequestsForCheckIn(CheckIn checkIn) {
+		checkNotNull(checkIn, "checkIn cannot be null");
+		checkNotNull(checkIn.getId(), "checkIn id cannot be null");
+		checkNotNull(checkIn.getBusiness(), "checkIn business cannot be null");
+		
+		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
+		List<Request> requests = requestRepo.query().ancestor(checkIn.getBusiness()).filter("checkin", checkIn).list();
+		
+		for (Request request : requests) {
+			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
+				
+				CustomerRequestDTO requestData = new CustomerRequestDTO();
+				requestData.setId(request.getId());
+				requestData.setCheckInId(request.getCheckIn().getId());
+				requestData.setSpotId(request.getSpot().getId());
+				requestData.setType(request.getStatus());
+				
+				requestDataList.add(requestData);
+			}
+				
+		}
+		
+		return requestDataList;
+	}
+	
+	/**
+	 * Delete request of the given checkIn or throws exception if not possible.
+	 * 
+	 * @param checkIn
+	 * @param requestId
+	 * @throws IllegalAccessException if the checkin does not own the request
+	 */
+	public void deleteCustomerRequestForCheckIn(CheckIn checkIn, long requestId) throws IllegalAccessException {
+		checkNotNull(checkIn, "checkIn cannot be null");
+		checkNotNull(checkIn.getId(), "checkIn id cannot be null");
+		checkNotNull(checkIn.getBusiness(), "checkIn business cannot be null");
+		checkArgument(requestId != 0, "requestId cannot be 0");
+		
+		Request request;
+		try {
+			request = requestRepo.getById(checkIn.getBusiness(), requestId);
+		} catch (com.googlecode.objectify.NotFoundException e1) {
+			throw new IllegalArgumentException("request not found", e1);
+		}
+
+		if( !checkIn.getId().equals(request.getCheckIn().getId())) {
+			throw new IllegalAccessException("checkIn does not own the request");
+		}
+		
+		requestRepo.delete(request);
+		
+		eventBus.post(new DeleteCustomerRequestEvent(businessRepo.getByKey(checkIn.getBusiness()), request, true));
 	}
 }
