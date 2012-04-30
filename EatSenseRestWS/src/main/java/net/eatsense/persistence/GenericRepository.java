@@ -164,11 +164,24 @@ public class GenericRepository<T> extends DAOBase{
 	 * @param id
 	 * 		List of ids of entities to load
 	 * @return
-	 * 		Found entity
+	 * 		List of entities
 	 */
 	public Collection<T> getByKeys(List<Key<T>> keys) throws NotFoundException {
 		
 		return ofy().get(keys).values();
+	}
+	
+	/**
+	 * Gets a map of entities by a list of keys.
+	 * 
+	 * @param id
+	 * 		List of ids of entities to load
+	 * @return
+	 * 		Map of entities, mapping given key objects to the entity.
+	 */
+	public Map<Key<T>, T> getByKeysAsMap(List<Key<T>> keys) throws NotFoundException {
+		
+		return ofy().get(keys);
 	}
 
 	/**

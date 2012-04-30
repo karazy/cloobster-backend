@@ -231,9 +231,7 @@ public class OrderController {
 				Set<ConstraintViolation<OrderChoice>> choiceViolations = validator.validate(orderChoice);
 				
 				if(choiceViolations.isEmpty()) {
-					if ( orderChoiceRepo.saveOrUpdate(orderChoice) == null ) {
-						throw new RuntimeException("Error saving choices for order: " +orderKey.toString());
-					}
+					order.getChoices().add(orderChoiceRepo.saveOrUpdate(orderChoice));
 				}
 				else { // handle validation errors ...
 					StringBuilder sb = new StringBuilder();
@@ -247,8 +245,10 @@ public class OrderController {
 					throw new IllegalArgumentException(message);
 				}	
 			}
+			
+			if(!order.getChoices().isEmpty())
+				orderRepo.saveOrUpdate(order);
 		}
-		
 		return orderKey;
 	}
 	
@@ -486,9 +486,6 @@ public class OrderController {
 				}
 				OrderChoice choice = new OrderChoice();
 				
-				
-				
-				
 				choice.setChoice(originalChoice);
 									
 				choices.add(choice);
@@ -496,7 +493,7 @@ public class OrderController {
 		}
 		
 
-		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());		
+		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();

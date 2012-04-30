@@ -1,5 +1,6 @@
 .DS_Store
 */target/*
+bin/
 */bin/*
 **/bin/**
 EatSenseAppAndroid/assets/www/*

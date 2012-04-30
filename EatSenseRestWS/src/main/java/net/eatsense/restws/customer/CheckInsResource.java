@@ -54,11 +54,10 @@ public class CheckInsResource {
 
 	
 	@Path("{checkInUid}")
+	@RolesAllowed({"guest"})
 	public CheckInResource getCheckInResource(@PathParam("checkInUid") String checkInUid) {
 		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
-		if(checkInFromPath == null)
-			throw new NotFoundException();
 		boolean authenticated = checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId());
 
 		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
