@@ -47780,6 +47780,7 @@ Ext.define('EatSense.model.Order', {
 		associations : {
 			type : 'hasOne',
 			model : 'EatSense.model.Product',
+			autoLoad : true
 		},
 		proxy: {
 			type: 'rest',
@@ -56602,7 +56603,7 @@ Ext.application({
 		'EatSense.override.CustomRestProxy',
 		'EatSense.override.OperationImprovement', 
 		'EatSense.view.fragment.DashboardButton', 
-		'EatSense.override.RadioOverride', 
+		'EatSense.override.RadioOverride',
 		'EatSense.model.AppState'
 	],
 	launch : function() {

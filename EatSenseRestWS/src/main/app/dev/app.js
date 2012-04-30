@@ -25,7 +25,7 @@ Ext.application({
 		'EatSense.override.CustomRestProxy',
 		'EatSense.override.OperationImprovement', 
 		'EatSense.view.fragment.DashboardButton', 
-		'EatSense.override.RadioOverride', 
+		'EatSense.override.RadioOverride',
 		'EatSense.model.AppState'
 	],
 	launch : function() {

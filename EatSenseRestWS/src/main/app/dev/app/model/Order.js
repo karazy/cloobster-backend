@@ -21,7 +21,7 @@ Ext.define('EatSense.model.Order', {
 		} ],
 		associations : {
 			type : 'hasOne',
-			model : 'EatSense.model.Product',
+			model : 'EatSense.model.Product'
 		},
 		proxy: {
 			type: 'rest',
