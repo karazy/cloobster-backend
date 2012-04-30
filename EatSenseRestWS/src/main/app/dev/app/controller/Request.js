@@ -33,6 +33,7 @@ Ext.define('EatSense.controller.Request',{
 	sendCallWaiterRequest: function(button, event) {
 		var 	me = this,
 				request = Ext.create('EatSense.model.Request'),
+				requestStore = Ext.StoreManager.lookup('requestStore'),
 				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
 		
 		console.log('send call waiter request');
@@ -40,6 +41,9 @@ Ext.define('EatSense.controller.Request',{
 		request.set('type', Karazy.constants.Request.CALL_WAITER);		
 		//workaround to prevent sencha from sending phantom id
 		request.setId('');
+
+		requestStore.add(request);
+		// requestStore.sync();
 
 		request.save({
 			failure: function(record, operation) {
@@ -84,6 +88,11 @@ Ext.define('EatSense.controller.Request',{
 		me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
 
 		if(request) {
+			// requestStore.setSyncRemovedRecords(true);
+			requestStore.remove(request);
+			// requestStore.sync();
+			// requestStore.setSyncRemovedRecords(false);
+
 			request.erase({
 				failure: function(record, operation) {
 					me.getApplication().handleServerError({
@@ -106,23 +115,23 @@ Ext.define('EatSense.controller.Request',{
 
 		requestStore.load({
 			callback: function(records, operation, success) {
-				   	if(!success) { 
-	                    me.getApplication().handleServerError({
-	                       	'error': operation.error, 
-	                     	'forceLogout': {403:true},
-	                     	hideMessage: true
-	                    });
-	                 } 
-	                else {
-	                	records.each(function(rec) {
-	                		if(rec.get('type') ==  Karazy.constants.Request.CALL_WAITER) {
-	                			me.getCallWaiterButton().mode = 'cancel';
-	                			//show info badge to indicate waiter is called
-								me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
-								me.getCallWaiterButton().setText(Karazy.i18n.translate('cancel'));
-	                		}
-	                	});
-	                }
+			   	if(!success) { 
+                    me.getApplication().handleServerError({
+                       	'error': operation.error, 
+                     	'forceLogout': {403:true},
+                     	hideMessage: true
+                    });
+                 } 
+                else {
+                	Ext.each(records,(function(rec) {
+                		if(rec.get('type') ==  Karazy.constants.Request.CALL_WAITER) {
+                			me.getCallWaiterButton().mode = 'cancel';
+                			//show info badge to indicate waiter is called
+							me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
+							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancel'));
+                		}
+                	}));
+                }
             }
 		})
 	},
@@ -130,8 +139,20 @@ Ext.define('EatSense.controller.Request',{
 	* Handle push messages for requests.
 	*/
 	handleRequestMessage: function(action, data) {
-		if(action == 'delete') {
-			this.getCallWaiterButton().setBadgeText('');
+		var me = this,
+			requestStore = Ext.StoreManager.lookup('requestStore'),
+			request;
+
+		request = requestStore.getById(data.id);
+		if(request) {
+			if(action == 'delete' && data.type == Karazy.constants.Request.CALL_WAITER) {
+				requestStore.remove(request);
+				this.getCallWaiterButton().mode = 'call';
+				//show info badge to indicate waiter is called	
+				this.getCallWaiterButton().setBadgeText("");
+				this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+			}
 		}
+
 	}
 });

@@ -75,28 +75,28 @@ Ext.application({
 	   	 }
 	   		
 	   	 if(restoredCheckInId) {
-	   			 //reload old state
-	   			 EatSense.model.CheckIn.load(restoredCheckInId, {
-	   				scope: this,
-	   				success : function(record, operation) {
-	   					console.log('found existing checkin '+record);	
-	   					checkInCtr.restoreState(record);
+	   	 	//TODO refactor
+	   	 	Ext.Ajax.setDefaultHeaders({
+            	'checkInId': restoredCheckInId
+       		});
 
-	   					// if(record.get('status') == Karazy.constants.CHECKEDIN || record.get('status') == Karazy.constants.ORDER_PLACED) {	   						
-		   				// 	checkInCtr.restoreState(record);
-	   					// } else {
-	   					// 	appStateStore.add(checkInCtr.getAppState());
-		   		  		//checkInCtr.showDashboard();
-	   					// }	   						   				
-	   				},
-	   				failure: function(record, operation) {
-	   					console.log('error restoring state');
-	   					appStateStore.removeAll();
-	   					appStateStore.sync();
-	   					appStateStore.add(checkInCtr.getAppState());
-	   		   		 	checkInCtr.showDashboard();
-	   				}
-	   			 });	   			 
+   			 //reload old state
+   			 EatSense.model.CheckIn.load(restoredCheckInId, {
+   				scope: this,
+   				success : function(record, operation) {
+   					console.log('found existing checkin '+record);	
+   					checkInCtr.restoreState(record);  						   				
+   				},
+   				failure: function(record, operation) {
+   					console.log('error restoring state');
+   					//TODO refactor
+   					Ext.Ajax.setDefaultHeaders({});
+   					appStateStore.removeAll();
+   					appStateStore.sync();
+   					appStateStore.add(checkInCtr.getAppState());
+   		   		 	checkInCtr.showDashboard();
+   				}
+   			 });	   			 
 	   	 }	   		 	   	 	   	 
 	   	 else {	   		 
 	   		if (appStateStore.getCount() > 1){
