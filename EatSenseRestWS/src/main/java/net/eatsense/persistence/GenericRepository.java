@@ -167,7 +167,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		List of entities
 	 */
 	public Collection<T> getByKeys(List<Key<T>> keys) throws NotFoundException {
-		
+		logger.info("getByKeys {} ", keys); 
 		return ofy().get(keys).values();
 	}
 	
@@ -180,7 +180,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		Map of entities, mapping given key objects to the entity.
 	 */
 	public Map<Key<T>, T> getByKeysAsMap(List<Key<T>> keys) throws NotFoundException {
-		
+		logger.info("getByKeysAsMap {} ", keys);
 		return ofy().get(keys);
 	}
 
@@ -246,6 +246,7 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public T getByProperty(String propName, Object propValue)
 	{
+		logger.info("getByProperty for {} and property {}", clazz, propName);
 		Query<T> q = ofy().query(clazz);
 
 		q.filter(propName, propValue);
@@ -265,6 +266,7 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public List<T> getListByProperty(String propName, Object propValue)
 	{
+		logger.info("getListByProperty for {} and property {}", clazz, propName);
 		Query<T> q = ofy().query(clazz);
 
 		q.filter(propName, propValue);
@@ -285,6 +287,7 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public List<Key<T>> getKeysByProperty(String propName, Object propValue)
 	{
+		logger.info("getKeysByProperty for {} and property {}", clazz, propName);
 		Query<T> q = ofy().query(clazz);
 
 		q.filter(propName, propValue);
@@ -308,6 +311,7 @@ public class GenericRepository<T> extends DAOBase{
 	 */
 	public List<T> getListByPropertyOrdered(String propName, Object propValue, String orderBy)
 	{
+		logger.info("getListByPropertyOrdered for {} ordered by {}", clazz, orderBy);
 		Query<T> q = ofy().query(clazz).filter(propName, propValue).order(orderBy);
 
 		return q.list();
@@ -322,6 +326,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return Count of matching entities
 	 */
 	public int countByProperty(String propFilter, Object propValue) {
+		logger.info("countByProperty for {} and property {}", clazz, propFilter);
 		return ofy().query(clazz).filter(propFilter, propValue).count();
 	}
 	
@@ -331,6 +336,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @return
 	 */
 	public Query<T> query() {
+		logger.info("query for {}", clazz);
 		return ofy().query(clazz);
 	}
 		
