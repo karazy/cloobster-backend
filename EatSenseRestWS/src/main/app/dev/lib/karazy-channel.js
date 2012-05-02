@@ -116,7 +116,7 @@ Karazy.channel = (function() {
 						clearInterval(reconnectInterval);
 						return;
 					}
-					if(tries > 100) {
+					if(tries > 10) {
 						console.log('maximum tries reached. no more reconnect attempts.')
 						connectionStatus = 'DISCONNECTED';
 					if(Karazy.util.isFunction(statusHandlerFunction)) {
