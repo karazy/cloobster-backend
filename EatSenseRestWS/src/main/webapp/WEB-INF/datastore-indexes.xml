@@ -7,4 +7,7 @@
 	<datastore-index kind="Order" ancestor="true" source="manual">
         <property name="status" direction="asc"/>
     </datastore-index>
+    <datastore-index kind="Product" ancestor="true" source="manual">
+        <property name="name" direction="asc"/>
+    </datastore-index>
 </datastore-indexes>

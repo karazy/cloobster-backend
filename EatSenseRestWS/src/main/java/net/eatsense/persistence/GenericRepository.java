@@ -124,7 +124,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @throws NotFoundException if no entity with the given id was found
 	 */
 	public T getById(long id) throws NotFoundException {
-		logger.info("findByKey {} ", id);
+		logger.info("getById {} {}",clazz, id);
 		
 		return ofy().get(clazz, id);
 	}
@@ -141,7 +141,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * @throws NotFoundException if no entity with the given id and parent was found
 	 */
 	public <V> T getById(Key<V> owner, long id) throws NotFoundException {
-		logger.info("getByKey {} ", id); 
+		logger.info("getById {} {}",clazz, id); 
 		return ofy().get(new Key<T>(owner, clazz, id));
 	}
 	
@@ -194,7 +194,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		List with children of given parent
 	 */
 	public <V> List<T> getByParent( Key<V> parentKey) {
-		logger.info("getChildren for {} ", parentKey);
+		logger.info("getByParent {} for parent {} ",clazz, parentKey);
 		return ofy().query(clazz).ancestor(parentKey).list();
 	}
 	
@@ -208,7 +208,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		List with children of given parent
 	 */
 	public <V> List<T> getByParent( V parent) {
-		logger.info("getByParent for {} ", parent);
+		logger.info("getByParent {} for parent {} ",clazz, parent);
 		return ofy().query(clazz).ancestor(parent).list();
 	}
 	
@@ -222,7 +222,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		List with children of given parent
 	 */
 	public <V> List<T> getByParentOrdered( V parent, String orderBy) {
-		logger.info("getByParentOredered for {} ", parent);
+		logger.info("getByParentOrdered {} for parent {} ",clazz, parent);
 		return ofy().query(clazz).ancestor(parent).order(orderBy).list();
 	}
 
@@ -232,7 +232,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		Collection of entities of type T
 	 */
 	public Collection<T> getAll() {
-		logger.info("getAll entities of type {} ", clazz);
+		logger.info("getAll {}", clazz);
 		Collection<T> list = ofy().query(clazz).list();
 		return list;
 	}
@@ -243,7 +243,7 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		List of keys of type T
 	 */
 	public List<Key<T>> getAllKeys() {
-		logger.info("getAllKeys of type {} ", clazz);
+		logger.info("getAllKeys {} ", clazz);
 		List<Key<T>> list = ofy().query(clazz).listKeys();
 		return list;
 	}
