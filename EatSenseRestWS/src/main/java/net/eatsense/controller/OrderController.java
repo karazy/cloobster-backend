@@ -288,7 +288,7 @@ public class OrderController {
 		checkArgument(order.getCheckIn().getId() == checkIn.getId(), "order expected to belong to checkin");
 
 		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
-		keysToDelete.addAll(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
+		keysToDelete.addAll(order.getChoices());
 		keysToDelete.add(order.getKey());
 		orderRepo.ofy().delete(keysToDelete);
 	}
@@ -301,10 +301,7 @@ public class OrderController {
 	 * @return the Order entity, if existing
 	 */
 	public Order getOrder(Business business, Long orderId) {
-		if(business == null) {
-			logger.error("Unable to get order, business is null (orderId={})", orderId);
-			return null;
-		}
+		checkNotNull(business, "business was null");
 			
 		try {
 			return orderRepo.getById(business.getKey(), orderId);

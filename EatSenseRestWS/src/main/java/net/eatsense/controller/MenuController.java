@@ -3,10 +3,13 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
+import net.eatsense.domain.Product;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -17,7 +20,12 @@ import net.eatsense.representation.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
 /**
@@ -51,12 +59,21 @@ public class MenuController {
 			return menuDTOs;
 		
 		List<Menu> menus = menuRepo.getByParent( business );
+		List<ProductDTO> products = transform.productsToDto(productRepo.getByParentOrdered(business, "name"));
+		
+		ListMultimap<Long, ProductDTO> menuToProductsMap = ArrayListMultimap.create();
+		
+		for (ProductDTO productDTO : products) {
+			menuToProductsMap.put(productDTO.getMenuId(), productDTO);
+		}
+
 		for ( Menu menu : menus) {
 			MenuDTO menuDTO = new MenuDTO();
 			menuDTO.setTitle(menu.getTitle());
-			// Query for a list of all products associated with this menu
-			menuDTO.setProducts(transform.productsToDto(productRepo
-					.getListByPropertyOrdered("menu", menu.getKey(), "name"))); 
+			// Get products for this menu from the product map.
+			menuToProductsMap.get(menu.getId());
+			
+			menuDTO.setProducts(menuToProductsMap.get(menu.getId())); 
 			menuDTOs.add(menuDTO);
 		}
 		

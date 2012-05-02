@@ -7,11 +7,15 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class ProductDTO {
 //	@NotNull
 //	@NotEmpty
 	private Long id;
+	
+	@JsonIgnore
+	private Long menuId;
 	@NotNull
 	@NotEmpty
 	private String name;
@@ -86,5 +90,15 @@ public class ProductDTO {
 
 	public void setChoices(Collection<ChoiceDTO> choices) {
 		this.choices = choices;
+	}
+
+
+	public Long getMenuId() {
+		return menuId;
+	}
+
+
+	public void setMenuId(Long menuId) {
+		this.menuId = menuId;
 	}
 }
