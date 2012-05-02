@@ -6,8 +6,9 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.bval.constraints.NotEmpty;
+
 import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.domain.validation.CheckInStep2;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
@@ -28,6 +29,7 @@ public class CheckIn extends GenericEntity{
 	 * user account.
 	 */
 	@NotNull
+	@NotEmpty
 	private String userId;
 	
 	/**
@@ -41,8 +43,8 @@ public class CheckIn extends GenericEntity{
 	 * A users nickname used for this checkin.
 	 * E. g. Peter Pan or Funny Bee ;)
 	 */
-	@NotNull(groups=CheckInStep2.class)
-	@Size(min = 3, max = 25, groups=CheckInStep2.class)
+	@NotNull
+	@Size(min = 3, max = 25)
 	private String nickname;
 	
 	/**
@@ -54,6 +56,7 @@ public class CheckIn extends GenericEntity{
 	/**
 	 * Time of checkin.
 	 */
+	@NotNull
 	private Date checkInTime;
 	
 	/**

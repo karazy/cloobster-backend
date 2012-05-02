@@ -1,264 +1,528 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollection;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.CheckIn;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.event.DeleteCheckInEvent;
+import net.eatsense.event.NewCheckInEvent;
+import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.OrderRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.ErrorDTO;
-import net.eatsense.representation.SpotDTO;
+import net.eatsense.representation.Transformer;
 
-import org.apache.bval.guice.ValidationModule;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
+import org.apache.bval.jsr303.ApacheValidationProvider;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CheckInControllerTest {
 	
-	private final LocalServiceTestHelper helper =
-	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-	    
-	    private Injector injector;
-	    private CheckInController ctr;
-	    private BusinessRepository rr;
-	    private SpotRepository br;
-	    private CheckInRepository cr;
-
-		private ObjectMapper mapper;
-
-		private Business business;
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	private CheckInController ctr;
+	@Mock
+	private BusinessRepository businessRepo;
+	@Mock
+	private SpotRepository spotRepo;
+	@Mock
+	private CheckInRepository checkInRepo;
+	@Mock
+	private Transformer transform;
+	@Mock
+	private ObjectMapper mapper;
+	@Mock
+	private Business business;
+	
+	@Mock
+	private RequestRepository requestRepo;
+	@Mock
+	private OrderRepository orderRepo;
+	@Mock
+	private EventBus eventBus;
+	@Mock
+	private Spot spot;
+	@Mock
+	Key<Business> businessKey;
+	@Mock
+	Key<Spot> spotKey;
 
 	@Before
 	public void setUp() throws Exception {
-		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-		ctr = injector.getInstance(CheckInController.class);
-		rr = injector.getInstance(BusinessRepository.class);
-		br = injector.getInstance(SpotRepository.class);
-		cr = injector.getInstance(CheckInRepository.class);
-		mapper = injector.getInstance(ObjectMapper.class);
-		//create necessary data in datastore
-		business = new Business();
-		business.setName("Heidi und Paul");
-		business.setDescription("Geiles Bio Burger Restaurant.");
-		Key<Business> kR = rr.saveOrUpdate(business);
-		
-		Spot b = new Spot();
-		b.setBarcode("b4rc0de");
-		b.setName("Tisch 1");
-		b.setBusiness(kR);
-		Key<Spot> kB = br.saveOrUpdate(b); 
+		ValidatorFactory avf =
+	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, eventBus);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		helper.tearDown();
 	}
 	
 	@Test
-	public void testCheckInProcessStandardCheckIn() {	
-		SpotDTO spot = ctr.getSpotInformation("b4rc0de");
+	public void testCreateCheckInEmptyBarcode() {
+		thrown.expect(IllegalArgumentException.class);
+		String spotId = "";
+	
 		CheckInDTO checkIn = new CheckInDTO();
-		checkIn.setSpotId("b4rc0de");
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInNullBarcode() {
+		thrown.expect(NullPointerException.class);
+		String spotId = null;
+	
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInNullDTO() {
+		thrown.expect(NullPointerException.class);
+		CheckInDTO checkIn = null;
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInInvalidStatus() {
+		thrown.expect(IllegalArgumentException.class);
+		String spotId = "b4rc0de";
+	
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(CheckInStatus.CHECKEDIN);
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInNullStatus() {
+		thrown.expect(NullPointerException.class);
+		String spotId = "b4rc0de";
+	
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(null);
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInUnknownBarcode() {
+		thrown.expect(IllegalArgumentException.class);
+		String spotId = "b4rc0de";
 		
-		assertEquals("Heidi und Paul", spot.getBusiness());
-		assertNotNull(spot.getBarcode());
-		assertNotNull(spot.getName());
-		assertNotNull(spot.getBusinessId());
+		when(business.getKey()).thenReturn( businessKey);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		when(spot.getKey()).thenReturn(spotKey);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		when(checkInRepo.getBySpot(spotKey)).thenReturn(new ArrayList<CheckIn>());
 		
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname("FakeNik");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInNicknameInUse() throws Exception {
+		thrown.expect(CheckInFailureException.class);
+		thrown.expectMessage("errormessage");
+		String spotId = "b4rc0de";
+		String nickname = "FakeNik";
+		
+		when(business.getKey()).thenReturn( businessKey);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		when(spot.getKey()).thenReturn(spotKey);
+		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
+		CheckIn olderCheckIn = new CheckIn();
+		olderCheckIn.setNickname(nickname);
+		checkInList.add(olderCheckIn);
+		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
+		when(mapper.writeValueAsString(any())).thenReturn("errormessage");
+		
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname(nickname);
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckInTooLongNickname() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("errormessage");
+		String spotId = "b4rc0de";
+		
+		when(business.getKey()).thenReturn( businessKey);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		when(spot.getKey()).thenReturn(spotKey);
+		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		when(checkInRepo.getBySpot(spotKey)).thenReturn(new ArrayList<CheckIn>());
+		when(mapper.writeValueAsString(any())).thenReturn("errormessage");
+		
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
+		checkIn.setNickname("FakeNik1234567890123456789012345");
+		checkIn.setStatus(CheckInStatus.INTENT);
+		checkIn = ctr.createCheckIn( checkIn);
+	}
+	
+	@Test
+	public void testCreateCheckIn() {	
+		String spotId = "b4rc0de";
+		
+		when(business.getKey()).thenReturn( businessKey);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		when(spot.getKey()).thenReturn(spotKey);
+		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		when(checkInRepo.getBySpot(spotKey)).thenReturn(new ArrayList<CheckIn>());
+		
+		CheckInDTO checkIn = new CheckInDTO();
+		checkIn.setSpotId(spotId);
 		checkIn.setNickname("FakeNik");
 		checkIn.setStatus(CheckInStatus.INTENT);
 		checkIn = ctr.createCheckIn( checkIn);
 		assertThat(checkIn, notNullValue());
 		assertThat(checkIn.getUserId(), notNullValue());
 		
-		CheckIn chkin = cr.getByProperty("userId", checkIn.getUserId());
-		assertEquals(CheckInStatus.CHECKEDIN, chkin.getStatus());
-		assertEquals("FakeNik", chkin.getNickname());
+		ArgumentCaptor<CheckIn> checkInArgument = ArgumentCaptor.forClass(CheckIn.class);
+		verify(checkInRepo).saveOrUpdate(checkInArgument.capture());
+		CheckIn savedCheckIn = checkInArgument.getValue();
 		
+		assertThat(savedCheckIn.getStatus(), is(CheckInStatus.CHECKEDIN));
+		assertThat(savedCheckIn.getSpot(), is(spotKey));
+		assertThat(savedCheckIn.getBusiness(), is(businessKey));
+		assertThat(savedCheckIn.getUserId(), is(checkIn.getUserId()));
+		assertThat(savedCheckIn.getNickname(), is(checkIn.getNickname()));
+		ArgumentCaptor<NewCheckInEvent> eventArgument = ArgumentCaptor.forClass(NewCheckInEvent.class);
+		verify(eventBus).post(eventArgument.capture());
+		NewCheckInEvent newEvent = eventArgument.getValue();
+		assertThat(newEvent.getCheckIn(), is(savedCheckIn));
+		assertThat(newEvent.getBusiness(), is(business));
 	}
 	
 	@Test
-	public void testCheckInProcessValidationError() throws JsonParseException, JsonMappingException, IOException {		
-		SpotDTO spot = ctr.getSpotInformation("b4rc0de");
-		CheckInDTO checkInData = new CheckInDTO();
-		checkInData.setSpotId("b4rc0de");
-		checkInData.setStatus(CheckInStatus.INTENT);
-		
-		assertEquals("Heidi und Paul", spot.getBusiness());
-		assertNotNull(spot.getBarcode());
-		assertNotNull(spot.getName());
-		assertNotNull(spot.getBusinessId());
-		
-		//Part1: set nickname too short for this test
-		checkInData.setNickname("Fa");
-
-		try {
-			checkInData =  ctr.createCheckIn( checkInData);
-		} catch (RuntimeException e) {
-			ErrorDTO error = mapper.readValue(e.getMessage(), ErrorDTO.class);
-			
-			assertThat(error.getErrorKey(), is("checkInErrorNickname"));//Nickname"));
-		}
-	
-		CheckIn checkIn = cr.getByProperty("nickname", checkInData.getNickname());
-		
-				
-		// checkin should not be saved
-		assertThat(checkIn, nullValue());
-		
-		//Part2: set nickname too long for this test
-		checkInData.setNickname("Fa123456789012345678901234567890");
-
-		// validation error should happen
-
-		try {
-			checkInData =  ctr.createCheckIn( checkInData);
-		} catch (RuntimeException e) {
-			ErrorDTO error = mapper.readValue(e.getMessage(), ErrorDTO.class);
-			assertThat(error.getErrorKey(), is("checkInErrorNickname"));
-		}
-	
-		checkIn = cr.getByProperty("nickname", checkInData.getNickname());
-		
-				
-		// checkin should not be saved
-		assertThat(checkIn, nullValue());
-		
-		// Part3: set nickname right now
-		checkInData.setNickname("FakeNik");
-		checkInData.setStatus(CheckInStatus.INTENT);
-		checkInData = ctr.createCheckIn(checkInData);
-		assertThat(checkInData.getUserId(), notNullValue());
-		
-		checkIn = cr.getByProperty("userId", checkInData.getUserId());
-		assertThat(checkIn, notNullValue());
-		assertThat(checkIn.getStatus(), is(CheckInStatus.CHECKEDIN));
-		assertThat(checkIn.getNickname(), is(checkInData.getNickname()));
-
-	}
-	
-	
-	@Test
-	public void testCheckInProcessLinkedCheckIn() {
-		SpotDTO spot = ctr.getSpotInformation("b4rc0de");
-		CheckInDTO checkInData = new CheckInDTO();
-		checkInData.setSpotId("b4rc0de");
-		checkInData.setStatus(CheckInStatus.INTENT);
-		checkInData.setNickname("Peter Pan");
-		
-		assertEquals("Heidi und Paul", spot.getBusiness());
-		assertNotNull(spot.getBarcode());
-		assertNotNull(spot.getName());
-		assertNotNull(spot.getBusinessId());
-		
-		checkInData = ctr.createCheckIn(checkInData);
-		assertThat(checkInData, notNullValue());
-		assertThat(checkInData.getUserId(), notNullValue());
-		
-		// Retrieve checkin entity from store.
-		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
-		
-		CheckInDTO checkInData2 = new CheckInDTO();
-		checkInData2.setSpotId("b4rc0de");
-		checkInData2.setStatus(CheckInStatus.INTENT);
-		checkInData2.setNickname("Papa Schlumpf");
-		
-		checkInData2 = ctr.createCheckIn(checkInData2);
-		assertThat(checkInData2, notNullValue());
-		assertThat(checkInData2.getUserId(), notNullValue());
-		
-		//load users at same spot
-		List<User> users = ctr.getOtherUsersAtSpot(checkIn, checkInData.getSpotId());
-		
-		assertThat(users.size(), is(1));
-		//the second checked in user should be Papa Schlumpf
-		assertThat(users.get( 0 ).getNickname(), is(checkInData2.getNickname()) );
-		//link user
-		checkInData.setLinkedCheckInId(checkInData2.getUserId());
-		CheckInDTO result = ctr.updateCheckIn(checkIn, checkInData);
-		assertThat(result, notNullValue());
-		
-		//check if user is linked
-		checkIn = cr.getByProperty("userId", checkInData.getUserId());
-		assertThat(checkIn.getLinkedUserId(), is(checkInData2.getUserId()));
+	public void testGetSpotInformationUnknown() throws Exception {
+		String barcode = "bla";
+		assertThat(ctr.getSpotInformation(barcode), nullValue());
+		verify(spotRepo).getByProperty("barcode", barcode);
 	}
 	
 	@Test
-	public void testGetCheckIn() {
-		SpotDTO spot = ctr.getSpotInformation("b4rc0de");
-		CheckInDTO checkIn = new CheckInDTO();
-		checkIn.setSpotId("b4rc0de");
-		
-		assertEquals("Heidi und Paul", spot.getBusiness());
-		assertNotNull(spot.getBarcode());
-		assertNotNull(spot.getName());
-		assertNotNull(spot.getBusinessId());
-		
-		checkIn.setNickname("FakeNik");
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn = ctr.createCheckIn( checkIn);
-		assertThat(checkIn, notNullValue());
-		assertThat(checkIn.getUserId(), notNullValue());
-		
-		CheckInDTO test = ctr.getCheckInAsDTO(checkIn.getUserId());
-		assertThat(checkIn, notNullValue());
-		assertThat(checkIn.getNickname(), is(test.getNickname()));
-		assertThat(checkIn.getUserId(), is(test.getUserId()));
-
+	public void testGetSpotInformationEmptyBarcode() throws Exception {
+		String barcode = null;
+		assertThat(ctr.getSpotInformation(barcode), nullValue());
 	}
-
+	
 	@Test
-	public void testDeleteCheckin() {
-		//#1.1 Create a checkin ...
-		CheckInDTO checkInData = new CheckInDTO();
-		checkInData.setSpotId("b4rc0de");
-		checkInData.setNickname("FakeNik");
-		checkInData.setStatus(CheckInStatus.INTENT);
-		checkInData = ctr.createCheckIn( checkInData);
-		//#1.2 Retrieve checkin id from the store.
-		CheckIn checkIn = ctr.getCheckIn(checkInData.getUserId());
+	public void testGetSpotInformationNullBarcode() throws Exception {
+		String barcode = null;
+		assertThat(ctr.getSpotInformation(barcode), nullValue());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetSpotInformation() throws Exception {
+		String barcode = "abarcode";
+
+		when(spotRepo.getByProperty("barcode", barcode )).thenReturn(spot);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		
-		//#2.1 Delete the checkin
-		ctr.deleteCheckIn(business, checkIn.getId());
-		//#2.2 Check the checkin is really gone.
-		CheckIn result = ctr.getCheckIn(checkIn.getUserId());
-		assertThat(result, nullValue());
+		assertThat(ctr.getSpotInformation(barcode), notNullValue());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetOtherUsersAtSpotPaymentLinkPossible() throws Exception {
+		String barcode = "abarcode";
+		CheckIn checkIn = mock(CheckIn.class);
 		
-		//#2.3 Try to delete the checkin again.
-		try {
-			ctr.deleteCheckIn(business, checkIn.getId());
-		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(spot.getBarcode()).thenReturn(barcode);
+		when(spotRepo.getByKey(spotKey)).thenReturn(spot);
+		
+		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
+		CheckIn olderCheckIn = new CheckIn();
+		olderCheckIn.setNickname("one");
+		olderCheckIn.setId(1l);
+		checkInList.add(olderCheckIn);
+		olderCheckIn = new CheckIn();
+		olderCheckIn.setNickname("two");
+		olderCheckIn.setId(2l);
+		olderCheckIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
+		checkInList.add(olderCheckIn);
+		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
+		
+		List<User> userList = ctr.getOtherUsersAtSpot(checkIn, barcode);
+		
+		assertThat(userList, hasSize(1));
+		for (User user : userList) {
+			assertThat(user.getNickname(), anyOf(is("one"), is("two")));
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetOtherUsersAtSpotNullCheckIn() throws Exception {
+		String barcode = "abarcode";
+		CheckIn checkIn = null;
+		assertThat(ctr.getOtherUsersAtSpot(checkIn, barcode).isEmpty(), is(true));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetOtherUsersAtSpot() throws Exception {
+		String barcode = "abarcode";
+		CheckIn checkIn = mock(CheckIn.class);
 		
-		//#2.3 Try to delete with null argument.
-		try {
-			ctr.deleteCheckIn(business, null);
-		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(spot.getBarcode()).thenReturn(barcode);
+		when(spotRepo.getByKey(spotKey)).thenReturn(spot);
+		
+		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
+		CheckIn olderCheckIn = new CheckIn();
+		olderCheckIn.setNickname("one");
+		olderCheckIn.setId(1l);
+		checkInList.add(olderCheckIn);
+		olderCheckIn = new CheckIn();
+		olderCheckIn.setNickname("two");
+		olderCheckIn.setId(2l);
+		checkInList.add(olderCheckIn);
+		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
+		
+		List<User> userList = ctr.getOtherUsersAtSpot(checkIn, barcode);
+		assertThat(userList, hasSize(2));
+		for (User user : userList) {
+			assertThat(user.getNickname(), anyOf(is("one"), is("two")));
 		}
+	}
+	
+	@Test
+	public void testGetCheckInEmptyUid() throws Exception {
+		String checkInUid = "";
+		
+		assertThat(ctr.getCheckIn(checkInUid), nullValue());
+		
+		verify(checkInRepo, never()).getByProperty(eq("userId"), anyString());
+	}
+	
+	@Test
+	public void testGetCheckInNullUid() throws Exception {
+		String checkInUid = null;
+		
+		assertThat(ctr.getCheckIn(checkInUid), nullValue());
+		
+		verify(checkInRepo, never()).getByProperty(eq("userId"), anyString());
+	}
+	
+	@Test
+	public void testGetCheckIn() throws Exception {
+		String checkInUid = "uniqueid";
+		CheckIn checkIn = mock(CheckIn.class);
+		when(checkInRepo.getByProperty("userId", checkInUid)).thenReturn(checkIn );
+		
+		assertThat(ctr.getCheckIn(checkInUid), is(checkIn));
+	}
+	
+	@Test
+	public void testCheckOutNullCheckInBusiness() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("business");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(1l);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(null);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.CHECKEDIN);
+		
+		ctr.checkOut(checkIn);
+		verifyZeroInteractions(checkInRepo, orderRepo);
+	}
+	
+	@Test
+	public void testCheckOutNullCheckInSpot() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("spot");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(1l);
+		when(checkIn.getSpot()).thenReturn(null);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.CHECKEDIN);
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@Test
+	public void testCheckOutZeroCheckInId() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("id");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(0l);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.CHECKEDIN);
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@Test
+	public void testCheckOutNullCheckInId() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("id");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(null);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.CHECKEDIN);
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@Test
+	public void testCheckOutCheckInStatusOrderPlaced() throws Exception {
+		thrown.expect(CheckInFailureException.class);
+		thrown.expectMessage("invalid status");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(1l);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.ORDER_PLACED);
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@Test
+	public void testCheckOutCheckInStatusPaymentRequest() throws Exception {
+		thrown.expect(CheckInFailureException.class);
+		thrown.expectMessage("invalid status");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(1l);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.PAYMENT_REQUEST);
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@Test
+	public void testCheckOutNullCheckInStatus() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("status");
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		
+		when(checkIn.getId()).thenReturn(1l);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(null);
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@Test
+	public void testCheckOutNullCheckIn() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("checkIn");
+		CheckIn checkIn = null;
+		
+		ctr.checkOut(checkIn);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testCheckOut() throws Exception {
+		CheckIn checkIn = mock(CheckIn.class);
+		when(checkIn.getId()).thenReturn(1l);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getStatus()).thenReturn(CheckInStatus.CHECKEDIN);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		int activeCheckIns = 2;
+		when(checkInRepo.countActiveCheckInsAtSpot(spotKey)).thenReturn(activeCheckIns);
+		
+		InOrder inOrder = inOrder(orderRepo);
+		
+		ctr.checkOut(checkIn);
+		
+		inOrder.verify(orderRepo).getKeysByProperty("status", OrderStatus.CART.toString());
+		inOrder.verify(orderRepo).delete(anyCollection());
+		verify(checkInRepo).delete(checkIn);
+		
+		ArgumentCaptor<DeleteCheckInEvent> eventArgument = ArgumentCaptor.forClass(DeleteCheckInEvent.class);
+		verify(eventBus).post(eventArgument.capture());
+		DeleteCheckInEvent newEvent = eventArgument.getValue();
+		assertThat(newEvent.getCheckIn(), is(checkIn));
+		assertThat(newEvent.getBusiness(), is(business));
+		assertThat(newEvent.isCheckOut(), is(true));
+		assertThat(newEvent.getCheckInCount().get(), is(activeCheckIns-1));
 	}
 }
