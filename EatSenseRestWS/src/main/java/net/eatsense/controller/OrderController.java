@@ -343,7 +343,7 @@ public class OrderController {
 		}
 		else {
 			// Only retrieve placed or retrieved orders.
-			query.filter("status in", new ArrayList<OrderStatus>(EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED, OrderStatus.CART)));
+			query.filter("status in", EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED));
 		}
 		
 		return query.list();
