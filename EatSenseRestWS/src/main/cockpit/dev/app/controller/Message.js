@@ -136,15 +136,15 @@ Ext.define('EatSense.controller.Message', {
 			interval;
 
 		if(start === true && !me.getPollingActive()) {
-			console.log('start refresh all');
+			console.log('start polling');
 			interval = window.setInterval(function() {
 				console.log('fire refresh all event');
 				me.fireEvent(me.getEvtPrefix()+'.refresh-all');
 			},heartbeatInterval);
 			me.setInterval(interval);
 			me.setPollingActive(true);
-		} else if(me.getPollingActive()) {
-			console.log('stop refresh all');
+		} else if(start === false && me.getPollingActive()) {
+			console.log('stop polling');
 			window.clearInterval(me.getInterval());
 			me.setInterval(null);
 			me.setPollingActive(false);
@@ -162,6 +162,7 @@ Ext.define('EatSense.controller.Message', {
 
 
 		if((previousStatus == 'DISCONNECTED' || previousStatus == 'RECONNECT') && connectionStatus == 'ONLINE') {
+			console.log('back online ... refresh all data');
 			this.fireEvent(this.getEvtPrefix()+'.refresh-all');
 			this.refreshAll(false);
 		} else if((!reconnectIteration || reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {

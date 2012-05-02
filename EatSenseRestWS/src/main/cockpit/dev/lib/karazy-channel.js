@@ -40,12 +40,10 @@ Karazy.channel = (function() {
 		//timeout used when attempting to reconnect the channel
 		channelReconnectTimeout = Karazy.config.channelReconnectTimeout,
 		//a factor by which the intervall for requesting a new token increases over time to prevent mass channel creations
-		channelReconnectFactor = 1.1;
-		
+		channelReconnectFactor = 1.1,
 		//the status for the connection
-		this.connectionStatus = 'INITIALIZING',
-		//the previous status for the connection
-		this.previousStatus = 'NONE';
+		connectionStatus = 'INITIALIZING',
+		previousStatus = 'NONE';
 
 	function onOpened() {		
 		console.log('channel opened');
@@ -53,7 +51,7 @@ Karazy.channel = (function() {
 		timedOut = false;		
 		channelReconnectTimeout = Karazy.config.channelReconnectTimeout;
 
-		setStatusHelper.apply(Karazy.channel, ['ONLINE']);
+		setStatusHelper('ONLINE');
 		statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
 	};
 
@@ -81,14 +79,12 @@ Karazy.channel = (function() {
 
 		if(timedOut === true && connectionStatus != 'RECONNECT') {
 			console.log('channel timeout');	
-			// setStatusHelper('RECONNECT');	
-			setStatusHelper.apply(Karazy.channel, ['RECONNECT']);	
-			// repeatedConnectionTry();
-			repeatedConnectionTry.call(Karazy.channel);
+			setStatusHelper('RECONNECT');		
+			repeatedConnectionTry();
 		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
 			console.log('channel connection lost');
-			setStatusHelper.apply(Karazy.channel, ['RECONNECT']);
-			repeatedConnectionTry.call(Karazy.channel);
+			setStatusHelper('RECONNECT');
+			repeatedConnectionTry();
 		} else {
 			setStatusHelper('DISCONNECTED');
 			statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
@@ -105,10 +101,8 @@ Karazy.channel = (function() {
 
 		console.log('Trying to connect and request new token.');
 
-		var tries = 1
-			me = this;
+		var tries = 1;
 		var connect = function() {
-			// return function() {
 				if(connectionStatus == 'ONLINE') {
 					return;
 				}
@@ -117,7 +111,7 @@ Karazy.channel = (function() {
 					console.log('Maximum tries reached. No more connection attempts.')
 					setStatusHelper('DISCONNECTED');	
 					if(Karazy.util.isFunction(statusHandlerFunction)) {
-						statusHandlerFunction.apply(executionScope, [me.connectionStatus, me.previousStatus]);
+						statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
 					}
 					return;
 				}
@@ -133,44 +127,13 @@ Karazy.channel = (function() {
 					console.log('Next reconnect try in %s msec.', channelReconnectTimeout);					
 					window.setTimeout(connect, channelReconnectTimeout);	
 				}]);
-			// }
 		};
-//(connectionStatus = 'INITIALIZING') ? 0 : 
-		window.setTimeout(connect, (connectionStatus = 'INITIALIZING') ? 0 : channelReconnectTimeout);
+		window.setTimeout(connect, (connectionStatus == 'INITIALIZING') ? 0 : channelReconnectTimeout);
 	};
 
-	// function connect() {
-	// 		return function() {
-	// 			if(connectionStatus == 'ONLINE') {
-	// 				return;
-	// 			}
-
-	// 			if(tries > Karazy.config.channelReconnectTries) {
-	// 				console.log('Maximum tries reached. No more connection attempts.')
-	// 				setStatusHelper('DISCONNECTED');	
-	// 				if(Karazy.util.isFunction(statusHandlerFunction)) {
-	// 					statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
-	// 				}
-	// 				return;
-	// 			}
-
-	// 			statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus, tries]);
-
-	// 			console.log('Connection try %s iteration.', tries);
-	// 			tries += 1;
-	// 			channelReconnectTimeout = (channelReconnectTimeout > 1800000) ? channelReconnectTimeout : channelReconnectTimeout * channelReconnectFactor;
-	// 			// setupChannel(channelToken);
-				
-	// 			requestTokenHandlerFunction.apply(executionScope, [setupChannel, function() {
-	// 				console.log('Next reconnect try in %s msec.', channelReconnectTimeout);					
-	// 				window.setTimeout(connect, channelReconnectTimeout);	
-	// 			}]);
-	// 		}
-	// 	}();
-
 	function setStatusHelper(newStatus) {
-		this.previousStatus = this.connectionStatus;
-		this.connectionStatus = newStatus;
+		previousStatus = connectionStatus;
+		connectionStatus = newStatus;
 	};
 
 	/**
