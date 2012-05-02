@@ -26,7 +26,8 @@ Karazy.constants = (function() {
 		Currency : {
 			EURO: '$1,$2 €',
 			US_DOLLAR: '\$ $1.$2'
-		}
+		},
+		FORCE_LOGOUT : 'FORCE_LOGOUT'
 
 	};
 

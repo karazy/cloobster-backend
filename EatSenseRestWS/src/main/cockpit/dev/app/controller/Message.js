@@ -9,7 +9,11 @@ Ext.define('EatSense.controller.Message', {
 		refs: 
 		{
 			connectionStatus: 'toolbar[docked=bottom] #connectionStatus'
-		}
+		},
+		evtPrefix: 'eatSense',
+		interval: null,
+		//indicates if polling is active and a refreshAll events get fired 
+		pollingActive: false
 	},
 
 
@@ -66,11 +70,13 @@ Ext.define('EatSense.controller.Message', {
 		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
 	},
 	/**
-	*	Requests a new token from server and executes the given callback with new token as parameter.
-	*	@param callback
-	*		callback function to invoke on success
+	* Requests a new token from server and executes the given callback with new token as parameter.
+	* @param successCallback
+	*	callback function to invoke on success
+	* @param connectionCallback
+	*	
 	*/
-	requestNewToken: function(callback) {
+	requestNewToken: function(successCallback, connectionCallback) {
 		var me = this,
 			account = this.getApplication().getController('Login').getAccount(),
 			login = account.get('login'),
@@ -87,9 +93,11 @@ Ext.define('EatSense.controller.Message', {
 		    },
 		    success: function(response){
 		       	token = response.responseText;
-		       	callback(token);
+		       	successCallback(token);
+		       	connectionCallback();
 		    }, 
 		    failure: function(response) {
+		    	//just log don't show message or force logout!
 		    	me.getApplication().handleServerError({
 					'error': {
 						'status' : response.status,
@@ -97,8 +105,8 @@ Ext.define('EatSense.controller.Message', {
 					}, 
 					'forceLogout': false, 
 					'hideMessage':true, 
-					// 'message': Karazy.i18n.translate('channelTokenError')
 				});
+				connectionCallback();
 		    }
 		});
 	},
@@ -110,25 +118,54 @@ Ext.define('EatSense.controller.Message', {
 	openChannel: function() {
 		var		me = this;
 
-		me.requestNewToken(function(newToken) {
-			Karazy.channel.createChannel( {
-				token: newToken, 
-				messageHandler: me.processMessages,
-				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: me,
-				requestTokenHandlerScope: me,
-				statusHandler: me.handleStatus
-			});
+		Karazy.channel.setup({
+			messageHandler: me.processMessages,
+			requestTokenHandler: me.requestNewToken,			
+			statusHandler: me.handleStatus,
+			executionScope: me
 		});
-	}, 
+	},
+	/**
+	* When push communication fails this method acts like a heartbeat for the application.
+	* It will fire a refreshAll event in a configured intervall. Every component that needs
+	* current data can listen to this event and refresh its view.
+	*/
+	refreshAll: function(start) {
+		var me = this,
+			heartbeatInterval = Karazy.config.heartbeatInterval || 10000,
+			interval;
+
+		if(start === true && !me.getPollingActive()) {
+			console.log('start refresh all');
+			interval = window.setInterval(function() {
+				console.log('fire refresh all event');
+				me.fireEvent(me.getEvtPrefix()+'.refresh-all');
+			},heartbeatInterval);
+			me.setInterval(interval);
+			me.setPollingActive(true);
+		} else if(me.getPollingActive()) {
+			console.log('stop refresh all');
+			window.clearInterval(me.getInterval());
+			me.setInterval(null);
+			me.setPollingActive(false);
+		}
+	},
 	/**
 	*	Called when the connection status changes.
 	*
 	*/
-	handleStatus: function(connectionStatus) {
+	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
 		var statusLabel = this.getConnectionStatus();
 		//render status in UI
-		console.log('connection status changed to %s', connectionStatus);
+		console.log('Connection status changed to %s from %s. %s iteration', connectionStatus, previousStatus, reconnectIteration);
 		statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
+
+
+		if((previousStatus == 'DISCONNECTED' || previousStatus == 'RECONNECT') && connectionStatus == 'ONLINE') {
+			this.fireEvent(this.getEvtPrefix()+'.refresh-all');
+			this.refreshAll(false);
+		} else if((!reconnectIteration || reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
+			this.refreshAll(true);
+		}
 	}
 });

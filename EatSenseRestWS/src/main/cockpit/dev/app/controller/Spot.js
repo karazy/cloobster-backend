@@ -90,19 +90,21 @@ Ext.define('EatSense.controller.Spot', {
 		//add listeners for message events
 		var messageCtr = this.getApplication().getController('Message');
 		messageCtr.on('eatSense.spot', this.updateSpotIncremental, this);
+		//refresh all is only active when psuh communication is out of order
+		messageCtr.on('eatSense.refresh-all', this.loadSpots, this);
 	},
 
 	// <LOAD AND SHOW DATA>
 	/**
 	*	Loads all spots and refreshes spot view.
 	*	Called after a successful login or credentials restore.
-	*	If spot loading fails user will be logged out
+	*	If spot loading fails user will be logged out.
 	*/
 	loadSpots: function() {
 		console.log('loadSpots');
-		var 	loginCtr = this.getApplication().getController('Login'),
-				account = loginCtr.getAccount(),
-				info = this.getInfo();
+		var loginCtr = this.getApplication().getController('Login'),
+			account = loginCtr.getAccount(),
+			info = this.getInfo();
 
 		info.getTpl().overwrite(info.element, account.data);
 
@@ -148,7 +150,15 @@ Ext.define('EatSense.controller.Spot', {
 		messageCtr.on('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 		messageCtr.on('eatSense.bill', this.updateSpotDetailBillIncremental, this);
 		messageCtr.on('eatSense.request', requestCtr.processCustomerRequest, requestCtr);
-
+		//refresh all is only active when psuh communication is out of order
+		messageCtr.on('eatSense.refresh-all', this.refreshActiveSpotCheckIns, this);
+		// messageCtr.on('eatSense.refresh-all', this.refreshActiveCustomerOrders, this);
+		// messageCtr.on('eatSense.refresh-all', this.refreshActiveCustomerPayment, this);
+		
+		
+		
+		me.setActiveSpot(data);		
+		titlebar.setTitle(data.get('name'));
 
 		//load checkins and orders and set lists
 		checkInStore.load({
@@ -158,8 +168,6 @@ Ext.define('EatSense.controller.Spot', {
 			},
 			 callback: function(records, operation, success) {
 			 	if(success) { 		
-			 		me.setActiveSpot(data);
-			 		titlebar.setTitle(data.get('name'));
 			 		requestCtr.loadRequests();
 			 		if(records.length > 0) {			 			
 			 			//selects the first customer. select event of list gets fired and calls showCustomerDetail	 	
@@ -176,7 +184,6 @@ Ext.define('EatSense.controller.Spot', {
 			 },
 			 scope: this
 		});
-
 
 		//show detail view
 		Ext.Viewport.add(detail);
@@ -210,29 +217,71 @@ Ext.define('EatSense.controller.Spot', {
 		me.getSpotDetail().fireEvent('eatSense.customer-update', true);
 
 		this.refreshActiveCustomerOrders();
+		this.refreshActiveCustomerPayment();
 
-		if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
-			paidButton.enable();
-			billStore.load({
-				params: {
-					pathId: restaurantId,
-					checkInId: record.get('id'),
-				},
-				 callback: function(records, operation, success) {
-				 	if(success && records.length == 1) { 
-				 		me.setActiveBill(records[0]);
-				 		me.updateCustomerPaymentMethod(records[0].getPaymentMethod().get('name'));
-				 	} else {				 		
-			    		me.updateCustomerPaymentMethod();
-				 	}				
-				 },
-				 scope: this
-			});
-		} else {
-			//make sure to hide payment method label
-			me.updateCustomerPaymentMethod();
-			paidButton.disable();
-		}
+		// if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
+		// 	paidButton.enable();
+		// 	billStore.load({
+		// 		params: {
+		// 			pathId: restaurantId,
+		// 			checkInId: record.get('id'),
+		// 		},
+		// 		 callback: function(records, operation, success) {
+		// 		 	if(success && records.length == 1) { 
+		// 		 		me.setActiveBill(records[0]);
+		// 		 		me.updateCustomerPaymentMethod(records[0].getPaymentMethod().get('name'));
+		// 		 	} else {				 		
+		// 	    		me.updateCustomerPaymentMethod();
+		// 		 	}				
+		// 		 },
+		// 		 scope: this
+		// 	});
+		// } else {
+		// 	//make sure to hide payment method label
+		// 	me.updateCustomerPaymentMethod();
+		// 	paidButton.disable();
+		// }
+	},
+	/**
+	* @private
+	* Loads all checkins for selected spot.
+	*/
+	refreshActiveSpotCheckIns: function() {
+		var me = this,
+			requestCtr = this.getApplication().getController('Request'),
+			checkInStore = Ext.StoreManager.lookup('checkInStore'),
+			tempCheckIn;
+
+		checkInStore.removeAll();
+		checkInStore.load({
+			params: {
+				// pathId: restaurantId,
+				spotId: me.getActiveSpot().get('id')
+			},
+			 callback: function(records, operation, success) {
+			 	if(success) { 		
+			 		requestCtr.loadRequests();
+			 		tempCheckIn = checkInStore.getById(me.getActiveCustomer().get('id'))
+			 		if(tempCheckIn) {
+			 			me.setActiveCustomer(tempCheckIn);
+			 			me.refreshActiveCustomerOrders();
+						me.refreshActiveCustomerPayment();
+			 		}
+			 		// me.getSpotDetailCustomerList().select(me.getActiveCustomer());
+			 		// me.setActiveCustomer(me.getSpotDetailCustomerList().getSelection()[0]);
+			 		// if(records.length > 0) {			 			
+			 		// 	me.getSpotDetailCustomerList().select(0);
+			 		// }
+			 	} else {
+			 		me.getApplication().handleServerError({
+						'error': operation.error, 
+						'forceLogout': {403: true},
+						'hideMessage':false
+						// 'message': Karazy.i18n.translate('errorSpotDetailCheckInLoading')
+					});
+			 	}				
+			 }
+		});
 	},
 	/**
 	* @private
@@ -267,9 +316,44 @@ Ext.define('EatSense.controller.Spot', {
 			 	}				
 			 }
 		});			
-
 	},
+	/**
+	* @private
+	* Loads bill for selected customer.
+	*/
+	refreshActiveCustomerPayment: function() {
+		var me = this,
+			billStore = Ext.StoreManager.lookup('billStore'),
+			paidButton = this.getPaidSpotDetailButton();
 
+		if(!me.getActiveCustomer()) {
+			console.log('no active customer');
+			return;
+		}
+
+		if(me.getActiveCustomer().get('status') == Karazy.constants.PAYMENT_REQUEST) {
+			paidButton.enable();
+			billStore.load({
+				params: {
+					// pathId: restaurantId,
+					checkInId: me.getActiveCustomer().getId()
+				},
+				 callback: function(records, operation, success) {
+				 	if(success && records.length == 1) { 
+				 		me.setActiveBill(records[0]);
+				 		me.updateCustomerPaymentMethod(records[0].getPaymentMethod().get('name'));
+				 	} else {				 		
+			    		me.updateCustomerPaymentMethod();
+				 	}				
+				 },
+				 scope: this
+			});
+		} else {
+			//make sure to hide payment method label
+			me.updateCustomerPaymentMethod();
+			paidButton.disable();
+		}
+	},
 	// </LOAD AND SHOW DATA>
 
 	//<PUSH MESSAGE HANDLERS>
@@ -391,7 +475,7 @@ Ext.define('EatSense.controller.Spot', {
 				} else if(action = 'update-orders') {
 					//update all orders
 					if(me.getActiveCustomer() && me.getActiveCustomer().get('id') == updatedCheckIn.get('id')) {
-							//select customer whos osrders where updated							
+							//select customer whos orders where updated							
 							// me.getSpotDetailCustomerList().select(me.getActiveCustomer());
 							me.refreshActiveCustomerOrders();
 					}
@@ -813,6 +897,13 @@ Ext.define('EatSense.controller.Spot', {
 	    	    jsonData: {}, //empty object needed, otherwise 411 gets thrown
 	    	    success: function(response) {
 	    	    	console.log('all orders confirmed');
+	    	    	orderStore.queryBy(function(order){
+						if(order.get('status') == Karazy.constants.Order.PLACED) {
+							return true;
+						}
+					}).each(function(order) {
+						order.set('status', Karazy.constants.Order.RECEIVED);
+					});
 	    	    },
 	    	    failure: function(response) {
 	    	    	me.getApplication().handleServerError({
@@ -934,6 +1025,9 @@ Ext.define('EatSense.controller.Spot', {
 		messageCtr.un('eatSense.checkin', this.updateSpotDetailCheckInIncremental, this);
 		messageCtr.un('eatSense.order', this.updateSpotDetailOrderIncremental, this);
 		messageCtr.un('eatSense.request', requestCtr.updateSpotDetailOrderIncremental, requestCtr);
+		messageCtr.un('eatSense.refresh-all', this.refreshActiveCustomerOrders(), this);
+		messageCtr.un('eatSense.refresh-all', this.refreshActiveCustomerPayment, this);
+		messageCtr.un('eatSense.refresh-all', this.refreshActiveSpotCheckIns, this);
 	}
 
 	// </MISC VIEW ACTIONS>

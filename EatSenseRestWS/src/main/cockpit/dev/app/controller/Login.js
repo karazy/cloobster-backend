@@ -37,6 +37,7 @@ Ext.define('EatSense.controller.Login', {
 		console.log('init');
 		var		me = this;
 
+		this.getApplication().on('statusChanged', this.handleStatusChange, this);
 
 		//private functions
 		/*
@@ -89,7 +90,6 @@ Ext.define('EatSense.controller.Login', {
 			account;
 
 	   	 try {
-
 	   			accountLocalStore.load();	   	
 		   	 if(accountLocalStore.getCount() == 1) {
 		   		 console.log('app state found');
@@ -115,6 +115,8 @@ Ext.define('EatSense.controller.Login', {
 
 						Ext.create('EatSense.view.Main');
 						spotCtr.loadSpots();
+						//TODO temporary
+						// messageCtr.refreshAll(true);
 						messageCtr.openChannel();
 					},
 					failure: function(record, operation) {					
@@ -373,6 +375,15 @@ Ext.define('EatSense.controller.Login', {
 	*/
 	chooseBusiness: function(dv, index, target, record) {
 		this.setBusinessId(record);
+	},
+	/**
+	* Handle status changes for this application.
+	* Currently only a forceLogout is handled.
+	*/
+	handleStatusChange: function(status) {
+		if(status == Karazy.constants.FORCE_LOGOUT) {
+			this.logout();
+		}
 	}
 
 

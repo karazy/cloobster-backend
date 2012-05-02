@@ -252,6 +252,15 @@
 	background-color: yellow;
 }
 
+.status-indicator .INITIALIZING {
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	float: right;
+	margin: 0px 0.5em;
+	background-color: yellow;
+}
+
 .status-indicator .DISCONNECTED {
 	width: 1em;
 	height: 1em;
