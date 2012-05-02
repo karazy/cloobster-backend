@@ -126,7 +126,7 @@ public class Transformer {
 			
 		dto.setProduct( productToDtoOmitChoices( product ) );
 		
-		List<OrderChoice> orderChoices = orderChoiceRepo.getByParent(order.getKey());
+		Collection<OrderChoice> orderChoices = orderChoiceRepo.getByKeys(order.getChoices());
 		if(orderChoices != null && !orderChoices.isEmpty()) {
 			ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
 			
@@ -194,12 +194,13 @@ public class Transformer {
 		if(product == null)
 			return null;
 		ProductDTO dto = new ProductDTO();
-		 
-		 dto.setId(product.getId());		 
-		 dto.setName( product.getName() );
-		 dto.setLongDesc( product.getLongDesc() );
-		 dto.setShortDesc( product.getShortDesc() );
-		 dto.setPrice( product.getPrice() );
+		
+		dto.setMenuId(product.getMenu().getId());
+		dto.setId(product.getId());		 
+		dto.setName( product.getName() );
+		dto.setLongDesc( product.getLongDesc() );
+		dto.setShortDesc( product.getShortDesc() );
+		dto.setPrice( product.getPrice() );
 		 
 		return dto;
 	}

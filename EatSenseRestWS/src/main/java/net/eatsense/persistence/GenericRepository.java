@@ -208,8 +208,22 @@ public class GenericRepository<T> extends DAOBase{
 	 * 		List with children of given parent
 	 */
 	public <V> List<T> getByParent( V parent) {
-		logger.info("getChildren for {} ", parent);
+		logger.info("getByParent for {} ", parent);
 		return ofy().query(clazz).ancestor(parent).list();
+	}
+	
+	/**
+	 * Returns children of a parent entity.
+	 * Performs an ancestor query.
+	 * 
+	 * @param parent
+	 * 			parent entity. Doesn't have to be the direct parent.
+	 * @return
+	 * 		List with children of given parent
+	 */
+	public <V> List<T> getByParentOrdered( V parent, String orderBy) {
+		logger.info("getByParentOredered for {} ", parent);
+		return ofy().query(clazz).ancestor(parent).order(orderBy).list();
 	}
 
 	/**
