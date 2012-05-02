@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.AccountController;
+import net.eatsense.controller.ChannelController;
 import net.eatsense.domain.Account;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
@@ -22,7 +23,9 @@ import net.eatsense.representation.BusinessDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.jersey.api.NotFoundException;
 
 @Path("accounts")
@@ -32,10 +35,12 @@ public class AccountResource {
 	
 	@Context
 	HttpServletRequest servletRequest;
+	private final Provider<ChannelController> channelCtrlProvider;
 	
 	@Inject
-	public AccountResource(AccountController accountCtr) {
+	public AccountResource(AccountController accountCtr, Provider<ChannelController> channelCtrlProvider) {
 		super();
+		this.channelCtrlProvider = channelCtrlProvider;
 		this.accountCtr = accountCtr;
 	}
 	
@@ -62,8 +67,9 @@ public class AccountResource {
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
-	public String requestToken(@PathParam("login") String login, @FormParam("businessId") Long businessId, @FormParam("clientId") String clientId) {
-		String token = accountCtr.requestToken(businessId, clientId);
+	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
+		//Set the timeout to 480 minutes (8 hours)
+		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(480));
 		if(token == null)
 			throw new NotFoundException();
 		return token;
