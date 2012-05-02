@@ -90,7 +90,7 @@ public class Choice extends GenericEntity {
 
 	@Transient
 	public Key<Choice> getKey() {
-		return new Key<Choice>(getProduct(), Choice.class, super.getId());
+		return getKey(business, getId());
 	}
 
 	public int getMaxOccurence() {
@@ -155,5 +155,9 @@ public class Choice extends GenericEntity {
 	
 	public void setText(String text) {
 		this.text = text;
+	}
+	
+	public static Key<Choice> getKey(Key<Business> parent, long id) {
+		return new Key<Choice>(parent,Choice.class, id);
 	}
 }

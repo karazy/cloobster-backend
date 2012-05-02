@@ -29,7 +29,6 @@ Ext.define('EatSense.model.Request', {
 			type: 'rest',
 			enablePagingParams: false,
 			url: '/b/businesses/{pathId}/requests'
-		},
-		syncRemovedRecords: true
+		}
 	}
 });

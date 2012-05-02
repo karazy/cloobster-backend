@@ -2,8 +2,6 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -12,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -29,7 +28,6 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.event.ConfirmAllOrdersEvent;
-import net.eatsense.event.MultiUpdateEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.OrderFailureException;
@@ -40,7 +38,6 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.representation.OrderCartDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -48,7 +45,6 @@ import net.eatsense.representation.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -230,10 +226,8 @@ public class OrderController {
 				// validate choices
 				Set<ConstraintViolation<OrderChoice>> choiceViolations = validator.validate(orderChoice);
 				
-				if(choiceViolations.isEmpty()) {
-					order.getChoices().add(orderChoiceRepo.saveOrUpdate(orderChoice));
-				}
-				else { // handle validation errors ...
+				if ( !choiceViolations.isEmpty()) {
+					// handle validation errors ...
 					StringBuilder sb = new StringBuilder();
 					sb.append("Choice validation failed:\n");
 					
@@ -243,8 +237,9 @@ public class OrderController {
 					}
 					String message = sb.toString();
 					throw new IllegalArgumentException(message);
-				}	
+				}
 			}
+			order.getChoices().addAll(orderChoiceRepo.saveOrUpdate(choices).keySet());
 			
 			if(!order.getChoices().isEmpty())
 				orderRepo.saveOrUpdate(order);
@@ -293,7 +288,7 @@ public class OrderController {
 		checkArgument(order.getCheckIn().getId() == checkIn.getId(), "order expected to belong to checkin");
 
 		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
-		keysToDelete.addAll(orderRepo.ofy().query(OrderChoice.class).ancestor(order).listKeys());
+		keysToDelete.addAll(order.getChoices());
 		keysToDelete.add(order.getKey());
 		orderRepo.ofy().delete(keysToDelete);
 	}
@@ -306,10 +301,7 @@ public class OrderController {
 	 * @return the Order entity, if existing
 	 */
 	public Order getOrder(Business business, Long orderId) {
-		if(business == null) {
-			logger.error("Unable to get order, business is null (orderId={})", orderId);
-			return null;
-		}
+		checkNotNull(business, "business was null");
 			
 		try {
 			return orderRepo.getById(business.getKey(), orderId);
@@ -351,7 +343,7 @@ public class OrderController {
 		}
 		else {
 			// Only retrieve placed or retrieved orders.
-			query.filter("status in", new ArrayList<OrderStatus>(EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED, OrderStatus.CART)));
+			query.filter("status in", EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED));
 		}
 		
 		return query.list();
@@ -434,6 +426,7 @@ public class OrderController {
 		if(orderData.getProduct().getChoices() != null) {
 			choices = new ArrayList<OrderChoice>();
 			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
+			Map<Key<Choice>, Choice> originalChoiceMap = choiceRepo.getByKeysAsMap(product.getChoices());
 			
 			HashMap<Long, ChoiceDTO> activeChoiceMap = new HashMap<Long, ChoiceDTO>();
 			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
@@ -442,12 +435,10 @@ public class OrderController {
 				if(choiceDto.getParent() == null) {
 					OrderChoice choice = new OrderChoice();
 					
-					Choice originalChoice;
-					try {
-						originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
-					} catch (com.googlecode.objectify.NotFoundException e) {
-						throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
-					}
+					Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
+					if(originalChoice == null)
+						throw new IllegalArgumentException("Order cannot be placed, unknown choice id " + choiceDto.getId());
+					
 					if(choiceDto.getOptions() != null ) {
 						selected = checkOptions(choiceDto, originalChoice);
 						
@@ -470,12 +461,10 @@ public class OrderController {
 			}
 			
 			for (ChoiceDTO choiceDto : childChoiceDtos) {
-				Choice originalChoice;
-				try {
-					originalChoice = choiceRepo.getById(checkIn.getBusiness(), choiceDto.getId());
-				} catch (com.googlecode.objectify.NotFoundException e) {
-					throw new IllegalArgumentException("Order cannot be placed, unknown choice id", e);
-				}
+				Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
+				if(originalChoice == null)
+					throw new IllegalArgumentException("Order cannot be placed, unknown choice id " + choiceDto.getId());
+				
 				// Check that the parent choice has been selected.
 				if(activeChoiceMap.containsKey(choiceDto.getParent())) {
 					if(choiceDto.getOptions() != null ) {
