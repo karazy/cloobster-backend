@@ -1,5 +1,13 @@
-var translationData = {
-	"DE" : {
+/*Karazy namespace. Create if not exists.*/
+var Karazy = (Karazy) ? Karazy : {};
+
+/**
+ * 
+ */
+Karazy.translations = (function() {
+
+	return {
+		"DE" : {
 
 		// General translations
 		"ok" : "Ok",
@@ -88,6 +96,7 @@ var translationData = {
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
 		"errorPermission" : "Deine Sitzung ist ungültig.",
 		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!"
+		}
 	}
-
-};
+	
+}());

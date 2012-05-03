@@ -1,5 +1,13 @@
-var translation = {
-	"DE" : {
+/*Karazy namespace. Create if not exists.*/
+var Karazy = (Karazy) ? Karazy : {};
+
+/**
+ * 
+ */
+Karazy.translations = (function() {
+
+	return {
+		"DE" : {
 
 		// General translations
 		"ok" : "Ok",
@@ -63,6 +71,6 @@ var translation = {
 		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
 		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
 		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig."
+		}
 	}
-
-};
+}());
