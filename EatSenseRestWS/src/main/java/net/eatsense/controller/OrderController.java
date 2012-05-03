@@ -423,7 +423,8 @@ public class OrderController {
 		Key<Product> productKey = product.getKey();
 		Long orderId = null;
 		List<OrderChoice> choices = null;
-		if(orderData.getProduct().getChoices() != null) {
+		if(orderData.getProduct().getChoices() != null
+				&& !orderData.getProduct().getChoices().isEmpty()) {
 			choices = new ArrayList<OrderChoice>();
 			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
 			Map<Key<Choice>, Choice> originalChoiceMap = choiceRepo.getByKeysAsMap(product.getChoices());
