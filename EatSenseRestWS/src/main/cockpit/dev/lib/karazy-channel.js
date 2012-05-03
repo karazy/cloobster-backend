@@ -43,6 +43,7 @@ Karazy.channel = (function() {
 		channelReconnectFactor = 1.1,
 		//the status for the connection
 		connectionStatus = 'INITIALIZING',
+		//previous connection status
 		previousStatus = 'NONE';
 
 	function onOpened() {		
