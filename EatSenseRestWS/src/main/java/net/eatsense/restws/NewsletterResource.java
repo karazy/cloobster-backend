@@ -37,6 +37,6 @@ public class NewsletterResource {
 	@GET
 	public String unsubscribe(@PathParam("id") long id, @QueryParam("email") String email) {
 		accountCtrl.removeNewsletterRecipient(id, email);
-		return "Sorry, that you wanted no more messages from the eatSense Team!";
+		return "You will recieve no future messages to "+ email +" from eatSense.";
 	}
 }
