@@ -2,7 +2,8 @@
 var Karazy = (Karazy) ? Karazy : {},
 	requires = {
 		'Karazy.config': Karazy.config, 
-		'Karazy.constants': Karazy.constants
+		'Karazy.constants': Karazy.constants,
+		'Karazy.translations' : Karazy.translations
 	};
 
 /**
@@ -61,7 +62,7 @@ Karazy.i18n = (function() {
 		//get browser/system locale 
 		lang = getLanguage();
 		try {
-			translations = translationData || {};
+			translations = Karazy.translations || {};
 		} catch(e) {
 			console.log('translation data not loaded');
 			translations = {};
