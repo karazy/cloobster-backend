@@ -3,12 +3,19 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Transport;
+import javax.mail.event.TransportAdapter;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -29,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Email;
+import com.google.apphosting.utils.config.WebXml.SecurityConstraint.TransportGuarantee;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -46,11 +54,13 @@ public class AccountController {
 	private ChannelController channelCtrl;
 	private NewsletterRecipientRepository recipientRepo;
 	private Validator validator;
+	private MailController mailCtrl;
 	
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, ChannelController cctrl, Validator validator) {
 		super();
+		this.mailCtrl = mailCtrl;
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
 		this.channelCtrl = cctrl;
@@ -214,7 +224,7 @@ public class AccountController {
 	 * 
 	 * @param recipientDto must contain valid email
 	 */
-	public void addNewsletterRecipient(RecipientDTO recipientDto) {
+	public NewsletterRecipient addNewsletterRecipient(RecipientDTO recipientDto) {
 		checkNotNull(recipientDto, "recipientDto was null");
 		checkNotNull(recipientDto.getEmail(), "recipientDto email was null");
 		
@@ -235,9 +245,9 @@ public class AccountController {
 			throw new IllegalArgumentException("email already registered");
 		}
 		
-		//TODO send welcome letter
-		
 		recipientRepo.saveOrUpdate(recipient);
+		
+		return recipient;
 	}
 	
 	/**

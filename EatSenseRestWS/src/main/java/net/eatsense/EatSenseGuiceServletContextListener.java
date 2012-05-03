@@ -67,15 +67,19 @@ public class EatSenseGuiceServletContextListener extends
 						bind(EventBus.class).in(Singleton.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*newsletter(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*accounts(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*newsletter(.)*", "(.)*b/businesses(.)*",
+								"(.)*c/businesses(.)*","(.)*c/checkins(.)*",
+								"(.)*accounts(.)*", "(.)*spots(.)*",
+								"(.)*nickname(.)*", "(.)*_ah/channel/connected(.)*",
+								"(.)*_ah/channel/disconnected(.)*", "(.)*cron(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*accounts(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*").with(GuiceContainer.class, parameters);
+//						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
 					@Provides
 					public ChannelService providesChannelService() {

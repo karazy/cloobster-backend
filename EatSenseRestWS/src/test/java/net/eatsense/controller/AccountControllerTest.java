@@ -7,8 +7,10 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
+import java.net.URI;
 import java.util.Date;
 
+import javax.mail.Message;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
@@ -65,6 +67,9 @@ public class AccountControllerTest {
 	
 	@Mock
 	private NewsletterRecipientRepository recipientRepo;
+	
+	@Mock
+	private MailController mailCtrl;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -169,6 +174,7 @@ public class AccountControllerTest {
 		String email = "email@host.de";
 		RecipientDTO recipientDto = mock(RecipientDTO.class);
 		when(recipientDto.getEmail()).thenReturn(email);
+		when(mailCtrl.newMimeMessage()).thenReturn(mock(Message.class));
 				
 		ctr.addNewsletterRecipient(recipientDto);
 		
