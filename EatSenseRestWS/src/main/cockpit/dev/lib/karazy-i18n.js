@@ -1,31 +1,39 @@
 /*Karazy namespace. Create if not exists.*/
-var Karazy = (Karazy) ? Karazy : {};
+var Karazy = (Karazy) ? Karazy : {},
+	requires = {
+		'Karazy.config': Karazy.config, 
+		'Karazy.constants': Karazy.constants,
+		'Karazy.translations' : Karazy.translations
+	};
 
 /**
  *  Karazy LocaleManager Singleton 
  */
 Karazy.i18n = (function() {
-	
+
+	for(precondition in requires) {
+		if(!requires[precondition]) {
+			console.log('Some functions of this class may need %s to properly work. Make sure inclusion order is correct.', precondition);
+		}
+	}
 	
 	//private members
 	/**
 	 * Singleton instance.
 	 */
-	var instance = null;
-	/**
-	 * Holds the translations.
-	 */
-	var translations = null;
-	
-	/**
-	 * default language.
-	 */
-	var defaultLang = "DE";
-	
-	/**
-	 * Chosen language.
-	 */
-	var lang = null;
+	var instance = null,
+		/**
+		 * Contains translations.
+		 */
+		translations = null,
+		/**
+		 * default language.
+		 */
+		defaultLang = "DE",
+		/**
+		 * Chosen language.
+		 */
+		lang = null;
 	
 	
 	//private functions
@@ -34,13 +42,14 @@ Karazy.i18n = (function() {
 	 * e.g. de, en
 	 */
 	function getLanguage() {
-		var userLang = (navigator.language) ? navigator.language : navigator.userLanguage; 
+		//if a language is configured use it otherwise use browser language
+		var userLang = (Karazy.config && Karazy.config.language) ? Karazy.config.language : (navigator.language) ? navigator.language : navigator.userLanguage; 
 		console.log('browser language: '+userLang);
 		if(userLang === 'undefined'|| userLang.length == 0) {
 			//use default language
 			userLang = defaultLang;
 		}
-		return userLang.substring(0,2);
+		return userLang.substring(0,2).toUpperCase();
 	}
 
 	
@@ -49,9 +58,15 @@ Karazy.i18n = (function() {
 	 * Constructor used for initialization.
 	 */
 	function constructor() {
+
 		//get browser/system locale 
 		lang = getLanguage();
-		translations = translation;
+		try {
+			translations = Karazy.translations || {};
+		} catch(e) {
+			console.log('translation data not loaded');
+			translations = {};
+		}
 
 		/*public methods*/
 		return {

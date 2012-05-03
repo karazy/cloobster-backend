@@ -3,5 +3,6 @@ Ext.define('EatSense.store.CheckIn', {
 	config: {
 		model: 'EatSense.model.CheckIn',
 		storeId: 'checkInStore',
+		syncRemovedRecords: false
 	}			
 });

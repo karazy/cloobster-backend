@@ -80,7 +80,7 @@ Ext.define('EatSense.controller.Message', {
 		    success: function(response){
 		       	token = response.responseText;
 		       	callback(token);
-		    }, 
+		    },
 		    failure: function(response, opts) {
 		    	console.log('request token failed ' + response);
 		    	me.getApplication().handleServerError({

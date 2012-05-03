@@ -114,6 +114,16 @@ public class GenericRepository<T> extends DAOBase{
 		logger.info("delete {} ", obj);
 		ofy().delete(obj);
 	}
+	
+	/**
+	 * Delete object by keys
+	 * @param keyIterable
+	 * 		Keys of objects to delete.
+	 */
+	public void delete(Iterable<Key<T>> keyIterable) {
+		logger.info("delete {} ", keyIterable);
+		ofy().delete(keyIterable);
+	}
 
 	/**
 	 * Finds an object by id. ONLY WORKING WITH OBJECTS WITH NO PARENT ANNOTATION
@@ -249,14 +259,14 @@ public class GenericRepository<T> extends DAOBase{
 	}
 
 	/**
-	 * Convenience method to get all objects matching a single property
+	 * Convenience method to get the first object matching a single property
 	 * 
 	 * 
 	 * @param propName
 	 * 
 	 * @param propValue
 	 * 
-	 * @return T matching Object or NULL if no match found
+	 * @return T matching Object or <code>null</code> if no match found
 	 */
 	public T getByProperty(String propName, Object propValue)
 	{

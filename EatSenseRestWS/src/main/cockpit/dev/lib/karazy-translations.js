@@ -1,20 +1,20 @@
-var translation = {
-	"DE" : {
+/*Karazy namespace. Create if not exists.*/
+var Karazy = (Karazy) ? Karazy : {};
+
+/**
+ * 
+ */
+Karazy.translations = (function() {
+
+	return {
+		"DE" : {
 
 		// General translations
 		"ok" : "Ok",
 		"cancel" : "Abbrechen",
 		"back" : "zurück",
-		"barcode" : "Barcode",
-		"error" : "Fehler",
-		"errorTitle" : "Fehler",
+		"barcode" : "Barcode",		
 		"close" : "Schliessen",
-		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten. Wir beheben diesen so schnell wie möglich!",
-		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
-		"errorPermission" : "Deine Sitzung ist ungültig.",
-		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
-		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
-		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
 		"loadingMsg" : "Laden ...",
 		"hint" : "Hinweis",
 		"success" : "Erfolg",
@@ -60,7 +60,17 @@ var translation = {
 		"PLACED" : "Neu!",
 		"CHECKEDIN" : "Checked-In",
 		"PAYMENT_REQUEST" : "Bezahlen",
-		"CALL_WAITER" : "{0} ruft eine Bedienung."
+		"CALL_WAITER" : "{0} ruft eine Bedienung",
+		//general errors
+		"error" : "Fehler",
+		"errorTitle" : "Fehler",		
+		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
+		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
+		"errorPermission" : "Deine Sitzung ist ungültig.",
+		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!",
+		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
+		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
+		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig."
+		}
 	}
-
-};
+}());
