@@ -1,22 +1,34 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.RecipientDTO;
 
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.datastore.Email;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -32,10 +44,15 @@ public class AccountController {
 	private AccountRepository accountRepo;
 	private BusinessRepository businessRepo;
 	private ChannelController channelCtrl;
+	private NewsletterRecipientRepository recipientRepo;
+	private Validator validator;
 	
 	@Inject
-	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository, ChannelController cctrl) {
+	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
+			NewsletterRecipientRepository recipientRepo, ChannelController cctrl, Validator validator) {
 		super();
+		this.validator = validator;
+		this.recipientRepo = recipientRepo;
 		this.channelCtrl = cctrl;
 		this.businessRepo = businessRepository;
 		this.accountRepo = accountRepo;
@@ -190,5 +207,57 @@ public class AccountController {
 	public String requestToken (Long businessId, String clientId) {
 		logger.debug("new token requested for "+clientId);
 		return channelCtrl.createCockpitChannel(businessId, clientId);
+	}
+	
+	/**
+	 * Save an email address as a newsletter recipient.
+	 * 
+	 * @param recipientDto must contain valid email
+	 */
+	public void addNewsletterRecipient(RecipientDTO recipientDto) {
+		checkNotNull(recipientDto, "recipientDto was null");
+		checkNotNull(recipientDto.getEmail(), "recipientDto email was null");
+		
+		NewsletterRecipient recipient = new NewsletterRecipient();
+		recipient.setEmail(recipientDto.getEmail());
+		recipient.setEntryDate(new Date());
+		
+		Set<ConstraintViolation<NewsletterRecipient>> violations = validator.validate(recipient);
+		
+		if(!violations.isEmpty()) {
+			for (ConstraintViolation<NewsletterRecipient> constraintViolation : violations) {
+				throw new IllegalArgumentException(String.format("%s %s",constraintViolation.getPropertyPath(), constraintViolation.getMessage()));
+			}
+		}
+		
+		NewsletterRecipient duplicateRecipient = recipientRepo.getByProperty("email", recipient.getEmail());
+		if(duplicateRecipient != null) {
+			throw new IllegalArgumentException("email already registered");
+		}
+		
+		//TODO send welcome letter
+		
+		recipientRepo.saveOrUpdate(recipient);
+	}
+	
+	/**
+	 * Remove a newsletter recipient.
+	 * 
+	 * @param id non-zero
+	 * @param email must match email stored under id
+	 */
+	public void removeNewsletterRecipient(long id, String email) {
+		checkArgument(id != 0, "id was 0");
+		checkNotNull(email, "email was null");
+		checkArgument(!email.isEmpty(), "email was empty");
+		
+		NewsletterRecipient recipient = recipientRepo.getById(id);
+		
+		if(recipient.getEmail().equals(email)) {
+			recipientRepo.delete(recipient);
+		}
+		else {
+			throw new IllegalArgumentException("email does not match stored address");
+		}
 	}
 }

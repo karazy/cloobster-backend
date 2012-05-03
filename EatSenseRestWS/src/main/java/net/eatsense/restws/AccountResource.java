@@ -1,5 +1,6 @@
 package net.eatsense.restws;
 
+import java.net.URI;
 import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
@@ -74,5 +75,7 @@ public class AccountResource {
 			throw new NotFoundException();
 		return token;
 	};
+	
+	
 	
 }

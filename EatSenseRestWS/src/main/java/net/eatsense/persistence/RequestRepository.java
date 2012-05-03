@@ -3,10 +3,11 @@ package net.eatsense.persistence;
 import net.eatsense.domain.Request;
 
 public class RequestRepository extends GenericRepository<Request> {
-
+	static {
+		GenericRepository.register(Request.class);
+	}	
 	public RequestRepository() {
-		super();
-		super.clazz = Request.class;
+		super(Request.class);
 	}
 
 }

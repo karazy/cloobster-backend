@@ -1,8 +1,6 @@
 package net.eatsense.controller;
 
 import net.eatsense.controller.bill.BillControllerTests;
-import net.eatsense.controller.bill.CreateBillTest;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;

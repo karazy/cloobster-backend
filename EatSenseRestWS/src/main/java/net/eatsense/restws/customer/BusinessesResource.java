@@ -12,10 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
-import net.eatsense.controller.BillController;
 import net.eatsense.controller.ImportController;
-import net.eatsense.controller.MenuController;
-import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.persistence.BusinessRepository;

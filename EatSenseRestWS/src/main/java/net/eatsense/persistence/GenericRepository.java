@@ -4,24 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import net.eatsense.domain.Account;
-import net.eatsense.domain.Bill;
-import net.eatsense.domain.Choice;
-import net.eatsense.domain.Menu;
-import net.eatsense.domain.NicknameAdjective;
-import net.eatsense.domain.NicknameNoun;
-import net.eatsense.domain.Order;
-import net.eatsense.domain.OrderChoice;
-import net.eatsense.domain.Product;
-import net.eatsense.domain.Request;
-import net.eatsense.domain.Spot;
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.GenericEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
@@ -33,40 +20,21 @@ import com.googlecode.objectify.util.DAOBase;
  * Generic repository. Acts as intermediate layer between datastore and domain
  * objects. Similar to a DAO.
  * 
- * @author freifschneider
+ * @author freifschneider, Nils Weiher
  * 
  * @param <T>
  */
-public class GenericRepository<T> extends DAOBase{
+public class GenericRepository<T extends GenericEntity> extends DAOBase{
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected Class<T> clazz;
 
-	static {
-		//Register classes with Objectify
-		ObjectifyService.register(Request.class);
-		ObjectifyService.register(Account.class);
-		ObjectifyService.register(Business.class);
-		ObjectifyService.register(Spot.class);
-		ObjectifyService.register(Menu.class);
-		ObjectifyService.register(Product.class);
-		ObjectifyService.register(CheckIn.class);
-		ObjectifyService.register(Choice.class);
-		ObjectifyService.register(Order.class);
-		ObjectifyService.register(Bill.class);
-		ObjectifyService.register(OrderChoice.class);
-		ObjectifyService.register(NicknameAdjective.class);
-		ObjectifyService.register(NicknameNoun.class);
-		
+	static public <T> void register(Class<T> clazz) {
+		ObjectifyService.register(clazz);
 	}
 
-	protected ObjectifyService datastore;
-
-	@Inject
-	public GenericRepository() {
-//		 this.clazz = (Class<T>) ((ParameterizedType)
-//				 getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-		//this.datastore = datastore;
+	public GenericRepository(Class<T> clazz) {
+		this.clazz = clazz;
 	}
 
 	/**

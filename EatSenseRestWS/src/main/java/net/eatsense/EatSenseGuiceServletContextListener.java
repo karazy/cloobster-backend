@@ -12,6 +12,7 @@ import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
+import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.business.BusinessesResource;
@@ -57,18 +58,16 @@ public class EatSenseGuiceServletContextListener extends
 						bind(BusinessesResource.class);
 						bind(net.eatsense.restws.customer.BusinessesResource.class);
 						bind(NicknameResource.class);
+						bind(NewsletterResource.class);
 						bind(SpotResource.class);
 						bind(CheckInsResource.class);
 						bind(CronResource.class);
 						bind(AccountResource.class);
 						bind(ChannelResource.class);
-						bind(Spot.class);
-						bind(CheckIn.class);
-						bind(Menu.class);
-						bind(GenericRepository.class);
 						bind(EventBus.class).in(Singleton.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*newsletter(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);

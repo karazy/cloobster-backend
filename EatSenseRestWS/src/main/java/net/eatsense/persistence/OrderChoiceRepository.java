@@ -3,9 +3,10 @@ package net.eatsense.persistence;
 import net.eatsense.domain.OrderChoice;
 
 public class OrderChoiceRepository extends GenericRepository<OrderChoice> {
-
+	static {
+		GenericRepository.register(OrderChoice.class);
+	}	
 	public OrderChoiceRepository() {
-		super();
-		super.clazz = OrderChoice.class;
+		super(OrderChoice.class);
 	}
 }

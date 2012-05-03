@@ -8,10 +8,14 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Spot;
 
 public class CheckInRepository extends GenericRepository<CheckIn> {
+	final static Class<CheckIn> entityClass = CheckIn.class;
 	
+	static {
+		GenericRepository.register(entityClass);
+	}
+
 	public CheckInRepository() {
-		super();
-		super.clazz = CheckIn.class;
+		super(CheckIn.class);
 	}
 
 	public int countActiveCheckInsAtSpot (Key<Spot> key) {

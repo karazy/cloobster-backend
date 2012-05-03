@@ -3,13 +3,10 @@ package net.eatsense.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
-import net.eatsense.domain.Product;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -21,11 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
 /**

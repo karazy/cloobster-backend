@@ -19,7 +19,6 @@ import net.eatsense.domain.User;
 import net.eatsense.representation.CheckInDTO;
 
 import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 @Path("c/checkins")
