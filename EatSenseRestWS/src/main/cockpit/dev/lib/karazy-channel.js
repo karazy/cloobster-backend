@@ -40,13 +40,19 @@ Karazy.channel = (function() {
 		//timeout used when attempting to reconnect the channel
 		channelReconnectTimeout = Karazy.config.channelReconnectTimeout,
 		//a factor by which the intervall for requesting a new token increases over time to prevent mass channel creations
-		channelReconnectFactor = 1.1,
+		channelReconnectFactor = 1.3,
 		//the status for the connection
 		connectionStatus = 'INITIALIZING',
 		//previous connection status
-		previousStatus = 'NONE';
+		previousStatus = 'NONE',
+		//online check interval object
+		interval;
 
-	function onOpened() {		
+	function onOpen() {
+		if(connectionStatus == 'ONLINE') {
+			console.log('channel opened already received');
+			return;
+		}
 		console.log('channel opened');
 		connectionLost = false;	
 		timedOut = false;		
@@ -68,6 +74,12 @@ Karazy.channel = (function() {
 			// socket.close();
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
+			console.log('channel connection lost');
+			setStatusHelper('RECONNECT');
+			statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
+			console.log('start online check interval every 5s');
+			interval = window.setInterval(repeatedOnlineCheck , 5000);
+			
 			// socket.close();
 		}
 	};
@@ -91,6 +103,19 @@ Karazy.channel = (function() {
 			statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
 		}
 	};
+	
+	function repeatedOnlineCheck() {
+		if(connectionStatus == 'ONLINE' || connectionStatus == 'DISCONNECTED') {
+			if(interval) {
+				console.log('stopping online check');
+				window.clearInterval(interval);
+			}
+		}
+		if(connectionStatus == 'RECONNECT') {
+			checkOnlineFunction.apply(executionScope, []);
+		}
+	}
+	
 	/**
 	*	Repeatedly tries to reopen a channel after it has been close.
 	*
@@ -146,22 +171,24 @@ Karazy.channel = (function() {
 			if(!token) {
 				return;
 			}
+			
+			var handler = new Object();
+			handler.onopen = onOpen;
+			handler.onmessage = onMessage;
+			handler.onerror = onError;
+			handler.onclose = onClose;
 
 			console.log('setup channel for token %s', token);
 
 			channelToken = token;
-
 			try {
 				channel = new goog.appengine.Channel(token);	
 			} catch(e) {
 				console.log('failed to open channel! reason '+ e);
+				return;
 			}
 			
-			socket = channel.open();
-			socket.onopen = onOpened;
-		    socket.onmessage = onMessage;
-		    socket.onerror = onError;
-		    socket.onclose = onClose;
+			socket = channel.open(handler);
 	};
 
 
@@ -192,10 +219,20 @@ Karazy.channel = (function() {
 
 			statusHandlerFunction = options.statusHandler;
 
+			if(!Karazy.util.isFunction(options.checkOnlineHandler)) {
+				throw "No checkOnlineHandler provided";
+			};
+
+			checkOnlineFunction = options.checkOnlineHandler;
+			
+
 			(options.executionScope) ? executionScope = options.executionScope : this;
 
 			repeatedConnectionTry();
 
+		},
+		connectedReceived: function () {
+			onOpen();
 		},
 		/**
 		* Closes the cannel and prevents a new token request.
