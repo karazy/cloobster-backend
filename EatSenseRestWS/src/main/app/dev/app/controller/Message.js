@@ -57,15 +57,19 @@ Ext.define('EatSense.controller.Message', {
 			return;
 		}	
 
+		console.log('broadcast message type %s, action %s', message.type, message.action);
+
 		//fire event based on the message
 		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
 	},
 	/**
-	*	Requests a new token from server and executes the given callback with new token as parameter.
-	*	@param callback
-	*		callback function to invoke on success
+	* Requests a new token from server and executes the given callback with new token as parameter.
+	* @param successCallback
+	*	callback function to invoke on success
+	* @param connectionCallback
+	*	
 	*/
-	requestNewToken: function(callback) {	
+	requestNewToken: function(successCallback, connectionCallback) {	
 		var me = this;
 			
 		if(!this.getChannelId()) {
@@ -73,25 +77,28 @@ Ext.define('EatSense.controller.Message', {
 			return;
 		};
 
+		console.log('request new token. clientId: ' + this.getChannelId());
+
 		Ext.Ajax.request({
 		    url: Karazy.config.serviceUrl+'/c/checkins/'+this.getChannelId()+'/tokens',		    
 		    method: 'POST',
 		    jsonData: true,
 		    success: function(response){
 		       	token = response.responseText;
-		       	callback(token);
+		       	successCallback(token);
+		       	connectionCallback();
 		    },
 		    failure: function(response, opts) {
-		    	console.log('request token failed ' + response);
 		    	me.getApplication().handleServerError({
 					'error': {
 						'status' : response.status,
 						'statusText': response.statusText
 					}, 
 					'forceLogout': false, 
-					'hideMessage':false, 
+					'hideMessage':true, 
 					'message': Karazy.i18n.translate('channelTokenError')
 				});
+				connectionCallback();
 		    }
 		});
 	},
@@ -105,23 +112,21 @@ Ext.define('EatSense.controller.Message', {
 		var		me = this;
 
 		this.setChannelId(id);
-		this.requestNewToken(function(newToken) {
-			Karazy.channel.createChannel( {
-				token: newToken, 
-				messageHandler: me.processMessages,
-				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: me,
-				requestTokenHandlerScope: me,
-				statusHandler: me.handleStatus
-			});
-		}, id);
+
+		Karazy.channel.setup({
+			messageHandler: me.processMessages,
+			requestTokenHandler: me.requestNewToken,			
+			statusHandler: me.handleStatus,
+			executionScope: me
+		});
+
 	},
 	/**
 	*	Called when the connection status changes.
 	*
 	*/
-	handleStatus: function(connectionStatus) {
+	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
 		//render status in UI
-		console.log('connection status changed to %s', connectionStatus);
+		console.log('Connection status changed to %s from %s. (%s call)', connectionStatus, previousStatus, reconnectIteration);
 	}
 });

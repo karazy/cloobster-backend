@@ -65,10 +65,10 @@ Karazy.channel = (function() {
 		console.log('channel error ' + (error && error.description) ? error.description : "");
 		if(error && ( error.code == '401' || error.code == '400') ) {
 			timedOut = true;
-			socket.close();
+			// socket.close();
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
-			socket.close();
+			// socket.close();
 		}
 	};
 
@@ -150,7 +150,13 @@ Karazy.channel = (function() {
 			console.log('setup channel for token %s', token);
 
 			channelToken = token;
-			channel = new goog.appengine.Channel(token);
+
+			try {
+				channel = new goog.appengine.Channel(token);	
+			} catch(e) {
+				console.log('failed to open channel! reason '+ e);
+			}
+			
 			socket = channel.open();
 			socket.onopen = onOpened;
 		    socket.onmessage = onMessage;
