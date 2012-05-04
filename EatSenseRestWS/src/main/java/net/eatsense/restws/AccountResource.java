@@ -49,8 +49,10 @@ public class AccountResource {
 	
 	@GET
 	@Path("channels")
-	public void checkOnlineStatus(@QueryParam("clientId")String clientId) {
-		channelCtrlProvider.get().subscribeClient(clientId);
+	@Produces("text/plain; charset=UTF-8")
+	public String checkOnlineStatus(@QueryParam("clientId")String clientId, @QueryParam("businessId") Long businessId) {
+		ChannelController channelController = channelCtrlProvider.get();
+		return channelController.subscribeClient(channelController.buildCockpitClientId(businessId, clientId));
 	}
 	
 	@GET

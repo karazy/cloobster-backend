@@ -95,7 +95,7 @@ Karazy.channel = (function() {
 			setStatusHelper('RECONNECT');		
 			repeatedConnectionTry();
 		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
-			console.log('channel connection lost');
+			console.log('channel closed');
 			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
 		} else {
@@ -112,7 +112,7 @@ Karazy.channel = (function() {
 			}
 		}
 		if(connectionStatus == 'RECONNECT') {
-			checkOnlineFunction.apply(executionScope, []);
+			checkOnlineFunction.apply(executionScope, [repeatedConnectionTry]);
 		}
 	}
 	
@@ -127,9 +127,9 @@ Karazy.channel = (function() {
 
 		console.log('Trying to connect and request new token.');
 
-		var tries = 1;
+		var tries = 0;
 		var connect = function() {
-				if(connectionStatus == 'ONLINE') {
+				if(connectionStatus == 'ONLINE' || connectionStatus == 'DISCONNECTED') {
 					return;
 				}
 
@@ -227,7 +227,8 @@ Karazy.channel = (function() {
 			
 
 			(options.executionScope) ? executionScope = options.executionScope : this;
-
+			connectionLost = true;
+			connectionStatus = 'INITIALIZING';
 			repeatedConnectionTry();
 
 		},
@@ -241,11 +242,11 @@ Karazy.channel = (function() {
 			timedOut = false;
 			connectionLost = false;	
 			channelToken = null;
-
 			if(socket) {
 				setStatusHelper('DISCONNECTED');	
 				socket.close();
-			};			
+			};
+			
 		}	
 
 

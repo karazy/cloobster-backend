@@ -118,9 +118,9 @@ Ext.define('EatSense.controller.Message', {
 		});
 	},
 	/**
-	* 	Let the server now we are still there.
+	* 	Let the server know we are still there.
 	*/
-	checkOnline: function() {
+	checkOnline: function(disconnectCallback) {
 		var account = this.getApplication().getController('Login').getAccount(),
 			clientId = account.get('clientId');
 		
@@ -129,13 +129,17 @@ Ext.define('EatSense.controller.Message', {
 		    url: Karazy.config.serviceUrl+'/accounts/channels',		    
 		    method: 'GET',
 		    params: {
+		    	'businessId' :  account.get('businessId'),
 		    	'clientId' : clientId
 		    },
 		    success: function(response){
-		       	console.log('online check request success');
+		       	console.log('online check request result: ' + response.responseText);
+		       	if(response.responseText == 'DISCONNECTED') {
+		       		disconnectCallback();
+		       	}		       	
 		    }, 
 		    failure: function(response) {
-		    	console.log('online check request failed. keep trying...');
+		    	console.log('online check request failed with code: ' + response.status);
 		    }
 		});
 	},
