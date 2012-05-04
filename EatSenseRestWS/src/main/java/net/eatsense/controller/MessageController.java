@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.eatsense.domain.Business;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -17,7 +16,6 @@ import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateBillEvent;
-import net.eatsense.event.MultiUpdateEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;

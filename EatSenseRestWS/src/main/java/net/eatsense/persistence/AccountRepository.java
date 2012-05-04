@@ -2,18 +2,23 @@ package net.eatsense.persistence;
 
 import java.util.List;
 
+import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
+
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.googlecode.objectify.Key;
 
-import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
-
 public class AccountRepository extends GenericRepository<Account> {
 
+	final static Class<Account> entityClass = Account.class;
+	
+	static {
+		GenericRepository.register(entityClass);
+	}
+	
 	public AccountRepository() {
-		super();
-		super.clazz = Account.class;
+		super(entityClass);
 	}
 	
 	/**

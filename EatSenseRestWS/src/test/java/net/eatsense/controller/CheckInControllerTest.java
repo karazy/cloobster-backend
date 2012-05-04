@@ -1,13 +1,11 @@
 package net.eatsense.controller;
 
 import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
@@ -23,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import net.eatsense.domain.Business;
@@ -45,7 +42,6 @@ import net.eatsense.representation.Transformer;
 
 import org.apache.bval.jsr303.ApacheValidationProvider;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

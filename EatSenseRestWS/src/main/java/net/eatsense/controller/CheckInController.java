@@ -47,7 +47,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
-import com.sun.jersey.api.NotFoundException;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a

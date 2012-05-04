@@ -8,9 +8,14 @@ import com.googlecode.objectify.Query;
 
 public class BusinessRepository extends GenericRepository<Business> {
 	
+	final static Class<Business> entityClass = Business.class;
+	
+	static {
+		GenericRepository.register(entityClass);
+	}
+	
 	public BusinessRepository() {
-		super();
-		super.clazz = Business.class;
+		super(Business.class);
 	}
 	
 	public Business findByBarcode(String code) {
