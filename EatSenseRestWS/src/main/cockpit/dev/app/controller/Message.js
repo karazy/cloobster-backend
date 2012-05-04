@@ -57,14 +57,14 @@ Ext.define('EatSense.controller.Message', {
 	broadcastMessage: function(message) {
 		var 	me = this,
 				evtPrefix = 'eatSense.',
-				model = message.content;
-				
-		console.log('broadcast message type %s, action %s', message.type, message.action);
+				model = message.content;						
 
 		if(!message) {
 			console.log('no message send');
 			return;
 		}	
+
+		console.log('broadcast message type %s, action %s', message.type, message.action);
 
 		//fire event based on the message
 		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
@@ -157,7 +157,7 @@ Ext.define('EatSense.controller.Message', {
 	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
 		var statusLabel = this.getConnectionStatus();
 		//render status in UI
-		console.log('Connection status changed to %s from %s. %s iteration', connectionStatus, previousStatus, reconnectIteration);
+		console.log('Connection status changed to %s from %s. (%s call)', connectionStatus, previousStatus, reconnectIteration);
 		statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
 
 
@@ -165,7 +165,7 @@ Ext.define('EatSense.controller.Message', {
 			console.log('back online ... refresh all data');
 			this.fireEvent(this.getEvtPrefix()+'.refresh-all');
 			this.refreshAll(false);
-		} else if((!reconnectIteration || reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
+		} else if((reconnectIteration && reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
 			this.refreshAll(true);
 		}
 	}
