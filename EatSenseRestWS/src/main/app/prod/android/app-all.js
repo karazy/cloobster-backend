@@ -44990,7 +44990,7 @@ Ext.define('EatSense.view.Menu', {
 	xtype : 'menutab',
 	config : {
 		layout: 'fit',
-		iconCls : 'compose',
+		iconCls : 'menu',
 		title: Karazy.i18n.translate('menuTitle'),
 		iconMask : true,
 		itemId : 'menutab',
@@ -45585,6 +45585,7 @@ Ext.define('EatSense.controller.Request',{
 	sendCallWaiterRequest: function(button, event) {
 		var 	me = this,
 				request = Ext.create('EatSense.model.Request'),
+				requestStore = Ext.StoreManager.lookup('requestStore'),
 				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
 		
 		console.log('send call waiter request');
@@ -45592,6 +45593,9 @@ Ext.define('EatSense.controller.Request',{
 		request.set('type', Karazy.constants.Request.CALL_WAITER);		
 		//workaround to prevent sencha from sending phantom id
 		request.setId('');
+
+		requestStore.add(request);
+		// requestStore.sync();
 
 		request.save({
 			failure: function(record, operation) {
@@ -45636,6 +45640,11 @@ Ext.define('EatSense.controller.Request',{
 		me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
 
 		if(request) {
+			// requestStore.setSyncRemovedRecords(true);
+			requestStore.remove(request);
+			// requestStore.sync();
+			// requestStore.setSyncRemovedRecords(false);
+
 			request.erase({
 				failure: function(record, operation) {
 					me.getApplication().handleServerError({
@@ -45658,23 +45667,23 @@ Ext.define('EatSense.controller.Request',{
 
 		requestStore.load({
 			callback: function(records, operation, success) {
-				   	if(!success) { 
-	                    me.getApplication().handleServerError({
-	                       	'error': operation.error, 
-	                     	'forceLogout': {403:true},
-	                     	hideMessage: true
-	                    });
-	                 } 
-	                else {
-	                	records.each(function(rec) {
-	                		if(rec.get('type') ==  Karazy.constants.Request.CALL_WAITER) {
-	                			me.getCallWaiterButton().mode = 'cancel';
-	                			//show info badge to indicate waiter is called
-								me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
-								me.getCallWaiterButton().setText(Karazy.i18n.translate('cancel'));
-	                		}
-	                	});
-	                }
+			   	if(!success) { 
+                    me.getApplication().handleServerError({
+                       	'error': operation.error, 
+                     	'forceLogout': {403:true},
+                     	hideMessage: true
+                    });
+                 } 
+                else {
+                	Ext.each(records,(function(rec) {
+                		if(rec.get('type') ==  Karazy.constants.Request.CALL_WAITER) {
+                			me.getCallWaiterButton().mode = 'cancel';
+                			//show info badge to indicate waiter is called
+							me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
+							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancel'));
+                		}
+                	}));
+                }
             }
 		})
 	},
@@ -45682,9 +45691,21 @@ Ext.define('EatSense.controller.Request',{
 	* Handle push messages for requests.
 	*/
 	handleRequestMessage: function(action, data) {
-		if(action == 'delete') {
-			this.getCallWaiterButton().setBadgeText('');
+		var me = this,
+			requestStore = Ext.StoreManager.lookup('requestStore'),
+			request;
+
+		request = requestStore.getById(data.id);
+		if(request) {
+			if(action == 'delete' && data.type == Karazy.constants.Request.CALL_WAITER) {
+				requestStore.remove(request);
+				this.getCallWaiterButton().mode = 'call';
+				//show info badge to indicate waiter is called	
+				this.getCallWaiterButton().setBadgeText("");
+				this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+			}
 		}
+
 	}
 });
 /**
@@ -45746,15 +45767,19 @@ Ext.define('EatSense.controller.Message', {
 			return;
 		}	
 
+		console.log('broadcast message type %s, action %s', message.type, message.action);
+
 		//fire event based on the message
 		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
 	},
 	/**
-	*	Requests a new token from server and executes the given callback with new token as parameter.
-	*	@param callback
-	*		callback function to invoke on success
+	* Requests a new token from server and executes the given callback with new token as parameter.
+	* @param successCallback
+	*	callback function to invoke on success
+	* @param connectionCallback
+	*	
 	*/
-	requestNewToken: function(callback) {	
+	requestNewToken: function(successCallback, connectionCallback) {	
 		var me = this;
 			
 		if(!this.getChannelId()) {
@@ -45762,25 +45787,28 @@ Ext.define('EatSense.controller.Message', {
 			return;
 		};
 
+		console.log('request new token. clientId: ' + this.getChannelId());
+
 		Ext.Ajax.request({
 		    url: Karazy.config.serviceUrl+'/c/checkins/'+this.getChannelId()+'/tokens',		    
 		    method: 'POST',
 		    jsonData: true,
 		    success: function(response){
 		       	token = response.responseText;
-		       	callback(token);
-		    }, 
+		       	successCallback(token);
+		       	connectionCallback();
+		    },
 		    failure: function(response, opts) {
-		    	console.log('request token failed ' + response);
 		    	me.getApplication().handleServerError({
 					'error': {
 						'status' : response.status,
 						'statusText': response.statusText
 					}, 
 					'forceLogout': false, 
-					'hideMessage':false, 
+					'hideMessage':true, 
 					'message': Karazy.i18n.translate('channelTokenError')
 				});
+				connectionCallback();
 		    }
 		});
 	},
@@ -45794,24 +45822,22 @@ Ext.define('EatSense.controller.Message', {
 		var		me = this;
 
 		this.setChannelId(id);
-		this.requestNewToken(function(newToken) {
-			Karazy.channel.createChannel( {
-				token: newToken, 
-				messageHandler: me.processMessages,
-				requestTokenHandler: me.requestNewToken,
-				messageHandlerScope: me,
-				requestTokenHandlerScope: me,
-				statusHandler: me.handleStatus
-			});
-		}, id);
+
+		Karazy.channel.setup({
+			messageHandler: me.processMessages,
+			requestTokenHandler: me.requestNewToken,			
+			statusHandler: me.handleStatus,
+			executionScope: me
+		});
+
 	},
 	/**
 	*	Called when the connection status changes.
 	*
 	*/
-	handleStatus: function(connectionStatus) {
+	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
 		//render status in UI
-		console.log('connection status changed to %s', connectionStatus);
+		console.log('Connection status changed to %s from %s. (%s call)', connectionStatus, previousStatus, reconnectIteration);
 	}
 });
 /**
@@ -46751,7 +46777,7 @@ Ext.define('EatSense.view.MyOrders', {
 		layout: {
 			type: 'fit'
 		},
-		iconCls : 'home',
+		iconCls : 'cash',
 		title: Karazy.i18n.translate('myOrdersTabBt'),
 		iconMask : true,
 		itemId : 'myorderstab',
@@ -47779,8 +47805,7 @@ Ext.define('EatSense.model.Order', {
 		} ],
 		associations : {
 			type : 'hasOne',
-			model : 'EatSense.model.Product',
-			autoLoad : true
+			model : 'EatSense.model.Product'
 		},
 		proxy: {
 			type: 'rest',
@@ -53543,7 +53568,8 @@ Ext.define('EatSense.store.Request', {
 	requires: ['EatSense.model.Request'],
 	config: {
 		storeId: 'requestStore',
-		model: 'EatSense.model.Request'
+		model: 'EatSense.model.Request',
+		syncRemovedRecords: false
 	}
 });
 /**
@@ -56653,28 +56679,28 @@ Ext.application({
 	   	 }
 	   		
 	   	 if(restoredCheckInId) {
-	   			 //reload old state
-	   			 EatSense.model.CheckIn.load(restoredCheckInId, {
-	   				scope: this,
-	   				success : function(record, operation) {
-	   					console.log('found existing checkin '+record);	
-	   					checkInCtr.restoreState(record);
+	   	 	//TODO refactor
+	   	 	Ext.Ajax.setDefaultHeaders({
+            	'checkInId': restoredCheckInId
+       		});
 
-	   					// if(record.get('status') == Karazy.constants.CHECKEDIN || record.get('status') == Karazy.constants.ORDER_PLACED) {	   						
-		   				// 	checkInCtr.restoreState(record);
-	   					// } else {
-	   					// 	appStateStore.add(checkInCtr.getAppState());
-		   		  		//checkInCtr.showDashboard();
-	   					// }	   						   				
-	   				},
-	   				failure: function(record, operation) {
-	   					console.log('error restoring state');
-	   					appStateStore.removeAll();
-	   					appStateStore.sync();
-	   					appStateStore.add(checkInCtr.getAppState());
-	   		   		 	checkInCtr.showDashboard();
-	   				}
-	   			 });	   			 
+   			 //reload old state
+   			 EatSense.model.CheckIn.load(restoredCheckInId, {
+   				scope: this,
+   				success : function(record, operation) {
+   					console.log('found existing checkin '+record);	
+   					checkInCtr.restoreState(record);  						   				
+   				},
+   				failure: function(record, operation) {
+   					console.log('error restoring state');
+   					//TODO refactor
+   					Ext.Ajax.setDefaultHeaders({});
+   					appStateStore.removeAll();
+   					appStateStore.sync();
+   					appStateStore.add(checkInCtr.getAppState());
+   		   		 	checkInCtr.showDashboard();
+   				}
+   			 });	   			 
 	   	 }	   		 	   	 	   	 
 	   	 else {	   		 
 	   		if (appStateStore.getCount() > 1){

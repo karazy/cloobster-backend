@@ -83,6 +83,9 @@ Karazy.translations = (function() {
 		"settingsTitle" : "Einstellungen",
 		"nickname" : "Nickname",
 		"nicknameDesc" : "Mit deinem Spitznamen wirst du im Restaurant angezeigt.</br>Änderungen wirken sich erst auf den nächsten CheckIn aus.",
+		"newsletterRegisterBt": "Registrieren",
+		"newsletterEmail" : "E-Mail",
+		"newsletterRegisterSuccess" : "Eine Bestätigung wird an {0} geschickt.",
 		//Request
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "Aktionen",

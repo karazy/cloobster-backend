@@ -16,14 +16,16 @@ Ext.define('EatSense.view.SettingsTab', {
 		}, 
 		{
 			xtype: 'label',
-			// height: '100px',
-			// styleHtmlContent : true,
 			html: Karazy.i18n.translate('nicknameDesc')
 		},
 		{
 			xtype : 'textfield',
 			label : Karazy.i18n.translate('nickname'),
 			itemId : 'nickname'
+		},
+		{
+			xtype: 'newsletter',
+			height: 200
 		} ]
 	}
 });

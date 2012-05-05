@@ -20,13 +20,24 @@ Ext.define('EatSense.view.Settings', {
 			} ]
 		}, 
 		{
-			xtype: 'label',
-			html: Karazy.i18n.translate('nicknameDesc')
+			xtype: 'panel',
+			layout: 'vbox',
+			items: [
+				{
+					xtype: 'label',
+					html: Karazy.i18n.translate('nicknameDesc')
+				},
+				{
+					xtype : 'textfield',
+					label : Karazy.i18n.translate('nickname'),
+					itemId : 'nicknameSetting',
+				}
+			]
 		},
-		{
-			xtype : 'textfield',
-			label : Karazy.i18n.translate('nickname'),
-			itemId : 'nicknameSetting'
-		} ]
+		// {
+		// 	xtype: 'newsletter',
+		// 	height: 200
+		// }
+		]
 	}
 });
