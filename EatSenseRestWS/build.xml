@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseRestWS" default="default" basedir=".">
 	<property name="appDir" value="src/main/app/dev/" />
+	<property name="cockpitDir" value="src/main/cockpit/" />
 	<property name="prodDir" value="src/main/app/prod/" />
 	
 	<target name="default">
@@ -23,8 +24,8 @@
 			
 			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
 		</exec>
-		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
-		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
+		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/desktop/lib" overwrite="true"></copy>
+		<move file="${appDir}/app-all.js" todir="${prodDir}/desktop/" overwrite="true"></move>
 		<copy todir="${prodDir}/desktop/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
 				<exclude name="**/*.iphone.*" />
@@ -37,6 +38,27 @@
 			</fileset>
 			<regexpmapper from="^(.+)\.desktop\.(.+)$$" to="\1.\2" />
 		</move>
+	</target>
+	
+	<target name="createCockpitProduction">
+		<echo message="Executing createCockpitProduction task from build.xml" />
+		<exec executable="${sencha.cmd}" >
+		
+			<arg line="create jsb -a ${cockpitDir}dev/index_pkg_ready.html -p ${cockpitDir}app.jsb3" />
+		</exec>
+		<exec executable="${sencha.cmd}">
+			
+			<arg line="build -p ${cockpitDir}dev/app.jsb3 -d ${cockpitDir}dev" />
+		</exec>
+		<copy file="${appDir}/touch/sencha-touch.js" todir="${cockpitDir}prod/lib" overwrite="true"></copy>
+		<move file="${cockpitDir}dev/app-all.js" todir="${cockpitDir}prod/" overwrite="true"></move>
+		<copy todir="${cockpitDir}prod/lib" overwrite="true">
+			<fileset dir="${cockpitDir}dev/lib">
+				<exclude name="**/*.iphone.*" />
+				<exclude name="**/*.phone.*" />
+				<exclude name="**/*.ignore.*" />
+			</fileset>
+		</copy>
 	</target>
 	
 	<target name="createAndroidProduction">
@@ -72,7 +94,7 @@
 			
 			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
 		</exec>
-		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
+		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/ios/lib" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/ios/" overwrite="true"></move>
 		<copy todir="${prodDir}/ios/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
