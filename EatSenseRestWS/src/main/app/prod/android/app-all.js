@@ -56601,7 +56601,6 @@ Ext.define('Ext.data.reader.Array', {
 });
 
 
-
 Ext.Loader.setConfig({
 	enabled : true,
 	//WORKAORUND related to Android 3x Bug and Webview URL handling
@@ -56802,6 +56801,5 @@ Ext.application({
         }
     }
 });
-
 
 

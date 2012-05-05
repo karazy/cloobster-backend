@@ -10,9 +10,11 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.AccountController;
@@ -46,6 +48,14 @@ public class AccountResource {
 	}
 	
 	@GET
+	@Path("channels")
+	@Produces("text/plain; charset=UTF-8")
+	public String checkOnlineStatus(@QueryParam("clientId")String clientId, @QueryParam("businessId") Long businessId) {
+		ChannelController channelController = channelCtrlProvider.get();
+		return channelController.subscribeClient(channelController.buildCockpitClientId(businessId, clientId));
+	}
+	
+	@GET
 	@Path("{login}")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"user"})
@@ -70,7 +80,7 @@ public class AccountResource {
 	@RolesAllowed({"restaurantadmin"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
 		//Set the timeout to 480 minutes (8 hours)
-		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(30));
+		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(10));
 		if(token == null)
 			throw new NotFoundException();
 		return token;

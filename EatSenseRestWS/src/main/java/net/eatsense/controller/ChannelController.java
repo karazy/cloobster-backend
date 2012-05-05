@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -95,7 +96,7 @@ public class ChannelController {
 		// create a channel id with the format "businessId|clientId"
 		clientId = buildCockpitClientId(business.getId(), clientId);
 		
-		logger.debug("creating channel for channelID: " +clientId);
+		logger.debug("clientId: {}, timeout: {}", clientId, timeout);
 		token = (timeout.isPresent())?channelService.createChannel(clientId, timeout.get()):channelService.createChannel(clientId);
 
 		return token;
@@ -294,12 +295,13 @@ public class ChannelController {
 	 * Subscribe this channel for updates of this business.
 	 * 
 	 * @param request
+	 * @throws IOException 
 	 */
 	public void handleConnected(HttpServletRequest request) {
 		String clientId;
-		
+
 		try {
-			clientId = channelService.parsePresence(request).clientId();		
+			clientId = channelService.parsePresence(request).clientId();
 		} catch (IOException e) {
 			logger.error("could not parse presence",e);
 			return;
@@ -310,6 +312,33 @@ public class ChannelController {
 		}
 		else if(clientId.startsWith("b"))
 			subscribeToBusiness(clientId);
+		
+		sendMessage(clientId, new MessageDTO("channel","connected", null));
+	}
+
+	/**
+	 * @param clientId
+	 */
+	public String subscribeClient(String clientId) {
+		boolean connected = false;
+		logger.debug("recieved online check from clientId:" + clientId);
+		if(clientId.startsWith("c")) {
+			CheckIn checkIn = parseCheckIn(clientId);
+	
+			connected =  (checkIn == null ||clientId.equals(checkIn.getChannelId()) );
+		}
+		else if(clientId.startsWith("b")) {
+			Business business = parseBusiness(clientId);
+
+			connected = !(business == null || business.getChannelIds() == null || !business.getChannelIds().contains(clientId));
+		}
+		if(connected) {
+			sendMessage(clientId, new MessageDTO("channel","connected", null));
+			return "CONNECTED";
+		}
+		else {
+			return "DISCONNECTED";
+		}
 	}
 	
 	/**
