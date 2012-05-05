@@ -9,15 +9,13 @@ Karazy.config = (function() {
 	return {
 		
 		serviceUrl : '',
-		msgboxHideTimeout: 1000,
-		msgboxHideLongTimeout: 1500,
+		msgboxHideTimeout : 1000,
+		msgboxHideLongTimeout: 2500,
 		currencyFormat: 'EURO',
 		version: 0.1,
 		disableCaching: true,
 		language: 'DE',
-		channelReconnectTimeout: 10000,
-		channelReconnectTries: 20,
-		heartbeatInterval: 10000
+		channelReconnectTimeout: 10000
 	};
 	
 })();

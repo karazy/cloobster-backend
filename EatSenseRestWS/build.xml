@@ -130,10 +130,15 @@
 		<delete file="${appDir}app.android.jsb3"></delete>
 		<delete file="${appDir}app.ios.jsb3"></delete>
 		<delete file="${appDir}all-classes.js"></delete>
+		<delete file="${cockpitDir}dev/all-classes.js"></delete>
+		<delete file="${cockpitDir}dev/app.jsb3"></delete>
+		<delete file="${frontendDirDev}all-classes.js"></delete>
+		<delete file="${frontendDirDev}app.jsb3"></delete>
 	</target>
 	
 	<target name="production" depends="createDesktopProduction, createAndroidProduction, createIOSProduction,cleanUpProductionFiles"></target>
 	<target name="android-production" depends="createAndroidProduction, cleanUpProductionFiles"/>
 	<target name="desktop-production" depends="createDesktopProduction, cleanUpProductionFiles"/>
+	<target name="server-production" depends="createDesktopProduction ,createCockpitProduction, createFrontendProduction, cleanUpProductionFiles"/>
 	<target name="ios-production" depends="createIOSProduction, cleanUpProductionFiles"/>
 </project>

@@ -1,6 +1,10 @@
 /*Karazy namespace. Create if not exists.*/
 var Karazy = (Karazy) ? Karazy : {};
 
+/**
+*	Contains contants used throughout the application.
+*	
+*/
 Karazy.constants = (function() {
 
 	return {
@@ -8,16 +12,16 @@ Karazy.constants = (function() {
 		//check in status
 		INTENT : 'INTENT',
 		CHECKEDIN : 'CHECKEDIN',
-		ORDER_PLACED: 'ORDER_PLACED',
-		SERVED: 'SERVED',
+		ORDER_PLACED : 'ORDER_PLACED',
 		PAYMENT_REQUEST : 'PAYMENT_REQUEST',
 		COMPLETE : 'COMPLETE',
+		CANCEL_ALL : 'CANCEL_ALL',
 		Order : {
 			CART : 'CART',
 			PLACED : 'PLACED',
-			CANCELED : 'CANCELED',
 			RECEIVED: 'RECEIVED',
-			COMPLETE : 'COMPLETE'			
+			CANCELED : 'CANCELED',
+			COMPLETE : 'COMPLETE'
 		},
 		Request : {
 			CALL_WAITER : 'CALL_WAITER'
@@ -27,8 +31,8 @@ Karazy.constants = (function() {
 			EURO: '$1,$2 €',
 			US_DOLLAR: '\$ $1.$2'
 		},
+		//Client side 
 		FORCE_LOGOUT : 'FORCE_LOGOUT'
-
 	};
 
 })();
