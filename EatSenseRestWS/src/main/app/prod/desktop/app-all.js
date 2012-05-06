@@ -44990,7 +44990,7 @@ Ext.define('EatSense.view.Menu', {
 	xtype : 'menutab',
 	config : {
 		layout: 'fit',
-		iconCls : 'compose',
+		iconCls : 'menu',
 		title: Karazy.i18n.translate('menuTitle'),
 		iconMask : true,
 		itemId : 'menutab',
@@ -45518,7 +45518,9 @@ Ext.define('EatSense.controller.Settings', {
     config: {
     	refs: {
     		settingsTab: 'lounge settingstab[tabName=settings]',
-    		nicknameField: 'settingstab #nickname'
+    		nicknameField: 'settingstab #nickname',
+            newsletterView: 'newsletter',
+            registerNewsletterBt: 'newsletter button[action=register]'
     	},
 
     	control: {
@@ -45527,15 +45529,32 @@ Ext.define('EatSense.controller.Settings', {
     		},
     		nicknameField : {
     			change: 'saveNickname'
-    		}
+    		},
+            registerNewsletterBt: {
+                tap: 'registerNewsletter'
+            }
     	}
+    },
+    launch: function() {
+        var me = this;
+
+        //setup newsletter record and listeners
+        this.getNewsletterView().setRecord(Ext.create('EatSense.model.Newsletter'));
+
+        this.getNewsletterView().on({
+            delegate: 'field',
+            change: function(field, newVal, oldVal) {
+                console.log('set field ' + newVal);
+                me.getNewsletterView().getRecord().set(field.getName(), newVal);
+            }
+        });
     },
     /**
     *	Loads the settings and sets the corresponding fields.
     */
     loadSettings: function(tab, options) {
-    	var 	checkInCtr = this.getApplication().getController('CheckIn'),
-    			appState = checkInCtr.getAppState();
+    	var checkInCtr = this.getApplication().getController('CheckIn'),
+    		appState = checkInCtr.getAppState();
 
     	this.getNicknameField().setValue(appState.get('nickname'));    	
     },
@@ -45549,6 +45568,47 @@ Ext.define('EatSense.controller.Settings', {
 
 		appState.set('nickname', newData);
 	},
+    /**
+    * Submits the form to register a new newsletter.
+    */
+    registerNewsletter: function(button) {
+        var me = this,
+            newsletter = this.getNewsletterView(),
+            record = newsletter.getRecord();
+
+        console.log('register new newsletter %s', newsletter.getValues().email);
+        //validate record
+        record.validate();
+
+        //get data from email field
+        Ext.Ajax.request({
+            url: Karazy.config.serviceUrl+'/newsletter',
+            method: 'POST',
+            jsonData: record.getData(),
+            success: function(response) {
+                //show short success message
+                Ext.Msg.show({
+                    title : Karazy.i18n.translate('hint'),
+                    'message' : Karazy.i18n.translate('newsletterRegisterSuccess', newsletter.getValues()),
+                    buttons : []
+                });
+                //show short alert and then hide
+                Ext.defer((function() {
+                    if(!Karazy.util.getAlertActive()) {
+                        Ext.Msg.hide();
+                    }                   
+                }), Karazy.config.msgboxHideTimeout, this);
+            },
+            failure: function(response) {
+                me.getApplication().handleServerError({
+                    'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+                    'forceLogout': false,
+                    'message' : {500: 'E-Mail schon vorhanden oder nicht gültig!'}
+                }); 
+            }
+        });
+
+    }
 });
 /**
 *	Handles customer requests like "Call Waiter".
@@ -45589,6 +45649,7 @@ Ext.define('EatSense.controller.Request',{
 				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
 		
 		console.log('send call waiter request');
+		//TODO validate!
 
 		request.set('type', Karazy.constants.Request.CALL_WAITER);		
 		//workaround to prevent sencha from sending phantom id
@@ -46097,6 +46158,177 @@ Ext.define('EatSense.override.CustomRestProxy', {
 	    }
 });
 /**
+ * @author Ed Spencer
+ * @aside guide models
+ *
+ * This singleton contains a set of validation functions that can be used to validate any type of data. They are most
+ * often used in {@link Ext.data.Model Models}, where they are automatically set up and executed.
+ */
+Ext.define('Ext.data.Validations', {
+    alternateClassName: 'Ext.data.validations',
+
+    singleton: true,
+
+    config: {
+        /**
+         * @property {String} presenceMessage
+         * The default error message used when a presence validation fails.
+         */
+        presenceMessage: 'must be present',
+
+        /**
+         * @property {String} lengthMessage
+         * The default error message used when a length validation fails.
+         */
+        lengthMessage: 'is the wrong length',
+
+        /**
+         * @property {Boolean} formatMessage
+         * The default error message used when a format validation fails.
+         */
+        formatMessage: 'is the wrong format',
+
+        /**
+         * @property {String} inclusionMessage
+         * The default error message used when an inclusion validation fails.
+         */
+        inclusionMessage: 'is not included in the list of acceptable values',
+
+        /**
+         * @property {String} exclusionMessage
+         * The default error message used when an exclusion validation fails.
+         */
+        exclusionMessage: 'is not an acceptable value',
+
+        /**
+         * @property {String} emailMessage
+         * The default error message used when an email validation fails
+         */
+        emailMessage: 'is not a valid email address'
+    },
+
+    constructor: function(config) {
+        this.initConfig(config);
+    },
+
+    /**
+     * Returns the configured error message for any of the validation types.
+     * @param {String} type The type of validation you want to get the error message for.
+     */
+    getMessage: function(type) {
+        var getterFn = this['get' + type[0].toUpperCase() + type.slice(1) + 'Message'];
+        if (getterFn) {
+            return getterFn.call(this);
+        }
+        return '';
+    },
+
+    /**
+     * The regular expression used to validate email addresses
+     * @property emailRe
+     * @type RegExp
+     */
+    emailRe: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+
+    /**
+     * Validates that the given value is present.
+     * For example:
+     *
+     *     validations: [{type: 'presence', field: 'age'}]
+     *
+     * @param {Object} config Config object
+     * @param {Object} value The value to validate
+     * @return {Boolean} True if validation passed
+     */
+    presence: function(config, value) {
+        if (value === undefined) {
+            value = config;
+        }
+
+        //we need an additional check for zero here because zero is an acceptable form of present data
+        return !!value || value === 0;
+    },
+
+    /**
+     * Returns true if the given value is between the configured min and max values.
+     * For example:
+     *
+     *     validations: [{type: 'length', field: 'name', min: 2}]
+     *
+     * @param {Object} config Config object
+     * @param {String} value The value to validate
+     * @return {Boolean} True if the value passes validation
+     */
+    length: function(config, value) {
+        if (value === undefined || value === null) {
+            return false;
+        }
+
+        var length = value.length,
+            min    = config.min,
+            max    = config.max;
+
+        if ((min && length < min) || (max && length > max)) {
+            return false;
+        } else {
+            return true;
+        }
+    },
+
+    /**
+     * Validates that an email string is in the correct format
+     * @param {Object} config Config object
+     * @param {String} email The email address
+     * @return {Boolean} True if the value passes validation
+     */
+    email: function(config, email) {
+        return Ext.data.validations.emailRe.test(email);
+    },
+
+    /**
+     * Returns true if the given value passes validation against the configured `matcher` regex.
+     * For example:
+     *
+     *     validations: [{type: 'format', field: 'username', matcher: /([a-z]+)[0-9]{2,3}/}]
+     *
+     * @param {Object} config Config object
+     * @param {String} value The value to validate
+     * @return {Boolean} True if the value passes the format validation
+     */
+    format: function(config, value) {
+        return !!(config.matcher && config.matcher.test(value));
+    },
+
+    /**
+     * Validates that the given value is present in the configured `list`.
+     * For example:
+     *
+     *     validations: [{type: 'inclusion', field: 'gender', list: ['Male', 'Female']}]
+     *
+     * @param {Object} config Config object
+     * @param {String} value The value to validate
+     * @return {Boolean} True if the value is present in the list
+     */
+    inclusion: function(config, value) {
+        return config.list && Ext.Array.indexOf(config.list,value) != -1;
+    },
+
+    /**
+     * Validates that the given value is present in the configured `list`.
+     * For example:
+     *
+     *     validations: [{type: 'exclusion', field: 'username', list: ['Admin', 'Operator']}]
+     *
+     * @param {Object} config Config object
+     * @param {String} value The value to validate
+     * @return {Boolean} True if the value is not present in the list
+     */
+    exclusion: function(config, value) {
+        return config.list && Ext.Array.indexOf(config.list,value) == -1;
+    }
+});
+
+/**
 *	Settings section. Show when navigating from dashboard.
 */
 Ext.define('EatSense.view.Settings', {
@@ -46118,14 +46350,25 @@ Ext.define('EatSense.view.Settings', {
 			} ]
 		}, 
 		{
-			xtype: 'label',
-			html: Karazy.i18n.translate('nicknameDesc')
+			xtype: 'panel',
+			layout: 'vbox',
+			items: [
+				{
+					xtype: 'label',
+					html: Karazy.i18n.translate('nicknameDesc')
+				},
+				{
+					xtype : 'textfield',
+					label : Karazy.i18n.translate('nickname'),
+					itemId : 'nicknameSetting',
+				}
+			]
 		},
-		{
-			xtype : 'textfield',
-			label : Karazy.i18n.translate('nickname'),
-			itemId : 'nicknameSetting'
-		} ]
+		// {
+		// 	xtype: 'newsletter',
+		// 	height: 200
+		// }
+		]
 	}
 });
 /**
@@ -46777,7 +47020,7 @@ Ext.define('EatSense.view.MyOrders', {
 		layout: {
 			type: 'fit'
 		},
-		iconCls : 'home',
+		iconCls : 'cash',
 		title: Karazy.i18n.translate('myOrdersTabBt'),
 		iconMask : true,
 		itemId : 'myorderstab',
@@ -46931,14 +47174,16 @@ Ext.define('EatSense.view.SettingsTab', {
 		}, 
 		{
 			xtype: 'label',
-			// height: '100px',
-			// styleHtmlContent : true,
 			html: Karazy.i18n.translate('nicknameDesc')
 		},
 		{
 			xtype : 'textfield',
 			label : Karazy.i18n.translate('nickname'),
 			itemId : 'nickname'
+		},
+		{
+			xtype: 'newsletter',
+			height: 200
 		} ]
 	}
 });
@@ -48021,6 +48266,25 @@ Ext.define('EatSense.model.Request', {
 			url: '/c/checkins/{checkInId}/requests',
 			enablePagingParams: false
 		}
+	}
+});
+/**
+* Represents data to register a user for a newsletter.
+* 
+*/
+Ext.define('EatSense.model.Newsletter', {
+	extend: 'Ext.data.Model',
+	config: {
+		fields: [
+			{
+			//email to register
+			name: 'email'
+		}
+		],
+		validations: [
+		{
+			type: 'email', field: 'email'
+		}]
 	}
 });
 /**
@@ -49666,6 +49930,30 @@ Ext.define('EatSense.view.ProductDetail', {
 			]
 		}
 		]		
+	}
+});
+Ext.define('EatSense.view.Newsletter', {
+	extend: 'Ext.form.Panel',
+	xtype: 'newsletter',
+	require: ['EatSense.model.Newsletter'],
+	config: {
+		layout: 'vbox',
+		// record: Ext.create('EatSense.model.Newsletter'),
+		items: [
+		{
+			xtype: 'label',
+			html: 'Stay up-to-date und verpasse nicht den eatSense Big Bang! Melde dich für den Newsletter an.'
+		},
+		{
+			xtype: 'emailfield',
+			label: Karazy.i18n.translate('newsletterEmail'),
+			name:'email'	
+		}, {
+			xtype: 'button',
+			action: 'register',
+			text: Karazy.i18n.translate('newsletterRegisterBt')
+		}
+		]
 	}
 });
 /**
@@ -56456,6 +56744,75 @@ Ext.define('EatSense.view.Main', {
 });
 
 /**
+ * @aside guide forms
+ *
+ * The Email field creates an HTML5 email input and is usually created inside a form. Because it creates an HTML email
+ * input field, most browsers will show a specialized virtual keyboard for email address input. Aside from that, the
+ * email field is just a normal text field. Here's an example of how to use it in a form:
+ *
+ *     @example
+ *     Ext.create('Ext.form.Panel', {
+ *         fullscreen: true,
+ *         items: [
+ *             {
+ *                 xtype: 'fieldset',
+ *                 title: 'Register',
+ *                 items: [
+ *                     {
+ *                         xtype: 'emailfield',
+ *                         label: 'Email',
+ *                         name: 'email'
+ *                     },
+ *                     {
+ *                         xtype: 'passwordfield',
+ *                         label: 'Password',
+ *                         name: 'password'
+ *                     }
+ *                 ]
+ *             }
+ *         ]
+ *     });
+ *
+ * Or on its own, outside of a form:
+ *
+ *     Ext.create('Ext.field.Email', {
+ *         label: 'Email address',
+ *         value: 'prefilled@email.com'
+ *     });
+ *
+ * Because email field inherits from {@link Ext.field.Text textfield} it gains all of the functionality that text fields
+ * provide, including getting and setting the value at runtime, validations and various events that are fired as the
+ * user interacts with the component. Check out the {@link Ext.field.Text} docs to see the additional functionality
+ * available.
+ */
+Ext.define('Ext.field.Email', {
+    extend: 'Ext.field.Text',
+    alternateClassName: 'Ext.form.Email',
+    xtype: 'emailfield',
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        component: {
+	        type: 'email'
+	    },
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        autoCapitalize: false
+    }
+});
+
+
+
+
+
+
+/**
  * @author Ed Spencer
  * @aside guide stores
  *
@@ -56601,6 +56958,7 @@ Ext.define('Ext.data.reader.Array', {
 });
 
 
+
 Ext.Loader.setConfig({
 	enabled : true,
 	//WORKAORUND related to Android 3x Bug and Webview URL handling
@@ -56612,8 +56970,8 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
-	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge'], 
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request', 'Newsletter'],
+	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge', 'Newsletter'], 
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill', 'Request'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
@@ -56801,5 +57159,6 @@ Ext.application({
         }
     }
 });
+
 
 

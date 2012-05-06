@@ -485,6 +485,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
         var     orderCtr = this.getApplication().getController('Order'),
                 menuCtr = this.getApplication().getController('Menu'),
+                settingsCtr = this.getApplication().getController('Settings'),
                 menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
@@ -509,6 +510,9 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
+            if(!this.getAppState().get('newsletterRegistered')) {
+              settingsCtr.registerNewsletterOnLeaving();
+            }
 		}
 
         if(status == Karazy.constants.CANCEL_ALL) {

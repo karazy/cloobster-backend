@@ -15,17 +15,29 @@ Ext.define('EatSense.view.SettingsTab', {
 			title : Karazy.i18n.translate('settingsTitle'),
 		}, 
 		{
-			xtype: 'label',
-			html: Karazy.i18n.translate('nicknameDesc')
+			xtype: 'formpanel',
+			//prevents also that the panel has a wrong size. Bug?
+			scrollable: false,
+			padding: 5,
+			layout: {
+				type: 'vbox',
+				// align: 'center'
+			},
+			items: [		
+				{
+					xtype: 'label',
+					html: Karazy.i18n.translate('nicknameDesc')
+				},
+				{
+					xtype : 'textfield',
+					label : Karazy.i18n.translate('nickname'),
+					itemId : 'nickname'
+				}
+			]
 		},
-		{
-			xtype : 'textfield',
-			label : Karazy.i18n.translate('nickname'),
-			itemId : 'nickname'
-		},
-		{
-			xtype: 'newsletter',
-			height: 200
-		} ]
+		{			
+			xtype: 'newsletter',			
+			padding: 5
+		}]
 	}
 });

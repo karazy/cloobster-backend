@@ -242,6 +242,9 @@ Karazy.channel = (function() {
 			timedOut = false;
 			connectionLost = false;	
 			channelToken = null;
+
+			console.log('normal channel closing');
+			
 			if(socket) {
 				setStatusHelper('DISCONNECTED');	
 				socket.close();

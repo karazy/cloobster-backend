@@ -1,15 +1,16 @@
 /**
 *	Handles save and restore of application settings.
-*
+*   Register for newsletter.
 */
 Ext.define('EatSense.controller.Settings', {
     extend: 'Ext.app.Controller',
+    requires: ['EatSense.view.NewsletterPopup'],
     config: {
     	refs: {
     		settingsTab: 'lounge settingstab[tabName=settings]',
     		nicknameField: 'settingstab #nickname',
-            newsletterView: 'newsletter',
-            registerNewsletterBt: 'newsletter button[action=register]'
+            newsletterView: 'settingstab newsletter',
+            registerNewsletterBt: 'settingstab newsletter button[action=register]'
     	},
 
     	control: {
@@ -20,16 +21,16 @@ Ext.define('EatSense.controller.Settings', {
     			change: 'saveNickname'
     		},
             registerNewsletterBt: {
-                tap: 'registerNewsletter'
+                tap: 'registerNewsletterBtTap'
             }
     	}
     },
     launch: function() {
         var me = this;
 
-        //setup newsletter record and listeners
+        //create newsletter record and setup listeners
         this.getNewsletterView().setRecord(Ext.create('EatSense.model.Newsletter'));
-
+        //don't specify listener in view because this won't work correctly
         this.getNewsletterView().on({
             delegate: 'field',
             change: function(field, newVal, oldVal) {
@@ -58,27 +59,43 @@ Ext.define('EatSense.controller.Settings', {
 		appState.set('nickname', newData);
 	},
     /**
-    * Submits the form to register a new newsletter.
+    *   Tap handler for register newsletter button.
     */
-    registerNewsletter: function(button) {
+    registerNewsletterBtTap: function(button) {
         var me = this,
             newsletter = this.getNewsletterView(),
             record = newsletter.getRecord();
 
-        console.log('register new newsletter %s', newsletter.getValues().email);
-        //validate record
-        record.validate();
+        this.registerNewsletter(record);
+    },
+    /**
+    * Submits the form to register a new newsletter.
+    */
+    registerNewsletter: function(record) {
+        var me = this,
+            checkInCtr = this.getApplication().getController('CheckIn'),
+            appState = checkInCtr.getAppState(),
+            errors;
 
-        //get data from email field
-        Ext.Ajax.request({
-            url: Karazy.config.serviceUrl+'/newsletter',
-            method: 'POST',
-            jsonData: record.getData(),
-            success: function(response) {
+        //validate record
+        errors = record.validate();
+
+        if(!errors.isValid()) {
+            Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('newsletterInvalidEmail', record.get('email')));
+            return;
+        }
+
+        record.save({
+            success: function(record, operation) {
+                //ensure PUT is always used when saving the mail
+                record.phantom = true;
+
+                appState.set('newsletterRegistered', true);
+
                 //show short success message
                 Ext.Msg.show({
                     title : Karazy.i18n.translate('hint'),
-                    'message' : Karazy.i18n.translate('newsletterRegisterSuccess', newsletter.getValues()),
+                    'message' : Karazy.i18n.translate('newsletterRegisterSuccess', record.get('email')),
                     buttons : []
                 });
                 //show short alert and then hide
@@ -88,14 +105,54 @@ Ext.define('EatSense.controller.Settings', {
                     }                   
                 }), Karazy.config.msgboxHideTimeout, this);
             },
-            failure: function(response) {
+            failure: function(record, operation) {
                 me.getApplication().handleServerError({
-                    'error': { 'status' : response.status, 'statusText' : response.statusText}, 
+                    'error': operation.error, 
                     'forceLogout': false,
-                    'message' : {500: 'E-Mail schon vorhanden oder nicht gültig!'}
+                    'message' : {500: Karazy.i18n.translate('newsletterDuplicateEmail')}
                 }); 
             }
         });
+    },
+    /**
+    * Shows a popup to user asking for his email to register for newsletter.
+    */
+    registerNewsletterOnLeaving: function() {
+        var me = this,
+            checkInCtr = this.getApplication().getController('CheckIn'),
+            appState = checkInCtr.getAppState(),
+            popup = Ext.create('EatSense.view.NewsletterPopup');
+
+        //see this.launch for comments
+        popup.setRecord(Ext.create('EatSense.model.Newsletter'));
+        popup.on({
+            delegate: 'field',
+            change: function(field, newVal, oldVal) {
+                popup.getRecord().set(field.getName(), newVal);
+            }
+        });
+        //setup button handler
+        popup.on({
+            delegate: 'button[action=register]',
+            tap: function() {
+                me.registerNewsletter(popup.getRecord());
+            }
+        });
+
+        popup.on({
+            delegate: 'button[action=dont-ask]',
+            tap: function() {
+                appState.set('newsletterRegistered', true);
+               Ext.Viewport.remove(popup);
+            }
+        });
+
+        popup.on('hide', function() {
+             Ext.Viewport.remove(popup);
+        });
+
+        Ext.Viewport.add(popup);
+        popup.show();
 
     }
 });

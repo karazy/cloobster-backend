@@ -210,7 +210,7 @@ input, textarea, select {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -241,8 +241,26 @@ input, textarea, select {
  * Makes the element text overflow to use ellipsis.
  */
 /* line 10, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_core.scss */
+
+/* ------- FONTS EMBEDD --------- */
+
+
+@font-face {
+    font-family: 'ComfortaaRegular';
+    src: url('fonts/comfortaa_regular-webfont.eot');
+    src: url('fonts/comfortaa_regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/comfortaa_regular-webfont.woff') format('woff'),
+         url('fonts/comfortaa_regular-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+/* ------ FONTS END ----------*/
+
+
 html, body {
-  font-family: "Helvetica Neue", HelveticaNeue, "Helvetica-Neue", Helvetica, "BBAlpha Sans", sans-serif;
+  font-family: ComfortaaRegular,"Helvetica Neue", HelveticaNeue, "Helvetica-Neue", Helvetica, "BBAlpha Sans", sans-serif;
   font-weight: normal;
   position: relative;
   -webkit-text-size-adjust: none;
@@ -420,7 +438,7 @@ input, textarea {
 /* line 33, ../../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.1/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 .x-html body {
   line-height: 1.5;
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-family: ComfortaaRegular, "Helvetica Neue", Arial, Helvetica, sans-serif;
   color: #333333;
   font-size: 75%;
 }
@@ -790,7 +808,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -956,7 +974,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -1122,7 +1140,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -1324,7 +1342,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -1536,7 +1554,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -1785,7 +1803,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -1980,7 +1998,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -2164,7 +2182,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -2383,7 +2401,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -2549,7 +2567,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -2794,7 +2812,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -2987,7 +3005,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -3187,7 +3205,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -3358,7 +3376,7 @@ input, textarea {
  * Colors the text of an element based on lightness of its background.
  *
  *     .my-element {
- *       @include color-by-background(#fff); // Colors text black.
+ *       @include color-by-background(#fff); // Colors text #594b3a.
  *     }
  *
  *     .my-element {
@@ -3404,7 +3422,7 @@ input, textarea {
 /* line 14, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_media.scss */
 .x-video-ghost {
   -webkit-background-size: 100% auto;
-  background: black url() center center no-repeat;
+  background: #594b3a url() center center no-repeat;
 }
 
 /* line 19, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_media.scss */
@@ -3515,7 +3533,7 @@ audio {
 .x-button, .x-toolbar .x-button {
   border: 1px solid #999999;
   border-top-color: #a6a6a6;
-  color: black;
+  color: #594b3a;
 }
 /* line 60, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-button.x-button-back:before, .x-button.x-button-forward:before, .x-toolbar .x-button.x-button-back:before, .x-toolbar .x-button.x-button-forward:before {
@@ -3530,7 +3548,7 @@ audio {
 }
 /* line 68, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-button .x-button-icon.x-icon-mask, .x-toolbar .x-button .x-button-icon.x-icon-mask {
-  background-color: black;
+  background-color: #594b3a;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #4d4d4d), color-stop(2%, #121212), color-stop(100%, #000000));
   background-image: -webkit-linear-gradient(#4d4d4d, #121212 2%, #000000);
   background-image: linear-gradient(#4d4d4d, #121212 2%, #000000);
@@ -3856,7 +3874,7 @@ audio {
 /* line 43, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-tab .x-button-icon.compose,
 .x-button .x-button-icon.x-icon-mask.compose {
-  -webkit-mask-image: url('data:image/png;base64,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');
+  -webkit-mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAF/0lEQVRoBe2aW4hVVRjH54xa6nSzm92sHiZNorJowMpxrDEoyECiUUpztIkeeumpoCB6rAwi6FHwIXqKXkqiEE0no0QNLWwyspmGsruWlVqp0+9/2t9hz3Lty+mcfTnpB/9Za397Xf7//a219lr7TGVsbKztZLL2k0mstJ4S/H+P+ESfwEqlMhn/VNAJpoOjoGibAIFfwDbWnT/DZOCrex34D4b9vvw4wVScRKEu0AcWgQtBmYb9DvgsA6OganCWhgFwL/lHEf35v3ci/mqVFrAO8AT4FugJHge6URZsg0s3aDfOAe+H8f0INAo3gavD9928iT2bgqvBYVAWgWEeG+E1G0wwAeQ18hTZ/cDKSvROECnaBD9Iod9DFa2BMqSDEgAqjtiH8H3v4XwM32ZwlZUPp/jbLgHDoAziXA7r4aXIhsVqgZLYA8Atb9eK9BbQGRarvOwxEDdfdU9D/UiOUH9bwTixAWGJ/QmYuKhUojU6xomu4HgL3AV89ipO3ZdYlc3LJOJTsAeR1bAEr56V+J4H00Aa0/D+BNxPM0NW4Wcyvqe0G7+Gu5b9IhAexnrYq8A+4OMa55PoDaA6p0kjG1jHvVqnetBFQBxAP9CrJ27qxYm2OX25IhdlxxGoRgqzYFOxHAIvgHMbIKKF7iIwVe+yMtsA5F4CjYiVPu2+lhG/z3QRNRTeKGIIB4NKgXgEHIrhF8Xb9WuxmmVayhphLVDPgimgEdtL5VWI3RNuxH0idp17hCGlAOg924zISmyXRdbSskVYYjVnmxFZvXt14DjBLKJummuEYXU3iNsuuvyirnXam2cRddNSRJjXj1bjteAc0Ih9QeU+RG6JayTqSeUSYYhpu/griOKR1j9MGze7EXWvKRPZUaaC6VebAYltxrFUYue64nzXRQ7pfki+CDpAI6bVWJuKD9M0Ere1TFO/7jLMV+2NbTXWh8JGTDuoxYjVySqVFRFhfV15DjQqdoQ2BuoRS/mqRS0KTZ3D9KTISuxvIKrPtP5R2rjFnaP4Ek93lInsvGmC6eM00A+asRp/RTu3esRej3+G63evKZOL4HvoJ/x1MW0k3XI/0E6PR0Q3/o/AHPeee53XHO6DzDRgw5ls3fYlNZYgYHO4JmvgfVy/DjqBPhDEWuaCIXQpDOYELNaQPg4SiQXlLfmazErEvmsOpbQ9j+RlcAH4G6Qyd9jYdVPmMAx6wDEgkXOBHrK+lIqg9RWXSmy3OzTxzQcjwOrq29x1bjn3mjK1ClbR0oYF07Z2U08FfewiPV8EMK3YOu8midYCNd9DWpHVSm1clZZC8HkQ2R4Qe4Z0kpEnr5Vb36oU+TBxy2uB6rXyluK7AehAb+UsTSU46zl8BcRuBBrSg5CuzTPyf+HTfPbNaUVvKWU2kLq2BMdM15n2OmvBd0BEw3cHGPaQ0r1XwNuhe/r2vAKxG0O+cNbWg7AvdT6zvTQrqH5rXhowWYeAqmD8Z+DTqroA9IKFYDqQSewDlN2kiywsM8GQnR3gCOkQQmeRanhL4J1Av2qY6SP7XvBklmLVWZaCV9D+6eAQ0DxVVK8EZiNkPgDvAS1sQ4jV2ThTy0Qw0ZwM69sD5joVdQV5iV8P9DOOxO5DpL5j5WaZCIb9AqAV+ij4A+hw/maA/XlEkr68lpXga+ltKxgE2sDs9vZegDMrwWsQuboAPYldtieW+A8F8p6X9VDMRHA9BPIuGyd4LG8yKfuL46WdW6xJcFQDU3i96LRTGoOPBGmnligsirQWre/AxZ4C1+DrpY/3PfeKcl1Gxz3AJ1inrsR3uiquBf3AZ9/g1FFMjZXBZkBCW1Sf7WSx1NEx0bSv1QZBQ7tVoYA8jeDEf7yhXNuZ4B2gSq0qeBjuM1MJViGsB6hSK4rW598BMO6/bKPE14YAFXQ2HQWtMrwVnINAYmufjqKEmr8mOIj0bVTWSUYb/qQPbBoaRUABOQz03znLwUQTkyat/hZDpZrxGjqLi4VgMbgJ6L1XFlNUPwYKymvgACL10FPbCYJT12zRgnFbyxaVFE/7lOD459P6d/8Bhs9x6sTqrJgAAAAASUVORK5CYII=') !important;
 }
 
 /* line 43, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
@@ -3929,7 +3947,7 @@ audio {
 .x-button.x-button-action, .x-toolbar .x-button.x-button-action, .x-button.x-button-action-round, .x-toolbar .x-button.x-button-action-round, .x-button.x-button-action-small, .x-toolbar .x-button.x-button-action-small {
   border: 1px solid #b15500;
   border-top-color: #cb6100;
-  color: black;
+  color: #594b3a;
 }
 /* line 60, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-button.x-button-action.x-button-back:before, .x-button.x-button-action.x-button-forward:before, .x-toolbar .x-button.x-button-action.x-button-back:before, .x-toolbar .x-button.x-button-action.x-button-forward:before, .x-button.x-button-action-round.x-button-back:before, .x-button.x-button-action-round.x-button-forward:before, .x-toolbar .x-button.x-button-action-round.x-button-back:before, .x-toolbar .x-button.x-button-action-round.x-button-forward:before, .x-button.x-button-action-small.x-button-back:before, .x-button.x-button-action-small.x-button-forward:before, .x-toolbar .x-button.x-button-action-small.x-button-back:before, .x-toolbar .x-button.x-button-action-small.x-button-forward:before {
@@ -3944,7 +3962,7 @@ audio {
 }
 /* line 68, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-button.x-button-action .x-button-icon.x-icon-mask, .x-toolbar .x-button.x-button-action .x-button-icon.x-icon-mask, .x-button.x-button-action-round .x-button-icon.x-icon-mask, .x-toolbar .x-button.x-button-action-round .x-button-icon.x-icon-mask, .x-button.x-button-action-small .x-button-icon.x-icon-mask, .x-toolbar .x-button.x-button-action-small .x-button-icon.x-icon-mask {
-  background-color: black;
+  background-color: #594b3a;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #994a00), color-stop(2%, #241100), color-stop(100%, #000000));
   background-image: -webkit-linear-gradient(#994a00, #241100 2%, #000000);
   background-image: linear-gradient(#994a00, #241100 2%, #000000);
@@ -4240,8 +4258,8 @@ audio {
 }
 /* line 155, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar.x-docked-bottom .x-tab {
-  -webkit-border-radius: 0.25em;
-  border-radius: 0.25em;
+  -webkit-border-radius: 21% 0;
+  border-radius: 21% 0;
   min-width: 3.3em;
   position: relative;
   padding-top: .2em;
@@ -4329,7 +4347,7 @@ audio {
 /* line 227, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-light .x-tab-active {
   color: white;
-  border-bottom: 1px solid #a5f10d;
+  border-bottom: 1.5px solid #a5f10d;
 }
 /* line 232, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-light .x-tab-pressed {
@@ -4376,21 +4394,34 @@ audio {
 
 /* line 218, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark {
-  background-color: #5b8800;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #b6ff22), color-stop(2%, #73ac00), color-stop(100%, #436400));
-  background-image: -webkit-linear-gradient(#b6ff22, #73ac00 2%, #436400);
-  background-image: linear-gradient(#b6ff22, #73ac00 2%, #436400);
-  border-top-color: #4a6e00;
-  border-bottom-color: #283b00;
+  
+  background: #CEDB93 url('../images/bg-rp-top.png') repeat left top;
+  /* background-color: #CEDB93;
+  background-image: linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -o-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -moz-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -webkit-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -ms-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  
+  background-image: -webkit-gradient(
+  	linear,
+  	left bottom,
+  	left top,
+  	color-stop(0.47, rgb(205,214,139)),
+  	color-stop(0.74, rgb(206,219,147)),
+  	color-stop(0.87, rgb(206,219,147))
+  ); */
+  border-color: #594b3a !important;
+  border-radius: 5px 5px 0 0;
 }
 /* line 223, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark .x-tab {
-  color: #c7ff55;
+  color: #614021;
 }
 /* line 227, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark .x-tab-active {
   color: white;
-  border-bottom: 1px solid #659700;
+  border-bottom: 2px solid #614021;
 }
 /* line 232, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark .x-tab-pressed {
@@ -4399,31 +4430,46 @@ audio {
 
 /* line 239, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark.x-docked-bottom .x-tab {
-  text-shadow: rgba(0, 0, 0, 0.5) 0 -0.08em 0;
+  text-shadow: rgba(0, 0, 0, 0.1) 0 -0.08em 0;
+  font-family: Helvetica Neue;
 }
 /* line 241, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark.x-docked-bottom .x-tab .x-button-icon {
-  background-color: #9fee00;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d7ff88), color-stop(2%, #b1ff13), color-stop(100%, #87ca00));
-  background-image: -webkit-linear-gradient(#d7ff88, #b1ff13 2%, #87ca00);
-  background-image: linear-gradient(#d7ff88, #b1ff13 2%, #87ca00);
+  background: #1e5799;
+  background: -moz-linear-gradient(top,  #1e5799 0%, #614021 0%, #8e6e51 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#1e5799), color-stop(0%,#614021), color-stop(100%,#8e6e51));
+  background: -webkit-linear-gradient(top,  #1e5799 0%,#614021 0%,#8e6e51 100%);
+  background: -o-linear-gradient(top,  #1e5799 0%,#614021 0%,#8e6e51 100%);
+  background: -ms-linear-gradient(top,  #1e5799 0%,#614021 0%,#8e6e51 100%);
+  background: linear-gradient(top,  #1e5799 0%,#614021 0%,#8e6e51 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#8e6e51',GradientType=0 );
+  
 }
 /* line 246, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark.x-docked-bottom .x-tab-active {
-  background-color: #4a6e00;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #283b00), color-stop(10%, #395500), color-stop(65%, #4a6e00), color-stop(100%, #4c7100));
-  background-image: -webkit-linear-gradient(#283b00, #395500 10%, #4a6e00 65%, #4c7100);
-  background-image: linear-gradient(#283b00, #395500 10%, #4a6e00 65%, #4c7100);
-  text-shadow: rgba(0, 0, 0, 0.5) 0 -0.08em 0;
-  -webkit-box-shadow: #395500 0 0 0.25em inset;
-  box-shadow: #395500 0 0 0.25em inset;
+background: #F79621;
+background: -moz-linear-gradient(top, #F79621 0%, #F9C667 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F79621), color-stop(100%,#F9C667));
+background: -webkit-linear-gradient(top, #F79621 0%,#F9C667 100%);
+background: -o-linear-gradient(top, #F79621 0%,#F9C667 100%);
+background: -ms-linear-gradient(top, #F79621 0%,#F9C667 100%);
+background: linear-gradient(top, #F79621 0%,#F9C667 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', endColorstr='#F9C667',GradientType=0 );
+-webkit-box-shadow: #F79621 0 0 0.25em inset;
+box-shadow: #F79621 0 0 0.25em inset;
+color: #614021;
 }
 /* line 254, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-dark.x-docked-bottom .x-tab-active .x-button-icon {
-  background-color: #ffd6b1;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(2%, #ffe9d5), color-stop(100%, #ffc48d));
-  background-image: -webkit-linear-gradient(#ffffff, #ffe9d5 2%, #ffc48d);
-  background-image: linear-gradient(#ffffff, #ffe9d5 2%, #ffc48d);
+ background: #614021;
+ background: -moz-linear-gradient(top,  #614021 0%, #996535 100%);
+ background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#614021), color-stop(100%,#996535));
+ background: -webkit-linear-gradient(top,  #614021 0%,#996535 100%);
+ background: -o-linear-gradient(top,  #614021 0%,#996535 100%);
+ background: -ms-linear-gradient(top,  #614021 0%,#996535 100%);
+ background: linear-gradient(top,  #614021 0%,#996535 100%);
+ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#614021', endColorstr='#996535',GradientType=0 );
+ 
 }
 
 /* line 263, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
@@ -4450,12 +4496,12 @@ audio {
 }
 /* line 227, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-neutral .x-tab-active {
-  color: black;
+  color: #594b3a;
   border-bottom: 1px solid #e8e8e8;
 }
 /* line 232, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar-neutral .x-tab-pressed {
-  color: black;
+  color: #594b3a;
 }
 
 /* line 239, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
@@ -4493,7 +4539,7 @@ audio {
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #bababa), color-stop(10%, #c7c7c7), color-stop(65%, #d3d3d3), color-stop(100%, #d5d5d5));
   background-image: -webkit-linear-gradient(#bababa, #c7c7c7 10%, #d3d3d3 65%, #d5d5d5);
   background-image: linear-gradient(#bababa, #c7c7c7 10%, #d3d3d3 65%, #d5d5d5);
-  color: black;
+  color: #594b3a;
 }
 
 /* line 111, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
@@ -4559,6 +4605,7 @@ audio {
   text-overflow: ellipsis;
   margin: 0 0.3em;
   max-width: 100%;
+  color: #917D64 !important;
 }
 /* line 80, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-title .x-innerhtml {
@@ -4570,11 +4617,26 @@ audio {
 
 /* line 120, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark {
-  background-color: #7dbb00;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #c7ff55), color-stop(2%, #95df00), color-stop(100%, #659700));
-  background-image: -webkit-linear-gradient(#c7ff55, #95df00 2%, #659700);
-  background-image: linear-gradient(#c7ff55, #95df00 2%, #659700);
-  border-color: black;
+
+  background: #CEDB93 url('../images/bg-rp-top.png') repeat left top;
+  /* background-color: #CEDB93;
+  background-image: linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -o-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -moz-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -webkit-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%);
+  background-image: -ms-linear-gradient(bottom, rgb(205,214,139) 47%, rgb(206,219,147) 74%, rgb(206,219,147) 87%); 
+  
+  background-image: -webkit-gradient(
+  	linear,
+  	left bottom,
+  	left top,
+  	color-stop(0.47, rgb(205,214,139)),
+  	color-stop(0.74, rgb(206,219,147)),
+  	color-stop(0.87, rgb(206,219,147))
+  );
+  */
+  border-color: #594b3a !important;
+  border-radius: 0 0 5px 5px;
 }
 /* line 124, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark .x-title {
@@ -4583,19 +4645,19 @@ audio {
 }
 /* line 129, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark.x-docked-top {
-  border-bottom-color: black;
+  border-bottom-color: #594b3a;
 }
 /* line 133, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark.x-docked-bottom {
-  border-top-color: black;
+  border-top-color: #594b3a;
 }
 /* line 137, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark.x-docked-left {
-  border-right-color: black;
+  border-right-color: #594b3a;
 }
 /* line 141, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark.x-docked-right {
-  border-left-color: black;
+  border-left-color: #594b3a;
 }
 /* line 55, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-toolbar-dark .x-button, .x-toolbar .x-toolbar-dark .x-button,
@@ -4633,10 +4695,26 @@ audio {
 .x-toolbar-dark .x-field-select .x-component-outer:before, .x-toolbar
 .x-toolbar-dark .x-field-select .x-component-outer:before.x-button-back:after, .x-toolbar
 .x-toolbar-dark .x-field-select .x-component-outer:before.x-button-forward:after {
-  background-color: #6ca200;
+ 
+
+background: #F79621;
+background: -moz-linear-gradient(top, #F9C667 0%, #F79621 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F9C667), color-stop(100%,#F79621));
+background: -webkit-linear-gradient(top, #F9C667 0%,#F79621 100%);
+background: -o-linear-gradient(top, #F9C667 0%,#F79621 100%);
+background: -ms-linear-gradient(top, #F9C667 0%,#F79621 100%);
+background: linear-gradient(top, #F9C667 0%,#F79621 100%);
+color: #614021;
+
+
+
+ 
+  /* background-color: #6ca200;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #beff3c), color-stop(2%, #84c500), color-stop(100%, #547e00));
   background-image: -webkit-linear-gradient(#beff3c, #84c500 2%, #547e00);
-  background-image: linear-gradient(#beff3c, #84c500 2%, #547e00);
+  background-image: linear-gradient(#beff3c, #84c500 2%, #547e00); */
+  
+  
 }
 /* line 68, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-toolbar-dark .x-button .x-button-icon.x-icon-mask, .x-toolbar .x-toolbar-dark .x-button .x-button-icon.x-icon-mask,
@@ -4675,10 +4753,17 @@ audio {
 .x-toolbar-dark .x-field-select .x-component-outer:before.x-button-pressed:after, .x-toolbar
 .x-toolbar-dark .x-field-select .x-component-outer:before.x-button-active, .x-toolbar
 .x-toolbar-dark .x-field-select .x-component-outer:before.x-button-active:after {
-  background-color: #629200;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #405f00), color-stop(10%, #517900), color-stop(65%, #629200), color-stop(100%, #639500));
-  background-image: -webkit-linear-gradient(#405f00, #517900 10%, #629200 65%, #639500);
-  background-image: linear-gradient(#405f00, #517900 10%, #629200 65%, #639500);
+ 
+background: #F79621;
+background: -moz-linear-gradient(top, #F79621 0%, #F9C667 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F79621), color-stop(100%,#F9C667));
+background: -webkit-linear-gradient(top, #F79621 0%,#F9C667 100%);
+background: -o-linear-gradient(top, #F79621 0%,#F9C667 100%);
+background: -ms-linear-gradient(top, #F79621 0%,#F9C667 100%);
+background: linear-gradient(top, #F79621 0%,#F9C667 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', endColorstr='#F9C667',GradientType=0 );
+
+
 }
 /* line 151, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark .x-form-label {
@@ -4692,7 +4777,7 @@ audio {
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d7ff88), color-stop(2%, #b1ff13), color-stop(100%, #87ca00));
   background-image: -webkit-linear-gradient(#d7ff88, #b1ff13 2%, #87ca00);
   background-image: linear-gradient(#d7ff88, #b1ff13 2%, #87ca00);
-  border-color: black;
+  border-color: #594b3a;
 }
 /* line 124, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-light .x-title {
@@ -4701,19 +4786,19 @@ audio {
 }
 /* line 129, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-light.x-docked-top {
-  border-bottom-color: black;
+  border-bottom-color: #594b3a;
 }
 /* line 133, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-light.x-docked-bottom {
-  border-top-color: black;
+  border-top-color: #594b3a;
 }
 /* line 137, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-light.x-docked-left {
-  border-right-color: black;
+  border-right-color: #594b3a;
 }
 /* line 141, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-light.x-docked-right {
-  border-left-color: black;
+  border-left-color: #594b3a;
 }
 /* line 55, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-toolbar-light .x-button, .x-toolbar .x-toolbar-light .x-button, .x-toolbar-light .x-field-select .x-component-outer, .x-toolbar .x-toolbar-light .x-field-select .x-component-outer, .x-toolbar-light .x-field-select .x-component-outer:before, .x-toolbar .x-toolbar-light .x-field-select .x-component-outer:before {
@@ -4762,7 +4847,7 @@ audio {
 }
 /* line 124, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-neutral .x-title {
-  color: black;
+  color: #594b3a;
   text-shadow: rgba(255, 255, 255, 0.25) 0 0.08em 0;
 }
 /* line 129, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
@@ -4785,7 +4870,7 @@ audio {
 .x-toolbar-neutral .x-button, .x-toolbar .x-toolbar-neutral .x-button, .x-toolbar-neutral .x-field-select .x-component-outer, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer, .x-toolbar-neutral .x-field-select .x-component-outer:before, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer:before {
   border: 1px solid #a0a0a0;
   border-top-color: #adadad;
-  color: black;
+  color: #594b3a;
 }
 /* line 60, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-toolbar-neutral .x-button.x-button-back:before, .x-toolbar-neutral .x-button.x-button-forward:before, .x-toolbar .x-toolbar-neutral .x-button.x-button-back:before, .x-toolbar .x-toolbar-neutral .x-button.x-button-forward:before, .x-toolbar-neutral .x-field-select .x-component-outer.x-button-back:before, .x-toolbar-neutral .x-field-select .x-component-outer.x-button-forward:before, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer.x-button-back:before, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer.x-button-forward:before, .x-toolbar-neutral .x-field-select .x-component-outer:before.x-button-back:before, .x-toolbar-neutral .x-field-select .x-component-outer:before.x-button-forward:before, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer:before.x-button-back:before, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer:before.x-button-forward:before {
@@ -4800,7 +4885,7 @@ audio {
 }
 /* line 68, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-toolbar-neutral .x-button .x-button-icon.x-icon-mask, .x-toolbar .x-toolbar-neutral .x-button .x-button-icon.x-icon-mask, .x-toolbar-neutral .x-field-select .x-component-outer .x-button-icon.x-icon-mask, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer .x-button-icon.x-icon-mask, .x-toolbar-neutral .x-field-select .x-component-outer:before .x-button-icon.x-icon-mask, .x-toolbar .x-toolbar-neutral .x-field-select .x-component-outer:before .x-button-icon.x-icon-mask {
-  background-color: black;
+  background-color: #594b3a;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #4d4d4d), color-stop(2%, #121212), color-stop(100%, #000000));
   background-image: -webkit-linear-gradient(#4d4d4d, #121212 2%, #000000);
   background-image: linear-gradient(#4d4d4d, #121212 2%, #000000);
@@ -4814,7 +4899,7 @@ audio {
 }
 /* line 151, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-neutral .x-form-label {
-  color: black;
+  color: #594b3a;
   text-shadow: rgba(255, 255, 255, 0.25) 0 0.08em 0;
 }
 
@@ -4897,7 +4982,7 @@ audio {
 }
 /* line 115, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar-forms.scss */
 .x-toolbar .x-form-field:focus {
-  color: black;
+  color: #594b3a;
 }
 /* line 122, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar-forms.scss */
 .x-toolbar .x-field-select .x-component-outer,
@@ -5046,7 +5131,7 @@ audio {
 /* line 111, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list .x-list-item {
   position: relative;
-  color: black;
+  color: #594b3a;
 }
 /* line 115, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list .x-list-item .x-list-item-label {
@@ -5063,7 +5148,7 @@ audio {
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffd6b1), color-stop(2%, #ff9a3c), color-stop(100%, #f37500));
   background-image: -webkit-linear-gradient(#ffd6b1, #ff9a3c 2%, #f37500);
   background-image: linear-gradient(#ffd6b1, #ff9a3c 2%, #f37500);
-  color: black;
+  color: #594b3a;
   text-shadow: rgba(255, 255, 255, 0.25) 0 0.08em 0;
 }
 
@@ -5126,8 +5211,31 @@ audio {
 
 /* line 207, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list-round .x-scroll-view {
-  background-color: #EEEEEE !important;
+  
+  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  
+  /* background-image: linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
+  background-image: -o-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
+  background-image: -moz-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
+  background-image: -webkit-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
+  background-image: -ms-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
+  
+  background-image: -webkit-gradient(
+  	linear,
+  	left bottom,
+  	left top,
+  	color-stop(0.47, rgb(145,125,100)),
+  	color-stop(0.74, rgb(143,120,93))
+  ); */
+  
 }
+/* FRED */
+.x-dataview .x-scroll-view {
+  
+  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+
+}
+
 /* line 211, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list-round .x-list-disclosure {
   overflow: hidden;
@@ -5477,6 +5585,7 @@ html, body {
   -webkit-box-orient: vertical;
   min-width: 100%;
   min-height: 100%;
+  background: #8f785d;
 }
 
 /* line 131, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_layout.scss */
@@ -6056,7 +6165,7 @@ html, body {
 .x-spinner.x-item-disabled .x-spinner-button, .x-toolbar .x-spinner.x-item-disabled .x-spinner-button {
   border: 1px solid #c4c4c4;
   border-top-color: #d0d0d0;
-  color: black;
+  color: #594b3a;
 }
 /* line 60, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-spinner.x-item-disabled .x-spinner-button.x-button-back:before, .x-spinner.x-item-disabled .x-spinner-button.x-button-forward:before, .x-toolbar .x-spinner.x-item-disabled .x-spinner-button.x-button-back:before, .x-toolbar .x-spinner.x-item-disabled .x-spinner-button.x-button-forward:before {
@@ -6071,7 +6180,7 @@ html, body {
 }
 /* line 68, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-spinner.x-item-disabled .x-spinner-button .x-button-icon.x-icon-mask, .x-toolbar .x-spinner.x-item-disabled .x-spinner-button .x-button-icon.x-icon-mask {
-  background-color: black;
+  background-color: #594b3a;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #4d4d4d), color-stop(2%, #121212), color-stop(100%, #000000));
   background-image: -webkit-linear-gradient(#4d4d4d, #121212 2%, #000000);
   background-image: linear-gradient(#4d4d4d, #121212 2%, #000000);
@@ -6099,7 +6208,7 @@ html, body {
 .x-spinner .x-spinner-button, .x-toolbar .x-spinner .x-spinner-button {
   border: 1px solid #b7b7b7;
   border-top-color: #c4c4c4;
-  color: black;
+  color: #594b3a;
 }
 /* line 60, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-spinner .x-spinner-button.x-button-back:before, .x-spinner .x-spinner-button.x-button-forward:before, .x-toolbar .x-spinner .x-spinner-button.x-button-back:before, .x-toolbar .x-spinner .x-spinner-button.x-button-forward:before {
@@ -6114,7 +6223,7 @@ html, body {
 }
 /* line 68, ../../touch/resources/themes/stylesheets/sencha-touch/default/_mixins.scss */
 .x-spinner .x-spinner-button .x-button-icon.x-icon-mask, .x-toolbar .x-spinner .x-spinner-button .x-button-icon.x-icon-mask {
-  background-color: black;
+  background-color: #594b3a;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #4d4d4d), color-stop(2%, #121212), color-stop(100%, #000000));
   background-image: -webkit-linear-gradient(#4d4d4d, #121212 2%, #000000);
   background-image: linear-gradient(#4d4d4d, #121212 2%, #000000);
@@ -6905,7 +7014,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 113, app-default.scss */
 .productDetail-close {
-  background-color: black;
+  background-color: #594b3a;
   border-radius: 1em;
   text-align: center;
   vertical-align: middle;
@@ -7061,7 +7170,7 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 90px !important;
   height: 90px !important;
   border: 2px solid;
-  border-color: black;
+  border-color: #594b3a;
   margin-right: 7px;
   padding: 10px;
   position: relative;
@@ -7122,20 +7231,38 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 335, app-default.scss */
 .x-tab .x-button-icon.cart {
-  -webkit-mask-image: url('data:image/png;base64,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');
+  /*-webkit-mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAABcRgAAXEYBFJRDQQAAAAd0SU1FB9wCGgozCWxsyi0AAAAidEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVAgb24gYSBNYWOHqHdDAAAGW0lEQVRYw72YS4wURRjHf19V98zOMLubXZ4LuyiiIQpBHgGjUeMj8ZEYvCgHxXjQ6AU0Gg8aL3swxlc4eDEQfBAwJptw82CMifGkCSEYs2DwFQOovITdBZadme4qD1UzU9PbMwhGKplM93T19/x//++rgbZllb8QQDF7aa7xErACYxoeLrrrpoHX3JiGYr967oJkkyK2BvslzHyViVTqDBZ7LQxT7mPFGdVzDPRvCnkURiNArEU5o7KO/P+GGR+FBMw8MEuBS/BRL7CxPbpirqVhfiV7DNMThto5g96tmbpXUXpKJHoZ+pcDdmysDW+SE0UJ7lUgX83WaSWD5W44a6QVoHQbRNtB7wD9PrAhvyCawuMuBmcqejRqMYDNM77poQ2+aV2vrMBPT4FZDWocRvbCbwZWAFUNfXVIBc7HML8KB2JYYaDulZRSuBhBMXX7i6l7FhuILCTifn/gIuysd4pWwzCPu8b9goXw9xuN8PhnYZoSv9e0qheVcdj4T+yfR/69CKiB/AnJm34P+AcEgoy1IELsXwROnob4ONjFisKMoT7jhKHAznXGyKTfnwIVsGWQi8BFr0PADrjnMunfj4GS20scGtWJzXMwUngS9C5N77MtXFiB+EWHwcoqTy9A4THQu6D4iCNsgMpK0B9CvK0dV4UnQO+E4qYsJlUQepV5aFtG1w4CKmV6tY8QjmLkhPP6wjCM+ghTdN5bDZs9KdeXeV9Pu+/nvVyz0emtHuxEFw0M2AAXjI42CfYXn6oKcCuwAFgCtUuQVoGbgGFgIdRiSItQqwCLQYagej2kCmrTwBDsnAvldWArkE4Bf4R6O/FHBvyN+3gbmA0Z8IZgN4E84/ekQVbCvbQYQH0H9R2ZAmyCP1ym/cVmnRyE2lonWI4G7Ww+UG+B3Q4Ac4BJkEs+rUO+c5zyylOww05HfX/gaNelMwzuPRkeBL0b9MewvtwCcbQd9B4HcIDCFtCfuCIAmLsE9F6I3muJWzTf7dG7gb48+sqbudIg30HYj58F+RkowOFVXo4B+dVd15cGvFZsGT497OWcbHWJc2scRaS/AFOBLbabYWQKwnsyGoE+4I24HwaWwrzFQNVFOV0Jg8Ng5/n0zYGBEUhu9iJmYOA66F8G1XWQWmB/kCVzOfDndQRv4OAwTL7nPYsC48UbWA46QQP8YSdI/QQVexlbgVM5hZcL/hzgo2BMYMud/n4aZCLYp/31GUiUK4amogawrYMB1jP/kcAo6aA3N1qqPdVWHHvrfS4d2XOCVRkZWcLWXcYuyWN+LoMzL1QspP1OwMTv7ucx7QrASo5jJhMB04EvVUDsXA5jYZNPAo/fAr0M1OfQ8y1I6loP4q4BpsIJpcelnULGsAg47itS8lIoXVJpA7ZurDtAvxKEXjLeRr7aTEA9scdcmMoEOAs8l6nKJs6k+1lg1qwG9NwNyYPBxGoDwX74m2W0d7CZAAv8CuzKG3eu9FyQg8fBEc9d0hpxcp1dAvOGPBZVziw4qzikQ0tKM+A0wZkAWN4LR1/z/U6DjMOiD+DYhD9xNVK7EHgJ9HV+3w+QbAdm2sm7ub+pq1NLCjklMzWIgaMvgB3xwL4AdjWcfNof78Lx5RlgOTABnHb72NruaHOCicK0dqOLDmQ3GnkFMcx/HRa96gwxawH8Ea+hbJUD/shr0Pe2V7wmQymNzpKEGYz+Jc4CI0cBPe0m13MbAgU1gM2b28BcB12CE+td7yRyEW5z2uYV2dX8YWLAxqDWgFkDZp2niX3Aj5mKLIK61Y3QZq37zX4K/JxJnWT57GoME+AwFP8C2wtyBuLPIPkiB8iHoTABtujm/cKnkHyTmVxyDfuPFHJ7qTU0tvXYTNWvL8NzcdC6ok498t+2pE5GRcAt0NPnZMxMAuM5keiD8o1Eqg+sRuK/qU/86EekrEwbnA+uKpUWuBlKFVBVV01xAZJKMMY0FN1AXJqDSA0kRdCYao9vR+HEmv2+7HSRY5YVynGJuFBl6L5DLLzrEHGhSjkuYW12rioDKavfPciih77HWuUPKjYH+FwNXbSvpDKDIEyN92GtICoh6U0yJS/ufzZV4Mg7A9hUIXq69ffCrNOYXEnE8jEY958GDMmFfpLzA4ClMOhO2fd8rbFWeNwq5lx/FtFVamcXUJ8aRFQCnOgyzTT1/QOjsCh0XPMxkwAAAABJRU5ErkJggg==');*/
+  -webkit-mask-image: url('../images/new/02_warenkorb.png');
+}
+
+.x-tab .x-button-icon.menu {
+  -webkit-mask-image: url('../images/new/01_menu.png');
+}
+
+.x-tab .x-button-icon.cash {
+  -webkit-mask-image: url('../images/new/03_Kasse.png');
 }
 
 /* line 339, app-default.scss */
 .x-tab .x-button-icon.requests {
-  -webkit-mask-image: url('data:image/png;base64,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');
+  /*-webkit-mask-image: url('data:image/png;base64,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');*/
+  -webkit-mask-image: url('../images/new/04_Aktionen.png');
 }
 
-/* Request tab */
-/* line 344, app-default.scss */
-.call-waiter-badge {
-  /*border-radius: 0.5em;
-  border: dotted 1px red;
-  background-color: yellow;
-  padding: 3px;*/
-  /*-webkit-transform: rotate(30deg)*/
+/* line 343, app-default.scss */
+.x-layout-accordion-item.x-layout-accordion-item-anim {
+  -webkit-transition: height 300ms ease-in;
+}
+
+/* line 347, app-default.scss */
+.x-accordion-arrow { 
+  padding: 0.6em !important;
+  background: transparent url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAeVJREFUeNqM1E9Ik3Ecx/FtuIHgaMOZMAwzKBMiD4UsiaBDB+kgJUMIcXYQunnpEJ0C/14SvHmpSxcvHjoIg6hdWixZRAcdtMMciGgozMDTFk/v7/qOfnv47Zk/eMGe777fzzP2/J6f33EcX4vVjwcYQq/WjlDAB5RtQ35L4EW8xG2U8MUYlpuMYgB5LOFX07QEGu7gG14j7vrO1Kc90pswvzObRlDAI70OewQ2SO+uzjYFRpHHpNGcxApibUKTOhs1A+fxxtXYiW2UkULAI1RmFxqBkpzDoKXxFmrOv/UR91oEXsdXRORiHO897r7o/F9VvMVVS59kjAd40NdQ9LVeq9jRzx14iixeIGz0/ZQsCYzgwCPwBK9ctR4s4zseak0yIhL4ByGf97ppqcncNvb1Oig1CTzEZY+wYTx31TL6Wj7BD61dqb+a+nbIEwxZ/mjZKlvGQyliFh2uvpBmjDaGPmHMEjitQb/1abfa5DKbkSxzt2cRNJouYQ+buOGxrYI6KxlNp807nOGZXk/oH73R5oGtowtT7tMmgrS+Ruc5GMLam9bZej1g3KmCx6jqAZpC3PKLpDajPTWdqXgdsLLuYg4x3dinWr+AbhxjDZ/Pc2I3lpzK95HQIJ8G53QflmxDfwUYAKNRwbDSoyXQAAAAAElFTkSuQmCC") no-repeat center center !important;
+  /* For arrow animation */
+  -webkit-transition: -webkit-transform 300ms ease-in;
+}
+
+/* line 355, app-default.scss */
+.x-accordion-arrow-expanded {
+  -webkit-transform: rotate(90deg);
 }

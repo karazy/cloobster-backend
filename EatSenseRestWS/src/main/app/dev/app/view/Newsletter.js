@@ -3,8 +3,12 @@ Ext.define('EatSense.view.Newsletter', {
 	xtype: 'newsletter',
 	require: ['EatSense.model.Newsletter'],
 	config: {
-		layout: 'vbox',
-		// record: Ext.create('EatSense.model.Newsletter'),
+		layout: {
+			type: 'vbox',
+		},
+		//prevents also that the panel has a wrong size. Bug?
+		scrollable: false,
+		border: 2,
 		items: [
 		{
 			xtype: 'label',
@@ -17,7 +21,8 @@ Ext.define('EatSense.view.Newsletter', {
 		}, {
 			xtype: 'button',
 			action: 'register',
-			text: Karazy.i18n.translate('newsletterRegisterBt')
+			text: Karazy.i18n.translate('newsletterRegisterBt'),
+			cls: 'newsletter-register-button'
 		}
 		]
 	}

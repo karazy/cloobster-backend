@@ -47,11 +47,11 @@ Ext.application({
 	 		profile = Ext.os.deviceType.toLowerCase();	 
 
 		//global error handler
-		window.onerror = function(message, url, lineNumber) {  
-			console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
-		  	//prevent firing of default handler (return true)
-		  	return false;
-		}; 
+		// window.onerror = function(message, url, lineNumber) {  
+		// 	console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
+		//   	//prevent firing of default handler (return true)
+		//   	return false;
+		// }; 
 
 		//timeout for requests
 		Ext.Ajax.timeout = 1200000;

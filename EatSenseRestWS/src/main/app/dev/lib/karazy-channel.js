@@ -61,14 +61,16 @@ Karazy.channel = (function() {
 		messageHandlerFunction.apply(executionScope, [data.data]);
 	};
 
-	function onError(error) {		
-		console.log('channel error ' + (error && error.description) ? error.description : "");
+	function onError(error) {	
+		var errorDesc = (error && error.description) ? error.description : "";
+		
+		console.log('channel error ' + errorDesc);
 		if(error && ( error.code == '401' || error.code == '400') ) {
 			timedOut = true;
-			socket.close();
+			// socket.close();
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
-			socket.close();
+			// socket.close();
 		}
 	};
 
@@ -204,6 +206,8 @@ Karazy.channel = (function() {
 			timedOut = false;
 			connectionLost = false;	
 			channelToken = null;
+
+			console.log('normal channel closing');
 
 			if(socket) {
 				setStatusHelper('DISCONNECTED');	
