@@ -85,7 +85,11 @@ Karazy.translations = (function() {
 		"nicknameDesc" : "Mit deinem Spitznamen wirst du im Restaurant angezeigt.</br>Änderungen wirken sich erst auf den nächsten CheckIn aus.",
 		"newsletterRegisterBt": "Registrieren",
 		"newsletterEmail" : "E-Mail",
-		"newsletterRegisterSuccess" : "Eine Bestätigung wird an {0} geschickt.",
+		"newsletterRegisterSuccess" : "Danke! Eine Bestätigungsmail wird an {0} geschickt.",
+		"newsletterInvalidEmail" : "{0} ist keine gültige E-Mail Adresse.",
+		"newsletterDuplicateEmail" : "Diese E-Mail Adresse ist bereits registriert",
+		"newsletterPopupTitle" : "Newsletter abonnieren?", 
+		"newsletterDontAskButton" : "Nicht mehr nachfragen!",
 		//Request
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "VIP",

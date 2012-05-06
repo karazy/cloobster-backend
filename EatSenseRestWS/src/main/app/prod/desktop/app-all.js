@@ -44445,14 +44445,9 @@ Ext.define('EatSense.model.AppState', {
 		}, {
 			name : 'checkInId',
 			type : 'string'
-		} ],
-		associations : [ {
-			type : 'hasMany',
-			model : 'EatSense.model.Order',
-			primaryKey : 'id',
-			name : 'cartOrders',
-			autoLoad : true,
-			//associationKey : 'choices' // read child data from child_groups
+		}, {
+			name: 'newsletterRegistered',
+			type: 'boolean'
 		} ]
 	}
 });
@@ -45509,107 +45504,6 @@ Ext.define('EatSense.controller.Menu', {
 });
 
 
-/**
-*	Handles save and restore of application settings.
-*
-*/
-Ext.define('EatSense.controller.Settings', {
-    extend: 'Ext.app.Controller',
-    config: {
-    	refs: {
-    		settingsTab: 'lounge settingstab[tabName=settings]',
-    		nicknameField: 'settingstab #nickname',
-            newsletterView: 'newsletter',
-            registerNewsletterBt: 'newsletter button[action=register]'
-    	},
-
-    	control: {
-    		settingsTab : {
-    			activate: 'loadSettings'
-    		},
-    		nicknameField : {
-    			change: 'saveNickname'
-    		},
-            registerNewsletterBt: {
-                tap: 'registerNewsletter'
-            }
-    	}
-    },
-    launch: function() {
-        var me = this;
-
-        //setup newsletter record and listeners
-        this.getNewsletterView().setRecord(Ext.create('EatSense.model.Newsletter'));
-
-        this.getNewsletterView().on({
-            delegate: 'field',
-            change: function(field, newVal, oldVal) {
-                console.log('set field ' + newVal);
-                me.getNewsletterView().getRecord().set(field.getName(), newVal);
-            }
-        });
-    },
-    /**
-    *	Loads the settings and sets the corresponding fields.
-    */
-    loadSettings: function(tab, options) {
-    	var checkInCtr = this.getApplication().getController('CheckIn'),
-    		appState = checkInCtr.getAppState();
-
-    	this.getNicknameField().setValue(appState.get('nickname'));    	
-    },
-
-    /**
-	 * Saves the nickname in local store.
-	 */
-	saveNickname: function(component, newData, oldValue, eOpts) {
-    	var 	checkInCtr = this.getApplication().getController('CheckIn'),
-		appState = checkInCtr.getAppState();
-
-		appState.set('nickname', newData);
-	},
-    /**
-    * Submits the form to register a new newsletter.
-    */
-    registerNewsletter: function(button) {
-        var me = this,
-            newsletter = this.getNewsletterView(),
-            record = newsletter.getRecord();
-
-        console.log('register new newsletter %s', newsletter.getValues().email);
-        //validate record
-        record.validate();
-
-        //get data from email field
-        Ext.Ajax.request({
-            url: Karazy.config.serviceUrl+'/newsletter',
-            method: 'POST',
-            jsonData: record.getData(),
-            success: function(response) {
-                //show short success message
-                Ext.Msg.show({
-                    title : Karazy.i18n.translate('hint'),
-                    'message' : Karazy.i18n.translate('newsletterRegisterSuccess', newsletter.getValues()),
-                    buttons : []
-                });
-                //show short alert and then hide
-                Ext.defer((function() {
-                    if(!Karazy.util.getAlertActive()) {
-                        Ext.Msg.hide();
-                    }                   
-                }), Karazy.config.msgboxHideTimeout, this);
-            },
-            failure: function(response) {
-                me.getApplication().handleServerError({
-                    'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-                    'forceLogout': false,
-                    'message' : {500: 'E-Mail schon vorhanden oder nicht gültig!'}
-                }); 
-            }
-        });
-
-    }
-});
 /**
 *	Handles customer requests like "Call Waiter".
 *	
@@ -47173,18 +47067,30 @@ Ext.define('EatSense.view.SettingsTab', {
 			title : Karazy.i18n.translate('settingsTitle'),
 		}, 
 		{
-			xtype: 'label',
-			html: Karazy.i18n.translate('nicknameDesc')
+			xtype: 'formpanel',
+			//prevents also that the panel has a wrong size. Bug?
+			scrollable: false,
+			padding: 5,
+			layout: {
+				type: 'vbox',
+				// align: 'center'
+			},
+			items: [		
+				{
+					xtype: 'label',
+					html: Karazy.i18n.translate('nicknameDesc')
+				},
+				{
+					xtype : 'textfield',
+					label : Karazy.i18n.translate('nickname'),
+					itemId : 'nickname'
+				}
+			]
 		},
-		{
-			xtype : 'textfield',
-			label : Karazy.i18n.translate('nickname'),
-			itemId : 'nickname'
-		},
-		{
-			xtype: 'newsletter',
-			height: 200
-		} ]
+		{			
+			xtype: 'newsletter',			
+			padding: 5
+		}]
 	}
 });
 /*
@@ -48275,16 +48181,25 @@ Ext.define('EatSense.model.Request', {
 Ext.define('EatSense.model.Newsletter', {
 	extend: 'Ext.data.Model',
 	config: {
+		idProperty: 'id',
 		fields: [
+			{
+				name: 'id',
+				persist: false
+			},
 			{
 			//email to register
 			name: 'email'
-		}
+			}
 		],
 		validations: [
 		{
 			type: 'email', field: 'email'
-		}]
+		}],
+		proxy: {
+			type: 'rest',
+			url: '/newsletter'
+		}
 	}
 });
 /**
@@ -48296,12 +48211,12 @@ Ext.define('EatSense.view.Dashboard', {
 	xtype : 'dashboard',
 	requires: ['Ext.Img'],
 	config : {
-		style : 'background-color: white;',
 		layout : {
 			type : 'vbox',
 			pack : 'center',
 			align : 'middle',
 		},
+		cls: 'dashboard',
 		items : [ {
 			xtype : 'image',
 			src : 'res/images/eatSenseLogo_small.png',
@@ -48349,20 +48264,20 @@ Ext.define('EatSense.view.Dashboard', {
 				]
 			} ]
 		},
-		{
-			xtype: 'toolbar',
-			docked: 'bottom',
-			layout: {
-				type:'hbox',
-				pack: 'center'
-			},
-			items: [{
-				xtype : 'button',
-				action : 'settings',
-				iconCls : 'settings',
-				iconMask : true,
-			} ]
-		}
+		// {
+		// 	xtype: 'toolbar',
+		// 	docked: 'bottom',
+		// 	layout: {
+		// 		type:'hbox',
+		// 		pack: 'center'
+		// 	},
+		// 	items: [{
+		// 		xtype : 'button',
+		// 		action : 'settings',
+		// 		iconCls : 'settings',
+		// 		iconMask : true,
+		// 	} ]
+		// }
 
 		]
 	},
@@ -49937,8 +49852,12 @@ Ext.define('EatSense.view.Newsletter', {
 	xtype: 'newsletter',
 	require: ['EatSense.model.Newsletter'],
 	config: {
-		layout: 'vbox',
-		// record: Ext.create('EatSense.model.Newsletter'),
+		layout: {
+			type: 'vbox',
+		},
+		//prevents also that the panel has a wrong size. Bug?
+		scrollable: false,
+		border: 2,
 		items: [
 		{
 			xtype: 'label',
@@ -49951,10 +49870,200 @@ Ext.define('EatSense.view.Newsletter', {
 		}, {
 			xtype: 'button',
 			action: 'register',
-			text: Karazy.i18n.translate('newsletterRegisterBt')
+			text: Karazy.i18n.translate('newsletterRegisterBt'),
+			cls: 'newsletter-register-button'
 		}
 		]
 	}
+});
+/**
+* Popup dialog showing a form to register for newsletter.
+*/
+Ext.define('EatSense.view.NewsletterPopup', {
+	extend: 'Ext.Panel',
+	requires: ['EatSense.view.Newsletter'],
+	config: {
+		layout: 'vbox',
+		top: '20%',
+		left: '20px',
+		right: '20px',
+		bottom: '15%',
+		hideOnMaskTap: true,
+		modal: true,
+		cls: 'newsletter-popup',
+		items: [
+		{
+			xtype: 'titlebar',
+			docked: 'top',
+			title: Karazy.i18n.translate('newsletterPopupTitle')
+		},
+		{
+			xtype: 'newsletter'
+		},
+		{
+			xtype: 'button',
+			action: 'dont-ask',
+			text: Karazy.i18n.translate('newsletterDontAskButton')
+		}]
+	}
+});
+/**
+*	Handles save and restore of application settings.
+*   Register for newsletter.
+*/
+Ext.define('EatSense.controller.Settings', {
+    extend: 'Ext.app.Controller',
+    requires: ['EatSense.view.NewsletterPopup'],
+    config: {
+    	refs: {
+    		settingsTab: 'lounge settingstab[tabName=settings]',
+    		nicknameField: 'settingstab #nickname',
+            newsletterView: 'settingstab newsletter',
+            registerNewsletterBt: 'settingstab newsletter button[action=register]'
+    	},
+
+    	control: {
+    		settingsTab : {
+    			activate: 'loadSettings'
+    		},
+    		nicknameField : {
+    			change: 'saveNickname'
+    		},
+            registerNewsletterBt: {
+                tap: 'registerNewsletterBtTap'
+            }
+    	}
+    },
+    launch: function() {
+        var me = this;
+
+        //create newsletter record and setup listeners
+        this.getNewsletterView().setRecord(Ext.create('EatSense.model.Newsletter'));
+        //don't specify listener in view because this won't work correctly
+        this.getNewsletterView().on({
+            delegate: 'field',
+            change: function(field, newVal, oldVal) {
+                console.log('set field ' + newVal);
+                me.getNewsletterView().getRecord().set(field.getName(), newVal);
+            }
+        });
+    },
+    /**
+    *	Loads the settings and sets the corresponding fields.
+    */
+    loadSettings: function(tab, options) {
+    	var checkInCtr = this.getApplication().getController('CheckIn'),
+    		appState = checkInCtr.getAppState();
+
+    	this.getNicknameField().setValue(appState.get('nickname'));    	
+    },
+
+    /**
+	 * Saves the nickname in local store.
+	 */
+	saveNickname: function(component, newData, oldValue, eOpts) {
+    	var 	checkInCtr = this.getApplication().getController('CheckIn'),
+		appState = checkInCtr.getAppState();
+
+		appState.set('nickname', newData);
+	},
+    /**
+    *   Tap handler for register newsletter button.
+    */
+    registerNewsletterBtTap: function(button) {
+        var me = this,
+            newsletter = this.getNewsletterView(),
+            record = newsletter.getRecord();
+
+        this.registerNewsletter(record);
+    },
+    /**
+    * Submits the form to register a new newsletter.
+    */
+    registerNewsletter: function(record) {
+        var me = this,
+            checkInCtr = this.getApplication().getController('CheckIn'),
+            appState = checkInCtr.getAppState(),
+            errors;
+
+        //validate record
+        errors = record.validate();
+
+        if(!errors.isValid()) {
+            Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('newsletterInvalidEmail', record.get('email')));
+            return;
+        }
+
+        record.save({
+            success: function(record, operation) {
+                //ensure PUT is always used when saving the mail
+                record.phantom = true;
+
+                appState.set('newsletterRegistered', true);
+
+                //show short success message
+                Ext.Msg.show({
+                    title : Karazy.i18n.translate('hint'),
+                    'message' : Karazy.i18n.translate('newsletterRegisterSuccess', record.get('email')),
+                    buttons : []
+                });
+                //show short alert and then hide
+                Ext.defer((function() {
+                    if(!Karazy.util.getAlertActive()) {
+                        Ext.Msg.hide();
+                    }                   
+                }), Karazy.config.msgboxHideTimeout, this);
+            },
+            failure: function(record, operation) {
+                me.getApplication().handleServerError({
+                    'error': operation.error, 
+                    'forceLogout': false,
+                    'message' : {500: Karazy.i18n.translate('newsletterDuplicateEmail')}
+                }); 
+            }
+        });
+    },
+    /**
+    * Shows a popup to user asking for his email to register for newsletter.
+    */
+    registerNewsletterOnLeaving: function() {
+        var me = this,
+            checkInCtr = this.getApplication().getController('CheckIn'),
+            appState = checkInCtr.getAppState(),
+            popup = Ext.create('EatSense.view.NewsletterPopup');
+
+        //see this.launch for comments
+        popup.setRecord(Ext.create('EatSense.model.Newsletter'));
+        popup.on({
+            delegate: 'field',
+            change: function(field, newVal, oldVal) {
+                popup.getRecord().set(field.getName(), newVal);
+            }
+        });
+        //setup button handler
+        popup.on({
+            delegate: 'button[action=register]',
+            tap: function() {
+                me.registerNewsletter(popup.getRecord());
+            }
+        });
+
+        popup.on({
+            delegate: 'button[action=dont-ask]',
+            tap: function() {
+                appState.set('newsletterRegistered', true);
+               Ext.Viewport.remove(popup);
+            }
+        });
+
+        popup.on('hide', function() {
+             Ext.Viewport.remove(popup);
+        });
+
+        Ext.Viewport.add(popup);
+        popup.show();
+
+    }
 });
 /**
  * Ext.tab.Bar is used internally by {@link Ext.tab.Panel} to create the bar of tabs that appears at the top of the tab
@@ -51443,6 +51552,7 @@ Ext.define('EatSense.controller.CheckIn', {
    				callback: function(records, operation, success) {
    					if(success == true) {
    						orderCtr.refreshCart();
+              orderCtr.refreshMyOrdersList();
    					}
    				}						
    			});
@@ -51475,6 +51585,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		console.log('CheckIn Controller -> handleStatusChange' + ' new status '+status);
         var     orderCtr = this.getApplication().getController('Order'),
                 menuCtr = this.getApplication().getController('Menu'),
+                settingsCtr = this.getApplication().getController('Settings'),
                 menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
@@ -51495,10 +51606,14 @@ Ext.define('EatSense.controller.CheckIn', {
             menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
-            orderCtr.refreshCartBadgeText();
+            orderCtr.refreshCartBadgeText(true);
+            orderCtr.refreshMyOrdersBadgeText(true);
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
+            if(!this.getAppState().get('newsletterRegistered')) {
+              settingsCtr.registerNewsletterOnLeaving();
+            }
 		}
 
         if(status == Karazy.constants.CANCEL_ALL) {
@@ -54930,6 +55045,7 @@ Ext.define('Ext.picker.Picker', {
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: 'myorderstab list',
 			myordersview: 'myorderstab',
+			myordersTabBt: 'lounge button[title='+Karazy.i18n.translate('myOrdersTabBt')+']',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: 'myorderstab button[action="pay"]',
 			leaveButton: 'myorderstab button[action="leave"]',
@@ -55114,6 +55230,10 @@ Ext.define('Ext.picker.Picker', {
 			    	    	me.getCancelOrderBt().enable();
 							orders.removeAll();
 							me.refreshCart();
+							me.refreshMyOrdersList();
+
+							me.getLoungeview().switchTab(me.getMenutab() ,'left');
+
 							//show success message
 							Ext.Msg.show({
 								title : Karazy.i18n.translate('success'),
@@ -55138,73 +55258,6 @@ Ext.define('Ext.picker.Picker', {
 			                }); 
 						}
 					});
-					/*
-					cartview.showLoadScreen(true);
-					this.getSubmitOrderBt().disable();
-					this.getCancelOrderBt().disable();
-
-					orders.each(function(order) {
-						console.log('save order id:' + order.get('id') + ' genuineId: '+order.getProduct().get('genuineId'));
-						
-						if(!errorIndicator) {
-
-							order.set('status',Karazy.constants.Order.PLACED);														
-
-							Ext.Ajax.request({				
-					    	    url: Karazy.config.serviceUrl+'/c/businesses/'+businessId+'/orders/'+order.getId(),
-					    	    method: 'PUT',    
-					    	    jsonData: order.getRawJsonData(),
-					    	    scope: this,
-					    	    success: function(response) {
-					    	    	console.log('Saved order checkin.');
-					    	    	ajaxOrderCount++;					    	    	
-					    	    	orders.remove(order);
-					    	    	
-					    	    	//TODO remove orders or filter them just filter them! load orders from server?
-//					    	    	orders.each(function(order) {
-//					    	    	orderStore.add(order);
-//					    	    	});	
-//					    	    	orderStore.add(order);		    	    		    	    			    	    			    	    			    	    
-					    	    	
-					    	    	if(ajaxOrderCount == ordersCount) {		    	    					    	    	
-						    	    	me.refreshCart();
-						    	    	cartview.showLoadScreen(false);
-						    	    	me.getSubmitOrderBt().enable();
-						    	    	me.getCancelOrderBt().enable();
-						    	    	
-						    	    	//show success message
-						    			Ext.Msg.show({
-						    				title : Karazy.i18n.translate('success'),
-						    				message : Karazy.i18n.translate('orderSubmit'),
-						    				buttons : []
-						    			});
-						    			
-						    			Ext.defer((function() {
-						    				Ext.Msg.hide();
-						    			}), Karazy.config.msgboxHideTimeout, this);
-						    			
-						    			
-					    	    	}
-					    	    },
-					    	    failure: function(response) {
-					    	    	errorIndicator = true;
-					    	    	cartview.showLoadScreen(false);
-					    	    	me.getSubmitOrderBt().enable();
-					    	    	me.getCancelOrderBt().enable();
-					    	    	me.getApplication().handleServerError({
-			                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-			                        	'forceLogout': {403:true}
-			                        }); 
-					    	    }
-							});			
-						}	else {
-							me.getSubmitOrderBt().enable();
-							me.getCancelOrderBt().enable();
-							cartview.showLoadScreen(false);
-							return false;
-						};					
-					});
-					*/
 					}
 				}
 			});						
@@ -55415,14 +55468,33 @@ Ext.define('Ext.picker.Picker', {
 	 * Refreshes the badge text on cart tab icon.
 	 * Displays the number of orders.
 	 */
-	refreshCartBadgeText: function() {
+	refreshCartBadgeText: function(clear) {
 		var cartButton = this.getLoungeTabBar().getAt(1),
 			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 			badgeText;
 		
-		badgeText = (!checkIn) ? "" : (checkIn.orders().getCount() > 0) ? checkIn.orders().getCount() : "";
-		
-		cartButton.setBadgeText(badgeText);
+		if(clear) {
+			cartButton.setBadgeText("");
+		} else {
+			badgeText = (!checkIn) ? "" : (checkIn.orders().getCount() > 0) ? checkIn.orders().getCount() : "";
+			cartButton.setBadgeText(badgeText);
+		}
+	},
+	/**
+	* Refresehes the badge text of myorders tab icon.
+	* Displays the number of placed orders.
+	*/
+	refreshMyOrdersBadgeText: function(clear) {
+		var button = this.getMyordersTabBt(),
+			orderStore = Ext.StoreManager.lookup('orderStore'),
+			badgeText;
+
+		if(clear) {
+			button.setBadgeText("");
+		} else {
+			badgeText = (!orderStore) ? '' : (orderStore.getCount() > 0) ? orderStore.getCount() : '';
+			button.setBadgeText(badgeText);
+		}
 	},
 	/**
 	 * Refresh myorderlist and recalculate the total price.
@@ -55458,6 +55530,7 @@ Ext.define('Ext.picker.Picker', {
 						total = me.calculateOrdersTotal(myordersStore);
 						myorderlist.refresh();
 						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
+						me.refreshMyOrdersBadgeText();
 					} else {
 						payButton.disable();
 						leaveButton.enable();					
@@ -55574,7 +55647,8 @@ Ext.define('Ext.picker.Picker', {
 					me.setActiveBill(record);
 					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
 					payButton.hide();
-					myordersComplete.show();					
+					myordersComplete.show();
+					me.refreshMyOrdersBadgeText(true);			
 			},
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
@@ -57008,11 +57082,11 @@ Ext.application({
 	 		profile = Ext.os.deviceType.toLowerCase();	 
 
 		//global error handler
-		window.onerror = function(message, url, lineNumber) {  
-			console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
-		  	//prevent firing of default handler (return true)
-		  	return false;
-		}; 
+		// window.onerror = function(message, url, lineNumber) {  
+		// 	console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
+		//   	//prevent firing of default handler (return true)
+		//   	return false;
+		// }; 
 
 		//timeout for requests
 		Ext.Ajax.timeout = 1200000;
