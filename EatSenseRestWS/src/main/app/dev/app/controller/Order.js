@@ -30,6 +30,7 @@
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: 'myorderstab list',
 			myordersview: 'myorderstab',
+			myordersTabBt: 'lounge button[title='+Karazy.i18n.translate('myOrdersTabBt')+']',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: 'myorderstab button[action="pay"]',
 			leaveButton: 'myorderstab button[action="leave"]',
@@ -214,6 +215,10 @@
 			    	    	me.getCancelOrderBt().enable();
 							orders.removeAll();
 							me.refreshCart();
+							me.refreshMyOrdersList();
+
+							me.getLoungeview().switchTab(me.getMenutab() ,'left');
+
 							//show success message
 							Ext.Msg.show({
 								title : Karazy.i18n.translate('success'),
@@ -238,73 +243,6 @@
 			                }); 
 						}
 					});
-					/*
-					cartview.showLoadScreen(true);
-					this.getSubmitOrderBt().disable();
-					this.getCancelOrderBt().disable();
-
-					orders.each(function(order) {
-						console.log('save order id:' + order.get('id') + ' genuineId: '+order.getProduct().get('genuineId'));
-						
-						if(!errorIndicator) {
-
-							order.set('status',Karazy.constants.Order.PLACED);														
-
-							Ext.Ajax.request({				
-					    	    url: Karazy.config.serviceUrl+'/c/businesses/'+businessId+'/orders/'+order.getId(),
-					    	    method: 'PUT',    
-					    	    jsonData: order.getRawJsonData(),
-					    	    scope: this,
-					    	    success: function(response) {
-					    	    	console.log('Saved order checkin.');
-					    	    	ajaxOrderCount++;					    	    	
-					    	    	orders.remove(order);
-					    	    	
-					    	    	//TODO remove orders or filter them just filter them! load orders from server?
-//					    	    	orders.each(function(order) {
-//					    	    	orderStore.add(order);
-//					    	    	});	
-//					    	    	orderStore.add(order);		    	    		    	    			    	    			    	    			    	    
-					    	    	
-					    	    	if(ajaxOrderCount == ordersCount) {		    	    					    	    	
-						    	    	me.refreshCart();
-						    	    	cartview.showLoadScreen(false);
-						    	    	me.getSubmitOrderBt().enable();
-						    	    	me.getCancelOrderBt().enable();
-						    	    	
-						    	    	//show success message
-						    			Ext.Msg.show({
-						    				title : Karazy.i18n.translate('success'),
-						    				message : Karazy.i18n.translate('orderSubmit'),
-						    				buttons : []
-						    			});
-						    			
-						    			Ext.defer((function() {
-						    				Ext.Msg.hide();
-						    			}), Karazy.config.msgboxHideTimeout, this);
-						    			
-						    			
-					    	    	}
-					    	    },
-					    	    failure: function(response) {
-					    	    	errorIndicator = true;
-					    	    	cartview.showLoadScreen(false);
-					    	    	me.getSubmitOrderBt().enable();
-					    	    	me.getCancelOrderBt().enable();
-					    	    	me.getApplication().handleServerError({
-			                        	'error': { 'status' : response.status, 'statusText' : response.statusText}, 
-			                        	'forceLogout': {403:true}
-			                        }); 
-					    	    }
-							});			
-						}	else {
-							me.getSubmitOrderBt().enable();
-							me.getCancelOrderBt().enable();
-							cartview.showLoadScreen(false);
-							return false;
-						};					
-					});
-					*/
 					}
 				}
 			});						
@@ -515,14 +453,33 @@
 	 * Refreshes the badge text on cart tab icon.
 	 * Displays the number of orders.
 	 */
-	refreshCartBadgeText: function() {
+	refreshCartBadgeText: function(clear) {
 		var cartButton = this.getLoungeTabBar().getAt(1),
 			checkIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 			badgeText;
 		
-		badgeText = (!checkIn) ? "" : (checkIn.orders().getCount() > 0) ? checkIn.orders().getCount() : "";
-		
-		cartButton.setBadgeText(badgeText);
+		if(clear) {
+			cartButton.setBadgeText("");
+		} else {
+			badgeText = (!checkIn) ? "" : (checkIn.orders().getCount() > 0) ? checkIn.orders().getCount() : "";
+			cartButton.setBadgeText(badgeText);
+		}
+	},
+	/**
+	* Refresehes the badge text of myorders tab icon.
+	* Displays the number of placed orders.
+	*/
+	refreshMyOrdersBadgeText: function(clear) {
+		var button = this.getMyordersTabBt(),
+			orderStore = Ext.StoreManager.lookup('orderStore'),
+			badgeText;
+
+		if(clear) {
+			button.setBadgeText("");
+		} else {
+			badgeText = (!orderStore) ? '' : (orderStore.getCount() > 0) ? orderStore.getCount() : '';
+			button.setBadgeText(badgeText);
+		}
 	},
 	/**
 	 * Refresh myorderlist and recalculate the total price.
@@ -558,6 +515,7 @@
 						total = me.calculateOrdersTotal(myordersStore);
 						myorderlist.refresh();
 						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
+						me.refreshMyOrdersBadgeText();
 					} else {
 						payButton.disable();
 						leaveButton.enable();					
@@ -674,7 +632,8 @@
 					me.setActiveBill(record);
 					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
 					payButton.hide();
-					myordersComplete.show();					
+					myordersComplete.show();
+					me.refreshMyOrdersBadgeText(true);			
 			},
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({

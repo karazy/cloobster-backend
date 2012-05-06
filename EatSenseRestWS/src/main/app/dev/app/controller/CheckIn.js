@@ -453,6 +453,7 @@ Ext.define('EatSense.controller.CheckIn', {
    				callback: function(records, operation, success) {
    					if(success == true) {
    						orderCtr.refreshCart();
+              orderCtr.refreshMyOrdersList();
    					}
    				}						
    			});
@@ -506,7 +507,8 @@ Ext.define('EatSense.controller.CheckIn', {
             menuCtr.backToMenu();
 			//remove menu to prevent problems on reload
             menuStore.removeAll();
-            orderCtr.refreshCartBadgeText();
+            orderCtr.refreshCartBadgeText(true);
+            orderCtr.refreshMyOrdersBadgeText(true);
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
