@@ -59,7 +59,10 @@ Karazy.channel = (function() {
 		channelReconnectTimeout = Karazy.config.channelReconnectTimeout;
 
 		setStatusHelper('ONLINE');
-		statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
+		statusHandlerFunction.apply(executionScope, [{
+			'status' : connectionStatus, 
+			'prevStatus': previousStatus
+		}]);
 	};
 
 	function onMessage(data) {
@@ -76,7 +79,10 @@ Karazy.channel = (function() {
 			connectionLost = true;
 			console.log('channel connection lost');
 			setStatusHelper('RECONNECT');
-			statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
+			statusHandlerFunction.apply(executionScope, [{
+				'status' : connectionStatus, 
+				'prevStatus': previousStatus
+			}]);
 			console.log('start online check interval every 5s');
 			interval = window.setInterval(repeatedOnlineCheck , 5000);
 			
@@ -100,7 +106,10 @@ Karazy.channel = (function() {
 			repeatedConnectionTry();
 		} else {
 			setStatusHelper('DISCONNECTED');
-			statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
+			statusHandlerFunction.apply(executionScope, [{
+				'status' : connectionStatus, 
+				'prevStatus': previousStatus
+			}]);
 		}
 	};
 	
@@ -137,12 +146,19 @@ Karazy.channel = (function() {
 					console.log('Maximum tries reached. No more connection attempts.')
 					setStatusHelper('DISCONNECTED');	
 					if(Karazy.util.isFunction(statusHandlerFunction)) {
-						statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus]);
+						statusHandlerFunction.apply(executionScope, [{
+							'status' : connectionStatus, 
+							'prevStatus': previousStatus
+						}]);
 					}
 					return;
 				}
 
-				statusHandlerFunction.apply(executionScope, [connectionStatus, previousStatus, tries]);
+				statusHandlerFunction.apply(executionScope, [{
+					'status' : connectionStatus, 
+					'prevStatus': previousStatus,
+					'reconnectIteration' : tries
+				}]);
 
 				console.log('Connection try %s iteration.', tries);
 				tries += 1;
@@ -244,7 +260,7 @@ Karazy.channel = (function() {
 			channelToken = null;
 
 			console.log('normal channel closing');
-			
+
 			if(socket) {
 				setStatusHelper('DISCONNECTED');	
 				socket.close();

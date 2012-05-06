@@ -188,19 +188,30 @@ Ext.define('EatSense.controller.Message', {
 	*	Called when the connection status changes.
 	*
 	*/
-	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
-		var statusLabel = this.getConnectionStatus();
+	handleStatus: function(opts) {
+		var statusLabel = this.getConnectionStatus(),
+		connectionStatus = opts.status,
+		previousStatus = opts.prevStatus,
+		reconnectIteration = opts.reconnectIteration,
+		stop = opts.stopAll || false;
+
 		//render status in UI
 		console.log('Connection status changed to %s from %s. (%s call)', connectionStatus, previousStatus, reconnectIteration);
-		statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
-
+		if(statusLabel) {
+			//no statuslabel exists in login mask. To prevent erros check if label exists.
+			statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
+		}		
 
 		if((previousStatus == 'DISCONNECTED' || previousStatus == 'RECONNECT') && connectionStatus == 'ONLINE') {
 			console.log('back online ... refresh all data');
 			this.fireEvent(this.getEvtPrefix()+'.refresh-all');
 			this.refreshAll(false);
-		} else if((reconnectIteration && reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
+		} else if((!stop && reconnectIteration && reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
 			this.refreshAll(true);
+		}
+
+		if(stop) {
+			this.refreshAll(false);
 		}
 	}
 });
