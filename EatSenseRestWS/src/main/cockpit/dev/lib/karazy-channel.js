@@ -76,14 +76,18 @@ Karazy.channel = (function() {
 			pageshowListenerRegistered = true;
 			window.addEventListener("pageshow", function(){
 				console.log('page shown');
-				alert('page show');
+				alert('page show');				
 				setStatusHelper('RECONNECT');
 				statusHandlerFunction.apply(executionScope, [{
 					'status' : connectionStatus, 
 					'prevStatus': previousStatus
 				}]);
 				console.log('online check');
-				repeatedOnlineCheck();
+				// repeatedOnlineCheck();
+				checkOnlineFunction.apply(executionScope, [function() {
+					timedOut = true;
+					socket.close();
+				}]);
 			}, false);
 		}
 	};
@@ -93,14 +97,17 @@ Karazy.channel = (function() {
 		messageHandlerFunction.apply(executionScope, [data.data]);
 	};
 
-	function onError(error) {		
-		console.log('channel error ' + (error && error.description) ? error.description : "");
+	function onError(error) {
+		var errorDesc = (error && error.description) ? error.description : "";
+
+		console.log('channel error: ' + errorDesc);
+
 		if(error && ( error.code == '401' || error.code == '400') ) {
 			timedOut = true;
-			// socket.close();
+			console.log('onError: reason TIMEOUT');
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
-			console.log('channel connection lost');
+			console.log('onError: reason CONNECTION_LOST');
 			setStatusHelper('RECONNECT');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
@@ -108,7 +115,6 @@ Karazy.channel = (function() {
 			}]);
 			console.log('start online check interval every 5s');
 			interval = window.setInterval(repeatedOnlineCheck , 5000);			
-			// socket.close();
 		}
 	};
 
@@ -118,15 +124,16 @@ Karazy.channel = (function() {
 			return;
 		};
 
-		if(timedOut === true && connectionStatus != 'RECONNECT') {
-			console.log('channel timeout');	
+		if(timedOut === true) {
+			console.log('onClose: reason TIMEOUT');
 			setStatusHelper('RECONNECT');		
 			repeatedConnectionTry();
-		} else if(connectionLost === true && connectionStatus != 'RECONNECT') {
-			console.log('channel closed');
+		} else if(connectionLost === true) {
+			console.log('onClose: reason CONNECTION_LOST');
 			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
 		} else {
+			console.log('onClose: reason DISCONNECTED');
 			setStatusHelper('DISCONNECTED');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
@@ -145,7 +152,7 @@ Karazy.channel = (function() {
 		if(connectionStatus == 'RECONNECT') {
 			checkOnlineFunction.apply(executionScope, [repeatedConnectionTry]);
 		}
-	}
+	};
 	
 	/**
 	*	Repeatedly tries to reopen a channel after it has been close.
@@ -182,14 +189,14 @@ Karazy.channel = (function() {
 					'reconnectIteration' : tries
 				}]);
 
-				console.log('Connection try %s iteration.', tries);
+				console.log('repeatedConnectionTry: iteration ' + tries);
 				tries += 1;
-				channelReconnectTimeout = (channelReconnectTimeout > 1800000) ? channelReconnectTimeout : channelReconnectTimeout * channelReconnectFactor;
+				channelReconnectTimeout = (channelReconnectTimeout > 300000) ? channelReconnectTimeout : channelReconnectTimeout * channelReconnectFactor;
 				// setupChannel(channelToken);
 				
 				requestTokenHandlerFunction.apply(executionScope, [setupChannel, function() {
-					console.log('Next reconnect try in %s msec.', channelReconnectTimeout);					
-					window.setTimeout(connect, channelReconnectTimeout);	
+					console.log('repeatedConnectionTry: Next reconnect try in '+channelReconnectTimeout);					
+					window.setTimeout(connect, channelReconnectTimeout);
 				}]);
 		};
 		window.setTimeout(connect, (connectionStatus == 'INITIALIZING') ? 0 : channelReconnectTimeout);
@@ -216,13 +223,13 @@ Karazy.channel = (function() {
 			handler.onerror = onError;
 			handler.onclose = onClose;
 
-			console.log('setup channel for token %s', token);
+			console.log('setupChannel: token ' + token);
 
 			channelToken = token;
 			try {
 				channel = new goog.appengine.Channel(token);	
 			} catch(e) {
-				console.log('failed to open channel! reason '+ e);
+				console.log('setupChannel: failed to open channel! reason '+ e);
 				return;
 			}
 			
@@ -286,12 +293,8 @@ Karazy.channel = (function() {
 			if(socket) {
 				setStatusHelper('DISCONNECTED');	
 				socket.close();
-			};
-			
+			};			
 		}	
-
-
-
 	}
 
 	
