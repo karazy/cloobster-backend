@@ -3,7 +3,6 @@ package net.eatsense.controller;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Properties;
 
@@ -15,16 +14,15 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
+import net.eatsense.domain.NewsletterRecipient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
-
-import net.eatsense.domain.NewsletterRecipient;
 
 public class MailController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -58,7 +56,7 @@ public class MailController {
 	public String readWelcomeTextTemplate() {
 		String welcomeText;
 		try {
-			welcomeText = CharStreams.toString(  new FileReader(new File("templates/welcomemail")));
+			welcomeText = CharStreams.toString(  new FileReader(new File("WEB-INF/templates/welcomemail")));
 		} catch (IOException e) {
 			logger.error("error reading welcome template", e);
 			welcomeText = "Welcome to the cloobster Newsletter,\n" +
