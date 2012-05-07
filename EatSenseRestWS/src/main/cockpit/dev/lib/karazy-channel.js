@@ -47,7 +47,7 @@ Karazy.channel = (function() {
 		previousStatus = 'NONE',
 		//online check interval object
 		interval,
-		//
+		//true when the listener for window event pageshow has been connected
 		pageshowListenerRegistered;
 
 	function onOpen() {
@@ -150,7 +150,15 @@ Karazy.channel = (function() {
 			}
 		}
 		if(connectionStatus == 'RECONNECT') {
-			checkOnlineFunction.apply(executionScope, [repeatedConnectionTry]);
+			checkOnlineFunction.apply(executionScope, [
+				function() {
+					if(interval) {
+						window.clearInterval(interval);	
+					}
+					timedOut = true;
+					socket.close();
+				}
+			]);
 		}
 	};
 	
