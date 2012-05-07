@@ -5,11 +5,8 @@ bin/
 **/bin/**
 Misc/SenchaTests/touch/*
 .sass-cache
-EatSenseRestWS/src/main/app/prod/**/*
-EatSenseRestWS/src/main/app/prod/android/lib/*
-EatSenseRestWS/src/main/app/prod/desktop/lib/*
-EatSenseRestWS/src/main/app/prod/ios/lib/*
 *.jsb3
 *.jar
-xcuserdata
+xcuserdata/
+*.xcuserstate
 EatSenseAppAndroid/assets/
