@@ -46,7 +46,9 @@ Karazy.channel = (function() {
 		//previous connection status
 		previousStatus = 'NONE',
 		//online check interval object
-		interval;
+		interval,
+		//
+		pageshowListenerRegistered;
 
 	function onOpen() {
 		if(connectionStatus == 'ONLINE') {
@@ -63,6 +65,27 @@ Karazy.channel = (function() {
 			'status' : connectionStatus, 
 			'prevStatus': previousStatus
 		}]);
+
+		/*		
+		 This is mainly for mobile devices when going into standby. 
+		 It is not possible in a webapp to be notified when standy is entered.
+		 However we can listen to the pageshow event which gets called when the window gets resumed. 
+		 http://stackoverflow.com/questions/4401764/what-event-fires-when-a-webkit-webapp-is-terminated
+		*/
+		if(!pageshowListenerRegistered) {
+			pageshowListenerRegistered = true;
+			window.addEventListener("pageshow", function(){
+				console.log('page shown');
+				alert('page show');
+				setStatusHelper('RECONNECT');
+				statusHandlerFunction.apply(executionScope, [{
+					'status' : connectionStatus, 
+					'prevStatus': previousStatus
+				}]);
+				console.log('online check');
+				repeatedOnlineCheck();
+			}, false);
+		}
 	};
 
 	function onMessage(data) {
@@ -84,8 +107,7 @@ Karazy.channel = (function() {
 				'prevStatus': previousStatus
 			}]);
 			console.log('start online check interval every 5s');
-			interval = window.setInterval(repeatedOnlineCheck , 5000);
-			
+			interval = window.setInterval(repeatedOnlineCheck , 5000);			
 			// socket.close();
 		}
 	};
