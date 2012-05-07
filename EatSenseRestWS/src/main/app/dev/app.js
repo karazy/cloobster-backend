@@ -40,11 +40,10 @@ Ext.application({
 
 		console.log('mainLaunch');
 		
-		var app = this,
-	   		appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+		var appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
 	 		checkInCtr = this.getController('CheckIn'),
-	 		restoredCheckInId,
-	 		profile = Ext.os.deviceType.toLowerCase();	 
+	 		restoredCheckInId;
+//	 		profile = Ext.os.deviceType.toLowerCase();	 
 
 		//global error handler
 		// window.onerror = function(message, url, lineNumber) {  

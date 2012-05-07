@@ -59,7 +59,12 @@ Ext.define('EatSense.view.Dashboard', {
 				}, 
 				]
 			} ]
-		},
+		}
+		//TEST
+		// ,
+		// {
+		// 	xtype: 'newsletterpopup'
+		// }
 		// {
 		// 	xtype: 'toolbar',
 		// 	docked: 'bottom',

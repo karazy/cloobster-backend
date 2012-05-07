@@ -149,7 +149,8 @@ Ext.define('EatSense.model.Choice', {
 	*	Returns a raw json representation of this objects data.
 	*/
 	getRawJsonData: function() {
-		var rawJson = {};		
+		var rawJson = {},
+			index = 0;		
 		
 		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
 		rawJson.text = this.get('text');
@@ -160,8 +161,8 @@ Ext.define('EatSense.model.Choice', {
 		rawJson.overridePrice = this.get('overridePrice');
 		
 		rawJson.options = new Array(this.options().data.length);
-		for ( var int = 0; int < this.options().data.length; int++) {
-			rawJson.options[int] = this.options().getAt(int).getRawJsonData();
+		for (; index < this.options().data.length; index++) {
+			rawJson.options[index] = this.options().getAt(index).getRawJsonData();
 		}		
 		return rawJson;
 	},
@@ -170,12 +171,14 @@ Ext.define('EatSense.model.Choice', {
 	*
 	*/	
 	setRawJsonData: function(rawData) {
+		var index = 0;
+
 		if(!rawData) {
 			return false;
 		}
 
-		for ( var int = 0; int < this.options().data.length; int++) {
-			if(!this.options().getAt(int).setRawJsonData(rawData.options[int])) {
+		for (; index < this.options().data.length; index++) {
+			if(!this.options().getAt(index).setRawJsonData(rawData.options[index])) {
 				return false;
 			}
 		}	

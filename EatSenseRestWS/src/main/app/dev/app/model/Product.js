@@ -99,7 +99,8 @@ Ext.define('EatSense.model.Product', {
 	*
 	*/	
 	getRawJsonData: function() {
-		var rawJson = {};
+		var rawJson = {}
+			index = 0;
 		
 		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
 		rawJson.name = this.get('name');
@@ -108,8 +109,8 @@ Ext.define('EatSense.model.Product', {
 		rawJson.price = this.get('price');
 		
 		rawJson.choices = new Array(this.choices().data.length);
-		for ( var int = 0; int < this.choices().data.length; int++) {
-			rawJson.choices[int] = this.choices().getAt(int).getRawJsonData();
+		for (; index < this.choices().data.length; index++) {
+			rawJson.choices[index] = this.choices().getAt(index).getRawJsonData();
 		}		
 		return rawJson;
 	},
@@ -118,12 +119,14 @@ Ext.define('EatSense.model.Product', {
 	*	
 	*/	
 	setRawJsonData: function(rawData) {
+		var index = 0;
+
 		if(!rawData) {
 			return false;
 		}
 
-		for ( var int = 0; int < this.choices().data.length; int++) {
-			if(!this.choices().getAt(int).setRawJsonData(rawData.choices[int])) {
+		for (; index < this.choices().data.length; index++) {
+			if(!this.choices().getAt(index).setRawJsonData(rawData.choices[index])) {
 				return false;
 			}
 		}

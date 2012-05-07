@@ -3,13 +3,18 @@
 */
 Ext.define('EatSense.view.NewsletterPopup', {
 	extend: 'Ext.Panel',
+	xtype: 'newsletterpopup',
 	requires: ['EatSense.view.Newsletter'],
 	config: {
-		layout: 'vbox',
-		top: '20%',
+		layout: {
+			type: 'vbox',
+			pack: 'center',
+			align: 'middle'
+		},
+		top: '30%',
 		left: '20px',
 		right: '20px',
-		bottom: '15%',
+		// bottom: '15%',
 		hideOnMaskTap: true,
 		modal: true,
 		cls: 'newsletter-popup',
