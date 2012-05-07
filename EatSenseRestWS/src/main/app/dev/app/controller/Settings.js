@@ -70,8 +70,12 @@ Ext.define('EatSense.controller.Settings', {
     },
     /**
     * Submits the form to register a new newsletter.
+    * @param record
+    *   newsletter data to submit
+    * @param successCallback
+    *   callback function called on success
     */
-    registerNewsletter: function(record) {
+    registerNewsletter: function(record, successCallback) {
         var me = this,
             checkInCtr = this.getApplication().getController('CheckIn'),
             appState = checkInCtr.getAppState(),
@@ -91,6 +95,8 @@ Ext.define('EatSense.controller.Settings', {
                 record.phantom = true;
 
                 appState.set('newsletterRegistered', true);
+                
+                successCallback();
 
                 //show short success message
                 Ext.Msg.show({
@@ -135,7 +141,12 @@ Ext.define('EatSense.controller.Settings', {
         popup.on({
             delegate: 'button[action=register]',
             tap: function() {
-                me.registerNewsletter(popup.getRecord());
+                me.registerNewsletter(popup.getRecord(), 
+                    //remove on success
+                    function() {
+                        Ext.Viewport.remove(popup);
+                    }
+                );
             }
         });
 

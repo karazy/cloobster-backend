@@ -38,6 +38,13 @@ Ext.application({
 	launch : function() {
 		console.log('launch cockpit ...');
 
+        //global error handler
+        window.onerror = function(message, url, lineNumber) {  
+         console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
+             //to prevent firing of default handler (return true)
+             return false;
+        }; 
+
 	   	var loginCtr = this.getController('Login');
 
 	   	//try to restore credentials
