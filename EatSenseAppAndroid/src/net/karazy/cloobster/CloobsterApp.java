@@ -1,10 +1,10 @@
-package net.karazy.eatsense;
+package net.karazy.cloobster;
 
 import org.apache.cordova.DroidGap;
 
 import android.os.Bundle;
 
-public class EatSenseApp extends DroidGap {
+public class CloobsterApp extends DroidGap {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

@@ -27,11 +27,15 @@
 		<echo message="Setting config values" />
 		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'http://192.168.1.103:8888'," byline="true">
 		</replaceregexp>
+		<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 true," byline="true">
+		</replaceregexp>
 	</target>
 
 	<target name="replaceConfigProduction" depends="renameFiles">
 		<echo message="Setting config values" />
 		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'https://eatsense-test.appspot.com'," byline="true">
+		</replaceregexp>
+		<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 true," byline="true">
 		</replaceregexp>
 	</target>
 
