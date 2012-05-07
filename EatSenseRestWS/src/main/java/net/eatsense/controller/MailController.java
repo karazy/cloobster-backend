@@ -1,5 +1,9 @@
 package net.eatsense.controller;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Properties;
 
@@ -17,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 
 import net.eatsense.domain.NewsletterRecipient;
@@ -41,10 +46,18 @@ public class MailController {
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
 		mail.setSubject("Thanks for subcribing to the eatSense newsletter.");
 		
-		mail.setText("Hello and welcome to the eatSense newsletter,\n" +
-				"we will keep you informed about future developments and other events!\n\n" +
-				"This is an automated message. If you did not register for the newsletter, unsubscribe here:\n" + unsubscribeUri.toString());
-		logger.info("unsubcribe url: {}", unsubscribeUri.toString());
+		String welcomeText; 
+		try {
+			welcomeText = CharStreams.toString(  new FileReader(new File("templates/welcomemail")));
+		} catch (IOException e) {
+			logger.error("error reading welcome template", e);
+			welcomeText = "Welcome to the cloobster Newsletter,\n" +
+					"this is an automated message. If you did not register for the newsletter, unsubscribe here:\n" +
+					"{unsubscribeurl}";
+		}
+		welcomeText.replaceAll("\\{unsubscribeurl\\}", unsubscribeUri.toString());
+		
+		mail.setText(welcomeText);
 		
 		Transport.send(mail);
 		return mail;

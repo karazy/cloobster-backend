@@ -79,8 +79,8 @@ public class AccountResource {
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
-		//Set the timeout to 480 minutes (8 hours)
-		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(10));
+		//Set the timeout to 240 minutes (4 hours)
+		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(240));
 		if(token == null)
 			throw new NotFoundException();
 		return token;
