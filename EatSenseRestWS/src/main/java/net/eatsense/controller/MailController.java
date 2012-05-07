@@ -46,7 +46,17 @@ public class MailController {
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
 		mail.setSubject("Thanks for subcribing to the eatSense newsletter.");
 		
-		String welcomeText; 
+		String welcomeText = readWelcomeTextTemplate();
+		welcomeText = welcomeText.replaceAll("\\{unsubscribeurl\\}", unsubscribeUri.toString());
+		logger.info("welcomeText: {}", welcomeText);
+		mail.setText(welcomeText);
+		
+		Transport.send(mail);
+		return mail;
+	}
+	
+	public String readWelcomeTextTemplate() {
+		String welcomeText;
 		try {
 			welcomeText = CharStreams.toString(  new FileReader(new File("templates/welcomemail")));
 		} catch (IOException e) {
@@ -55,12 +65,8 @@ public class MailController {
 					"this is an automated message. If you did not register for the newsletter, unsubscribe here:\n" +
 					"{unsubscribeurl}";
 		}
-		welcomeText.replaceAll("\\{unsubscribeurl\\}", unsubscribeUri.toString());
 		
-		mail.setText(welcomeText);
-		
-		Transport.send(mail);
-		return mail;
+		return welcomeText;
 	}
 	
 	public Message newMimeMessage() {
