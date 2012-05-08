@@ -42,13 +42,11 @@ public class AccountController {
 	private ChannelController channelCtrl;
 	private NewsletterRecipientRepository recipientRepo;
 	private Validator validator;
-	private MailController mailCtrl;
-	
+		
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, ChannelController cctrl, Validator validator) {
 		super();
-		this.mailCtrl = mailCtrl;
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
 		this.channelCtrl = cctrl;

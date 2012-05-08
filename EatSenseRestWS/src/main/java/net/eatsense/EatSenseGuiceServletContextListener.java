@@ -5,10 +5,6 @@ import java.util.HashMap;
 
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.controller.MessageController;
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Menu;
-import net.eatsense.domain.Spot;
-import net.eatsense.persistence.GenericRepository;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
