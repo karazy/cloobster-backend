@@ -21,7 +21,6 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.CheckInEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
@@ -29,6 +28,7 @@ import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -67,6 +67,7 @@ public class CheckInController {
 	private RequestRepository requestRepo;
 	private OrderRepository orderRepo;
 	private EventBus eventBus;
+	private OrderChoiceRepository orderChoiceRepo;
 
 	/**
 	 * Constructor using injection for creation.
@@ -84,7 +85,7 @@ public class CheckInController {
 			CheckInRepository checkInRepository, SpotRepository spotRepository,
 			Transformer transformer,
 			ObjectMapper objectMapper, Validator validator,
-			RequestRepository requestRepository, OrderRepository orderRepo,
+			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo,
 			EventBus eventBus) {
 		this.businessRepo = businessRepository;
 		this.eventBus = eventBus;
@@ -95,6 +96,7 @@ public class CheckInController {
 		this.transform = transformer;
 		this.mapper = objectMapper;
 		this.validator = validator;
+		this.orderChoiceRepo = orderChoiceRepo;
 	}
 
     /**
@@ -338,11 +340,18 @@ public class CheckInController {
 		}
 		else {
 			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
-			orderRepo.delete(orderRepo.getKeysByProperty("status", OrderStatus.CART.toString()));
+			List<Key<Order>> orderKeys = orderRepo.getKeysByProperty("checkIn", checkIn);
+			List<Key<OrderChoice>> orderChoiceKeys = new ArrayList<Key<OrderChoice>>();
+			
+			for (Key<Order> orderKey : orderKeys) {
+				orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
+			}
+			
+			orderChoiceRepo.delete(orderChoiceKeys);
+			orderRepo.delete(orderKeys);
 			checkInRepo.delete(checkIn);
 			
 			DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
-			
 			event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
 			eventBus.post(event);
 		}			
@@ -367,33 +376,36 @@ public class CheckInController {
 	 * 
 	 * @param checkInId
 	 */
-	public void deleteCheckIn(Business business, Long checkInId) {
-		if(checkInId == null)
-			throw new IllegalArgumentException("Unable to delete checkIn, checkInId is null");
-		
+	public void deleteCheckIn(Business business, long checkInId) {
+		checkNotNull(business, "business was null");
+		checkNotNull(business.getId(), "business id was null");
+		checkArgument(checkInId != 0, "checkInId was 0");
+	
 		CheckIn checkIn;
 		try {
 			checkIn = checkInRepo.getById(checkInId);
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Unable to delete checkIn, unknown checkInId",e);
+			throw new IllegalArgumentException("checkInId unknown",e);
 		}
-		if(checkIn.getBusiness().getId() != business.getId()) {
-			throw new IllegalArgumentException("Unable to delete checkIn, checkIn does not belong to business");
+		if(!checkIn.getBusiness().equals(business.getKey())) {
+			throw new IllegalArgumentException("checkIn does not belong to business");
 		}
 		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
-		Objectify ofy = checkInRepo.ofy();
 					
 		// Delete requests
-		ofy.delete(ofy.query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).listKeys());
-		
+		requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
+				
 		// Get all orders for this checkin ... 
-		List<Key<Order>> orderKeys = ofy.query(Order.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).listKeys();
+		List<Key<Order>> orderKeys = orderRepo.getKeysByProperty("checkIn", checkIn);
+		List<Key<OrderChoice>> orderChoiceKeys = new ArrayList<Key<OrderChoice>>();
+		
 		for (Key<Order> orderKey : orderKeys) {
-			// ... , delete the choices for the order ...
-			ofy.delete(orderRepo.ofy().query(OrderChoice.class).ancestor(orderKey).listKeys());
+			orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
 		}
+		
+		orderChoiceRepo.delete(orderChoiceKeys);
 		// ... and delete all orders for the checkin.
-		ofy.delete(orderKeys);
+		orderRepo.delete(orderKeys);
 		
 		// Finally delete the checkin.
 		checkInRepo.delete(checkIn);
@@ -413,29 +425,34 @@ public class CheckInController {
 	 * @param checkInData
 	 * @return updated checkin data
 	 */
-	public CheckInStatusDTO updateCheckInAsBusiness(Business business, Long checkInId, CheckInStatusDTO checkInData) {
+	public CheckInStatusDTO updateCheckInAsBusiness(Business business, long checkInId, CheckInStatusDTO checkInData) {
+		checkNotNull(business, "business was null");
+		checkNotNull(business.getId(), "business id was null");
+		checkArgument(checkInId != 0, "checkInId was 0");
+		checkNotNull(checkInData, "checkInData was null");
+	
 		CheckIn checkIn;
 		try {
 			checkIn = checkInRepo.getById(checkInId);
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Unable to update checkin, unknown ckeckInId",e);
+			throw new IllegalArgumentException("ckeckInId unknown",e);
 		}
-		if(checkIn.getBusiness().getId() != business.getId()) {
-			throw new IllegalArgumentException("Unable to update checkIn, checkIn does not belong to business");
+		if(!checkIn.getBusiness().equals(business.getKey())) {
+			throw new IllegalArgumentException("checkIn does not belong to business");
 		}
-		Objectify ofy = checkInRepo.ofy();
 			
-		Key<Spot> oldSpotKey = checkIn.getSpot();
-		Key<Spot> newSpotKey = Spot.getKey(checkIn.getBusiness(), checkInData.getSpotId());
 		// Check if spot has changed ...
-		if(oldSpotKey.getId() != newSpotKey.getId()) {
+		if(checkInData.getSpotId() != null && checkInData.getSpotId() != 0
+				&& checkInData.getSpotId() != checkIn.getSpot().getId()) {
 			// ... then we move the checkin to a new spot.
-			
+			Key<Spot> oldSpotKey = checkIn.getSpot();
+			Key<Spot> newSpotKey = spotRepo.getKey(checkIn.getBusiness(), checkInData.getSpotId());
+
 			checkIn.setSpot(newSpotKey);
 			checkInRepo.saveOrUpdate(checkIn);
 			
 			// Get all pending requests of this user.
-			List<Request> requests = ofy.query(Request.class).ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();
+			List<Request> requests = requestRepo.getListByProperty("checkIn", checkIn);
 			for (Request request : requests) {
 				// Update the requests for the new spot.
 				request.setSpot(newSpotKey);
@@ -443,9 +460,8 @@ public class CheckInController {
 			requestRepo.saveOrUpdate(requests);
 			
 			// Send move event
-			eventBus.post(new MoveCheckInEvent(checkIn, business, oldSpotKey));			
+			eventBus.post(new MoveCheckInEvent(checkIn, business, oldSpotKey));
 		}
-		
 		return checkInData;
 	}
 }

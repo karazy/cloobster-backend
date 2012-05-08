@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
@@ -25,20 +26,25 @@ import javax.validation.ValidatorFactory;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Order;
+import net.eatsense.domain.OrderChoice;
+import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.DeleteCheckInEvent;
+import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
 import org.apache.bval.jsr303.ApacheValidationProvider;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -55,6 +61,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CheckInControllerTest {
@@ -87,12 +94,15 @@ public class CheckInControllerTest {
 	Key<Business> businessKey;
 	@Mock
 	Key<Spot> spotKey;
+	
+	@Mock
+	private OrderChoiceRepository orderChoiceRepo;
 
 	@Before
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, eventBus);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, eventBus);
 	}
 
 	@After
@@ -509,7 +519,7 @@ public class CheckInControllerTest {
 		
 		ctr.checkOut(checkIn);
 		
-		inOrder.verify(orderRepo).getKeysByProperty("status", OrderStatus.CART.toString());
+		inOrder.verify(orderRepo).getKeysByProperty("checkIn", checkIn);
 		inOrder.verify(orderRepo).delete(anyCollection());
 		verify(checkInRepo).delete(checkIn);
 		
@@ -520,5 +530,194 @@ public class CheckInControllerTest {
 		assertThat(newEvent.getBusiness(), is(business));
 		assertThat(newEvent.isCheckOut(), is(true));
 		assertThat(newEvent.getCheckInCount().get(), is(activeCheckIns-1));
+	}
+	
+	@Test
+	public void testDeleteCheckInInvalidBusiness() throws Exception {
+		long checkInId = 1;
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		@SuppressWarnings("unchecked")
+		Key<Business> anotherBusiness = mock(Key.class);
+		when(business.getKey()).thenReturn(anotherBusiness);
+		
+		thrown.expect(IllegalArgumentException.class);
+		
+		ctr.deleteCheckIn(business, checkInId);
+	}
+	
+	@Test
+	public void testDeleteCheckInUnknownId() throws Exception {
+		long checkInId = 1;
+		when(checkInRepo.getById(checkInId)).thenThrow(new NotFoundException(null));
+		thrown.expect(IllegalArgumentException.class);
+		
+		ctr.deleteCheckIn(business, checkInId);
+	}
+	
+	@Test
+	public void testDeleteCheckInZeroId() throws Exception {
+		long checkInId = 0;
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("checkInId");
+		
+		ctr.deleteCheckIn(business, checkInId);
+	}
+	
+	@Test
+	public void testDeleteCheckInNullBusinessId() throws Exception {
+		long checkInId = 1;
+		when(business.getId()).thenReturn(null);
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("business id");
+		ctr.deleteCheckIn(business, checkInId);
+	}
+	
+	@Test
+	public void testDeleteCheckInNullBusiness() throws Exception {
+		long checkInId = 1;
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("business");
+		ctr.deleteCheckIn(null, checkInId);
+	}
+	
+	@Test
+	public void testDeleteCheckIn() throws Exception {
+		long checkInId = 1;
+		int activeCheckIns = 2;
+		List<Key<Order>> orderKeys = new ArrayList<Key<Order>>();
+		@SuppressWarnings("unchecked")
+		Key<Order> orderKey1 = mock( Key.class);
+		orderKeys.add( orderKey1 );
+		List<Key<OrderChoice>> choiceList = new ArrayList<Key<OrderChoice>>();
+		List<Key<Request>> requestKeys = new ArrayList<Key<Request>>();
+		
+		CheckIn checkIn = mock(CheckIn.class);
+		when(checkIn.getId()).thenReturn(checkInId);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(business.getKey()).thenReturn(businessKey);
+		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
+		
+		
+		when(orderChoiceRepo.getKeysByParent(orderKey1)).thenReturn(choiceList );
+		when(requestRepo.getKeysByProperty("checkIn", checkIn)).thenReturn(requestKeys );
+		when(orderRepo.getKeysByProperty("checkIn", checkIn)).thenReturn(orderKeys );
+		when(checkInRepo.countActiveCheckInsAtSpot(spotKey)).thenReturn(activeCheckIns);
+		
+		ctr.deleteCheckIn(business, checkInId);
+		
+		verify(requestRepo).delete(requestKeys);
+		verify(orderRepo).delete(orderKeys);
+		verify(orderChoiceRepo).delete(choiceList);
+		verify(checkInRepo).delete(checkIn);
+		
+		ArgumentCaptor<DeleteCheckInEvent> eventArgument = ArgumentCaptor.forClass(DeleteCheckInEvent.class);
+		verify(eventBus).post(eventArgument.capture());
+		DeleteCheckInEvent newEvent = eventArgument.getValue();
+		assertThat(newEvent.getCheckIn(), is(checkIn));
+		assertThat(newEvent.getBusiness(), is(business));
+		assertThat(newEvent.isCheckOut(), is(false));
+		assertThat(newEvent.getCheckInCount().get(), is(activeCheckIns-1));
+	}
+	
+	@Test
+	public void testUpdateCheckInAsBusinessNullData() throws Exception {
+		long checkInId = 1;
+		CheckInStatusDTO checkInData = null;
+		
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("checkInData");
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);
+	}
+	
+	@Test
+	public void testUpdateCheckInAsBusinessUnknownId() throws Exception {
+		long checkInId = 1;
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		
+		when(checkInRepo.getById(checkInId)).thenThrow(new NotFoundException(null));
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("checkInId");
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);
+	}
+	
+	@Test
+	public void testUpdateCheckInAsBusinessZeroId() throws Exception {
+		long checkInId = 0;
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("checkInId");
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);
+	}
+	
+	@Test
+	public void testUpdateCheckInAsBusinessNullBusinessId() throws Exception {
+		long checkInId = 1;
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		
+		when(business.getId()).thenReturn(null);
+		
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("business id");
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);	
+	}
+	
+	
+	@Test
+	public void testUpdateCheckInAsBusinessNullBusiness() throws Exception {
+		long checkInId = 1;
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("business");
+		
+		ctr.updateCheckInAsBusiness(null, checkInId, checkInData);	
+	}
+	
+	@Test
+	public void testUpdateCheckInAsBusiness() throws Exception {
+		long checkInId = 1;
+		long newSpotId = 2;
+		long spotId = 1;
+		
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		checkInData.setSpotId( newSpotId );
+		CheckIn checkIn = mock (CheckIn.class);
+		@SuppressWarnings("unchecked")
+		Key<Spot> newSpotKey= mock( Key.class);
+		List<Request> requestList = new ArrayList<Request>();
+		Request request = mock ( Request.class);
+		requestList.add(request );
+				
+		when(spotKey.getId()).thenReturn( spotId);
+		when(checkInRepo.getById(checkInId)).thenReturn(checkIn );
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(business.getKey()).thenReturn(businessKey);
+		when(requestRepo.getListByProperty("checkIn", checkIn)).thenReturn(requestList );
+		when(spotRepo.getKey(businessKey, newSpotId)).thenReturn(newSpotKey);
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);
+		
+		verify(request).setSpot(newSpotKey);
+		verify(checkIn).setSpot(newSpotKey);
+		verify(checkInRepo).saveOrUpdate(checkIn);
+		verify(requestRepo).saveOrUpdate(requestList);
+		
+		ArgumentCaptor<MoveCheckInEvent> eventArgument = ArgumentCaptor.forClass(MoveCheckInEvent.class);
+		verify(eventBus).post(eventArgument.capture());
+		MoveCheckInEvent newEvent = eventArgument.getValue();
+		assertThat(newEvent.getCheckIn(), is(checkIn));
+		assertThat(newEvent.getBusiness(), is(business));
+		assertThat(newEvent.getOldSpot(), is(spotKey));	
 	}
 }
