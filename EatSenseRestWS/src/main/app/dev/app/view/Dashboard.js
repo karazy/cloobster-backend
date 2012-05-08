@@ -7,12 +7,12 @@ Ext.define('EatSense.view.Dashboard', {
 	xtype : 'dashboard',
 	requires: ['Ext.Img'],
 	config : {
-		style : 'background-color: white;',
 		layout : {
 			type : 'vbox',
 			pack : 'center',
 			align : 'middle',
 		},
+		cls: 'dashboard',
 		items : [ {
 			xtype : 'image',
 			src : 'res/images/eatSenseLogo_small.png',
@@ -59,21 +59,26 @@ Ext.define('EatSense.view.Dashboard', {
 				}, 
 				]
 			} ]
-		},
-		{
-			xtype: 'toolbar',
-			docked: 'bottom',
-			layout: {
-				type:'hbox',
-				pack: 'center'
-			},
-			items: [{
-				xtype : 'button',
-				action : 'settings',
-				iconCls : 'settings',
-				iconMask : true,
-			} ]
 		}
+		//TEST
+		// ,
+		// {
+		// 	xtype: 'newsletterpopup'
+		// }
+		// {
+		// 	xtype: 'toolbar',
+		// 	docked: 'bottom',
+		// 	layout: {
+		// 		type:'hbox',
+		// 		pack: 'center'
+		// 	},
+		// 	items: [{
+		// 		xtype : 'button',
+		// 		action : 'settings',
+		// 		iconCls : 'settings',
+		// 		iconMask : true,
+		// 	} ]
+		// }
 
 		]
 	},

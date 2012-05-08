@@ -9,6 +9,7 @@ Karazy.constants = (function() {
 		INTENT : 'INTENT',
 		CHECKEDIN : 'CHECKEDIN',
 		ORDER_PLACED: 'ORDER_PLACED',
+		SERVED: 'SERVED',
 		PAYMENT_REQUEST : 'PAYMENT_REQUEST',
 		COMPLETE : 'COMPLETE',
 		Order : {
@@ -16,7 +17,7 @@ Karazy.constants = (function() {
 			PLACED : 'PLACED',
 			CANCELED : 'CANCELED',
 			RECEIVED: 'RECEIVED',
-			COMPLETE : 'COMPLETE'
+			COMPLETE : 'COMPLETE'			
 		},
 		Request : {
 			CALL_WAITER : 'CALL_WAITER'
@@ -25,7 +26,8 @@ Karazy.constants = (function() {
 		Currency : {
 			EURO: '$1,$2 €',
 			US_DOLLAR: '\$ $1.$2'
-		}
+		},
+		FORCE_LOGOUT : 'FORCE_LOGOUT'
 
 	};
 

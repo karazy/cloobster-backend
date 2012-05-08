@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.karazy.eatsense"
+    package="net.karazy.cloobster"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -35,7 +35,7 @@
         android:icon="@drawable/icon96"
         android:label="@string/eatsense_app_name" >
         <activity
-            android:name=".EatSenseApp"
+            android:name=".CloobsterApp"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/eatsense_app_name" 
     		android:screenOrientation="portrait">
@@ -65,15 +65,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.google.zxing.client.android.encode.EncodeActivity"
-            android:label="@string/share_name" >
-            <intent-filter>
-                <action android:name="com.phonegap.plugins.barcodescanner.ENCODE" />
+<!--         <activity -->
+<!--             android:name="com.google.zxing.client.android.encode.EncodeActivity" -->
+<!--             android:label="@string/share_name" > -->
+<!--             <intent-filter> -->
+<!--                 <action android:name="com.phonegap.plugins.barcodescanner.ENCODE" /> -->
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+<!--                 <category android:name="android.intent.category.DEFAULT" /> -->
+<!--             </intent-filter> -->
+<!--         </activity> -->
     </application>
     <!-- ZXing activities -->
 

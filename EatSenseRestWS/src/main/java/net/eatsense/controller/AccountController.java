@@ -3,19 +3,11 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Transport;
-import javax.mail.event.TransportAdapter;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -29,14 +21,10 @@ import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.RecipientDTO;
 
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.datastore.Email;
-import com.google.apphosting.utils.config.WebXml.SecurityConstraint.TransportGuarantee;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 

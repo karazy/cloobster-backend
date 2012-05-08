@@ -3,7 +3,7 @@ Ext.define('EatSense.view.Menu', {
 	xtype : 'menutab',
 	config : {
 		layout: 'fit',
-		iconCls : 'compose',
+		iconCls : 'menu',
 		title: Karazy.i18n.translate('menuTitle'),
 		iconMask : true,
 		itemId : 'menutab',

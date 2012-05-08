@@ -1,6 +1,5 @@
 package net.eatsense.restws;
 
-import java.net.URI;
 import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
@@ -10,7 +9,6 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -49,8 +47,10 @@ public class AccountResource {
 	
 	@GET
 	@Path("channels")
-	public void checkOnlineStatus(@QueryParam("clientId")String clientId) {
-		channelCtrlProvider.get().subscribeClient(clientId);
+	@Produces("text/plain; charset=UTF-8")
+	public String checkOnlineStatus(@QueryParam("clientId")String clientId, @QueryParam("businessId") Long businessId) {
+		ChannelController channelController = channelCtrlProvider.get();
+		return channelController.checkOnlineStatus(businessId, clientId);
 	}
 	
 	@GET
@@ -77,8 +77,8 @@ public class AccountResource {
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
-		//Set the timeout to 480 minutes (8 hours)
-		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(10));
+		//Set the timeout to 240 minutes (4 hours)
+		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(240));
 		if(token == null)
 			throw new NotFoundException();
 		return token;

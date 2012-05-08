@@ -9,8 +9,8 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request'],
-	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge'], 
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request', 'Newsletter'],
+	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge', 'Newsletter'], 
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill', 'Request'],
 	phoneStartupScreen: 'res/images/startup.png',
 	tabletStartupScreen: 'res/images/startup.png',
@@ -40,18 +40,17 @@ Ext.application({
 
 		console.log('mainLaunch');
 		
-		var app = this,
-	   		appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+		var appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
 	 		checkInCtr = this.getController('CheckIn'),
-	 		restoredCheckInId,
-	 		profile = Ext.os.deviceType.toLowerCase();	 
+	 		restoredCheckInId;
+//	 		profile = Ext.os.deviceType.toLowerCase();	 
 
 		//global error handler
-		window.onerror = function(message, url, lineNumber) {  
-			console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
-		  	//prevent firing of default handler (return true)
-		  	return false;
-		}; 
+		// window.onerror = function(message, url, lineNumber) {  
+		// 	console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
+		//   	//prevent firing of default handler (return true)
+		//   	return false;
+		// }; 
 
 		//timeout for requests
 		Ext.Ajax.timeout = 1200000;

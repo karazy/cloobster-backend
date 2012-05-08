@@ -70,7 +70,7 @@ Ext.define('EatSense.controller.Message', {
 			}
 		}
 		else {
-			console.log('broadcast message type %s, action %s', message.type, message.action);
+			console.log('broadcast message type '+message.type+', action '+message.action);
 
 			//fire event based on the message
 			me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
@@ -90,7 +90,7 @@ Ext.define('EatSense.controller.Message', {
 			clientId = login + new Date().getTime();
 		
 		account.set('clientId', clientId);
-		console.log('request new token. clientId: ' + clientId);
+		console.log('requestNewToken: clientId ' + clientId);
 		Ext.Ajax.request({
 		    url: Karazy.config.serviceUrl+'/accounts/'+login+'/tokens',		    
 		    method: 'POST',
@@ -118,24 +118,28 @@ Ext.define('EatSense.controller.Message', {
 		});
 	},
 	/**
-	* 	Let the server now we are still there.
+	* 	Let the server know we are still there.
 	*/
-	checkOnline: function() {
+	checkOnline: function(disconnectCallback) {
 		var account = this.getApplication().getController('Login').getAccount(),
 			clientId = account.get('clientId');
 		
-		console.log('checking online status. clientId: ' + clientId);
+		console.log('checkOnline: clientId ' + clientId);
 		Ext.Ajax.request({
 		    url: Karazy.config.serviceUrl+'/accounts/channels',		    
 		    method: 'GET',
 		    params: {
+		    	'businessId' :  account.get('businessId'),
 		    	'clientId' : clientId
 		    },
 		    success: function(response){
-		       	console.log('online check request success');
+		       	console.log('online check request result: ' + response.responseText);
+		       	if(response.responseText == 'DISCONNECTED') {
+		       		disconnectCallback();
+		       	}		       	
 		    }, 
 		    failure: function(response) {
-		    	console.log('online check request failed. keep trying...');
+		    	console.log('online check request failed with code: ' + response.status);
 		    }
 		});
 	},
@@ -166,7 +170,7 @@ Ext.define('EatSense.controller.Message', {
 			interval;
 
 		if(start === true && !me.getPollingActive()) {
-			console.log('start polling');
+			console.log('refreshAll: start polling');
 			interval = window.setInterval(function() {
 				console.log('fire refresh all event');
 				me.fireEvent(me.getEvtPrefix()+'.refresh-all');
@@ -174,7 +178,7 @@ Ext.define('EatSense.controller.Message', {
 			me.setInterval(interval);
 			me.setPollingActive(true);
 		} else if(start === false && me.getPollingActive()) {
-			console.log('stop polling');
+			console.log('refreshAll: stop polling');
 			window.clearInterval(me.getInterval());
 			me.setInterval(null);
 			me.setPollingActive(false);
@@ -184,19 +188,30 @@ Ext.define('EatSense.controller.Message', {
 	*	Called when the connection status changes.
 	*
 	*/
-	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
-		var statusLabel = this.getConnectionStatus();
-		//render status in UI
-		console.log('Connection status changed to %s from %s. (%s call)', connectionStatus, previousStatus, reconnectIteration);
-		statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
+	handleStatus: function(opts) {
+		var statusLabel = this.getConnectionStatus(),
+		connectionStatus = opts.status,
+		previousStatus = opts.prevStatus,
+		reconnectIteration = opts.reconnectIteration,
+		stop = opts.stopAll || false;
 
+		//render status in UI
+		console.log('handleStatus: status changed from '+previousStatus+' to '+connectionStatus+' ('+reconnectIteration+' call).');
+		if(statusLabel) {
+			//no statuslabel exists in login mask. To prevent erros check if label exists.
+			statusLabel.getTpl().overwrite(statusLabel.element, [connectionStatus]);
+		}		
 
 		if((previousStatus == 'DISCONNECTED' || previousStatus == 'RECONNECT') && connectionStatus == 'ONLINE') {
-			console.log('back online ... refresh all data');
+			console.log('handleStatus: back online ... refresh all data');
 			this.fireEvent(this.getEvtPrefix()+'.refresh-all');
 			this.refreshAll(false);
-		} else if((reconnectIteration && reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
+		} else if((!stop && reconnectIteration && reconnectIteration > 5) && (connectionStatus == 'DISCONNECTED' || connectionStatus == 'RECONNECT')) {
 			this.refreshAll(true);
+		}
+
+		if(stop) {
+			this.refreshAll(false);
 		}
 	}
 });

@@ -3,11 +3,11 @@
 bin/
 */bin/*
 **/bin/**
-EatSenseAppAndroid/assets/www/*
-EatSenseAppiOS/eatSense/www/*
 Misc/SenchaTests/touch/*
 .sass-cache
-EatSenseRestWS/src/main/app/prod/**/*
 *.jsb3
 *.jar
-xcuserdata
+xcuserdata/
+*.xcuserstate
+EatSenseAppAndroid/assets/
+eatSenseAppiOS/eatSense/www/

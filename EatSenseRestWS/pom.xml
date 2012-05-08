@@ -112,7 +112,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>		
+			<id>prod</id>	
 			<build>			
 				<plugins>
 					<plugin>
