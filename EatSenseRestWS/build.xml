@@ -19,8 +19,7 @@
 	<target name="createCockpitProduction">
 		<echo message="Executing createCockpitProduction task from build.xml" />
 		<exec executable="${sencha.cmd}" >
-		
-			<arg line="create jsb -a ${cockpitDir}dev/index_pkg_ready.html -p ${cockpitDir}app.jsb3" />
+			<arg line="create jsb -a ${cockpitDir}dev/index_pkg_ready.html -p ${cockpitDir}dev/app.jsb3" />
 		</exec>
 		<exec executable="${sencha.cmd}">
 			
