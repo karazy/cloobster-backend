@@ -635,6 +635,45 @@ public class CheckInControllerTest {
 	}
 	
 	@Test
+	public void testUpdateCheckInAsBusinessNoUpdateData() throws Exception {
+		long checkInId = 1;
+		long newSpotId = 1;
+		long spotId = 1;
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		CheckIn checkIn = mock (CheckIn.class);
+		
+		checkInData.setSpotId(newSpotId);
+		when(spotKey.getId()).thenReturn( spotId);
+		when(checkIn.getSpot()).thenReturn(spotKey);
+		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(business.getKey()).thenReturn(businessKey);
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);
+		
+		verify(checkInRepo, never()).saveOrUpdate(checkIn);
+		verify(eventBus, never()).post(any(MoveCheckInEvent.class));
+	}
+	
+	@Test
+	public void testUpdateCheckInAsBusinessInvalidBusiness() throws Exception {
+		long checkInId = 1;
+		CheckInStatusDTO checkInData = new CheckInStatusDTO();
+		CheckIn checkIn = mock (CheckIn.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> anotherBusiness = mock(Key.class);
+		
+		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
+		when(checkIn.getBusiness()).thenReturn(businessKey);
+		when(business.getKey()).thenReturn(anotherBusiness);
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("checkIn");
+		
+		ctr.updateCheckInAsBusiness(business, checkInId, checkInData);
+	}
+	
+	@Test
 	public void testUpdateCheckInAsBusinessUnknownId() throws Exception {
 		long checkInId = 1;
 		CheckInStatusDTO checkInData = new CheckInStatusDTO();

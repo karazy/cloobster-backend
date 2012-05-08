@@ -435,7 +435,7 @@ public class CheckInController {
 		try {
 			checkIn = checkInRepo.getById(checkInId);
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("ckeckInId unknown",e);
+			throw new IllegalArgumentException("checkInId unknown",e);
 		}
 		if(!checkIn.getBusiness().equals(business.getKey())) {
 			throw new IllegalArgumentException("checkIn does not belong to business");
