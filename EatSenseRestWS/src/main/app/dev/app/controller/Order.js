@@ -331,12 +331,13 @@
 	 * Edit an existing order.
 	 */
 	editOrder : function(component, eOpts) {
-		var order = this.getActiveOrder(),
-		product = this.getActiveOrder().getProduct(), 
-		validationError = "", 
-		productIsValid = true,
-		activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
-		detail = this.getProductdetail();
+		var me =this,
+			order = this.getActiveOrder(),
+			product = this.getActiveOrder().getProduct(), 
+			validationError = "", 
+			productIsValid = true,
+			activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
+			detail = this.getProductdetail();
 		
 		order.getData(true);
 
