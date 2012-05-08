@@ -319,21 +319,39 @@ public class ChannelController {
 	/**
 	 * @param clientId
 	 */
-	public String subscribeClient(String clientId) {
+	public String checkOnlineStatus(long businessId, String clientId) {
 		boolean connected = false;
 		logger.debug("recieved online check from clientId:" + clientId);
-		if(clientId.startsWith("c")) {
-			CheckIn checkIn = parseCheckIn(clientId);
-	
-			connected =  (checkIn == null ||clientId.equals(checkIn.getChannelId()) );
-		}
-		else if(clientId.startsWith("b")) {
-			Business business = parseBusiness(clientId);
 
-			connected = !(business == null || business.getChannelIds() == null || !business.getChannelIds().contains(clientId));
+		Business business;
+		try {
+			business = businessRepo.getById(businessId);
+		} catch (NotFoundException e) {
+			logger.warn("Unknown businessId");
+			business = null;
 		}
+		
+		connected = !(business == null || business.getChannelIds() == null || !business.getChannelIds().contains(clientId));
+
 		if(connected) {
 			sendMessage(clientId, new MessageDTO("channel","connected", null));
+			return "CONNECTED";
+		}
+		else {
+			return "DISCONNECTED";
+		}
+	}
+	
+	public String checkOnlineStatusOfCheckIn(String checkInUid) {
+		boolean connected = false;
+		logger.debug("recieved online check from clientId:" + checkInUid);
+		
+		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
+
+		connected = !(checkIn == null || checkIn.getChannelId() == null);
+		
+		if(connected) {
+			sendMessage(checkIn.getChannelId(), new MessageDTO("channel","connected", null));
 			return "CONNECTED";
 		}
 		else {

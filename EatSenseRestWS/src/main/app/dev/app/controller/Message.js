@@ -55,12 +55,19 @@ Ext.define('EatSense.controller.Message', {
 		if(!message) {
 			console.log('no message send');
 			return;
-		}	
+		}
+		if(message.type == 'channel') {
+			console.log('received service message ' + message.action);
+			if(message.action == 'connected') {
+				Karazy.channel.connectedReceived();
+			}
+		}
+		else {
+			console.log('broadcast message type %s, action %s', message.type, message.action);
 
-		console.log('broadcast message type %s, action %s', message.type, message.action);
-
-		//fire event based on the message
-		me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
+			//fire event based on the message
+			me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
+		}
 	},
 	/**
 	* Requests a new token from server and executes the given callback with new token as parameter.
@@ -103,6 +110,29 @@ Ext.define('EatSense.controller.Message', {
 		});
 	},
 	/**
+	* 	Let the server know we are still there.
+	*/
+	checkOnline: function(disconnectCallback) {
+		
+		console.log('checkOnline: clientId ' + this.getChannelId());
+		Ext.Ajax.request({
+		    url: Karazy.config.serviceUrl+'c/checkins/channels',		    
+		    method: 'GET',
+		    params: {
+		    	'c' :  this.getChannelId()
+		    },
+		    success: function(response){
+		       	console.log('online check request result: ' + response.responseText);
+		       	if(response.responseText == 'DISCONNECTED') {
+		       		disconnectCallback();
+		       	}		       	
+		    }, 
+		    failure: function(response) {
+		    	console.log('online check request failed with code: ' + response.status);
+		    }
+		});
+	},
+	/**
 	* 	Requests a token and
 	*	opens a channel for server side push messages.
 	*	@param id
@@ -117,6 +147,7 @@ Ext.define('EatSense.controller.Message', {
 			messageHandler: me.processMessages,
 			requestTokenHandler: me.requestNewToken,			
 			statusHandler: me.handleStatus,
+			checkOnlineHandler: me.checkOnline,
 			executionScope: me
 		});
 

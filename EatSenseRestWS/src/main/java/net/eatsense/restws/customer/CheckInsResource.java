@@ -13,17 +13,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.representation.CheckInDTO;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
 
 @Path("c/checkins")
 public class CheckInsResource {
-	private CheckInController checkInCtrl;
+	private final CheckInController checkInCtrl;
+	private final Provider<ChannelController> channelCtrlProvider;
 	
 	@Context
 	private ResourceContext resourceContext;
@@ -31,8 +34,9 @@ public class CheckInsResource {
 	HttpServletRequest servletRequest;
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr) {
+	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl) {
 		super();
+		this.channelCtrlProvider = channelCtrl;
 		this.checkInCtrl = checkInCtr;
 	}
 	
@@ -41,6 +45,7 @@ public class CheckInsResource {
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO createCheckIn(CheckInDTO checkIn) {
 		return checkInCtrl.createCheckIn(checkIn);
+		
 	}
 
 	@GET
@@ -49,6 +54,12 @@ public class CheckInsResource {
 	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotBarcode, @QueryParam("checkInId") String checkInId) {
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		return checkInCtrl.getOtherUsersAtSpot(checkIn, spotBarcode);
+	}
+	
+	@GET
+	@Path("channels")
+	public String getConnectionStatus(@QueryParam ("c") String checkInUid) {
+		return channelCtrlProvider.get().checkOnlineStatusOfCheckIn(checkInUid);
 	}
 
 	
