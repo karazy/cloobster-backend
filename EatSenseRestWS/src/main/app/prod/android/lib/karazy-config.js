@@ -15,7 +15,7 @@ Karazy.config = (function() {
 		version: 0.1,
 		disableCaching: true,
 		language: 'DE',
-		channelReconnectTimeout: 15000,
+		channelReconnectTimeout: 10000,
 		channelReconnectTries: 30,
 		heartbeatIntervall: 10000
 	};
