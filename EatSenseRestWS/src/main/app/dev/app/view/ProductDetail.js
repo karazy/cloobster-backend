@@ -100,7 +100,7 @@ Ext.define('EatSense.view.ProductDetail', {
 				}, 
 				{
 					xtype: 'button',
-					ui: 'confirm',
+					// ui: 'confirm',
 					action: 'close',
 					text: Karazy.i18n.translate('close')
 				}
