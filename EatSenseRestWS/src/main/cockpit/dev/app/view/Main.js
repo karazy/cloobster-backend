@@ -32,6 +32,15 @@ Ext.define('EatSense.view.Main', {
     			iconMask: true,
     			action: 'logout'
 			}]
-		}]
+		},
+		{
+			xtype: 'panel',
+			id: 'debugConsole',
+			docked: 'bottom',
+			hidden: !Karazy.config.debug,	
+			height: 100,
+			scrollable: true		
+		}
+		]
 	}
 });
