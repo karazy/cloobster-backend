@@ -34,6 +34,10 @@ Ext.application({
         this.mainLaunch();
 	},
 	mainLaunch : function() {
+		var me = this;
+
+    me.androidBackHandler = new Array();
+		
 		if (cordovaInit == false || !this.launched) {
         	return;
         }
@@ -42,25 +46,27 @@ Ext.application({
 		
 		var appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
 	 		checkInCtr = this.getController('CheckIn'),
-	 		restoredCheckInId;
-//	 		profile = Ext.os.deviceType.toLowerCase();	 
+	 		restoredCheckInId; 
 
 		//global error handler
 		// window.onerror = function(message, url, lineNumber) {  
 		// 	console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
 		//   	//prevent firing of default handler (return true)
 		//   	return false;
-		// }; 
+		// };
 
   		//timeout for requests
   		Ext.Ajax.timeout = 1200000;
 
       //Android specific behaviour
       if (Ext.os.is.Android) {
-        document.addEventListener("backbutton", onBackKeyDown, false);
-        function onBackKeyDown() {
-            console.log('android backbutton tapped');
-        }
+        document.addEventListener('backbutton', onBackKeyDown, false);
+        function onBackKeyDown() {            
+            if(me.androidBackHandler && me.androidBackHandler.length > 0) {
+              console.log('fire backbutton event');
+              me.androidBackHandler.pop()();
+            }
+        };
       }
 		
     	//try to restore application state

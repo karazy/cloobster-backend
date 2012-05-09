@@ -53,12 +53,14 @@ Ext.define('EatSense.controller.Menu', {
              //TODO refactor general loungeview control into another controller?!
              loungeview : {
      			activeitemchange : function(container, value, oldValue, opts) {
-    				console.log('tab change for %s', value.getItemId());
-    				if(value.getItemId() === 'carttab') {
+    				console.log('tab change to ' + value.tabName);
+    				if(value.tabName === 'cart') {
     					status = this.getApplication().getController('Order').refreshCart();
-    				} else if (value.getItemId() === 'myorderstab') {
+    				} else if (value.tabName === 'myorders') {
     					this.getApplication().getController('Order').refreshMyOrdersList();
     				}
+
+    				this.getApplication().androidBackHandler = [];
 
     				return status;
     			}
@@ -79,8 +81,15 @@ Ext.define('EatSense.controller.Menu', {
      */
     showProductlist: function(dataview, record) {
     	console.log("Menu Controller -> showProductlist");
-    	var pov = this.getProductoverview(),
+    	var me = this,
+    		pov = this.getProductoverview(),
     		prodStore = record.productsStore;
+
+		//Android: return to menu on backbutton
+		// this.getApplication().on('backbutton', this.backToMenu, this);
+		this.getApplication().androidBackHandler.push(function() {
+					me.backToMenu();
+		});
 
     	this.setActiveMenu(record);
     	this.getProductlist().setStore(prodStore);
@@ -130,6 +139,9 @@ Ext.define('EatSense.controller.Menu', {
      */
 	backToMenu: function() {
 		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
+
+		//Android: disable backbutton
+		// this.getApplication().un('backbutton', this.backToMenu, this);
 	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
@@ -144,6 +156,11 @@ Ext.define('EatSense.controller.Menu', {
 			choicesPanel =  this.getProductdetail().getComponent('choicesPanel'),
 			titlebar = detail.down('titlebar'),
 			activeProduct;
+	
+		this.getApplication().androidBackHandler.push(function() {
+					// me.closeProductDetail();
+					me.getProductdetail().hide();
+		});
 
 		//save original ids
 		record.set('genuineId', record.get('id'));
