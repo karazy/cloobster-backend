@@ -52,8 +52,16 @@ Ext.application({
 		//   	return false;
 		// }; 
 
-		//timeout for requests
-		Ext.Ajax.timeout = 1200000;
+  		//timeout for requests
+  		Ext.Ajax.timeout = 1200000;
+
+      //Android specific behaviour
+      if (Ext.os.is.Android) {
+        document.addEventListener("backbutton", onBackKeyDown, false);
+        function onBackKeyDown() {
+            console.log('android backbutton tapped');
+        }
+      }
 		
     	//try to restore application state
 	   	 
