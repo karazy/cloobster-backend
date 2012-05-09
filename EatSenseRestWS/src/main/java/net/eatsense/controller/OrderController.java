@@ -158,9 +158,12 @@ public class OrderController {
 		if(!oldSpotStatus.equals(newSpotStatus)) {
 			confirmAllEvent.setNewSpotStatus(newSpotStatus);
 		}
-		confirmAllEvent.setNewCheckInStatus(CheckInStatus.CHECKEDIN.toString());
-		checkIn.setStatus(CheckInStatus.CHECKEDIN);
-		checkInRepo.saveOrUpdate(checkIn);
+		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED)
+		{
+			confirmAllEvent.setNewCheckInStatus(CheckInStatus.CHECKEDIN.toString());
+			checkIn.setStatus(CheckInStatus.CHECKEDIN);
+			checkInRepo.saveOrUpdate(checkIn);
+		}
 		
 		requestRepo.ofy().delete(requestsToDelete);
 		orderRepo.saveOrUpdate(orders);
