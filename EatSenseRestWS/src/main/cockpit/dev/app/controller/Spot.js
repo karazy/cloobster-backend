@@ -449,9 +449,9 @@ Ext.define('EatSense.controller.Spot', {
 					if(dirtyCheckIn) {
 						console.log('delete checkin with id ' + updatedCheckIn.get('id'));
 						customerIndex = store.indexOf(dirtyCheckIn);
-						store.remove(dirtyCheckIn);	
+						store.remove(dirtyCheckIn);
 						//make sure to load new request so they exist
-						requestCtr.loadRequests();			
+						requestCtr.loadRequests();	
 
 						//clear status panel if deleted checkin is activeCustomer or select another checkin
 						if(me.getActiveCustomer() && updatedCheckIn.get('id') == me.getActiveCustomer().get('id')) {
@@ -700,7 +700,8 @@ Ext.define('EatSense.controller.Spot', {
 			requestCtr = this.getApplication().getController('Request'),
 			bill = this.getActiveBill(),
 			customerList = this.getSpotDetailCustomerList(),
-			customerIndex;
+			checkInId = me.getActiveCustomer().getId(),
+			customerIndex = customerStore.indexOf(me.getActiveCustomer());
 
 		if(!bill) {
 			console.log('cannot confirm payment because no bill exists');
@@ -724,20 +725,30 @@ Ext.define('EatSense.controller.Spot', {
 					pathId: loginCtr.getAccount().get('businessId')
 				},
 				success: function(record, operation) {
-					//remove customer
-					customerIndex = customerStore.indexOf(me.getActiveCustomer());
-					customerStore.remove(me.getActiveCustomer());
-					if(customerStore.getCount() > 0) {
-						customerList.select(customerIndex);
-					} else {
-						orderStore.removeAll();
-						me.updateCustomerStatusPanel();
-						me.updateCustomerTotal();
-						me.updateCustomerPaymentMethod();
-					}
-					me.setActiveBill(null);	
-					//update requests
-					requestCtr.loadRequests();		
+
+					requestCtr.removeRequestsForCustomerById(checkInId);
+					//although a message will be received we update the view directly					
+					if(me.getActiveCustomer() && checkInId == me.getActiveCustomer().get('id')) {				
+						//remove customer						
+						customerStore.remove(me.getActiveCustomer());
+						if(customerStore.getCount() > 0) {
+							if(customerStore.getAt(customerIndex)) {
+								customerList.select(customerIndex);	
+							} else {
+								customerList.select(customerIndex-1);
+							}
+						} else {
+							orderStore.removeAll();
+							me.setActiveCustomer(null);
+							me.updateCustomerStatusPanel();
+							me.updateCustomerTotal();
+							me.updateCustomerPaymentMethod();
+							me.getSpotDetail().fireEvent('eatSense.customer-update', false);
+						}
+						me.setActiveBill(null);	
+						//update requests
+						// requestCtr.loadRequests();
+					}			
 				},
 				failure: function(record, operation) {
 					console.log('saving bill failed');
@@ -844,7 +855,7 @@ Ext.define('EatSense.controller.Spot', {
 							} else {
 								requestCtr.removeRequestsForCustomerById(checkInId);
 								//although a message will be received we update the view directly
-								if(me.getActiveCustomer() && checkInId == me.getActiveCustomer().get('id')) {									
+								if(me.getActiveCustomer() && checkInId == me.getActiveCustomer().get('id')) {					
 									checkins.remove(me.getActiveCustomer());
 									if(checkins.getCount() > 0) {
 										if(checkins.getAt(customerIndex)) {

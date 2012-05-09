@@ -181,8 +181,8 @@ Ext.define('EatSense.model.Choice', {
 		if(!rawData) {
 			return false;
 		}
-
-		for (var index = 0; index < this.options().data.length; index++) {
+		
+		for ( ; index < optionsLength; index++) {
 			if(!this.options().getAt(index).setRawJsonData(rawData.options[index])) {
 				return false;
 			}
