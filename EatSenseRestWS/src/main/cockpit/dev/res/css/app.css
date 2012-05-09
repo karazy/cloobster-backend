@@ -243,6 +243,15 @@
 	background-color: green;
 }
 
+.status-indicator .TIMEOUT {
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	float: right;
+	margin: 0px 0.5em;
+	background-color: gray;
+}
+
 .status-indicator .RECONNECT {
 	width: 1em;
 	height: 1em;
@@ -259,6 +268,15 @@
 	float: right;
 	margin: 0px 0.5em;
 	background-color: yellow;
+}
+
+.status-indicator .CONNECTION_LOST {
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	float: right;
+	margin: 0px 0.5em;
+	background-color: white;
 }
 
 .status-indicator .DISCONNECTED {

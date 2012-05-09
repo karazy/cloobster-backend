@@ -103,11 +103,13 @@ Karazy.channel = (function() {
 
 		if(error && ( error.code == '401' || error.code == '400') ) {
 			timedOut = true;
-			console.log('onError: reason TIMEOUT');
+			setStatusHelper('TIMEOUT');
+			socket.close();
+			console.log('onError: reason TIMEOUT, code: ' + error.code);
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
 			connectionLost = true;
 			console.log('onError: reason CONNECTION_LOST');
-			setStatusHelper('RECONNECT');
+			setStatusHelper('CONNECTION_LOST');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
 				'prevStatus': previousStatus
@@ -123,11 +125,11 @@ Karazy.channel = (function() {
 			return;
 		};
 
-		if(timedOut === true) {
+		if(timedOut === true && connectionStatus == 'TIMEOUT') {
 			console.log('onClose: reason TIMEOUT');
-			setStatusHelper('RECONNECT');		
+			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
-		} else if(connectionLost === true) {
+		} else if(connectionLost === true && connectionStatus == 'CONNECTION_LOST') {
 			console.log('onClose: reason CONNECTION_LOST');
 			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
@@ -148,13 +150,14 @@ Karazy.channel = (function() {
 				window.clearInterval(interval);
 			}
 		}
-		if(connectionStatus == 'RECONNECT') {
+		if(connectionStatus == 'CONNECTION_LOST') {
 			checkOnlineFunction.apply(executionScope, [
 				function() {
 					if(interval) {
 						window.clearInterval(interval);	
 					}
 					timedOut = true;
+					setStatusHelper('TIMEOUT');
 					socket.close();
 				}
 			]);
