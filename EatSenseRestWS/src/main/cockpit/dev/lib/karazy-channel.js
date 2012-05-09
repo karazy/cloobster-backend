@@ -102,13 +102,18 @@ Karazy.channel = (function() {
 		console.log('channel error: ' + errorDesc);
 
 		if(error && ( error.code == '401' || error.code == '400') ) {
+			console.log('onError: reason TIMEOUT, code: ' + error.code);
 			timedOut = true;
 			setStatusHelper('TIMEOUT');
+			statusHandlerFunction.apply(executionScope, [{
+				'status' : connectionStatus, 
+				'prevStatus': previousStatus
+			}]);
 			socket.close();
-			console.log('onError: reason TIMEOUT, code: ' + error.code);
+			
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
-			connectionLost = true;
 			console.log('onError: reason CONNECTION_LOST');
+			connectionLost = true;
 			setStatusHelper('CONNECTION_LOST');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
@@ -133,9 +138,8 @@ Karazy.channel = (function() {
 			console.log('onClose: reason CONNECTION_LOST');
 			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
-		} else {
+		} else if(connectionStatus == 'DISCONNECTED'){
 			console.log('onClose: reason DISCONNECTED');
-			setStatusHelper('DISCONNECTED');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
 				'prevStatus': previousStatus
