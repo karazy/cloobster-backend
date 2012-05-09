@@ -1,7 +1,7 @@
 Ext.define('EatSense.view.Newsletter', {
 	extend: 'Ext.form.Panel',
 	xtype: 'newsletter',
-	require: ['Ext.field.Email'],
+	requires: ['Ext.field.Email'],
 	config: {
 		layout: {
 			type: 'vbox',

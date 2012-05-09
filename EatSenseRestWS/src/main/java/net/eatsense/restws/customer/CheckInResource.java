@@ -27,6 +27,7 @@ import net.eatsense.representation.CustomerRequestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
@@ -129,7 +130,8 @@ public class CheckInResource {
 	@Produces("text/plain; charset=UTF-8")
 	@RolesAllowed({"guest"})
 	public String requestToken() {
-		return channelCtrlProvider.get().createCustomerChannel(checkIn);
+		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.app.timeout")));
+		return channelCtrlProvider.get().createCustomerChannel(checkIn, timeout);
 	}
 	
 	@PUT

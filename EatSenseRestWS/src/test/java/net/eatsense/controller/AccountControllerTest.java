@@ -3,12 +3,10 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-
-import java.net.URI;
-import java.util.Date;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import javax.mail.Message;
 import javax.validation.Validation;
@@ -16,7 +14,6 @@ import javax.validation.ValidatorFactory;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;

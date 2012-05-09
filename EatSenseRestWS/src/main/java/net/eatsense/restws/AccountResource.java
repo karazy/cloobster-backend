@@ -77,8 +77,9 @@ public class AccountResource {
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({"restaurantadmin"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
-		//Set the timeout to 240 minutes (4 hours)
-		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, Optional.of(240));
+		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
+		
+		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, timeout);
 		if(token == null)
 			throw new NotFoundException();
 		return token;

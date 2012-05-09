@@ -99,7 +99,8 @@ Ext.define('EatSense.model.Product', {
 	*
 	*/	
 	getRawJsonData: function() {
-		var rawJson = {}
+		var rawJson = {},
+			choicesCount = this.choices().getCount(),
 			index = 0;
 		
 		rawJson.id = (this.phantom === true) ? this.get('genuineId') : this.get('id');
@@ -109,7 +110,8 @@ Ext.define('EatSense.model.Product', {
 		rawJson.price = this.get('price');
 		
 		rawJson.choices = new Array(this.choices().data.length);
-		for (; index < this.choices().data.length; index++) {
+		
+		for( ; index < choicesCount; index++) {
 			rawJson.choices[index] = this.choices().getAt(index).getRawJsonData();
 		}		
 		return rawJson;
@@ -119,16 +121,23 @@ Ext.define('EatSense.model.Product', {
 	*	
 	*/	
 	setRawJsonData: function(rawData) {
-		var index = 0;
+		var index = 0,
+			choicesCount = rawData.choices.length,
+			choice;
 
 		if(!rawData) {
 			return false;
 		}
 
-		for (; index < this.choices().data.length; index++) {
-			if(!this.choices().getAt(index).setRawJsonData(rawData.choices[index])) {
-				return false;
-			}
+		for( ; index < choicesCount; index++) {
+			//check if an option with given id exists
+			choice = this.choices().getById(rawData.choices[index].id);
+			if(choice) {
+				console.log('option with id ' + rawData.choices[index].id);
+				if(!choice.setRawJsonData(rawData.choices[index])) {
+					return false;
+				}
+			} 
 		}
 
 		this.set('id', rawData.id);

@@ -10,4 +10,5 @@ Misc/SenchaTests/touch/*
 xcuserdata/
 *.xcuserstate
 EatSenseAppAndroid/assets/
+gen/
 eatSenseAppiOS/eatSense/www/

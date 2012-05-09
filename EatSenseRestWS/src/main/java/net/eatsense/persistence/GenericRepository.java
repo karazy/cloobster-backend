@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.GenericEntity;
+import net.eatsense.domain.Spot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -289,6 +291,23 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	}
 	
 	/**
+	 * Convenience method to get all object keys matching a single property
+	 * 
+	 * @param parentKey
+	 * @return List<Key<T>> of matching entity keys
+	 */
+	public List<Key<T>> getKeysByParent(Key<? extends GenericEntity> parentKey)
+	{
+		logger.info("{}, parent: {}", clazz, parentKey);
+		Query<T> q = ofy().query(clazz);
+
+		q.ancestor(parentKey);
+
+		return q.listKeys();
+
+	}
+	
+	/**
 	 * Convenience method to get all objects matching a single property.
 	 * orderby is the property to order the list f.e. "age" for ascending order by the "age" property 
 	 * 		"-age" for descending. 
@@ -340,4 +359,24 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 		return ofy();
 	}
 
+	/**
+	 * Create a typesafe wrapper for the datastore key object.
+	 * 
+	 * @param parent parent {@link Key}
+	 * @param id numerical identifier
+	 * @return {@link Key}
+	 */
+	public Key<T> getKey(Key<? extends GenericEntity> parent, long id) {
+		return new Key<T>(parent , clazz, id);
+	}
+	
+	/**
+	 * Create a typesafe wrapper for the datastore key object.
+	 * 
+	 * @param id numerical identifier
+	 * @return {@link Key} of type T
+	 */
+	public Key<T> getKey(long id) {
+		return new Key<T>( clazz, id);
+	}
 }

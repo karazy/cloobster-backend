@@ -38,12 +38,21 @@ Ext.application({
 	launch : function() {
 		console.log('launch cockpit ...');
 
-        //global error handler
-        window.onerror = function(message, url, lineNumber) {  
-         console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
-             //to prevent firing of default handler (return true)
-             return false;
-        }; 
+    if(Karazy.config.debug) {        
+        (function() {
+            var exLog = console.log,
+                debugConsole;
+            console.log = function(msg) {
+                exLog.apply(this, arguments);
+                debugConsole = Ext.getCmp('debugConsole');
+                if(debugConsole) {
+                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + msg);
+                    debugConsole.getScrollable().getScroller().scrollToEnd();
+                }                
+            }
+        })();
+        console.log('Debug mode active!');
+    }
 
 	   	var loginCtr = this.getController('Login');
 
