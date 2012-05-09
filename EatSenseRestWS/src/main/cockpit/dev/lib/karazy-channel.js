@@ -213,7 +213,7 @@ Karazy.channel = (function() {
 					window.setTimeout(connect, channelReconnectTimeout);
 				}]);
 		};
-		window.setTimeout(connect, (connectionStatus == 'INITIALIZING') ? 0 : channelReconnectTimeout);
+		connect();
 	};
 
 	function setStatusHelper(newStatus) {
