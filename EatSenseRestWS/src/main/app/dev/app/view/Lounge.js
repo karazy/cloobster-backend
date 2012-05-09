@@ -9,6 +9,11 @@ Ext.define('EatSense.view.Lounge', {
 	],
 	xtype : 'lounge',
 	config : {
+		layout: {
+           type: 'card',
+           //override default tabpanel animation setting
+           animation: null
+        },
 		tabBarPosition: 'bottom',
 		tabBar : {
 			itemId : 'loungeTabBar',
