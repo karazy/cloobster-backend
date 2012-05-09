@@ -7109,7 +7109,8 @@ input[type="search"]::-webkit-search-cancel-button {
   padding: 5px;
   margin: 5px;
   border-radius: 0.3em;
-  background-color: #FFD073;
+  background-color: white;
+  /*#FFD073;*/
 }
 /* line 197, app-default.scss */
 .cartoverviewitem .name {

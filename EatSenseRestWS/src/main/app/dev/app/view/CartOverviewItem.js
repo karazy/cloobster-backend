@@ -10,7 +10,7 @@ Ext.define('EatSense.view.CartOverviewItem', {
 
 		name : {
 			tpl: new Ext.XTemplate(
-				"{Product.name} ({amount}x) {[this.formatPrice(values.Product.price_calculated)]}",
+				"<h8>{amount}x</h8> <h9>{Product.name}</h9> {[this.formatPrice(values.Product.price_calculated)]}",
 				{
 					formatPrice: function(price) {
 						return Karazy.util.formatPrice(price);
