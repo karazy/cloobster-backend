@@ -102,12 +102,19 @@ Karazy.channel = (function() {
 		console.log('channel error: ' + errorDesc);
 
 		if(error && ( error.code == '401' || error.code == '400') ) {
+			console.log('onError: reason TIMEOUT, code: ' + error.code);
 			timedOut = true;
-			console.log('onError: reason TIMEOUT');
+			setStatusHelper('TIMEOUT');
+			statusHandlerFunction.apply(executionScope, [{
+				'status' : connectionStatus, 
+				'prevStatus': previousStatus
+			}]);
+			socket.close();
+			
 		} else if (!connectionLost && error && (error.code == '-1' || error.code == '0')) {
-			connectionLost = true;
 			console.log('onError: reason CONNECTION_LOST');
-			setStatusHelper('RECONNECT');
+			connectionLost = true;
+			setStatusHelper('CONNECTION_LOST');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
 				'prevStatus': previousStatus
@@ -123,17 +130,16 @@ Karazy.channel = (function() {
 			return;
 		};
 
-		if(timedOut === true) {
+		if(timedOut === true && connectionStatus == 'TIMEOUT') {
 			console.log('onClose: reason TIMEOUT');
-			setStatusHelper('RECONNECT');		
+			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
-		} else if(connectionLost === true) {
+		} else if(connectionLost === true && connectionStatus == 'CONNECTION_LOST') {
 			console.log('onClose: reason CONNECTION_LOST');
 			setStatusHelper('RECONNECT');
 			repeatedConnectionTry();
-		} else {
+		} else if(connectionStatus == 'DISCONNECTED'){
 			console.log('onClose: reason DISCONNECTED');
-			setStatusHelper('DISCONNECTED');
 			statusHandlerFunction.apply(executionScope, [{
 				'status' : connectionStatus, 
 				'prevStatus': previousStatus
@@ -148,13 +154,14 @@ Karazy.channel = (function() {
 				window.clearInterval(interval);
 			}
 		}
-		if(connectionStatus == 'RECONNECT') {
+		if(connectionStatus == 'CONNECTION_LOST') {
 			checkOnlineFunction.apply(executionScope, [
 				function() {
 					if(interval) {
 						window.clearInterval(interval);	
 					}
 					timedOut = true;
+					setStatusHelper('TIMEOUT');
 					socket.close();
 				}
 			]);
@@ -206,7 +213,7 @@ Karazy.channel = (function() {
 					window.setTimeout(connect, channelReconnectTimeout);
 				}]);
 		};
-		window.setTimeout(connect, (connectionStatus == 'INITIALIZING') ? 0 : channelReconnectTimeout);
+		connect();
 	};
 
 	function setStatusHelper(newStatus) {
