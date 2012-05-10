@@ -1,12 +1,15 @@
 package net.eatsense.domain;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Embedded;
 import javax.persistence.Transient;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.Channel;
 import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -36,7 +39,6 @@ public class Business extends GenericEntity {
 	 * Description of location.
 	 */
 	private String description;
-
 	/**
 	 * Location's logo.
 	 */
@@ -47,7 +49,8 @@ public class Business extends GenericEntity {
 	@Unindexed
 	private List<PaymentMethod> paymentMethods;
 	
-	private List<String> channelIds;
+	@Embedded
+	private Set<Channel> channels;
 
 	public Business() {
 	}
@@ -98,12 +101,15 @@ public class Business extends GenericEntity {
 		this.paymentMethods = paymentMethods;
 	}
 
-	public List<String> getChannelIds() {
-		return channelIds;
+	public Set<Channel> getChannels() {
+		if(channels == null)
+			channels = new HashSet<Channel>();
+		return channels;
 	}
 
-	public void setChannelIds(List<String> channelTokens) {
-		this.channelIds = channelTokens;
+	public void setChannels(Set<Channel> channels) {
+		this.channels = channels;
 	}
+	
 	
 }

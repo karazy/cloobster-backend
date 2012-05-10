@@ -116,7 +116,7 @@ Ext.define('EatSense.controller.Message', {
 		
 		console.log('checkOnline: clientId ' + this.getChannelId());
 		Ext.Ajax.request({
-		    url: Karazy.config.serviceUrl+'c/checkins/channels',		    
+		    url: Karazy.config.serviceUrl+'/c/checkins/channels',		    
 		    method: 'GET',
 		    params: {
 		    	'c' :  this.getChannelId()

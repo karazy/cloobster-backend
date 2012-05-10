@@ -5,13 +5,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
@@ -254,11 +257,11 @@ public class ChannelController {
 		
 		String messageString = buildJsonMessage(content);
 		
-		if(business.getChannelIds() != null && !business.getChannelIds().isEmpty()) {
+		if(!business.getChannels().isEmpty()) {
 			// Send to all clients registered to the business ...
-			for (String clientId : business.getChannelIds()) {
-				sendMessageRaw(clientId, messageString);
-				logger.debug("sent message to channel {} ", clientId);
+			for (Channel client : business.getChannels()) {
+				sendMessageRaw(client.getClientId(), messageString);
+				logger.debug("sent message to channel {} ", client);
 			}
 		}
 		else {
@@ -330,7 +333,7 @@ public class ChannelController {
 			business = null;
 		}
 		
-		connected = !(business == null || business.getChannelIds() == null || !business.getChannelIds().contains(clientId));
+		connected = !(business == null || !business.getChannels().contains( Channel.fromClientId(clientId)));
 
 		if(connected) {
 			sendMessage(clientId, new MessageDTO("channel","connected", null));
@@ -406,11 +409,12 @@ public class ChannelController {
 			return;
 		}
 		else {
-			if (business.getChannelIds() == null || business.getChannelIds().isEmpty())	{
+			if (business.getChannels().isEmpty())	{
 				return;
 			}
-			if(business.getChannelIds().contains(clientId)) {
-				business.getChannelIds().remove(clientId);
+			Channel channel = Channel.fromClientId(clientId);
+			if(business.getChannels().contains(channel)) {
+				business.getChannels().remove(channel);
 				logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
 				businessRepo.saveOrUpdate(business);
 			}
@@ -472,10 +476,27 @@ public class ChannelController {
 		Business business = parseBusiness(clientId);
 		if(business == null)
 			return;
-		if(business.getChannelIds() == null)
-			business.setChannelIds(new ArrayList<String>());
-		if(!business.getChannelIds().contains(clientId)) {
-			business.getChannelIds().add(clientId);
+		
+		Calendar calendar = Calendar.getInstance();
+		Integer timeout;
+		try {
+			timeout = Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout"));
+		} catch (NumberFormatException e) {
+			timeout = 120;
+		}
+		calendar.add(Calendar.MINUTE, -timeout);			
+		
+		Channel newChannel = Channel.fromClientId(clientId);
+		
+		for (Iterator<Channel> iterator = business.getChannels().iterator(); iterator.hasNext();) {
+			Channel channel  = iterator.next();
+			if(channel.getCreationDate().before(calendar.getTime())) {
+				iterator.remove();
+			}
+		}
+		
+		if(!business.getChannels().contains(newChannel)) {
+			business.getChannels().add(newChannel);
 			logger.info("Subscribing channel {} to business {} ", clientId, business.getName());
 		}
 		businessRepo.saveOrUpdate(business);

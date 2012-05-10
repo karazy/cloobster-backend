@@ -1,5 +1,6 @@
 package net.eatsense.controller;
 
+import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -16,10 +17,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
@@ -177,14 +181,15 @@ public class ChannelControllerTest {
 	public void testSubscribeToBusiness() throws Exception {
 		long businessId = 1;
 		Business business = mock(Business.class);
-		List<String> channelList = new ArrayList<String>();
-		when(business.getChannelIds()).thenReturn(channelList );
+		Set<Channel> channelList = new HashSet<Channel>();
+		when(business.getChannels()).thenReturn(channelList );
 		when(rr.getById(businessId)).thenReturn(business);
 				
 		String clientId = ctr.buildCockpitClientId(businessId, "test");
 		ctr.subscribeToBusiness(clientId);
-		
+				
 		verify(rr).saveOrUpdate(business);
+		assertThat(channelList.contains(Channel.fromClientId(clientId)), is (true));
 	}
 	
 	@Test(expected=NullPointerException.class)
@@ -206,9 +211,9 @@ public class ChannelControllerTest {
 	public void testUnsubscribeFromBusinessValidButUnknownClientId() throws Exception {
 		long businessId = 1;
 		Business business = mock(Business.class);
-		List<String> channelList = new ArrayList<String>();
-		channelList.add("clientid1");
-		when(business.getChannelIds()).thenReturn(channelList );
+		Set<Channel> channelList = new HashSet<Channel>();
+		channelList.add(Channel.fromClientId("clientid1"));
+		when(business.getChannels()).thenReturn(channelList );
 		when(rr.getById(businessId)).thenReturn(business);
 
 		ctr.unsubscribeFromBusiness(ctr.buildCockpitClientId(businessId, "unknown"));
@@ -220,15 +225,16 @@ public class ChannelControllerTest {
 	public void testUnsubscribeFromBusiness() throws Exception {
 		long businessId = 1;
 		Business business = mock(Business.class);
-		List<String> channelList = new ArrayList<String>();
+		Set<Channel> channelList = new HashSet<Channel>();
 		String clientId = ctr.buildCockpitClientId(businessId, "test");
-		channelList.add(clientId);
-		when(business.getChannelIds()).thenReturn(channelList );
+		Channel channel = Channel.fromClientId(clientId);
+		channelList.add(channel);
+		when(business.getChannels()).thenReturn(channelList );
 		when(rr.getById(businessId)).thenReturn(business);
 		
 		ctr.unsubscribeFromBusiness(clientId);
 		verify(rr).saveOrUpdate(business);
-		assertThat(channelList, not(hasItem(clientId)));
+		assertThat(channelList, not(hasItem(channel)));
 	}
 	
 	@Test(expected = NullPointerException.class)
@@ -360,13 +366,13 @@ public class ChannelControllerTest {
 	public void testSendMessages() throws Exception {
 		business = mock(Business.class);
 		
-		ArrayList<String> channelList = new ArrayList<String>();
-		when(business.getChannelIds()).thenReturn(channelList);
+		Set<Channel> channelList = new HashSet<Channel>();
+		when(business.getChannels()).thenReturn(channelList);
 		
 		String clientId1 = "testclient1";
-		channelList.add(clientId1);
+		channelList.add(Channel.fromClientId(clientId1));
 		String clientId2 = "testclient2";
-		channelList.add(clientId2);
+		channelList.add(Channel.fromClientId(clientId2));
 		
 		List<MessageDTO> content = new ArrayList<MessageDTO>();
 		content.add(new MessageDTO("testtype","testaction", "content"));
@@ -378,8 +384,8 @@ public class ChannelControllerTest {
 
 		verify(channelService, times(2)).sendMessage(messageArgument.capture());
 		List<ChannelMessage> messages = messageArgument.getAllValues();
-		assertThat(messages.get(0).getClientId(), is(clientId1));
-		assertThat(messages.get(1).getClientId(), is(clientId2));
+		assertThat(messages.get(0).getClientId(), anyOf(is(clientId1), is(clientId2)));
+		assertThat(messages.get(1).getClientId(), anyOf(is(clientId1), is(clientId2)));
 		
 		assertThat(messages.get(0).getMessage(), is(messageString));
 		assertThat(messages.get(1).getMessage(), is(messageString));
@@ -432,13 +438,13 @@ public class ChannelControllerTest {
 	public void testSendMessage() throws Exception {
 		business = mock(Business.class);
 		
-		ArrayList<String> channelList = new ArrayList<String>();
-		when(business.getChannelIds()).thenReturn(channelList);
+		Set<Channel> channelList = new HashSet<Channel>();
+		when(business.getChannels()).thenReturn(channelList);
 		
 		String clientId1 = "testclient1";
-		channelList.add(clientId1);
+		channelList.add(Channel.fromClientId(clientId1));
 		String clientId2 = "testclient2";
-		channelList.add(clientId2);
+		channelList.add(Channel.fromClientId(clientId2));
 		
 		MessageDTO content = new MessageDTO("testtype","testaction", "content");
 		
@@ -450,8 +456,8 @@ public class ChannelControllerTest {
 
 		verify(channelService, times(2)).sendMessage(messageArgument.capture());
 		List<ChannelMessage> messages = messageArgument.getAllValues();
-		assertThat(messages.get(0).getClientId(), is(clientId1));
-		assertThat(messages.get(1).getClientId(), is(clientId2));
+		assertThat(messages.get(0).getClientId(), anyOf(is(clientId1), is(clientId2)));
+		assertThat(messages.get(1).getClientId(), anyOf(is(clientId1), is(clientId2)));
 		
 		assertThat(messages.get(0).getMessage(), is(messageString));
 		assertThat(messages.get(1).getMessage(), is(messageString));
