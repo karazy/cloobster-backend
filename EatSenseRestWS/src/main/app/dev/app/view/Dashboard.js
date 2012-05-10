@@ -13,57 +13,72 @@ Ext.define('EatSense.view.Dashboard', {
 			align : 'middle',
 		},
 		cls: 'dashboard',
-		items : [ {
+		items : [ 
+		{
 			xtype : 'image',
-			src : 'res/images/eatSenseLogo_small.png',
-			style : 'background-image: url(res/images/eatSenseLogo_small.png); background-repeat:no-repeat; background-position:center center;',
+			src : 'res/images/dashboard/eatsense-logo.png',
+			style : 'background-image: url(res/images/eatsense-logo.png); background-repeat:no-repeat; background-position:center center;',
 			height : 100,
 			width : 150
-		}, {
-			xtype : 'panel',
-			layout : 'hbox',
-			items : [ {
-				xtype : 'panel',
-				layout : {
-					type : 'vbox',
-					align : 'middle'
-				},
-				defaults: {
-					xtype : 'dashboardbutton',
-				},
-				items : [ {
-					cls: 'newRestaurantsButton',
-					text: Karazy.i18n.translate('newRestaurantsButton'),
-					badgeText: '6',					
-
-				}, {
-					cls: 'currentDealsButton',	
-					text: Karazy.i18n.translate('currentDealsButton')
-				} ]
-			}, {
-				xtype : 'panel',
-				layout : {
-					type : 'vbox',
-					align : 'middle'
-				},
-				items : [ {
-					xtype : 'label',
-					height: '75px',
-					html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
-				}, {
+		}, 
+		{
+			xtype: 'image',
+			style : 'background-image: url(res/images/dashboard/hup-logo.png); background-repeat:no-repeat; background-position:center center;',
+			src : 'res/images/dashboard/hup-logo.png',
+		},
+		{
+			xtype: 'image',
+			style : 'background-image: url(res/images/dashboard/drei-buttons.png); background-repeat:no-repeat; background-position:center center;',
+			src : 'res/images/dashboard/drei-buttons.png',
+		},
+		{
 					xtype : 'dashboardbutton',
 					action: 'checkin',
-					text : Karazy.i18n.translate('checkInButton'),
+					// text : Karazy.i18n.translate('checkInButton'),
 					cls : 'checkInButton',
 					labelCls: 'checkInButton-label'
-				}, 
-				]
-			} ]
 		}
-		//TEST
-		// ,
+
 		// {
-		// 	xtype: 'newsletterpopup'
+		// 	xtype : 'panel',
+		// 	layout : 'hbox',
+		// 	items : [ {
+		// 		xtype : 'panel',
+		// 		layout : {
+		// 			type : 'vbox',
+		// 			align : 'middle'
+		// 		},
+		// 		defaults: {
+		// 			xtype : 'dashboardbutton',
+		// 		},
+		// 		items : [ {
+		// 			cls: 'newRestaurantsButton',
+		// 			text: Karazy.i18n.translate('newRestaurantsButton'),
+		// 			badgeText: '6',					
+
+		// 		}, {
+		// 			cls: 'currentDealsButton',	
+		// 			text: Karazy.i18n.translate('currentDealsButton')
+		// 		} ]
+		// 	}, {
+		// 		xtype : 'panel',
+		// 		layout : {
+		// 			type : 'vbox',
+		// 			align : 'middle'
+		// 		},
+		// 		items : [ {
+		// 			xtype : 'label',
+		// 			height: '75px',
+		// 			html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
+		// 		}, {
+		// 			xtype : 'dashboardbutton',
+		// 			action: 'checkin',
+		// 			text : Karazy.i18n.translate('checkInButton'),
+		// 			cls : 'checkInButton',
+		// 			labelCls: 'checkInButton-label'
+		// 		}, 
+		// 		]
+		// 	} ]
 		// }
 		// {
 		// 	xtype: 'toolbar',
