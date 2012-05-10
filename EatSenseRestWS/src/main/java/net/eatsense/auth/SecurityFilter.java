@@ -78,7 +78,12 @@ public class SecurityFilter implements ContainerRequestFilter {
 		
 		if(businessId == null) {
 			if( request.getFormParameters().getFirst("businessId") != null)
-				businessId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
+				try {
+					businessId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
+				} catch (NumberFormatException e) {
+					logger.error("businessId invalid");
+				}
+				
 		}
 		
 		if(checkInId != null && !checkInId.isEmpty()) {

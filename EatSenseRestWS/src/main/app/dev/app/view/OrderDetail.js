@@ -85,15 +85,13 @@ Ext.define('EatSense.view.OrderDetail', {
 			items: [
 				{
 					xtype: 'button',
-					ui: 'confirm',
-					// icon: '../app/res/images/into_cart.png',
-					// iconAlign: 'centered',
+					// ui: 'confirm',
 					text: Karazy.i18n.translate('change'),
 					action: 'edit'
 				},
 				{
 					xtype: 'button',
-					ui: 'confirm',
+					// ui: 'confirm',
 					text: Karazy.i18n.translate('cancel'),
 					action: 'undo'
 				}
