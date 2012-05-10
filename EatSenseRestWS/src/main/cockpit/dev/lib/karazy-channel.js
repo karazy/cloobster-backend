@@ -84,6 +84,11 @@ Karazy.channel = (function() {
 				console.log('online check');
 				// repeatedOnlineCheck();
 				checkOnlineFunction.apply(executionScope, [function() {
+					setStatusHelper('TIMEOUT');
+					statusHandlerFunction.apply(executionScope, [{
+						'status' : connectionStatus, 
+						'prevStatus': previousStatus
+					}]);
 					timedOut = true;
 					socket.close();
 				}]);
