@@ -52,6 +52,14 @@ Karazy.util = (function() {
 		 	return functionToCheck && getType.toString.call(functionToCheck) == '[object Function]';
 		},
 		/**
+		*	Checks if the given argument is of type Array.
+		*
+		*/
+		isArray: function(functionToCheck) {
+		 	var getType = {};
+		 	return functionToCheck && getType.toString.call(functionToCheck) == '[object Array]';
+		},
+		/**
 		*	Rounds a price to number of given decimals.
 		*	@param price
 		*		Price to round

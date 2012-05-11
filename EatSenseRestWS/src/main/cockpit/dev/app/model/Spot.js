@@ -2,7 +2,7 @@ Ext.define('EatSense.model.Spot', {
 	extend : 'Ext.data.Model',
 	// requires: ['EatSense.model.PaymentMethod'],
 	config : {
-		idProperty : 'barcode',
+		idProperty : 'id',
 		fields : [ 
 		{
 			name: 'id'

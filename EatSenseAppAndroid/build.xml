@@ -27,7 +27,7 @@
 
 	<target name="replaceConfigTest" depends="renameFiles">
 		<echo message="Setting config values" />
-		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'http://192.168.1.131:8888'," byline="true">
+		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'http://192.168.1.103:8888'," byline="true">
 		</replaceregexp>
 		<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 false," byline="true">
 		</replaceregexp>
