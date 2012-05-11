@@ -4,6 +4,8 @@
 	<property name="config" value="eatSense/www/lib/karazy-config.js" />
 
 	<target name="copySenchaApp" depends="">
+		<echo message="Delete old files" />
+		<delete dir="eatSense/www"></delete>
 		<echo message="Copy App" />
 		<copy todir="eatSense/www" overwrite="true">
 			<fileset dir="${appDir}">

@@ -12,7 +12,6 @@ Ext.define('EatSense.view.ProductDetail', {
 	config : {
     	scrollable : 'vertical',
     	modal: true,
-		hideOnMaskTap: true,
 		top: '5%',
 		left: '3%',
 		right: '3%',
@@ -57,7 +56,7 @@ Ext.define('EatSense.view.ProductDetail', {
 					value : 1,
 					minValue : '1',
 					maxValue : '10',
-					cycle : true,
+					cycle : false,
 				},
 				{
 					xtype: 'label',
