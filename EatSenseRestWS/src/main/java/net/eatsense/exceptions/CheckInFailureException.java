@@ -1,6 +1,6 @@
 package net.eatsense.exceptions;
 
-public class CheckInFailureException extends EatsenseException {
+public class CheckInFailureException extends ServiceException {
 
 	/**
 	 * 
@@ -24,6 +24,12 @@ public class CheckInFailureException extends EatsenseException {
 
 	public CheckInFailureException(Throwable cause) {
 		super(cause);
+		// TODO Auto-generated constructor stub
+	}
+
+	public CheckInFailureException(String message, String errorKey,
+			String... substitutions) {
+		super(message, errorKey, substitutions);
 		// TODO Auto-generated constructor stub
 	}
 

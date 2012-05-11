@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.controller.MessageController;
+import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
@@ -61,6 +62,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(AccountResource.class);
 						bind(ChannelResource.class);
 						bind(EventBus.class).in(Singleton.class);
+						bind(ServiceExceptionMapper.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*newsletter(.)*", "(.)*b/businesses(.)*",

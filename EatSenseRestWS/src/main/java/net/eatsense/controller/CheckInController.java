@@ -200,14 +200,7 @@ public class CheckInController {
 				CheckIn next = it.next();
 				
 				if(next.getNickname().equals(checkIn.getNickname() ) ) {
-					logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
-					try {
-						errorMessage = mapper.writeValueAsString(new ErrorDTO("checkInErrorNicknameExists", ""));
-					} catch (Exception e) {
-						throw new RuntimeException("error while mapping error data",e);
-					}
-					//abort checkin
-					throw new CheckInFailureException(errorMessage);
+					throw new CheckInFailureException("nickname already exists", "checkInErrorNicknameExists");
 				}
 			}
 		}

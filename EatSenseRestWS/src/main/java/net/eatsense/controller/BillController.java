@@ -267,7 +267,7 @@ public class BillController {
 				Float choicePrice = calculateTotalPrice(orderChoice );
 				total += choicePrice;
 			}
-		}		
+		}
 		
 		Product product;
 		try {
