@@ -21,6 +21,8 @@ Karazy.translations = (function() {
 		"yes" : "Ja",
 		"no" : "Nein",
 		"comment" : "Kommentar",
+		//tabbar
+		"spotsTitle" : "Tische",
 		//login
 		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
