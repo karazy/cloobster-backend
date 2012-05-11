@@ -191,9 +191,8 @@ Ext.application({
                     	errMsg = message[500];                    
                     } else {
                     	try {
-                        //TODO Bug in error message handling in some browsers
-                        nestedError = Ext.JSON.decode(error.statusText);
-	                      errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
+                    		nestedError = Ext.JSON.decode(error.responseText);
+                    		errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);
 	                    } catch (e) {
 	                        errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorMsg');
 	                    }

@@ -185,7 +185,7 @@ public class CheckInControllerTest {
 	@Test
 	public void testCreateCheckInNicknameInUse() throws Exception {
 		thrown.expect(CheckInFailureException.class);
-		thrown.expectMessage("errormessage");
+		thrown.expectMessage("nickname");
 		String spotId = "b4rc0de";
 		String nickname = "FakeNik";
 		
@@ -199,8 +199,7 @@ public class CheckInControllerTest {
 		olderCheckIn.setNickname(nickname);
 		checkInList.add(olderCheckIn);
 		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
-		when(mapper.writeValueAsString(any())).thenReturn("errormessage");
-		
+				
 		CheckInDTO checkIn = new CheckInDTO();
 		checkIn.setSpotId(spotId);
 		checkIn.setNickname(nickname);
