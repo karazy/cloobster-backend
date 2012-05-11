@@ -4,7 +4,7 @@ Ext.define('EatSense.view.Spot', {
 	xtype: 'spotcard',
 	config: {
 		id: 'spotcard',
-		title: 'Spots',
+		title: Karazy.i18n.translate('spotsTitle'),
 		fullscreen: true,
 		layout: 'fit',
 		items: [		

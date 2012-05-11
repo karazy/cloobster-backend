@@ -35,8 +35,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
 				tpl: new Ext.XTemplate(
-				 	// '<div class="price">{[this.formatPrice(values.product.calculate(values.amount))]}</div>'+
-				 	// '<div style="clear: both;">'+
 				 	'<p class="desc">{product.data.longDesc}</p>',
 				 	{
 						formatPrice: function(price) {
@@ -51,7 +49,8 @@ Ext.define('EatSense.view.ProductDetail', {
 					align : 'stretch',
 					pack: 'center'
 				},
-				items : [ {
+				items : [
+				{
 					xtype : 'spinnerfield',
 					itemId : 'productAmountSpinner',
 					increment : 1,
@@ -100,7 +99,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				}, 
 				{
 					xtype: 'button',
-					// ui: 'confirm',
 					action: 'close',
 					text: Karazy.i18n.translate('close')
 				}

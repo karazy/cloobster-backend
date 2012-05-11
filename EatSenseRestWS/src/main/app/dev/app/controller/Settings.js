@@ -85,7 +85,7 @@ Ext.define('EatSense.controller.Settings', {
         errors = record.validate();
 
         if(!errors.isValid()) {
-            Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('newsletterInvalidEmail', record.get('email')));
+            Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('newsletterInvalidEmail'));
             return;
         }
 
@@ -96,8 +96,10 @@ Ext.define('EatSense.controller.Settings', {
 
                 appState.set('newsletterRegistered', true);
                 
-                successCallback();
-
+                if(Karazy.util.isFunction(successCallback)) {
+                    successCallback();    
+                }
+                
                 //show short success message
                 Ext.Msg.show({
                     title : Karazy.i18n.translate('hint'),

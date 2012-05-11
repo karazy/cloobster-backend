@@ -14,10 +14,10 @@ Ext.define('EatSense.view.NewsletterPopup', {
 		top: '30%',
 		left: '20px',
 		right: '20px',
-		// bottom: '15%',
 		hideOnMaskTap: true,
 		modal: true,
 		cls: 'newsletter-popup',
+		floatingCls: 'newsletter-floating',
 		items: [
 		{
 			xtype: 'titlebar',
@@ -25,11 +25,15 @@ Ext.define('EatSense.view.NewsletterPopup', {
 			title: Karazy.i18n.translate('newsletterPopupTitle')
 		},
 		{
-			xtype: 'newsletter'
+			xtype: 'newsletter',
+			width: '100%'
 		},
 		{
 			xtype: 'button',
+			ui: 'action',
 			action: 'dont-ask',
+			width: '90%',
+			margin: '5 0 5 0',
 			text: Karazy.i18n.translate('newsletterDontAskButton')
 		}]
 	}

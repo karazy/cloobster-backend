@@ -9,7 +9,7 @@ Ext.Loader.setPath('EatSense', 'app');
 Ext.application({
 	name : 'EatSense',
 	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request', 'Newsletter'],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Spot', 'Bill', 'PaymentMethod', 'Request', 'Newsletter'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge', 'Newsletter'], 
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill', 'Request'],
 	phoneStartupScreen: 'res/images/startup.png',
@@ -191,16 +191,16 @@ Ext.application({
                     	errMsg = message[500];                    
                     } else {
                     	try {
-                         //TODO Bug in error message handling in some browsers
+                        //TODO Bug in error message handling in some browsers
                         nestedError = Ext.JSON.decode(error.statusText);
-	                    errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
+	                      errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
 	                    } catch (e) {
 	                        errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorMsg');
 	                    }
                     }
                     if(forceLogout && (forceLogout[500] === true || forceLogout === true)) {
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
-                    }                                         
+                    }
                     break;
             }
         }

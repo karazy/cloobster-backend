@@ -21,7 +21,11 @@ Ext.define('EatSense.view.SettingsTab', {
 			padding: 5,
 			layout: {
 				type: 'vbox',
-				// align: 'center'
+				pack: 'center',
+				align: 'middle'
+			},
+			defaults: {
+				width: '90%'
 			},
 			items: [		
 				{
@@ -35,7 +39,7 @@ Ext.define('EatSense.view.SettingsTab', {
 				}
 			]
 		},
-		{			
+		{	
 			xtype: 'newsletter',			
 			padding: 5
 		}]
