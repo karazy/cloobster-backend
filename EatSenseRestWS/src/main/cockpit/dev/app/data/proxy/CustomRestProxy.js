@@ -23,6 +23,20 @@ Ext.define('EatSense.data.proxy.CustomRestProxy', {
 
 	        return me.callParent([request]);
 	    },
+	    
+	    /**
+	     * Sets up an exception on the operation
+	     * @private
+	     * @param {Ext.data.Operation} operation The operation
+	     * @param {Object} response The response
+	     */
+	    setException: function(operation, response) {
+	        operation.setException({
+	            status: response.status,
+	            statusText: response.statusText,
+	            responseText: response.responseText
+	        });
+	    },
 
 	    doRequest: function(operation, callback, scope) {
 	    	  var writer  = this.getWriter(),
