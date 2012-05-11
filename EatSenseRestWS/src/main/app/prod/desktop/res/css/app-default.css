@@ -40,6 +40,19 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
 }
 
+
+h8 {
+	position: absolute;
+	left: 5px;
+}
+
+h9 {
+	position: relative;
+	padding-right: 20px;
+	
+}
+
+
 /* line 37, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_reset.scss */
 q:before,
 q:after {
@@ -73,6 +86,13 @@ input, textarea, select {
 *:focus {
   outline: none;
 }
+
+
+/* Cart background */
+
+.cartTotal {background: #F79621;border-top: 1px solid #666;}
+
+
 
 /**
  * @class Global_CSS
@@ -431,7 +451,7 @@ input, textarea {
   -webkit-user-select: auto;
   -webkit-touch-callout: inherit;
   line-height: 1.5;
-  color: #333;
+  color: #4c321a;
   font-size: .8em;
   padding: 1.2em;
 }
@@ -439,13 +459,13 @@ input, textarea {
 .x-html body {
   line-height: 1.5;
   font-family: ComfortaaRegular, "Helvetica Neue", Arial, Helvetica, sans-serif;
-  color: #333333;
+  color: #4c321a;
   font-size: 75%;
 }
 /* line 51, ../../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.1/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 .x-html h1, .x-html h2, .x-html h3, .x-html h4, .x-html h5, .x-html h6 {
   font-weight: normal;
-  color: #222222;
+  color: #4c321a;
 }
 /* line 52, ../../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.1/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 .x-html h1 img, .x-html h2 img, .x-html h3 img, .x-html h4 img, .x-html h5 img, .x-html h6 img {
@@ -459,7 +479,7 @@ input, textarea {
 }
 /* line 54, ../../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.1/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 .x-html h2 {
-  font-size: 2em;
+  font-size: 1.5em;
   margin-bottom: 0.75em;
 }
 /* line 55, ../../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.1/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
@@ -4255,6 +4275,7 @@ audio {
   border-top-style: solid;
   height: 3em;
   padding: 0;
+  
 }
 /* line 155, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar.x-docked-bottom .x-tab {
@@ -4605,7 +4626,7 @@ color: #614021;
   text-overflow: ellipsis;
   margin: 0 0.3em;
   max-width: 100%;
-  color: #917D64 !important;
+  color: #fff !important;
 }
 /* line 80, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-title .x-innerhtml {
@@ -4641,8 +4662,7 @@ color: #614021;
 /* line 124, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark .x-title {
   color: white;
-  text-shadow: rgba(0, 0, 0, 0.5) 0 -0.08em 0;
-}
+  text-shadow: rgba(0, 0, 0, 1) 0 -0.08em 0;}
 /* line 129, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark.x-docked-top {
   border-bottom-color: #594b3a;
@@ -5589,7 +5609,7 @@ html, body {
   -webkit-box-orient: vertical;
   min-width: 100%;
   min-height: 100%;
-  background: #8f785d;
+  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
 }
 
 /* line 131, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_layout.scss */
@@ -5956,7 +5976,7 @@ html, body {
 /* line 141, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_form.scss */
 .x-form-label {
   text-shadow: #fff 0 1px 1px;
-  color: #333333;
+  color: #4c321a;
   text-shadow: rgba(255, 255, 255, 0.25) 0 0.08em 0;
   padding: 0.6em;
   display: none !important;
@@ -6533,9 +6553,9 @@ input[type="search"]::-webkit-search-cancel-button {
 /* line 555, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_form.scss */
 .x-form-fieldset-title {
   text-shadow: #fff 0 1px 1px;
-  color: #333333;
+  color: #4c321a;
   margin: 1em 0.7em 0.3em;
-  color: #333333;
+  color: #4c321a;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -6543,7 +6563,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /* line 563, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_form.scss */
 .x-form-fieldset-instructions {
   text-shadow: #fff 0 1px 1px;
-  color: #333333;
+  color: #4c321a;
   color: gray;
   margin: 1em 0.7em 0.3em;
   font-size: .8em;
@@ -6606,7 +6626,7 @@ input[type="search"]::-webkit-search-cancel-button {
   -webkit-box-shadow: rgba(0, 0, 0, 0.4) 0 0.1em 0.5em;
   -webkit-border-radius: 0.3em;
   border-radius: 0.3em;
-  border: 0.15em solid #9fee00;
+  border: 0.15em solid #e8ffbb;
 }
 /* line 16, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_msgbox.scss */
 .x-msgbox .x-icon {
@@ -6969,7 +6989,8 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 67, app-default.scss */
 .productDetailPanel {
-  background-color: #FFBF40;
+  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  ;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   padding: 10px;
@@ -7096,7 +7117,7 @@ input[type="search"]::-webkit-search-cancel-button {
   padding: 5px;
   margin: 5px;
   border-radius: 0.3em;
-  background-color: #FFD073;
+  background-color: #fff;
 }
 /* line 197, app-default.scss */
 .cartoverviewitem .name {
@@ -7173,8 +7194,6 @@ input[type="search"]::-webkit-search-cancel-button {
 .dashboard-button {
   width: 90px !important;
   height: 90px !important;
-  border: 2px solid;
-  border-color: #594b3a;
   margin-right: 7px;
   padding: 10px;
   position: relative;
@@ -7187,8 +7206,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .dashboard-button-pressed {
   width: 90px !important;
   height: 90px !important;
-  border: 3px solid;
-  border-color: blue;
+  background-image: url(../images/dashboard/start_button_touch.png) !important;
 }
 
 /* line 286, app-default.scss */

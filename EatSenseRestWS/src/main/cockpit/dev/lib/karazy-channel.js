@@ -74,8 +74,7 @@ Karazy.channel = (function() {
 		*/
 		if(!pageshowListenerRegistered) {
 			pageshowListenerRegistered = true;
-			window.addEventListener("pageshow", function(){
-				alert('onOpen: window page show');				
+			window.addEventListener("pageshow", function(){			
 				setStatusHelper('RECONNECT');
 				statusHandlerFunction.apply(executionScope, [{
 					'status' : connectionStatus, 

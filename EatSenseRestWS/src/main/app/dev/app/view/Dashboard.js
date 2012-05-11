@@ -16,27 +16,27 @@ Ext.define('EatSense.view.Dashboard', {
 		items : [ 
 		{
 			xtype : 'image',
-			src : 'res/images/dashboard/eatsense-logo.png',
-			style : 'background-image: url(res/images/eatsense-logo.png); background-repeat:no-repeat; background-position:center center;',
-			height : 100,
-			width : 150
+			src : 'res/images/dashboard/eatsense-logo_300.png',
+			style : 'background-image: url(res/images/dashboard/eatsense-logo_300.png); background-repeat:no-repeat; background-position:center center;',
+			height : 80,
+			width : 186
 		}, 
-		{
-			xtype: 'image',
-			style : 'background-image: url(res/images/dashboard/hup-logo.png); background-repeat:no-repeat; background-position:center center;',
-			src : 'res/images/dashboard/hup-logo.png',
-		},
-		{
-			xtype: 'image',
-			style : 'background-image: url(res/images/dashboard/drei-buttons.png); background-repeat:no-repeat; background-position:center center;',
-			src : 'res/images/dashboard/drei-buttons.png',
-		},
-		{
-					xtype : 'dashboardbutton',
-					action: 'checkin',
-					// text : Karazy.i18n.translate('checkInButton'),
-					cls : 'checkInButton',
-					labelCls: 'checkInButton-label'
+		
+		{	xtype : 'image',
+			src : 'res/images/dashboard/middle.png',
+			style : 'background-image: url(res/images/dashboard/middle.png); background-repeat:no-repeat; background-position:center center;',
+			height : 230,
+			width : 277
+			
+			},
+			
+		{ 	xtype : 'dashboardbutton',
+			action: 'checkin',
+			src : 'res/images/dashboard/start_button.png',
+			style : 'background-image: url(res/images/dashboard/start_button.png); background-repeat:no-repeat; background-position:center center;',
+			height : 110,
+			width : 186
+			
 		}
 
 		// {

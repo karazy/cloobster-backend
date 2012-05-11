@@ -41,12 +41,14 @@ Ext.application({
     if(Karazy.config.debug) {        
         (function() {
             var exLog = console.log,
-                debugConsole;
+                debugConsole,
+                date;
             console.log = function(msg) {
                 exLog.apply(this, arguments);
                 debugConsole = Ext.getCmp('debugConsole');
                 if(debugConsole) {
-                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + msg);
+                    date = new Date();
+                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + Ext.Date.format(date, 'Y-m-d H:i:s') + ' -> ' + msg);
                     debugConsole.getScrollable().getScroller().scrollToEnd();
                 }                
             }

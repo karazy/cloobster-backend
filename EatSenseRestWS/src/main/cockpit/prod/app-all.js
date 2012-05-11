@@ -52612,6 +52612,7 @@ Ext.define('Ext.data.reader.Array', {
 });
 
 
+
 Karazy.i18n.setLang('DE');
 
 Ext.Loader.setConfig({
@@ -52762,5 +52763,6 @@ Ext.application({
         }
     }
 });
+
 
 

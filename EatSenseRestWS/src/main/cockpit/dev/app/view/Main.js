@@ -35,11 +35,23 @@ Ext.define('EatSense.view.Main', {
 		},
 		{
 			xtype: 'panel',
-			id: 'debugConsole',
+			layout: 'fit',					
 			docked: 'bottom',
 			hidden: !Karazy.config.debug,	
-			height: 100,
-			scrollable: true		
+			height: 150,			
+			items: [
+			{
+				xtype: 'titlebar',
+				title: 'Debug console',
+				docked: 'top',
+				style: 'font-size: 0.6em; font-weight: bold;'
+			},
+			{
+				xtype: 'panel',
+				id: 'debugConsole',
+				scrollable: true		
+			}
+			]
 		}
 		]
 	}
