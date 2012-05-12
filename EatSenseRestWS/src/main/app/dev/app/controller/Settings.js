@@ -4,7 +4,7 @@
 */
 Ext.define('EatSense.controller.Settings', {
     extend: 'Ext.app.Controller',
-    requires: ['EatSense.view.NewsletterPopup'],
+    requires: ['EatSense.view.NewsletterPopup', 'EatSense.view.Newsletter'],
     config: {
     	refs: {
     		settingsTab: 'lounge settingstab[tabName=settings]',
@@ -27,7 +27,7 @@ Ext.define('EatSense.controller.Settings', {
     },
     launch: function() {
         var me = this;
-
+        console.log('Settings Controller -> launch');
         //create newsletter record and setup listeners
         this.getNewsletterView().setRecord(Ext.create('EatSense.model.Newsletter'));
         //don't specify listener in view because this won't work correctly

@@ -6,10 +6,10 @@
 Ext.define('EatSense.model.Request', {
 	extend: 'Ext.data.Model',
 	config: {
+		idProperty: 'id',
 		fields: [
 		{
-			name: 'id',
-			type: 'number'
+			name: 'id'
 		},
 		{
 			name: 'type'
