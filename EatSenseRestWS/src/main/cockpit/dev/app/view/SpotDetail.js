@@ -50,7 +50,7 @@ Ext.define('EatSense.view.SpotDetail', {
 			xtype: 'customerrequest',
 			docked: 'right',
 			layout:'fit',
-			width: 200
+			minWidth: 200
 		},
 		{
 			xtype: 'panel',
