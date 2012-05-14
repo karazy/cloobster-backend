@@ -46,6 +46,7 @@
         {
             "description": "100% saftiges, lockeres Bio-Rinderhackfleisch",
             "title": "Die Rindfleischburger",
+            "order": 1,
             "products": [
                 {
                     "name": "Der Pure",
@@ -1228,6 +1229,7 @@
         {
             "description": "100% zartes Hühnchenbrustfilet aus der Region, saftig und mild im Geschmack",
             "title": "Die Geflügelburger",
+            "order": 2,
             "products": [
                 {
                     "name": "Der Geflügelte",
@@ -1822,6 +1824,7 @@
         {
             "description": null,
             "title": "Die Vegetarischen Burger",
+            "order": 3,
             "products": [
                 {
                     "name": "Der Grüne",
@@ -2269,6 +2272,7 @@
         {
             "description": null,
             "title": "Der Fischburger",
+            "order": 4,
             "products": [
                 {
                     "name": "Der Meeresfrische",
@@ -2406,6 +2410,7 @@
         {
             "description": "",
             "title": "Menüs",
+            "order": 5,
             "products": [
                 {
                     "name": "Paulchen Menü",
@@ -2500,6 +2505,7 @@
         {
             "description": null,
             "title": "Unsere Salate",
+            "order": 6,
             "products": [
                 {
                     "name": "Der Grosse",
@@ -2748,6 +2754,7 @@
         {
             "description": "Unsere Pommes sind nicht frittiert, nur auf Wunsch",
             "title": "Unser Fingerfood",
+            "order": 7,
             "products": [
                 {
                     "name": "Die Dauerrenner",
@@ -2824,6 +2831,7 @@
         {
             "description": null,
             "title": "Suppen",
+            "order": 8,
             "products": [
                 {
                     "name": "Heidis Favoritin",
@@ -2842,6 +2850,7 @@
         {
             "description": null,
             "title": "Getränke",
+            "order": 9,
             "products": [
                 {
                     "name": "Selters Classic",
@@ -2944,6 +2953,7 @@
         {
             "description": "",
             "title": "Desserts",
+            "order": 10,
             "products": [
                 {
                     "name": "Das Kalte",

@@ -113,7 +113,7 @@ public class ImportController {
 		}
 		
 		for(MenuDTO menu : businessData.getMenus()) {
-			Key<Menu> kM = createAndSaveMenu(kR, menu.getTitle(), menu.getDescription());
+			Key<Menu> kM = createAndSaveMenu(kR, menu.getTitle(), menu.getDescription(), menu.getOrder());
 			
 			if(kM != null) {
 				// Continue with adding products to the menu ...
@@ -205,7 +205,7 @@ public class ImportController {
 		return kS;
 	}
 	
-	private Key<Menu> createAndSaveMenu (Key<Business> businessKey, String title, String description) {
+	private Key<Menu> createAndSaveMenu (Key<Business> businessKey, String title, String description, Integer order) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new menu for business ("+ businessKey.getId() + ") with title: " + title );
@@ -214,6 +214,7 @@ public class ImportController {
 		menu.setTitle(title);
 		menu.setBusiness(businessKey);
 		menu.setDescription(description);
+		menu.setOrder(order);
 				
 		Key<Menu> kM = menuRepo.saveOrUpdate(menu);
 		logger.info("Created new menu with id: " + kM.getId());

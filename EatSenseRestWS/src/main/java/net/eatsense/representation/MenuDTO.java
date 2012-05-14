@@ -24,6 +24,7 @@ public class MenuDTO {
 	
 	private String description;
 	
+	private Integer order;
 	
 	/**
 	 * All products that are listed under this menu entry.
@@ -50,6 +51,12 @@ public class MenuDTO {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public Integer getOrder() {
+		return order;
+	}
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 	
 }

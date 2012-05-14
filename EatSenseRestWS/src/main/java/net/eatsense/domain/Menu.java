@@ -14,7 +14,7 @@ public class Menu extends GenericEntity{
 	@Parent
 	private Key<Business> business;
 	
-	
+	private Integer order;
 	
 	public String getTitle() {
 		return title;
@@ -55,6 +55,18 @@ public class Menu extends GenericEntity{
 	@Transient
 	public Key<Menu> getKey() {
 		return new Key<Menu>(getBusiness(), Menu.class, super.getId());
+	}
+
+
+
+	public Integer getOrder() {
+		return order;
+	}
+
+
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 	
 }

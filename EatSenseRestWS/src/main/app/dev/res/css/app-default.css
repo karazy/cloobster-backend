@@ -7072,10 +7072,17 @@ input[type="search"]::-webkit-search-cancel-button {
 * Orderlist
 */
 /* line 154, app-default.scss */
-.orderListItem h2 {
+ .order-title h4 {
+  float: left;
+  margin-right: 5px;
+  /*width: 80%;*/
+}
+
+.orderListItem .order-title h5 {
   float: left;
   /*width: 80%;*/
 }
+
 /* line 160, app-default.scss */
 .orderListItem div {
   position: relative;
@@ -7090,11 +7097,11 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /* line 174, app-default.scss */
-.orderListItem.canceled {
+.orderListItem .canceled {
   text-decoration: line-through;
 }
 /* line 177, app-default.scss */
-.orderListItem.canceled h2 {
+.orderListItem .canceled h2 {
   text-decoration: line-through;
 }
 
