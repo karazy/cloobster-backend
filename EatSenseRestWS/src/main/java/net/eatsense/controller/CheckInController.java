@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Objectify;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a
@@ -164,29 +163,20 @@ public class CheckInController {
 
 		// validation 
 		Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn);
-		String errorMessage = null;
+		
 		// check for validation errors ...
 		if( !constraintViolations.isEmpty() )  {
 			// constraint violations occurred setting status and logging error
-			logger.info("CheckIn validation failed. Message(s):");
+			logger.info("CheckIn validation failed");
 			for (ConstraintViolation<CheckIn> violation : constraintViolations) {
 				
-				logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
-				ErrorDTO errorDto;
 				if(violation.getPropertyPath().toString().equals("nickname")) {
-					errorDto = new ErrorDTO("checkInErrorNickname", "3","20");
+					throw new CheckInFailureException("nickname too long or too short", "checkInErrorNickname", "3","25");
 				}
 				else {
-					errorDto = new ErrorDTO("checkInError", violation.getPropertyPath().toString() + " " + violation.getMessage());
-				}
-				
-				try {
-					errorMessage = mapper.writeValueAsString(errorDto);
-				} catch (Exception e) {
-					throw new RuntimeException("error while mapping error data",e);
-				}
-				throw new IllegalArgumentException(errorMessage);
-					
+					throw new CheckInFailureException("nickname too long or too short", "checkInError",
+							violation.getPropertyPath().toString() + " " + violation.getMessage());
+				}	
 			}
 		}			
  		
@@ -200,14 +190,7 @@ public class CheckInController {
 				CheckIn next = it.next();
 				
 				if(next.getNickname().equals(checkIn.getNickname() ) ) {
-					logger.info("Error: checkin with duplicate nickname tried: "+ checkIn.getNickname());
-					try {
-						errorMessage = mapper.writeValueAsString(new ErrorDTO("checkInErrorNicknameExists", ""));
-					} catch (Exception e) {
-						throw new RuntimeException("error while mapping error data",e);
-					}
-					//abort checkin
-					throw new CheckInFailureException(errorMessage);
+					throw new CheckInFailureException("nickname already exists", "checkInErrorNicknameExists");
 				}
 			}
 		}
@@ -375,8 +358,9 @@ public class CheckInController {
 	 * @param business 
 	 * 
 	 * @param checkInId
+	 * @return 
 	 */
-	public void deleteCheckIn(Business business, long checkInId) {
+	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -415,6 +399,8 @@ public class CheckInController {
 		
 		event.setCheckInCount(checkInCount-1);
 		eventBus.post(event);
+		
+		return transform.toStatusDto(checkIn);
 	}
 
 	/**

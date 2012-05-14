@@ -39739,7 +39739,7 @@ Ext.define('EatSense.view.Spot', {
 	xtype: 'spotcard',
 	config: {
 		id: 'spotcard',
-		title: 'Spots',
+		title: Karazy.i18n.translate('spotsTitle'),
 		fullscreen: true,
 		layout: 'fit',
 		items: [		
@@ -39794,11 +39794,23 @@ Ext.define('EatSense.view.Main', {
 		},
 		{
 			xtype: 'panel',
-			id: 'debugConsole',
+			layout: 'fit',					
 			docked: 'bottom',
 			hidden: !Karazy.config.debug,	
-			height: 100,
-			scrollable: true		
+			height: 150,			
+			items: [
+			{
+				xtype: 'titlebar',
+				title: 'Debug console',
+				docked: 'top',
+				style: 'font-size: 0.6em; font-weight: bold;'
+			},
+			{
+				xtype: 'panel',
+				id: 'debugConsole',
+				scrollable: true		
+			}
+			]
 		}
 		]
 	}
@@ -51687,6 +51699,20 @@ Ext.define('EatSense.data.proxy.CustomRestProxy', {
 
 	        return me.callParent([request]);
 	    },
+	    
+	    /**
+	     * Sets up an exception on the operation
+	     * @private
+	     * @param {Ext.data.Operation} operation The operation
+	     * @param {Object} response The response
+	     */
+	    setException: function(operation, response) {
+	        operation.setException({
+	            status: response.status,
+	            statusText: response.statusText,
+	            responseText: response.responseText
+	        });
+	    },
 
 	    doRequest: function(operation, callback, scope) {
 	    	  var writer  = this.getWriter(),
@@ -52170,7 +52196,7 @@ Ext.define('EatSense.model.Spot', {
 	extend : 'Ext.data.Model',
 	// requires: ['EatSense.model.PaymentMethod'],
 	config : {
-		idProperty : 'barcode',
+		idProperty : 'id',
 		fields : [ 
 		{
 			name: 'id'
@@ -52655,12 +52681,14 @@ Ext.application({
     if(Karazy.config.debug) {        
         (function() {
             var exLog = console.log,
-                debugConsole;
+                debugConsole,
+                date;
             console.log = function(msg) {
                 exLog.apply(this, arguments);
                 debugConsole = Ext.getCmp('debugConsole');
                 if(debugConsole) {
-                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + msg);
+                    date = new Date();
+                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + Ext.Date.format(date, 'Y-m-d H:i:s') + ' -> ' + msg);
                     debugConsole.getScrollable().getScroller().scrollToEnd();
                 }                
             }
@@ -52742,9 +52770,8 @@ Ext.application({
                         errMsg = message[500];                    
                     } else {
                         try {
-                         //TODO Bug in error message handling in some browsers
-                        nestedError = Ext.JSON.decode(error.statusText);
-                        errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
+                        	nestedError = Ext.JSON.decode(error.responseText);
+                        	errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
                         } catch (e) {
                             errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorMsg');
                         }

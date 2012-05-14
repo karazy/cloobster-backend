@@ -1,6 +1,6 @@
 package net.eatsense.exceptions;
 
-public class IllegalAccessException extends EatsenseException {
+public class IllegalAccessException extends ServiceException {
 
 	/**
 	 * 
@@ -27,4 +27,11 @@ public class IllegalAccessException extends EatsenseException {
 		// TODO Auto-generated constructor stub
 	}
 
+	public IllegalAccessException(String message, String errorKey,
+			String... substitutions) {
+		super(message, errorKey, substitutions);
+		// TODO Auto-generated constructor stub
+	}
+
+	
 }

@@ -8,8 +8,8 @@ Ext.Loader.setPath('EatSense', 'app');
 
 Ext.application({
 	name : 'EatSense',
-	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message' ],
-	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Error', 'Spot', 'Bill', 'PaymentMethod', 'Request', 'Newsletter'],
+	controllers : [ 'CheckIn', 'Menu', 'Order', 'Settings', 'Request', 'Message', 'Android' ],
+	models : [ 'CheckIn', 'User', 'Menu', 'Product', 'Choice', 'Option', 'Order', 'Cart', 'Spot', 'Bill', 'PaymentMethod', 'Request', 'Newsletter'],
 	views : [ 'Main', 'Dashboard', 'Checkinconfirmation', 'CheckinWithOthers', 'MenuOverview', 'ProductOverview', 'ProductDetail', 'OrderDetail', 'OptionDetail', 'Cart', 'Menu', 'Lounge', 'Newsletter'], 
 	stores : [ 'CheckIn', 'User', 'Spot', 'AppState', 'Menu', 'Product', 'Order', 'Bill', 'Request'],
 	phoneStartupScreen: 'res/images/startup.png',
@@ -34,9 +34,6 @@ Ext.application({
         this.mainLaunch();
 	},
 	mainLaunch : function() {
-		var me = this;
-
-    me.androidBackHandler = new Array();
 		
 		if (cordovaInit == false || !this.launched) {
         	return;
@@ -44,8 +41,10 @@ Ext.application({
 
 		console.log('mainLaunch');
 		
-		var appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+		var me = this,
+			appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
 	 		checkInCtr = this.getController('CheckIn'),
+      settingsCtr = this.getController('Settings'),
 	 		restoredCheckInId; 
 
 		//global error handler
@@ -58,19 +57,23 @@ Ext.application({
   		//timeout for requests
   		Ext.Ajax.timeout = 1200000;
 
-      //Android specific behaviour
-      if (Ext.os.is.Android) {
-        document.addEventListener('backbutton', onBackKeyDown, false);
-        function onBackKeyDown() {            
-            if(me.androidBackHandler && me.androidBackHandler.length > 0) {
-              console.log('fire backbutton event');
-              me.androidBackHandler.pop()();
-            }
-        };
-      }
+    //----- Launch functions start ------  	
+    //TODO: Bug in current state. Controller launch function not executed in correct order. So this logic is move here.
+    //Android controller launch
+		//Android specific behaviour
+        if(Ext.os.is.Android) {
+        	console.log('Android Controller -> setup android specific behaviour');
+        	me.getController('Android').setAndroidBackHandler(me.getController('Menu').getMenuNavigationFunctions());
+        	document.addEventListener('backbutton', onBackKeyDown, false);
+          function onBackKeyDown() {            
+                console.log('fire backbutton event');
+                me.getController('Android').executeBackHandler();
+          };
+        }
+
+    //----- Launch functions end ------
 		
     	//try to restore application state
-	   	 
 	   	 //create main screen
 	   	 Ext.create('EatSense.view.Main');
 	   	 
@@ -191,16 +194,15 @@ Ext.application({
                     	errMsg = message[500];                    
                     } else {
                     	try {
-                         //TODO Bug in error message handling in some browsers
-                        nestedError = Ext.JSON.decode(error.statusText);
-	                    errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
+                    		nestedError = Ext.JSON.decode(error.responseText);
+                    		errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);
 	                    } catch (e) {
 	                        errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorMsg');
 	                    }
                     }
                     if(forceLogout && (forceLogout[500] === true || forceLogout === true)) {
                         this.fireEvent('statusChanged', Karazy.constants.FORCE_LOGOUT);
-                    }                                         
+                    }
                     break;
             }
         }

@@ -459,7 +459,7 @@ public class ChannelController {
 		try {
 			return checkInRepo.getById(checkInId);
 		} catch (NotFoundException e) {
-			logger.error("clientId contains unknown encoded checkIn, clientId={}", clientId, e);
+			logger.error("clientId contains unknown encoded checkIn, clientId={}", clientId);
 			return null;
 		}
 	}

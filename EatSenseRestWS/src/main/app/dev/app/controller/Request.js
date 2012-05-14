@@ -37,6 +37,7 @@ Ext.define('EatSense.controller.Request',{
 				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
 		
 		console.log('send call waiter request');
+		button.disable();
 		//TODO validate!
 
 		request.set('type', Karazy.constants.Request.CALL_WAITER);		
@@ -47,19 +48,23 @@ Ext.define('EatSense.controller.Request',{
 		// requestStore.sync();
 
 		request.save({
+			success: function(record, operation) {
+				button.enable();
+			},
 			failure: function(record, operation) {
+				button.enable();
 				me.getApplication().handleServerError({
 					'error': operation.error,
 					'forceLogout': {403: true}
-				});
+				});				
 			}
 		});
 
 		button.mode = 'cancel';
 
 		//show info badge to indicate waiter is called
-		me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
-		me.getCallWaiterButton().setText(Karazy.i18n.translate('cancel'));
+		// me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
+		me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
 
 		//show success message to give user the illusion of success
 		Ext.Msg.show({
@@ -85,23 +90,33 @@ Ext.define('EatSense.controller.Request',{
 
 		button.mode = 'call';
 		//show info badge to indicate waiter is called	
-		me.getCallWaiterButton().setBadgeText("");
+		// me.getCallWaiterButton().setBadgeText("");
 		me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
 
 		if(request) {
+			button.disable();
 			// requestStore.setSyncRemovedRecords(true);
 			requestStore.remove(request);
 			// requestStore.sync();
 			// requestStore.setSyncRemovedRecords(false);
 
-			request.erase({
-				failure: function(record, operation) {
-					me.getApplication().handleServerError({
-						'error': operation.error,
-						'forceLogout': {403: true}
-					});
-				}
-			});
+			//try catch is due to android aborting the action because sencha throws a warning which causes and undefined error
+			try {
+				request.erase({
+					callback: function(record, operation) {
+						button.enable();
+					},
+					failure: function(record, operation) {
+						me.getApplication().handleServerError({
+							'error': operation.error,
+							'forceLogout': {403: true}
+						});
+					}
+				});
+			} catch(e) {
+				console.log('Request Controller -> cancelCallWaiterRequest error: '+ e);
+				button.enable();
+			}
 		}
 	},
 	//</call-waiter-request>
@@ -128,8 +143,8 @@ Ext.define('EatSense.controller.Request',{
                 		if(rec.get('type') ==  Karazy.constants.Request.CALL_WAITER) {
                 			me.getCallWaiterButton().mode = 'cancel';
                 			//show info badge to indicate waiter is called
-							me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
-							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancel'));
+							// me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
+							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
                 		}
                 	}));
                 }

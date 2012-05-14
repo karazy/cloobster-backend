@@ -487,6 +487,7 @@ Ext.define('EatSense.controller.CheckIn', {
         var     orderCtr = this.getApplication().getController('Order'),
                 menuCtr = this.getApplication().getController('Menu'),
                 settingsCtr = this.getApplication().getController('Settings'),
+                androidCtr = this.getApplication().getController('Android'),
                 menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
@@ -515,11 +516,12 @@ Ext.define('EatSense.controller.CheckIn', {
             if(!this.getAppState().get('newsletterRegistered')) {
               settingsCtr.registerNewsletterOnLeaving();
             }
+      androidCtr.setAndroidBackHandler(null);
 		}
 
-        if(status == Karazy.constants.CANCEL_ALL) {
-            Ext.Msg.alert(Karazy.i18n.translate('hint'), Karazy.i18n.translate('checkInCanceled'), Ext.emptyFn);
-        }
+    if(status == Karazy.constants.CANCEL_ALL) {
+        Ext.Msg.alert(Karazy.i18n.translate('hint'), Karazy.i18n.translate('checkInCanceled'), Ext.emptyFn);
+    }
 	},
     /**
     *   Handle push notifications for checkins.

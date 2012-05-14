@@ -5,7 +5,6 @@
 Ext.define('EatSense.view.Checkinconfirmation', {
 	extend : 'Ext.Panel',
 	xtype : 'checkinconfirmation',
-	fullscreen : false,
 	requires: ['Ext.field.Toggle'],
 	config : {
 		layout : {
@@ -35,7 +34,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			xtype : 'textfield',
 			itemId : 'nicknameTf',
 			label : Karazy.i18n.translate('nickname'),
-			width : 300,
+			width : '90%',
 			labelWidth : 100,
 			labelAlign : 'top',
 			required : true,
@@ -49,8 +48,9 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			items : [ {
 				xtype : 'button',
 				action: 'regenerate-nickname',
-				iconCls : 'refresh',
-				iconMask : true,
+				text : Karazy.i18n.translate('refreshNicknameBt'),
+				// iconCls : 'refresh',
+				// iconMask : true,
 				style : 'margin-right:10px;',
 				ui : 'action',
 				margin : 5
@@ -67,6 +67,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			xtype : 'togglefield',
 			action : 'toggle-nickname',
 			labelAlign: 'top',
+			width: '90%',
 			value : 0,
 			label : Karazy.i18n.translate('saveNicknameToggle'),
 			margin : 5

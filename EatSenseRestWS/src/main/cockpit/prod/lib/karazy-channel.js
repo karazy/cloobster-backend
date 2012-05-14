@@ -74,8 +74,7 @@ Karazy.channel = (function() {
 		*/
 		if(!pageshowListenerRegistered) {
 			pageshowListenerRegistered = true;
-			window.addEventListener("pageshow", function(){
-				alert('onOpen: window page show');				
+			window.addEventListener("pageshow", function(){			
 				setStatusHelper('RECONNECT');
 				statusHandlerFunction.apply(executionScope, [{
 					'status' : connectionStatus, 
@@ -84,6 +83,11 @@ Karazy.channel = (function() {
 				console.log('online check');
 				// repeatedOnlineCheck();
 				checkOnlineFunction.apply(executionScope, [function() {
+					setStatusHelper('TIMEOUT');
+					statusHandlerFunction.apply(executionScope, [{
+						'status' : connectionStatus, 
+						'prevStatus': previousStatus
+					}]);
 					timedOut = true;
 					socket.close();
 				}]);

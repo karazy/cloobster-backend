@@ -12,7 +12,6 @@ Ext.define('EatSense.view.ProductDetail', {
 	config : {
     	scrollable : 'vertical',
     	modal: true,
-		hideOnMaskTap: true,
 		top: '5%',
 		left: '3%',
 		right: '3%',
@@ -35,8 +34,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
 				tpl: new Ext.XTemplate(
-				 	// '<div class="price">{[this.formatPrice(values.product.calculate(values.amount))]}</div>'+
-				 	// '<div style="clear: both;">'+
 				 	'<p class="desc">{product.data.longDesc}</p>',
 				 	{
 						formatPrice: function(price) {
@@ -51,14 +48,15 @@ Ext.define('EatSense.view.ProductDetail', {
 					align : 'stretch',
 					pack: 'center'
 				},
-				items : [ {
+				items : [
+				{
 					xtype : 'spinnerfield',
 					itemId : 'productAmountSpinner',
 					increment : 1,
 					value : 1,
 					minValue : '1',
 					maxValue : '10',
-					cycle : true,
+					cycle : false,
 				},
 				{
 					xtype: 'label',
@@ -100,7 +98,6 @@ Ext.define('EatSense.view.ProductDetail', {
 				}, 
 				{
 					xtype: 'button',
-					// ui: 'confirm',
 					action: 'close',
 					text: Karazy.i18n.translate('close')
 				}

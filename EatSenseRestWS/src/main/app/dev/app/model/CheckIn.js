@@ -1,6 +1,5 @@
 Ext.define('EatSense.model.CheckIn', {
 	extend : 'Ext.data.Model',
-	requires : [ 'EatSense.model.Error' ],
 	config : {
 		idProperty : 'userId',
 		fields : [ {

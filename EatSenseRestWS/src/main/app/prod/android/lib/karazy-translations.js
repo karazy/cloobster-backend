@@ -33,6 +33,7 @@ Karazy.translations = (function() {
 		"barcodePromptTitle" : "Barcode Abfrage",
 		"barcodePromptText" : "Bitte gib den Tischcode ein.",
 		"checkInStep1Label1" : "Wähle einen Nickname",
+		"refreshNicknameBt" : "Neu generieren",
 		"checkInStep1Button" : "Los gehts!",
 		"checkInStep2Label1" : "Andere haben hier bereits eingecheckt.",
 		"checkInStep2Label2" : "Willst du mit jemand Anderem einchecken?",
@@ -86,23 +87,26 @@ Karazy.translations = (function() {
 		"newsletterRegisterBt": "Registrieren",
 		"newsletterEmail" : "E-Mail",
 		"newsletterRegisterSuccess" : "Danke! Eine Bestätigungsmail wird an {0} geschickt.",
-		"newsletterInvalidEmail" : "{0} ist keine gültige E-Mail Adresse.",
+		"newsletterInvalidEmail" : "Bitte gib eine gültige E-Mail Adresse an.",
 		"newsletterDuplicateEmail" : "Diese E-Mail Adresse ist bereits registriert",
 		"newsletterPopupTitle" : "Newsletter abonnieren?", 
 		"newsletterDontAskButton" : "Nicht mehr nachfragen!",
+		"newsletterLabel" : "Stay up-to-date und verpasse nicht den Cloobster Big Bang! Melde dich für den Newsletter an.",
 		//Request
 		"errorRequest" : "Deine Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "VIP",
 		"requestsTitle" : "VIP",
 		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen.",
 		"callWaiterButton" : "Bedienung rufen",
-		"callWaiterRequestBadge" : "Kellner gerufen",	
+		"callWaiterRequestBadge" : "Kellner gerufen",
+		"cancelCallWaiterRequest" : "Bedienung rufen abbrechen",	
 		//general errors
+		"error" : "Fehler",
 		"errorTitle" : "Fehler",		
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
 		"errorPermission" : "Deine Sitzung ist ungültig.",
-		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!"
+		"errorCommunication" : "Es kann keine Verbindung zum Server hergestellt werden."
 		}
 	}
 	

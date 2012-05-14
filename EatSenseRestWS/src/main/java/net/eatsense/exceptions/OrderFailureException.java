@@ -1,6 +1,6 @@
 package net.eatsense.exceptions;
 
-public class OrderFailureException extends EatsenseException {
+public class OrderFailureException extends ServiceException {
 
 	/**
 	 * 

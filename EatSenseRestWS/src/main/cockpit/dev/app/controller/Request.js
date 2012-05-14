@@ -137,6 +137,8 @@ Ext.define('EatSense.controller.Request',{
 	dissmissCustomerRequest: function(dv, index, target, record) {
 		var 	requestStore = Ext.StoreManager.lookup('requestStore');
 
+		console.log('Request Controller -> dissmissCustomerRequest with id ' + record.get('id'));
+
 		requestStore.setSyncRemovedRecords(true);
 		requestStore.remove(record);
 		requestStore.sync();

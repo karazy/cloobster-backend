@@ -1,6 +1,6 @@
 package net.eatsense.exceptions;
 
-public class BillFailureException extends EatsenseException {
+public class BillFailureException extends ServiceException {
 
 	/**
 	 * 

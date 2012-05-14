@@ -41,12 +41,14 @@ Ext.application({
     if(Karazy.config.debug) {        
         (function() {
             var exLog = console.log,
-                debugConsole;
+                debugConsole,
+                date;
             console.log = function(msg) {
                 exLog.apply(this, arguments);
                 debugConsole = Ext.getCmp('debugConsole');
                 if(debugConsole) {
-                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + msg);
+                    date = new Date();
+                    debugConsole.setHtml(debugConsole.getHtml() + '<br/>' + Ext.Date.format(date, 'Y-m-d H:i:s') + ' -> ' + msg);
                     debugConsole.getScrollable().getScroller().scrollToEnd();
                 }                
             }
@@ -128,9 +130,8 @@ Ext.application({
                         errMsg = message[500];                    
                     } else {
                         try {
-                         //TODO Bug in error message handling in some browsers
-                        nestedError = Ext.JSON.decode(error.statusText);
-                        errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
+                        	nestedError = Ext.JSON.decode(error.responseText);
+                        	errMsg = Karazy.i18n.translate(nestedError.errorKey,nestedError.substitutions);                        
                         } catch (e) {
                             errMsg = (typeof message == "string") ? message : Karazy.i18n.translate('errorMsg');
                         }

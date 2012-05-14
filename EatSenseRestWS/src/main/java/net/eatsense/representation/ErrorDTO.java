@@ -2,6 +2,14 @@ package net.eatsense.representation;
 
 public class ErrorDTO {
 	private String errorKey;
+	private String message;
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
 	private String[] substitutions;
 	
 	
@@ -9,7 +17,8 @@ public class ErrorDTO {
 		super();
 	}
 
-	public ErrorDTO(String errorKey, String... substitutions)	{
+	public ErrorDTO(String errorKey, String message, String... substitutions)	{
+		this.message = message;
 		this.errorKey = errorKey;
 		this.substitutions = substitutions;
 	}

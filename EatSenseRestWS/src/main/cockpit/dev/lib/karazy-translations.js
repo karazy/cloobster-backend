@@ -21,6 +21,8 @@ Karazy.translations = (function() {
 		"yes" : "Ja",
 		"no" : "Nein",
 		"comment" : "Kommentar",
+		//tabbar
+		"spotsTitle" : "Tische",
 		//login
 		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
@@ -54,7 +56,7 @@ Karazy.translations = (function() {
 		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
 		//requests
 		"requestMsgboxTitle" : "Kundenwünsche",
-		"requestDismiss" : "Alle Verwerfen",
+		"requestDismiss" : "Kundenwünsche löschen",
 		//constants
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",

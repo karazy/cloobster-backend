@@ -87,6 +87,13 @@ input, textarea, select {
   outline: none;
 }
 
+
+/* Cart background */
+
+.cartTotal {background: #F79621;border-top: 1px solid #666;}
+
+
+
 /**
  * @class Global_CSS
  *
@@ -4268,6 +4275,7 @@ audio {
   border-top-style: solid;
   height: 3em;
   padding: 0;
+  
 }
 /* line 155, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_tabs.scss */
 .x-tabbar.x-docked-bottom .x-tab {
@@ -5601,7 +5609,7 @@ html, body {
   -webkit-box-orient: vertical;
   min-width: 100%;
   min-height: 100%;
-  background: #8f785d;
+  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
 }
 
 /* line 131, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_layout.scss */
@@ -6982,9 +6990,6 @@ input[type="search"]::-webkit-search-cancel-button {
 /* line 67, app-default.scss */
 .productDetailPanel {
   background: #917D64 url('../images/bg-rp-main.png') repeat left top;
-  ;
-/*  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;*/
   padding: 10px;
 }
 
@@ -7109,7 +7114,7 @@ input[type="search"]::-webkit-search-cancel-button {
   padding: 5px;
   margin: 5px;
   border-radius: 0.3em;
-  background-color: #FFD073;
+  background-color: #fff;
 }
 /* line 197, app-default.scss */
 .cartoverviewitem .name {
@@ -7186,8 +7191,6 @@ input[type="search"]::-webkit-search-cancel-button {
 .dashboard-button {
   width: 90px !important;
   height: 90px !important;
-  border: 2px solid;
-  border-color: #594b3a;
   margin-right: 7px;
   padding: 10px;
   position: relative;
@@ -7200,8 +7203,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .dashboard-button-pressed {
   width: 90px !important;
   height: 90px !important;
-  border: 3px solid;
-  border-color: blue;
+  background-image: url(../images/dashboard/start_button_touch.png) !important;
 }
 
 /* line 286, app-default.scss */
@@ -7279,11 +7281,18 @@ input[type="search"]::-webkit-search-cancel-button {
   -webkit-transition: -webkit-transform 300ms ease-in;
 }
 
+
 /* line 355, app-default.scss */
 .x-accordion-arrow-expanded {
   -webkit-transform: rotate(90deg);
 }
 
+.newsletter-floating {
+  border-radius: 0.3em !important;
+  padding: 6px !important;
+  background-color: #86B22D !important;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
+}
 
 .newsletter-register-button {
   width: 200px;
@@ -7295,3 +7304,11 @@ input[type="search"]::-webkit-search-cancel-button {
   border-radius: 0.5em;
   border-right: 1px solid #86B22D;
 }
+
+/*
+* Bugfix for icons in Android 4 not displayed.
+* http://www.sencha.com/forum/showthread.php?192463-Blank-icons-in-tabbar-if-container-has-scrollable-set-to-true&p=782717#post782717
+*/
+.x-tabbar > * {
+    z-index: 1;
+  }

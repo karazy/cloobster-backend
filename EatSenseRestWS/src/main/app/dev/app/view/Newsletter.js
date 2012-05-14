@@ -11,21 +11,24 @@ Ext.define('EatSense.view.Newsletter', {
 		//prevents also that the panel has a wrong size. Bug?
 		scrollable: false,
 		cls: 'newsletter',
+		defaults: {
+				width: '90%'
+		},
 		items: [
 		{
 			xtype: 'label',			
 			cls: 'newsletter-label',
-			html: 'Stay up-to-date und verpasse nicht den eatSense Big Bang! Melde dich für den Newsletter an.'
+			html: Karazy.i18n.translate('newsletterLabel')
 		},
 		{
 			xtype: 'emailfield',
 			label: Karazy.i18n.translate('newsletterEmail'),
 			name:'email',
-			cls: 'newsletter-field',
-			minWidth: 200
+			cls: 'newsletter-field'
 		}, {
 			xtype: 'button',
 			action: 'register',
+			ui: 'action',
 			cls: 'newsletter-button',
 			text: Karazy.i18n.translate('newsletterRegisterBt'),
 			cls: 'newsletter-register-button',			

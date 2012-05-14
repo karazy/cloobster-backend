@@ -81,6 +81,9 @@
 			
 			<arg line="create jsb -a ${appDir}index.desktop.html -p ${appDir}app.android.jsb3" />
 		</exec>
+		<echo message="Disable debug mode" />
+		<replaceregexp file="${appDir}app.android.jsb3" match='&quot;debug&quot; \: true' replace='&quot;debug&quot; \: false' byline="true">
+		</replaceregexp>
 		<exec executable="${sencha.cmd}">	
 			
 			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
@@ -125,10 +128,10 @@
 			<regexpmapper from="^(.+)\.iphone\.(.+)$$" to="\1.\2" />
 		</move>
 	</target>
-	
+
 	<target name="cleanUpProductionFiles">
 		<delete file="${appDir}app.desktop.jsb3"></delete>
-		<delete file="${appDir}app.android.jsb3"></delete>
+		<!--<delete file="${appDir}app.android.jsb3"></delete>-->
 		<delete file="${appDir}app.ios.jsb3"></delete>
 		<delete file="${appDir}all-classes.js"></delete>
 		<delete file="${cockpitDir}dev/all-classes.js"></delete>

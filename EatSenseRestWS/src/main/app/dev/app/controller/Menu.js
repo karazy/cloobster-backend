@@ -17,7 +17,7 @@ Ext.define('EatSense.controller.Menu', {
                 selector: 'tabpanel panel[name=menu] productdetail',
                 xtype: 'productdetail',
                 autoCreate: true
-            },	        
+            },
         	prodDetailLabel :'productdetail #prodDetailLabel' ,	 
         	prodPriceLabel :'productdetail #prodPriceLabel' ,    
         	amountSpinner: 'productdetail spinnerfield',
@@ -50,18 +50,23 @@ Ext.define('EatSense.controller.Menu', {
              amountSpinner : {
             	 spin: 'amountChanged'
              },
-             //TODO refactor general loungeview control into another controller?!
+             //TODO refactor general loungeview control into another controller!
              loungeview : {
      			activeitemchange : function(container, value, oldValue, opts) {
+     				var androidCtr = this.getApplication().getController('Android');
+
     				console.log('tab change to ' + value.tabName);
     				if(value.tabName === 'cart') {
     					status = this.getApplication().getController('Order').refreshCart();
+    					androidCtr.setAndroidBackHandler(this.getApplication().getController('Order').getMyordersNavigationFunctions());
     				} else if (value.tabName === 'myorders') {
     					this.getApplication().getController('Order').refreshMyOrdersList();
+    					androidCtr.setAndroidBackHandler(this.getApplication().getController('Order').getCartNavigationFunctions());
+    				} else if(value.tabName === 'menu') {
+    					androidCtr.setAndroidBackHandler(this.getMenuNavigationFunctions());
+    				} else {
+    					androidCtr.setAndroidBackHandler(null);
     				}
-
-    				this.getApplication().androidBackHandler = [];
-
     				return status;
     			}
     		},
@@ -73,7 +78,9 @@ Ext.define('EatSense.controller.Menu', {
 		/**
 		*	Current selected product.
 		*/
-		activeProduct: null
+		activeProduct: null,
+
+		menuNavigationFunctions : new Array()
     },
     /**
      * Shows the products of a menuitem
@@ -86,8 +93,7 @@ Ext.define('EatSense.controller.Menu', {
     		prodStore = record.productsStore;
 
 		//Android: return to menu on backbutton
-		// this.getApplication().on('backbutton', this.backToMenu, this);
-		this.getApplication().androidBackHandler.push(function() {
+		this.getApplication().getController('Android').addBackHandler(function() {
 					me.backToMenu();
 		});
 
@@ -157,10 +163,9 @@ Ext.define('EatSense.controller.Menu', {
 			titlebar = detail.down('titlebar'),
 			activeProduct;
 	
-		this.getApplication().androidBackHandler.push(function() {
-					// me.closeProductDetail();
+			this.getApplication().getController('Android').addBackHandler(function() {
 					me.getProductdetail().hide();
-		});
+			});
 
 		//save original ids
 		record.set('genuineId', record.get('id'));
@@ -323,7 +328,9 @@ Ext.define('EatSense.controller.Menu', {
 	*/
 	closeProductDetail: function() {
 		var detail = this.getProductdetail();		
+		
 		detail.hide();
+		this.getApplication().getController('Android').removeLastBackHandler();
 	},
 	/**
 	 * Adds the current product to card.
@@ -341,7 +348,8 @@ Ext.define('EatSense.controller.Menu', {
 			appStateStore = Ext.StoreManager.lookup('appStateStore'),
 			activeCheckIn = this.getApplication().getController('CheckIn').getActiveCheckIn(),
 			detail = this.getProductdetail(),
-			message;
+			message,
+			androidCtr = this.getApplication().getController('Android');
 		
 		//validate choices 
 		productForCart.choices().each(function(choice) {
@@ -355,6 +363,7 @@ Ext.define('EatSense.controller.Menu', {
 			};
 		});
 		
+		//if valid create order and attach to checkin
 		if(productIsValid === true) {
 			order = Ext.create('EatSense.model.Order');
 			order.set('amount', this.getAmountSpinner().getValue());
@@ -363,8 +372,7 @@ Ext.define('EatSense.controller.Menu', {
 			order.setProduct(productForCart);
 			
 			order.set('comment', this.getProductdetail().getComponent('choicesPanel').getComponent('productComment').getValue());
-			//if valid create order and attach to checkin
-			activeCheckIn.orders().add(order);
+
 			
 			Ext.Ajax.request({
 	    	    url: Karazy.config.serviceUrl+'/c/businesses/'+activeCheckIn.get('businessId')+'/orders/',
@@ -372,7 +380,9 @@ Ext.define('EatSense.controller.Menu', {
 	    	    jsonData: order.getRawJsonData(),
 	    	    success: function(response, operation) {
 	    	    	order.setId(response.responseText);
-	    	    	order.phantom = false;
+	    	    	order.phantom = false;	    	    	
+					activeCheckIn.orders().add(order);
+					cartButton.setBadgeText(activeCheckIn.orders().data.length);
 	    	    },
 	    	    failure: function(response, operation) {
 	    	    	me.getApplication().handleServerError({
@@ -381,15 +391,14 @@ Ext.define('EatSense.controller.Menu', {
                     }); 
 	    	    }
 	    	});
-			
-			cartButton.setBadgeText(activeCheckIn.orders().data.length);
-			
+									
 			detail.hide();
 			message = Karazy.i18n.translate('productPutIntoCardMsg', this.getActiveProduct().get('name'));
 			this.setActiveProduct(null);
 
 			this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 			
+			androidCtr.removeLastBackHandler();
 
 			if (message) {
 				Ext.Msg.show({

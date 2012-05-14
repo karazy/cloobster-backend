@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
@@ -185,7 +184,7 @@ public class CheckInControllerTest {
 	@Test
 	public void testCreateCheckInNicknameInUse() throws Exception {
 		thrown.expect(CheckInFailureException.class);
-		thrown.expectMessage("errormessage");
+		thrown.expectMessage("nickname");
 		String spotId = "b4rc0de";
 		String nickname = "FakeNik";
 		
@@ -199,8 +198,7 @@ public class CheckInControllerTest {
 		olderCheckIn.setNickname(nickname);
 		checkInList.add(olderCheckIn);
 		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
-		when(mapper.writeValueAsString(any())).thenReturn("errormessage");
-		
+				
 		CheckInDTO checkIn = new CheckInDTO();
 		checkIn.setSpotId(spotId);
 		checkIn.setNickname(nickname);
@@ -210,8 +208,8 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCreateCheckInTooLongNickname() throws Exception {
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("errormessage");
+		thrown.expect(CheckInFailureException.class);
+		thrown.expectMessage("nickname");
 		String spotId = "b4rc0de";
 		
 		when(business.getKey()).thenReturn( businessKey);
@@ -219,9 +217,7 @@ public class CheckInControllerTest {
 		when(spot.getKey()).thenReturn(spotKey);
 		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
-		when(checkInRepo.getBySpot(spotKey)).thenReturn(new ArrayList<CheckIn>());
-		when(mapper.writeValueAsString(any())).thenReturn("errormessage");
-		
+						
 		CheckInDTO checkIn = new CheckInDTO();
 		checkIn.setSpotId(spotId);
 		checkIn.setNickname("FakeNik1234567890123456789012345");
@@ -283,7 +279,6 @@ public class CheckInControllerTest {
 		assertThat(ctr.getSpotInformation(barcode), nullValue());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetSpotInformation() throws Exception {
 		String barcode = "abarcode";
@@ -325,7 +320,6 @@ public class CheckInControllerTest {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetOtherUsersAtSpotNullCheckIn() throws Exception {
 		String barcode = "abarcode";

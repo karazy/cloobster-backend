@@ -4,7 +4,7 @@
 */
 Ext.define('EatSense.controller.Settings', {
     extend: 'Ext.app.Controller',
-    requires: ['EatSense.view.NewsletterPopup'],
+    requires: ['EatSense.view.NewsletterPopup', 'EatSense.view.Newsletter'],
     config: {
     	refs: {
     		settingsTab: 'lounge settingstab[tabName=settings]',
@@ -28,16 +28,6 @@ Ext.define('EatSense.controller.Settings', {
     launch: function() {
         var me = this;
 
-        //create newsletter record and setup listeners
-        this.getNewsletterView().setRecord(Ext.create('EatSense.model.Newsletter'));
-        //don't specify listener in view because this won't work correctly
-        this.getNewsletterView().on({
-            delegate: 'field',
-            change: function(field, newVal, oldVal) {
-                console.log('set field ' + newVal);
-                me.getNewsletterView().getRecord().set(field.getName(), newVal);
-            }
-        });
     },
     /**
     *	Loads the settings and sets the corresponding fields.
@@ -64,9 +54,9 @@ Ext.define('EatSense.controller.Settings', {
     registerNewsletterBtTap: function(button) {
         var me = this,
             newsletter = this.getNewsletterView(),
-            record = newsletter.getRecord();
+            values = newsletter.getValues();
 
-        this.registerNewsletter(record);
+        this.registerNewsletter(values);
     },
     /**
     * Submits the form to register a new newsletter.
@@ -75,17 +65,19 @@ Ext.define('EatSense.controller.Settings', {
     * @param successCallback
     *   callback function called on success
     */
-    registerNewsletter: function(record, successCallback) {
+    registerNewsletter: function(data, successCallback) {
         var me = this,
             checkInCtr = this.getApplication().getController('CheckIn'),
             appState = checkInCtr.getAppState(),
+            record = Ext.create('EatSense.model.Newsletter'),
             errors;
 
+        record.setData(data);
         //validate record
         errors = record.validate();
 
         if(!errors.isValid()) {
-            Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('newsletterInvalidEmail', record.get('email')));
+            Ext.Msg.alert(Karazy.i18n.translate('error'), Karazy.i18n.translate('newsletterInvalidEmail'));
             return;
         }
 
@@ -96,8 +88,10 @@ Ext.define('EatSense.controller.Settings', {
 
                 appState.set('newsletterRegistered', true);
                 
-                successCallback();
-
+                if(Karazy.util.isFunction(successCallback)) {
+                    successCallback();    
+                }
+                
                 //show short success message
                 Ext.Msg.show({
                     title : Karazy.i18n.translate('hint'),
@@ -129,25 +123,17 @@ Ext.define('EatSense.controller.Settings', {
             appState = checkInCtr.getAppState(),
             popup = Ext.create('EatSense.view.NewsletterPopup');
 
-        //see this.launch for comments
-        popup.setRecord(Ext.create('EatSense.model.Newsletter'));
-        popup.on({
-            delegate: 'field',
-            change: function(field, newVal, oldVal) {
-                popup.getRecord().set(field.getName(), newVal);
-            }
-        });
         //setup button handler
         popup.on({
             delegate: 'button[action=register]',
             tap: function() {
-                me.registerNewsletter(popup.getRecord(), 
+                me.registerNewsletter(popup.down('newsletter').getValues(), 
                     //remove on success
-                    function() {
-                        Ext.Viewport.remove(popup);
-                    }
-                );
+                function() {
+                    Ext.Viewport.remove(popup);
+                });
             }
+            
         });
 
         popup.on({

@@ -79,7 +79,9 @@
 		/**
 		*	Current active bill.
 		*/
-		activeBill: null	
+		activeBill: null,
+		cartNavigationFunctions : new Array(),
+		myordersNavigationFunctions : new Array()
 	},
 	init: function() {
 		//store retrieved models
@@ -266,6 +268,10 @@
 		 		titlebar = detail.down('titlebar'),
 		 		menuCtr = this.getApplication().getController('Menu');
 
+		me.getApplication().getController('Android').addBackHandler(function() {
+			me.closeOrderDetail();
+		});
+
 		 //save state of order to undo changes
 		 order.saveState();
 
@@ -429,7 +435,9 @@
 		//try to avoid unecessary calculation, only needed to update price after cancelation
 		this.recalculate(this.getActiveOrder());
 		this.refreshCart();
-		detail.hide();		
+		detail.hide();
+
+		this.getApplication().getController('Android').removeLastBackHandler();		
 	},
 	/**
 	 * Called when the product spinner value changes. 
@@ -568,6 +576,7 @@
 			me = this;
 		
 		if(orderCount>0 && checkIn.get('status') !== Karazy.constants.PAYMENT_REQUEST && checkIn.get('status') !== Karazy.constants.COMPLETE) {
+
 			//create picker
 			picker = Ext.create('Ext.Picker', {
 				doneButton: {
@@ -598,6 +607,10 @@
 			            store: availableMethods
 			        }
 			    ]
+			});
+
+			me.getApplication().getController('Android').addBackHandler(function() {
+				picker.hide();	
 			});
 									
 			Ext.Viewport.add(picker);
@@ -655,7 +668,9 @@
 			if(!Karazy.util.getAlertActive()) {
 				Ext.Msg.hide();
 			}
-		}), Karazy.config.msgboxHideLongTimeout, this);		
+		}), Karazy.config.msgboxHideLongTimeout, this);
+
+		this.getApplication().getController('Android').removeLastBackHandler();	
 
 	},
 	/**
