@@ -329,7 +329,7 @@ public class CheckInController {
 			for (Key<Order> orderKey : orderKeys) {
 				orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
 			}
-			
+			requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
 			orderChoiceRepo.delete(orderChoiceKeys);
 			orderRepo.delete(orderKeys);
 			checkInRepo.delete(checkIn);
