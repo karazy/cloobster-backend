@@ -44,6 +44,7 @@ Ext.application({
 		var me = this,
 			appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
 	 		checkInCtr = this.getController('CheckIn'),
+      settingsCtr = this.getController('Settings'),
 	 		restoredCheckInId; 
 
 		//global error handler
@@ -55,7 +56,10 @@ Ext.application({
 
   		//timeout for requests
   		Ext.Ajax.timeout = 1200000;
-  		
+
+    //----- Launch functions start ------  	
+    //TODO: Bug in current state. Controller launch function not executed in correct order. So this logic is move here.
+    //Android controller launch
 		//Android specific behaviour
         if(Ext.os.is.Android) {
         	console.log('Android Controller -> setup android specific behaviour');
@@ -66,6 +70,8 @@ Ext.application({
                 me.getController('Android').executeBackHandler();
           };
         }
+
+    //----- Launch functions end ------
 		
     	//try to restore application state
 	   	 //create main screen
