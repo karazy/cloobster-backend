@@ -360,7 +360,9 @@ Ext.define('EatSense.controller.CheckIn', {
     */
 	showMenu: function() {
     	var menuCtr = this.getApplication().getController('Menu');
-        menuCtr.showMenu();    		   
+          
+        menuCtr.showMenu();
+        this.getApplication().getController('Android').setAndroidBackHandler(menuCtr.getMenuNavigationFunctions());
 	},
 	/**
 	 * Show settings screen.
@@ -507,7 +509,7 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getRequestsTab().enable();			
 			this.getLoungeview().setActiveItem(this.getMenuTab());
             menuCtr.backToMenu();
-			//remove menu to prevent problems on reload
+		    	//remove menu to prevent problems on reload
             menuStore.removeAll();
             orderCtr.refreshCartBadgeText(true);
             orderCtr.refreshMyOrdersBadgeText(true);

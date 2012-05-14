@@ -50,22 +50,5 @@ Ext.define('EatSense.view.Lounge', {
 	 */
 	switchTab : function(view, direction) {
 		this.setActiveItem(view);
-	},
-	/**
-	 * Hides the back button in top toolbar.
-	 */
-	hideBackButton : function() {
-		this.getComponent('loungeTopBar').getComponent('loungeBackBt').hide();
-	},
-	/**
-	 * Shows the back button in top toolbar.
-	 * 
-	 * @param text
-	 *            Label to display on button.
-	 */
-	showBackButton : function(text) {
-		this.getComponent('loungeTopBar').getComponent('loungeBackBt').setText(text);
-		this.getComponent('loungeTopBar').getComponent('loungeBackBt').show();
-	},
-
+	}
 });
