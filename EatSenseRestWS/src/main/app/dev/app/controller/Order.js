@@ -770,13 +770,14 @@
 				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
 			}
 		} else if(action == 'delete') {
-			console.log('delete order with id %s', updatedOrder.id);
+			console.log('delete order with id ' + updatedOrder.id);
 
 			oldOrder = orderStore.getById(updatedOrder.id);
 			if(oldOrder) {
 				orderStore.remove(oldOrder);
 				total = me.calculateOrdersTotal(orderStore);
 				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
+				me.refreshMyOrdersBadgeText();
 
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),
