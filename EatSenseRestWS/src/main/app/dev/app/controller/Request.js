@@ -151,6 +151,13 @@ Ext.define('EatSense.controller.Request',{
             }
 		})
 	},
+	/*
+	* Used for cleanup methods. Resets the state of button to call mode.
+	*/
+	resetCallWaiterButton: function() {
+		this.getCallWaiterButton().mode = 'call';
+		this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+	},
 	/**
 	* Handle push messages for requests.
 	*/
@@ -164,8 +171,6 @@ Ext.define('EatSense.controller.Request',{
 			if(action == 'delete' && data.type == Karazy.constants.Request.CALL_WAITER) {
 				requestStore.remove(request);
 				this.getCallWaiterButton().mode = 'call';
-				//show info badge to indicate waiter is called	
-				this.getCallWaiterButton().setBadgeText("");
 				this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
 			}
 		}

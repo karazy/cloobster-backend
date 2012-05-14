@@ -101,6 +101,7 @@ Karazy.translations = (function() {
 		"callWaiterRequestBadge" : "Kellner gerufen",
 		"cancelCallWaiterRequest" : "Bedienung rufen abbrechen",	
 		//general errors
+		"error" : "Fehler",
 		"errorTitle" : "Fehler",		
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",

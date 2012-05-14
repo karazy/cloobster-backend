@@ -488,6 +488,7 @@ Ext.define('EatSense.controller.CheckIn', {
                 menuCtr = this.getApplication().getController('Menu'),
                 settingsCtr = this.getApplication().getController('Settings'),
                 androidCtr = this.getApplication().getController('Android'),
+                requestCtr = this.getApplication().getController('Request'),
                 menuStore = Ext.StoreManager.lookup('menuStore');
 		//TODO check status transitions, refactor     
 				
@@ -516,7 +517,8 @@ Ext.define('EatSense.controller.CheckIn', {
             if(!this.getAppState().get('newsletterRegistered')) {
               settingsCtr.registerNewsletterOnLeaving();
             }
-      androidCtr.setAndroidBackHandler(null);
+            requestCtr.resetCallWaiterButton();
+            androidCtr.setAndroidBackHandler(null);
 		}
 
     if(status == Karazy.constants.CANCEL_ALL) {
