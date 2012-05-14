@@ -64,9 +64,8 @@ public class MenuController {
 		for ( Menu menu : menus) {
 			MenuDTO menuDTO = new MenuDTO();
 			menuDTO.setTitle(menu.getTitle());
-			// Get products for this menu from the product map.
-			menuToProductsMap.get(menu.getId());
-			
+			menuDTO.setOrder(menu.getOrder());
+			// Get products for this menu from the product map.		
 			menuDTO.setProducts(menuToProductsMap.get(menu.getId())); 
 			menuDTOs.add(menuDTO);
 		}
