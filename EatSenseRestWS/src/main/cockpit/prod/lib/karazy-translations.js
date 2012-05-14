@@ -56,7 +56,7 @@ Karazy.translations = (function() {
 		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
 		//requests
 		"requestMsgboxTitle" : "Kundenwünsche",
-		"requestDismiss" : "Alle Verwerfen",
+		"requestDismiss" : "Kundenwünsche löschen",
 		//constants
 		"ORDER_PLACED" : "Neue Bestellung!",
 		"PLACED" : "Neu!",

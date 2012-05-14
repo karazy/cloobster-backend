@@ -98,13 +98,15 @@ Karazy.translations = (function() {
 		"requestsTitle" : "VIP",
 		"requestCallWaiterSendMsd" : "Bitte habe einen Moment Geduld!<br>Es wird gleich jemand kommen.",
 		"callWaiterButton" : "Bedienung rufen",
-		"callWaiterRequestBadge" : "Kellner gerufen",	
+		"callWaiterRequestBadge" : "Kellner gerufen",
+		"cancelCallWaiterRequest" : "Bedienung rufen abbrechen",	
 		//general errors
+		"error" : "Fehler",
 		"errorTitle" : "Fehler",		
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
 		"errorPermission" : "Deine Sitzung ist ungültig.",
-		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!"
+		"errorCommunication" : "Es kann keine Verbindung zum Server hergestellt werden."
 		}
 	}
 	
