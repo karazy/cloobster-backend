@@ -327,8 +327,7 @@ Ext.define('EatSense.controller.Menu', {
 	*	Hides Product detail.
 	*/
 	closeProductDetail: function() {
-		var detail = this.getProductdetail(),
-			productComment = this.getProductdetail().getComponent('choicesPanel').getComponent('productComment');		
+		var detail = this.getProductdetail();		
 		
 		detail.hide();
 		this.getApplication().getController('Android').removeLastBackHandler();
@@ -396,8 +395,6 @@ Ext.define('EatSense.controller.Menu', {
 			detail.hide();
 			message = Karazy.i18n.translate('productPutIntoCardMsg', this.getActiveProduct().get('name'));
 			this.setActiveProduct(null);
-
-			this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 			
 			androidCtr.removeLastBackHandler();
 
