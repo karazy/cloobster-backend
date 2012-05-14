@@ -253,17 +253,18 @@ public class MessageController {
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(event.getCheckIn().getSpot().getId());		
 		spotData.setCheckInCount(event.getCheckInCount().orNull());
+		if ( spotData.getCheckInCount() > 0) {
+			Request request = requestRepo.query().filter("spot",event.getCheckIn().getSpot()).order("-receivedTime").get();
+			// Save the status of the next request in line, if there is one.
+			if( request != null) {
+				spotData.setStatus(request.getStatus());
+			}
+			else 
+				spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
+		}
+		
 		// If the customer didn't check out himself.
 		if(!event.isCheckOut()) {
-			if ( spotData.getCheckInCount() > 0) {
-				Request request = requestRepo.query().filter("spot",event.getCheckIn().getSpot()).order("-receivedTime").get();
-				// Save the status of the next request in line, if there is one.
-				if( request != null) {
-					spotData.setStatus(request.getStatus());
-				}
-				else 
-					spotData.setStatus(CheckInStatus.CHECKEDIN.toString());
-			}
 			// notify client
 			if(event.getCheckIn().getChannelId() != null)
 				channelCtrl.sendMessage(event.getCheckIn().getChannelId(),
