@@ -19,9 +19,9 @@ Ext.define('EatSense.view.MyOrders', {
 			{
 				xtype: 'button',
 				text: Karazy.i18n.translate('payRequestButton'),
-				itemId: 'payRequestBt',
 				ui: 'forward',
 				action: 'pay',
+				hidden: true,
 				align: 'right'
 			},
 			{

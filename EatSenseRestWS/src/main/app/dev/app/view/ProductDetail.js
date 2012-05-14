@@ -55,8 +55,9 @@ Ext.define('EatSense.view.ProductDetail', {
 					increment : 1,
 					value : 1,
 					minValue : '1',
-					maxValue : '10',
-					cycle : false,
+					maxValue : '10',					
+					cycle : true,
+					width: 130
 				},
 				{
 					xtype: 'label',

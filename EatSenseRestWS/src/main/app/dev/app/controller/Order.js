@@ -510,9 +510,11 @@
 			callback: function(records, operation, success) {
 				try {
 					if(success == true) {
+						payButton.enable();
 						(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
 						(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 						
+
 						//WORKAROUND to make sure all data is available in data property
 						//otherwise nested choices won't be shown
 						Ext.each(records, function(order) {
@@ -526,8 +528,7 @@
 						me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 						me.refreshMyOrdersBadgeText();
 					} else {
-						payButton.disable();
-						leaveButton.enable();					
+						payButton.disable();			
 						me.getApplication().handleServerError({
 							'error': operation.error,
 							'forceLogout': {403: true}
