@@ -43,13 +43,14 @@ Ext.define('EatSense.view.MyOrders', {
 			onItemDisclosure: this.removeItem,
 			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
-			"<div class='orderListItem {[values.status.toLowerCase()]}'>" +
-				"<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
-				"<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>("+Karazy.i18n.translate('amount')+" {amount}) {[this.formatPrice(values)]}</div>" +
+			"<div class='{[values.status.toLowerCase()]}'>" +
+				"<div class='order-title'><h4>{amount}x</h4> <h4>{Product.name}</h4> {[this.formatPrice(values.Product.price_calculated)]}</div>"+
+				// "<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
+				// "<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>({amount}x) {[this.formatPrice(values)]}</div>" +
 				"<div style='clear: both;'>" +
 					"<tpl for='Product.choices'>" +
 						"<tpl if='this.checkSelections(values, xindex)'>" +
-							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
+							"<tpl if='!parent'><h5>{text}</h5></tpl>" +
 							"<ul>" +
 								"<tpl for='options'>" +
 									"<tpl if='selected === true'>" +
@@ -79,8 +80,8 @@ Ext.define('EatSense.view.MyOrders', {
 					
 					return result;
 				},
-				formatPrice: function(values) {
-					return Karazy.util.formatPrice(values.Product.price_calculated);
+				formatPrice: function(price) {
+					return Karazy.util.formatPrice(price);
 				},
 				renderChoices: function(values) {
 
