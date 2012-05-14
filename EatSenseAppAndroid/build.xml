@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
+<project name="EatSenseAndroidApp" default="replaceConfigLocal" basedir=".">
 	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod/android" />
 	<property name="config" value="assets/www/lib/karazy-config.js" />
 	
@@ -25,7 +25,7 @@
 		</move>
 	</target>
 
-	<target name="replaceConfigTest" depends="renameFiles">
+	<target name="replaceConfigLocal" depends="renameFiles">
 		<echo message="Setting config values" />
 		<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'http://192.168.1.103:8888'," byline="true">
 		</replaceregexp>
@@ -40,9 +40,17 @@
 		<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 false," byline="true">
 		</replaceregexp>
 	</target>
+	
+	<target name="replaceConfigTesting" depends="renameFiles">
+			<echo message="Setting config values" />
+			<replaceregexp file="${config}" match="(serviceUrl :) .*" replace="\1 'http://eatsense-test.appspot.com'," byline="true">
+			</replaceregexp>
+			<replaceregexp file="${config}" match="(disableCaching :) .*" replace="\1 false," byline="true">
+			</replaceregexp>
+		</target>
 
 	<!-- Only run this from within eclipse. Make sure in external tools configuration "Run in the same JRE as workspace" is selected.-->
-	<target name="refreshEclipse" depends="replaceConfigTest">
+	<target name="refreshEclipse" depends="replaceConfigLocal">
 		<eclipse.refreshLocal resource="${basedir}" depth="infinite" />
 	</target>
 </project>
