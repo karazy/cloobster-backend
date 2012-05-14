@@ -145,7 +145,7 @@ public class BusinessController {
 		checkNotNull(business.getId(), "business id cannot be null");
 		
 		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
-		Query<Request> query = requestRepo.ofy().query(Request.class).ancestor(business);
+		Query<Request> query = requestRepo.query().ancestor(business);
 
 		if( spotId != null) {
 			query = query.filter("spot", Spot.getKey(business.getKey(), spotId));
@@ -155,7 +155,7 @@ public class BusinessController {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
 		
-		List<Request> requests = query.list();		
+		List<Request> requests = query.list();
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
 				
@@ -233,9 +233,10 @@ public class BusinessController {
 	 * 
 	 * @param checkIn
 	 * @param requestId
+	 * @return 
 	 * @throws IllegalAccessException if the checkin does not own the request
 	 */
-	public void deleteCustomerRequestForCheckIn(CheckIn checkIn, long requestId) throws IllegalAccessException {
+	public CustomerRequestDTO deleteCustomerRequestForCheckIn(CheckIn checkIn, long requestId) throws IllegalAccessException {
 		checkNotNull(checkIn, "checkIn cannot be null");
 		checkNotNull(checkIn.getId(), "checkIn id cannot be null");
 		checkNotNull(checkIn.getBusiness(), "checkIn business cannot be null");
@@ -251,9 +252,16 @@ public class BusinessController {
 		if( !checkIn.getId().equals(request.getCheckIn().getId())) {
 			throw new IllegalAccessException("checkIn does not own the request");
 		}
+		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		requestData.setCheckInId(request.getCheckIn().getId());
+		requestData.setId(request.getId());
+		requestData.setSpotId(request.getSpot().getId());
+		requestData.setType(request.getStatus());
 		
 		requestRepo.delete(request);
 		
 		eventBus.post(new DeleteCustomerRequestEvent(businessRepo.getByKey(checkIn.getBusiness()), request, true));
+		
+		return requestData;
 	}
 }
