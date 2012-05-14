@@ -4,8 +4,18 @@ Ext.define('EatSense.model.Menu', {
 	config : {
 		idProperty: 'id',
 		fields: [
-		    {name: 'id', type: 'string'},
-			{name: 'title', type: 'string'}
+		    {	
+		    	name: 'id', 
+		    	type: 'string'
+			},
+			{
+				name: 'title', 
+				type: 'string'}
+			,
+			{
+				name: 'order',
+				type: 'number'
+			}
 		],
 		proxy: {
 		   type: 'rest',
