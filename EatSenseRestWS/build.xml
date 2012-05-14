@@ -21,6 +21,8 @@
 		<exec executable="${sencha.cmd}" >
 			<arg line="create jsb -a ${cockpitDir}dev/index_pkg_ready.html -p ${cockpitDir}dev/app.jsb3" />
 		</exec>
+		<echo message="Disable debug mode" />
+		<replaceregexp file="${appDir}app.android.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">
 			
 			<arg line="build -p ${cockpitDir}dev/app.jsb3 -d ${cockpitDir}dev" />
@@ -42,6 +44,8 @@
 		
 			<arg line="create jsb -a ${frontendDirDev}index.html -p ${frontendDirDev}app.jsb3" />
 		</exec>
+		<echo message="Disable debug mode" />
+		<replaceregexp file="${appDir}app.android.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">
 			
 			<arg line="build -p ${frontendDirDev}app.jsb3 -d ${frontendDirDev}" />
@@ -55,6 +59,8 @@
 		
 			<arg line="create jsb -a ${appDir}index.desktop.html -p ${appDir}app.desktop.jsb3" />
 		</exec>
+		<echo message="Disable debug mode" />
+		<replaceregexp file="${appDir}app.android.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">
 			
 			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
@@ -82,8 +88,7 @@
 			<arg line="create jsb -a ${appDir}index.desktop.html -p ${appDir}app.android.jsb3" />
 		</exec>
 		<echo message="Disable debug mode" />
-		<replaceregexp file="${appDir}app.android.jsb3" match='"debug": true' replace='"debug": false' byline="true">
-		</replaceregexp>
+		<replaceregexp file="${appDir}app.android.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">	
 			
 			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
@@ -109,6 +114,8 @@
 		<exec executable="${sencha.cmd}" >		
 			<arg line="create jsb -a ${appDir}index.desktop.html -p ${appDir}app.ios.jsb3" />
 		</exec>
+		<echo message="Disable debug mode" />
+		<replaceregexp file="${appDir}app.android.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">
 			
 			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
