@@ -44,8 +44,9 @@ public class CheckInsResource {
 	
 	@DELETE
 	@Path("{checkInId}")
-	public void cancelAndDeleteCheckIn(@PathParam("checkInId") Long checkInId) {
-		checkInController.deleteCheckIn(business, checkInId);
+	@Produces("application/json; charset=UTF-8")
+	public CheckInStatusDTO cancelAndDeleteCheckIn(@PathParam("checkInId") Long checkInId) {
+		return checkInController.deleteCheckIn(business, checkInId);
 	}
 	
 	@PUT

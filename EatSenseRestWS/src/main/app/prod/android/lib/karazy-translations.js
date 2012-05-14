@@ -104,7 +104,7 @@ Karazy.translations = (function() {
 		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
 		"errorPermission" : "Deine Sitzung ist ungültig.",
-		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!"
+		"errorCommunication" : "Der Server ist nicht erreichbar.<br/>Wir kümmern uns darum!"
 		}
 	}
 	

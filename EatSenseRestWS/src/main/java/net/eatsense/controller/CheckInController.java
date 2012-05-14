@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Objectify;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a
@@ -368,8 +367,9 @@ public class CheckInController {
 	 * @param business 
 	 * 
 	 * @param checkInId
+	 * @return 
 	 */
-	public void deleteCheckIn(Business business, long checkInId) {
+	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -408,6 +408,8 @@ public class CheckInController {
 		
 		event.setCheckInCount(checkInCount-1);
 		eventBus.post(event);
+		
+		return transform.toStatusDto(checkIn);
 	}
 
 	/**
