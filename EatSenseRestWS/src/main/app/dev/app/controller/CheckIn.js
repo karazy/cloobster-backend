@@ -517,7 +517,7 @@ Ext.define('EatSense.controller.CheckIn', {
             if(!this.getAppState().get('newsletterRegistered')) {
               settingsCtr.registerNewsletterOnLeaving();
             }
-            requestCtr.resetCallWaiterButton();
+            requestCtr.resetAllRequests();
             androidCtr.setAndroidBackHandler(null);
 		}
 
