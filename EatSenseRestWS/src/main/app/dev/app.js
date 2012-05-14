@@ -29,7 +29,7 @@ Ext.application({
 		'EatSense.model.AppState'
 	],
 	launch : function() {
-		console.log('launch');		
+		console.log('App -> launch');		
     	this.launched = true;
         this.mainLaunch();
 	},
@@ -39,20 +39,13 @@ Ext.application({
         	return;
         }
 
-		console.log('mainLaunch');
+		console.log('App -> mainLaunch');
 		
 		var me = this,
-			appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
-	 		checkInCtr = this.getController('CheckIn'),
-      settingsCtr = this.getController('Settings'),
-	 		restoredCheckInId; 
-
-		//global error handler
-		// window.onerror = function(message, url, lineNumber) {  
-		// 	console.error('unhandled error > ' + message +' in '+ url +' at '+ lineNumber);
-		//   	//prevent firing of default handler (return true)
-		//   	return false;
-		// };
+  			appStateStore = Ext.data.StoreManager.lookup('appStateStore'),
+  	 		checkInCtr = this.getController('CheckIn'),
+        settingsCtr = this.getController('Settings'),
+  	 		restoredCheckInId; 
 
   		//timeout for requests
   		Ext.Ajax.timeout = 1200000;
@@ -63,7 +56,6 @@ Ext.application({
 		//Android specific behaviour
         if(Ext.os.is.Android) {
         	console.log('Android Controller -> setup android specific behaviour');
-        	me.getController('Android').setAndroidBackHandler(me.getController('Menu').getMenuNavigationFunctions());
         	document.addEventListener('backbutton', onBackKeyDown, false);
           function onBackKeyDown() {            
                 console.log('fire backbutton event');

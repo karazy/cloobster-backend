@@ -154,9 +154,15 @@ Ext.define('EatSense.controller.Request',{
 	/*
 	* Used for cleanup methods. Resets the state of button to call mode.
 	*/
-	resetCallWaiterButton: function() {
+	resetAllRequests: function() {
+		var requestStore = Ext.StoreManager.lookup('requestStore');
+
+		console.log('Request Controller -> resetAllRequests');
+
 		this.getCallWaiterButton().mode = 'call';
 		this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+
+		requestStore.removeAll();
 	},
 	/**
 	* Handle push messages for requests.

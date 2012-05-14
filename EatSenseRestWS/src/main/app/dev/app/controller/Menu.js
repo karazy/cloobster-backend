@@ -327,7 +327,8 @@ Ext.define('EatSense.controller.Menu', {
 	*	Hides Product detail.
 	*/
 	closeProductDetail: function() {
-		var detail = this.getProductdetail();		
+		var detail = this.getProductdetail(),
+			productComment = this.getProductdetail().getComponent('choicesPanel').getComponent('productComment');		
 		
 		detail.hide();
 		this.getApplication().getController('Android').removeLastBackHandler();
