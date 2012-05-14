@@ -163,29 +163,20 @@ public class CheckInController {
 
 		// validation 
 		Set<ConstraintViolation<CheckIn>> constraintViolations = validator.validate(checkIn);
-		String errorMessage = null;
+		
 		// check for validation errors ...
 		if( !constraintViolations.isEmpty() )  {
 			// constraint violations occurred setting status and logging error
-			logger.info("CheckIn validation failed. Message(s):");
+			logger.info("CheckIn validation failed");
 			for (ConstraintViolation<CheckIn> violation : constraintViolations) {
 				
-				logger.info( violation.getPropertyPath() + ": " +violation.getMessage() );
-				ErrorDTO errorDto;
 				if(violation.getPropertyPath().toString().equals("nickname")) {
-					errorDto = new ErrorDTO("checkInErrorNickname", "3","20");
+					throw new CheckInFailureException("nickname too long or too short", "checkInErrorNickname", "3","25");
 				}
 				else {
-					errorDto = new ErrorDTO("checkInError", violation.getPropertyPath().toString() + " " + violation.getMessage());
-				}
-				
-				try {
-					errorMessage = mapper.writeValueAsString(errorDto);
-				} catch (Exception e) {
-					throw new RuntimeException("error while mapping error data",e);
-				}
-				throw new IllegalArgumentException(errorMessage);
-					
+					throw new CheckInFailureException("nickname too long or too short", "checkInError",
+							violation.getPropertyPath().toString() + " " + violation.getMessage());
+				}	
 			}
 		}			
  		
