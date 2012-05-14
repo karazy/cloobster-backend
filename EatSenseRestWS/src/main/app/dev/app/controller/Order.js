@@ -647,7 +647,8 @@
 					checkInCtr.fireEvent('statusChanged', Karazy.constants.PAYMENT_REQUEST);
 					payButton.hide();
 					myordersComplete.show();
-					me.refreshMyOrdersBadgeText(true);			
+					me.refreshMyOrdersBadgeText(true);
+					this.getApplication().getController('Android').removeLastBackHandler();		
 			},
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
@@ -669,9 +670,6 @@
 				Ext.Msg.hide();
 			}
 		}), Karazy.config.msgboxHideLongTimeout, this);
-
-		this.getApplication().getController('Android').removeLastBackHandler();	
-
 	},
 	/**
 	 * Called when user checks in and wants to leave without issuing an order.
