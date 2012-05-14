@@ -49,6 +49,7 @@ Ext.define('EatSense.view.OrderDetail', {
 					minValue : '1',
 					maxValue : '10',
 					cycle : true,
+					width: 130
 				},
 				{
 					xtype: 'label',
