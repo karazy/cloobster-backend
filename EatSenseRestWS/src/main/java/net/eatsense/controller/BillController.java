@@ -139,11 +139,11 @@ public class BillController {
 		checkIn.setArchived(true);
 		checkInRepo.saveOrUpdate(checkIn);
 		// Get all pending requests sorted by oldest first.
-		List<Request> requests = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").list();
+		List<Request> requests = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 
 		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
 			Request request = iterator.next();
-			if(request.getType() == RequestType.BILL && request.getObjectId().equals(bill.getId())) {
+			if(request.getCheckIn().getId() == checkIn.getId()) {
 				requestRepo.delete(request);
 				iterator.remove();
 			}
