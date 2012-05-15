@@ -76,7 +76,7 @@ public class CheckInResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO getCheckIn() {
-		return checkInCtrlprovider.get().toDto(checkIn);
+		return checkInCtrlprovider.get().getCheckInDto(checkIn);
 	}
 	
 	@DELETE

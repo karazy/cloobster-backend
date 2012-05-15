@@ -125,8 +125,14 @@ public class CheckInController {
 		return spotDto;
 	}
 	
-	public CheckInDTO toDto(CheckIn checkIn) {
-		return transform.checkInToDto(checkIn);
+	/**
+	 * Return transfer object containing relevant data for the checkin.
+	 * 
+	 * @param checkIn
+	 * @return CheckIn transfer object
+	 */
+	public CheckInDTO getCheckInDto(CheckIn checkIn) {
+		return transform.checkInToDto(checkIn, true);
 	}
 
 	/**

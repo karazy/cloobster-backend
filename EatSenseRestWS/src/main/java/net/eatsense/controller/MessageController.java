@@ -268,7 +268,7 @@ public class MessageController {
 			// notify client
 			if(event.getCheckIn().getChannelId() != null)
 				channelCtrl.sendMessage(event.getCheckIn().getChannelId(),
-						new MessageDTO("checkin", "delete", transform.checkInToDto(event.getCheckIn())));
+						new MessageDTO("checkin", "delete", transform.checkInToDto(event.getCheckIn(), false)));
 		}
 		
 		// Notify cockpit clients
