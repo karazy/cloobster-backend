@@ -63,7 +63,8 @@ public class AccountController {
 	 * @return
 	 */
 	public boolean isAccountManagingBusiness(final Account account, long businessId){
-		checkNotNull(account, "Unable to check account, was null");
+		if(account == null)
+			return false;
 		
 		if(account.getBusinesses() != null) {
 			for (Key<Business> businessKey : account.getBusinesses()) {
@@ -215,7 +216,7 @@ public class AccountController {
 	public List<BusinessDTO> getBusinessDtos(String login) {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
-		if(account != null && account.getRole().equals("cockpituser")) {
+		if(account != null && isAccountInRole(account, "cockpituser")) {
 			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
 				BusinessDTO businessData = new BusinessDTO();
 				businessData.setId(business.getId());

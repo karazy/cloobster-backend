@@ -3,10 +3,13 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
 
 import javax.mail.Message;
 import javax.validation.Validation;
@@ -14,6 +17,7 @@ import javax.validation.ValidatorFactory;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
@@ -36,6 +40,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.googlecode.objectify.Key;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {
@@ -192,5 +197,126 @@ public class AccountControllerTest {
 		ctr.removeNewsletterRecipient(id, email);
 		
 		verify(recipientRepo).delete(recipient);
+	}
+	
+	@Test
+	public void testIsAccountInRoleUserAsCompanyowner() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("companyowner");
+				
+		assertThat(ctr.isAccountInRole(account, "user"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleBusinessadminAsCompanyowner() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("companyowner");
+		
+		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleCockpituserAsCompanyowner() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("companyowner");
+		
+		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleCompanyownerAsCompanyowner() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("companyowner");
+		
+		assertThat(ctr.isAccountInRole(account, "companyowner"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleCockpituserAsCockpituser() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("cockpituser");
+		
+		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleBusinessadminAsCockpituser() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("cockpituser");
+		
+		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(false));
+	}
+	
+	@Test
+	public void testIsAccountInRoleCompanyownerAsCockpituser() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("cockpituser");
+		
+		assertThat(ctr.isAccountInRole(account, "companyowner"), is(false));
+	}
+	
+	@Test
+	public void testIsAccountInRoleCompanyownerAsBusinessadmin() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("businessadmin");
+		
+		assertThat(ctr.isAccountInRole(account, "companyowner"), is(false));
+	}
+	
+	@Test
+	public void testIsAccountInRoleBusinessadminAsBusinessadmin() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("businessadmin");
+		
+		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleCockpituserAsBusinessadmin() throws Exception {
+		account = mock(Account.class);
+		when(account.getRole()).thenReturn("businessadmin");
+		
+		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleNullOrEmpty() throws Exception {
+		account = mock(Account.class);
+				
+		assertThat(ctr.isAccountInRole(account, null), is(true));
+		assertThat(ctr.isAccountInRole(account, ""), is(true));
+	}
+	
+	@Test
+	public void testIsAccountInRoleNullAccount() throws Exception {
+		account = null;
+				
+		assertThat(ctr.isAccountInRole(account, "companyowner"), is(false));
+		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(false));
+		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(false));
+		assertThat(ctr.isAccountInRole(account, "user"), is(false));
+	}
+	
+	@Test
+	public void testIsAccountManagingBusiness() throws Exception {
+		account = mock(Account.class);
+		long businessId = 1;
+		ArrayList<Key<Business>> businessList = new ArrayList<Key<Business>>();
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock( Key.class);
+		when(businessKey.getId()).thenReturn(businessId);
+		businessList.add(businessKey);
+		when(account.getBusinesses()).thenReturn( businessList);
+		
+		assertThat(ctr.isAccountManagingBusiness(account, businessId), is(true));
+		assertThat(ctr.isAccountManagingBusiness(account, businessId+1), is(false));
+	}
+	
+	@Test
+	public void testIsAccountManagingBusinessNullAccount() throws Exception {
+		account = null;
+		long businessId = 1;
+		assertThat(ctr.isAccountManagingBusiness(account, businessId), is(false));
+		assertThat(ctr.isAccountManagingBusiness(account, 0), is(false));
 	}
 }
