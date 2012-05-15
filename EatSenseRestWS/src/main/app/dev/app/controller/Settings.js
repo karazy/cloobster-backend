@@ -56,6 +56,9 @@ Ext.define('EatSense.controller.Settings', {
             newsletter = this.getNewsletterView(),
             values = newsletter.getValues();
 
+        //force keyboard to hide, due to a bug in Android 4.0 the textfield is visible above the popup
+        newsletter.down('emailfield').blur();
+
         this.registerNewsletter(values);
     },
     /**

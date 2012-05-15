@@ -649,7 +649,7 @@
 					payButton.hide();
 					myordersComplete.show();
 					me.refreshMyOrdersBadgeText(true);
-					this.getApplication().getController('Android').removeLastBackHandler();		
+					me.getApplication().getController('Android').removeLastBackHandler();		
 			},
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({

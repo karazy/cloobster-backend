@@ -32,7 +32,7 @@ Karazy.translations = (function() {
 		"checkInTitle" : "Check-In",
 		"barcodePromptTitle" : "Barcode Abfrage",
 		"barcodePromptText" : "Bitte Tischcode eingeben.",
-		"checkInStep1Label1" : "Spitznamen wählen",
+		"checkInStep1Label1" : "Wähle deinen Spitznamen",
 		"refreshNicknameBt" : "Neu",
 		"checkInStep1Button" : "Los geht's!",
 		"checkInStep2Label1" : "Andere haben hier bereits eingecheckt.",
@@ -45,7 +45,7 @@ Karazy.translations = (function() {
 		"checkInCanceled" : "Sitzung wurde durch das Restaurant beendet.",
 		"nickname" : "Spitzname",
 		// Menu
-		"menuTitle" : "Karte",
+		"menuTitle" : "Dein Menü",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
 		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
