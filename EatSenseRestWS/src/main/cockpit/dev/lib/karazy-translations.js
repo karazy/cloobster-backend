@@ -24,7 +24,7 @@ Karazy.translations = (function() {
 		//tabbar
 		"spotsTitle" : "Tische",
 		//login
-		"needCredentials" : "Bitte gib einen Benutzernamen und Passwort an.",
+		"needCredentials" : "Bitte Benutzernamen und Passwort eingeben.",
 		"wrongCredentials" : "Benutzername und/oder Passwort falsch.",
 		"savePasswordToggle" : "Automatisch<br/>einloggen?",
 		"logoutQuestion" : "Wirklich ausloggen?",
@@ -40,8 +40,8 @@ Karazy.translations = (function() {
 		"errorSpotDetailOrderSave" : "Speichern der Bestellung fehlgeschlagen!",
 		"status" : "Status",
 		"statistic" : "Infos",
-		"processOrdersFirst" : "Bitte arbeite zuerst alle Bestellungen ab.",
-		"cancelAllOrders" : "Möchtest du alle Bestellungen stornieren und diesen Gast entfernen?",
+		"processOrdersFirst" : "Bitte zuerst alle Bestellungen abarbeiten.",
+		"cancelAllOrders" : "Alle Bestellungen stornieren und diesen Gast entfernen?",
 		"errorSpotDetailOrderCancel" : "Bestellung {0} konnte nicht storniert werden.",
 		"switchSpotButton" : "Tisch wechseln",
 		"switchSpotMessage": "{0} an {1} verschoben",
@@ -49,11 +49,11 @@ Karazy.translations = (function() {
 		"confirmAllOrdersButton" : "Alle abgearbeitet",
 		"paidButton" : "Bezahlt",
 		"spotSelectionTitle" : "Tisch auswählen",
-		"switchSpotError" : "Server Fehler aufgetreten. Tisch wechseln fehlgeschlagen!",
+		"switchSpotError" : "Server Fehler aufgetreten. Tischwechsel fehlgeschlagen!",
 		"paymentMethodLabel" : "Bezahlart",
-		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
-		"choiceValErrMin" : "Bitte wähle mindestens {0} {1} aus.",
-		"choiceValErrMax" : "Du kannst maximal  {0} {1} auswählen.",
+		"choiceValErrMandatory" : "Bitte Wahl für {0} treffen.",
+		"choiceValErrMin" : "Bitte mindestens {0} {1} auswählen.",
+		"choiceValErrMax" : "Bitte maximal  {0} {1} auswählen.",
 		//requests
 		"requestMsgboxTitle" : "Kundenwünsche",
 		"requestDismiss" : "Kundenwünsche löschen",
@@ -66,12 +66,12 @@ Karazy.translations = (function() {
 		//general errors
 		"error" : "Fehler",
 		"errorTitle" : "Fehler",		
-		"errorMsg" : "Sorry! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
+		"errorMsg" : "Entschuldigung! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
-		"errorPermission" : "Deine Sitzung ist ungültig.",
-		"errorCommunication" : "Leider ist der eatSense Server nicht erreichbar.<br/>Wir kümmern uns darum!",
-		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit sollten Sie sich neu anmelden.",
-		"resourceNotAvailable" : "Angeforderte Resource ist nicht erreichbar.",
+		"errorPermission" : "Sitzung ist ungültig.",
+		"errorCommunication" : "Leider ist unser Server nicht erreichbar.<br/>Wir kümmern uns darum!",
+		"errorGeneralCommunication" : "Beim Laden von Aktualisierungsdaten trat ein Fehler auf.<br/>Zur Sicherheit bitte neu anmelden.",
+		"resourceNotAvailable" : "Angeforderte Ressource ist nicht erreichbar.",
 		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig."
 		}
 	}

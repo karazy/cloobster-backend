@@ -33,7 +33,7 @@ Ext.define('EatSense.view.SettingsTab', {
 					html: Karazy.i18n.translate('nicknameDesc')
 				},
 				{
-					xtype : 'textfield',
+					xtype : 'emailfield',
 					label : Karazy.i18n.translate('nickname'),
 					itemId : 'nickname'
 				}
