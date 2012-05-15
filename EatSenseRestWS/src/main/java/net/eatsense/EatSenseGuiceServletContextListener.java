@@ -14,6 +14,7 @@ import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.business.BusinessesResource;
 import net.eatsense.restws.customer.CheckInsResource;
+import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
 
@@ -63,6 +64,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(ChannelResource.class);
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
+						bind(NicknameGenerator.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*newsletter(.)*", "(.)*b/businesses(.)*",
