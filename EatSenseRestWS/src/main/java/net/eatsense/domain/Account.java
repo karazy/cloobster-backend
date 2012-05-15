@@ -46,6 +46,37 @@ public class Account extends GenericEntity {
 	@NotNull
 	Key<Company> company;
 	
+	private String facebookUid;
+	private String emailConfirmationHash;
+	private boolean emailConfirmed = false;
+	private boolean active = false;
+	
+	private Date signupDate;
+	
+	public String getFacebookUid() {
+		return facebookUid;
+	}
+
+	public void setFacebookUid(String facebookUid) {
+		this.facebookUid = facebookUid;
+	}
+
+	public boolean isEmailConfirmed() {
+		return emailConfirmed;
+	}
+
+	public void setEmailConfirmed(boolean emailConfirmed) {
+		this.emailConfirmed = emailConfirmed;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
 	public Key<Company> getCompany() {
 		return company;
 	}
@@ -138,5 +169,21 @@ public class Account extends GenericEntity {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public Date getSignupDate() {
+		return signupDate;
+	}
+
+	public void setSignupDate(Date signupDate) {
+		this.signupDate = signupDate;
+	}
+
+	public String getEmailConfirmationHash() {
+		return emailConfirmationHash;
+	}
+
+	public void setEmailConfirmationHash(String emailConfirmationHash) {
+		this.emailConfirmationHash = emailConfirmationHash;
 	}
 }

@@ -29,14 +29,18 @@ public class AccountRepository extends GenericRepository<Account> {
 	 * @param email
 	 * @param role
 	 * @param businessKeys
+	 * @param emailConfirmed 
+	 * @param active 
 	 * @return
 	 */
-	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Business>> businessKeys) {
+	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Business>> businessKeys, boolean emailConfirmed, boolean active) {
 		Account account = new Account();
 		account.setLogin(login);
 		account.setEmail(email);
 		account.setRole(role);
 		account.setBusinesses(businessKeys);
+		account.setEmailConfirmed(emailConfirmed);
+		account.setActive(active);
 		
 		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
 		

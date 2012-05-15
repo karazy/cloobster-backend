@@ -175,26 +175,6 @@ public class AccountController {
 			
 	}
 	
-	/**
-	 * Create and save a new Account, with the given credentials, in the datastore.
-	 * 
-	 * @param login
-	 * @param password
-	 * @param email
-	 * @param role
-	 * @param businessIds list of business ids this account manages
-	 * @return
-	 */
-	public Account createAndSaveAccount(String login, String password, String email, String role, List<Long> businessIds) {
-		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
-		if(businessIds != null) {
-			for (Long businessId : businessIds) {
-				businessKeys.add( new Key<Business>(Business.class,businessId));
-			}
-		}
-		return accountRepo.createAndSaveAccount(login, password, email, role, businessKeys);
-	}
-	
 	public AccountDTO toDto(Account account) {
 		if(account == null) {
 			return null;

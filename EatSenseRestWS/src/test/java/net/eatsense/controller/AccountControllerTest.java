@@ -91,7 +91,7 @@ public class AccountControllerTest {
 		 role = "admin";
 		 //TODO update to use restaurant id
 		account = ar.createAndSaveAccount( login, password,
-				email, role, rr.getAllKeys());		 
+				email, role, rr.getAllKeys(), true, true);		 
 	}
 
 	@After
