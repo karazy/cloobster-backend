@@ -51,7 +51,7 @@ public class Account extends GenericEntity {
 	private boolean emailConfirmed = false;
 	private boolean active = false;
 	
-	private Date signupDate;
+	private Date creationDate;
 	
 	public String getFacebookUid() {
 		return facebookUid;
@@ -171,12 +171,12 @@ public class Account extends GenericEntity {
 		this.phone = phone;
 	}
 
-	public Date getSignupDate() {
-		return signupDate;
+	public Date getCreationDate() {
+		return creationDate;
 	}
 
-	public void setSignupDate(Date signupDate) {
-		this.signupDate = signupDate;
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	public String getEmailConfirmationHash() {
