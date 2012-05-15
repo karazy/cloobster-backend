@@ -7,7 +7,15 @@
 	<datastore-index kind="Order" ancestor="true" source="manual">
         <property name="status" direction="asc"/>
     </datastore-index>
+    <datastore-index kind="Order" ancestor="true" source="manual">
+        <property name="checkIn" direction="asc"/>
+        <property name="status" direction="asc"/>
+    </datastore-index>
     <datastore-index kind="Product" ancestor="true" source="manual">
         <property name="name" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="Request" ancestor="false" source="manual">
+        <property name="spot" direction="asc"/>
+        <property name="receivedTime" direction="desc"/>
     </datastore-index>
 </datastore-indexes>
