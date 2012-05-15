@@ -34,7 +34,7 @@ public class SpotsResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"restaurantadmin"})
+	@RolesAllowed({"cockpituser"})
 	public Collection<SpotStatusDTO> getSpotCockpitInformation() throws Exception {
 		return businessController.getSpotStatusData(business);
 	}

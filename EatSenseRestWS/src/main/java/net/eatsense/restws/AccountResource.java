@@ -75,7 +75,7 @@ public class AccountResource {
 	@Path("{login}/tokens")
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
-	@RolesAllowed({"restaurantadmin"})
+	@RolesAllowed({"cockpituser"})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
 		

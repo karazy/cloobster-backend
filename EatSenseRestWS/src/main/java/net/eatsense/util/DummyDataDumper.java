@@ -49,7 +49,7 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "restaurantadmin", rr.getAllKeys());
+		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "companyadmin", rr.getAllKeys());
 		
 	}	
 

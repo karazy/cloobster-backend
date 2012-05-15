@@ -76,6 +76,41 @@ public class AccountController {
 	}
 	
 	/**
+	 * Check if the account is in a specific role.
+	 * 
+	 * @param account
+	 * @param role
+	 * @return 	<code>true</code> if the account is in the role<br>
+	 * 			<code>false</code> otherwise
+	 */
+	public boolean isAccountInRole(final Account account, String role) {
+		if(role == null || role == "")
+			return true;
+		
+		if(account == null)
+			return false;
+		
+		// grant the user role, if an account was authenticated
+    	if(role.equals("user") && account.getId() != null) {
+    		return true;
+    	}
+		
+		if(role.equals(account.getRole()))
+			return true;
+	
+    	// grant the cockpituser role too if the account is in businessadmin or companyowner role.
+		if(role.equals("cockpituser")
+				&& ( account.getRole().equals("businessadmin") || account.getRole().equals("companyowner") ))
+			return true;
+		
+    	// grant the businessadmin role too if the account is in companyowner role.		
+		if(role.equals("businessadmin") && ( account.getRole().equals("companyowner")))
+			return true;
+					
+		return false;
+	}
+	
+	/**
 	 * Retrieve an account from the store ONLY if the given credentials match.
 	 * 
 	 * @param login
@@ -180,7 +215,7 @@ public class AccountController {
 	public List<BusinessDTO> getBusinessDtos(String login) {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
-		if(account != null && account.getRole().equals("restaurantadmin")) {
+		if(account != null && account.getRole().equals("cockpituser")) {
 			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
 				BusinessDTO businessData = new BusinessDTO();
 				businessData.setId(business.getId());

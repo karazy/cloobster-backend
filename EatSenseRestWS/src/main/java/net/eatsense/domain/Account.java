@@ -19,6 +19,8 @@ public class Account extends GenericEntity {
 	@NotEmpty
 	String login;
 	String hashedPassword;
+	
+	@NotNull
 	@Email
 	String email;
 	
@@ -30,6 +32,43 @@ public class Account extends GenericEntity {
 	int failedLoginAttempts;
 	
 	List<Key<Business>> businessess;
+	
+	@NotNull
+	@NotEmpty
+	String firstName;
+	
+	@NotNull
+	@NotEmpty
+	String lastName;
+	
+	private String phone;
+		
+	@NotNull
+	Key<Company> company;
+	
+	public Key<Company> getCompany() {
+		return company;
+	}
+
+	public void setCompany(Key<Company> company) {
+		this.company = company;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 	
 	public List<Key<Business>> getBusinesses() {
 		return businessess;
@@ -91,5 +130,13 @@ public class Account extends GenericEntity {
 	@Transient
 	public Key<Account> getKey() {
 		return new Key<Account>(Account.class, super.getId());
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 }
