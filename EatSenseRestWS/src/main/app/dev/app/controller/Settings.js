@@ -132,7 +132,6 @@ Ext.define('EatSense.controller.Settings', {
             tap: function() {
                  //force keyboard to hide, due to a bug in Android 4.0 the textfield is visible above the popup
                 popup.down('newsletter').down('emailfield').blur();
-                
                 me.registerNewsletter(popup.down('newsletter').getValues(), 
                     //remove on success
                 function() {
