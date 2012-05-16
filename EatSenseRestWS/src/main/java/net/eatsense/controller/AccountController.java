@@ -62,7 +62,7 @@ public class AccountController {
 	 * @param businessId identifying the business to check for
 	 * @return
 	 */
-	public boolean isAccountManagingBusiness(final Account account, long businessId){
+	public boolean isAccountManagingBusiness(final Account account, long businessId) {
 		if(account == null)
 			return false;
 		
