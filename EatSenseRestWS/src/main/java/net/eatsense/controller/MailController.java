@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
@@ -40,7 +41,8 @@ public class MailController {
 		Message mail = new MimeMessage(session);
 		URI unsubscribeUri = uriInfo.getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient.getEmail()).build(recipient.getId());
 		
-		mail.setFrom(new InternetAddress("weiher@karazy.net"));
+		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
+		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
 		mail.setSubject("Thanks for subcribing to the eatSense newsletter.");
 		
