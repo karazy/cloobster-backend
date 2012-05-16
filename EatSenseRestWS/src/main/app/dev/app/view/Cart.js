@@ -8,6 +8,7 @@ Ext.define('EatSense.view.Cart', {
 		iconMask : true,
 		itemId : 'carttab',
 		layout: 'fit',
+		cls: 'cart-panel',
 		items : [
 		          {
 			docked : 'top',

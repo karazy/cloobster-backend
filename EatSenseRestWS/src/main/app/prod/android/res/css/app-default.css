@@ -88,12 +88,6 @@ input, textarea, select {
 }
 
 
-/* Cart background */
-
-.cartTotal {background: #F79621;border-top: 1px solid #666;}
-
-
-
 /**
  * @class Global_CSS
  *
@@ -5232,7 +5226,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
 /* line 207, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list-round .x-scroll-view {
   
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
   
   /* background-image: linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
   background-image: -o-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
@@ -5250,11 +5244,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
   
 }
 /* FRED */
-.x-dataview .x-scroll-view {
+/*.x-dataview .x-scroll-view {
   
   background: #917D64 url('../images/bg-rp-main.png') repeat left top;
 
-}
+}*/
 
 .dashboard {
   background: #917D64 url('../images/bg-rp-main.png') repeat left top;  
@@ -5609,7 +5603,7 @@ html, body {
   -webkit-box-orient: vertical;
   min-width: 100%;
   min-height: 100%;
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  /*background: #917D64 url('../images/bg-rp-main.png') repeat left top;*/
 }
 
 /* line 131, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_layout.scss */
@@ -6958,26 +6952,23 @@ input[type="search"]::-webkit-search-cancel-button {
 * Productlist
 */
 /* line 37, app-default.scss */
-.productListItem h2 {
+.productListItem div {
   float: left;
-  /*width: 70%;*/
-  margin: 0;
+  width: 80%;
+  font-size: 1em;
+  /*margin: 0;*/
 }
 
 /* line 43, app-default.scss */
-.productListItem h2.price {
-  position: absolute;
-  right: 0;
-  /*top: 50%;*/
-  /*width: 30%;*/
-  text-align: right;
-  padding-right: 10px;
+.productListItem div.price {
   font-size: 1em;
+  width: 20%;
+  float: left;
+  text-align: right;
 }
 /* line 53, app-default.scss */
 .productListItem div p {
   font-size: 0.6em;
-  clear: both;
 }
 
 /* line 60, app-default.scss */
@@ -6990,7 +6981,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 67, app-default.scss */
 .productDetailPanel {
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
   padding: 10px;
 }
 
@@ -7072,16 +7063,38 @@ input[type="search"]::-webkit-search-cancel-button {
 /*
 * Orderlist
 */
-/* line 154, app-default.scss */
- .order-title h4 {
+
+.orderListItem {
+  color: #000000;
+}
+
+.orderListItem .order-title {
+  margin-bottom: 7px;
+}
+
+.orderListItem .order-title h4 {
   float: left;
   margin-right: 5px;
-  /*width: 80%;*/
+  color: #000000;
+  font-size: 1.2em;
 }
 
 .orderListItem .order-title h5 {
   float: left;
-  /*width: 80%;*/
+  color: #000000;
+  font-size: 1.2em;
+}
+
+.orderListItem h6 {
+  color: #000000;
+  margin-left: 10px;
+  font-size: 0.8em;
+}
+
+.orderListItem li {
+  color: #000000;
+  margin-left: 15px;
+  font-size: 0.7em;
 }
 
 /* line 160, app-default.scss */
@@ -7115,6 +7128,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .cartTotal {
   text-align: center;
   font-size: 1.5em;
+  color: #FFFFFF;
 }
 
 /* line 191, app-default.scss */
@@ -7314,9 +7328,80 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*
+* General styles
+*/
+
+.general-label {
+  color: white; 
+  font-size: 1em;
+}
+.general-textfield {
+  border-radius: 0.3em;
+}
+
+.general-field-label-horizontal {
+  border-top-left-radius: 0.3em;
+  border-bottom-left-radius: 0.3em;
+}
+
+/*
+* CheckIn confirmation view
+*/
+
+.checkin-confirm-nickname-field {
+  border-radius: 0.3em;
+}
+
+.checkin-confirm-nickname-label {
+  color: white; 
+  font-size: 1.5em;
+}
+
+.checkin-confirm-nickname-toggle {
+  border-radius: 0.3em;  
+  margin-top: 5px;
+}
+
+.checkin-confirm-nickname-toggle .x-component-outer {
+  padding: 5px;
+}
+
+.checkin-confirm-nickname-toggle .x-component-outer .x-toggle {
+  float: left;
+  margin-right: 10px;
+}
+
+.checkin-confirm-nickname-toggle .x-innerhtml {
+  position: relative;
+  top: 10px;
+}
+
+.checkin-confirm-nickname-toggle-label {
+  border-radius: 0.3em 0.3em 0 0;
+}
+
+/*
+* Overrides! Most of them should later be solved via mixins or custom classes.
+*/
+
+/*
+* A smaller distance between border and box content.
+*/
+.x-msgbox.x-floating {
+  padding: 2px;
+}
+
+/*
+* Rounded badges.
+*/
+.x-hasbadge > .x-badge {
+  border-radius: 1em;
+}
+
+/*
 * Bugfix for icons in Android 4 not displayed.
 * http://www.sencha.com/forum/showthread.php?192463-Blank-icons-in-tabbar-if-container-has-scrollable-set-to-true&p=782717#post782717
 */
 .x-tabbar > * {
     z-index: 1;
-  }
+}

@@ -43,21 +43,25 @@ Ext.define('EatSense.view.ProductDetail', {
 				)
 			}, {
 				xtype : 'panel',
+				docked: 'right',
+				width: '130px',
 				layout : {
-					type : 'hbox',
+					type : 'vbox',
 					align : 'stretch',
 					pack: 'center'
 				},
 				items : [
 				{
 					xtype : 'spinnerfield',
+					label: Karazy.i18n.translate('amountspinnerLabel'),
+					labelAlign: 'top',
 					itemId : 'productAmountSpinner',
 					increment : 1,
 					value : 1,
 					minValue : '1',
 					maxValue : '10',					
 					cycle : true,
-					width: 130
+					width: 120
 				},
 				{
 					xtype: 'label',

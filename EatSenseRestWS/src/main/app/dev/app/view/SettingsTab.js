@@ -7,6 +7,7 @@ Ext.define('EatSense.view.SettingsTab', {
 	config : {
 		layout : 'vbox',				
 		iconCls : 'settings',
+		cls: 'setting-panel',
 		title: Karazy.i18n.translate('settingsButton'),
 		iconMask : true,
 		items : [ {

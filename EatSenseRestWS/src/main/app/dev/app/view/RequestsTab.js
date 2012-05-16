@@ -11,6 +11,7 @@ Ext.define('EatSense.view.RequestsTab', {
 			align: 'middle'
 		},				
 		iconCls : 'requests',
+		cls: 'request-panel',
 		title: Karazy.i18n.translate('requestsButton'),
 		iconMask : true,
 		items : [
