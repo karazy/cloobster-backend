@@ -21,6 +21,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.RecipientDTO;
 
@@ -72,6 +73,9 @@ public class AccountControllerTest {
 	
 	@Mock
 	private MailController mailCtrl;
+
+	@Mock
+	private CompanyRepository companyRepo;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -82,7 +86,7 @@ public class AccountControllerTest {
 		ar = injector.getInstance(AccountRepository.class);
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new AccountController(ar, rr,recipientRepo, channelController, avf.getValidator());
+		ctr = new AccountController(ar, rr,recipientRepo, companyRepo, channelController, avf.getValidator());
 		
 		
 		 password = "diesisteintestpasswort";

@@ -11,15 +11,22 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.exceptions.RegistrationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.RecipientDTO;
+import net.eatsense.representation.RegistrationDTO;
+import net.eatsense.util.IdHelper;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -42,16 +49,19 @@ public class AccountController {
 	private ChannelController channelCtrl;
 	private NewsletterRecipientRepository recipientRepo;
 	private Validator validator;
+	private CompanyRepository companyRepo;
 		
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
-			NewsletterRecipientRepository recipientRepo, ChannelController cctrl, Validator validator) {
+			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
+			ChannelController cctrl, Validator validator) {
 		super();
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
 		this.channelCtrl = cctrl;
 		this.businessRepo = businessRepository;
 		this.accountRepo = accountRepo;
+		this.companyRepo = companyRepo;
 	}
 	
 	
@@ -92,7 +102,7 @@ public class AccountController {
 			return false;
 		
 		// grant the user role, if an account was authenticated
-    	if(role.equals("user") && account.getId() != null) {
+    	if(role.equals(Role.USER) && account.getId() != null) {
     		return true;
     	}
 		
@@ -100,12 +110,12 @@ public class AccountController {
 			return true;
 	
     	// grant the cockpituser role too if the account is in businessadmin or companyowner role.
-		if(role.equals("cockpituser")
-				&& ( account.getRole().equals("businessadmin") || account.getRole().equals("companyowner") ))
+		if(role.equals(Role.COCKPITUSER)
+				&& ( account.getRole().equals(Role.BUSINESSADMIN) || account.getRole().equals(Role.COMPANYOWNER) ))
 			return true;
 		
     	// grant the businessadmin role too if the account is in companyowner role.		
-		if(role.equals("businessadmin") && ( account.getRole().equals("companyowner")))
+		if(role.equals(Role.BUSINESSADMIN) && ( account.getRole().equals(Role.COMPANYOWNER)))
 			return true;
 					
 		return false;
@@ -250,6 +260,62 @@ public class AccountController {
 		recipientRepo.saveOrUpdate(recipient);
 		
 		return recipient;
+	}
+	
+	public RegistrationDTO registerNewAccount(RegistrationDTO accountData) {
+		checkNotNull(accountData.getLogin(), "accountData login was null");
+		checkNotNull(accountData.getEmail(), "accountData email was null");
+		checkNotNull(accountData.getPassword(), "accountData password was null");
+		checkNotNull(accountData.getCompany(), "accountData company was null");
+		checkArgument(!accountData.getLogin().isEmpty(), "accountData login was empty");
+		checkArgument(!accountData.getEmail().isEmpty(), "accountData email was empty");
+		checkArgument(!accountData.getPassword().isEmpty(), "accountData password was empty");
+		checkCompany(accountData.getCompany());
+		
+		if( accountRepo.getKeyByProperty("email", accountData.getEmail()) != null ) {
+			throw new RegistrationException("email already in use", "registrationErrorEmailExists");
+		}
+		if( accountRepo.getKeyByProperty("login", accountData.getLogin()) != null ) {
+			throw new RegistrationException("login already in use", "registrationErrorLoginExists");
+		}
+		
+		Account account = new Account();
+		Company company = new Company();
+		
+		company.setAddress(accountData.getCompany().getAddress());
+		company.setCity(accountData.getCompany().getCity());
+		company.setCountry(accountData.getCompany().getCountry());
+		company.setName(accountData.getCompany().getName());
+		company.setPhone(accountData.getCompany().getPhone());
+		company.setPostcode(accountData.getCompany().getPostcode());
+		Key<Company> companyKey = companyRepo.saveOrUpdate(company);
+		
+		account.setActive(false);
+		account.setCompany(companyKey);
+		account.setCreationDate(new Date());
+		account.setEmail(accountData.getEmail());
+		account.setEmailConfirmationHash( IdHelper.generateId() );
+		account.setEmailConfirmed(false);
+		account.setLogin(accountData.getLogin());
+		account.setName(accountData.getName());
+		account.setPhone(accountData.getPhone());
+		account.setRole(Role.COMPANYOWNER);
+		account.setHashedPassword(BCrypt.hashpw(accountData.getPassword(), BCrypt.gensalt()));
+		
+		accountRepo.saveOrUpdate(account);
+		
+		return accountData;
+	}
+	
+	private boolean checkCompany(CompanyDTO company) {
+		checkNotNull(company, "company was null");
+		checkNotNull(company.getName(), "company name was null");
+		checkNotNull(company.getPhone(), "company phone was null");
+		checkNotNull(company.getAddress(), "company address was null");
+		checkNotNull(company.getCity(), "company address was null");
+		checkNotNull(company.getCountry(), "company country was null");
+		checkNotNull(company.getPostcode(), "company postcode was null");
+		return true;
 	}
 	
 	/**

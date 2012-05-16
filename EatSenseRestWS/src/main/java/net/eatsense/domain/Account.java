@@ -35,11 +35,7 @@ public class Account extends GenericEntity {
 	
 	@NotNull
 	@NotEmpty
-	String firstName;
-	
-	@NotNull
-	@NotEmpty
-	String lastName;
+	String name;
 	
 	private String phone;
 		
@@ -85,22 +81,14 @@ public class Account extends GenericEntity {
 		this.company = company;
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getName() {
+		return name;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-	
 	public List<Key<Business>> getBusinesses() {
 		return businessess;
 	}
