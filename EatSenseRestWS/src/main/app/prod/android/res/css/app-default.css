@@ -7434,6 +7434,7 @@ input[type="search"]::-webkit-search-cancel-button {
 */
 .x-msgbox.x-floating {
   padding: 2px;
+  background: #917D64 url('../images/bg-rp-main.png');
 }
 
 /*
