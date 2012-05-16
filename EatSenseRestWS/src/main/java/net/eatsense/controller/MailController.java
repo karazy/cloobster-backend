@@ -16,6 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.UriInfo;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.NewsletterRecipient;
 
 import org.slf4j.Logger;
@@ -34,6 +35,14 @@ public class MailController {
 		super();
 		this.uriInfo = uriInfo;
 		// TODO Auto-generated constructor stub
+	}
+	
+	public Message sendEmailConfirmationMessage(Account account) throws AddressException, MessagingException {
+		Message mail = new MimeMessage(session);
+		
+		mail.setFrom(new InternetAddress("weiher@karazy.net"));
+		
+		return mail;
 	}
 
 	public Message sendWelcomeMessage(NewsletterRecipient recipient) throws MessagingException {

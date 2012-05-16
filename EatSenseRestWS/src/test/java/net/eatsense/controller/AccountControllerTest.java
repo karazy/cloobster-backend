@@ -24,6 +24,7 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.RecipientDTO;
+import net.eatsense.representation.RegistrationDTO;
 
 import org.apache.bval.guice.ValidationModule;
 import org.apache.bval.jsr303.ApacheValidationProvider;
@@ -322,5 +323,11 @@ public class AccountControllerTest {
 		long businessId = 1;
 		assertThat(ctr.isAccountManagingBusiness(account, businessId), is(false));
 		assertThat(ctr.isAccountManagingBusiness(account, 0), is(false));
+	}
+	
+	@Test
+	public void testRegisterNewAccount() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail(email);
 	}
 }
