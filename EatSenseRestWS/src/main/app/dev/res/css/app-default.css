@@ -5226,7 +5226,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
 /* line 207, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list-round .x-scroll-view {
   
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  background: #917D64 url('../images/bg-main.png') no-repeat left top;
   
   /* background-image: linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
   background-image: -o-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
@@ -5246,12 +5246,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
 /* FRED */
 .x-dataview .x-scroll-view {
   
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  background: #917D64 url('../images/bg-main.png') no-repeat left top;
 
 }
 
 .dashboard {
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;  
+  background: #917D64 url('../images/bg-main.png') no-repeat left top;  
 }
 
 /* line 211, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
@@ -5603,7 +5603,7 @@ html, body {
   -webkit-box-orient: vertical;
   min-width: 100%;
   min-height: 100%;
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  background: #917D64 url('../images/bg-main.png') no-repeat left top;
 }
 
 /* line 131, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_layout.scss */
@@ -6984,7 +6984,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 67, app-default.scss */
 .productDetailPanel {
-  background: #917D64 url('../images/bg-rp-main.png') repeat left top;
+  background: #917D64 url('../images/bg-main.png') no-repeat left top;
   padding: 10px;
 }
 
