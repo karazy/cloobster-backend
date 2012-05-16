@@ -7362,7 +7362,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*
-* Overrides! Should later be solved via mixins or custom classes.
+* Overrides! Most of them should later be solved via mixins or custom classes.
 */
 
 /*
@@ -7370,6 +7370,13 @@ input[type="search"]::-webkit-search-cancel-button {
 */
 .x-msgbox.x-floating {
   padding: 2px;
+}
+
+/*
+* Rounded badges.
+*/
+.x-hasbadge > .x-badge {
+  border-radius: 1em;
 }
 
 /*
