@@ -7314,6 +7314,23 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*
+* General styles
+*/
+
+.general-label {
+  color: white; 
+  font-size: 1em;
+}
+.general-textfield {
+  border-radius: 0.3em;
+}
+
+.general-field-label-horizontal {
+  border-top-left-radius: 0.3em;
+  border-bottom-left-radius: 0.3em;
+}
+
+/*
 * CheckIn confirmation view
 */
 
@@ -7348,6 +7365,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .checkin-confirm-nickname-toggle-label {
   border-radius: 0.3em 0.3em 0 0;
 }
+
 
 /*
 * Bugfix for icons in Android 4 not displayed.
