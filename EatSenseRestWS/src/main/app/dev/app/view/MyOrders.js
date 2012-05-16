@@ -44,7 +44,7 @@ Ext.define('EatSense.view.MyOrders', {
 			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
 			"<div class='{[values.status.toLowerCase()]}'>" +
-				"<div class='order-title'><h4>{amount}x</h4> <h4>{Product.name}</h4> <h5>{[this.formatPrice(values.Product.price_calculated)]}</h5></div>"+
+				"<h2 class='title'>{amount}x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
 				// "<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				// "<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>({amount}x) {[this.formatPrice(values)]}</div>" +
 				"<div style='clear: both;'>" +
