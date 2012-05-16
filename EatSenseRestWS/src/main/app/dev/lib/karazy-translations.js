@@ -35,6 +35,7 @@ Karazy.translations = (function() {
 		"checkInStep1Label1" : "Wähle deinen Spitznamen",
 		"refreshNicknameBt" : "Neu",
 		"checkInStep1Button" : "Los geht's!",
+		"nicknameToggleHint" : "Nein/Ja",
 		"checkInStep2Label1" : "Andere haben hier bereits eingecheckt.",
 		"checkInStep2Label2" : "Mit jemand anderem einchecken?",
 		"checkInStep2OnMyOwnButton" : "Ich bin alleine hier",
