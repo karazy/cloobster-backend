@@ -88,12 +88,6 @@ input, textarea, select {
 }
 
 
-/* Cart background */
-
-.cartTotal {background: #F79621;border-top: 1px solid #666;}
-
-
-
 /**
  * @class Global_CSS
  *
@@ -7115,6 +7109,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .cartTotal {
   text-align: center;
   font-size: 1.5em;
+  color: #FFFFFF;
 }
 
 /* line 191, app-default.scss */
