@@ -100,7 +100,9 @@ Karazy.translations = (function() {
 		"requestCallWaiterSendMsd" : "Bitte einen Moment Geduld!<br>Es wird gleich jemand kommen.",
 		"callWaiterButton" : "Bedienung rufen",
 		"callWaiterRequestBadge" : "Bedienung gerufen",
-		"cancelCallWaiterRequest" : "Bedienung rufen abbrechen",	
+		"cancelCallWaiterRequest" : "Danke, hat sich erledigt",
+		"callWaiterCallHint" : "Du hast ein Anliegen?",
+		"callWaiterCancelHint" :	"Du hast uns gerufen.<br/>Wir kommen so schnell wie möglich!",
 		//general errors
 		"error" : "Fehler",
 		"errorTitle" : "Fehler",		

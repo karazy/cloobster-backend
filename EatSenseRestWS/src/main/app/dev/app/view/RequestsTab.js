@@ -20,11 +20,16 @@ Ext.define('EatSense.view.RequestsTab', {
 			title : Karazy.i18n.translate('requestsTitle'),
 			},
 			{
+				xtype: 'label',
+				cls: 'general-label',
+				html: Karazy.i18n.translate('callWaiterCallHint')
+			},
+			{
 				xtype: 'button',
 				text: Karazy.i18n.translate('callWaiterButton'),
 				action: 'waiter',
-				ui: 'action'
-				// badgeCls: 'call-waiter-badge'
+				ui: 'action',
+				margin: '10 0 0 0'
 			},
 		]
 	}
