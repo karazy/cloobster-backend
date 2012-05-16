@@ -179,7 +179,7 @@
 			cartview = this.getCartview(),
 			ajaxOrderCount = 0,
 			ordersCount = orders.getCount(),
-			// cart = Ext.create('EatSense.model.Cart'),
+			menuCtr = this.getApplication().getController('Menu'),
 			me = this;
 		
 		if(ordersCount > 0) {
@@ -219,6 +219,7 @@
 							me.refreshCart();
 							me.refreshMyOrdersList();
 
+							menuCtr.backToMenu();
 							me.getLoungeview().switchTab(me.getMenutab() ,'left');
 
 							//show success message
@@ -501,9 +502,8 @@
 				payButton = me.getPaymentButton();
 				leaveButton = me.getLeaveButton();
 		
-		//TODO investigate if this is a bug
+		//remove all orders and reload to have a fresh state
 		myordersStore.removeAll();
-//		myorderlist.getStore().removeAll();
 		
 		myordersStore.load({
 			scope   : this,			
@@ -511,8 +511,9 @@
 				try {
 					if(success == true) {
 						payButton.enable();
-						(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
-						(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
+						me.toggleMyordersButtons();
+						// (myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
+						// (myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 						
 
 						//WORKAROUND to make sure all data is available in data property
@@ -649,7 +650,7 @@
 					payButton.hide();
 					myordersComplete.show();
 					me.refreshMyOrdersBadgeText(true);
-					this.getApplication().getController('Android').removeLastBackHandler();		
+					me.getApplication().getController('Android').removeLastBackHandler();		
 			},
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
@@ -719,8 +720,12 @@
 	 * Shows (issued orders are not empty) or hides (issued orders are empty) myorders buttons (pay).
 	 */
 	toggleMyordersButtons: function() {
-		var payButton = this.getPayButton();
-		
+		var payButton = this.getPaymentButton(),
+			leaveButton = this.getLeaveButton(),
+			myordersStore = Ext.StoreManager.lookup('orderStore');
+
+		(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
+		(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 	},
 	//Utility methods
 	/**
@@ -778,6 +783,7 @@
 				total = me.calculateOrdersTotal(orderStore);
 				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
 				me.refreshMyOrdersBadgeText();
+				me.toggleMyordersButtons();
 
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),

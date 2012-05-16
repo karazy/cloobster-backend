@@ -12,19 +12,21 @@ Ext.define('EatSense.view.Newsletter', {
 		scrollable: false,
 		cls: 'newsletter',
 		defaults: {
-				width: '90%'
+				width: '80%'
 		},
 		items: [
 		{
 			xtype: 'label',			
-			cls: 'newsletter-label',
+			cls: 'general-label',
 			html: Karazy.i18n.translate('newsletterLabel')
 		},
 		{
-			xtype: 'textfield',
+			xtype: 'emailfield',
 			label: Karazy.i18n.translate('newsletterEmail'),
 			name:'email',
-			cls: 'newsletter-field'
+			cls: 'general-textfield',
+			labelCls: 'general-field-label-horizontal',
+			margin: '5 0 5 0'
 		}, {
 			xtype: 'button',
 			action: 'register',
