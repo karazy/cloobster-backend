@@ -7,6 +7,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 	xtype : 'checkinconfirmation',
 	requires: ['Ext.field.Toggle'],
 	config : {
+		cls: 'dashboard',
 		layout : {
 			type : 'vbox',
 			pack : 'center',
