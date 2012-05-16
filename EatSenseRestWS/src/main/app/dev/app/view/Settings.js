@@ -25,12 +25,14 @@ Ext.define('EatSense.view.Settings', {
 			items: [
 				{
 					xtype: 'label',
-					html: Karazy.i18n.translate('nicknameDesc')
+					html: Karazy.i18n.translate('nicknameDesc'),
+					width: '80%'
 				},
 				{
 					xtype : 'textfield',
 					label : Karazy.i18n.translate('nickname'),
 					itemId : 'nicknameSetting',
+					width: '80%'
 				}
 			]
 		},

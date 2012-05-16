@@ -7,6 +7,7 @@ Ext.define('EatSense.view.SettingsTab', {
 	config : {
 		layout : 'vbox',				
 		iconCls : 'settings',
+		cls: 'setting-panel',
 		title: Karazy.i18n.translate('settingsButton'),
 		iconMask : true,
 		items : [ {
@@ -18,6 +19,7 @@ Ext.define('EatSense.view.SettingsTab', {
 			xtype: 'formpanel',
 			//prevents also that the panel has a wrong size. Bug?
 			scrollable: false,
+			margin: '10 0 0 0',
 			padding: 5,
 			layout: {
 				type: 'vbox',
@@ -25,17 +27,21 @@ Ext.define('EatSense.view.SettingsTab', {
 				align: 'middle'
 			},
 			defaults: {
-				width: '90%'
+				width: '80%'
 			},
 			items: [		
 				{
 					xtype: 'label',
+					cls: 'general-label',
+					margin: '5 0 5 0',
 					html: Karazy.i18n.translate('nicknameDesc')
 				},
 				{
-					xtype : 'emailfield',
+					xtype : 'textfield',
 					label : Karazy.i18n.translate('nickname'),
-					itemId : 'nickname'
+					itemId : 'nickname',
+					cls: 'general-textfield',
+					labelCls: 'general-field-label-horizontal'
 				}
 			]
 		},

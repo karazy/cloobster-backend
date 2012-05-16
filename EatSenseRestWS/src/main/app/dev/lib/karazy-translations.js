@@ -35,6 +35,7 @@ Karazy.translations = (function() {
 		"checkInStep1Label1" : "Wähle deinen Spitznamen",
 		"refreshNicknameBt" : "Neu",
 		"checkInStep1Button" : "Los geht's!",
+		"nicknameToggleHint" : "Nein/Ja",
 		"checkInStep2Label1" : "Andere haben hier bereits eingecheckt.",
 		"checkInStep2Label2" : "Mit jemand anderem einchecken?",
 		"checkInStep2OnMyOwnButton" : "Ich bin alleine hier",
@@ -60,6 +61,7 @@ Karazy.translations = (function() {
 		"orderRemoved" : "Bestellung entfernt",
 		"orderComment" : "Optionaler Kommentar",
 		"amount" : "Menge",
+		"amountspinnerLabel" : "Ich will ...",
 		"orderSubmit" : "Bestellung abgeschickt ...<br/>Guten Appetit!",
 		"productCartBt" : "In den Warenkorb",
 		"orderCanceled" : "{0} wurde storniert.",
@@ -74,7 +76,7 @@ Karazy.translations = (function() {
 		//Lounge
 		"loungeviewTitle" : "Die Lounge",
 		//MyOrders
-		"myOrdersTitle" : "Bezahlen",
+		"myOrdersTitle" : "Deine Bestellung",
 		"myOrdersTabBt" : "Bezahlen",
 		"payRequestButton" : "Bezahlen",
 		"leaveButton" : "Verlassen",
@@ -99,7 +101,9 @@ Karazy.translations = (function() {
 		"requestCallWaiterSendMsd" : "Bitte einen Moment Geduld!<br>Es wird gleich jemand kommen.",
 		"callWaiterButton" : "Bedienung rufen",
 		"callWaiterRequestBadge" : "Bedienung gerufen",
-		"cancelCallWaiterRequest" : "Bedienung rufen abbrechen",	
+		"cancelCallWaiterRequest" : "Danke, hat sich erledigt",
+		"callWaiterCallHint" : "Du hast ein Anliegen?",
+		"callWaiterCancelHint" :	"Du hast uns gerufen.<br/>Wir kommen so schnell wie möglich!",
 		//general errors
 		"error" : "Fehler",
 		"errorTitle" : "Fehler",		

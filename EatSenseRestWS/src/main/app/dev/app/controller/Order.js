@@ -581,6 +581,7 @@
 
 			//create picker
 			picker = Ext.create('Ext.Picker', {
+				height: '45%',
 				doneButton: {
 					text: Karazy.i18n.translate('ok'),
 					listeners: {
