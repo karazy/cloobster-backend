@@ -32,7 +32,7 @@ Karazy.translations = (function() {
 		"checkInTitle" : "Check-In",
 		"barcodePromptTitle" : "Barcode Abfrage",
 		"barcodePromptText" : "Bitte Tischcode eingeben.",
-		"checkInStep1Label1" : "Spitznamen wählen",
+		"checkInStep1Label1" : "Wähle deinen Spitznamen",
 		"refreshNicknameBt" : "Neu",
 		"checkInStep1Button" : "Los geht's!",
 		"checkInStep2Label1" : "Andere haben hier bereits eingecheckt.",
@@ -45,7 +45,8 @@ Karazy.translations = (function() {
 		"checkInCanceled" : "Sitzung wurde durch das Restaurant beendet.",
 		"nickname" : "Spitzname",
 		// Menu
-		"menuTitle" : "Karte",
+		"menuTab" : "Dein Menü",
+		"menuTitle" : "Heidi & Paul - Fresh Food",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
 		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
@@ -63,9 +64,9 @@ Karazy.translations = (function() {
 		"productCartBt" : "In den Warenkorb",
 		"orderCanceled" : "{0} wurde storniert.",
 		//Cart
-		"cartviewTitle" : "Warenkorb",
-		"cartTabBt" : "Warenkorb",
-		"dumpCart" : "Warenkorb leeren?",
+		"cartviewTitle" : "Bestellen",
+		"cartTabBt" : "Bestellen",
+		"dumpCart" : "Bestellzettel leeren?",
 		"dumpItem" : "{0} entfernen?",
 		"submitButton" : "Bestellen",
 		"submitOrderProcess" : "Schicke Bestellung ...",
@@ -73,8 +74,8 @@ Karazy.translations = (function() {
 		//Lounge
 		"loungeviewTitle" : "Die Lounge",
 		//MyOrders
-		"myOrdersTitle" : "Bestellübersicht",
-		"myOrdersTabBt" : "Kasse",
+		"myOrdersTitle" : "Bezahlen",
+		"myOrdersTabBt" : "Bezahlen",
 		"payRequestButton" : "Bezahlen",
 		"leaveButton" : "Verlassen",
 		//Payment Request
