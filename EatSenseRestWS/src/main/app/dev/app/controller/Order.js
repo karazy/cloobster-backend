@@ -179,7 +179,7 @@
 			cartview = this.getCartview(),
 			ajaxOrderCount = 0,
 			ordersCount = orders.getCount(),
-			// cart = Ext.create('EatSense.model.Cart'),
+			menuCtr = this.getApplication().getController('Menu'),
 			me = this;
 		
 		if(ordersCount > 0) {
@@ -219,6 +219,7 @@
 							me.refreshCart();
 							me.refreshMyOrdersList();
 
+							menuCtr.backToMenu();
 							me.getLoungeview().switchTab(me.getMenutab() ,'left');
 
 							//show success message

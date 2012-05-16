@@ -144,10 +144,12 @@ Ext.define('EatSense.controller.Menu', {
      * Shows the menu. At this point the store is already filled with data.
      */
 	backToMenu: function() {
-		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
+		var androidCtr = this.getApplication().getController('Android');
 
-		//Android: disable backbutton
-		// this.getApplication().un('backbutton', this.backToMenu, this);
+		this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
+		//directly remove handler, because this function can be called from another controller
+		//so the wrong context is set
+		this.getMenuNavigationFunctions().pop();
 	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
