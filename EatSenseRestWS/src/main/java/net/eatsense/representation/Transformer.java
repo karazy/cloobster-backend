@@ -261,7 +261,7 @@ public class Transformer {
 		return choiceDtos; 		
 	}
 	
-	public CheckInDTO checkInToDto(CheckIn checkIn) {
+	public CheckInDTO checkInToDto(CheckIn checkIn, boolean loadAll) {
 		if(checkIn == null)
 			return null;
 		
@@ -270,15 +270,19 @@ public class Transformer {
 		dto.setLinkedCheckInId(checkIn.getLinkedUserId());
 		dto.setNickname(checkIn.getNickname());
 		dto.setUserId(checkIn.getUserId());
-		Business business;
-		business = businessRepo.getByKey(checkIn.getBusiness());
-		dto.setBusinessId(business.getId());
-		dto.setBusinessName(business.getName());
-		dto.setStatus(checkIn.getStatus());
-		Spot spot = spotRepo.getByKey(checkIn.getSpot());
-		dto.setSpot(spot.getName());
-		dto.setSpotId(spot.getBarcode());
 		
+		if(loadAll) {
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
+			dto.setBusinessName(business.getName());
+		}
+		
+		dto.setBusinessId(checkIn.getBusiness().getId());
+		dto.setStatus(checkIn.getStatus());
+		if(loadAll) {
+			Spot spot = spotRepo.getByKey(checkIn.getSpot());
+			dto.setSpot(spot.getName());
+			dto.setSpotId(spot.getBarcode());
+		}
 		return dto;
 	}
 

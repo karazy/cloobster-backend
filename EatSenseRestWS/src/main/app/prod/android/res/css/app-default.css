@@ -5226,7 +5226,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
 /* line 207, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
 .x-list-round .x-scroll-view {
   
-  background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
+  /*background: #917D64;*/ /*url('../images/bg-rp-main.png') repeat left top;*/
   
   /* background-image: linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
   background-image: -o-linear-gradient(bottom, rgb(145,125,100) 47%, rgb(143,120,93) 74%);
@@ -5603,7 +5603,7 @@ html, body {
   -webkit-box-orient: vertical;
   min-width: 100%;
   min-height: 100%;
-  /*background: #917D64 url('../images/bg-rp-main.png') repeat left top;*/
+  /*background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
 }
 
 /* line 131, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_layout.scss */
@@ -6949,10 +6949,15 @@ input[type="search"]::-webkit-search-cancel-button {
 
 @CHARSET "UTF-8";
 /*
-* Productlist
+* Menu- and Productlist
 */
+
+.menu-panel .x-list-round .x-scroll-view {
+ background: #917D64;  
+}
+
 /* line 37, app-default.scss */
-.productListItem div {
+.productListItem h2.title {
   float: left;
   width: 80%;
   font-size: 1em;
@@ -6960,22 +6965,24 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /* line 43, app-default.scss */
-.productListItem div.price {
+.productListItem h2.price {
+  float: left;
   font-size: 1em;
   width: 20%;
-  float: left;
   text-align: right;
 }
 /* line 53, app-default.scss */
 .productListItem div p {
+  clear: both;
   font-size: 0.6em;
 }
 
 /* line 60, app-default.scss */
 .productdetail-floating {
   border-radius: 0.3em !important;
-  padding: 6px !important;
-  background-color: #86B22D !important;
+  padding: 3px !important;
+  /* #86B22D */
+  background-color: #A9A9A9 !important;
   -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
 }
 
@@ -6983,6 +6990,14 @@ input[type="search"]::-webkit-search-cancel-button {
 .productDetailPanel {
   background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
   padding: 10px;
+}
+
+/* Set background for product description and amount spinner */
+.productDetailPanel .x-panel-inner, .productDetailPanel .x-component-outer, .productDetailPanel .x-form-label {
+  background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
+  color: black;
+  /* To prevent rounded corners on form label. */
+  border-radius: 0 !important;
 }
 
 /* line 76, app-default.scss */
@@ -7064,6 +7079,14 @@ input[type="search"]::-webkit-search-cancel-button {
 * Orderlist
 */
 
+.myorders-panel {
+  background: #917D64; 
+}
+
+.myorders-panel .x-list-round .x-scroll-view {
+ background: #917D64;  
+}
+
 .orderListItem {
   color: #000000;
 }
@@ -7117,6 +7140,14 @@ input[type="search"]::-webkit-search-cancel-button {
 /* line 177, app-default.scss */
 .orderListItem .canceled h2 {
   text-decoration: line-through;
+}
+
+.cart-panel {
+  background: #917D64; 
+}
+
+.cart-panel .x-list-round .x-scroll-view {
+ background: #917D64;  
 }
 
 /* line 182, app-default.scss */
@@ -7328,9 +7359,23 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*
+* Requests tab.
+*/
+.request-panel {
+ background: #917D64;  
+}
+
+/*
+* Settings tab.
+*/
+.setting-panel {
+ background: #917D64;  
+}
+
+
+/*
 * General styles
 */
-
 .general-label {
   color: white; 
   font-size: 1em;

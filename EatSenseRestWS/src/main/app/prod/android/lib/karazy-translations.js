@@ -61,6 +61,7 @@ Karazy.translations = (function() {
 		"orderRemoved" : "Bestellung entfernt",
 		"orderComment" : "Optionaler Kommentar",
 		"amount" : "Menge",
+		"amountspinnerLabel" : "Ich will ...",
 		"orderSubmit" : "Bestellung abgeschickt ...<br/>Guten Appetit!",
 		"productCartBt" : "In den Warenkorb",
 		"orderCanceled" : "{0} wurde storniert.",
