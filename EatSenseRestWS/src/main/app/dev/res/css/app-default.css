@@ -7366,6 +7366,16 @@ input[type="search"]::-webkit-search-cancel-button {
   border-radius: 0.3em 0.3em 0 0;
 }
 
+/*
+* Overrides! Should later be solved via mixins or custom classes.
+*/
+
+/*
+* A smaller distance between border and box content.
+*/
+.x-msgbox.x-floating {
+  padding: 2px;
+}
 
 /*
 * Bugfix for icons in Android 4 not displayed.
