@@ -45,12 +45,30 @@
 	<profiles>
 		<profile>
 			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>	
 			<build>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
 						<version>2.4.2</version>
 						<executions>
+							<execution>
+								<id>copy-cloobster-frontend-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<resources>
+										<resource>
+											<directory>../../cloobster_frontend/src</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
 							<execution>
 								<id>copy-admin-dev</id>
 								<phase>compile</phase>
@@ -107,9 +125,7 @@
 		</profile>
 		<profile>
 			<id>prod</id>	
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>	
+
 			<build>			
 				<plugins>
 					<plugin>
