@@ -67,7 +67,7 @@ Karazy.translations = (function() {
 		"productCartBt" : "In den Warenkorb",
 		"orderCanceled" : "{0} wurde storniert.",
 		//Cart
-		"cartviewTitle" : "Bestellen",
+		"cartviewTitle" : "Ich will ...",
 		"cartTabBt" : "Bestellen",
 		"dumpCart" : "Bestellzettel leeren?",
 		"dumpItem" : "{0} entfernen?",
