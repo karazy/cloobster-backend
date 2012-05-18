@@ -47,7 +47,7 @@ Karazy.translations = (function() {
 		"checkInCanceled" : "Sitzung wurde durch das Restaurant beendet.",
 		"nickname" : "Spitzname",
 		// Menu
-		"menuTab" : "Dein Menü",
+		"menuTab" : "Auswählen",
 		"menuTitle" : "Heidi & Paul - Fresh Food",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
