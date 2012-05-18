@@ -16,11 +16,11 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : Karazy.i18n.translate('checkInTitle'),
+			title : Karazy.i18n.translate('nickname'),
 			items : [ {
 				xtype : 'button',
 				action: 'cancel-checkin',
-				text : Karazy.i18n.translate('cancel'),
+				text : Karazy.i18n.translate('back'),
 				ui : 'back'
 			}, ]
 		}, 
