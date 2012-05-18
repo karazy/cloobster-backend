@@ -21,6 +21,7 @@ Karazy.translations = (function() {
 		"success" : "Erfolg",
 		"yes" : "Ja",
 		"no" : "Nein",
+		"continue" : "Weiter",
 		"leave" : "Verlassen",
 		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
 		// main menu
