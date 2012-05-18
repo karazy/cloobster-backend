@@ -4656,7 +4656,9 @@ color: #614021;
 /* line 124, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark .x-title {
   color: white;
-  text-shadow: rgba(0, 0, 0, 1) 0 -0.08em 0;}
+  /* Ticket 105 */
+  /*text-shadow: rgba(0, 0, 0, 1) 0 -0.08em 0; */
+}
 /* line 129, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_toolbar.scss */
 .x-toolbar-dark.x-docked-top {
   border-bottom-color: #594b3a;
