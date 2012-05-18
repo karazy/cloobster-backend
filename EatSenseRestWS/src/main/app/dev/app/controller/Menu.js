@@ -33,7 +33,8 @@ Ext.define('EatSense.controller.Menu', {
 
 		control: {
 			menulist: {
-             	select: 'showProductlist'
+             	select: 'showProductlist',
+             	disclose: 'showProductlist'
              },
              productlist : {
             	select: 'loadProductDetail' 

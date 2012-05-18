@@ -7459,6 +7459,11 @@ input[type="search"]::-webkit-search-cancel-button {
   border-radius: 1em;
 }
 
+/* Item disclosure! */
+.x-list-round .x-list-disclosure {
+  background-image: -webkit-linear-gradient(#336633, #336633 2%, #336633);
+}
+
 /*
 * Bugfix for icons in Android 4 not displayed.
 * http://www.sencha.com/forum/showthread.php?192463-Blank-icons-in-tabbar-if-container-has-scrollable-set-to-true&p=782717#post782717
