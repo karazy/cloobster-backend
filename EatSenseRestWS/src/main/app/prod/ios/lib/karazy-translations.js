@@ -21,6 +21,7 @@ Karazy.translations = (function() {
 		"success" : "Erfolg",
 		"yes" : "Ja",
 		"no" : "Nein",
+		"continue" : "Weiter",
 		"leave" : "Verlassen",
 		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
 		// main menu
@@ -42,7 +43,7 @@ Karazy.translations = (function() {
 		"checkInErrorBarcode" : "Der Barcode ist nicht valide!",
 		"checkInErrorNickname" : "Der Spitzname muss zwischen {0} und {1} Zeichen lang sein.",
 		"checkInErrorNicknameExists" : "Der Spitzname wird an diesem Tisch bereits benutzt.",
-		"saveNicknameToggle" : "Spitzname als Standard setzen?",
+		"saveNicknameToggle" : "Spitzname speichern?",
 		"checkInCanceled" : "Sitzung wurde durch das Restaurant beendet.",
 		"nickname" : "Spitzname",
 		// Menu

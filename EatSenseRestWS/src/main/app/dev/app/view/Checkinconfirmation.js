@@ -28,7 +28,6 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			xtype : 'label',
 			itemId : 'checkInDlg1Label1',
 			html : Karazy.i18n.translate('checkInStep1Label1'),
-			margin : 5,
 			cls: 'checkin-confirm-nickname-label'
 		}, 
 		{
