@@ -47,7 +47,7 @@ Ext.define('EatSense.view.MyOrders', {
 				"<h2 class='title'>{amount}x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
 				// "<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				// "<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>({amount}x) {[this.formatPrice(values)]}</div>" +
-				"<div style='clear: both;'>" +
+				/*"<div style='clear: both;'>" +
 					"<tpl for='Product.choices'>" +
 						"<tpl if='this.checkSelections(values, xindex)'>" +
 							"<tpl if='!parent'><h6>{text}</h6></tpl>" +
@@ -63,7 +63,7 @@ Ext.define('EatSense.view.MyOrders', {
 					"<tpl if='comment!=\"\"'>" +
 					"<p>Kommentar: {comment}</p>" +
 					"</tpl>" +
-				"</div>" +
+				"</div>" +*/
 			"</div>"
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
