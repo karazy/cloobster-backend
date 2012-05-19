@@ -47,7 +47,7 @@ Karazy.translations = (function() {
 		"checkInCanceled" : "Sitzung wurde durch das Restaurant beendet.",
 		"nickname" : "Spitzname",
 		// Menu
-		"menuTab" : "Dein Menü",
+		"menuTab" : "Auswählen",
 		"menuTitle" : "Heidi & Paul - Fresh Food",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
@@ -67,7 +67,7 @@ Karazy.translations = (function() {
 		"productCartBt" : "In den Warenkorb",
 		"orderCanceled" : "{0} wurde storniert.",
 		//Cart
-		"cartviewTitle" : "Bestellen",
+		"cartviewTitle" : "Ich will ...",
 		"cartTabBt" : "Bestellen",
 		"dumpCart" : "Bestellzettel leeren?",
 		"dumpItem" : "{0} entfernen?",

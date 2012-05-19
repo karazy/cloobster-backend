@@ -23,8 +23,8 @@ Ext.define('EatSense.view.Dashboard', {
 		}, 
 		
 		{	xtype : 'image',
-			src : 'res/images/dashboard/middle.png',
-			style : 'background-image: url(res/images/dashboard/middle.png); background-repeat:no-repeat; background-position:center center;',
+			src : 'res/images/dashboard/middle-v2.png',
+			style : 'background-image: url(res/images/dashboard/middle-v2.png); background-repeat:no-repeat; background-position:center center;',
 			height : 230,
 			width : 277
 			
