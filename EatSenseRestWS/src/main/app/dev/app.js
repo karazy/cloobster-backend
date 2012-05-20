@@ -23,8 +23,7 @@ Ext.application({
 		'Ext.TitleBar',
 		//require custom types
 		'EatSense.override.CustomRestProxy',
-		'EatSense.override.OperationImprovement', 
-		'EatSense.view.fragment.DashboardButton', 
+		'EatSense.override.OperationImprovement',
 		'EatSense.override.RadioOverride',
 		'EatSense.model.AppState'
 	],
