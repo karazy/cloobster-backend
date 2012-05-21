@@ -25,6 +25,16 @@ Ext.define('EatSense.model.Menu', {
 			   type: 'json'
 	   		}
 	 	},
-		hasMany: {model: 'EatSense.model.Product', name: 'products'}
+		hasMany: {
+			model: 'EatSense.model.Product',
+			name: 'products',
+			store: {
+				sorters: [
+			     			{
+			    				property: 'order',
+			    				direction: 'ASC'
+			    			}
+			    	    ]
+			}}
 	}
 });
