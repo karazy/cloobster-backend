@@ -72,17 +72,17 @@ Ext.define('EatSense.controller.Request',{
 		});
 
 		//show success message to give user the illusion of success
-		Ext.Msg.show({
-			title : Karazy.i18n.translate('hint'),
-			message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
-			buttons : []
-		});
+		// Ext.Msg.show({
+		// 	title : Karazy.i18n.translate('hint'),
+		// 	message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
+		// 	buttons : []
+		// });
 		
-		Ext.defer((function() {
-			if(!Karazy.util.getAlertActive()) {
-				Ext.Msg.hide();
-			}
-		}), Karazy.config.msgboxHideLongTimeout, this);
+		// Ext.defer((function() {
+		// 	if(!Karazy.util.getAlertActive()) {
+		// 		Ext.Msg.hide();
+		// 	}
+		// }), Karazy.config.msgboxHideLongTimeout, this);
 	},
 	cancelCallWaiterRequest: function(button, event) {
 		var me = this,
@@ -165,12 +165,14 @@ Ext.define('EatSense.controller.Request',{
 	* Used for cleanup methods. Resets the state of button to call mode.
 	*/
 	resetAllRequests: function() {
-		var requestStore = Ext.StoreManager.lookup('requestStore');
+		var requestStore = Ext.StoreManager.lookup('requestStore'),
+			label = this.getCallWaiterLabel();
 
 		console.log('Request Controller -> resetAllRequests');
 
 		this.getCallWaiterButton().mode = 'call';
 		this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+		label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 
 		requestStore.removeAll();
 	},
@@ -180,6 +182,7 @@ Ext.define('EatSense.controller.Request',{
 	handleRequestMessage: function(action, data) {
 		var me = this,
 			requestStore = Ext.StoreManager.lookup('requestStore'),
+			label = this.getCallWaiterLabel(),
 			request;
 
 		request = requestStore.getById(data.id);
@@ -188,6 +191,7 @@ Ext.define('EatSense.controller.Request',{
 				requestStore.remove(request);
 				this.getCallWaiterButton().mode = 'call';
 				this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+				label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 			}
 		}
 

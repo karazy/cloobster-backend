@@ -789,14 +789,11 @@
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),
 					message : Karazy.i18n.translate('orderCanceled', oldOrder.getProduct().get('name')),
-					buttons : []
+					buttons : [{
+						text : Karazy.i18n.translate('continue'),
+						ui: 'action'
+					}]
 				});
-				
-				Ext.defer((function() {
-					if(!Karazy.util.getAlertActive()) {
-						Ext.Msg.hide();
-					}
-				}), Karazy.config.msgboxHideTimeout, this);
 			}
 
 		}

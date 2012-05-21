@@ -32,7 +32,7 @@ Ext.define('EatSense.view.NewsletterPopup', {
 			xtype: 'button',
 			ui: 'action',
 			action: 'dont-ask',
-			width: '90%',
+			width: '80%',
 			margin: '5 0 5 0',
 			text: Karazy.i18n.translate('newsletterDontAskButton')
 		}]

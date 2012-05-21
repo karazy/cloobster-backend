@@ -14,6 +14,7 @@ Ext.define('EatSense.view.MenuOverview', {
 			type : 'fit',
 			ui: 'round',
 			cls: 'std-background',
+			onItemDisclosure: true,
 			allowDeselect: true,
 			itemTpl : '{title}',
 			store: 'menuStore',

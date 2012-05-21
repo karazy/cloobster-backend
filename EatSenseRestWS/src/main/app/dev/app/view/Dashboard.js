@@ -16,8 +16,8 @@ Ext.define('EatSense.view.Dashboard', {
 		items : [ 
 		{
 			xtype : 'image',
-			src : 'res/images/dashboard/eatsense-logo_300.png',
-			style : 'background-image: url(res/images/dashboard/eatsense-logo_300.png); background-repeat:no-repeat; background-position:center center;',
+			src : 'res/images/dashboard/cloobster-logo-186.png',
+			style : 'background-image: url(res/images/dashboard/cloobster-logo-186.png); background-repeat:no-repeat; background-position:center center;',
 			height : 80,
 			width : 186
 		}, 

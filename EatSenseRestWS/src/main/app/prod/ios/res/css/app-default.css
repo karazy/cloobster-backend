@@ -6952,8 +6952,8 @@ input[type="search"]::-webkit-search-cancel-button {
 * Menu- and Productlist
 */
 
-.menu-panel .x-list-round .x-scroll-view {
- background: #917D64;  
+.menu-panel, .menu-panel .x-list-round .x-scroll-view {
+ background: #917D64;
 }
 
 /* line 37, app-default.scss */
@@ -7095,17 +7095,19 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-bottom: 7px;
 }
 
-.orderListItem .order-title h4 {
+.orderListItem h2.title {
   float: left;
-  margin-right: 5px;
   color: #000000;
-  font-size: 1.2em;
+  font-size: 1em;
+  width: 80%;
 }
 
-.orderListItem .order-title h5 {
+.orderListItem h2.price {
   float: left;
   color: #000000;
-  font-size: 1.2em;
+  font-size: 1em;
+  width: 20%;
+  text-align: right;
 }
 
 .orderListItem h6 {
@@ -7342,7 +7344,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .newsletter-floating {
   border-radius: 0.3em !important;
-  padding: 6px !important;
+  padding: 3px !important;
   background-color: #86B22D !important;
   -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.6em !important;
 }
@@ -7354,8 +7356,13 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .newsletter-popup {
   background-color: #86B22D;
+  background: black;
   border-radius: 0.5em;
   border-right: 1px solid #86B22D;
+}
+
+.newsletter-popup .x-panel-inner {
+    background: #917D64 url('../images/bg-rp-main.png');
 }
 
 /*
@@ -7379,7 +7386,15 @@ input[type="search"]::-webkit-search-cancel-button {
 .general-label {
   color: white; 
   font-size: 1em;
+  text-align: center;
 }
+
+.general-label-black {
+  color: black; 
+  font-size: 1em;
+  text-align: center;
+}
+
 .general-textfield {
   border-radius: 0.3em;
 }
@@ -7442,6 +7457,11 @@ input[type="search"]::-webkit-search-cancel-button {
 */
 .x-hasbadge > .x-badge {
   border-radius: 1em;
+}
+
+/* Item disclosure! */
+.x-list-round .x-list-disclosure {
+  background-image: -webkit-linear-gradient(#336633, #336633 2%, #336633);
 }
 
 /*
