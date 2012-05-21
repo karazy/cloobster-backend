@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="EatSenseAndroidApp" default="replaceConfigTest" basedir=".">
+<project name="CloobsterAppiOS" default="replaceConfigTest" basedir=".">
 	<property name="appDir" value="../EatSenseRestWS/src/main/app/prod/ios" />
 	<property name="config" value="eatSense/www/lib/karazy-config.js" />
 

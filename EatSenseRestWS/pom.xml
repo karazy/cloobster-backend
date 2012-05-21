@@ -125,7 +125,6 @@
 		</profile>
 		<profile>
 			<id>prod</id>	
-
 			<build>			
 				<plugins>
 					<plugin>
