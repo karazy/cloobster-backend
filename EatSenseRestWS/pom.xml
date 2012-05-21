@@ -94,7 +94,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/cockpit/dev</directory>
+											<directory>../../cloobster_cockpit/src</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -156,7 +156,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/cockpit/prod</directory>
+											<directory>../../cloobster_cockpit/prod</directory>
 										</resource>
 									</resources>
 								</configuration>

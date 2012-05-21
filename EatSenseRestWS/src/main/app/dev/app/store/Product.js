@@ -3,6 +3,12 @@ Ext.define('EatSense.store.Product', {
 	requires: ['EatSense.model.Product'],
 	config: {
 		storeId: 'productStore',
-		model: 'EatSense.model.Product'
+		model: 'EatSense.model.Product',
+		sorters: [
+		    {
+		    	property: 'order',
+                direction: 'ASC'
+            }
+		]
 	}
-})
+});

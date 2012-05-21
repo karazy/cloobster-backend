@@ -21,6 +21,7 @@ Karazy.translations = (function() {
 		"success" : "Erfolg",
 		"yes" : "Ja",
 		"no" : "Nein",
+		"continue" : "Weiter",
 		"leave" : "Verlassen",
 		"channelTokenError" : "Updates im Hintergrund nicht funktionsfähig.",
 		// main menu
@@ -42,11 +43,11 @@ Karazy.translations = (function() {
 		"checkInErrorBarcode" : "Der Barcode ist nicht valide!",
 		"checkInErrorNickname" : "Der Spitzname muss zwischen {0} und {1} Zeichen lang sein.",
 		"checkInErrorNicknameExists" : "Der Spitzname wird an diesem Tisch bereits benutzt.",
-		"saveNicknameToggle" : "Spitzname als Standard setzen?",
+		"saveNicknameToggle" : "Spitzname speichern?",
 		"checkInCanceled" : "Sitzung wurde durch das Restaurant beendet.",
 		"nickname" : "Spitzname",
 		// Menu
-		"menuTab" : "Dein Menü",
+		"menuTab" : "Auswählen",
 		"menuTitle" : "Heidi & Paul - Fresh Food",
 		"choicesPanelTitle" : "Optionen",
 		"putIntoCartButton" : "In den Warenkorb",
@@ -66,7 +67,7 @@ Karazy.translations = (function() {
 		"productCartBt" : "In den Warenkorb",
 		"orderCanceled" : "{0} wurde storniert.",
 		//Cart
-		"cartviewTitle" : "Bestellen",
+		"cartviewTitle" : "Ich will ...",
 		"cartTabBt" : "Bestellen",
 		"dumpCart" : "Bestellzettel leeren?",
 		"dumpItem" : "{0} entfernen?",

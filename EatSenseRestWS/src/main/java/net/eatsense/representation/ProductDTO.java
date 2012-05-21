@@ -32,6 +32,8 @@ public class ProductDTO {
 	@Valid
 	private Collection<ChoiceDTO> choices;
 	
+	private Integer order;
+	
 	public String getName() {
 		return name;
 	}
@@ -100,5 +102,15 @@ public class ProductDTO {
 
 	public void setMenuId(Long menuId) {
 		this.menuId = menuId;
+	}
+
+
+	public Integer getOrder() {
+		return order;
+	}
+
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 }
