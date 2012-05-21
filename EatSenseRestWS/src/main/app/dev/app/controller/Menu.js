@@ -230,9 +230,10 @@ Ext.define('EatSense.controller.Menu', {
 			label: Karazy.i18n.translate('orderComment'),
 			labelAlign: 'top',
 			itemId: 'productComment',
-			maxRows: 4,
+			maxRows: 3,
 			value: '',
-			cls: 'choice'
+			inputCls: 'comment-input',
+			labelCls: 'comment'
 		});
 		 
 		Ext.Viewport.add(detail);
@@ -274,6 +275,7 @@ Ext.define('EatSense.controller.Menu', {
 							label : opt.get('name'),
 							checked: opt.get('selected'),
 							cls: 'option',
+							labelCls: 'option-label',
 							disabled: (parentChoice && !parentChoice.isActive()) ? true : false
 					}, me);							 
 			//TODO this is sooo dirty

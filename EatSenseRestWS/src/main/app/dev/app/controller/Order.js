@@ -327,7 +327,8 @@
 				labelAlign: 'top',
 				itemId: 'productComment',
 				value: order.get('comment'),
-				cls: 'choice'
+				inputCls: 'comment-input',
+				labelCls: 'comment'
 			}
 		);
 		Ext.Viewport.add(detail);

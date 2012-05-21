@@ -71,66 +71,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -165,33 +154,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -218,66 +207,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -312,33 +290,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -365,66 +343,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -459,33 +426,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -512,66 +479,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },
-						{
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -606,33 +562,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -659,66 +615,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -753,33 +698,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -806,66 +751,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },
-						{
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -900,33 +834,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -953,66 +887,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -1047,33 +970,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -1100,66 +1023,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },
-						{
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -1194,33 +1106,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 }
@@ -1254,66 +1166,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -1348,33 +1249,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -1401,66 +1302,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -1495,33 +1385,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -1548,65 +1438,54 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
+                            "price": 0.5,
                             "maxOccurence": 7,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
@@ -1642,33 +1521,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -1695,66 +1574,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },                       
-                         {
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -1789,33 +1657,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 }
@@ -1849,66 +1717,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },
-						{
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -1943,33 +1800,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -1977,7 +1834,7 @@
                     "name": "Der Leichte",
                     "longDesc": "Mit mariniertem mediterranem Gemüse, Rucola, Oliven, gratiniertem Ziegenkäse und zweierlei Pesto",
                     "shortDesc": "Mit mariniertem Gemüse, gratiniertem Ziegenkäse...",
-                    "price": 6.20,
+                    "price": 6.2,
                     "choices": [
                         {
                             "options": [
@@ -1996,66 +1853,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },
-						{
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -2090,33 +1936,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 },
@@ -2143,66 +1989,55 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
-                            "included": 0,
-                            "selected": null
-                        },
-						{
-                            "options": [
-                                {
-                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
-                                    "id": null,
-                                    "price": 2.50
-                                }
-                            ],
-                            "price": 2.50,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Bio Fleisch Extra",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
                         {
                             "options": [
                                 {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
-                            "maxOccurence": 7,
+                            "price": 0.5,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Burger Extras",
@@ -2237,33 +2072,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 }
@@ -2297,7 +2132,7 @@
                             "maxOccurence": 1,
                             "minOccurence": 1,
                             "overridePrice": "NONE",
-                            "text": "Mit welchem Burger-Brötchen?",
+                            "text": "Burger Brötchen",
                             "included": 0,
                             "selected": null
                         },
@@ -2306,40 +2141,40 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.50
+                                    "price": 2.5
                                 }
                             ],
-                            "price": 0.50,
+                            "price": 0.5,
                             "maxOccurence": 7,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
@@ -2375,33 +2210,33 @@
                                     "price": 0.5
                                 }
                             ],
-                            "price": 3.30,
+                            "price": 3.3,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": true,
-                            "group" : "BR01"
+                            "group": "BR01"
                         },
-                         {
+                        {
                             "options": [
                                 {
-                                     "name": "Beilagensalat statt Pommes",
+                                    "name": "Beilagensalat statt Pommes",
                                     "id": null,
-                                    "price": 0.50
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 1,
                             "minOccurence": 0,
                             "overridePrice": "NONE",
-                            "text": "Menü: Pommes und 0,33l Getränk",
+                            "text": "Menü mit Pommes & Getränk",
                             "included": 0,
                             "selected": null,
                             "groupParent": false,
-                            "group" : "BR01"
+                            "group": "BR01"
                         }
                     ]
                 }
@@ -2416,89 +2251,89 @@
                     "name": "Paulchen Menü",
                     "longDesc": "4 Fischstäbchen mit einer Portion Pommes, Menügetränk nach Wahl und einer tollen Überraschung",
                     "shortDesc": "4 Fischstäbchen mit einer Portion Pommes...",
-                    "price": 6.20,
-					"choices": [
-						{
-						"options": [
+                    "price": 6.2,
+                    "choices": [
+                        {
+                            "options": [
                                 {
                                     "name": "Coca-Cola",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Coca-Cola light",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Bionade",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Selters",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Spezi",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 }
                             ],
-                            "price": 0.0,
+                            "price": 0,
                             "maxOccurence": 1,
-                            "minOccurence": 0,
+                            "minOccurence": 1,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Auswahl Menügetränk",
                             "included": 0,
                             "selected": null
                         }
-					]
-                },                 
+                    ]
+                },
                 {
                     "name": "Kleine Heide Menü",
                     "longDesc": "4 Bio-Chicken-Nuggets mit Lieblingsdip, einer Portion Pommes, Menügetränk und einer tollen Überraschung",
                     "shortDesc": "4 Bio-Chicken-Nuggets mit Lieblingsdip...",
-                    "price": 6.30,
-					"choices": [
-						{
-						"options": [
+                    "price": 6.3,
+                    "choices": [
+                        {
+                            "options": [
                                 {
                                     "name": "Coca-Cola",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Coca-Cola light",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Bionade",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Selters",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 },
                                 {
                                     "name": "Spezi",
                                     "id": null,
-                                    "price": 0.0
+                                    "price": 0
                                 }
                             ],
-                            "price": 0.0,
+                            "price": 0,
                             "maxOccurence": 1,
-                            "minOccurence": 0,
+                            "minOccurence": 1,
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Auswahl Menügetränk",
                             "included": 0,
                             "selected": null
                         }
-					]
+                    ]
                 }
             ]
         },
@@ -2511,7 +2346,7 @@
                     "name": "Der Grosse",
                     "longDesc": "Einfach 4 Basic-Toppings auswählen - wer möchte, mit Extra-Toppings und Dressing ergänzen - und den knackfrischen Salat mit Brot genießen",
                     "shortDesc": "Knackfrischer Salat mit Brot, Toppings und Dressing frei wählbar",
-                    "price": 4.90,
+                    "price": 4.9,
                     "choices": [
                         {
                             "options": [
@@ -2525,7 +2360,7 @@
                                     "id": null,
                                     "price": 0
                                 },
-								{
+                                {
                                     "name": "Cashewkerne",
                                     "id": null,
                                     "price": 0
@@ -2555,7 +2390,7 @@
                                     "id": null,
                                     "price": 0
                                 },
-								{
+                                {
                                     "name": "Frühlingszwiebeln",
                                     "id": null,
                                     "price": 0
@@ -2565,12 +2400,12 @@
                                     "id": null,
                                     "price": 0
                                 },
-								{
+                                {
                                     "name": "Karotten",
                                     "id": null,
                                     "price": 0
                                 },
-								{
+                                {
                                     "name": "Kürbiskerne",
                                     "id": null,
                                     "price": 0
@@ -2605,7 +2440,7 @@
                                     "id": null,
                                     "price": 0
                                 },
-								{
+                                {
                                     "name": "Rote Beete",
                                     "id": null,
                                     "price": 0
@@ -2620,7 +2455,7 @@
                                     "id": null,
                                     "price": 0
                                 },
-								{
+                                {
                                     "name": "Sonnenblumenkerne",
                                     "id": null,
                                     "price": 0
@@ -2714,12 +2549,12 @@
                     "shortDesc": "Salat mit gegrillten Putenbrustfilets, Parmesan, ...",
                     "price": 6.8
                 },
-				{
+                {
                     "name": "Der Rucola Salat",
                     "longDesc": "Rucola Salat mit gratiniertem Ziegenkäse und Feigendip, sowie Cherrytomaten und Walnüssen",
                     "shortDesc": "Rucola Salat mit gratiniertem Ziegenkäse...",
                     "price": 6.9
-				},
+                },
                 {
                     "name": "Der Beilagensalat",
                     "longDesc": "Kleiner Krautsalat oder kleiner gemischter Salat",
@@ -2837,14 +2672,14 @@
                     "name": "Heidis Favoritin",
                     "longDesc": "Frische, selbstgemachte Suppe aus dem Gemüsegarten",
                     "shortDesc": "Frische, selbstgemachte Suppe aus dem Gemüsegarten",
-                    "price": 3.5               
+                    "price": 3.5
                 },
                 {
                     "name": "Pauls Beste",
                     "longDesc": "Immer wieder eine andere hausgemachte herzhafte Suppe",
                     "shortDesc": "Immer wieder eine andere hausgemachte herzhafte Suppe",
-                    "price": 4.5               
-                }			
+                    "price": 4.5
+                }
             ]
         },
         {
