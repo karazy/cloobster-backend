@@ -33,6 +33,10 @@ Ext.define('EatSense.model.Menu', {
 			     			{
 			    				property: 'order',
 			    				direction: 'ASC'
+			    			},
+			    			{
+			    				property: 'name',
+			    				direction: 'ASC'
 			    			}
 			    	    ]
 			}}
