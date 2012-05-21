@@ -3,9 +3,6 @@
 	<application>eatsense-test</application>
 	<version>2</version>
 
-	<!-- By default, App Engine sends requests serially to a given web server. 
-		To allow App Engine to send multiple requests in parallel specify: <threadsafe>true</threadsafe> -->
-
 	<!-- Configure java.util.logging -->
 	<system-properties>
 		<property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties" />

@@ -179,7 +179,7 @@
 			cartview = this.getCartview(),
 			ajaxOrderCount = 0,
 			ordersCount = orders.getCount(),
-			// cart = Ext.create('EatSense.model.Cart'),
+			menuCtr = this.getApplication().getController('Menu'),
 			me = this;
 		
 		if(ordersCount > 0) {
@@ -219,6 +219,7 @@
 							me.refreshCart();
 							me.refreshMyOrdersList();
 
+							menuCtr.backToMenu();
 							me.getLoungeview().switchTab(me.getMenutab() ,'left');
 
 							//show success message
@@ -501,9 +502,8 @@
 				payButton = me.getPaymentButton();
 				leaveButton = me.getLeaveButton();
 		
-		//TODO investigate if this is a bug
+		//remove all orders and reload to have a fresh state
 		myordersStore.removeAll();
-//		myorderlist.getStore().removeAll();
 		
 		myordersStore.load({
 			scope   : this,			
@@ -511,8 +511,9 @@
 				try {
 					if(success == true) {
 						payButton.enable();
-						(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
-						(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
+						me.toggleMyordersButtons();
+						// (myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
+						// (myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 						
 
 						//WORKAROUND to make sure all data is available in data property
@@ -580,6 +581,7 @@
 
 			//create picker
 			picker = Ext.create('Ext.Picker', {
+				height: '45%',
 				doneButton: {
 					text: Karazy.i18n.translate('ok'),
 					listeners: {
@@ -649,7 +651,7 @@
 					payButton.hide();
 					myordersComplete.show();
 					me.refreshMyOrdersBadgeText(true);
-					this.getApplication().getController('Android').removeLastBackHandler();		
+					me.getApplication().getController('Android').removeLastBackHandler();		
 			},
 			failure: function(record, operation) {
 				me.getApplication().handleServerError({
@@ -719,8 +721,12 @@
 	 * Shows (issued orders are not empty) or hides (issued orders are empty) myorders buttons (pay).
 	 */
 	toggleMyordersButtons: function() {
-		var payButton = this.getPayButton();
-		
+		var payButton = this.getPaymentButton(),
+			leaveButton = this.getLeaveButton(),
+			myordersStore = Ext.StoreManager.lookup('orderStore');
+
+		(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
+		(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 	},
 	//Utility methods
 	/**
@@ -770,25 +776,24 @@
 				console.log('updatedOrder ' + updatedOrder.id + ' does not exist');
 			}
 		} else if(action == 'delete') {
-			console.log('delete order with id %s', updatedOrder.id);
+			console.log('delete order with id ' + updatedOrder.id);
 
 			oldOrder = orderStore.getById(updatedOrder.id);
 			if(oldOrder) {
 				orderStore.remove(oldOrder);
 				total = me.calculateOrdersTotal(orderStore);
 				me.getMyordersTotal().getTpl().overwrite(me.getMyordersTotal().element, {'price': total});
+				me.refreshMyOrdersBadgeText();
+				me.toggleMyordersButtons();
 
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),
 					message : Karazy.i18n.translate('orderCanceled', oldOrder.getProduct().get('name')),
-					buttons : []
+					buttons : [{
+						text : Karazy.i18n.translate('continue'),
+						ui: 'action'
+					}]
 				});
-				
-				Ext.defer((function() {
-					if(!Karazy.util.getAlertActive()) {
-						Ext.Msg.hide();
-					}
-				}), Karazy.config.msgboxHideTimeout, this);
 			}
 
 		}

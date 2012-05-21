@@ -12,8 +12,10 @@ import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
+import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
 import net.eatsense.restws.customer.CheckInsResource;
+import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
 
@@ -52,6 +54,7 @@ public class EatSenseGuiceServletContextListener extends
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
+						bind(AccountsResource.class);
 						bind(BusinessesResource.class);
 						bind(net.eatsense.restws.customer.BusinessesResource.class);
 						bind(NicknameResource.class);
@@ -63,9 +66,11 @@ public class EatSenseGuiceServletContextListener extends
 						bind(ChannelResource.class);
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
+						bind(NicknameGenerator.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*newsletter(.)*", "(.)*b/businesses(.)*",
+						serveRegex("(.)*b/accounts(.)*",
+								"(.)*newsletter(.)*", "(.)*b/businesses(.)*",
 								"(.)*c/businesses(.)*","(.)*c/checkins(.)*",
 								"(.)*accounts(.)*", "(.)*spots(.)*",
 								"(.)*nickname(.)*", "(.)*_ah/channel/connected(.)*",

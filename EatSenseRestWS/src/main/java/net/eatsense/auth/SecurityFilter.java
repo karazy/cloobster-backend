@@ -191,14 +191,11 @@ public class SecurityFilter implements ContainerRequestFilter {
         	if( role.equals("guest") && checkIn != null && checkIn.getUserId() != null)
         		return true;
         	
-        	// only grant the restaurantadmin role if an account was authenticated and the account has the role for this business
-        	if(role.equals("restaurantadmin") && account != null && businessId != null && role.equals(account.getRole())){
-   				return accountCtrl.isAccountManagingBusiness(account, businessId);
+        	if(accountCtrl.isAccountInRole(account, role)) {
+        		if( businessId != null && accountCtrl.isAccountManagingBusiness(account, businessId))
+        			return true;
         	}
-        	// grant the user role, if an account was authenticated
-        	if(role.equals("user") && account != null) {
-        		return true;
-        	}
+        	
             return false;
         }
 

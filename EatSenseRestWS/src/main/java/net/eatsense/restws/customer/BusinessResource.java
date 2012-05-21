@@ -97,12 +97,14 @@ public class BusinessResource {
 	@GET
 	@Path("orders")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
 	public Collection<OrderDTO> getOrders( @QueryParam("status") String status) {
 		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, status);
 		return orders;
 	}
 	
 	@Path("orders/{orderId}")
+	@RolesAllowed({"guest"})
 	public OrderResource getOrderResource(@PathParam("orderId") Long orderId) {
 		Order order = orderCtrl.getOrder(business, orderId);
 		if( order == null)

@@ -19,6 +19,8 @@ public class Account extends GenericEntity {
 	@NotEmpty
 	String login;
 	String hashedPassword;
+	
+	@NotNull
 	@Email
 	String email;
 	
@@ -31,6 +33,62 @@ public class Account extends GenericEntity {
 	
 	List<Key<Business>> businessess;
 	
+	@NotNull
+	@NotEmpty
+	String name;
+	
+	private String phone;
+		
+	@NotNull
+	Key<Company> company;
+	
+	private String facebookUid;
+	private String emailConfirmationHash;
+	private boolean emailConfirmed = false;
+	private boolean active = false;
+	
+	private Date creationDate;
+	
+	public String getFacebookUid() {
+		return facebookUid;
+	}
+
+	public void setFacebookUid(String facebookUid) {
+		this.facebookUid = facebookUid;
+	}
+
+	public boolean isEmailConfirmed() {
+		return emailConfirmed;
+	}
+
+	public void setEmailConfirmed(boolean emailConfirmed) {
+		this.emailConfirmed = emailConfirmed;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public Key<Company> getCompany() {
+		return company;
+	}
+
+	public void setCompany(Key<Company> company) {
+		this.company = company;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public List<Key<Business>> getBusinesses() {
 		return businessess;
 	}
@@ -91,5 +149,29 @@ public class Account extends GenericEntity {
 	@Transient
 	public Key<Account> getKey() {
 		return new Key<Account>(Account.class, super.getId());
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public String getEmailConfirmationHash() {
+		return emailConfirmationHash;
+	}
+
+	public void setEmailConfirmationHash(String emailConfirmationHash) {
+		this.emailConfirmationHash = emailConfirmationHash;
 	}
 }

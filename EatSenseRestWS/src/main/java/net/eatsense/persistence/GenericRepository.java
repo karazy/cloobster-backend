@@ -249,6 +249,26 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	}
 	
 	/**
+	 * Convenience method to get the Key of the first object matching a single property.
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return Key of matching Object or <code>null</code> if no match found
+	 */
+	public Key<T> getKeyByProperty(String propName, Object propValue)
+	{
+		logger.info("{}, property: {}", clazz, propName);
+		Query<T> q = ofy().query(clazz);
+
+		q.filter(propName, propValue);
+
+		return q.getKey();
+	}
+	
+	/**
 	 * Convenience method to get all objects matching a single property
 	 * 
 	 * 

@@ -33,7 +33,8 @@ Ext.define('EatSense.controller.Menu', {
 
 		control: {
 			menulist: {
-             	select: 'showProductlist'
+             	select: 'showProductlist',
+             	disclose: 'showProductlist'
              },
              productlist : {
             	select: 'loadProductDetail' 
@@ -144,10 +145,12 @@ Ext.define('EatSense.controller.Menu', {
      * Shows the menu. At this point the store is already filled with data.
      */
 	backToMenu: function() {
-		 this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
+		var androidCtr = this.getApplication().getController('Android');
 
-		//Android: disable backbutton
-		// this.getApplication().un('backbutton', this.backToMenu, this);
+		this.switchView(this.getMenuoverview(), Karazy.i18n.translate('menuTitle'), null, 'right');
+		//directly remove handler, because this function can be called from another controller
+		//so the wrong context is set
+		this.getMenuNavigationFunctions().pop();
 	},
 	/**
 	 * Displays detailed information for a product (e.g. Burger)
@@ -327,8 +330,7 @@ Ext.define('EatSense.controller.Menu', {
 	*	Hides Product detail.
 	*/
 	closeProductDetail: function() {
-		var detail = this.getProductdetail(),
-			productComment = this.getProductdetail().getComponent('choicesPanel').getComponent('productComment');		
+		var detail = this.getProductdetail();		
 		
 		detail.hide();
 		this.getApplication().getController('Android').removeLastBackHandler();
@@ -396,8 +398,6 @@ Ext.define('EatSense.controller.Menu', {
 			detail.hide();
 			message = Karazy.i18n.translate('productPutIntoCardMsg', this.getActiveProduct().get('name'));
 			this.setActiveProduct(null);
-
-			this.getProductdetail().getComponent('choicesPanel').removeAll(false);
 			
 			androidCtr.removeLastBackHandler();
 

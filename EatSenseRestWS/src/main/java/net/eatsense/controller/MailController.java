@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
@@ -16,6 +17,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.UriInfo;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.NewsletterRecipient;
 
 import org.slf4j.Logger;
@@ -35,12 +37,21 @@ public class MailController {
 		this.uriInfo = uriInfo;
 		// TODO Auto-generated constructor stub
 	}
+	
+	public Message sendEmailConfirmationMessage(Account account) throws AddressException, MessagingException {
+		Message mail = new MimeMessage(session);
+		
+		mail.setFrom(new InternetAddress("weiher@karazy.net"));
+		
+		return mail;
+	}
 
 	public Message sendWelcomeMessage(NewsletterRecipient recipient) throws MessagingException {
 		Message mail = new MimeMessage(session);
 		URI unsubscribeUri = uriInfo.getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient.getEmail()).build(recipient.getId());
 		
-		mail.setFrom(new InternetAddress("weiher@karazy.net"));
+		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
+		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
 		mail.setSubject("Thanks for subcribing to the eatSense newsletter.");
 		

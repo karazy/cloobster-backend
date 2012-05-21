@@ -6,7 +6,8 @@ Ext.define('EatSense.controller.Request',{
 	extend: 'Ext.app.Controller',
 	config: {
 		refs: {
-			callWaiterButton: 'requeststab button[action=waiter]'
+			callWaiterButton: 'requeststab button[action=waiter]',
+			callWaiterLabel: 'requeststab label'
 		},
 		control: {
 			callWaiterButton: {
@@ -34,13 +35,19 @@ Ext.define('EatSense.controller.Request',{
 		var 	me = this,
 				request = Ext.create('EatSense.model.Request'),
 				requestStore = Ext.StoreManager.lookup('requestStore'),
+				label = this.getCallWaiterLabel(),
 				checkInId = this.getApplication().getController('CheckIn').getActiveCheckIn().getId();
 		
-		console.log('send call waiter request');
-		button.disable();
-		//TODO validate!
+		console.log('Request Controller -> sendCallWaiterRequest');
 
-		request.set('type', Karazy.constants.Request.CALL_WAITER);		
+		button.disable();
+		button.mode = 'cancel';
+		me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
+		label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
+		
+		//TODO validate!?!?!
+
+		request.set('type', Karazy.constants.Request.CALL_WAITER);
 		//workaround to prevent sencha from sending phantom id
 		request.setId('');
 
@@ -49,10 +56,14 @@ Ext.define('EatSense.controller.Request',{
 
 		request.save({
 			success: function(record, operation) {
-				button.enable();
+				button.enable();				
 			},
 			failure: function(record, operation) {
 				button.enable();
+				button.mode = 'call';
+				me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+				label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
+
 				me.getApplication().handleServerError({
 					'error': operation.error,
 					'forceLogout': {403: true}
@@ -60,41 +71,35 @@ Ext.define('EatSense.controller.Request',{
 			}
 		});
 
-		button.mode = 'cancel';
-
-		//show info badge to indicate waiter is called
-		// me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
-		me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
-
 		//show success message to give user the illusion of success
-		Ext.Msg.show({
-			title : Karazy.i18n.translate('hint'),
-			message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
-			buttons : []
-		});
+		// Ext.Msg.show({
+		// 	title : Karazy.i18n.translate('hint'),
+		// 	message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
+		// 	buttons : []
+		// });
 		
-		Ext.defer((function() {
-			if(!Karazy.util.getAlertActive()) {
-				Ext.Msg.hide();
-			}
-		}), Karazy.config.msgboxHideLongTimeout, this);
+		// Ext.defer((function() {
+		// 	if(!Karazy.util.getAlertActive()) {
+		// 		Ext.Msg.hide();
+		// 	}
+		// }), Karazy.config.msgboxHideLongTimeout, this);
 	},
 	cancelCallWaiterRequest: function(button, event) {
 		var me = this,
+			label = this.getCallWaiterLabel(),
 			requestStore = Ext.StoreManager.lookup('requestStore'),
 			request;
 
-		console.log('cancel call waiter request');
+		console.log('Request Controller -> cancelCallWaiterRequest');
 
 		request = requestStore.findRecord('type', Karazy.constants.Request.CALL_WAITER, false, true, true);
 
-		button.mode = 'call';
-		//show info badge to indicate waiter is called	
-		// me.getCallWaiterButton().setBadgeText("");
-		me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
-
 		if(request) {
 			button.disable();
+			button.mode = 'call';
+			me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+			label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
+
 			// requestStore.setSyncRemovedRecords(true);
 			requestStore.remove(request);
 			// requestStore.sync();
@@ -107,6 +112,11 @@ Ext.define('EatSense.controller.Request',{
 						button.enable();
 					},
 					failure: function(record, operation) {
+						button.enable();
+						button.mode = 'cancel';
+						me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
+						label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
+
 						me.getApplication().handleServerError({
 							'error': operation.error,
 							'forceLogout': {403: true}
@@ -125,9 +135,10 @@ Ext.define('EatSense.controller.Request',{
 	*/
 	loadRequests: function() {
 		var me = this,
+			label = this.getCallWaiterLabel(),
 			requestStore = Ext.StoreManager.lookup('requestStore');
 
-		console.log('load requests');
+		console.log('Request Controller -> loadRequests');
 
 		requestStore.load({
 			callback: function(records, operation, success) {
@@ -142,8 +153,7 @@ Ext.define('EatSense.controller.Request',{
                 	Ext.each(records,(function(rec) {
                 		if(rec.get('type') ==  Karazy.constants.Request.CALL_WAITER) {
                 			me.getCallWaiterButton().mode = 'cancel';
-                			//show info badge to indicate waiter is called
-							// me.getCallWaiterButton().setBadgeText(Karazy.i18n.translate('callWaiterRequestBadge'));
+                			label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
 							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
                 		}
                 	}));
@@ -155,12 +165,14 @@ Ext.define('EatSense.controller.Request',{
 	* Used for cleanup methods. Resets the state of button to call mode.
 	*/
 	resetAllRequests: function() {
-		var requestStore = Ext.StoreManager.lookup('requestStore');
+		var requestStore = Ext.StoreManager.lookup('requestStore'),
+			label = this.getCallWaiterLabel();
 
 		console.log('Request Controller -> resetAllRequests');
 
 		this.getCallWaiterButton().mode = 'call';
 		this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+		label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 
 		requestStore.removeAll();
 	},
@@ -170,6 +182,7 @@ Ext.define('EatSense.controller.Request',{
 	handleRequestMessage: function(action, data) {
 		var me = this,
 			requestStore = Ext.StoreManager.lookup('requestStore'),
+			label = this.getCallWaiterLabel(),
 			request;
 
 		request = requestStore.getById(data.id);
@@ -178,6 +191,7 @@ Ext.define('EatSense.controller.Request',{
 				requestStore.remove(request);
 				this.getCallWaiterButton().mode = 'call';
 				this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+				label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 			}
 		}
 

@@ -15,9 +15,7 @@ Ext.define('EatSense.view.ProductOverview', {
 			allowDeselect : true,
 			itemCls: 'productListItem',
 			itemTpl : new Ext.XTemplate(
-				"<h2>{name}</h2>" +
-					"<div class='price'>{[this.formatPrice(values.price)]}</div>" +
-					"<div style='clear: both;'></div>"+
+					"<h2 class='title'>{name}</h2><h2 class='price'>{[this.formatPrice(values.price)]}</h2>" +
 					"<p>{shortDesc}</p>",
 					{
 						formatPrice: function(price) {

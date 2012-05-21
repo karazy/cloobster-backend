@@ -51,6 +51,45 @@ public class Business extends GenericEntity {
 	
 	@Embedded
 	private Set<Channel> channels;
+	
+	private String address;
+	private String city;
+	private String postcode;
+	private String phone;
+	
+	private Key<Company> company;
+	
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getPostcode() {
+		return postcode;
+	}
+
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public Business() {
 	}
@@ -109,6 +148,14 @@ public class Business extends GenericEntity {
 
 	public void setChannels(Set<Channel> channels) {
 		this.channels = channels;
+	}
+
+	public Key<Company> getCompany() {
+		return company;
+	}
+
+	public void setCompany(Key<Company> company) {
+		this.company = company;
 	}
 	
 	

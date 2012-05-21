@@ -516,9 +516,7 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
-            if(!this.getAppState().get('newsletterRegistered')) {
-              settingsCtr.registerNewsletterOnLeaving();
-            }
+
             requestCtr.resetAllRequests();
             androidCtr.setAndroidBackHandler(null);
 		}

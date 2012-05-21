@@ -32,7 +32,7 @@ public class BusinessesResource {
 	
 	
 	@Path("{businessId}")
-	@RolesAllowed({"restaurantadmin"})
+	@RolesAllowed({"cockpituser"})
 	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
 		Business business;
 		try {

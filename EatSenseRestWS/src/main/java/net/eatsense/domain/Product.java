@@ -16,6 +16,7 @@ public class Product extends GenericEntity {
 	 */
 	private String longDesc;
 	private Float price;
+	private Integer order;
 	
 	/**
 	 * The menu listing this product belongs to.
@@ -105,6 +106,16 @@ public class Product extends GenericEntity {
 	
 	public static Key<Product> getKey(Key<Business> parentKey, long id) {
 		return new Key<Product>(parentKey, Product.class, id);
+	}
+
+
+	public Integer getOrder() {
+		return order;
+	}
+
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 	
 }

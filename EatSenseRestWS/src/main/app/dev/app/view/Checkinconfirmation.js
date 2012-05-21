@@ -7,6 +7,7 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 	xtype : 'checkinconfirmation',
 	requires: ['Ext.field.Toggle'],
 	config : {
+		cls: 'dashboard',
 		layout : {
 			type : 'vbox',
 			pack : 'center',
@@ -15,30 +16,28 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : Karazy.i18n.translate('checkInTitle'),
+			title : Karazy.i18n.translate('nickname'),
 			items : [ {
 				xtype : 'button',
 				action: 'cancel-checkin',
-				text : Karazy.i18n.translate('cancel'),
+				text : Karazy.i18n.translate('back'),
 				ui : 'back'
 			}, ]
 		}, 
 		{
 			xtype : 'label',
-			styleHtmlContent : true,
 			itemId : 'checkInDlg1Label1',
 			html : Karazy.i18n.translate('checkInStep1Label1'),
-			margin : 5
+			cls: 'checkin-confirm-nickname-label'
 		}, 
 		{
 			xtype : 'textfield',
 			itemId : 'nicknameTf',
-			label : Karazy.i18n.translate('nickname'),
-			width : '90%',
-			labelWidth : 100,
-			labelAlign : 'top',
+			width : '80%',
 			required : true,
-			margin : 5
+			maxLength: 25,
+			margin : 5,
+			cls: 'checkin-confirm-nickname-field'
 		},  
 		{
 			xtype : 'panel',
@@ -66,11 +65,13 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 		{
 			xtype : 'togglefield',
 			action : 'toggle-nickname',
+			cls: 'checkin-confirm-nickname-toggle',
+			labelCls: 'checkin-confirm-nickname-toggle-label',
 			labelAlign: 'top',
-			width: '90%',
+			html: Karazy.i18n.translate('nicknameToggleHint'),
+			width: '80%',
 			value : 0,
-			label : Karazy.i18n.translate('saveNicknameToggle'),
-			margin : 5
+			label : Karazy.i18n.translate('saveNicknameToggle')			
 		}
 		]
 	},
