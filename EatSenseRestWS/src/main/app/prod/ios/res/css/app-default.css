@@ -41,18 +41,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-h8 {
-	position: absolute;
-	left: 5px;
-}
-
-h9 {
-	position: relative;
-	padding-right: 20px;
-	
-}
-
-
 /* line 37, ../../touch/resources/themes/stylesheets/sencha-touch/default/core/_reset.scss */
 q:before,
 q:after {
@@ -7031,17 +7019,17 @@ input[type="search"]::-webkit-search-cancel-button {
 .productdetail-spinner-down {
   position: relative;
   top: 22px;
-  right: 15px;
-  height: 20px;
-  width: 35px;
+  right: 5px;
+  height: 26px;
+  width: 45px;
 }
 
 .productdetail-spinner-up {
   position: relative;
   top: -3px;
   right: 50px;
-  height: 20px;
-  width: 35px;
+  height: 26px;
+  width: 45px;
 }
 
 /* line 104, app-default.scss */
@@ -7086,12 +7074,13 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 /* line 138, app-default.scss */
 .choice-panel .option {
-  
+  white-space: normal;
 }
 .choice-panel .option-label {
   font-size: 0.8em;
   background-color: white;
   color: black;
+  white-space: normal;
 }
 
 .choice-panel .comment {
@@ -7101,6 +7090,7 @@ input[type="search"]::-webkit-search-cancel-button {
   font-weight: bold;
   padding-left: 5px;
   margin-bottom: 3px;
+  border-radius: 0 !important;
 }
 
 .choice-panel .comment-input {
@@ -7111,6 +7101,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /* line 142, app-default.scss #8AA529*/
 .choice-panel .option-panel {
   padding: 5px 0px;
+  white-space: normal;
 }
 
 .choice-panel-title {
@@ -7152,30 +7143,12 @@ input[type="search"]::-webkit-search-cancel-button {
   text-align: right;
 }
 
-.orderListItem h6 {
-  color: #000000;
-  margin-left: 10px;
-  font-size: 0.8em;
-}
-
 .orderListItem li {
   color: #000000;
   margin-left: 15px;
   font-size: 0.7em;
 }
 
-/* line 160, app-default.scss */
-.orderListItem div {
-  position: relative;
-}
-/* line 164, app-default.scss */
-.orderListItem div.price {
-  position: absolute;
-  right: 0;
-  /*	width: 30%;*/
-  text-align: right;
-  padding-right: 10px;
-}
 
 /* line 174, app-default.scss */
 .orderListItem .canceled {
@@ -7218,23 +7191,42 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 50%;
 }
 /* line 200, app-default.scss */
-.cartoverviewitem .name h2 {
+.cartoverviewitem .name h2.title {
   float: left;
-  padding-left: 10px;
-  padding-right: 5px;
+  /*padding-left: 10px;
+  padding-right: 5px;*/
+ 
+  /*float: left;*/
+  color: #000000;
+  font-size: 1em;
+ /* white-space: normal;
+  word-wrap:break-word;*/
+  width: 80%;
+/*
+  position: absolute;
+  left: 5px;*/
 }
+
 /* line 206, app-default.scss */
 .cartoverviewitem .name div.amount {
   float: left;
 }
 /* line 210, app-default.scss */
-.cartoverviewitem .name div.price {
+.cartoverviewitem .name h2.price {
   /*position: absolute;*/
   right: 0;
-  float: right;
+  /*float: right;*/
   text-align: right;
   padding-right: 10px;
   padding-left: 10px;
+
+  float: left;
+  color: #000000;
+  font-size: 1em;
+  width: 20%;
+  text-align: right;
+ /* position: relative;
+  padding-right: 20px;*/
 }
 /* line 220, app-default.scss */
 .cartoverviewitem .edit {
@@ -7423,6 +7415,17 @@ input[type="search"]::-webkit-search-cancel-button {
   border-bottom-left-radius: 0.3em;
 }
 
+h8 {
+  position: absolute;
+  left: 5px;
+}
+
+h9 {
+  position: relative;
+  padding-right: 20px;
+  
+}
+
 /*
 * CheckIn confirmation view
 */
@@ -7433,7 +7436,8 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .checkin-confirm-nickname-label {
   color: white; 
-  font-size: 1.5em;
+  font-size: 1.2em;
+  margin-bottom: 5px;
 }
 
 .checkin-confirm-nickname-toggle {

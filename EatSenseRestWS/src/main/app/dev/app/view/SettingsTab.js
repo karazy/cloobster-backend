@@ -9,7 +9,8 @@ Ext.define('EatSense.view.SettingsTab', {
 			type: 'vbox',
 			pack: 'center',
 			align: 'middle'
-		},				
+		},
+		scrollable: 'vertical',				
 		iconCls : 'settings',
 		cls: 'setting-panel',
 		title: Karazy.i18n.translate('settingsButton'),
