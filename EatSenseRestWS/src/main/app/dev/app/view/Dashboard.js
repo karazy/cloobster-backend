@@ -34,7 +34,6 @@ Ext.define('EatSense.view.Dashboard', {
 			width : 186,
 			baseCls : 'dashboard-button',
 			pressedCls: 'dashboard-button-pressed'
-			
 		},
 		{
 			xtype: 'button',

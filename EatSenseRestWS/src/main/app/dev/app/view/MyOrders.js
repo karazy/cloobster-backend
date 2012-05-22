@@ -43,8 +43,8 @@ Ext.define('EatSense.view.MyOrders', {
 			onItemDisclosure: this.removeItem,
 			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
-			"<div class='{[values.status.toLowerCase()]}'>" +
 				"<h2 class='title'>{amount} x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
+				"<div style='clear:both;'></div>"
 				// "<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				// "<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>({amount}x) {[this.formatPrice(values)]}</div>" +
 				/*"<div style='clear: both;'>" +
@@ -64,7 +64,6 @@ Ext.define('EatSense.view.MyOrders', {
 					"<p>Kommentar: {comment}</p>" +
 					"</tpl>" +
 				"</div>" +*/
-			"</div>"
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
 				//we need to pass the product as the choices object in this context is raw data

@@ -70,6 +70,9 @@
              },
              undoEditButton: {
              	tap: 'closeOrderDetail'
+             },
+             myorderlist: {
+             	itemtap: 'showMyOrderDetail'
              }
 		},
 		/**
@@ -566,6 +569,15 @@
 		}
 			
 		return total;
+	},
+	showMyOrderDetail: function(list, index, dataitem) {
+		var panel = Ext.create('Ext.Panel');
+		panel.setWidth(200);
+		panel.setHeight(200);
+		panel.setModal(true);
+		panel.setHideOnMaskTap(true);
+
+		panel.showBy(dataitem);
 	},
 	/**
 	 * Choose a payment method to issue the paymentRequest.

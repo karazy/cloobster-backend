@@ -1,0 +1,117 @@
+﻿{
+    "name": "Cloobster Test",
+    "description": "",
+    "payments": [
+        {
+            "name": "EC",
+            "order": 2
+        },
+        {
+            "name": "Bar",
+            "order": 1
+        },
+        {
+            "name": "Kreditkarte",
+            "order": 3
+        },
+        {
+            "name": "Goldbarren",
+            "order": 4
+        }
+    ],
+    "spots": [
+        {
+            "name": "Höhle11",
+            "barcode": "test001",
+            "groupTag": null
+        },
+        {
+            "name": "Höhle2",
+            "barcode": "test002",
+            "groupTag": null
+        },
+        {
+            "name": "Höhle3",
+            "barcode": "test003",
+            "groupTag": null
+        },
+        {
+            "name": "Höhle4",
+            "barcode": "test004",
+            "groupTag": null
+        },
+        {
+            "name": "Höhle5",
+            "barcode": "test005",
+            "groupTag": null
+        }
+    ],
+    "menus": [
+        {
+            "description": "100%saftige, lockereTestdaten",
+            "title": "Testmenü",
+            "order": 1,
+            "products": [
+                {
+                    "name": "Extra langer Produktname um die Zeilenumbrüche zu testen.",
+                    "longDesc": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
+                    "shortDesc": "MitbiologischenTestdatenundvielvielText",
+                    "price": 10,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!",
+                                    "id": "null",
+                                    "price": 100
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 200
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 300
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 400
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 500
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 600
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 700
+                                },
+                                {
+                                    "name": "ganz viele viele viele viele viele sinnlose Buchstaben!!",
+                                    "id": null,
+                                    "price": 800
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 8,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "TestExtras",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

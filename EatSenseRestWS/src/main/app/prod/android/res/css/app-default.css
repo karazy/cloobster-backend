@@ -5226,7 +5226,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
 }
 
 /* line 207, ../../touch/resources/themes/stylesheets/sencha-touch/default/widgets/_list.scss */
-.x-list-round .x-scroll-view {
+/*.x-list-round .x-scroll-view {*/
   
   /*background: #917D64;*/ /*url('../images/bg-rp-main.png') repeat left top;*/
   
@@ -5244,7 +5244,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F79621', end
   	color-stop(0.74, rgb(143,120,93))
   ); */
   
-}
+/*}*/
 /* FRED */
 /*.x-dataview .x-scroll-view {
   
@@ -7296,6 +7296,30 @@ input[type="search"]::-webkit-search-cancel-button {
   background-image: url(../images/dashboard/start_button_touch.png) !important;
   background-repeat:no-repeat; 
   background-position:center center;
+}
+
+.about-text {
+  font-size: 0.9em;
+  margin: 5px;
+}
+
+.about-text h2 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 7px;
+  margin-bottom: 3px;
+}
+
+.about-text h3 {
+  font-weight: bold;
+}
+
+.about-text p {
+
+}
+
+.x-button-icon.about {
+  -webkit-mask-image: url('../images/buttons/about.png');
 }
 
 /* line 335, app-default.scss */
