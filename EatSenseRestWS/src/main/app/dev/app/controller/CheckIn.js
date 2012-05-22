@@ -193,12 +193,14 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    checkInConfirm: function(options) {
-	   var checkInDialog = this.getCheckinconfirmation(), 
+	  var checkInDialog = this.getCheckinconfirmation(), 
 		    main = this.getMain(),
-		checkIn = Ext.create('EatSense.model.CheckIn');		
+        nicknameToggle = this.getNicknameTogglefield(),
+		    checkIn = Ext.create('EatSense.model.CheckIn');		
 			
 	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
 	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
+         nicknameToggle.setValue(1);
 	   	 } else {
 	   		this.generateNickname();
 	   	 }

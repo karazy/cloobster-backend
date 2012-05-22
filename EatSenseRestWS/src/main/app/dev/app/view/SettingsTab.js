@@ -26,7 +26,7 @@ Ext.define('EatSense.view.SettingsTab', {
 			// padding: 5,	
 			margin: '10 0 0 0',
 			width: '80%',
-			items: [		
+			items: [
 				{
 					xtype: 'label',
 					cls: 'general-label',

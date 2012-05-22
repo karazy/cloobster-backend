@@ -20,14 +20,12 @@ Ext.define('EatSense.view.Dashboard', {
 			style : 'background-repeat:no-repeat; background-position:center center;',
 			height : 80,
 			width : 186
-		}, 
-		
+		},
 		{	xtype : 'image',
 			src : 'res/images/dashboard/middle-v3.png',
 			style : 'background-repeat:no-repeat; background-position:center center;',
 			height : 230,
-			width : 277
-			
+			width : 277			
 		},			
 		{ 	
 			xtype : 'button',
@@ -47,10 +45,8 @@ Ext.define('EatSense.view.Dashboard', {
 			styleHtmlContent: true,
 			style: 'position: absolute; bottom: 10px; right: 10px;'
 		}
-
 		]
 	},
-
 	showLoadScreen : function(mask) {
 		if (mask) {
 			this.setMasked({
