@@ -34,11 +34,11 @@ Ext.define('EatSense.view.OrderDetail', {
 				xtype : 'label',
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
-				tpl: '<p class="desc">{product.data.longDesc}</p>'
+				tpl: '{product.data.longDesc}'
 			}, {
 				xtype : 'panel',
 				docked: 'right',
-				width: '130px',
+				// width: '130px',
 				layout : {
 					type : 'vbox',
 					align : 'stretch',

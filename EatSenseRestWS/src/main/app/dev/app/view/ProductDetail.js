@@ -39,7 +39,7 @@ Ext.define('EatSense.view.ProductDetail', {
 			}, {
 				xtype : 'panel',
 				docked: 'right',
-				width: '130px',
+				// width: '130px',
 				layout : {
 					type : 'vbox',
 					align : 'stretch',

@@ -21,6 +21,9 @@ Ext.define('EatSense.model.Product', {
 		}, {
 			name : 'price',
 			type: 'number'
+		}, {
+			name: 'order',
+			type: 'number'
 		}, { //dont change, gets set automatically
 			name: 'price_calculated',
 			persist: false,

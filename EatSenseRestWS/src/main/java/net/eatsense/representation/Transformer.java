@@ -201,6 +201,7 @@ public class Transformer {
 		dto.setLongDesc( product.getLongDesc() );
 		dto.setShortDesc( product.getShortDesc() );
 		dto.setPrice( product.getPrice() );
+		dto.setOrder(product.getOrder());
 		 
 		return dto;
 	}

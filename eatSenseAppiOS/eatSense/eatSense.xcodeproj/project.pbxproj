@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B6117EAC156B81B8001A3DB9 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B6719242156979050070D140 /* Default@2x.png */; };
+		B6117EAD156B81BD001A3DB9 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B671923F156979000070D140 /* Default.png */; };
 		B63F670715361C2000F76817 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B640151731B200EE035F /* AssetsLibrary.framework */; };
 		B63F670815361C2C00F76817 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B644151731CC00EE035F /* libiconv.dylib */; };
 		B63F670915361C3600F76817 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6F5B642151731B900EE035F /* CoreVideo.framework */; };
 		B645109015162E60009D2AE3 /* www in Resources */ = {isa = PBXBuildFile; fileRef = B645108F15162E60009D2AE3 /* www */; };
-		B6719240156979000070D140 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B671923F156979000070D140 /* Default.png */; };
-		B6719243156979050070D140 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B6719242156979050070D140 /* Default@2x.png */; };
 		B6D87B501536ECB500557AE6 /* 57.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B4F1536ECB500557AE6 /* 57.png */; };
 		B6D87B531536ECBA00557AE6 /* 72.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B521536ECBA00557AE6 /* 72.png */; };
 		B6D87B551536ECCE00557AE6 /* 144.png in Resources */ = {isa = PBXBuildFile; fileRef = B6D87B541536ECCE00557AE6 /* 144.png */; };
@@ -383,8 +383,8 @@
 				B6D87B531536ECBA00557AE6 /* 72.png in Resources */,
 				B6D87B551536ECCE00557AE6 /* 144.png in Resources */,
 				B6D87B571536ECF100557AE6 /* 114.png in Resources */,
-				B6719240156979000070D140 /* Default.png in Resources */,
-				B6719243156979050070D140 /* Default@2x.png in Resources */,
+				B6117EAC156B81B8001A3DB9 /* Default@2x.png in Resources */,
+				B6117EAD156B81BD001A3DB9 /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -546,7 +546,7 @@
 					/usr/lib/libSystem.B.dylib,
 				);
 				PRODUCT_NAME = eatSense;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -576,7 +576,7 @@
 					/usr/lib/libSystem.B.dylib,
 				);
 				PRODUCT_NAME = eatSense;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};
