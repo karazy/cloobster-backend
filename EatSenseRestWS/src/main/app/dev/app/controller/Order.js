@@ -70,9 +70,6 @@
              },
              undoEditButton: {
              	tap: 'closeOrderDetail'
-             },
-             myorderlist: {
-             	itemtap: 'showMyOrderDetail'
              }
 		},
 		/**
