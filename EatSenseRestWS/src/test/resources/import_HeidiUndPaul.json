@@ -53,7 +53,6 @@
                     "longDesc": "Mit Bio-Rindfleisch, Salatherzen, Käse, Bio-Ketchup und Mayonnaise",
                     "shortDesc": "Mit Bio-Rindfleisch, Salatherzen, Käse...",
                     "price": 4.25,
-                    "order": 0,
                     "choices": [
                         {
                             "options": [
@@ -86,43 +85,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -190,7 +189,6 @@
                     "longDesc": "Mit leckerem Bio-Rindfleisch, Tomaten, roten Zwiebeln, Gürkchen, Salatherzen und einer hausgemachten Burgersauce",
                     "shortDesc": "Mit Bio-Rindfleisch, Tomaten, Gürkchen...",
                     "price": 5.75,
-                    "order": 1,
                     "choices": [
                         {
                             "options": [
@@ -223,43 +221,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -327,7 +325,6 @@
                     "longDesc": "Schmeckt so gut wie der Klassiker – mit einer Portion Cheddarkäse extra",
                     "shortDesc": "Wie der Klassiker, aber mit Extrakäse...",
                     "price": 5.95,
-                    "order": 2,
                     "choices": [
                         {
                             "options": [
@@ -360,43 +357,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -464,7 +461,6 @@
                     "longDesc": "Mit saftigem Bio-Rindfleisch, Mozzarella, Tomaten, Rucola, Basilikum, Oliven, Parmesan und zweierlei Pesto",
                     "shortDesc": "Mit Bio-Rindfleisch, Mozzarella, Rucola...",
                     "price": 6.95,
-                    "order": 3,
                     "choices": [
                         {
                             "options": [
@@ -497,43 +493,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -601,7 +597,6 @@
                     "longDesc": "Mit Bio-Rindfleisch, Tomaten, Frischkäse, Rucola, Kapern, Pecorino, Pinienkerne,  Serrano Schinken und zweierlei Pesto",
                     "shortDesc": "Mit Bio-Rindfleisch, Pecorino, Serrano-Schinken...",
                     "price": 7.15,
-                    "order": 4,
                     "choices": [
                         {
                             "options": [
@@ -634,43 +629,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -738,7 +733,6 @@
                     "longDesc": "Mit Bio-Rindfleisch, Salatblatt, Jalapeños und einem scharfen Tomaten-Chilli-Relish",
                     "shortDesc": "Mit Bio-Rindfleisch, Jalapenos, scharfer Sauce...",
                     "price": 5.95,
-                    "order": 5,
                     "choices": [
                         {
                             "options": [
@@ -771,43 +765,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -875,7 +869,6 @@
                     "longDesc": "Mit würzigem Bio-Rindfleisch, knusprigem Bacon, Käse, Tomatenscheiben, Jalapeños und Barbeque-Sauce",
                     "shortDesc": "Mit Bio-Rindfleisch, Bacon, Käse...",
                     "price": 6.15,
-                    "order": 6,
                     "choices": [
                         {
                             "options": [
@@ -908,43 +901,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1012,7 +1005,6 @@
                     "longDesc": "Mit saftigem Bio-Rindfleisch, Salatblatt, Tomatenscheiben, Käse, Bacon, Spiegelei, Bone’s Suckin Sauce und unserer würzigen Hausburgersauce",
                     "shortDesc": "Mit Bio-Rindfleisch, Bacon, Spiegelei...",
                     "price": 6.55,
-                    "order": 7,
                     "choices": [
                         {
                             "options": [
@@ -1045,43 +1037,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1188,43 +1180,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1314,7 +1306,7 @@
                             "included": 0,
                             "selected": null
                         },
-                        {
+                         {
                             "options": [
                                 {
                                     "name": "Zusätzliches Bio-Rindfleisch-Patty",
@@ -1324,43 +1316,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1460,43 +1452,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
-                            "maxOccurence": 7,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1596,43 +1588,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1739,43 +1731,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -1875,43 +1867,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -2011,43 +2003,43 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
                             "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
@@ -2149,48 +2141,47 @@
                                 {
                                     "name": "Tomate",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Käse",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Bacon",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Spiegelei",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "gegrillte Paprika",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Rucola",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 },
                                 {
                                     "name": "Mozzarella",
                                     "id": null,
-                                    "price": 2.5
+                                    "price": 0.5
                                 }
                             ],
                             "price": 0.5,
-                            "maxOccurence": 7,
+                            "maxOccurence": 8,
                             "minOccurence": 0,
-                            "overridePrice": "OVERRIDE_SINGLE_PRICE",
+                            "overridePrice": "NONE",
                             "text": "Burger Extras",
                             "included": 0,
                             "selected": null
-                        },
-                        {
+                        },                        {
                             "options": [
                                 {
                                     "name": "Coca-Cola",
