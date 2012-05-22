@@ -293,9 +293,10 @@
 		 	 	if(!rec.get('parent')) {
 		 	 		return true;
 		 	 	}}).each(function(choice) {
-					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail'),
+						choicePriceLabel = (choice.get('overridePrice') == 'OVERRIDE_FIXED_SUM') ? ' (+' + Karazy.util.formatPrice(choice.get('price')) + ')' : '';
 
-					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text + choicePriceLabel);
 					menuCtr.createOptions(choice, optionsDetailPanel);
 					choice.on('recalculate', function() {
 						me.recalculate(order);
