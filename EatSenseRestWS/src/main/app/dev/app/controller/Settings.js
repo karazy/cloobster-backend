@@ -10,7 +10,8 @@ Ext.define('EatSense.controller.Settings', {
     		settingsTab: 'lounge settingstab[tabName=settings]',
     		nicknameField: 'settingstab #nickname',
             newsletterView: 'settingstab newsletter',
-            registerNewsletterBt: 'settingstab newsletter button[action=register]'
+            registerNewsletterBt: 'settingstab newsletter button[action=register]',
+            aboutBt: 'settingstab button[action=about]',
     	},
 
     	control: {
@@ -22,6 +23,9 @@ Ext.define('EatSense.controller.Settings', {
     		},
             registerNewsletterBt: {
                 tap: 'registerNewsletterBtTap'
+            },
+            aboutBt: {
+                tap: 'showAbout'
             }
     	}
     },
@@ -117,6 +121,15 @@ Ext.define('EatSense.controller.Settings', {
             }
         });
     },
+
+    /**
+    * Shows an about screen.
+    */
+    showAbout: function() {
+        var about = Ext.create('EatSense.view.About');
+
+        Ext.Viewport.add(about);
+    }
     /**
     * Shows a popup to user asking for his email to register for newsletter.
     */

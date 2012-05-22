@@ -6,7 +6,7 @@
  */
 Ext.define('EatSense.controller.CheckIn', {
     extend: 'Ext.app.Controller',
-    requires: ['Ext.data.proxy.LocalStorage', 'EatSense.controller.Message'],
+    requires: ['Ext.data.proxy.LocalStorage', 'EatSense.controller.Message', 'EatSense.view.About'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
     	refs: {
@@ -16,6 +16,7 @@ Ext.define('EatSense.controller.CheckIn', {
         	checkinwithothers: 'checkinwithothers',
         	dashboard: 'dashboard',
         	settingsBt: 'dashboard button[action=settings]',
+          aboutBt: 'dashboard button[action=about]',
         	settingsBackBt: 'settings button[action=back]',
         	nicknameTogglefield: 'checkinconfirmation togglefield[action=toggle-nickname]',
         	nicknameSettingsField: 'settings #nicknameSetting',
@@ -57,6 +58,9 @@ Ext.define('EatSense.controller.CheckIn', {
             },
             regenerateNicknameBt: {
             	tap: 'generateNickname'
+            },
+            aboutBt: {
+              tap: 'showAbout'
             },
             settingsBt: {
             	tap: 'showSettings'
@@ -364,6 +368,15 @@ Ext.define('EatSense.controller.CheckIn', {
         menuCtr.showMenu();
         this.getApplication().getController('Android').setAndroidBackHandler(menuCtr.getMenuNavigationFunctions());
 	},
+  /**
+  * Shows an about screen.
+  */
+  showAbout: function() {
+    var about = Ext.create('EatSense.view.About');
+
+    Ext.Viewport.add(about);
+
+  },
 	/**
 	 * Show settings screen.
 	 * 

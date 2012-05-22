@@ -37,7 +37,17 @@ Ext.define('EatSense.view.Dashboard', {
 			baseCls : 'dashboard-button',
 			pressedCls: 'dashboard-button-pressed'
 			
+		},
+		{
+			xtype: 'button',
+			action: 'about',
+			ui: 'confirm',
+			iconCls: 'about',
+			iconMask: true,
+			styleHtmlContent: true,
+			style: 'position: absolute; bottom: 10px; right: 10px;'
 		}
+
 		]
 	},
 
