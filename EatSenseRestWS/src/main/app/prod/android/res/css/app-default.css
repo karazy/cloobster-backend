@@ -6933,13 +6933,6 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 @CHARSET "UTF-8";
-/*
-* Menu- and Productlist
-*/
-
-.menu-panel, .menu-panel .x-list-round .x-scroll-view {
- background: #917D64;
-}
 
 /* line 37, app-default.scss */
 .productListItem h2.title {
@@ -7132,14 +7125,14 @@ input[type="search"]::-webkit-search-cancel-button {
   float: left;
   color: #000000;
   font-size: 1em;
-  width: 80%;
+  width: 75%;
 }
 
 .orderListItem h2.price {
   float: left;
   color: #000000;
   font-size: 1em;
-  width: 20%;
+  width: 25%;
   text-align: right;
 }
 
@@ -7427,6 +7420,14 @@ h9 {
 }
 
 /*
+* Menu- and Productlist
+*/
+
+.menu-panel, .menu-panel .x-list-round .x-scroll-view {
+ background: #917D64;
+}
+
+/*
 * CheckIn confirmation view
 */
 
@@ -7436,7 +7437,8 @@ h9 {
 
 .checkin-confirm-nickname-label {
   color: white; 
-  font-size: 1.5em;
+  font-size: 1.2em;
+  margin-bottom: 5px;
 }
 
 .checkin-confirm-nickname-toggle {
