@@ -7019,17 +7019,17 @@ input[type="search"]::-webkit-search-cancel-button {
 .productdetail-spinner-down {
   position: relative;
   top: 22px;
-  right: 15px;
-  height: 20px;
-  width: 35px;
+  right: 5px;
+  height: 26px;
+  width: 45px;
 }
 
 .productdetail-spinner-up {
   position: relative;
   top: -3px;
   right: 50px;
-  height: 20px;
-  width: 35px;
+  height: 26px;
+  width: 45px;
 }
 
 /* line 104, app-default.scss */
