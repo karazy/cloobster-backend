@@ -45,8 +45,6 @@ public class BusinessesResource{
 	@Inject
 	public BusinessesResource(BusinessRepository repo, DummyDataDumper ddd, ImportController importCtr) {
 		this.businessRepo = repo;
-		this.ddd = ddd;
-		this.importCtrl = importCtr;
 	}
 
 	/**
@@ -77,55 +75,4 @@ public class BusinessesResource{
 		
 		return businessResource;
 	}
-		
-	@PUT
-	@Path("dummies")
-	public void dummyData() {
-		ddd.generateDummyBusinesses();
-	}
-	
-	@PUT
-	@Path("dummieusers")
-	public void dummyUsers() {
-		ddd.generateDummyUsers();
-	}
-		
-	@PUT
-	@Path("import")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("text/plain; charset=UTF-8")
-	public String importNewBusiness(BusinessImportDTO newBusiness ) {
-		Long id =  importCtrl.addBusiness(newBusiness);
-		
-		if(id == null)
-			return "Error:\n" + importCtrl.getReturnMessage();
-		else
-		    return id.toString();
-	}
-	
-	
-	
-	/**
-	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
-	 * {@link ImportController#deleteAllData()}
-	 * Also recreates the dummy users.
-	 */
-	@DELETE
-	@Path("all")
-	public void deleteAllData() {
-		//TODO DELETE
-		importCtrl.deleteAllData();
-	}
-	
-	/**
-	 * ATTENTION! THIS METHOD IS DANGEROUS AND SHOULD NOT MAKE IT INTO PRODUCTION
-	 * {@link ImportController#deleteAllData()}
-	 */
-	@DELETE
-	@Path("livedata")
-	public void deleteLiveData() {
-		//TODO DELETE
-		importCtrl.deleteLiveData();
-	}
-
 }

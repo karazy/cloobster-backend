@@ -47,7 +47,7 @@
 			<id>dev</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
-			</activation>	
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -124,7 +124,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>	
+			<id>prod</id>		
 			<build>			
 				<plugins>
 					<plugin>

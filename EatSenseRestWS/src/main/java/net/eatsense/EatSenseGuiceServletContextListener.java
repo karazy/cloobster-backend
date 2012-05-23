@@ -7,6 +7,7 @@ import net.eatsense.auth.SecurityFilter;
 import net.eatsense.controller.MessageController;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.restws.AccountResource;
+import net.eatsense.restws.AdminResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NewsletterResource;
@@ -64,17 +65,25 @@ public class EatSenseGuiceServletContextListener extends
 						bind(CronResource.class);
 						bind(AccountResource.class);
 						bind(ChannelResource.class);
+						bind(AdminResource.class);
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
 						bind(NicknameGenerator.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*b/accounts(.)*",
-								"(.)*newsletter(.)*", "(.)*b/businesses(.)*",
-								"(.)*c/businesses(.)*","(.)*c/checkins(.)*",
-								"(.)*accounts(.)*", "(.)*spots(.)*",
-								"(.)*nickname(.)*", "(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*", "(.)*cron(.)*").with(GuiceContainer.class, parameters);
+						serveRegex("(.)*admin/services(.)*",
+								"(.)*b/accounts(.)*",
+								"(.)*newsletter(.)*",
+								"(.)*b/businesses(.)*",
+								"(.)*c/businesses(.)*",
+								"(.)*c/checkins(.)*",
+								"(.)*accounts(.)*",
+								"(.)*spots(.)*",
+								"(.)*nickname(.)*",
+								"(.)*_ah/channel/connected(.)*",
+								"(.)*_ah/channel/disconnected(.)*",
+								"(.)*cron(.)*"
+							).with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);

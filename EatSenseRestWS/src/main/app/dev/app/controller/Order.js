@@ -293,9 +293,10 @@
 		 	 	if(!rec.get('parent')) {
 		 	 		return true;
 		 	 	}}).each(function(choice) {
-					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail'),
+						choicePriceLabel = (choice.get('overridePrice') == 'OVERRIDE_FIXED_SUM') ? ' (+' + Karazy.util.formatPrice(choice.get('price')) + ')' : '';
 
-					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text + choicePriceLabel);
 					menuCtr.createOptions(choice, optionsDetailPanel);
 					choice.on('recalculate', function() {
 						me.recalculate(order);
@@ -327,7 +328,8 @@
 				labelAlign: 'top',
 				itemId: 'productComment',
 				value: order.get('comment'),
-				cls: 'choice'
+				inputCls: 'comment-input',
+				labelCls: 'comment'
 			}
 		);
 		Ext.Viewport.add(detail);
@@ -564,6 +566,15 @@
 		}
 			
 		return total;
+	},
+	showMyOrderDetail: function(list, index, dataitem) {
+		var panel = Ext.create('Ext.Panel');
+		panel.setWidth(200);
+		panel.setHeight(200);
+		panel.setModal(true);
+		panel.setHideOnMaskTap(true);
+
+		panel.showBy(dataitem);
 	},
 	/**
 	 * Choose a payment method to issue the paymentRequest.

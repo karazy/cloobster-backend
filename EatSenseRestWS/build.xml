@@ -10,7 +10,6 @@
 		<move todir="target" includeemptydirs="false">
 			<fileset dir="target">
 			</fileset>
-
 			<regexpmapper from="^(.+)\.desktop\.(.+)$$" to="\1.\2" />
 		</move>
 	</target>
@@ -24,7 +23,6 @@
 		<echo message="Disable debug mode" />
 		<replaceregexp file="${frontendDirDev}app.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">
-			
 			<arg line="build -p ${frontendDirDev}app.jsb3 -d ${frontendDirDev}" />
 		</exec>
 		<move file="${frontendDirDev}app-all.js" todir="${frontendDirProd}" overwrite="true"></move>

@@ -49,6 +49,7 @@ public final class R {
         public static final int launcher_icon=0x7f02000a;
         public static final int share_via_barcode=0x7f02000b;
         public static final int shopper_icon=0x7f02000c;
+        public static final int splash=0x7f02000d;
     }
     public static final class id {
         /**  Messages IDs 
