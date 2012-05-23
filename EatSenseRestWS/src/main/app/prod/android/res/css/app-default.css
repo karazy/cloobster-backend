@@ -6984,6 +6984,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .productDetail {
   background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
   font-size: 0.8em;
+  padding-right: 5px;
 }
 /* line 79, app-default.scss */
 .productDetail h2 {
