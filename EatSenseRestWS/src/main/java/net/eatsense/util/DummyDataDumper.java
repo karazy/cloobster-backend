@@ -3,6 +3,7 @@ package net.eatsense.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
@@ -50,7 +51,7 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		Account account = ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "companyadmin", rr.getAllKeys(), true, true);
+		Account account = ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), true, true);
 		account.setActive(true);
 		account.setEmailConfirmed(true);
 		

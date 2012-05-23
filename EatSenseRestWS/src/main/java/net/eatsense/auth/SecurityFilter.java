@@ -190,10 +190,12 @@ public class SecurityFilter implements ContainerRequestFilter {
         	// guest role is for checkedin customers
         	if( role.equals("guest") && checkIn != null && checkIn.getUserId() != null)
         		return true;
-        	
+       	
         	if(accountCtrl.isAccountInRole(account, role)) {
-        		if( businessId != null && accountCtrl.isAccountManagingBusiness(account, businessId))
+        		if( businessId == null || businessId == 0)
         			return true;
+        		else 
+        			return accountCtrl.isAccountManagingBusiness(account, businessId);
         	}
         	
             return false;
