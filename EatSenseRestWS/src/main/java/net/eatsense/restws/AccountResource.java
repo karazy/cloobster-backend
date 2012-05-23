@@ -64,6 +64,25 @@ public class AccountResource {
 	}
 	
 	@GET
+	@Path("login")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"user"})
+	public AccountDTO getAccount() {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		logger.info("Authenticated request from user :" + account.getLogin());
+		return accountCtr.toDto(account);
+	}
+	
+	@GET
+	@Path("loginfb")
+	@Produces("application/json; charset=UTF-8")
+	public AccountDTO getAccountFacebook(@QueryParam("uid") String uid, @QueryParam("token") String accessToken) {
+		Account account = accountCtr.authenticateFacebook(uid, accessToken);
+		logger.info("Authenticated request from user :" + account.getLogin());
+		return accountCtr.toDto(account);
+	}
+	
+	@GET
 	@Path("{login}/businesses")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({"user"})

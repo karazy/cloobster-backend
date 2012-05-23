@@ -21,6 +21,8 @@ import org.apache.bval.guice.ValidationModule;
 
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -87,6 +89,10 @@ public class EatSenseGuiceServletContextListener extends
 					@Provides
 					public ChannelService providesChannelService() {
 						return ChannelServiceFactory.getChannelService();
+					}
+					@Provides
+					public URLFetchService providesURLFetchService() {
+						return URLFetchServiceFactory.getURLFetchService();
 					}
 				}, new ValidationModule());
 		// Register event listeners

@@ -38,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
@@ -77,6 +78,9 @@ public class AccountControllerTest {
 
 	@Mock
 	private CompanyRepository companyRepo;
+
+	@Mock
+	private URLFetchService fetchService;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -87,7 +91,7 @@ public class AccountControllerTest {
 		ar = injector.getInstance(AccountRepository.class);
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new AccountController(ar, rr,recipientRepo, companyRepo, channelController, avf.getValidator());
+		ctr = new AccountController(ar, rr,recipientRepo, companyRepo, channelController, avf.getValidator(), fetchService);
 		
 		
 		 password = "diesisteintestpasswort";
