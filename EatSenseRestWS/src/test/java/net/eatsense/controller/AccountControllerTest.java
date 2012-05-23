@@ -125,9 +125,32 @@ public class AccountControllerTest {
 	}
 	
 	@Test
+	public void testAuthenticateCaseInsensitive() {
+		String loginWithUpperCase = "TestLogin";		
+		Account test = ctr.authenticate(loginWithUpperCase, password);
+		
+		assertThat(test.getLogin(), is(login));
+		assertThat(test.getHashedPassword(), notNullValue());
+		assertThat(test.getRole(), is(role));
+		assertThat(test.getEmail(), is(email));
+	}
+		
+	
+	@Test
 	public void testAuthenticateHashed() {
 		//#1 Test correct hash
 		Account test = ctr.authenticateHashed(login, account.getHashedPassword());
+		
+		assertThat(test.getLogin(), is(login));
+		assertThat(test.getHashedPassword(), notNullValue());
+		assertThat(test.getRole(), is(role));
+		assertThat(test.getEmail(), is(email));
+	}
+	
+	@Test
+	public void testAuthenticateHashedCaseInsensitive() {
+		String loginWithUpperCase = "TestLogin";		
+		Account test = ctr.authenticateHashed(loginWithUpperCase, account.getHashedPassword());
 		
 		assertThat(test.getLogin(), is(login));
 		assertThat(test.getHashedPassword(), notNullValue());

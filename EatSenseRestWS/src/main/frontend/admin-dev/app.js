@@ -60,9 +60,9 @@ Ext.application({
 										text : 'Upload data',
 										handler : function() {
 											Ext.Ajax.request({
-												url : '/c/businesses/import',
+												url : '/admin/services/businesses',
 												// 'file://Users/fred/karazy/Dropbox/karazy_entwicklung/import_Sergio.json',
-												method : 'PUT',
+												method : 'POST',
 												scope : this,
 												jsonData : Ext.getCmp('jsonData').getValue(),
 												success : function(response) {
@@ -86,7 +86,7 @@ Ext.application({
 												fn: function(btn) {
 													if (btn == 'yes'){
 														Ext.Ajax.request({
-															url : '/c/businesses/all', 
+															url : '/admin/services/datastore/all', 
 															method : 'DELETE',
 															success : function(response) {
 																Ext.Msg.alert('Success', "All data deleted. I'm sure you know what you did!");
@@ -113,7 +113,7 @@ Ext.application({
 												fn: function(btn) {
 													if (btn == 'yes'){
 														Ext.Ajax.request({
-															url : '/c/businesses/livedata', 
+															url : '/admin/services/datastore/live', 
 															method : 'DELETE',
 															success : function(response) {
 																Ext.Msg.alert('Success', "All live data deleted. I'm sure you know what you did!");
@@ -139,8 +139,8 @@ Ext.application({
 												fn: function(btn) {
 													if (btn == 'yes'){
 														Ext.Ajax.request({
-															url : '/c/businesses/dummieusers', 
-															method : 'PUT',
+															url : '/admin/services/accounts/dummies', 
+															method : 'POST',
 															success : function(response) {
 //																Ext.Msg.alert('Success', "Dummie user created!");
 															},
