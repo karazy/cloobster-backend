@@ -25,6 +25,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -82,7 +83,9 @@ public class AccountController {
 	 * @param hashedPassword as bcrypt hash
 	 * @return the authenticated Account object for the given login
 	 */
-	public Account authenticateHashed(String login, String hashedPassword) {	
+	public Account authenticateHashed(String login, String hashedPassword) {
+		login = Strings.nullToEmpty(login).toLowerCase();
+		
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
 			return null;
@@ -114,7 +117,9 @@ public class AccountController {
 	 * @param password cleartext
 	 * @return
 	 */
-	public Account authenticate(String login, String password) {	
+	public Account authenticate(String login, String password) {
+		login = Strings.nullToEmpty(login).toLowerCase();
+		
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
 			return null;
@@ -136,7 +141,6 @@ public class AccountController {
 			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
-			
 	}
 	
 	/**
