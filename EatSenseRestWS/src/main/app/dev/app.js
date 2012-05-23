@@ -21,6 +21,7 @@ Ext.application({
 		'Ext.dataview.List',
 		'Ext.Label',
 		'Ext.TitleBar',
+    'Ext.Anim',
 		//require custom types
 		'EatSense.override.CustomRestProxy',
 		'EatSense.override.OperationImprovement',

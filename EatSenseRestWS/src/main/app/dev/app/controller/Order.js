@@ -70,6 +70,9 @@
              },
              undoEditButton: {
              	tap: 'closeOrderDetail'
+             }, 
+             myorderlist: {
+             	itemtap: 'toggleOrderDetail'
              }
 		},
 		/**
@@ -738,6 +741,28 @@
 
 		(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
 		(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
+	},
+	toggleOrderDetail: function(view, index, htmlElement, order) {		
+    // change the div plus to minu..
+    // Get hold of the div with details class and animate
+    	var el = htmlElement.select('div.myorder-detail'),
+    		convert = Ext.get(el.elements[0]);
+    	
+    	convert.toggleCls('hidden');
+
+  //   	Ext.Anim.run(convert,'slide',{
+		//     out:false,
+		//     autoClear: false,
+		//     direction: 'down',
+		//     after: function() {
+		//         convert.toggleCls('hidden');
+		//     }
+		// });
+
+	    // el.toggleCls('hidden'); //remove the hidden class if available..
+	    // Ext.get(el.elements[0]).show(true); // show with animation
+
+
 	},
 	//Utility methods
 	/**

@@ -7433,6 +7433,15 @@ h9 {
   
 }
 
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+
 /*
 * Menu- and Productlist
 */
