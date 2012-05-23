@@ -7129,6 +7129,9 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .orderListItem {
   color: #000000;
+    background-image: url('../images/arrow_right.png');
+  background-repeat: no-repeat;
+  background-position: 3px 3px;
 }
 
 .orderListItem .order-title {
@@ -7150,12 +7153,21 @@ input[type="search"]::-webkit-search-cancel-button {
   text-align: right;
 }
 
-.orderListItem li {
+.orderListItem li, .orderListItem p  {
   color: #000000;
   margin-left: 15px;
   font-size: 0.7em;
 }
 
+.orderListItem h4{
+  font-size: 0.7em;
+  color: #000000;
+}
+
+.orderListItem h3{
+  font-size: 0.9em;
+  color: #000000;
+}
 
 /* line 174, app-default.scss */
 .orderListItem .canceled {
@@ -7433,6 +7445,22 @@ h9 {
   
 }
 
+.hidden {
+  display: none;
+
+}
+
+.collapsed-arrow {
+  background-image: url('../images/arrow_right.png');
+  background-repeat: no-repeat;
+  background-position: 3px 3px;
+}
+
+.visible {
+  display: block;
+}
+
+
 /*
 * Menu- and Productlist
 */
@@ -7499,7 +7527,7 @@ h9 {
 
 /* Item disclosure! */
 .x-list-round .x-list-disclosure {
-  background-image: -webkit-linear-gradient(#336633, #336633 2%, #336633);
+  background-image: -webkit-linear-gradient(top right, #8AA529, #ABCD34 50%);
 }
 
 /*

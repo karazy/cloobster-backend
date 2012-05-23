@@ -81,6 +81,8 @@ Karazy.translations = (function() {
 		"myOrdersTabBt" : "Bezahlen",
 		"payRequestButton" : "Bezahlen",
 		"leaveButton" : "Verlassen",
+		"orderTime" : "Bestellzeit",
+		"myorderComment" : "Meine Wünsche",
 		//Payment Request
 		"paymentPickerTitle" : "Bezahlmethode",
 		"paymentRequestSend": "Bitte einen Moment warten,</br>die Rechnung wird vorbereitet ...",

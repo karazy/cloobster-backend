@@ -46,7 +46,7 @@ Ext.define('EatSense.view.MyOrders', {
 				"<h2 class='title'>{amount} x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
 				"<div style='clear:both;'></div>"+
 				"<div class='myorder-detail hidden'>"+
-				"<h4>Uhrzeit: {[values.orderTime.toLocaleTimeString()]}</h4>"+
+				"<h4>"+Karazy.i18n.translate('orderTime')+": {[values.orderTime.toLocaleTimeString()]}</h4>"+
 				"<div class='choices'>"+
 					"<tpl for='Product.choices'>" +				
 						"<tpl if='this.checkSelections(values, xindex)'>" +
@@ -61,7 +61,8 @@ Ext.define('EatSense.view.MyOrders', {
 						"</tpl>" +
 					"</tpl>" +
 					"<tpl if='comment!=\"\"'>" +
-					"<p>"+Karazy.i18n.translate('comment')+": {comment}</p>" +
+					"<h3>"+Karazy.i18n.translate('myorderComment')+"</h3>"+
+					"<p>{comment}</p>" +
 					"</tpl>" +
 				"</div>"+
 				"</div>"
