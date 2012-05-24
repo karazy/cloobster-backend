@@ -46,7 +46,6 @@ Ext.define('EatSense.view.MyOrders', {
 				"<table style='width:100%;'>"+				
 				"<td align='left'><h2 class='title'>{amount} x {Product.name}</h2></td><td align='right'><h2 class='price collapsed-arrow'>{[this.formatPrice(values.Product.price_calculated)]}</td></h2>"+
 				"</table>"+
-				// "<div style='clear:both;'></div>"+
 				"<div class='myorder-detail hidden'>"+
 				"<h4>"+Karazy.i18n.translate('orderTime')+": {[values.orderTime.toLocaleTimeString()]}</h4>"+
 				"<div class='choices'>"+
@@ -134,7 +133,7 @@ Ext.define('EatSense.view.MyOrders', {
 			{
 				type: 'panel',
 				// docked: 'bottom',
-				bottom: '20%',
+				bottom: '30%',
 				left: '10%',
 				right: '10%',
 				itemId: 'myorderscompletepanel',
