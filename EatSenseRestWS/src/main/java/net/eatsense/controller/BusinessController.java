@@ -15,6 +15,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
@@ -25,6 +26,7 @@ import net.eatsense.representation.cockpit.SpotStatusDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Query;
@@ -246,7 +248,7 @@ public class BusinessController {
 		try {
 			request = requestRepo.getById(checkIn.getBusiness(), requestId);
 		} catch (com.googlecode.objectify.NotFoundException e1) {
-			throw new IllegalArgumentException("request not found", e1);
+			throw new NotFoundException(String.format("request %d not found", requestId));
 		}
 
 		if( !checkIn.getId().equals(request.getCheckIn().getId())) {
