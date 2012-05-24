@@ -59,20 +59,16 @@ Ext.define('EatSense.controller.Request',{
 			success: function(record, operation) {
 				button.enable();				
 			},
-			failure: function(record, operation) {
-				if(operation.error.status != 404) {
-					button.enable();
-					button.mode = 'call';
-					me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
-					label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
+			failure: function(record, operation) {				
+				button.enable();
+				button.mode = 'call';
+				me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+				label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 
-					me.getApplication().handleServerError({
-						'error': operation.error,
-						'forceLogout': {403: true}
-					});	
-				} else {
-					console.log('Tried to revoke an already confirmed request. Maybe channel communication is offline.');
-				}
+				me.getApplication().handleServerError({
+					'error': operation.error,
+					'forceLogout': {403: true}
+				});					
 			}
 		});
 
@@ -117,15 +113,19 @@ Ext.define('EatSense.controller.Request',{
 						button.enable();
 					},
 					failure: function(record, operation) {
-						button.enable();
-						button.mode = 'cancel';
-						me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
-						label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
+						if(operation.error.status != 404) {
+							button.enable();
+							button.mode = 'cancel';
+							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
+							label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
 
-						me.getApplication().handleServerError({
-							'error': operation.error,
-							'forceLogout': {403: true}
-						});
+							me.getApplication().handleServerError({
+								'error': operation.error,
+								'forceLogout': {403: true}
+							});
+						} else {
+							console.log('Tried to revoke an already confirmed request. Maybe channel communication is offline.');
+						}
 					}
 				});
 			} catch(e) {
