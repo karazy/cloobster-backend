@@ -2370,6 +2370,37 @@
                         {
                             "options": [
                                 {
+                                    "name": "Balsamicodressing",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Sauerrahmdressing",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Hausdressing",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Nach Saison",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Dressings - im Preis enthalten",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {                    
+                            "options": [
+                                {
                                     "name": "Alfalfasprossen",
                                     "id": null,
                                     "price": 0
@@ -2526,37 +2557,6 @@
                             "minOccurence": 0,
                             "overridePrice": "OVERRIDE_SINGLE_PRICE",
                             "text": "Extra-Toppings - nur 2,50€ extra",
-                            "included": 0,
-                            "selected": null
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Balsamicodressing",
-                                    "id": null,
-                                    "price": 0
-                                },
-                                {
-                                    "name": "Sauerrahmdressing",
-                                    "id": null,
-                                    "price": 0
-                                },
-                                {
-                                    "name": "Hausdressing",
-                                    "id": null,
-                                    "price": 0
-                                },
-                                {
-                                    "name": "Nach Saison",
-                                    "id": null,
-                                    "price": 0
-                                }
-                            ],
-                            "price": 0,
-                            "maxOccurence": 1,
-                            "minOccurence": 1,
-                            "overridePrice": "NONE",
-                            "text": "Dressings - im Preis enthalten",
                             "included": 0,
                             "selected": null
                         }
