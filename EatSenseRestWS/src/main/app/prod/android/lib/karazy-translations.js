@@ -107,6 +107,7 @@ Karazy.translations = (function() {
 		"cancelCallWaiterRequest" : "Danke, hat sich erledigt",
 		"callWaiterCallHint" : "Gibt es ein Anliegen?",
 		"callWaiterCancelHint" :	"Wir wurden gerufen und <br/>kommen so schnell wie möglich!",
+		"vipGreetingMessage" : "Willkommen <span style='font-weight:bold;'>{0}</span> in deinem persönlichen VIP Bereich!",
 		//general errors
 		"error" : "Fehler",
 		"errorTitle" : "Fehler",		

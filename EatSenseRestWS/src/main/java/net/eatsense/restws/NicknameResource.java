@@ -54,5 +54,4 @@ public class NicknameResource {
 		}
 		return nickname;
 	}
-
 }
