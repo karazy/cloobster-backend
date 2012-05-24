@@ -133,17 +133,24 @@ Ext.define('EatSense.view.MyOrders', {
 			{
 				type: 'panel',
 				// docked: 'bottom',
-				bottom: '30%',
-				left: '10%',
-				right: '10%',
+				// bottom: '30%',
+				// left: '10%',
+				// right: '10%',
 				itemId: 'myorderscompletepanel',
 				hidden: true,
+				padding: 5,
+				layout: {
+					type: 'hbox',
+					align: 'center',
+					pack: 'center'
+				},
 				items: [{
 					xtype: 'button',
 					text: Karazy.i18n.translate('leave'),
 					ui: 'confirm',
 					action: 'complete',
-					height: '50px'
+					height: '50px',
+					width: '80%',
 				}
 				]
 			}
