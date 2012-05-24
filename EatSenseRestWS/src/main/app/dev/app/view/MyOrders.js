@@ -43,8 +43,10 @@ Ext.define('EatSense.view.MyOrders', {
 			onItemDisclosure: this.removeItem,
 			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
-				"<h2 class='title'>{amount} x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
-				"<div style='clear:both;'></div>"+
+				"<table style='width:100%;'>"+				
+				"<td align='left'><h2 class='title'>{amount} x {Product.name}</h2></td><td align='right'><h2 class='price collapsed-arrow'>{[this.formatPrice(values.Product.price_calculated)]}</td></h2>"+
+				"</table>"+
+				// "<div style='clear:both;'></div>"+
 				"<div class='myorder-detail hidden'>"+
 				"<h4>"+Karazy.i18n.translate('orderTime')+": {[values.orderTime.toLocaleTimeString()]}</h4>"+
 				"<div class='choices'>"+

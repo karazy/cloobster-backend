@@ -6936,22 +6936,23 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 37, app-default.scss */
 .productListItem h2.title {
-  float: left;
-  width: 80%;
+  /*float: left;*/
+  /*width: 80%;*/
   font-size: 1em;
   /*margin: 0;*/
 }
 
 /* line 43, app-default.scss */
 .productListItem h2.price {
-  float: left;
+  /*float: left;*/
   font-size: 1em;
-  width: 20%;
-  text-align: right;
+  white-space: nowrap;
+  /*width: 20%;*/
+  /*text-align: right;*/
 }
 /* line 53, app-default.scss */
 .productListItem div p {
-  clear: both;
+  /*clear: both;*/
   font-size: 0.6em;
 }
 
@@ -7129,9 +7130,6 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .orderListItem {
   color: #000000;
-    background-image: url('../images/arrow_right.png');
-  background-repeat: no-repeat;
-  background-position: 3px 3px;
 }
 
 .orderListItem .order-title {
@@ -7139,18 +7137,20 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .orderListItem h2.title {
-  float: left;
+  /*float: left;*/
   color: #000000;
   font-size: 1em;
-  width: 75%;
+  /*width: 75%;*/
 }
 
 .orderListItem h2.price {
-  float: left;
+  /*float: left;*/
   color: #000000;
   font-size: 1em;
-  width: 25%;
+  white-space: nowrap;
+  /*width: 25%;*/
   text-align: right;
+  padding-right: 25px;
 }
 
 .orderListItem li, .orderListItem p  {
@@ -7211,20 +7211,10 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 /* line 200, app-default.scss */
 .cartoverviewitem .name h2.title {
-  float: left;
-  /*padding-left: 10px;
-  padding-right: 5px;*/
- 
-  /*float: left;*/
   color: #000000;
   font-size: 1em;
- /* white-space: normal;
-  word-wrap:break-word;*/
-  width: 80%;
-/*
-  position: absolute;
-  left: 5px;*/
 }
+
 
 /* line 206, app-default.scss */
 .cartoverviewitem .name div.amount {
@@ -7232,21 +7222,13 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 /* line 210, app-default.scss */
 .cartoverviewitem .name h2.price {
-  /*position: absolute;*/
-  right: 0;
-  /*float: right;*/
-  text-align: right;
-  padding-right: 10px;
-  padding-left: 10px;
-
-  float: left;
   color: #000000;
   font-size: 1em;
-  width: 20%;
+  white-space: nowrap;
   text-align: right;
- /* position: relative;
-  padding-right: 20px;*/
+  padding-right: 5px;
 }
+
 /* line 220, app-default.scss */
 .cartoverviewitem .edit {
   top: 0;
@@ -7453,7 +7435,15 @@ h9 {
 .collapsed-arrow {
   background-image: url('../images/arrow_right.png');
   background-repeat: no-repeat;
-  background-position: 3px 3px;
+  background-position: right center;
+  background-size: 20px 20px;
+}
+
+.expanded-arrow {
+  background-image: url('../images/arrow_down.png');
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 20px 20px;
 }
 
 .visible {

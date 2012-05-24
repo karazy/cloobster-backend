@@ -337,7 +337,7 @@
 		B6EC7B1215162C5000DF3484 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = B6EC7B1515162C5000DF3484 /* Build configuration list for PBXProject "eatSense" */;
 			compatibilityVersion = "Xcode 3.2";

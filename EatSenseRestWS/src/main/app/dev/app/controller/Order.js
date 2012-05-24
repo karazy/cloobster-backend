@@ -746,9 +746,13 @@
     // change the div plus to minu..
     // Get hold of the div with details class and animate
     	var el = htmlElement.select('div.myorder-detail'),
-    		convert = Ext.get(el.elements[0]);
+    		convert = Ext.get(el.elements[0]),
+    		priceDiv = htmlElement.select('h2.price');
     	
     	convert.toggleCls('hidden');
+    	priceDiv.toggleCls('collapsed-arrow');
+    	priceDiv.toggleCls('expanded-arrow');
+
 
   //   	Ext.Anim.run(convert,'slide',{
 		//     out:false,
