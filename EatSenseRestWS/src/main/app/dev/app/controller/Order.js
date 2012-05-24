@@ -190,11 +190,11 @@
 				title: Karazy.i18n.translate('hint'),
 				message: Karazy.i18n.translate('submitOrdersQuestion'),
 				buttons: [{
-					text: 'Ja',
+					text: Karazy.i18n.translate('yes'),
 					itemId: 'yes',
 					ui: 'action'
 				}, {
-					text: 'Nein',
+					text: Karazy.i18n.translate('no'),
 					itemId: 'no',
 					ui: 'action'
 				}],

@@ -129,7 +129,7 @@ Ext.define('EatSense.view.MyOrders', {
 						}
 					}
 				)
-			},
+			},			
 			{
 				type: 'panel',
 				// docked: 'bottom',
