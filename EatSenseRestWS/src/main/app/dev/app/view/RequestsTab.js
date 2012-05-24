@@ -23,7 +23,9 @@ Ext.define('EatSense.view.RequestsTab', {
 			{
 				xtype: 'label',
 				itemId: 'accountLabel',
-				cls: 'general-label'			
+				cls: 'general-label',
+				margin: 5,
+				padding: '0 0 10 0'			
 			},
 			{
 				xtype: 'label',
