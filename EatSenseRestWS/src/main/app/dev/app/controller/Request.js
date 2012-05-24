@@ -7,7 +7,8 @@ Ext.define('EatSense.controller.Request',{
 	config: {
 		refs: {
 			callWaiterButton: 'requeststab button[action=waiter]',
-			callWaiterLabel: 'requeststab label'
+			callWaiterLabel: 'requeststab #callWaiterLabel',
+			accountLabel: 'requeststab #accountLabel'
 		},
 		control: {
 			callWaiterButton: {
@@ -59,15 +60,19 @@ Ext.define('EatSense.controller.Request',{
 				button.enable();				
 			},
 			failure: function(record, operation) {
-				button.enable();
-				button.mode = 'call';
-				me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
-				label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
+				if(operation.error.status != 404) {
+					button.enable();
+					button.mode = 'call';
+					me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+					label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 
-				me.getApplication().handleServerError({
-					'error': operation.error,
-					'forceLogout': {403: true}
-				});				
+					me.getApplication().handleServerError({
+						'error': operation.error,
+						'forceLogout': {403: true}
+					});	
+				} else {
+					console.log('Tried to revoke an already confirmed request. Maybe channel communication is offline.');
+				}
 			}
 		});
 
@@ -195,5 +200,14 @@ Ext.define('EatSense.controller.Request',{
 			}
 		}
 
+	},
+	/*
+	*	Sets the account label in request tab displaying nickname of current checkin
+	*/
+	refreshAccountLabel: function() {
+		var accountLabel = this.getAccountLabel(),
+			checkInCtr = this.getApplication().getController('CheckIn');
+
+		accountLabel.setHtml(Karazy.i18n.translate('vipGreetingMessage', checkInCtr.getActiveCheckIn().get('nickname')));
 	}
 });

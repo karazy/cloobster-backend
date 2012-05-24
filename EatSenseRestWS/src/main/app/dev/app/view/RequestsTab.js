@@ -22,7 +22,13 @@ Ext.define('EatSense.view.RequestsTab', {
 			},
 			{
 				xtype: 'label',
+				itemId: 'accountLabel',
+				cls: 'general-label'			
+			},
+			{
+				xtype: 'label',
 				cls: 'general-label',
+				itemId: 'callWaiterLabel',
 				html: Karazy.i18n.translate('callWaiterCallHint')
 			},
 			{
