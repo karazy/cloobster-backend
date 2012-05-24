@@ -197,9 +197,10 @@ Ext.define('EatSense.controller.Menu', {
 		 	 	if(!rec.get('parent')) {
 		 	 		return true;
 		 	 	}}).each(function(choice) {
-					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail'),
+						choicePriceLabel = (choice.get('overridePrice') == 'OVERRIDE_FIXED_SUM') ? ' (+' + Karazy.util.formatPrice(choice.get('price')) + ')' : '';
 
-					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text + choicePriceLabel);
 					//recalculate when selection changes
 					choice.on('recalculate', function() {
 						me.recalculate(activeProduct);
@@ -230,9 +231,10 @@ Ext.define('EatSense.controller.Menu', {
 			label: Karazy.i18n.translate('orderComment'),
 			labelAlign: 'top',
 			itemId: 'productComment',
-			maxRows: 4,
+			maxRows: 3,
 			value: '',
-			cls: 'choice'
+			inputCls: 'comment-input',
+			labelCls: 'comment'
 		});
 		 
 		Ext.Viewport.add(detail);
@@ -258,7 +260,9 @@ Ext.define('EatSense.controller.Menu', {
 		var me = this,
 			optionType = '',
 			field,
-			isChecked;
+			isChecked,
+			optionPriceLabel,
+			overrideMode = choice.get('overridePrice');
 
 		if(choice.get('minOccurence') <= 1 && choice.get('maxOccurence') == 1) {
 			optionType = 'Ext.field.Radio';
@@ -268,12 +272,21 @@ Ext.define('EatSense.controller.Menu', {
 		}
 
 		choice.options().each(function(opt) {
-			 field = Ext.create(optionType, {
+			if(overrideMode == 'NONE' && opt.get('price') > 0) {
+				optionPriceLabel =  ' (+'+ Karazy.util.formatPrice(opt.get('price')) + ')';	
+			} else if (overrideMode == 'OVERRIDE_SINGLE_PRICE' && choice.get('price') > 0) {
+				optionPriceLabel =  ' (+'+ Karazy.util.formatPrice(choice.get('price')) + ')';
+			} else {
+				optionPriceLabel = '';
+			}
+		
+			field = Ext.create(optionType, {
 				 			name : choice.get('id'),
 				 			labelWidth: '80%',
-							label : opt.get('name'),
+							label : opt.get('name') + optionPriceLabel,
 							checked: opt.get('selected'),
 							cls: 'option',
+							labelCls: 'option-label',
 							disabled: (parentChoice && !parentChoice.isActive()) ? true : false
 					}, me);							 
 			//TODO this is sooo dirty

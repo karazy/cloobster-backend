@@ -21,11 +21,12 @@ Ext.application({
 		'Ext.dataview.List',
 		'Ext.Label',
 		'Ext.TitleBar',
+    'Ext.Anim',
 		//require custom types
 		'EatSense.override.CustomRestProxy',
-		'EatSense.override.OperationImprovement', 
-		'EatSense.view.fragment.DashboardButton', 
+		'EatSense.override.OperationImprovement',
 		'EatSense.override.RadioOverride',
+    'EatSense.override.CustomSpinner',
 		'EatSense.model.AppState'
 	],
 	launch : function() {

@@ -43,11 +43,34 @@ Ext.define('EatSense.view.MyOrders', {
 			onItemDisclosure: this.removeItem,
 			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
-			"<div class='{[values.status.toLowerCase()]}'>" +
-				"<h2 class='title'>{amount}x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
+				"<table style='width:100%;'>"+				
+				"<td align='left'><h2 class='title'>{amount} x {Product.name}</h2></td><td align='right'><h2 class='price collapsed-arrow'>{[this.formatPrice(values.Product.price_calculated)]}</td></h2>"+
+				"</table>"+
+				// "<div style='clear:both;'></div>"+
+				"<div class='myorder-detail hidden'>"+
+				"<h4>"+Karazy.i18n.translate('orderTime')+": {[values.orderTime.toLocaleTimeString()]}</h4>"+
+				"<div class='choices'>"+
+					"<tpl for='Product.choices'>" +				
+						"<tpl if='this.checkSelections(values, xindex)'>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
+							"<ul>" +
+								"<tpl for='options'>" +
+									"<tpl if='selected === true'>" +
+										"<li>{name}</li>" +
+									"</tpl>" +
+								"</tpl>" +
+							"</ul>" +
+						"</tpl>" +
+					"</tpl>" +
+					"<tpl if='comment!=\"\"'>" +
+					"<h3>"+Karazy.i18n.translate('myorderComment')+"</h3>"+
+					"<p>{comment}</p>" +
+					"</tpl>" +
+				"</div>"+
+				"</div>"
 				// "<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				// "<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>({amount}x) {[this.formatPrice(values)]}</div>" +
-				"<div style='clear: both;'>" +
+				/*"<div style='clear: both;'>" +
 					"<tpl for='Product.choices'>" +
 						"<tpl if='this.checkSelections(values, xindex)'>" +
 							"<tpl if='!parent'><h6>{text}</h6></tpl>" +
@@ -63,8 +86,7 @@ Ext.define('EatSense.view.MyOrders', {
 					"<tpl if='comment!=\"\"'>" +
 					"<p>Kommentar: {comment}</p>" +
 					"</tpl>" +
-				"</div>" +
-			"</div>"
+				"</div>" +*/
 				, {
 				//checks if the current choice has selections. If not it will not be shown.
 				//we need to pass the product as the choices object in this context is raw data

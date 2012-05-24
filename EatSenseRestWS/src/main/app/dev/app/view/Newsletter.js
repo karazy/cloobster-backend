@@ -12,7 +12,7 @@ Ext.define('EatSense.view.Newsletter', {
 		scrollable: false,
 		cls: 'newsletter',
 		defaults: {
-				width: '80%'
+				width: '100%'
 		},
 		items: [
 		{

@@ -5,11 +5,16 @@ Ext.define('EatSense.view.SettingsTab', {
 	extend : 'Ext.Panel',
 	xtype : 'settingstab',
 	config : {
-		layout : 'vbox',				
+		layout: {
+			type: 'vbox',
+			pack: 'center',
+			align: 'middle'
+		},
+		scrollable: 'vertical',				
 		iconCls : 'settings',
 		cls: 'setting-panel',
 		title: Karazy.i18n.translate('settingsButton'),
-		iconMask : true,
+		iconMask : true,		
 		items : [ {
 			xtype : 'titlebar',
 			docked : 'top',
@@ -18,22 +23,15 @@ Ext.define('EatSense.view.SettingsTab', {
 		{
 			xtype: 'formpanel',
 			//prevents also that the panel has a wrong size. Bug?
-			scrollable: false,
+			scrollable: false,			
+			// padding: 5,	
 			margin: '10 0 0 0',
-			padding: 5,
-			layout: {
-				type: 'vbox',
-				pack: 'center',
-				align: 'middle'
-			},
-			defaults: {
-				width: '80%'
-			},
-			items: [		
+			width: '80%',
+			items: [
 				{
 					xtype: 'label',
 					cls: 'general-label',
-					margin: '5 0 5 0',
+					margin: '7 0 5 0',
 					html: Karazy.i18n.translate('nicknameDesc')
 				},
 				{
@@ -47,7 +45,17 @@ Ext.define('EatSense.view.SettingsTab', {
 		},
 		{	
 			xtype: 'newsletter',			
-			padding: 5
-		}]
+			// padding: 5,
+			width: '80%'
+		},
+		{
+			xtype: 'button',
+			text: 'Impressum',
+			ui: 'action',
+			action: 'about',
+			margin: '7 0 5 0',
+			width: '80%'
+		}
+		]
 	}
 });

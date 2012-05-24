@@ -17,87 +17,35 @@ Ext.define('EatSense.view.Dashboard', {
 		{
 			xtype : 'image',
 			src : 'res/images/dashboard/cloobster-logo-186.png',
-			style : 'background-image: url(res/images/dashboard/cloobster-logo-186.png); background-repeat:no-repeat; background-position:center center;',
+			style : 'background-repeat:no-repeat; background-position:center center;',
 			height : 80,
 			width : 186
-		}, 
-		
+		},
 		{	xtype : 'image',
-			src : 'res/images/dashboard/middle.png',
-			style : 'background-image: url(res/images/dashboard/middle.png); background-repeat:no-repeat; background-position:center center;',
+			src : 'res/images/dashboard/middle-v3.png',
+			style : 'background-repeat:no-repeat; background-position:center center;',
 			height : 230,
-			width : 277
-			
-			},
-			
-		{ 	xtype : 'dashboardbutton',
+			width : 277			
+		},			
+		{ 	
+			xtype : 'button',
 			action: 'checkin',
-			src : 'res/images/dashboard/start_button.png',
-			style : 'background-image: url(res/images/dashboard/start_button.png); background-repeat:no-repeat; background-position:center center;',
 			height : 110,
-			width : 186
-			
+			width : 186,
+			baseCls : 'dashboard-button',
+			pressedCls: 'dashboard-button-pressed'
+		},
+		{
+			xtype: 'button',
+			action: 'about',
+			ui: 'confirm',
+			iconCls: 'about',
+			iconMask: true,
+			styleHtmlContent: true,
+			style: 'position: absolute; bottom: 10px; right: 10px;'
 		}
-
-		// {
-		// 	xtype : 'panel',
-		// 	layout : 'hbox',
-		// 	items : [ {
-		// 		xtype : 'panel',
-		// 		layout : {
-		// 			type : 'vbox',
-		// 			align : 'middle'
-		// 		},
-		// 		defaults: {
-		// 			xtype : 'dashboardbutton',
-		// 		},
-		// 		items : [ {
-		// 			cls: 'newRestaurantsButton',
-		// 			text: Karazy.i18n.translate('newRestaurantsButton'),
-		// 			badgeText: '6',					
-
-		// 		}, {
-		// 			cls: 'currentDealsButton',	
-		// 			text: Karazy.i18n.translate('currentDealsButton')
-		// 		} ]
-		// 	}, {
-		// 		xtype : 'panel',
-		// 		layout : {
-		// 			type : 'vbox',
-		// 			align : 'middle'
-		// 		},
-		// 		items : [ {
-		// 			xtype : 'label',
-		// 			height: '75px',
-		// 			html : 'Du hast <br/><span style="font-size:1.5em;">800</span><br/>Punkte!',
-		// 		}, {
-		// 			xtype : 'dashboardbutton',
-		// 			action: 'checkin',
-		// 			text : Karazy.i18n.translate('checkInButton'),
-		// 			cls : 'checkInButton',
-		// 			labelCls: 'checkInButton-label'
-		// 		}, 
-		// 		]
-		// 	} ]
-		// }
-		// {
-		// 	xtype: 'toolbar',
-		// 	docked: 'bottom',
-		// 	layout: {
-		// 		type:'hbox',
-		// 		pack: 'center'
-		// 	},
-		// 	items: [{
-		// 		xtype : 'button',
-		// 		action : 'settings',
-		// 		iconCls : 'settings',
-		// 		iconMask : true,
-		// 	} ]
-		// }
-
 		]
 	},
-
 	showLoadScreen : function(mask) {
 		if (mask) {
 			this.setMasked({

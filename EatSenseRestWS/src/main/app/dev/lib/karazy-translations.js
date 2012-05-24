@@ -10,7 +10,7 @@ Karazy.translations = (function() {
 		"DE" : {
 
 		// General translations
-		"ok" : "Ok",
+		"ok" : "OK",
 		"cancel" : "Abbrechen",
 		"back" : "Zurück",
 		"change" : "Ändern",
@@ -49,7 +49,7 @@ Karazy.translations = (function() {
 		// Menu
 		"menuTab" : "Auswählen",
 		"menuTitle" : "Heidi & Paul - Fresh Food",
-		"choicesPanelTitle" : "Optionen",
+		"choicesPanelTitle" : "Du hast die Wahl ...",
 		"putIntoCartButton" : "In den Warenkorb",
 		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",
 		"choiceValErrMin" : "Bitte mindestens {0} {1} auswählen.",
@@ -60,7 +60,7 @@ Karazy.translations = (function() {
 		"cartEmpty" : "Noch keine Bestellung getätigt.",
 		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
 		"orderRemoved" : "Bestellung entfernt",
-		"orderComment" : "Optionaler Kommentar",
+		"orderComment" : "Deine Wünsche",
 		"amount" : "Menge",
 		"amountspinnerLabel" : "Ich will ...",
 		"orderSubmit" : "Bestellung abgeschickt ...<br/>Guten Appetit!",
@@ -81,6 +81,8 @@ Karazy.translations = (function() {
 		"myOrdersTabBt" : "Bezahlen",
 		"payRequestButton" : "Bezahlen",
 		"leaveButton" : "Verlassen",
+		"orderTime" : "Bestellzeit",
+		"myorderComment" : "Meine Wünsche",
 		//Payment Request
 		"paymentPickerTitle" : "Bezahlmethode",
 		"paymentRequestSend": "Bitte einen Moment warten,</br>die Rechnung wird vorbereitet ...",
@@ -91,10 +93,10 @@ Karazy.translations = (function() {
 		"newsletterEmail" : "E-Mail",
 		"newsletterRegisterSuccess" : "Danke! Eine Bestätigungsmail wird an {0} geschickt.",
 		"newsletterInvalidEmail" : "Bitte gib eine gültige E-Mail Adresse an.",
-		"newsletterDuplicateEmail" : "Diese E-Mail Adresse ist bereits registriert",
+		"newsletterDuplicateEmail" : "Diese E-Mail Adresse ist bereits registriert.",
 		"newsletterPopupTitle" : "Newsletter abonnieren?", 
 		"newsletterDontAskButton" : "Nicht mehr nachfragen!",
-		"newsletterLabel" : "Stay up-to-date und verpasse nicht den Cloobster Big Bang! Melde dich für den Newsletter an.",
+		"newsletterLabel" : "Nicht den Cloobster Big-Bang verpassen und für den Newsletter anmelden!",
 		//Request
 		"errorRequest" : "Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "VIP",
@@ -103,8 +105,8 @@ Karazy.translations = (function() {
 		"callWaiterButton" : "Bedienung rufen",
 		"callWaiterRequestBadge" : "Bedienung gerufen",
 		"cancelCallWaiterRequest" : "Danke, hat sich erledigt",
-		"callWaiterCallHint" : "Du hast ein Anliegen?",
-		"callWaiterCancelHint" :	"Du hast uns gerufen.<br/>Wir kommen so schnell wie möglich!",
+		"callWaiterCallHint" : "Gibt es ein Anliegen?",
+		"callWaiterCancelHint" :	"Wir wurden gerufen und <br/>kommen so schnell wie möglich!",
 		//general errors
 		"error" : "Fehler",
 		"errorTitle" : "Fehler",		
