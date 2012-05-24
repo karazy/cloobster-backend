@@ -6969,6 +6969,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .productDetailPanel {
   background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
   padding: 10px;
+  margin-bottom: 3px;
   border-radius: 0.3em;
   -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.4em !important;
 }
@@ -7021,12 +7022,14 @@ input[type="search"]::-webkit-search-cancel-button {
    font-size: 1.2em;
    width: 45px !important;
    text-align: center !important;
+   /* otherise value is 2.5em inherited from x-input-el */
+   min-height: 0em;
    -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.15em 0.3em !important;
 }
 
 .productdetail-spinner-down {
   position: relative;
-  top: 30px;
+  top: 25px;
   right: -5px;
   height: 26px;
   width: 45px;
@@ -7034,7 +7037,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .productdetail-spinner-up {
   position: relative;
-  top: 4px;
+  top: -2px;
   right: 40px;
   height: 26px;
   width: 45px;
@@ -7077,8 +7080,9 @@ input[type="search"]::-webkit-search-cancel-button {
   color: #8AA529;
   background-color: #D3D3D3;
   font-weight: bold;
-  padding: 3px;
+  padding: 3px 3px 3px 7px;
   border-radius: 0.3em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.6) 0 0.15em 0.3em !important;
 }
 /* line 138, app-default.scss */
 .choice-panel .option {
@@ -7099,6 +7103,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-bottom: 3px;
   padding: 3px;
   border-radius: 0.3em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.6) 0 0.15em 0.3em !important;
 }
 
 .choice-panel .comment-input {

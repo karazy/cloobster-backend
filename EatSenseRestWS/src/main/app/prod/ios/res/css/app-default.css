@@ -6936,22 +6936,23 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* line 37, app-default.scss */
 .productListItem h2.title {
-  float: left;
-  width: 80%;
+  /*float: left;*/
+  /*width: 80%;*/
   font-size: 1em;
   /*margin: 0;*/
 }
 
 /* line 43, app-default.scss */
 .productListItem h2.price {
-  float: left;
+  /*float: left;*/
   font-size: 1em;
-  width: 20%;
-  text-align: right;
+  white-space: nowrap;
+  /*width: 20%;*/
+  /*text-align: right;*/
 }
 /* line 53, app-default.scss */
 .productListItem div p {
-  clear: both;
+  /*clear: both;*/
   font-size: 0.6em;
 }
 
@@ -6968,6 +6969,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .productDetailPanel {
   background: #917D64; /*url('../images/bg-rp-main.png') repeat left top;*/
   padding: 10px;
+  margin-bottom: 3px;
   border-radius: 0.3em;
   -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.2em 0.4em !important;
 }
@@ -7020,12 +7022,14 @@ input[type="search"]::-webkit-search-cancel-button {
    font-size: 1.2em;
    width: 45px !important;
    text-align: center !important;
+   /* otherise value is 2.5em inherited from x-input-el */
+   min-height: 0em;
    -webkit-box-shadow: rgba(0, 0, 0, 0.8) 0 0.15em 0.3em !important;
 }
 
 .productdetail-spinner-down {
   position: relative;
-  top: 30px;
+  top: 25px;
   right: -5px;
   height: 26px;
   width: 45px;
@@ -7033,7 +7037,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .productdetail-spinner-up {
   position: relative;
-  top: 4px;
+  top: -2px;
   right: 40px;
   height: 26px;
   width: 45px;
@@ -7076,8 +7080,9 @@ input[type="search"]::-webkit-search-cancel-button {
   color: #8AA529;
   background-color: #D3D3D3;
   font-weight: bold;
-  padding: 3px;
+  padding: 3px 3px 3px 7px;
   border-radius: 0.3em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.6) 0 0.15em 0.3em !important;
 }
 /* line 138, app-default.scss */
 .choice-panel .option {
@@ -7145,7 +7150,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .orderListItem h2.price {
   /*float: left;*/
   color: #000000;
-  font-size: 1em
+  font-size: 1em;
   white-space: nowrap;
   /*width: 25%;*/
   text-align: right;
@@ -7210,20 +7215,10 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 /* line 200, app-default.scss */
 .cartoverviewitem .name h2.title {
-  float: left;
-  /*padding-left: 10px;
-  padding-right: 5px;*/
- 
-  /*float: left;*/
   color: #000000;
   font-size: 1em;
- /* white-space: normal;
-  word-wrap:break-word;*/
-  width: 80%;
-/*
-  position: absolute;
-  left: 5px;*/
 }
+
 
 /* line 206, app-default.scss */
 .cartoverviewitem .name div.amount {
@@ -7231,21 +7226,13 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 /* line 210, app-default.scss */
 .cartoverviewitem .name h2.price {
-  /*position: absolute;*/
-  right: 0;
-  /*float: right;*/
-  text-align: right;
-  padding-right: 10px;
-  padding-left: 10px;
-
-  float: left;
   color: #000000;
   font-size: 1em;
-  width: 20%;
+  white-space: nowrap;
   text-align: right;
- /* position: relative;
-  padding-right: 20px;*/
+  padding-right: 5px;
 }
+
 /* line 220, app-default.scss */
 .cartoverviewitem .edit {
   top: 0;
