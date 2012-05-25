@@ -31,6 +31,7 @@ import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
+import net.eatsense.representatione.EmailConfirmationDTO;
 import net.eatsense.util.IdHelper;
 
 import org.codehaus.jettison.json.JSONException;
@@ -281,7 +282,7 @@ public class AccountController {
 		return recipient;
 	}
 	
-	public RegistrationDTO registerNewAccount(RegistrationDTO accountData) {
+	public Account registerNewAccount(RegistrationDTO accountData) {
 		checkNotNull(accountData.getLogin(), "accountData login was null");
 		checkNotNull(accountData.getEmail(), "accountData email was null");
 		checkNotNull(accountData.getPassword(), "accountData password was null");
@@ -324,7 +325,9 @@ public class AccountController {
 		
 		accountRepo.saveOrUpdate(account);
 		
-		return accountData;
+		
+		
+		return account;
 	}
 	
 	private boolean checkCompany(CompanyDTO company) {
@@ -397,5 +400,30 @@ public class AccountController {
 		}
 		
 		return account ;
+	}
+	
+	/**
+	 * Confirms an account with the generated token, which was send to the user during registration.
+	 * 
+	 * @param account
+	 * @param confirmationData
+	 * @return
+	 */
+	public EmailConfirmationDTO confirmAccountEmail(Account account, EmailConfirmationDTO confirmationData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(confirmationData, "confirmationData was null");
+		checkArgument(!Strings.nullToEmpty(confirmationData.getConfirmationToken()).isEmpty(), "confirmationToken was null or empty");
+		
+		if(!account.isEmailConfirmed() && confirmationData.getConfirmationToken().equals(account.getEmailConfirmationHash())) {
+			account.setEmailConfirmed(true);
+			account.setEmailConfirmationHash(null);
+			accountRepo.saveOrUpdate(account);
+		}
+		else
+			throw new ServiceException("account already confirmed or invalid token");
+		
+		confirmationData.setLogin(account.getLogin());
+		confirmationData.setEmailConfirmed(true);
+		return confirmationData;
 	}
 }

@@ -19,6 +19,7 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.representation.RegistrationDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +38,6 @@ public class MailController {
 		this.uriInfo = uriInfo;
 		// TODO Auto-generated constructor stub
 	}
-	
-	public Message sendEmailConfirmationMessage(Account account) throws AddressException, MessagingException {
-		Message mail = new MimeMessage(session);
-		
-		mail.setFrom(new InternetAddress("weiher@karazy.net"));
-		
-		return mail;
-	}
 
 	public Message sendWelcomeMessage(NewsletterRecipient recipient) throws MessagingException {
 		Message mail = new MimeMessage(session);
@@ -62,6 +55,38 @@ public class MailController {
 		
 		Transport.send(mail);
 		return mail;
+	}
+	
+	public Message sendRegistrationConfirmation(Account account) throws MessagingException {
+		Message mail = new MimeMessage(session);
+		URI confirmationUri = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(account.getEmailConfirmationHash());
+		
+		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
+		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
+		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
+		mail.setSubject("Cloobster service account confirmation.");
+		
+		String confirmationText = readEmailConfirmationTextTemplate();
+		confirmationText = confirmationText.replaceAll("\\{confirmationurl\\}", confirmationUri.toString());
+		logger.info("welcomeText: {}", confirmationText);
+		mail.setText(confirmationText);
+		
+		Transport.send(mail);
+		return mail;
+	}
+	
+	public String readEmailConfirmationTextTemplate() {
+		String welcomeText;
+		try {
+			welcomeText = CharStreams.toString(  new FileReader(new File("WEB-INF/templates/confirmationmail")));
+		} catch (IOException e) {
+			logger.error("error reading email confirmation template", e);
+			welcomeText = "Welcome to the Cloobster service,\n" +
+					"this is an automated message. Confirm your account with this link:\n" +
+					"{confirmationurl}";
+		}
+		
+		return welcomeText;
 	}
 	
 	public String readWelcomeTextTemplate() {

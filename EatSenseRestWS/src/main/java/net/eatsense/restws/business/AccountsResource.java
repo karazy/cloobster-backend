@@ -1,13 +1,20 @@
 package net.eatsense.restws.business;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.AccountController;
-import net.eatsense.representation.CheckInDTO;
+import net.eatsense.controller.MailController;
+import net.eatsense.domain.Account;
 import net.eatsense.representation.RegistrationDTO;
+import net.eatsense.representatione.EmailConfirmationDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +26,14 @@ public class AccountsResource {
 	private AccountController accountCtr;
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@Context
+	HttpServletRequest servletRequest;
+	private MailController mailCtrl;
+	
 	@Inject
-	public AccountsResource(AccountController accountCtr) {
+	public AccountsResource(AccountController accountCtr, MailController mailCtr) {
 		super();
+		this.mailCtrl = mailCtr;
 		this.accountCtr = accountCtr;
 	}
 	
@@ -29,6 +41,26 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public RegistrationDTO registerAccount(RegistrationDTO accountData) {
-		return accountCtr.registerNewAccount(accountData);
+		Account account = accountCtr.registerNewAccount(accountData);
+		try {
+			mailCtrl.sendRegistrationConfirmation(account);
+		} catch (AddressException e) {
+			logger.error("sending confirmation mail failed", e);
+			if(account.getEmail().equals(e.getRef())) {
+				throw new IllegalArgumentException("invalid email", e);
+			}
+		} catch (MessagingException e) {
+			logger.error("sending confirmation mail failed", e);
+		}
+		return accountData;
+	}
+	
+	@PUT
+	@Path("emailconfirmation")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public EmailConfirmationDTO confirmEmail(EmailConfirmationDTO emailData) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		return accountCtr.confirmAccountEmail(account, emailData);
 	}
 }
