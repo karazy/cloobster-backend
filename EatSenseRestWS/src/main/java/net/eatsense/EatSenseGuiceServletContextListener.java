@@ -75,7 +75,6 @@ public class EatSenseGuiceServletContextListener extends
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/accounts(.)*",
 								"(.)*admin/services(.)*",
-								"(.)*b/businesses(.)*",
 								"(.)*newsletter(.)*",
 								"(.)*b/businesses(.)*",
 								"(.)*c/businesses(.)*",
