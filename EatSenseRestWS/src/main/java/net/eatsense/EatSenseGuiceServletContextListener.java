@@ -74,12 +74,18 @@ public class EatSenseGuiceServletContextListener extends
 						
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/accounts(.)*",
-								"(.)*admin/services(.)*","(.)*newsletter(.)*", "(.)*b/businesses(.)*",
-								"(.)*newsletter(.)*", "(.)*b/businesses(.)*",
-								"(.)*c/businesses(.)*","(.)*c/checkins(.)*",
-								"(.)*accounts(.)*", "(.)*spots(.)*",
-								"(.)*nickname(.)*", "(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*", "(.)*cron(.)*").with(GuiceContainer.class, parameters);
+								"(.)*admin/services(.)*",
+								"(.)*b/businesses(.)*",
+								"(.)*newsletter(.)*",
+								"(.)*b/businesses(.)*",
+								"(.)*c/businesses(.)*",
+								"(.)*c/checkins(.)*",
+								"(.)*accounts(.)*",
+								"(.)*spots(.)*",
+								"(.)*nickname(.)*",
+								"(.)*_ah/channel/connected(.)*",
+								"(.)*_ah/channel/disconnected(.)*",
+								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
