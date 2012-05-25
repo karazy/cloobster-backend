@@ -319,6 +319,7 @@ public class AccountController {
 		account.setName(accountData.getName());
 		account.setPhone(accountData.getPhone());
 		account.setRole(Role.COMPANYOWNER);
+		account.setFacebookUid(accountData.getFacebookUID());
 		account.setHashedPassword(BCrypt.hashpw(accountData.getPassword(), BCrypt.gensalt()));
 		
 		accountRepo.saveOrUpdate(account);
