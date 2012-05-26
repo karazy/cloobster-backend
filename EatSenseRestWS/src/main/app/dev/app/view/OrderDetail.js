@@ -38,7 +38,7 @@ Ext.define('EatSense.view.OrderDetail', {
 			}, {
 				xtype : 'panel',
 				docked: 'right',
-				// width: '130px',
+				width: 110,
 				layout : {
 					type : 'vbox',
 					align : 'stretch',
@@ -47,17 +47,19 @@ Ext.define('EatSense.view.OrderDetail', {
 				items : [ {
 					xtype : 'spinnerfield',
 					label: Karazy.i18n.translate('amountspinnerLabel'),
+					labelCls: 'productdetail-spinner-label',
+					inputCls: 'productdetail-spinner-input',
 					labelAlign: 'top',
 					increment : 1,
 					value : 1,
 					minValue : '1',
 					maxValue : '10',
 					cycle : true,
-					width: 120
 				},
 				{
 					xtype: 'label',
 					cls: 'productPrice',
+					margin: '5 0 0 0',
 					itemId : 'prodPriceLabel',
 					tpl: new Ext.XTemplate(
 					'{[this.formatPrice(values.product.calculate(values.amount))]}',
@@ -76,7 +78,7 @@ Ext.define('EatSense.view.OrderDetail', {
 			itemId : 'choicesPanel',
 			cls: 'choice-panel',
 			layout: 'vbox',
-			minHeight: '200px',
+			// minHeight: '200px',
 			scrollable : false,
 			items: [
 				{
