@@ -77,7 +77,7 @@
             "products": [
                 {
                     "name": "Cuba Libre",
-                    "longDesc": "",
+                    "longDesc": "Extra Libre aus Cuba.",
                     "shortDesc": "Extra Libre aus Cuba.",
                     "price": 6.0,
                     "order": 15,
@@ -112,7 +112,7 @@
                 },
                 {
                     "name": "Cool Comfort",
-                    "longDesc": "",
+                    "longDesc": "Mit Komfort, aber auch cool.",
                     "shortDesc": "Mit Komfort, aber auch cool.",
                     "price": 6.0,
                     "order": 10,
@@ -147,7 +147,7 @@
                 },
                 {
                     "name": "Kaipirinha",
-                    "longDesc": "",
+                    "longDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
                     "shortDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
                     "price": 6.0,
                     "order": 25,
@@ -187,7 +187,7 @@
                 },
                 {
                     "name": "Mojito",
-                    "longDesc": "",
+                    "longDesc": "Mit (möglicherweise) frischer Minze!",
                     "shortDesc": "Mit (möglicherweise) frischer Minze!",
                     "price": 6.0,
                     "order": 50,
@@ -221,8 +221,43 @@
                     ]
                 },
                 {
+                    "name": "Hugo",
+                    "longDesc": "Nicht das Waisenkind aus dem Film ...",
+                    "shortDesc": "Nicht das Waisenkind aus dem Film ...",
+                    "price": 6.0,
+                    "order": 40,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'So wie Annika ihn hatte.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Eigentlich Prosecco'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
                     "name": "Mocca Flip",
-                    "longDesc": "",
+                    "longDesc": "Bei dem Flip sind wir uns nicht so sicher...",
                     "shortDesc": "Bei dem Flip sind wir uns nicht so sicher...",
                     "price": 6.0,
                     "order": 40,
@@ -257,7 +292,7 @@
                 },
                 {
                     "name": "Long Island Ice Tea",
-                    "longDesc": "",
+                    "longDesc": "Jetzt noch länger und inseliger...",
                     "shortDesc": "Jetzt noch länger und inseliger...",
                     "price": 6.0,
                     "order": 30,
@@ -292,7 +327,7 @@
                 },
                 {
                     "name": "Gin Tonic",
-                    "longDesc": "",
+                    "longDesc": "'Witzige Beschreibung hier einsetzen.'",
                     "shortDesc": "'Witzige Beschreibung hier einsetzen.'",
                     "price": 6.0,
                     "order": 20,
@@ -327,7 +362,7 @@
                 },
                 {
                     "name": "White(Caucasian) Russian",
-                    "longDesc": "",
+                    "longDesc": "'Witzige Beschreibung hier einsetzen.'",
                     "shortDesc": "Der Dude will es so.",
                     "price": 6.0,
                     "order": 110,
@@ -362,7 +397,7 @@
                 },
                 {
                     "name": "Zombie",
-                    "longDesc": "",
+                    "longDesc": "Random joke about zombies here...",
                     "shortDesc": "Random joke about zombies here...",
                     "price": 6.0,
                     "order": 120,
@@ -404,14 +439,14 @@
             "products": [
                 {
                     "name": "Mit Kai in die VIP Lounge.",
-                    "longDesc": "",
+                    "longDesc": "Für eine Stunde das besondere Erlebnis!",
                     "shortDesc": "Für eine Stunde das besondere Erlebnis!",
                     "price": 160.0,
                     "order": 1
                 },
                 {
                     "name": "Übernachtung",
-                    "longDesc": "",
+                    "longDesc": "Jetzt neu: mit und ohne anfassen!",
                     "shortDesc": "Jetzt neu: mit und ohne anfassen!",
                     "price": 40,
                     "order": 1,
