@@ -48,7 +48,7 @@ Karazy.translations = (function() {
 		"nickname" : "Spitzname",
 		// Menu
 		"menuTab" : "Auswählen",
-		"menuTitle" : "Heidi & Paul - Fresh Food",
+		"menuTitle" : "Kai's Lounge",
 		"choicesPanelTitle" : "Du hast die Wahl ...",
 		"putIntoCartButton" : "In den Warenkorb",
 		"choiceValErrMandatory" : "Bitte triff eine Wahl für {0}",

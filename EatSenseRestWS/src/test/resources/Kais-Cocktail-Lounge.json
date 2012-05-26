@@ -77,7 +77,7 @@
             "products": [
                 {
                     "name": "Cuba Libre",
-                    "longDesc": "",
+                    "longDesc": "Extra Libre aus Cuba.",
                     "shortDesc": "Extra Libre aus Cuba.",
                     "price": 6.0,
                     "order": 20,
@@ -112,7 +112,7 @@
                 },
                 {
                     "name": "Cool Comfort",
-                    "longDesc": "",
+                    "longDesc": "Mit Komfort, aber auch cool.",
                     "shortDesc": "Mit Komfort, aber auch cool.",
                     "price": 6.0,
                     "order": 10,
@@ -147,7 +147,7 @@
                 },
                 {
                     "name": "Kaipirinha",
-                    "longDesc": "",
+                    "longDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
                     "shortDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
                     "price": 6.0,
                     "order": 30,
