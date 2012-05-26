@@ -45,7 +45,7 @@
             {
             "description": null,
             "title": "Andere Getränke",
-            "order": 8,
+            "order": 15,
             "products": [
                 {
                     "name": "Mineralwasser",
@@ -80,7 +80,7 @@
                     "longDesc": "",
                     "shortDesc": "Extra Libre aus Cuba.",
                     "price": 6.0,
-                    "order": 20,
+                    "order": 15,
                     "choices": [
                         {
                             "options": [
@@ -150,7 +150,7 @@
                     "longDesc": "",
                     "shortDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
                     "price": 6.0,
-                    "order": 30,
+                    "order": 25,
                     "choices": [
                         {
                             "options": [
@@ -295,7 +295,7 @@
                     "longDesc": "",
                     "shortDesc": "'Witzige Beschreibung hier einsetzen.'",
                     "price": 6.0,
-                    "order": 30,
+                    "order": 20,
                     "choices": [
                         {
                             "options": [
@@ -330,7 +330,7 @@
                     "longDesc": "",
                     "shortDesc": "Der Dude will es so.",
                     "price": 6.0,
-                    "order": 30,
+                    "order": 110,
                     "choices": [
                         {
                             "options": [
@@ -365,7 +365,7 @@
                     "longDesc": "",
                     "shortDesc": "Random joke about zombies here...",
                     "price": 6.0,
-                    "order": 30,
+                    "order": 120,
                     "choices": [
                         {
                             "options": [
@@ -414,7 +414,7 @@
                     "longDesc": "",
                     "shortDesc": "Jetzt neu: mit und ohne anfassen!",
                     "price": 40,
-                    "order": 1
+                    "order": 1,
                     "choices": [
                         {
                             "options": [
