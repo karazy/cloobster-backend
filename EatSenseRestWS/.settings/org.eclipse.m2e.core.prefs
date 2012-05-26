@@ -1,5 +1,4 @@
-#Thu May 24 22:39:38 CEST 2012
-activeProfiles=dev
+activeProfiles=prod
 eclipse.preferences.version=1
 resolveWorkspaceProjects=true
 version=1
