@@ -10,7 +10,8 @@ Ext.define('EatSense.controller.Settings', {
     		settingsTab: 'lounge settingstab[tabName=settings]',
     		nicknameField: 'settingstab #nickname',
             newsletterView: 'settingstab newsletter',
-            registerNewsletterBt: 'settingstab newsletter button[action=register]'
+            registerNewsletterBt: 'settingstab newsletter button[action=register]',
+            aboutBt: 'settingstab button[action=about]',
     	},
 
     	control: {
@@ -22,6 +23,9 @@ Ext.define('EatSense.controller.Settings', {
     		},
             registerNewsletterBt: {
                 tap: 'registerNewsletterBtTap'
+            },
+            aboutBt: {
+                tap: 'showAbout'
             }
     	}
     },
@@ -117,45 +121,53 @@ Ext.define('EatSense.controller.Settings', {
             }
         });
     },
+
+    /**
+    * Shows an about screen.
+    */
+    showAbout: function() {
+        var about = Ext.create('EatSense.view.About');
+
+        Ext.Viewport.add(about);
+    }
     /**
     * Shows a popup to user asking for his email to register for newsletter.
     */
-    registerNewsletterOnLeaving: function() {
-        var me = this,
-            checkInCtr = this.getApplication().getController('CheckIn'),
-            appState = checkInCtr.getAppState(),
-            popup = Ext.create('EatSense.view.NewsletterPopup');
+    // registerNewsletterOnLeaving: function() {
+    //     var me = this,
+    //         checkInCtr = this.getApplication().getController('CheckIn'),
+    //         appState = checkInCtr.getAppState(),
+    //         popup = Ext.create('EatSense.view.NewsletterPopup');
 
-        //setup button handler
-        popup.on({
-            delegate: 'button[action=register]',
-            tap: function() {
-                 //force keyboard to hide, due to a bug in Android 4.0 the textfield is visible above the popup
-                popup.down('newsletter').down('emailfield').blur();
-                
-                me.registerNewsletter(popup.down('newsletter').getValues(), 
-                    //remove on success
-                function() {
-                    Ext.Viewport.remove(popup);
-                });
-            }
+    //     //setup button handler
+    //     popup.on({
+    //         delegate: 'button[action=register]',
+    //         tap: function() {
+    //              //force keyboard to hide, due to a bug in Android 4.0 the textfield is visible above the popup
+    //             popup.down('newsletter').down('emailfield').blur();
+    //             me.registerNewsletter(popup.down('newsletter').getValues(), 
+    //                 //remove on success
+    //             function() {
+    //                 Ext.Viewport.remove(popup);
+    //             });
+    //         }
             
-        });
+    //     });
 
-        popup.on({
-            delegate: 'button[action=dont-ask]',
-            tap: function() {
-                appState.set('newsletterRegistered', true);
-               Ext.Viewport.remove(popup);
-            }
-        });
+    //     popup.on({
+    //         delegate: 'button[action=dont-ask]',
+    //         tap: function() {
+    //             appState.set('newsletterRegistered', true);
+    //            Ext.Viewport.remove(popup);
+    //         }
+    //     });
 
-        popup.on('hide', function() {
-             Ext.Viewport.remove(popup);
-        });
+    //     popup.on('hide', function() {
+    //          Ext.Viewport.remove(popup);
+    //     });
 
-        Ext.Viewport.add(popup);
-        popup.show();
+    //     Ext.Viewport.add(popup);
+    //     popup.show();
 
-    }
+    // }
 });

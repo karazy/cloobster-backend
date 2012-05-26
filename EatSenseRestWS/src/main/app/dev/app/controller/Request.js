@@ -7,7 +7,8 @@ Ext.define('EatSense.controller.Request',{
 	config: {
 		refs: {
 			callWaiterButton: 'requeststab button[action=waiter]',
-			callWaiterLabel: 'requeststab label'
+			callWaiterLabel: 'requeststab #callWaiterLabel',
+			accountLabel: 'requeststab #accountLabel'
 		},
 		control: {
 			callWaiterButton: {
@@ -58,7 +59,7 @@ Ext.define('EatSense.controller.Request',{
 			success: function(record, operation) {
 				button.enable();				
 			},
-			failure: function(record, operation) {
+			failure: function(record, operation) {				
 				button.enable();
 				button.mode = 'call';
 				me.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
@@ -67,22 +68,22 @@ Ext.define('EatSense.controller.Request',{
 				me.getApplication().handleServerError({
 					'error': operation.error,
 					'forceLogout': {403: true}
-				});				
+				});					
 			}
 		});
 
 		//show success message to give user the illusion of success
-		Ext.Msg.show({
-			title : Karazy.i18n.translate('hint'),
-			message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
-			buttons : []
-		});
+		// Ext.Msg.show({
+		// 	title : Karazy.i18n.translate('hint'),
+		// 	message : Karazy.i18n.translate('requestCallWaiterSendMsd'),
+		// 	buttons : []
+		// });
 		
-		Ext.defer((function() {
-			if(!Karazy.util.getAlertActive()) {
-				Ext.Msg.hide();
-			}
-		}), Karazy.config.msgboxHideLongTimeout, this);
+		// Ext.defer((function() {
+		// 	if(!Karazy.util.getAlertActive()) {
+		// 		Ext.Msg.hide();
+		// 	}
+		// }), Karazy.config.msgboxHideLongTimeout, this);
 	},
 	cancelCallWaiterRequest: function(button, event) {
 		var me = this,
@@ -112,15 +113,19 @@ Ext.define('EatSense.controller.Request',{
 						button.enable();
 					},
 					failure: function(record, operation) {
-						button.enable();
-						button.mode = 'cancel';
-						me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
-						label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
+						if(operation.error.status != 404) {
+							button.enable();
+							button.mode = 'cancel';
+							me.getCallWaiterButton().setText(Karazy.i18n.translate('cancelCallWaiterRequest'));
+							label.setHtml(Karazy.i18n.translate('callWaiterCancelHint'));
 
-						me.getApplication().handleServerError({
-							'error': operation.error,
-							'forceLogout': {403: true}
-						});
+							me.getApplication().handleServerError({
+								'error': operation.error,
+								'forceLogout': {403: true}
+							});
+						} else {
+							console.log('Tried to revoke an already confirmed request. Maybe channel communication is offline.');
+						}
 					}
 				});
 			} catch(e) {
@@ -165,12 +170,14 @@ Ext.define('EatSense.controller.Request',{
 	* Used for cleanup methods. Resets the state of button to call mode.
 	*/
 	resetAllRequests: function() {
-		var requestStore = Ext.StoreManager.lookup('requestStore');
+		var requestStore = Ext.StoreManager.lookup('requestStore'),
+			label = this.getCallWaiterLabel();
 
 		console.log('Request Controller -> resetAllRequests');
 
 		this.getCallWaiterButton().mode = 'call';
 		this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+		label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 
 		requestStore.removeAll();
 	},
@@ -180,6 +187,7 @@ Ext.define('EatSense.controller.Request',{
 	handleRequestMessage: function(action, data) {
 		var me = this,
 			requestStore = Ext.StoreManager.lookup('requestStore'),
+			label = this.getCallWaiterLabel(),
 			request;
 
 		request = requestStore.getById(data.id);
@@ -188,8 +196,18 @@ Ext.define('EatSense.controller.Request',{
 				requestStore.remove(request);
 				this.getCallWaiterButton().mode = 'call';
 				this.getCallWaiterButton().setText(Karazy.i18n.translate('callWaiterButton'));
+				label.setHtml(Karazy.i18n.translate('callWaiterCallHint'));
 			}
 		}
 
+	},
+	/*
+	*	Sets the account label in request tab displaying nickname of current checkin
+	*/
+	refreshAccountLabel: function() {
+		var accountLabel = this.getAccountLabel(),
+			checkInCtr = this.getApplication().getController('CheckIn');
+
+		accountLabel.setHtml(Karazy.i18n.translate('vipGreetingMessage', checkInCtr.getActiveCheckIn().get('nickname')));
 	}
 });

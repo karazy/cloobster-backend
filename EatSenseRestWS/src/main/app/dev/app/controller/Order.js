@@ -70,6 +70,9 @@
              },
              undoEditButton: {
              	tap: 'closeOrderDetail'
+             }, 
+             myorderlist: {
+             	itemtap: 'toggleOrderDetail'
              }
 		},
 		/**
@@ -187,11 +190,11 @@
 				title: Karazy.i18n.translate('hint'),
 				message: Karazy.i18n.translate('submitOrdersQuestion'),
 				buttons: [{
-					text: 'Ja',
+					text: Karazy.i18n.translate('yes'),
 					itemId: 'yes',
 					ui: 'action'
 				}, {
-					text: 'Nein',
+					text: Karazy.i18n.translate('no'),
 					itemId: 'no',
 					ui: 'action'
 				}],
@@ -293,9 +296,10 @@
 		 	 	if(!rec.get('parent')) {
 		 	 		return true;
 		 	 	}}).each(function(choice) {
-					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail');
+					var optionsDetailPanel = Ext.create('EatSense.view.OptionDetail'),
+						choicePriceLabel = (choice.get('overridePrice') == 'OVERRIDE_FIXED_SUM') ? ' (+' + Karazy.util.formatPrice(choice.get('price')) + ')' : '';
 
-					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text);
+					optionsDetailPanel.getComponent('choiceTextLbl').setHtml(choice.data.text + choicePriceLabel);
 					menuCtr.createOptions(choice, optionsDetailPanel);
 					choice.on('recalculate', function() {
 						me.recalculate(order);
@@ -327,7 +331,8 @@
 				labelAlign: 'top',
 				itemId: 'productComment',
 				value: order.get('comment'),
-				cls: 'choice'
+				inputCls: 'comment-input',
+				labelCls: 'comment'
 			}
 		);
 		Ext.Viewport.add(detail);
@@ -565,6 +570,15 @@
 			
 		return total;
 	},
+	showMyOrderDetail: function(list, index, dataitem) {
+		var panel = Ext.create('Ext.Panel');
+		panel.setWidth(200);
+		panel.setHeight(200);
+		panel.setModal(true);
+		panel.setHideOnMaskTap(true);
+
+		panel.showBy(dataitem);
+	},
 	/**
 	 * Choose a payment method to issue the paymentRequest.
 	 */
@@ -728,6 +742,32 @@
 		(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
 		(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
 	},
+	toggleOrderDetail: function(view, index, htmlElement, order) {		
+    // change the div plus to minu..
+    // Get hold of the div with details class and animate
+    	var el = htmlElement.select('div.myorder-detail'),
+    		convert = Ext.get(el.elements[0]),
+    		priceDiv = htmlElement.select('h2.price');
+    	
+    	convert.toggleCls('hidden');
+    	priceDiv.toggleCls('collapsed-arrow');
+    	priceDiv.toggleCls('expanded-arrow');
+
+
+  //   	Ext.Anim.run(convert,'slide',{
+		//     out:false,
+		//     autoClear: false,
+		//     direction: 'down',
+		//     after: function() {
+		//         convert.toggleCls('hidden');
+		//     }
+		// });
+
+	    // el.toggleCls('hidden'); //remove the hidden class if available..
+	    // Ext.get(el.elements[0]).show(true); // show with animation
+
+
+	},
 	//Utility methods
 	/**
 	 * Returns number of orders in cart.
@@ -789,14 +829,11 @@
 				Ext.Msg.show({
 					title : Karazy.i18n.translate('hint'),
 					message : Karazy.i18n.translate('orderCanceled', oldOrder.getProduct().get('name')),
-					buttons : []
+					buttons : [{
+						text : Karazy.i18n.translate('continue'),
+						ui: 'action'
+					}]
 				});
-				
-				Ext.defer((function() {
-					if(!Karazy.util.getAlertActive()) {
-						Ext.Msg.hide();
-					}
-				}), Karazy.config.msgboxHideTimeout, this);
 			}
 
 		}

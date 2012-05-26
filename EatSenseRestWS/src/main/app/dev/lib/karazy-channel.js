@@ -309,7 +309,4 @@ Karazy.channel = (function() {
 			};			
 		}	
 	}
-
-	
-
 }());

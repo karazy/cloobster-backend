@@ -7,6 +7,7 @@ import net.eatsense.auth.SecurityFilter;
 import net.eatsense.controller.MessageController;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.restws.AccountResource;
+import net.eatsense.restws.AdminResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NewsletterResource;
@@ -21,6 +22,8 @@ import org.apache.bval.guice.ValidationModule;
 
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -64,17 +67,24 @@ public class EatSenseGuiceServletContextListener extends
 						bind(CronResource.class);
 						bind(AccountResource.class);
 						bind(ChannelResource.class);
+						bind(AdminResource.class);
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
 						bind(NicknameGenerator.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/accounts(.)*",
-								"(.)*newsletter(.)*", "(.)*b/businesses(.)*",
-								"(.)*c/businesses(.)*","(.)*c/checkins(.)*",
-								"(.)*accounts(.)*", "(.)*spots(.)*",
-								"(.)*nickname(.)*", "(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*", "(.)*cron(.)*").with(GuiceContainer.class, parameters);
+								"(.)*admin/services(.)*",
+								"(.)*newsletter(.)*",
+								"(.)*b/businesses(.)*",
+								"(.)*c/businesses(.)*",
+								"(.)*c/checkins(.)*",
+								"(.)*accounts(.)*",
+								"(.)*spots(.)*",
+								"(.)*nickname(.)*",
+								"(.)*_ah/channel/connected(.)*",
+								"(.)*_ah/channel/disconnected(.)*",
+								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
@@ -87,6 +97,10 @@ public class EatSenseGuiceServletContextListener extends
 					@Provides
 					public ChannelService providesChannelService() {
 						return ChannelServiceFactory.getChannelService();
+					}
+					@Provides
+					public URLFetchService providesURLFetchService() {
+						return URLFetchServiceFactory.getURLFetchService();
 					}
 				}, new ValidationModule());
 		// Register event listeners

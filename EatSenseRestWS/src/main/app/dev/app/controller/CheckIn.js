@@ -6,7 +6,7 @@
  */
 Ext.define('EatSense.controller.CheckIn', {
     extend: 'Ext.app.Controller',
-    requires: ['Ext.data.proxy.LocalStorage', 'EatSense.controller.Message'],
+    requires: ['Ext.data.proxy.LocalStorage', 'EatSense.controller.Message', 'EatSense.view.About'],
     config: {
         profile: Ext.os.deviceType.toLowerCase(),
     	refs: {
@@ -16,6 +16,7 @@ Ext.define('EatSense.controller.CheckIn', {
         	checkinwithothers: 'checkinwithothers',
         	dashboard: 'dashboard',
         	settingsBt: 'dashboard button[action=settings]',
+          aboutBt: 'dashboard button[action=about]',
         	settingsBackBt: 'settings button[action=back]',
         	nicknameTogglefield: 'checkinconfirmation togglefield[action=toggle-nickname]',
         	nicknameSettingsField: 'settings #nicknameSetting',
@@ -50,13 +51,16 @@ Ext.define('EatSense.controller.CheckIn', {
             	select: 'linkToUser'
             },
             checkinDlg2CancelBt: {
-            	tap: 'showMenu'
+            	tap: 'showLounge'
             },
             cancelCheckInBt: {
             	tap: 'showDashboard'
             },
             regenerateNicknameBt: {
             	tap: 'generateNickname'
+            },
+            aboutBt: {
+              tap: 'showAbout'
             },
             settingsBt: {
             	tap: 'showSettings'
@@ -69,9 +73,9 @@ Ext.define('EatSense.controller.CheckIn', {
             }
     	},
         /**
-    	* Contains information to resume application state after the app was closed.
-    	*/
-    	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
+      	* Contains information to resume application state after the app was closed.
+      	*/
+      	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
         /**
         *   Active checkIn for this session. Used througout whole application
         */
@@ -189,12 +193,14 @@ Ext.define('EatSense.controller.CheckIn', {
     * @param options
     */
    checkInConfirm: function(options) {
-	   var checkInDialog = this.getCheckinconfirmation(), 
+	  var checkInDialog = this.getCheckinconfirmation(), 
 		    main = this.getMain(),
-		checkIn = Ext.create('EatSense.model.CheckIn');		
+        nicknameToggle = this.getNicknameTogglefield(),
+		    checkIn = Ext.create('EatSense.model.CheckIn');		
 			
 	   	 if(this.getAppState().get('nickname') != null && Ext.String.trim(this.getAppState().get('nickname')) != '') {
 	   		 this.getNickname().setValue(this.getAppState().get('nickname'));
+         nicknameToggle.setValue(1);
 	   	 } else {
 	   		this.generateNickname();
 	   	 }
@@ -239,7 +245,7 @@ Ext.define('EatSense.controller.CheckIn', {
   					   	    console.log("CheckIn Controller -> checkIn success");
   					   	    //currently disabled, will be enabled when linking to users actually makes sense
                     //me.showCheckinWithOthers();					   	    
-  					   	     me.showMenu();
+  					   	     me.showLounge();
   					   	     me.getAppState().set('checkInId', response.get('userId'));
 
                     //Set default headers so that always checkInId is send
@@ -322,7 +328,7 @@ Ext.define('EatSense.controller.CheckIn', {
 				  	if(records.length > 0) {
 				  		main.setActiveItem(checkinwithothersDlg);
 				  	} else {
-				  		this.showMenu();
+				  		this.showLounge();
 				  	}
 	  	     }
 	  	 });	  		  	
@@ -342,7 +348,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   checkIn.save({
 		  scope: this,
 		  success: function(record, operation) {
-			  me.showMenu();
+			  me.showLounge();
 		  },
 		   failure: function(record, operation) {
    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
@@ -358,12 +364,24 @@ Ext.define('EatSense.controller.CheckIn', {
     *
     * Show menu to user 
     */
-	showMenu: function() {
-    	var menuCtr = this.getApplication().getController('Menu');
-          
+	showLounge: function() {
+    	var menuCtr = this.getApplication().getController('Menu'),
+          requestCtr = this.getApplication().getController('Request'),
+          androidCtr = this.getApplication().getController('Android');
+
         menuCtr.showMenu();
-        this.getApplication().getController('Android').setAndroidBackHandler(menuCtr.getMenuNavigationFunctions());
+        requestCtr.refreshAccountLabel();
+        androidCtr.setAndroidBackHandler(menuCtr.getMenuNavigationFunctions());
 	},
+  /**
+  * Shows an about screen.
+  */
+  showAbout: function() {
+    var about = Ext.create('EatSense.view.About');
+
+    Ext.Viewport.add(about);
+
+  },
 	/**
 	 * Show settings screen.
 	 * 
@@ -441,7 +459,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		scope: this,
    		 success: function(record, operation) {
    			 this.setActiveSpot(record);
-   			 this.showMenu();
+   			 this.showLounge();
    			    			
    			Ext.Viewport.add(main);
    			
@@ -516,9 +534,7 @@ Ext.define('EatSense.controller.CheckIn', {
             this.getAppState().set('checkInId', null);
             this.resetDefaultAjaxHeaders();
             Karazy.channel.closeChannel();
-            if(!this.getAppState().get('newsletterRegistered')) {
-              settingsCtr.registerNewsletterOnLeaving();
-            }
+
             requestCtr.resetAllRequests();
             androidCtr.setAndroidBackHandler(null);
 		}

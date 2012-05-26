@@ -10,14 +10,18 @@ Ext.define('EatSense.view.CartOverviewItem', {
 
 		name : {
 			tpl: new Ext.XTemplate(
-				"<h8>{amount}x</h8> <h9>{Product.name}</h9> {[this.formatPrice(values.Product.price_calculated)]}",
+				"<table style='width:100%;'>"+
+					"<td align='left'><h2 class='title'>{amount} x {Product.name}</h2></td><td align='right'><h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</td></h2>"+
+					// "<td align='left'><h8>{amount}x</h8> <h9>{Product.name}</h9></td><td align='right'>{[this.formatPrice(values.Product.price_calculated)]}</td>"+
+				"</table>",					
 				{
 					formatPrice: function(price) {
 						return Karazy.util.formatPrice(price);
 					}
 				}
 				),
-			cls: 'name'
+			cls: 'name',
+			flex: 4
 		},
 
 		editButton : {

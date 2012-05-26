@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EatSenseRestWS" default="default" basedir=".">
 	<property name="appDir" value="src/main/app/dev/" />
-	<property name="cockpitDir" value="src/main/cockpit/" />
 	<property name="frontendDirDev" value="src/main/frontend/admin-dev/" />
 	<property name="frontendDirProd" value="src/main/frontend/admin-prod/" />
 	<property name="prodDir" value="src/main/app/prod/" />
@@ -11,31 +10,8 @@
 		<move todir="target" includeemptydirs="false">
 			<fileset dir="target">
 			</fileset>
-
 			<regexpmapper from="^(.+)\.desktop\.(.+)$$" to="\1.\2" />
 		</move>
-	</target>
-	
-	<target name="createCockpitProduction">
-		<echo message="Executing createCockpitProduction task from build.xml" />
-		<exec executable="${sencha.cmd}" >
-			<arg line="create jsb -a ${cockpitDir}dev/index_pkg_ready.html -p ${cockpitDir}dev/app.jsb3" />
-		</exec>
-		<echo message="Disable debug mode" />
-		<replaceregexp file="${cockpitDir}dev/app.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
-		<exec executable="${sencha.cmd}">
-			
-			<arg line="build -p ${cockpitDir}dev/app.jsb3 -d ${cockpitDir}dev" />
-		</exec>
-		<copy file="${appDir}/touch/sencha-touch.js" todir="${cockpitDir}prod/lib" overwrite="true"></copy>
-		<move file="${cockpitDir}dev/app-all.js" todir="${cockpitDir}prod/" overwrite="true"></move>
-		<copy todir="${cockpitDir}prod/lib" overwrite="true">
-			<fileset dir="${cockpitDir}dev/lib">
-				<exclude name="**/*.iphone.*" />
-				<exclude name="**/*.phone.*" />
-				<exclude name="**/*.ignore.*" />
-			</fileset>
-		</copy>
 	</target>
 	
 	<target name="createFrontendProduction">
@@ -47,7 +23,6 @@
 		<echo message="Disable debug mode" />
 		<replaceregexp file="${frontendDirDev}app.jsb3" match='"debug": true' replace='"debug": false' byline="true" />
 		<exec executable="${sencha.cmd}">
-			
 			<arg line="build -p ${frontendDirDev}app.jsb3 -d ${frontendDirDev}" />
 		</exec>
 		<move file="${frontendDirDev}app-all.js" todir="${frontendDirProd}" overwrite="true"></move>
@@ -66,6 +41,7 @@
 			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
 		</exec>
 		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/desktop/lib" overwrite="true"></copy>
+		<copy file="${appDir}/res/css/app-default.css" todir="${prodDir}/desktop/res/css" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/desktop/" overwrite="true"></move>
 		<copy todir="${prodDir}/desktop/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -94,6 +70,7 @@
 			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
 		</exec>
 		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
+		<copy file="${appDir}/res/css/app-default.css" todir="${prodDir}/android/res/css" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
 		<copy todir="${prodDir}/android/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -121,6 +98,7 @@
 			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
 		</exec>
 		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/ios/lib" overwrite="true"></copy>
+		<copy file="${appDir}/res/css/app-default.css" todir="${prodDir}/ios/res/css" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/ios/" overwrite="true"></move>
 		<copy todir="${prodDir}/ios/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -141,8 +119,6 @@
 		<delete file="${appDir}app.android.jsb3"></delete>
 		<delete file="${appDir}app.ios.jsb3"></delete>
 		<delete file="${appDir}all-classes.js"></delete>
-		<delete file="${cockpitDir}dev/all-classes.js"></delete>
-		<delete file="${cockpitDir}dev/app.jsb3"></delete>
 		<delete file="${frontendDirDev}all-classes.js"></delete>
 		<delete file="${frontendDirDev}app.jsb3"></delete>
 	</target>
@@ -150,6 +126,6 @@
 	<target name="production" depends="createDesktopProduction, createAndroidProduction, createIOSProduction,cleanUpProductionFiles"></target>
 	<target name="android-production" depends="createAndroidProduction, cleanUpProductionFiles"/>
 	<target name="desktop-production" depends="createDesktopProduction, cleanUpProductionFiles"/>
-	<target name="server-production" depends="createDesktopProduction ,createCockpitProduction, createFrontendProduction, cleanUpProductionFiles"/>
+	<target name="server-production" depends="createDesktopProduction , createFrontendProduction, cleanUpProductionFiles"/>
 	<target name="ios-production" depends="createIOSProduction, cleanUpProductionFiles"/>
 </project>

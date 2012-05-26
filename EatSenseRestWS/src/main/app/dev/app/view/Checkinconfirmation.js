@@ -16,11 +16,11 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 		items : [ {
 			docked : 'top',
 			xtype : 'toolbar',
-			title : Karazy.i18n.translate('checkInTitle'),
+			title : Karazy.i18n.translate('nickname'),
 			items : [ {
 				xtype : 'button',
 				action: 'cancel-checkin',
-				text : Karazy.i18n.translate('cancel'),
+				text : Karazy.i18n.translate('back'),
 				ui : 'back'
 			}, ]
 		}, 
@@ -28,7 +28,6 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			xtype : 'label',
 			itemId : 'checkInDlg1Label1',
 			html : Karazy.i18n.translate('checkInStep1Label1'),
-			margin : 5,
 			cls: 'checkin-confirm-nickname-label'
 		}, 
 		{
@@ -37,7 +36,6 @@ Ext.define('EatSense.view.Checkinconfirmation', {
 			width : '80%',
 			required : true,
 			maxLength: 25,
-			margin : 5,
 			cls: 'checkin-confirm-nickname-field'
 		},  
 		{

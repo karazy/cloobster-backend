@@ -16,6 +16,8 @@
 		<string>114.png</string>
 		<string>72.png</string>
 		<string>144.png</string>
+		<string>Default.png</string>
+		<string>Default@2x.png</string>
 	</array>
 	<key>CFBundleIcons</key>
 	<dict>
@@ -27,6 +29,8 @@
 				<string>114.png</string>
 				<string>72.png</string>
 				<string>144.png</string>
+				<string>Default.png</string>
+				<string>Default@2x.png</string>
 			</array>
 		</dict>
 	</dict>

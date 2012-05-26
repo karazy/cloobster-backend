@@ -3,6 +3,9 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +19,9 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.RegistrationException;
+import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
@@ -26,12 +31,22 @@ import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
+import net.eatsense.representatione.EmailConfirmationDTO;
 import net.eatsense.util.IdHelper;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.urlfetch.FetchOptions;
+import com.google.appengine.api.urlfetch.HTTPMethod;
+import com.google.appengine.api.urlfetch.HTTPRequest;
+import com.google.appengine.api.urlfetch.HTTPResponse;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -50,11 +65,12 @@ public class AccountController {
 	private NewsletterRecipientRepository recipientRepo;
 	private Validator validator;
 	private CompanyRepository companyRepo;
-		
+	private URLFetchService urlFetchService;
+	
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
-			ChannelController cctrl, Validator validator) {
+			ChannelController cctrl, Validator validator, URLFetchService urlFetchService) {
 		super();
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
@@ -62,6 +78,7 @@ public class AccountController {
 		this.businessRepo = businessRepository;
 		this.accountRepo = accountRepo;
 		this.companyRepo = companyRepo;
+		this.urlFetchService = urlFetchService;
 	}
 	
 	
@@ -128,7 +145,9 @@ public class AccountController {
 	 * @param hashedPassword as bcrypt hash
 	 * @return the authenticated Account object for the given login
 	 */
-	public Account authenticateHashed(String login, String hashedPassword) {	
+	public Account authenticateHashed(String login, String hashedPassword) {
+		login = Strings.nullToEmpty(login).toLowerCase();
+		
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
 			return null;
@@ -160,7 +179,9 @@ public class AccountController {
 	 * @param password cleartext
 	 * @return
 	 */
-	public Account authenticate(String login, String password) {	
+	public Account authenticate(String login, String password) {
+		login = Strings.nullToEmpty(login).toLowerCase();
+		
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
 			return null;
@@ -182,7 +203,6 @@ public class AccountController {
 			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
-			
 	}
 	
 	public AccountDTO toDto(Account account) {
@@ -206,7 +226,7 @@ public class AccountController {
 	public List<BusinessDTO> getBusinessDtos(String login) {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
-		if(account != null && isAccountInRole(account, "cockpituser")) {
+		if(account != null && account.getBusinesses() != null && isAccountInRole(account, "cockpituser")) {
 			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
 				BusinessDTO businessData = new BusinessDTO();
 				businessData.setId(business.getId());
@@ -262,7 +282,7 @@ public class AccountController {
 		return recipient;
 	}
 	
-	public RegistrationDTO registerNewAccount(RegistrationDTO accountData) {
+	public Account registerNewAccount(RegistrationDTO accountData) {
 		checkNotNull(accountData.getLogin(), "accountData login was null");
 		checkNotNull(accountData.getEmail(), "accountData email was null");
 		checkNotNull(accountData.getPassword(), "accountData password was null");
@@ -300,11 +320,14 @@ public class AccountController {
 		account.setName(accountData.getName());
 		account.setPhone(accountData.getPhone());
 		account.setRole(Role.COMPANYOWNER);
+		account.setFacebookUid(accountData.getFacebookUID());
 		account.setHashedPassword(BCrypt.hashpw(accountData.getPassword(), BCrypt.gensalt()));
 		
 		accountRepo.saveOrUpdate(account);
 		
-		return accountData;
+		
+		
+		return account;
 	}
 	
 	private boolean checkCompany(CompanyDTO company) {
@@ -337,5 +360,70 @@ public class AccountController {
 		else {
 			throw new IllegalArgumentException("email does not match stored address");
 		}
+	}
+	
+	public Account authenticateFacebook(String uid, String accessToken) {
+		checkArgument( !Strings.nullToEmpty(uid).isEmpty(), "uid was null or empty");
+		checkArgument( !Strings.nullToEmpty(accessToken).isEmpty(), "uid was null or empty");
+		
+		Account account = null;
+		
+		try {
+			HTTPResponse response = urlFetchService.fetch( new HTTPRequest(new URL("https://graph.facebook.com/me?access_token=" + accessToken), HTTPMethod.GET, FetchOptions.Builder.validateCertificate()));
+			if(response.getResponseCode() == 200) {
+				String responseText = new String (response.getContent(), "UTF-8");
+				JSONObject jsonMe;
+				try {
+					jsonMe = new JSONObject(responseText);
+				} catch (JSONException e) {
+					throw new ServiceException("error parsing facebook response", e);
+				}
+				String facebookUid = jsonMe.optString("id");
+				if( uid.equals( facebookUid)) {
+					logger.info("Valid access token recieved for {}", jsonMe.optString("name"));
+					account = accountRepo.getByProperty( "facebookUid", facebookUid);
+					if(account == null) {
+						throw new IllegalAccessException("unregistered facebook user " + jsonMe.optString("name"));
+					}
+					else
+						return account;
+				}
+			}
+			else {
+				throw new ServiceException("invalid token or cant connect to facebook server");
+			}
+			
+		} catch (MalformedURLException e) {
+			throw new ServiceException("error in facebook api url call");
+		} catch (IOException e) {
+			throw new ServiceException("error contacting facebook server");
+		}
+		
+		return account ;
+	}
+	
+	/**
+	 * Confirms an account with the generated token, which was send to the user during registration.
+	 * 
+	 * @param account
+	 * @param confirmationData
+	 * @return
+	 */
+	public EmailConfirmationDTO confirmAccountEmail(Account account, EmailConfirmationDTO confirmationData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(confirmationData, "confirmationData was null");
+		checkArgument(!Strings.nullToEmpty(confirmationData.getConfirmationToken()).isEmpty(), "confirmationToken was null or empty");
+		
+		if(!account.isEmailConfirmed() && confirmationData.getConfirmationToken().equals(account.getEmailConfirmationHash())) {
+			account.setEmailConfirmed(true);
+			account.setEmailConfirmationHash(null);
+			accountRepo.saveOrUpdate(account);
+		}
+		else
+			throw new ServiceException("account already confirmed or invalid token");
+		
+		confirmationData.setLogin(account.getLogin());
+		confirmationData.setEmailConfirmed(true);
+		return confirmationData;
 	}
 }
