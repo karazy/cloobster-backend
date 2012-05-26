@@ -79,6 +79,7 @@ Karazy.translations = (function() {
 		//MyOrders
 		"myOrdersTitle" : "Deine Bestellung",
 		"myOrdersTabBt" : "Bezahlen",
+		"myOrdersTabLeaveBt" : "Verlassen",
 		"payRequestButton" : "Bezahlen",
 		"leaveButton" : "Verlassen",
 		"orderTime" : "Bestellzeit",
