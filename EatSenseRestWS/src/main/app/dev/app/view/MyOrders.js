@@ -43,8 +43,30 @@ Ext.define('EatSense.view.MyOrders', {
 			onItemDisclosure: this.removeItem,
 			itemCls: 'orderListItem',
 			itemTpl:  new Ext.XTemplate(
-				"<h2 class='title'>{amount} x {Product.name}</h2> <h2 class='price'>{[this.formatPrice(values.Product.price_calculated)]}</h2>"+
-				"<div style='clear:both;'></div>"
+				"<table style='width:100%;'>"+				
+				"<td align='left'><h2 class='title'>{amount} x {Product.name}</h2></td><td align='right'><h2 class='price collapsed-arrow'>{[this.formatPrice(values.Product.price_calculated)]}</td></h2>"+
+				"</table>"+
+				"<div class='myorder-detail hidden'>"+
+				"<h4>"+Karazy.i18n.translate('orderTime')+": {[values.orderTime.toLocaleTimeString()]}</h4>"+
+				"<div class='choices'>"+
+					"<tpl for='Product.choices'>" +				
+						"<tpl if='this.checkSelections(values, xindex)'>" +
+							"<tpl if='!parent'><h3>{text}</h3></tpl>" +
+							"<ul>" +
+								"<tpl for='options'>" +
+									"<tpl if='selected === true'>" +
+										"<li>{name}</li>" +
+									"</tpl>" +
+								"</tpl>" +
+							"</ul>" +
+						"</tpl>" +
+					"</tpl>" +
+					"<tpl if='comment!=\"\"'>" +
+					"<h3>"+Karazy.i18n.translate('myorderComment')+"</h3>"+
+					"<p>{comment}</p>" +
+					"</tpl>" +
+				"</div>"+
+				"</div>"
 				// "<h2 style='float: left; width: 80%; margin: 0;'>{Product.name}</h2>" +
 				// "<div style='position: absolute; right: 0; width: 30%; text-align: right; padding-right: 10px;'>({amount}x) {[this.formatPrice(values)]}</div>" +
 				/*"<div style='clear: both;'>" +
@@ -107,21 +129,28 @@ Ext.define('EatSense.view.MyOrders', {
 						}
 					}
 				)
-			},
+			},			
 			{
 				type: 'panel',
 				// docked: 'bottom',
-				bottom: '20%',
-				left: '10%',
-				right: '10%',
+				// bottom: '30%',
+				// left: '10%',
+				// right: '10%',
 				itemId: 'myorderscompletepanel',
 				hidden: true,
+				padding: 5,
+				layout: {
+					type: 'hbox',
+					align: 'center',
+					pack: 'center'
+				},
 				items: [{
 					xtype: 'button',
 					text: Karazy.i18n.translate('leave'),
 					ui: 'confirm',
 					action: 'complete',
-					height: '50px'
+					height: '50px',
+					width: '80%',
 				}
 				]
 			}

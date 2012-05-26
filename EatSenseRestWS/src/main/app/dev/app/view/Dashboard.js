@@ -27,7 +27,7 @@ Ext.define('EatSense.view.Dashboard', {
 			height : 230,
 			width : 277			
 		},			
-		{ 	
+		{
 			xtype : 'button',
 			action: 'checkin',
 			height : 110,
@@ -43,6 +43,11 @@ Ext.define('EatSense.view.Dashboard', {
 			iconMask: true,
 			styleHtmlContent: true,
 			style: 'position: absolute; bottom: 10px; right: 10px;'
+		},
+		{
+			xtype: 'image',
+			src: 'res/images/dashboard/start_button_touch.png',
+			hidden: true
 		}
 		]
 	},

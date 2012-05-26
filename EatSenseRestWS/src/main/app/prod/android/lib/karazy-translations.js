@@ -10,7 +10,7 @@ Karazy.translations = (function() {
 		"DE" : {
 
 		// General translations
-		"ok" : "Ok",
+		"ok" : "OK",
 		"cancel" : "Abbrechen",
 		"back" : "Zurück",
 		"change" : "Ändern",
@@ -81,6 +81,8 @@ Karazy.translations = (function() {
 		"myOrdersTabBt" : "Bezahlen",
 		"payRequestButton" : "Bezahlen",
 		"leaveButton" : "Verlassen",
+		"orderTime" : "Bestellzeit",
+		"myorderComment" : "Meine Wünsche",
 		//Payment Request
 		"paymentPickerTitle" : "Bezahlmethode",
 		"paymentRequestSend": "Bitte einen Moment warten,</br>die Rechnung wird vorbereitet ...",
@@ -91,10 +93,10 @@ Karazy.translations = (function() {
 		"newsletterEmail" : "E-Mail",
 		"newsletterRegisterSuccess" : "Danke! Eine Bestätigungsmail wird an {0} geschickt.",
 		"newsletterInvalidEmail" : "Bitte gib eine gültige E-Mail Adresse an.",
-		"newsletterDuplicateEmail" : "Diese E-Mail Adresse ist bereits registriert",
+		"newsletterDuplicateEmail" : "Diese E-Mail Adresse ist bereits registriert.",
 		"newsletterPopupTitle" : "Newsletter abonnieren?", 
 		"newsletterDontAskButton" : "Nicht mehr nachfragen!",
-		"newsletterLabel" : "Stay up-to-date und verpasse nicht den Cloobster Big Bang! Melde dich für den Newsletter an.",
+		"newsletterLabel" : "Nicht den Cloobster Big-Bang verpassen und für den Newsletter anmelden!",
 		//Request
 		"errorRequest" : "Anfrage konnte leider nicht bearbeitet werden.",
 		"requestsButton" : "VIP",
@@ -103,8 +105,9 @@ Karazy.translations = (function() {
 		"callWaiterButton" : "Bedienung rufen",
 		"callWaiterRequestBadge" : "Bedienung gerufen",
 		"cancelCallWaiterRequest" : "Danke, hat sich erledigt",
-		"callWaiterCallHint" : "Du hast ein Anliegen?",
-		"callWaiterCancelHint" :	"Du hast uns gerufen.<br/>Wir kommen so schnell wie möglich!",
+		"callWaiterCallHint" : "Gibt es ein Anliegen?",
+		"callWaiterCancelHint" :	"Wir wurden gerufen und <br/>kommen so schnell wie möglich!",
+		"vipGreetingMessage" : "Willkommen <span style='font-weight:bold;'>{0}</span> in deinem persönlichen VIP Bereich!",
 		//general errors
 		"error" : "Fehler",
 		"errorTitle" : "Fehler",		

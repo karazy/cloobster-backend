@@ -63,7 +63,7 @@ Ext.define('EatSense.controller.Message', {
 			}
 		}
 		else {
-			console.log('broadcast message type %s, action %s', message.type, message.action);
+			console.log('broadcast message type ' + message.type + ', action ' + message.action);
 
 			//fire event based on the message
 			me.fireEvent(evtPrefix+message.type.toLowerCase(), message.action, message.content);
@@ -158,6 +158,6 @@ Ext.define('EatSense.controller.Message', {
 	*/
 	handleStatus: function(connectionStatus, previousStatus, reconnectIteration) {
 		//render status in UI
-		console.log('Connection status changed to %s from %s. (%s call)', connectionStatus, previousStatus, reconnectIteration);
+		console.log('Connection status changed to '+connectionStatus+' from '+previousStatus+'. ('+reconnectIteration+' call)');
 	}
 });

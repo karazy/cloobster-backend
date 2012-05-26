@@ -51,7 +51,7 @@ Ext.define('EatSense.controller.CheckIn', {
             	select: 'linkToUser'
             },
             checkinDlg2CancelBt: {
-            	tap: 'showMenu'
+            	tap: 'showLounge'
             },
             cancelCheckInBt: {
             	tap: 'showDashboard'
@@ -73,9 +73,9 @@ Ext.define('EatSense.controller.CheckIn', {
             }
     	},
         /**
-    	* Contains information to resume application state after the app was closed.
-    	*/
-    	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
+      	* Contains information to resume application state after the app was closed.
+      	*/
+      	appState : Ext.create('EatSense.model.AppState', {id: '1'}),
         /**
         *   Active checkIn for this session. Used througout whole application
         */
@@ -245,7 +245,7 @@ Ext.define('EatSense.controller.CheckIn', {
   					   	    console.log("CheckIn Controller -> checkIn success");
   					   	    //currently disabled, will be enabled when linking to users actually makes sense
                     //me.showCheckinWithOthers();					   	    
-  					   	     me.showMenu();
+  					   	     me.showLounge();
   					   	     me.getAppState().set('checkInId', response.get('userId'));
 
                     //Set default headers so that always checkInId is send
@@ -328,7 +328,7 @@ Ext.define('EatSense.controller.CheckIn', {
 				  	if(records.length > 0) {
 				  		main.setActiveItem(checkinwithothersDlg);
 				  	} else {
-				  		this.showMenu();
+				  		this.showLounge();
 				  	}
 	  	     }
 	  	 });	  		  	
@@ -348,7 +348,7 @@ Ext.define('EatSense.controller.CheckIn', {
 	   checkIn.save({
 		  scope: this,
 		  success: function(record, operation) {
-			  me.showMenu();
+			  me.showLounge();
 		  },
 		   failure: function(record, operation) {
    	    	if(operation.getError() != null && operation.getError().status != null && operation.getError().status == 500) {
@@ -364,11 +364,14 @@ Ext.define('EatSense.controller.CheckIn', {
     *
     * Show menu to user 
     */
-	showMenu: function() {
-    	var menuCtr = this.getApplication().getController('Menu');
-          
+	showLounge: function() {
+    	var menuCtr = this.getApplication().getController('Menu'),
+          requestCtr = this.getApplication().getController('Request'),
+          androidCtr = this.getApplication().getController('Android');
+
         menuCtr.showMenu();
-        this.getApplication().getController('Android').setAndroidBackHandler(menuCtr.getMenuNavigationFunctions());
+        requestCtr.refreshAccountLabel();
+        androidCtr.setAndroidBackHandler(menuCtr.getMenuNavigationFunctions());
 	},
   /**
   * Shows an about screen.
@@ -456,7 +459,7 @@ Ext.define('EatSense.controller.CheckIn', {
 		scope: this,
    		 success: function(record, operation) {
    			 this.setActiveSpot(record);
-   			 this.showMenu();
+   			 this.showLounge();
    			    			
    			Ext.Viewport.add(main);
    			

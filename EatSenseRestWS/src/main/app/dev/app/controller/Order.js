@@ -70,6 +70,9 @@
              },
              undoEditButton: {
              	tap: 'closeOrderDetail'
+             }, 
+             myorderlist: {
+             	itemtap: 'toggleOrderDetail'
              }
 		},
 		/**
@@ -137,7 +140,7 @@
 				itemId: 'yes',
 				ui: 'action'
 			}, {
-				text:  Karazy.i18n.translate('yes'),
+				text:  Karazy.i18n.translate('no'),
 				itemId: 'no',
 				ui: 'action'
 			}],
@@ -187,11 +190,11 @@
 				title: Karazy.i18n.translate('hint'),
 				message: Karazy.i18n.translate('submitOrdersQuestion'),
 				buttons: [{
-					text: 'Ja',
+					text: Karazy.i18n.translate('yes'),
 					itemId: 'yes',
 					ui: 'action'
 				}, {
-					text: 'Nein',
+					text: Karazy.i18n.translate('no'),
 					itemId: 'no',
 					ui: 'action'
 				}],
@@ -738,6 +741,32 @@
 
 		(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();
 		(myordersStore.getCount() > 0) ? leaveButton.hide() : leaveButton.show();
+	},
+	toggleOrderDetail: function(view, index, htmlElement, order) {		
+    // change the div plus to minu..
+    // Get hold of the div with details class and animate
+    	var el = htmlElement.select('div.myorder-detail'),
+    		convert = Ext.get(el.elements[0]),
+    		priceDiv = htmlElement.select('h2.price');
+    	
+    	convert.toggleCls('hidden');
+    	priceDiv.toggleCls('collapsed-arrow');
+    	priceDiv.toggleCls('expanded-arrow');
+
+
+  //   	Ext.Anim.run(convert,'slide',{
+		//     out:false,
+		//     autoClear: false,
+		//     direction: 'down',
+		//     after: function() {
+		//         convert.toggleCls('hidden');
+		//     }
+		// });
+
+	    // el.toggleCls('hidden'); //remove the hidden class if available..
+	    // Ext.get(el.elements[0]).show(true); // show with animation
+
+
 	},
 	//Utility methods
 	/**

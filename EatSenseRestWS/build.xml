@@ -41,6 +41,7 @@
 			<arg line="build -p ${appDir}app.desktop.jsb3 -d ${appDir}" />
 		</exec>
 		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/desktop/lib" overwrite="true"></copy>
+		<copy file="${appDir}/res/css/app-default.css" todir="${prodDir}/desktop/res/css" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/desktop/" overwrite="true"></move>
 		<copy todir="${prodDir}/desktop/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -69,6 +70,7 @@
 			<arg line="build -p ${appDir}app.android.jsb3 -d ${appDir}" />
 		</exec>
 		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/android/lib" overwrite="true"></copy>
+		<copy file="${appDir}/res/css/app-default.css" todir="${prodDir}/android/res/css" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/android/" overwrite="true"></move>
 		<copy todir="${prodDir}/android/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
@@ -96,6 +98,7 @@
 			<arg line="build -p ${appDir}app.ios.jsb3 -d ${appDir}" />
 		</exec>
 		<copy file="${appDir}/touch/sencha-touch.js" todir="${prodDir}/ios/lib" overwrite="true"></copy>
+		<copy file="${appDir}/res/css/app-default.css" todir="${prodDir}/ios/res/css" overwrite="true"></copy>
 		<move file="${appDir}/app-all.js" todir="${prodDir}/ios/" overwrite="true"></move>
 		<copy todir="${prodDir}/ios/lib" overwrite="true">
 			<fileset dir="${appDir}/lib">
