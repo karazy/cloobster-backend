@@ -192,7 +192,9 @@ public class SecurityFilter implements ContainerRequestFilter {
         		return true;
         	
         	if(accountCtrl.isAccountInRole(account, role)) {
-        		if( businessId != null && accountCtrl.isAccountManagingBusiness(account, businessId))
+        		if( businessId != null)
+        			return  accountCtrl.isAccountManagingBusiness(account, businessId);
+        		else
         			return true;
         	}
         	

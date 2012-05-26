@@ -1,8 +1,10 @@
 package net.eatsense.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
@@ -16,6 +18,7 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.RestaurantRepositoryTest;
 import net.eatsense.persistence.SpotRepository;
 
 import org.slf4j.Logger;
@@ -48,13 +51,14 @@ public class DummyDataDumper {
 		this.cr = cr;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		Account account = ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", "companyadmin", rr.getAllKeys(), true, true);
-		account.setActive(true);
-		account.setEmailConfirmed(true);
-		
-		ar.saveOrUpdate(account);
+		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), true, true);
+		Key<Business> kaiBusiness = rr.getKeyByProperty("name", "Kai's Lounge");
+		if(kaiBusiness != null) {
+			ar.createAndSaveAccount("kai", "kk123", "kai.krupka@gmail.com", Role.COMPANYOWNER, Arrays.asList(kaiBusiness), true, true);
+		}
 	}	
 
 	public void generateDummyBusinesses() {

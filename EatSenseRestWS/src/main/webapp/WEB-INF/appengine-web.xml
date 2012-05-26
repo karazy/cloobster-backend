@@ -6,8 +6,8 @@
 	<!-- Configure java.util.logging -->
 	<system-properties>
 		<property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties" />
-		<property name="net.karazy.channels.cockpit.timeout" value="20"/>
-		<property name="net.karazy.channels.app.timeout" value="120"/>
+		<property name="net.karazy.channels.cockpit.timeout" value="480"/>
+		<property name="net.karazy.channels.app.timeout" value="480"/>
 	</system-properties>
 
 	<inbound-services>
