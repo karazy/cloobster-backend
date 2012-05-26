@@ -33,10 +33,9 @@ Ext.define('EatSense.view.ProductDetail', {
 				xtype : 'label',
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
-				tpl: new Ext.XTemplate(
-				 	'{product.data.longDesc}'
-				)
-			}, {
+				tpl: '{product.data.longDesc}'
+			}, 
+			{
 				xtype : 'panel',
 				docked: 'right',
 				width: 110,
@@ -53,13 +52,11 @@ Ext.define('EatSense.view.ProductDetail', {
 					itemId : 'productAmountSpinner',
 					labelCls: 'productdetail-spinner-label',
 					inputCls: 'productdetail-spinner-input',
-					// cls: 'productdetail-spinner',
 					increment : 1,
 					value : 1,
 					minValue : '1',
 					maxValue : '10',					
-					cycle : true,
-					// width: 120
+					cycle : true
 				},
 				{
 					xtype: 'label',
