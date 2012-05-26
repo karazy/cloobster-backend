@@ -78,6 +78,14 @@ Ext.define('EatSense.view.OrderDetail', {
 			layout: 'vbox',
 			minHeight: '200px',
 			scrollable : false,
+			items: [
+				{
+					xtype: 'label',
+					docked: 'top',
+					cls: 'choice-panel-title',
+					html: Karazy.i18n.translate('choicesPanelTitle')
+				}
+			]
 		},
 		{
 			xtype: 'toolbar',

@@ -140,7 +140,7 @@
 				itemId: 'yes',
 				ui: 'action'
 			}, {
-				text:  Karazy.i18n.translate('yes'),
+				text:  Karazy.i18n.translate('no'),
 				itemId: 'no',
 				ui: 'action'
 			}],
