@@ -10,7 +10,7 @@ Ext.define('EatSense.view.Dashboard', {
 		layout : {
 			type : 'vbox',
 			pack : 'center',
-			align : 'middle',
+			align : 'center',
 		},
 		cls: 'dashboard',
 		items : [ 
@@ -21,19 +21,25 @@ Ext.define('EatSense.view.Dashboard', {
 			height : 80,
 			width : 186
 		},
-		{	xtype : 'image',
-			src : 'res/images/dashboard/middle-v3.png',
-			style : 'background-repeat:no-repeat; background-position:center center;',
-			height : 230,
-			width : 277			
-		},			
+		// {	xtype : 'image',
+		// 	src : 'res/images/dashboard/middle-v3.png',
+		// 	style : 'background-repeat:no-repeat; background-position:center center;',
+		// 	height : 230,
+		// 	width : 277			
+		// },			
 		{
 			xtype : 'button',
 			action: 'checkin',
+			margin: '20 0',
 			height : 110,
 			width : 186,
 			baseCls : 'dashboard-button',
 			pressedCls: 'dashboard-button-pressed'
+		},
+		{
+			xtype: 'label',
+			cls: 'dashboard-description',
+			html: '1. Check-In<br/>2. Bestellen<br/>3. Genießen'
 		},
 		{
 			xtype: 'button',

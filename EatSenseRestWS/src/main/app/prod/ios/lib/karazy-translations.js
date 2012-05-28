@@ -58,7 +58,7 @@ Karazy.translations = (function() {
 		"orderInvalid" : "Bitte Auswahl überprüfen.",
 		"orderPlaced" : "Bestellung im Warenkorb.",
 		"cartEmpty" : "Noch keine Bestellung getätigt.",
-		"productPutIntoCardMsg" : "{0} &gt; Warenkorb",
+		"productPutIntoCardMsg" : "{0} &gt; Bestellzettel",
 		"orderRemoved" : "Bestellung entfernt",
 		"orderComment" : "Deine Wünsche",
 		"amount" : "Menge",

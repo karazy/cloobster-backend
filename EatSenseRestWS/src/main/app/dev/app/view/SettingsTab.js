@@ -37,6 +37,7 @@ Ext.define('EatSense.view.SettingsTab', {
 				{
 					xtype : 'textfield',
 					label : Karazy.i18n.translate('nickname'),
+					labelWidth: '40%',
 					itemId : 'nickname',
 					cls: 'general-textfield',
 					labelCls: 'general-field-label-horizontal'

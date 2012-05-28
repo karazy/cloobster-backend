@@ -10,7 +10,24 @@ Ext.define('EatSense.view.ProductDetail', {
 		align : 'stretch',
 	},	
 	config : {
-    	scrollable : 'vertical',
+		scrollable : {
+		  direction: 'vertical',
+		  directionLock: true,
+		  momentumEasing:  {
+		     momentum: {
+		       acceleration: 30,
+		       friction: 0.5
+		     },
+		     bounce: {
+		        acceleration: 0.0001,
+		        springTension: 0.9999,
+		     },
+		     minVelocity: 5
+		  },
+		  outOfBoundRestrictFactor: 0	
+		 },
+    	// scrollable : 'vertical',
+    	// fullscreen: true,
     	modal: true,
 		top: '5%',
 		left: '3%',
@@ -73,7 +90,8 @@ Ext.define('EatSense.view.ProductDetail', {
 					)
 				} 
 				]
-			}]
+			}
+			]
 		}, 
 		{
 			xtype : 'formpanel',
