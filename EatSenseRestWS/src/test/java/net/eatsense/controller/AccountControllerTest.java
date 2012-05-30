@@ -19,6 +19,7 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
@@ -27,9 +28,11 @@ import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.representatione.EmailConfirmationDTO;
+import net.eatsense.service.FacebookService;
 
 import org.apache.bval.guice.ValidationModule;
 import org.apache.bval.jsr303.ApacheValidationProvider;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -84,25 +87,31 @@ public class AccountControllerTest {
 
 	@Mock
 	private URLFetchService fetchService;
+
+	@Mock
+	private FacebookService facebookService;
 	
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(),
+				new ValidationModule());
 		channelController = mock(ChannelController.class);
 		rr = injector.getInstance(BusinessRepository.class);
 		ar = injector.getInstance(AccountRepository.class);
-		ValidatorFactory avf =
-	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new AccountController(ar, rr,recipientRepo, companyRepo, channelController, avf.getValidator(), fetchService);
-		
-		
-		 password = "diesisteintestpasswort";
-		 login = "testlogin";
-		 email = "wurst@wurst.de";
-		 role = "admin";
-		 //TODO update to use restaurant id
-		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, null, true, true);		 
+		ValidatorFactory avf = Validation
+				.byProvider(ApacheValidationProvider.class).configure()
+				.buildValidatorFactory();
+		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
+				channelController, avf.getValidator(), facebookService);
+
+		password = "diesisteintestpasswort";
+		login = "testlogin";
+		email = "wurst@wurst.de";
+		role = "admin";
+		// TODO update to use restaurant id
+		account = ar.createAndSaveAccount(login, password, email, role,
+				rr.getAllKeys(), null, null, null, true, true);
 	}
 
 	@After
@@ -388,5 +397,63 @@ public class AccountControllerTest {
 		thrown.expect(ServiceException.class);
 		thrown.expectMessage("token");
 		ctr.confirmAccountEmail(data);
+	}
+	
+	@Test
+	public void testAuthenticateFacebook() throws Exception {
+		String uid = "100000164823174";
+		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, uid, true, true);
+		String accessToken = "test";
+		JSONObject jsonMe = new JSONObject();
+		jsonMe.put("id", uid);
+		when(facebookService.getMe(accessToken)).thenReturn(jsonMe );
+				
+		ctr.authenticateFacebook(uid, accessToken );
+	}
+	
+	@Test
+	public void testAuthenticateFacebookUnknownUID() throws Exception {
+		String uid = "100000164823174";
+		String accessToken = "test";
+		JSONObject jsonMe = new JSONObject();
+		jsonMe.put("id", uid);
+		jsonMe.put("name", "testuser");
+		when(facebookService.getMe(accessToken)).thenReturn(jsonMe );
+		
+		thrown.expect(IllegalAccessException.class);
+		ctr.authenticateFacebook(uid, accessToken );
+	}
+	
+	@Test
+	public void testAuthenticateFacebookInvalidAccessToken() throws Exception {
+		String uid = "100000164823174";
+		String accessToken = "test";
+		JSONObject jsonMe = new JSONObject();
+		jsonMe.put("id", uid);
+		jsonMe.put("name", "testuser");
+		when(facebookService.getMe(accessToken)).thenThrow(IllegalArgumentException.class);
+		
+		thrown.expect(IllegalAccessException.class);
+		ctr.authenticateFacebook(uid, accessToken );
+	}
+	
+	@Test
+	public void testAuthenticateFacebookNullAccessToken() throws Exception {
+		String uid = "100000164823174";
+		String accessToken = null;
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("accessToken");
+		ctr.authenticateFacebook(uid, accessToken );
+	}
+	
+	@Test
+	public void testAuthenticateFacebookNullUid() throws Exception {
+		String uid = null;
+		String accessToken = "test";
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("uid");
+		ctr.authenticateFacebook(uid, accessToken );
 	}
 }

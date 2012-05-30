@@ -360,11 +360,16 @@ public class AccountController {
 	 */
 	public Account authenticateFacebook(String uid, String accessToken) {
 		checkArgument( !Strings.nullToEmpty(uid).isEmpty(), "uid was null or empty");
-		checkArgument( !Strings.nullToEmpty(accessToken).isEmpty(), "uid was null or empty");
+		checkArgument( !Strings.nullToEmpty(accessToken).isEmpty(), "accessToken was null or empty");
 		
 		Account account = null;
-		
-		JSONObject jsonMe = facebookService.getMe(accessToken); 
+		// Return the user object from the facebook api, to which the access token belongs.
+		JSONObject jsonMe;
+		try {
+			jsonMe = facebookService.getMe(accessToken);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalAccessException("invalid accessToken");
+		} 
 		String facebookUid = jsonMe.optString("id");
 		if( uid.equals( facebookUid)) {
 			logger.info("Valid access token recieved for {}", jsonMe.optString("name"));
