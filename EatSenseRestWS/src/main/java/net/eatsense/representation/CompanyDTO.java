@@ -1,11 +1,26 @@
 package net.eatsense.representation;
 
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 public class CompanyDTO {
+	@NotNull
+	@NotEmpty
 	String name;
+	@NotNull
+	@NotEmpty
 	String address;
+	@NotNull
+	@NotEmpty
 	String city;
+	@NotNull
+	@NotEmpty
 	String country;
+	@NotNull
+	@NotEmpty
 	String postcode;
+	
 	String phone;
 	
 	public String getName() {

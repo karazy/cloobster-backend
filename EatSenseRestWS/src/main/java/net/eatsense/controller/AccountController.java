@@ -284,14 +284,14 @@ public class AccountController {
 	}
 	
 	public Account registerNewAccount(RegistrationDTO accountData) {
-		checkNotNull(accountData.getLogin(), "accountData login was null");
-		checkNotNull(accountData.getEmail(), "accountData email was null");
-		checkNotNull(accountData.getPassword(), "accountData password was null");
-		checkNotNull(accountData.getCompany(), "accountData company was null");
-		checkArgument(!accountData.getLogin().isEmpty(), "accountData login was empty");
-		checkArgument(!accountData.getEmail().isEmpty(), "accountData email was empty");
-		checkArgument(!accountData.getPassword().isEmpty(), "accountData password was empty");
-		checkCompany(accountData.getCompany());
+		Set<ConstraintViolation<RegistrationDTO>> violationSet = validator.validate(accountData);
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors :\n");
+			for (ConstraintViolation<RegistrationDTO> violation : violationSet) {
+				stringBuilder.append(String.format("%s %s\n", violation.getPropertyPath(), violation.getMessage()));
+			}
+			throw new RegistrationException(stringBuilder.toString());
+		}
 		
 		if( accountRepo.getKeyByProperty("email", accountData.getEmail()) != null ) {
 			throw new RegistrationException("email already in use", "registrationErrorEmailExists");
@@ -308,6 +308,7 @@ public class AccountController {
 		company.setName(accountData.getCompany().getName());
 		company.setPhone(accountData.getCompany().getPhone());
 		company.setPostcode(accountData.getCompany().getPostcode());
+		
 		Key<Company> companyKey = companyRepo.saveOrUpdate(company);
 		
 		Account account = accountRepo.createAndSaveAccount(accountData.getLogin(),
@@ -316,17 +317,6 @@ public class AccountController {
 				accountData.getFacebookUID(), false, false);
 
 		return account;
-	}
-	
-	private boolean checkCompany(CompanyDTO company) {
-		checkNotNull(company, "company was null");
-		checkNotNull(company.getName(), "company name was null");
-		checkNotNull(company.getPhone(), "company phone was null");
-		checkNotNull(company.getAddress(), "company address was null");
-		checkNotNull(company.getCity(), "company address was null");
-		checkNotNull(company.getCountry(), "company country was null");
-		checkNotNull(company.getPostcode(), "company postcode was null");
-		return true;
 	}
 	
 	/**
