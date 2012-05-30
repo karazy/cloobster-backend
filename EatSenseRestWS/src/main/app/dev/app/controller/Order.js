@@ -30,7 +30,9 @@
 			//the orderlist shown in lounge in myorders tab lounge tab #myorderstab
 			myorderlist: 'myorderstab list',
 			myordersview: 'myorderstab',
-			myordersTabBt: 'lounge button[title='+Karazy.i18n.translate('myOrdersTabBt')+']',
+			// myordersTabBt: 'lounge button[title='+Karazy.i18n.translate('myOrdersTabBt')+']',
+			//TODO find a better way to select tab
+			myordersTabBt: 'lounge #ext-tab-3',
 			loungeTabBar: '#loungeTabBar',
 			paymentButton: 'myorderstab button[action="pay"]',
 			leaveButton: 'myorderstab button[action="leave"]',
@@ -140,7 +142,7 @@
 				itemId: 'yes',
 				ui: 'action'
 			}, {
-				text:  Karazy.i18n.translate('yes'),
+				text:  Karazy.i18n.translate('no'),
 				itemId: 'no',
 				ui: 'action'
 			}],
@@ -491,8 +493,20 @@
 
 		if(clear) {
 			button.setBadgeText("");
+			button.setText(Karazy.i18n.translate('leave'));
+			// button.setIconCls('leave');
 		} else {
-			badgeText = (!orderStore) ? '' : (orderStore.getCount() > 0) ? orderStore.getCount() : '';
+
+			if(orderStore && orderStore.getCount() > 0) {
+				badgeText = orderStore.getCount();
+				button.setText(Karazy.i18n.translate('myOrdersTabBt'));
+				// button.setIconCls('cash');
+			} else {
+				badgeText = '';
+				button.setText(Karazy.i18n.translate('leave'));
+				// button.setIconCls('leave');
+			}
+			//badgeText = (!orderStore) ? '' : (orderStore.getCount() > 0) ? orderStore.getCount() : '';
 			button.setBadgeText(badgeText);
 		}
 	},
@@ -736,7 +750,7 @@
 	 */
 	toggleMyordersButtons: function() {
 		var payButton = this.getPaymentButton(),
-			leaveButton = this.getLeaveButton(),
+			// leaveButton = this.getLeaveButton(),
 			myordersStore = Ext.StoreManager.lookup('orderStore');
 
 		(myordersStore.getCount() > 0) ? payButton.show() : payButton.hide();

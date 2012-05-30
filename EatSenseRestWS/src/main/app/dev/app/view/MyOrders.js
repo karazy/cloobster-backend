@@ -6,7 +6,7 @@ Ext.define('EatSense.view.MyOrders', {
 			type: 'fit'
 		},
 		iconCls : 'cash',
-		title: Karazy.i18n.translate('myOrdersTabBt'),
+		title: Karazy.i18n.translate('myOrdersTabLeaveBt'),
 		iconMask : true,
 		itemId : 'myorderstab',
 		cls: 'myorders-panel',
@@ -36,7 +36,6 @@ Ext.define('EatSense.view.MyOrders', {
 		},
 		{
 			xtype: 'list',
-			// id: 'myorderlist',
 			store: 'orderStore',
 			ui: 'round',
 			allowDeselect: true,

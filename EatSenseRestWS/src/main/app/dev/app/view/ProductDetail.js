@@ -10,7 +10,24 @@ Ext.define('EatSense.view.ProductDetail', {
 		align : 'stretch',
 	},	
 	config : {
-    	scrollable : 'vertical',
+		scrollable : {
+		  direction: 'vertical',
+		  directionLock: true,
+		  momentumEasing:  {
+		     momentum: {
+		       acceleration: 30,
+		       friction: 0.5
+		     },
+		     bounce: {
+		        acceleration: 0.0001,
+		        springTension: 0.9999,
+		     },
+		     minVelocity: 5
+		  },
+		  outOfBoundRestrictFactor: 0	
+		 },
+    	// scrollable : 'vertical',
+    	// fullscreen: true,
     	modal: true,
 		top: '5%',
 		left: '3%',
@@ -33,10 +50,9 @@ Ext.define('EatSense.view.ProductDetail', {
 				xtype : 'label',
 				itemId : 'prodDetailLabel',
 				cls: 'productDetail',
-				tpl: new Ext.XTemplate(
-				 	'{product.data.longDesc}'
-				)
-			}, {
+				tpl: '{product.data.longDesc}'
+			}, 
+			{
 				xtype : 'panel',
 				docked: 'right',
 				width: 110,
@@ -53,13 +69,11 @@ Ext.define('EatSense.view.ProductDetail', {
 					itemId : 'productAmountSpinner',
 					labelCls: 'productdetail-spinner-label',
 					inputCls: 'productdetail-spinner-input',
-					// cls: 'productdetail-spinner',
 					increment : 1,
 					value : 1,
 					minValue : '1',
 					maxValue : '10',					
-					cycle : true,
-					// width: 120
+					cycle : true
 				},
 				{
 					xtype: 'label',
@@ -76,7 +90,8 @@ Ext.define('EatSense.view.ProductDetail', {
 					)
 				} 
 				]
-			}]
+			}
+			]
 		}, 
 		{
 			xtype : 'formpanel',

@@ -1,0 +1,485 @@
+﻿{
+    "name": "Kai's Lounge",
+    "description": "",
+    "payments": [
+        {
+            "name": "Naturalien",
+            "order": 2
+        },
+        {
+            "name": "Schläge",
+            "order": 1
+        },
+        {
+            "name": "Liebe",
+            "order": 3
+        },
+        {
+            "name": "ÜBERHAUPT NICHT!!!",
+            "order": 4
+        }
+    ],
+    "spots": [
+        {
+            "name": "Bar",
+            "barcode": "kk001",
+            "groupTag": null
+        },
+        {
+            "name": "Tisch",
+            "barcode": "kk002",
+            "groupTag": null
+        },
+        {
+            "name": "Sofatisch",
+            "barcode": "kk003",
+            "groupTag": null
+        },
+        {
+            "name": "Balkontisch",
+            "barcode": "kk004",
+            "groupTag": null
+        }
+    ],
+    "menus": [
+            {
+            "description": null,
+            "title": "Andere Getränke",
+            "order": 15,
+            "products": [
+                {
+                    "name": "Mineralwasser",
+                    "longDesc": "",
+                    "shortDesc": "0,25l",
+                    "price": 1.6,
+                    "order": 1
+                },
+                {
+                    "name": "Coca-Cola",
+                    "longDesc": "",
+                    "shortDesc": "0,33l",
+                    "price": 1.8,
+                    "order": 3
+                },
+                {
+                    "name": "Bier",
+                    "longDesc": "",
+                    "shortDesc": "0,33l",
+                    "price": 1.8,
+                    "order": 4
+                }
+             ]
+        },
+        {
+            "description": "100% mit Liebe selbstgemachte Mischungen.",
+            "title": "Gib mir Cocktails!",
+            "order": 10,
+            "products": [
+                {
+                    "name": "Cuba Libre",
+                    "longDesc": "Extra Libre aus Cuba.",
+                    "shortDesc": "Extra Libre aus Cuba.",
+                    "price": 6.0,
+                    "order": 15,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe EXTREME!!!",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe gemäßigt",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Wtf, wo sind wir hier?'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Cool Comfort",
+                    "longDesc": "Mit Komfort, aber auch cool.",
+                    "shortDesc": "Mit Komfort, aber auch cool.",
+                    "price": 6.0,
+                    "order": 10,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe EXTREME!!!",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe gemäßigt",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Wtf, wo sind wir hier?'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Kaipirinha",
+                    "longDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
+                    "shortDesc": "Nicht zu verwechseln mit dem Kai-Piranha.",
+                    "price": 6.0,
+                    "order": 25,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe EXTREME!!!",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe gemäßigt",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Wtf, wo sind wir hier?'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Doch ein Piranha bitte.'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Mojito",
+                    "longDesc": "Mit (möglicherweise) frischer Minze!",
+                    "shortDesc": "Mit (möglicherweise) frischer Minze!",
+                    "price": 6.0,
+                    "order": 50,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe EXTREME!!!",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe gemäßigt",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Wtf, wo sind wir hier?'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Hugo",
+                    "longDesc": "Nicht das Waisenkind aus dem Film ...",
+                    "shortDesc": "Nicht das Waisenkind aus dem Film ...",
+                    "price": 6.0,
+                    "order": 40,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'So wie Annika ihn hatte.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Eigentlich Prosecco'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Mocca Flip",
+                    "longDesc": "Bei dem Flip sind wir uns nicht so sicher...",
+                    "shortDesc": "Bei dem Flip sind wir uns nicht so sicher...",
+                    "price": 6.0,
+                    "order": 40,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'EXTREME!!!'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'MEHR FLIP!!!'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Long Island Ice Tea",
+                    "longDesc": "Jetzt noch länger und inseliger...",
+                    "shortDesc": "Jetzt noch länger und inseliger...",
+                    "price": 6.0,
+                    "order": 30,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'EXTREME!!!'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Loooooooooooooong Island...'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Gin Tonic",
+                    "longDesc": "'Witzige Beschreibung hier einsetzen.'",
+                    "shortDesc": "'Witzige Beschreibung hier einsetzen.'",
+                    "price": 6.0,
+                    "order": 20,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'EXTREME!!!'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Tonic Water'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "White(Caucasian) Russian",
+                    "longDesc": "'Witzige Beschreibung hier einsetzen.'",
+                    "shortDesc": "Der Dude will es so.",
+                    "price": 6.0,
+                    "order": 110,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'EXTREME!!!'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Little Virgin Snow White'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Zombie",
+                    "longDesc": "Random joke about zombies here...",
+                    "shortDesc": "Random joke about zombies here...",
+                    "price": 6.0,
+                    "order": 120,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Stufe 'ZOMBIE APOKALYPSE'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Gemäßigt, ich muss noch laufen.'",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Stufe 'Shaun of the Dead'",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Alkoholmenge",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "",
+            "title": "Persönliche Dienstleistung",
+            "order": 100,
+            "products": [
+                {
+                    "name": "Mit Kai in die VIP Lounge.",
+                    "longDesc": "Für eine Stunde das besondere Erlebnis!",
+                    "shortDesc": "Für eine Stunde das besondere Erlebnis!",
+                    "price": 160.0,
+                    "order": 1
+                },
+                {
+                    "name": "Übernachtung",
+                    "longDesc": "Jetzt neu: mit und ohne anfassen!",
+                    "shortDesc": "Jetzt neu: mit und ohne anfassen!",
+                    "price": 40,
+                    "order": 1,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "mit Belästigung",
+                                    "id": null,
+                                    "price": 10
+                                },
+                                {
+                                    "name": "'Ich will doch nur schlafen.'",
+                                    "id": null,
+                                    "price": 40
+                                },
+                                {
+                                    "name": "Gruppenwärme",
+                                    "id": null,
+                                    "price": 20
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Kuschelfaktor",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

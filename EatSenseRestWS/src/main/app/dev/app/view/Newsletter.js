@@ -24,6 +24,7 @@ Ext.define('EatSense.view.Newsletter', {
 			xtype: 'emailfield',
 			label: Karazy.i18n.translate('newsletterEmail'),
 			name:'email',
+			labelWidth: '40%',
 			cls: 'general-textfield',
 			labelCls: 'general-field-label-horizontal',
 			margin: '5 0 5 0'
