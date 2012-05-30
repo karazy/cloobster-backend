@@ -21,7 +21,7 @@ Ext.define('EatSense.view.MenuOverview', {
 				select : function(dv, index, target, record, e, eOpts) {					
 					Ext.defer((function() {
 						dv.deselectAll();
-					}), 500, this);					
+					}), 1000, this);					
 				}
 			}
 			
