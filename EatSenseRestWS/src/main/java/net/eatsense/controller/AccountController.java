@@ -32,6 +32,7 @@ import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.representatione.EmailConfirmationDTO;
+import net.eatsense.service.FacebookService;
 import net.eatsense.util.IdHelper;
 
 import org.codehaus.jettison.json.JSONException;
@@ -65,12 +66,12 @@ public class AccountController {
 	private NewsletterRecipientRepository recipientRepo;
 	private Validator validator;
 	private CompanyRepository companyRepo;
-	private URLFetchService urlFetchService;
+	private FacebookService facebookService;
 	
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
-			ChannelController cctrl, Validator validator, URLFetchService urlFetchService) {
+			ChannelController cctrl, Validator validator, FacebookService facebookService) {
 		super();
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
@@ -78,7 +79,7 @@ public class AccountController {
 		this.businessRepo = businessRepository;
 		this.accountRepo = accountRepo;
 		this.companyRepo = companyRepo;
-		this.urlFetchService = urlFetchService;
+		this.facebookService = facebookService;
 	}
 	
 	
@@ -349,44 +350,34 @@ public class AccountController {
 		}
 	}
 	
+	/**
+	 * Retrieve the account associated with the given facebook UID and access token.
+	 * Only if both belong to the same account, we return the account object.
+	 * 
+	 * @param uid
+	 * @param accessToken
+	 * @return {@link Account} saved with the given uid
+	 */
 	public Account authenticateFacebook(String uid, String accessToken) {
 		checkArgument( !Strings.nullToEmpty(uid).isEmpty(), "uid was null or empty");
 		checkArgument( !Strings.nullToEmpty(accessToken).isEmpty(), "uid was null or empty");
 		
 		Account account = null;
 		
-		try {
-			HTTPResponse response = urlFetchService.fetch( new HTTPRequest(new URL("https://graph.facebook.com/me?access_token=" + accessToken), HTTPMethod.GET, FetchOptions.Builder.validateCertificate()));
-			if(response.getResponseCode() == 200) {
-				String responseText = new String (response.getContent(), "UTF-8");
-				JSONObject jsonMe;
-				try {
-					jsonMe = new JSONObject(responseText);
-				} catch (JSONException e) {
-					throw new ServiceException("error parsing facebook response", e);
-				}
-				String facebookUid = jsonMe.optString("id");
-				if( uid.equals( facebookUid)) {
-					logger.info("Valid access token recieved for {}", jsonMe.optString("name"));
-					account = accountRepo.getByProperty( "facebookUid", facebookUid);
-					if(account == null) {
-						throw new IllegalAccessException("unregistered facebook user " + jsonMe.optString("name"));
-					}
-					else
-						return account;
-				}
+		JSONObject jsonMe = facebookService.getMe(accessToken); 
+		String facebookUid = jsonMe.optString("id");
+		if( uid.equals( facebookUid)) {
+			logger.info("Valid access token recieved for {}", jsonMe.optString("name"));
+			account = accountRepo.getByProperty( "facebookUid", facebookUid);
+			if(account == null) {
+				throw new IllegalAccessException("unregistered facebook user " + jsonMe.optString("name"));
 			}
-			else {
-				throw new ServiceException("invalid token or cant connect to facebook server");
-			}
-			
-		} catch (MalformedURLException e) {
-			throw new ServiceException("error in facebook api url call");
-		} catch (IOException e) {
-			throw new ServiceException("error contacting facebook server");
+			else
+				return account;
 		}
-		
-		return account ;
+		else {
+			throw new IllegalAccessException("facebook uid not belonging to access token, token owner: " + jsonMe.optString("name"));
+		}
 	}
 	
 	/**
