@@ -60,7 +60,6 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public EmailConfirmationDTO confirmEmail(EmailConfirmationDTO emailData) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		return accountCtr.confirmAccountEmail(account, emailData);
+		return accountCtr.confirmAccountEmail(emailData);
 	}
 }

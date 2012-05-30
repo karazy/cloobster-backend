@@ -19,12 +19,14 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
+import net.eatsense.representatione.EmailConfirmationDTO;
 
 import org.apache.bval.guice.ValidationModule;
 import org.apache.bval.jsr303.ApacheValidationProvider;
@@ -68,6 +70,7 @@ public class AccountControllerTest {
 	
 	private Account account;
 	
+	@Mock
 	private AccountRepository ar;
 	
 	@Mock
@@ -99,8 +102,7 @@ public class AccountControllerTest {
 		 email = "wurst@wurst.de";
 		 role = "admin";
 		 //TODO update to use restaurant id
-		account = ar.createAndSaveAccount( login, password,
-				email, role, rr.getAllKeys(), true, true);		 
+		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, null, true, true);		 
 	}
 
 	@After
@@ -356,5 +358,35 @@ public class AccountControllerTest {
 	public void testRegisterNewAccount() throws Exception {
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail(email);
+	}
+	
+	@Test
+	public void testConfirmAccountEmail() throws Exception {
+		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
+		EmailConfirmationDTO data = new EmailConfirmationDTO();
+		String confirmationToken = account.getEmailConfirmationHash();
+		data.setConfirmationToken(confirmationToken);
+		
+		ctr.confirmAccountEmail(data);
+	}
+	
+	@Test
+	public void testConfirmAccountEmailNullConfirmationData() throws Exception {
+		EmailConfirmationDTO data = null;
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("confirmationData");
+		ctr.confirmAccountEmail(data);
+	}
+	
+	@Test
+	public void testConfirmAccountEmailInvalidToken() throws Exception {
+		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
+		EmailConfirmationDTO data = new EmailConfirmationDTO();
+		String confirmationToken = account.getEmailConfirmationHash();
+		data.setConfirmationToken("not"+confirmationToken);
+		
+		thrown.expect(ServiceException.class);
+		thrown.expectMessage("token");
+		ctr.confirmAccountEmail(data);
 	}
 }

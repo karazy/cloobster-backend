@@ -299,7 +299,6 @@ public class AccountController {
 			throw new RegistrationException("login already in use", "registrationErrorLoginExists");
 		}
 		
-		Account account = new Account();
 		Company company = new Company();
 		
 		company.setAddress(accountData.getCompany().getAddress());
@@ -310,23 +309,11 @@ public class AccountController {
 		company.setPostcode(accountData.getCompany().getPostcode());
 		Key<Company> companyKey = companyRepo.saveOrUpdate(company);
 		
-		account.setActive(false);
-		account.setCompany(companyKey);
-		account.setCreationDate(new Date());
-		account.setEmail(accountData.getEmail());
-		account.setEmailConfirmationHash( IdHelper.generateId() );
-		account.setEmailConfirmed(false);
-		account.setLogin(accountData.getLogin());
-		account.setName(accountData.getName());
-		account.setPhone(accountData.getPhone());
-		account.setRole(Role.COMPANYOWNER);
-		account.setFacebookUid(accountData.getFacebookUID());
-		account.setHashedPassword(BCrypt.hashpw(accountData.getPassword(), BCrypt.gensalt()));
-		
-		accountRepo.saveOrUpdate(account);
-		
-		
-		
+		Account account = accountRepo.createAndSaveAccount(accountData.getLogin(),
+				accountData.getPassword(), accountData.getEmail(),
+				Role.COMPANYOWNER, null, companyKey, accountData.getPhone(),
+				accountData.getFacebookUID(), false, false);
+
 		return account;
 	}
 	
@@ -405,22 +392,23 @@ public class AccountController {
 	/**
 	 * Confirms an account with the generated token, which was send to the user during registration.
 	 * 
-	 * @param account
 	 * @param confirmationData
 	 * @return
 	 */
-	public EmailConfirmationDTO confirmAccountEmail(Account account, EmailConfirmationDTO confirmationData) {
-		checkNotNull(account, "account was null");
+	public EmailConfirmationDTO confirmAccountEmail(EmailConfirmationDTO confirmationData) {
 		checkNotNull(confirmationData, "confirmationData was null");
 		checkArgument(!Strings.nullToEmpty(confirmationData.getConfirmationToken()).isEmpty(), "confirmationToken was null or empty");
 		
-		if(!account.isEmailConfirmed() && confirmationData.getConfirmationToken().equals(account.getEmailConfirmationHash())) {
+		Account account = accountRepo.getByProperty("emailConfirmationHash", confirmationData.getConfirmationToken());
+		if(account == null)
+			throw new ServiceException("Unknown confirmation token");
+		
+		if(!account.isEmailConfirmed() ) {
 			account.setEmailConfirmed(true);
+			// Clear the token from the account, so that we get lesser conflicts in the future.
 			account.setEmailConfirmationHash(null);
 			accountRepo.saveOrUpdate(account);
 		}
-		else
-			throw new ServiceException("account already confirmed or invalid token");
 		
 		confirmationData.setLogin(account.getLogin());
 		confirmationData.setEmailConfirmed(true);

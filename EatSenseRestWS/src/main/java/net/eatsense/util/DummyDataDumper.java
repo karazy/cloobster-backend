@@ -51,12 +51,7 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		Account account = ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), true, true);
-	
-		account = ar.createAndSaveAccount("nils.weiher", "karazy123", "nils.weiher@gmail.com", Role.COMPANYOWNER, null , true, true);
-		account.setFacebookUid("100000164823174");
-		
-		ar.saveOrUpdate(account);
+		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), null, null, null, true, true);
 	}	
 
 	public void generateDummyBusinesses() {

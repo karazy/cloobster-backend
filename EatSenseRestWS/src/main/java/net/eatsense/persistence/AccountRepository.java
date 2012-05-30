@@ -5,6 +5,8 @@ import java.util.List;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Company;
+import net.eatsense.util.IdHelper;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -34,15 +36,21 @@ public class AccountRepository extends GenericRepository<Account> {
 	 * @param active 
 	 * @return
 	 */
-	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Business>> businessKeys, boolean emailConfirmed, boolean active) {
+	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Business>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active) {
 		Account account = new Account();
+		account.setActive(active);
+		account.setCreationDate(new Date());
 		account.setLogin(login);
 		account.setEmail(email);
 		account.setRole(role);
 		account.setBusinesses(businessKeys);
+		if(emailConfirmed == false) {
+			account.setEmailConfirmationHash(IdHelper.generateId());
+		}
+		account.setCompany(companyKey);
+		account.setPhone(phone);
+		account.setFacebookUid(facebookUID);
 		account.setEmailConfirmed(emailConfirmed);
-		account.setActive(active);
-		account.setCreationDate(new Date());		
 		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
 		
 		if(saveOrUpdate(account) == null)
