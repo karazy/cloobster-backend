@@ -44,6 +44,13 @@
 
 	<profiles>
 		<profile>
+			<id>clean</id>
+			<build>
+			</build>
+		</profile>
+			
+	
+		<profile>
 			<id>dev</id>
 			<build>
 				<plugins>
@@ -467,7 +474,7 @@
 				</executions>
 			</plugin>
 
-			<plugin>
+<!-- 			<plugin>
 				<groupId>com.google.code.maven-replacer-plugin</groupId>
 				<artifactId>maven-replacer-plugin</artifactId>
 				<version>1.4.0</version>
@@ -492,7 +499,7 @@
 						</replacement>
 					</replacements>
 				</configuration>
-			</plugin>
+			</plugin> -->
 
 
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
