@@ -293,6 +293,7 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
 			<version>${jetty.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject</groupId>
@@ -334,11 +335,12 @@
 			<version>${jersey.version}</version>
 		</dependency>
 		<!-- Ant run plugin for special purposes -->
-		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-antrun-plugin</artifactId>
-			<version>${antrun.version}</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 			<artifactId>maven-antrun-plugin</artifactId> -->
+<!-- 			<version>${antrun.version}</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
 
 
 		<!-- Unit tests -->
