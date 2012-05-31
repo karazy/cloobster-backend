@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.eatsense.auth.Role;
-import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
