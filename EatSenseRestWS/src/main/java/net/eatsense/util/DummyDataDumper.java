@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.eatsense.auth.Role;
-import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -18,7 +17,6 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RestaurantRepositoryTest;
 import net.eatsense.persistence.SpotRepository;
 
 import org.slf4j.Logger;
