@@ -68,6 +68,7 @@ Ext.define('EatSense.controller.Menu', {
     				} else {
     					androidCtr.setAndroidBackHandler(null);
     				}
+
     				return status;
     			}
     		},
@@ -115,7 +116,8 @@ Ext.define('EatSense.controller.Menu', {
     		checkInCtr = this.getApplication().getController('CheckIn'),
     		businessId = Ext.String.trim(checkInCtr.getActiveCheckIn().get('businessId')),
     		menuStore = Ext.StoreManager.lookup('menuStore');
-		 
+		
+
 		if(businessId.toString().length != 0) {
 			menuStore.load({
 				scope   : this,
@@ -346,6 +348,7 @@ Ext.define('EatSense.controller.Menu', {
 		var detail = this.getProductdetail();		
 		
 		detail.hide();
+		detail.destroy();
 		this.getApplication().getController('Android').removeLastBackHandler();
 	},
 	/**
