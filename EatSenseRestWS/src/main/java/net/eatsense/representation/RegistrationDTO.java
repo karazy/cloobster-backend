@@ -19,7 +19,7 @@ public class RegistrationDTO {
 	 */
 	@NotNull
 	@Size(min = 4, max = 30)
-	@Pattern(regexp = "^[a-z0-9_\\.-]{4,30}$")
+	@Pattern(regexp = "^[a-z0-9_\\.-]+$")
 	String login;
 	
 	@NotNull

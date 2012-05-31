@@ -47,6 +47,7 @@ import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -286,9 +287,9 @@ public class AccountController {
 	public Account registerNewAccount(RegistrationDTO accountData) {
 		Set<ConstraintViolation<RegistrationDTO>> violationSet = validator.validate(accountData);
 		if(!violationSet.isEmpty()) {
-			StringBuilder stringBuilder = new StringBuilder("validation errors :\n");
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
 			for (ConstraintViolation<RegistrationDTO> violation : violationSet) {
-				stringBuilder.append(String.format("%s %s\n", violation.getPropertyPath(), violation.getMessage()));
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
 			}
 			throw new RegistrationException(stringBuilder.toString());
 		}

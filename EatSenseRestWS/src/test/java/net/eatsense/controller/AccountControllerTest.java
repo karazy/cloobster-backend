@@ -20,11 +20,13 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.RegistrationException;
 import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
+import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.representatione.EmailConfirmationDTO;
@@ -364,9 +366,199 @@ public class AccountControllerTest {
 	}
 	
 	@Test
+	public void testRegisterNewAccountLoginTooLong() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("testaverylongloginnamewhichislongerthan30chars");
+		data.setName("Test Person");
+		data.setPassword("test!1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("login");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
+	public void testRegisterNewAccountLoginTooShort() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("tes");
+		data.setName("Test Person");
+		data.setPassword("test!1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("login");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
+	public void testRegisterNewAccountInvalidLogin3() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("test _user-1");
+		data.setName("Test Person");
+		data.setPassword("test!1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("login");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	
+	@Test
+	public void testRegisterNewAccountInvalidLogin2() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("test_user-1$");
+		data.setName("Test Person");
+		data.setPassword("test!1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("login");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
+	public void testRegisterNewAccountInvalidLogin() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("TEST_user-1");
+		data.setName("Test Person");
+		data.setPassword("test!1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("login");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
+	public void testRegisterNewAccountPasswordTooShort() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("testuser1");
+		data.setName("Test Person");
+		data.setPassword("abc");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("password");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
+	public void testRegisterNewAccountInvalidPassword2() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("testuser1");
+		data.setName("Test Person");
+		data.setPassword("test1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("password");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
+	public void testRegisterNewAccountInvalidPassword() throws Exception {
+		RegistrationDTO data = new RegistrationDTO();
+		data.setEmail("test@test.de");
+		data.setLogin("testuser1");
+		data.setName("Test Person");
+		data.setPassword("test");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		thrown.expect(RegistrationException.class);
+		thrown.expectMessage("password");
+		
+		ctr.registerNewAccount(data);
+	}
+	
+	@Test
 	public void testRegisterNewAccount() throws Exception {
 		RegistrationDTO data = new RegistrationDTO();
-		data.setEmail(email);
+		data.setEmail("test@test.de");
+		data.setLogin("testuser1");
+		data.setName("Test Person");
+		data.setPassword("test!1");
+		CompanyDTO company = new CompanyDTO();
+		company.setName("Test Company");
+		company.setAddress("Street 1");
+		company.setCity("City");
+		company.setCountry("Country");
+		company.setPostcode("12345");
+		
+		data.setCompany(company);
+		
+		ctr.registerNewAccount(data);
 	}
 	
 	@Test
