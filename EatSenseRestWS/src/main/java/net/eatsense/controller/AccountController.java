@@ -284,6 +284,12 @@ public class AccountController {
 		return recipient;
 	}
 	
+	/**
+	 * Create and save an inactive account if all data was validated. 
+	 * 
+	 * @param accountData
+	 * @return
+	 */
 	public Account registerNewAccount(RegistrationDTO accountData) {
 		Set<ConstraintViolation<RegistrationDTO>> violationSet = validator.validate(accountData);
 		if(!violationSet.isEmpty()) {
