@@ -1,4 +1,8 @@
-Hallo und danke für die Registrierung bei Cloobster,
+Hallo {name},
+
+danke für die Registrierung bei Cloobster.
 
 Dies ist eine automatische Nachricht. Um die Registrierung zu bestätigen, folgen Sie bitte diesem Link:
 {confirmationurl}
+
+Dein Cloobster Team.

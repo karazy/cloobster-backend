@@ -318,8 +318,8 @@ public class AccountController {
 		
 		Key<Company> companyKey = companyRepo.saveOrUpdate(company);
 		
-		Account account = accountRepo.createAndSaveAccount(accountData.getLogin(),
-				accountData.getPassword(), accountData.getEmail(),
+		Account account = accountRepo.createAndSaveAccount(accountData.getName(), 
+				accountData.getLogin(),	accountData.getPassword(), accountData.getEmail(),
 				Role.COMPANYOWNER, null, companyKey, accountData.getPhone(),
 				accountData.getFacebookUID(), false, false);
 

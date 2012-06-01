@@ -26,7 +26,8 @@ public class AccountRepository extends GenericRepository<Account> {
 	
 	/**
 	 * Create and save the account in the datastore. password is encrypted as bcrypt hash.
-	 * 
+	 *
+	 * @param name
 	 * @param login
 	 * @param password
 	 * @param email
@@ -34,12 +35,13 @@ public class AccountRepository extends GenericRepository<Account> {
 	 * @param businessKeys
 	 * @param emailConfirmed 
 	 * @param active 
-	 * @return
+	 * @return new Account entity
 	 */
-	public Account createAndSaveAccount(String login, String password, String email, String role, List<Key<Business>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active) {
+	public Account createAndSaveAccount( String name, String login, String password, String email, String role, List<Key<Business>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active) {
 		Account account = new Account();
 		account.setActive(active);
 		account.setCreationDate(new Date());
+		account.setName(name);
 		account.setLogin(login);
 		account.setEmail(email);
 		account.setRole(role);

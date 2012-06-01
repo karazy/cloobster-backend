@@ -64,10 +64,11 @@ public class MailController {
 		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
 		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
-		mail.setSubject("Cloobster service account confirmation.");
+		mail.setSubject("Cloobster account confirmation.");
 		
 		String confirmationText = readEmailConfirmationTextTemplate();
 		confirmationText = confirmationText.replaceAll("\\{confirmationurl\\}", confirmationUri.toString());
+		confirmationText = confirmationText.replaceAll("\\{name\\}", account.getName());
 		logger.info("welcomeText: {}", confirmationText);
 		mail.setText(confirmationText);
 		
