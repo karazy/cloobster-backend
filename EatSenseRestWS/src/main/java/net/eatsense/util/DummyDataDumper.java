@@ -50,7 +50,7 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), null, null, null, true, true);
+		ar.createAndSaveAccount( "Admin User", "admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), null, null, null, true, true);
 	}	
 
 	public void generateDummyBusinesses() {

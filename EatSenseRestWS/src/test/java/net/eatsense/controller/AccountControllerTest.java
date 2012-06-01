@@ -16,8 +16,10 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.RegistrationException;
@@ -41,10 +43,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -112,7 +116,7 @@ public class AccountControllerTest {
 		email = "wurst@wurst.de";
 		role = "admin";
 		// TODO update to use restaurant id
-		account = ar.createAndSaveAccount(login, password, email, role,
+		account = ar.createAndSaveAccount("admin",login, password, email, role,
 				rr.getAllKeys(), null, null, null, true, true);
 	}
 
@@ -558,12 +562,34 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		ctr.registerNewAccount(data);
+		account = ctr.registerNewAccount(data);
+		assertThat(account.getEmail(), is(data.getEmail()));
+		assertThat(account.getLogin(), is(data.getLogin()));
+		assertThat(account.getName(), is(data.getName()));
+		assertThat(BCrypt.checkpw(data.getPassword(), account.getHashedPassword()), is(true));
+		assertThat(account.getCreationDate(), notNullValue());
+		assertThat(account.isActive(), is(false));
+		assertThat(account.getEmailConfirmationHash(), notNullValue());
+		assertThat(account.isEmailConfirmed(), is(false));
+		assertThat(account.getBusinesses(), nullValue());
+		assertThat(account.getRole(), is(Role.COMPANYOWNER));
+		assertThat(account.getId(), notNullValue());
+		assertThat(account.getPhone(), is(data.getPhone()));
+		ArgumentCaptor<Company> companyArg = ArgumentCaptor.forClass(Company.class);
+		verify(companyRepo).saveOrUpdate(companyArg.capture());
+		Company savedCompany = companyArg.getValue();
+		
+		assertThat(savedCompany.getName(), is(company.getName()));
+		assertThat(savedCompany.getAddress(), is(company.getAddress()));
+		assertThat(savedCompany.getCity(), is(company.getCity()));
+		assertThat(savedCompany.getCountry(), is(company.getCountry()));
+		assertThat(savedCompany.getPostcode(), is(company.getPostcode()));
+		assertThat(savedCompany.getPhone(), is(company.getPhone()));
 	}
 	
 	@Test
 	public void testConfirmAccountEmail() throws Exception {
-		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
+		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
 		EmailConfirmationDTO data = new EmailConfirmationDTO();
 		String confirmationToken = account.getEmailConfirmationHash();
 		data.setConfirmationToken(confirmationToken);
@@ -581,7 +607,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testConfirmAccountEmailInvalidToken() throws Exception {
-		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
+		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
 		EmailConfirmationDTO data = new EmailConfirmationDTO();
 		String confirmationToken = account.getEmailConfirmationHash();
 		data.setConfirmationToken("not"+confirmationToken);
@@ -594,7 +620,7 @@ public class AccountControllerTest {
 	@Test
 	public void testAuthenticateFacebook() throws Exception {
 		String uid = "100000164823174";
-		account = ar.createAndSaveAccount( login, password,	email, role, rr.getAllKeys(), null, null, uid, true, true);
+		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, uid, true, true);
 		String accessToken = "test";
 		JSONObject jsonMe = new JSONObject();
 		jsonMe.put("id", uid);
