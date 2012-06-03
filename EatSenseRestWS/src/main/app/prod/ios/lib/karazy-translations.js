@@ -115,7 +115,7 @@ Karazy.translations = (function() {
 		"errorMsg" : "Entschuldigung! Ein Fehler ist aufgetreten.<br/>Wir kümmern uns darum!",
 		"errorResource" : "Daten konnten nicht vom Server geladen werden.",
 		"errorPermission" : "Sitzung ist ungültig.",
-		"errorCommunication" : "Es kann keine Verbindung zum Server hergestellt werden."
+		"errorCommunication" : "Es kann keine Verbindung zum Server hergestellt werden.<br/>Bitte probiere es noch einmal."
 		}
 	}
 	
