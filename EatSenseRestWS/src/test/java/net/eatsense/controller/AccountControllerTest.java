@@ -29,9 +29,9 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.CompanyDTO;
+import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
-import net.eatsense.representatione.EmailConfirmationDTO;
 import net.eatsense.service.FacebookService;
 
 import org.apache.bval.guice.ValidationModule;

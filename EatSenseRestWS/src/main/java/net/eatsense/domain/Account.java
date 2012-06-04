@@ -42,6 +42,8 @@ public class Account extends GenericEntity {
 	@NotNull
 	Key<Company> company;
 	
+	
+	
 	private String facebookUid;
 	private String emailConfirmationHash;
 	private boolean emailConfirmed = false;

@@ -13,8 +13,8 @@ import javax.ws.rs.core.Context;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
+import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RegistrationDTO;
-import net.eatsense.representatione.EmailConfirmationDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

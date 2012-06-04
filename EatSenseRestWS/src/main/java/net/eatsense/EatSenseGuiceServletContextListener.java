@@ -20,6 +20,8 @@ import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
 
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.appengine.api.urlfetch.URLFetchService;
@@ -101,6 +103,10 @@ public class EatSenseGuiceServletContextListener extends
 					@Provides
 					public URLFetchService providesURLFetchService() {
 						return URLFetchServiceFactory.getURLFetchService();
+					}
+					@Provides
+					public BlobstoreService providesBlobStoreService() {
+						return BlobstoreServiceFactory.getBlobstoreService();
 					}
 				}, new ValidationModule());
 		// Register event listeners

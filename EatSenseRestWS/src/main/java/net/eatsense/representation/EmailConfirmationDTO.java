@@ -1,4 +1,4 @@
-package net.eatsense.representatione;
+package net.eatsense.representation;
 
 public class EmailConfirmationDTO {
 	String login;
