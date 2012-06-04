@@ -13,28 +13,13 @@
     ],
     "spots": [
         {
-            "name": "Tisch 1",
+            "name": "Tisch A",
             "barcode": "hup001",
             "groupTag": null
         },
         {
-            "name": "Tisch 2",
+            "name": "Tisch B",
             "barcode": "hup002",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 3",
-            "barcode": "hup003",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 4",
-            "barcode": "hup004",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 5",
-            "barcode": "hup005",
             "groupTag": null
         }
     ],
