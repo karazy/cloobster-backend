@@ -10,9 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
-
-import org.mortbay.jetty.MimeTypes;
 
 import com.google.inject.Inject;
 
@@ -35,10 +32,10 @@ public class UploadsResource {
 	}
 
 	@GET
-	@Path("images/url")
+	@Path("imagesurl")
 	@Produces("text/html")
 	@RolesAllowed(Role.USER)
-	String getImagesUploadUrl() {
+	public String getImagesUploadUrl() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return uploadCtrl.getUploadUrl(account, "/uploads/images/new");
 	}
@@ -48,6 +45,6 @@ public class UploadsResource {
 	@Produces("application/json")
 	public Collection<ImageUploadDTO> handleUpload( @PathParam("token") String token) {
 		
-		return uploadCtrl.parseUploadRequest(servletRequest);
+		return uploadCtrl.parseUploadRequest(token, servletRequest);
 	}
 }

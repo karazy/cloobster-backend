@@ -6,6 +6,7 @@ import java.util.List;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
+import net.eatsense.domain.embedded.UploadToken;
 import net.eatsense.util.IdHelper;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -59,5 +60,17 @@ public class AccountRepository extends GenericRepository<Account> {
 			return null;
 		
 		return account;
+	}
+	
+	/**
+	 * 
+	 *  
+	 * @return new Token valid 
+	 */
+	public UploadToken newUploadToken() {
+		UploadToken token = new UploadToken();
+		token.setToken(IdHelper.generateId());
+		token.setCreation(new Date());
+		return token;
 	}
 }

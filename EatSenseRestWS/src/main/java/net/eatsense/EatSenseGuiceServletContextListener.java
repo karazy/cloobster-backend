@@ -13,6 +13,7 @@ import net.eatsense.restws.CronResource;
 import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
+import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
 import net.eatsense.restws.customer.CheckInsResource;
@@ -24,6 +25,8 @@ import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.eventbus.EventBus;
@@ -73,9 +76,11 @@ public class EatSenseGuiceServletContextListener extends
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
 						bind(NicknameGenerator.class);
+						bind(UploadsResource.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*b/accounts(.)*",
+						serveRegex("(.)*uploads(.)*",
+								"(.)*b/accounts(.)*",
 								"(.)*admin/services(.)*",
 								"(.)*newsletter(.)*",
 								"(.)*b/businesses(.)*",
@@ -108,6 +113,11 @@ public class EatSenseGuiceServletContextListener extends
 					public BlobstoreService providesBlobStoreService() {
 						return BlobstoreServiceFactory.getBlobstoreService();
 					}
+					@Provides
+					public ImagesService providesImagesService() {
+						return ImagesServiceFactory.getImagesService();
+					}
+					
 				}, new ValidationModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);

@@ -3,9 +3,11 @@ package net.eatsense.domain;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.UploadToken;
 import org.apache.bval.constraints.Email;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -42,7 +44,8 @@ public class Account extends GenericEntity {
 	@NotNull
 	Key<Company> company;
 	
-	
+	@Embedded
+	private UploadToken uploadToken;
 	
 	private String facebookUid;
 	private String emailConfirmationHash;
@@ -175,5 +178,13 @@ public class Account extends GenericEntity {
 
 	public void setEmailConfirmationHash(String emailConfirmationHash) {
 		this.emailConfirmationHash = emailConfirmationHash;
+	}
+
+	public UploadToken getUploadToken() {
+		return uploadToken;
+	}
+
+	public void setUploadToken(UploadToken uploadToken) {
+		this.uploadToken = uploadToken;
 	}
 }

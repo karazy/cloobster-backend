@@ -484,7 +484,7 @@ public class ChannelController {
 		} catch (NumberFormatException e) {
 			timeout = 120;
 		}
-		calendar.add(Calendar.MINUTE, -timeout);			
+		calendar.add(Calendar.MINUTE, -timeout);
 		
 		Channel newChannel = Channel.fromClientId(clientId);
 		
