@@ -9,10 +9,6 @@
         {
             "name": "Bar",
             "order": 1
-        },
-        {
-            "name": "Kreditkarte",
-            "order": 3
         }
     ],
     "spots": [

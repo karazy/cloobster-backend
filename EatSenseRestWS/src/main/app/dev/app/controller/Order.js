@@ -625,7 +625,7 @@
 					text: Karazy.i18n.translate('cancel'),
 					listeners: {
 						tap: function() {
-							picker.hide();					
+							picker.destroy();					
 						}
 					}
 				},
@@ -641,7 +641,7 @@
 			});
 
 			me.getApplication().getController('Android').addBackHandler(function() {
-				picker.hide();	
+				picker.destroy();	
 			});
 									
 			Ext.Viewport.add(picker);

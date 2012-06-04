@@ -16,7 +16,7 @@ Ext.define('EatSense.view.Lounge', {
         },
 		tabBarPosition: 'bottom',
 		tabBar : {
-			itemId : 'loungeTabBar',
+			itemId : 'loungeTabBar'
 		},
 		activeItem : 0,
 		items : [ 
