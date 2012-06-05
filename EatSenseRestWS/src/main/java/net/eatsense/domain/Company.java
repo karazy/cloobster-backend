@@ -1,6 +1,11 @@
 package net.eatsense.domain;
 
-import com.google.appengine.api.blobstore.BlobKey;
+import java.util.List;
+
+import javax.persistence.Embedded;
+
+import net.eatsense.representation.ImageDTO;
+
 
 /**
  * Holds information for the company of a specific customer account.
@@ -15,8 +20,9 @@ public class Company extends GenericEntity {
 	String postcode;
 	String phone;
 	
-	private BlobKey logo;
-		
+	@Embedded
+	private List<ImageDTO> images;
+				
 	public String getName() {
 		return name;
 	}
@@ -53,10 +59,10 @@ public class Company extends GenericEntity {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public BlobKey getLogo() {
-		return logo;
+	public List<ImageDTO> getImages() {
+		return images;
 	}
-	public void setLogo(BlobKey logo) {
-		this.logo = logo;
+	public void setImages(List<ImageDTO> images) {
+		this.images = images;
 	}	
 }

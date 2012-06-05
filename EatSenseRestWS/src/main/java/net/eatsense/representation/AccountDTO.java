@@ -7,6 +7,8 @@ public class AccountDTO {
 	String role;
 	String token;
 	
+	private Long companyId;
+	
 	public String getLogin() {
 		return login;
 	}
@@ -36,5 +38,11 @@ public class AccountDTO {
 	}
 	public void setToken(String token) {
 		this.token = token;
+	}
+	public Long getCompanyId() {
+		return companyId;
+	}
+	public void setCompanyId(Long companyId) {
+		this.companyId = companyId;
 	}
 }

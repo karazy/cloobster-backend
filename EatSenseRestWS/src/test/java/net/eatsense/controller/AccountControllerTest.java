@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.appengine.api.channel.ChannelMessage;
+import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -96,6 +97,9 @@ public class AccountControllerTest {
 
 	@Mock
 	private FacebookService facebookService;
+
+	@Mock
+	private ImagesService imagesService;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -109,7 +113,7 @@ public class AccountControllerTest {
 				.byProvider(ApacheValidationProvider.class).configure()
 				.buildValidatorFactory();
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, avf.getValidator(), facebookService);
+				channelController, avf.getValidator(), facebookService, imagesService);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

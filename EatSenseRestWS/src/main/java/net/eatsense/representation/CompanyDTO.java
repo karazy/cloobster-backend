@@ -1,5 +1,8 @@
 package net.eatsense.representation;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -23,6 +26,10 @@ public class CompanyDTO {
 	
 	String phone;
 	
+	String logoBlobKey;
+	
+	private LinkedHashMap<String,ImageDTO> images;
+		
 	public String getName() {
 		return name;
 	}
@@ -58,5 +65,11 @@ public class CompanyDTO {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	public LinkedHashMap<String, ImageDTO> getImages() {
+		return images;
+	}
+	public void setImages(LinkedHashMap<String, ImageDTO> images) {
+		this.images = images;
 	}
 }
