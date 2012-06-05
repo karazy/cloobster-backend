@@ -23,6 +23,7 @@ public class CompaniesResource {
 		this.companyRepo = companyRepo;
 	}
 	
+	@Path("{id}")
 	public CompanyResource getCompanyResource(@PathParam("id") Long id) {
 		Company company;
 		try {

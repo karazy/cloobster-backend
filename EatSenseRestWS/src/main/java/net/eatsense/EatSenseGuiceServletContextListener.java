@@ -16,6 +16,8 @@ import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
+import net.eatsense.restws.business.CompaniesResource;
+import net.eatsense.restws.business.CompanyResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.util.NicknameGenerator;
 
@@ -77,9 +79,11 @@ public class EatSenseGuiceServletContextListener extends
 						bind(ServiceExceptionMapper.class);
 						bind(NicknameGenerator.class);
 						bind(UploadsResource.class);
+						bind(CompaniesResource.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*uploads(.)*",
+						serveRegex("(.)*b/companies(.)*",
+								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",
 								"(.)*admin/services(.)*",
 								"(.)*newsletter(.)*",

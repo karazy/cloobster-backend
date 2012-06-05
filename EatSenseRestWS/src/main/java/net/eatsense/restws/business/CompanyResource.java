@@ -41,5 +41,4 @@ public class CompanyResource {
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO updatedImage) {
 		return accountCtrl.updateCompanyImage(company, updatedImage);
 	}
-	
 }
