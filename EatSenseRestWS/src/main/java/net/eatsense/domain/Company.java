@@ -1,5 +1,12 @@
 package net.eatsense.domain;
 
+import com.google.appengine.api.blobstore.BlobKey;
+
+/**
+ * Holds information for the company of a specific customer account.
+ * @author Nils Weiher
+ *
+ */
 public class Company extends GenericEntity {
 	String name;
 	String address;
@@ -8,6 +15,8 @@ public class Company extends GenericEntity {
 	String postcode;
 	String phone;
 	
+	private BlobKey logo;
+		
 	public String getName() {
 		return name;
 	}
@@ -43,5 +52,11 @@ public class Company extends GenericEntity {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	public BlobKey getLogo() {
+		return logo;
+	}
+	public void setLogo(BlobKey logo) {
+		this.logo = logo;
 	}	
 }

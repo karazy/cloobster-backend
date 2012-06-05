@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.embedded.UploadToken;
-import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
@@ -25,7 +24,6 @@ import net.eatsense.representation.ImageUploadDTO;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.search.query.QueryParser.orOp_return;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
@@ -60,9 +58,9 @@ public class UploadController {
 			accountRepo.saveOrUpdate(account);
 		}
 				
-		String uploadUrl = successUrl + "/" + account.getUploadToken().getToken();
-		logger.info("new upload url: {}", uploadUrl);		
-		return blobStoreService.createUploadUrl(uploadUrl);
+		String uploadUrl = blobStoreService.createUploadUrl(successUrl + "/" + account.getUploadToken().getToken());
+		logger.info("new upload url created for {}: {}", account.getLogin(), uploadUrl);
+		return uploadUrl;
 	}
 
 	/**
@@ -70,7 +68,7 @@ public class UploadController {
 	 * 
 	 * @param token
 	 * @param request
-	 * @return
+	 * @return List of image data 
 	 */
 	public Collection<ImageUploadDTO> parseUploadRequest(String token, HttpServletRequest request) {
 		Account account = accountRepo.getByProperty("uploadToken.token", token);
