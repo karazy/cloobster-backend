@@ -29,6 +29,8 @@ public class CompanyDTO {
 	String logoBlobKey;
 	
 	private LinkedHashMap<String,ImageDTO> images;
+	private Long id;
+	
 		
 	public String getName() {
 		return name;
@@ -71,5 +73,11 @@ public class CompanyDTO {
 	}
 	public void setImages(LinkedHashMap<String, ImageDTO> images) {
 		this.images = images;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

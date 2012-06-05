@@ -471,6 +471,7 @@ public class AccountController {
 		companyDto.setAddress(company.getAddress());
 		companyDto.setCity(company.getCity());
 		companyDto.setCountry(company.getCountry());
+		companyDto.setId(company.getId());
 		
 		if(company.getImages() != null && !company.getImages().isEmpty()) {
 			LinkedHashMap<String, ImageDTO> images = new LinkedHashMap<String, ImageDTO>();
