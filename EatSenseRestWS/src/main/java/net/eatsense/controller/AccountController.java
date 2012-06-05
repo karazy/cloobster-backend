@@ -421,7 +421,7 @@ public class AccountController {
 	public ImageDTO updateCompanyImage(Company company, ImageDTO updatedImage) {
 		checkNotNull(company, "company was null");
 		checkNotNull(updatedImage, "updatedImage was null ");
-		checkArgument(Strings.isNullOrEmpty(updatedImage.getId()), "updatedImage id was null or empty");
+		checkArgument(!Strings.isNullOrEmpty(updatedImage.getId()), "updatedImage id was null or empty");
 		
 		ImageDTO image = null;
 		List<ImageDTO> images = company.getImages();
@@ -440,6 +440,7 @@ public class AccountController {
 			image = new ImageDTO();
 			image.setId(updatedImage.getId());
 		}
+		//TODO Delete old blob if there already is an existing entry.
 		// Check if the blobKey has changed.
 		if(!Strings.isNullOrEmpty(updatedImage.getBlobKey()) && !updatedImage.getBlobKey().equals(image.getBlobKey())) {
 			image.setBlobKey(updatedImage.getBlobKey());
