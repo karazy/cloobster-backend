@@ -14,12 +14,12 @@
     "spots": [
         {
             "name": "Tisch A",
-            "barcode": "hup001",
+            "barcode": "heidiundpaul001",
             "groupTag": null
         },
         {
             "name": "Tisch B",
-            "barcode": "hup002",
+            "barcode": "heidiundpaul002",
             "groupTag": null
         }
     ],
