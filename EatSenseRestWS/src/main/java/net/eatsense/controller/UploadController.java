@@ -58,7 +58,7 @@ public class UploadController {
 			account.setUploadToken(accountRepo.newUploadToken());
 			accountRepo.saveOrUpdate(account);
 		}
-				
+		
 		String uploadUrl = blobStoreService.createUploadUrl(successUrl + "/" + account.getUploadToken().getToken());
 		logger.info("new upload url created for {}: {}", account.getLogin(), uploadUrl);
 		return uploadUrl;

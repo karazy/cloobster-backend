@@ -1,9 +1,14 @@
 package net.eatsense.restws.business;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Business;
+import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.representation.BusinessDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +25,15 @@ public class BusinessResource {
 	
 	public void setBusiness(Business business) {
 		this.business = business;
+	}
+	
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	public BusinessDTO getBusiness() {
+		if(business == null)
+			throw new NotFoundException();
+		
+		return new BusinessDTO(business);
 	}
 
 	@Path("orders")

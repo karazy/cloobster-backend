@@ -171,7 +171,6 @@ public class AccountController {
 			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
-			
 	}
 	
 	/**

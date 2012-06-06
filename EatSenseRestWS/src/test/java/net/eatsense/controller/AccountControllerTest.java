@@ -48,6 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.urlfetch.URLFetchService;
@@ -100,6 +101,9 @@ public class AccountControllerTest {
 
 	@Mock
 	private ImagesService imagesService;
+
+	@Mock
+	private BlobstoreService blobstoreService;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -113,7 +117,7 @@ public class AccountControllerTest {
 				.byProvider(ApacheValidationProvider.class).configure()
 				.buildValidatorFactory();
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, avf.getValidator(), facebookService, imagesService);
+				channelController, avf.getValidator(), facebookService, imagesService, blobstoreService);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

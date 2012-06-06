@@ -1,9 +1,24 @@
 package net.eatsense.representation;
 
+import net.eatsense.domain.Business;
+
 public class BusinessDTO {
 	String name;
 	String description;
 	Long id;
+	
+	public BusinessDTO() {
+		super();
+	}
+	
+	public BusinessDTO(Business business) {
+		if(business == null)
+			return;
+		this.name = business.getName();
+		this.description = business.getDescription();
+		this.id = business.getId();
+	}
+	
 	public String getName() {
 		return name;
 	}
