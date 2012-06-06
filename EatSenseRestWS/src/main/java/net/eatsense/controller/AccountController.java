@@ -439,6 +439,7 @@ public class AccountController {
 		if( image == null ) {
 			image = new ImageDTO();
 			image.setId(updatedImage.getId());
+			company.getImages().add(image);
 		}
 		//TODO Delete old blob if there already is an existing entry.
 		// Check if the blobKey has changed.
@@ -453,7 +454,7 @@ public class AccountController {
 				// Create new serving url from the new blob key.
 				image.setUrl(imagesService.getServingUrl( new BlobKey( image.getBlobKey() ) ) );
 			}
-			
+						
 			companyRepo.saveOrUpdate(company);
 		}
 				
