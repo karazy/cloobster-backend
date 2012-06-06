@@ -3,9 +3,6 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -37,25 +34,15 @@ import net.eatsense.representation.ImageUploadDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
-import net.eatsense.util.IdHelper;
 
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.urlfetch.FetchOptions;
-import com.google.appengine.api.urlfetch.HTTPMethod;
-import com.google.appengine.api.urlfetch.HTTPRequest;
-import com.google.appengine.api.urlfetch.HTTPResponse;
-import com.google.appengine.api.urlfetch.URLFetchService;
-import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
-import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -77,11 +64,13 @@ public class AccountController {
 	private CompanyRepository companyRepo;
 	private FacebookService facebookService;
 	private final ImagesService imagesService;
+	private BlobstoreService blobstoreService;
 	
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
-			ChannelController cctrl, Validator validator, FacebookService facebookService, ImagesService imagesService) {
+			ChannelController cctrl, Validator validator, FacebookService facebookService,
+			ImagesService imagesService, BlobstoreService blobstoreService) {
 		super();
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
@@ -91,6 +80,7 @@ public class AccountController {
 		this.companyRepo = companyRepo;
 		this.facebookService = facebookService;
 		this.imagesService = imagesService;
+		this.blobstoreService = blobstoreService;
 	}
 	
 	
@@ -443,9 +433,12 @@ public class AccountController {
 			image.setId(updatedImage.getId());
 			company.getImages().add(image);
 		}
-		//TODO Delete old blob if there already is an existing entry.
+		
 		// Check if the blobKey has changed.
 		if(!Strings.isNullOrEmpty(updatedImage.getBlobKey()) && !updatedImage.getBlobKey().equals(image.getBlobKey())) {
+			if(image.getBlobKey() != null) {
+				blobstoreService.delete(new BlobKey(image.getBlobKey()));
+			}
 			image.setBlobKey(updatedImage.getBlobKey());
 			// Check if we got an image serving url supplied.
 			if(!Strings.isNullOrEmpty(updatedImage.getUrl()) && !updatedImage.getUrl().equals(image.getUrl())) {
