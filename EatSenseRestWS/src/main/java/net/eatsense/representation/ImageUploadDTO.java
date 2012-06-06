@@ -2,6 +2,7 @@ package net.eatsense.representation;
 
 public class ImageUploadDTO {
 	String blobKey;
+	// Serving url from the images service.
 	String url;
 	String name;
 	

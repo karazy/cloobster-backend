@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -56,7 +57,15 @@ public class UploadsResource {
 	@Path("images/new/{token}")
 	@Produces("application/json")
 	public Collection<ImageUploadDTO> handleUpload( @PathParam("token") String token) {
-		logger.info("upload receied for token: {}", token);
+		logger.info("uploads received for token: {}", token);
 		return uploadCtrl.parseUploadRequest(token, servletRequest);
+	}
+	
+	@DELETE
+	@Path("images/{blobKey}")
+	@RolesAllowed(Role.USER)
+	public void deleteUpload(@PathParam("blobKey") String blobKey) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		uploadCtrl.deleteUpload(account, blobKey);
 	}
 }

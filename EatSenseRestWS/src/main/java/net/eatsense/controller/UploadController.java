@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -66,9 +67,9 @@ public class UploadController {
 	/**
 	 * Callback to handle upload request of an BlobStore upload.
 	 * 
-	 * @param token
-	 * @param request
-	 * @return List of image data 
+	 * @param token - Challenge token created by {@link #getUploadUrl}, supplied as part of the URL in the callback.
+	 * @param request - Request data.
+	 * @return List of image data.
 	 */
 	public Collection<ImageUploadDTO> parseUploadRequest(String token, HttpServletRequest request) {
 		Account account = accountRepo.getByProperty("uploadToken.token", token);
@@ -83,6 +84,9 @@ public class UploadController {
 		
 		Map<String, List<BlobKey>> uploads = blobStoreService.getUploads(request);
 		List<ImageUploadDTO> images = new ArrayList<ImageUploadDTO>();
+		if(account.getImageUploads() == null) {
+			account.setImageUploads(new ArrayList<ImageUploadDTO>());
+		}
 		for (String key : uploads.keySet()) {
 			for(BlobKey blobKey : uploads.get(key)) {
 				ImageUploadDTO image = new ImageUploadDTO();
@@ -92,9 +96,36 @@ public class UploadController {
 				images.add(image);
 			}
 		}
-		
+		account.getImageUploads().addAll(images);
+				
 		return images;
 	}
+	
+	/**
+	 * Delete an unused uploaded image.
+	 * 
+	 * @param account - The account that uploaded the image.
+	 * @param blobKey - Identifying the blob that was uploaded.
+	 */
+	public void deleteUpload(Account account, String blobKey) {
+		checkNotNull(account, "account was null");
+		checkArgument(!Strings.isNullOrEmpty(blobKey), "blobKey was null or empty");
+		
+		if(account.getImageUploads() == null || account.getImageUploads().isEmpty())
+			return;
+		else {
+			for (Iterator<ImageUploadDTO> iterator = account.getImageUploads().iterator(); iterator.hasNext();) {
+				ImageUploadDTO upload = iterator.next();
+				if(upload.getBlobKey().equals(blobKey)) {
+					// Found the corresponding upload, delete the blob and the object.
+					iterator.remove();
+					blobStoreService.delete(new BlobKey(blobKey));
+					accountRepo.saveOrUpdate(account);
+				}
+			}	
+		}
+	}
+	
 	
 	/**
 	 * Check if the supplied token has expired.

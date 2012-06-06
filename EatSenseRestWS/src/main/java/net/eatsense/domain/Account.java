@@ -8,6 +8,8 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.embedded.UploadToken;
+import net.eatsense.representation.ImageUploadDTO;
+
 import org.apache.bval.constraints.Email;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -46,6 +48,8 @@ public class Account extends GenericEntity {
 	
 	@Embedded
 	private UploadToken uploadToken;
+	
+	private List<ImageUploadDTO> imageUploads;
 	
 	private String facebookUid;
 	private String emailConfirmationHash;
@@ -186,5 +190,13 @@ public class Account extends GenericEntity {
 
 	public void setUploadToken(UploadToken uploadToken) {
 		this.uploadToken = uploadToken;
+	}
+
+	public List<ImageUploadDTO> getImageUploads() {
+		return imageUploads;
+	}
+
+	public void setImageUploads(List<ImageUploadDTO> imageUploads) {
+		this.imageUploads = imageUploads;
 	}
 }
