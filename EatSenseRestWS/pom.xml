@@ -39,7 +39,12 @@
 
 		<!-- ant run plugin -->
 		<antrun.version>1.7</antrun.version>
-
+		
+		<!-- Cloobster Projects -->
+		<cloobster.app>../../cloobster_app/app</cloobster.app>
+		<cloobster.cockpit>../../cloobster_cockpit</cloobster.cockpit>
+		<cloobster.frontend>../../cloobster_frontend</cloobster.frontend>
+		
 	</properties>
 
 	<profiles>
@@ -61,7 +66,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src</directory>
+											<directory>${cloobster.frontend}/src</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -91,7 +96,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_cockpit/src</directory>
+											<directory>${cloobster.cockpit}/src</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -106,7 +111,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/dev</directory>
+											<directory>${cloobster.app}/src</directory>
 												<excludes>
 												<exclude>**/*.phone.*</exclude>
 												<exclude>**/*.iphone.*</exclude>
@@ -153,7 +158,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_cockpit/prod</directory>
+											<directory>${cloobster.cockpit}/prod</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -168,7 +173,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/prod/desktop</directory>
+											<directory>${cloobster.app}/prod/desktop</directory>
 										</resource>
 									</resources>
 								</configuration>
