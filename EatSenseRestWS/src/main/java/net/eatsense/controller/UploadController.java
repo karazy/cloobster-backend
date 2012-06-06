@@ -97,6 +97,7 @@ public class UploadController {
 			}
 		}
 		account.getImageUploads().addAll(images);
+		accountRepo.saveOrUpdate(account);
 				
 		return images;
 	}
@@ -111,8 +112,10 @@ public class UploadController {
 		checkNotNull(account, "account was null");
 		checkArgument(!Strings.isNullOrEmpty(blobKey), "blobKey was null or empty");
 		
-		if(account.getImageUploads() == null || account.getImageUploads().isEmpty())
+		if(account.getImageUploads() == null || account.getImageUploads().isEmpty()) {
+			logger.warn("Received delete for image upload, but no uploads found for account {}", account.getLogin());
 			return;
+		}
 		else {
 			for (Iterator<ImageUploadDTO> iterator = account.getImageUploads().iterator(); iterator.hasNext();) {
 				ImageUploadDTO upload = iterator.next();
