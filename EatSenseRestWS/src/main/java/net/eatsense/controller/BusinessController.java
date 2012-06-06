@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Request;
@@ -20,6 +21,7 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
@@ -265,5 +267,21 @@ public class BusinessController {
 		eventBus.post(new DeleteCustomerRequestEvent(businessRepo.getByKey(checkIn.getBusiness()), request, true));
 		
 		return requestData;
+	}
+	
+	/**
+	 * Get and transform the Business entities belonging to the supplied account.
+	 * 
+	 * @param account
+	 * @return List of businesses.
+	 */
+	public List<BusinessDTO> getBusinessDtosForAccount(Account account) {
+		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
+		if(account != null && account.getBusinesses() != null ) {
+			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
+				businessDtos.add(new BusinessDTO(business));
+			}
+		}
+		return businessDtos;
 	}
 }

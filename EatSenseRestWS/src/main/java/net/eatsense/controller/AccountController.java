@@ -210,14 +210,8 @@ public class AccountController {
 		if(account == null) {
 			return null;
 		}
-		AccountDTO accountData = new AccountDTO();
-		accountData.setLogin(account.getLogin());
-		accountData.setRole(account.getRole());
-		accountData.setEmail(account.getEmail());
-		accountData.setPasswordHash(account.getHashedPassword());
-		if( account.getCompany() != null )
-			accountData.setCompanyId(account.getCompany().getId());
-		return accountData;
+		
+		return new AccountDTO(account);
 	}
 	
 	/**

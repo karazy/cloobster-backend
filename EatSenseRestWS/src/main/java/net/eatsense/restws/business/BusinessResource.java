@@ -5,7 +5,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
-import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.representation.BusinessDTO;
