@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,7 @@ import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.ImageDTO;
+import net.eatsense.representation.ImageUploadDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
@@ -418,7 +420,7 @@ public class AccountController {
 		return confirmationData;
 	}
 	
-	public ImageDTO updateCompanyImage(Company company, ImageDTO updatedImage) {
+	public ImageDTO updateCompanyImage(Account account, Company company, ImageDTO updatedImage) {
 		checkNotNull(company, "company was null");
 		checkNotNull(updatedImage, "updatedImage was null ");
 		checkArgument(!Strings.isNullOrEmpty(updatedImage.getId()), "updatedImage id was null or empty");
@@ -454,7 +456,25 @@ public class AccountController {
 				// Create new serving url from the new blob key.
 				image.setUrl(imagesService.getServingUrl( new BlobKey( image.getBlobKey() ) ) );
 			}
-						
+			if(account.getImageUploads() == null || account.getImageUploads().isEmpty()) {
+				throw new ServiceException("No uploaded images for account "+ account.getLogin());
+			}
+			else {
+				boolean found = false;
+				for (Iterator<ImageUploadDTO> iterator = account.getImageUploads().iterator(); iterator.hasNext();) {
+					ImageUploadDTO upload = iterator.next();
+					if(upload.getBlobKey().equals(updatedImage.getBlobKey())) {
+						// Found the corresponding upload, delete the object.
+						found = true;
+						iterator.remove();
+						accountRepo.saveOrUpdate(account);
+					}
+				}
+				if(!found) {
+					throw new ServiceException("Updated image was not uploaded by account "+ account.getLogin());
+				}
+			}
+			
 			companyRepo.saveOrUpdate(company);
 		}
 				
