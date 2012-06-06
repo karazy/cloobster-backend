@@ -26,8 +26,6 @@ public class CompanyDTO {
 	
 	String phone;
 	
-	String logoBlobKey;
-	
 	private LinkedHashMap<String,ImageDTO> images;
 	private Long id;
 	

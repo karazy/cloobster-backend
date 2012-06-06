@@ -94,16 +94,10 @@ public class AccountControllerTest {
 	private CompanyRepository companyRepo;
 
 	@Mock
-	private URLFetchService fetchService;
-
-	@Mock
 	private FacebookService facebookService;
 
 	@Mock
-	private ImagesService imagesService;
-
-	@Mock
-	private BlobstoreService blobstoreService;
+	private ImageController imageCtrl;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -117,7 +111,7 @@ public class AccountControllerTest {
 				.byProvider(ApacheValidationProvider.class).configure()
 				.buildValidatorFactory();
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, avf.getValidator(), facebookService, imagesService, blobstoreService);
+				channelController, avf.getValidator(), facebookService, imageCtrl);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

@@ -1,13 +1,23 @@
 package net.eatsense.restws.business;
 
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
+import net.eatsense.controller.BusinessController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.BusinessProfileDTO;
+import net.eatsense.representation.ImageDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +29,12 @@ public class BusinessResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Context
 	ResourceContext resourceContext;
+	@Context
+	HttpServletRequest servletRequest;
 	
 	private Business business;
-	
+	private BusinessController businessCtrl;
+			
 	public void setBusiness(Business business) {
 		this.business = business;
 	}
@@ -32,7 +45,19 @@ public class BusinessResource {
 		if(business == null)
 			throw new NotFoundException();
 		
-		return new BusinessDTO(business);
+		return new BusinessProfileDTO(business);
+	}
+	
+	
+	
+	@POST
+	@Path("images/{id}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.COMPANYOWNER)
+	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO updatedImage) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		return businessCtrl.updateBusinessImage(account, business, updatedImage);
 	}
 
 	@Path("orders")

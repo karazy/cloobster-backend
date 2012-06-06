@@ -37,11 +37,4 @@ public class BusinessDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getLogo() {
-		return logo;
-	}
-	public void setLogo(String logo) {
-		this.logo = logo;
-	}
-	String logo;
 }

@@ -17,7 +17,6 @@ import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
 import net.eatsense.restws.business.CompaniesResource;
-import net.eatsense.restws.business.CompanyResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.util.NicknameGenerator;
 

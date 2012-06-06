@@ -13,12 +13,15 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
@@ -31,12 +34,19 @@ import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+@RunWith(MockitoJUnitRunner.class)
 public class BusinessControllerTest {
 	
 	private final LocalServiceTestHelper helper =
@@ -65,11 +75,23 @@ public class BusinessControllerTest {
 
 		private Business business;
 
+		private AccountRepository accountRepo;
+		
+		@Mock
+		private ImagesService imagesService;
+		
+		@Mock
+		private BlobstoreService blobstoreService;
+
+		@Mock
+		private EventBus eventBus;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-		businessCtrl = injector.getInstance(BusinessController.class);
+		
+		
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		rr = injector.getInstance(BusinessRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
@@ -78,7 +100,13 @@ public class BusinessControllerTest {
 		br = injector.getInstance(SpotRepository.class);
 		or = injector.getInstance(OrderRepository.class);
 		ocr = injector.getInstance(OrderChoiceRepository.class);
+		accountRepo = injector.getInstance(AccountRepository.class);
 		transform = injector.getInstance(Transformer.class);
+		
+		ImageController imageController = new ImageController(blobstoreService, imagesService, accountRepo);
+		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
+		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController );
 		
 		
 		

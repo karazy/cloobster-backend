@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +13,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import net.eatsense.auth.Role;
+import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
@@ -30,7 +30,6 @@ import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.ImageDTO;
-import net.eatsense.representation.ImageUploadDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
@@ -40,9 +39,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.blobstore.BlobKey;
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.images.ImagesService;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -63,14 +59,13 @@ public class AccountController {
 	private Validator validator;
 	private CompanyRepository companyRepo;
 	private FacebookService facebookService;
-	private final ImagesService imagesService;
-	private BlobstoreService blobstoreService;
+	private ImageController imageController;
 	
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ChannelController cctrl, Validator validator, FacebookService facebookService,
-			ImagesService imagesService, BlobstoreService blobstoreService) {
+			ImageController imageController) {
 		super();
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
@@ -79,8 +74,7 @@ public class AccountController {
 		this.accountRepo = accountRepo;
 		this.companyRepo = companyRepo;
 		this.facebookService = facebookService;
-		this.imagesService = imagesService;
-		this.blobstoreService = blobstoreService;
+		this.imageController = imageController;
 	}
 	
 	
@@ -408,63 +402,14 @@ public class AccountController {
 		checkNotNull(updatedImage, "updatedImage was null ");
 		checkArgument(!Strings.isNullOrEmpty(updatedImage.getId()), "updatedImage id was null or empty");
 		
-		ImageDTO image = null;
-		List<ImageDTO> images = company.getImages();
-		// Check if the company already has images.
-		if(images == null) {
-			images = new ArrayList<ImageDTO>();
-			company.setImages(images);
-		}
-		// Look if we already have an image saved under this id.
-		for (ImageDTO imageDTO : images) {
-			if(imageDTO.getId().equals(updatedImage.getId()))
-				image = imageDTO;
-		}
-		// It's an unknown image, create a new one.
-		if( image == null ) {
-			image = new ImageDTO();
-			image.setId(updatedImage.getId());
-			company.getImages().add(image);
-		}
+		UpdateImagesResult result = imageController.updateImages(account, company.getImages(), updatedImage);
 		
-		// Check if the blobKey has changed.
-		if(!Strings.isNullOrEmpty(updatedImage.getBlobKey()) && !updatedImage.getBlobKey().equals(image.getBlobKey())) {
-			if(image.getBlobKey() != null) {
-				blobstoreService.delete(new BlobKey(image.getBlobKey()));
-			}
-			image.setBlobKey(updatedImage.getBlobKey());
-			// Check if we got an image serving url supplied.
-			if(!Strings.isNullOrEmpty(updatedImage.getUrl()) && !updatedImage.getUrl().equals(image.getUrl())) {
-				// Use the supplied url.
-				image.setUrl(updatedImage.getUrl());
-			}
-			else {
-				// Create new serving url from the new blob key.
-				image.setUrl(imagesService.getServingUrl( new BlobKey( image.getBlobKey() ) ) );
-			}
-			if(account.getImageUploads() == null || account.getImageUploads().isEmpty()) {
-				throw new ServiceException("No uploaded images for account "+ account.getLogin());
-			}
-			else {
-				boolean found = false;
-				for (Iterator<ImageUploadDTO> iterator = account.getImageUploads().iterator(); iterator.hasNext();) {
-					ImageUploadDTO upload = iterator.next();
-					if(upload.getBlobKey().equals(updatedImage.getBlobKey())) {
-						// Found the corresponding upload, delete the object.
-						found = true;
-						iterator.remove();
-						accountRepo.saveOrUpdate(account);
-					}
-				}
-				if(!found) {
-					throw new ServiceException("Updated image was not uploaded by account "+ account.getLogin());
-				}
-			}
-			
+		if(result.isDirty()) {
+			company.setImages(result.getImages());
 			companyRepo.saveOrUpdate(company);
 		}
-				
-		return image;
+		
+		return result.getUpdatedImage();
 	}
 	
 	/**

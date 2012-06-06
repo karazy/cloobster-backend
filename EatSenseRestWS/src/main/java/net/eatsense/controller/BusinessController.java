@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
@@ -17,20 +19,25 @@ import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
 
@@ -47,14 +54,20 @@ public class BusinessController {
 	private RequestRepository requestRepo;
 	private BusinessRepository businessRepo;
 	private EventBus eventBus;
+	private final AccountRepository accountRepo;
+	private final ImageController imageController;
 	
 	@Inject
-	public BusinessController(RequestRepository rr, CheckInRepository cr, SpotRepository sr, BusinessRepository br, EventBus eventBus) {
+	public BusinessController(RequestRepository rr, CheckInRepository cr,
+			SpotRepository sr, BusinessRepository br, EventBus eventBus,
+			AccountRepository accountRepo, ImageController imageController) {
 		this.eventBus = eventBus;
 		this.requestRepo = rr;
 		this.spotRepo = sr;
 		this.checkInRepo = cr;
 		this.businessRepo = br;
+		this.accountRepo = accountRepo;
+		this.imageController = imageController;
 	}
 	
 	/**
@@ -283,5 +296,114 @@ public class BusinessController {
 			}
 		}
 		return businessDtos;
+	}
+	
+	public BusinessProfileDTO newBusinessForAccount(Account account, BusinessProfileDTO businessData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(businessData, "businessData was null");
+		
+		if(account.getBusinesses() == null) {
+			account.setBusinesses(new ArrayList<Key<Business>>());	
+		}
+		Business business = new Business();
+		
+		updateBusiness(business, businessData);
+		businessData.setId(business.getId());
+		
+		account.getBusinesses().add(business.getKey());
+		accountRepo.saveOrUpdate(account);
+		
+		return businessData;
+	}
+
+	/**
+	 * Update and save the Business entity with new data.
+	 * 
+	 * @param business
+	 * 				- Entity to update.
+	 * @param businessData
+	 * 				- The data transfer object to update the entity with.
+	 * @return Updated data transfer object.
+	 */
+	public BusinessProfileDTO updateBusiness(Business business,	BusinessProfileDTO businessData) {
+		checkNotNull(business, "business was null");
+		checkNotNull(businessData, "businessData was null");
+		
+		//TODO Add validation of businessData.
+		
+		boolean dirty = false;
+		
+		if(Objects.equal(business.getAddress(), businessData.getAddress())) {
+			dirty = true;
+			business.setAddress(businessData.getAddress());
+		}
+		
+		if(Objects.equal(business.getCity(), businessData.getCity())) {
+			dirty = true;
+			business.setCity(businessData.getCity());
+		}
+		
+		if(Objects.equal(business.getDescription(), businessData.getDescription())) {
+			dirty = true;
+			business.setDescription(businessData.getDescription());
+		}
+		if(Objects.equal(business.getName(), businessData.getName())) {
+			dirty = true;
+			business.setName(businessData.getName());
+		}
+		if(Objects.equal(business.getPhone(), businessData.getPhone())) {
+			dirty = true;
+			business.setPhone(businessData.getPhone());
+		}
+		
+		if(Objects.equal(business.getPhone(), businessData.getPhone())) {
+			dirty = true;
+			business.setPhone(businessData.getPhone());
+		}
+		
+		if(Objects.equal(business.getPostcode(), businessData.getPostcode())) {
+			dirty = true;
+			business.setPostcode(businessData.getPostcode());
+		}
+		if(Objects.equal(business.getSlogan(), businessData.getSlogan())) {
+			dirty = true;
+			business.setSlogan(businessData.getSlogan());
+		}
+								
+		if(dirty) {
+			businessRepo.saveOrUpdate(business);
+		}
+		
+		return new BusinessProfileDTO(business);		
+	}
+	
+	
+	/**
+	 * Update the images of the given Business entity, with the supplied image
+	 * data.
+	 * 
+	 * @param account
+	 *            - The Account that uploaded the image to use.
+	 * @param business
+	 *            - The Business for which the images will be updated.
+	 * @param updatedImage
+	 *            - Data transfer object, containing the blobkey and id of the
+	 *            image to save.
+	 * @return The saved image data.
+	 */
+	public ImageDTO updateBusinessImage(Account account, Business business, ImageDTO updatedImage) {
+		checkNotNull(account, "account was null");
+		checkNotNull(business, "business was null");
+		checkNotNull(updatedImage, "updatedImage was null ");
+		checkArgument(!Strings.isNullOrEmpty(updatedImage.getId()),	"updatedImage id was null or empty");
+
+		UpdateImagesResult result = imageController.updateImages(account, business.getImages(), updatedImage);
+
+		if (result.isDirty()) {
+			business.setImages(result.getImages());
+			businessRepo.saveOrUpdate(business);
+		}
+
+		return result.getUpdatedImage();
 	}
 }

@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.representation.ImageDTO;
 
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -39,11 +40,9 @@ public class Business extends GenericEntity {
 	 * Description of location.
 	 */
 	private String description;
-	/**
-	 * Location's logo.
-	 */
-	private byte[] logo;
-
+	
+	private String slogan;
+	
 	@Embedded
 	@Valid
 	@Unindexed
@@ -58,6 +57,9 @@ public class Business extends GenericEntity {
 	private String phone;
 	
 	private Key<Company> company;
+	
+	@Embedded
+	private List<ImageDTO> images;
 	
 	public String getAddress() {
 		return address;
@@ -110,14 +112,6 @@ public class Business extends GenericEntity {
 		this.description = description;
 	}
 
-	public byte[] getLogo() {
-		return logo;
-	}
-
-	public void setLogo(byte[] logo) {
-		this.logo = logo;
-	}
-
 	@Transient
 	@JsonIgnore
 	public Key<Business> getKey() {
@@ -157,6 +151,20 @@ public class Business extends GenericEntity {
 	public void setCompany(Key<Company> company) {
 		this.company = company;
 	}
-	
-	
+
+	public List<ImageDTO> getImages() {
+		return images;
+	}
+
+	public void setImages(List<ImageDTO> images) {
+		this.images = images;
+	}
+
+	public String getSlogan() {
+		return slogan;
+	}
+
+	public void setSlogan(String slogan) {
+		this.slogan = slogan;
+	}
 }
