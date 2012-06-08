@@ -67,6 +67,7 @@ public class BusinessController {
 	public BusinessController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, BusinessRepository br, EventBus eventBus,
 			AccountRepository accountRepo, ImageController imageController, Validator validator) {
+		this.validator = validator;
 		this.eventBus = eventBus;
 		this.requestRepo = rr;
 		this.spotRepo = sr;
