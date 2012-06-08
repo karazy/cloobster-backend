@@ -23,8 +23,14 @@ import net.eatsense.representation.ImageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
+/**
+ * Sub-resource representing {@link Business} entities.
+ * @author Nils Weiher
+ *
+ */
 public class BusinessResource {
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -40,6 +46,12 @@ public class BusinessResource {
 		this.business = business;
 	}
 	
+	@Inject
+	public BusinessResource(BusinessController businessCtrl) {
+		super();
+		this.businessCtrl = businessCtrl;
+	}
+
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public BusinessDTO getBusiness() {

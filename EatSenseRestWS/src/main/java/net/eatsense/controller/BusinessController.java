@@ -370,10 +370,12 @@ public class BusinessController {
 			dirty = true;
 			business.setDescription(businessData.getDescription());
 		}
+		
 		if(Objects.equal(business.getName(), businessData.getName())) {
 			dirty = true;
 			business.setName(businessData.getName());
 		}
+		
 		if(Objects.equal(business.getPhone(), businessData.getPhone())) {
 			dirty = true;
 			business.setPhone(businessData.getPhone());
@@ -388,6 +390,7 @@ public class BusinessController {
 			dirty = true;
 			business.setPostcode(businessData.getPostcode());
 		}
+		
 		if(Objects.equal(business.getSlogan(), businessData.getSlogan())) {
 			dirty = true;
 			business.setSlogan(businessData.getSlogan());
