@@ -24,11 +24,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * Represents a location where you can check in and order food/drinks what ever.
  * 
  * @author Frederik Reifschneider
- *
- */
-/**
- * @author Nils
- *
+ * @author Nils Weiher
  */
 @Cached
 public class Business extends GenericEntity {
@@ -77,6 +73,9 @@ public class Business extends GenericEntity {
 	
 	private Key<Company> company;
 	
+	/**
+	 * List of images used by the Business, at the moment we use 'logo' and several scrapbook images.
+	 */
 	@Embedded
 	private List<ImageDTO> images;
 	

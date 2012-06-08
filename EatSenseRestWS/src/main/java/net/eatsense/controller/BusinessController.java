@@ -22,7 +22,7 @@ import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.exceptions.RegistrationException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -347,9 +347,10 @@ public class BusinessController {
 		if(!violationSet.isEmpty()) {
 			StringBuilder stringBuilder = new StringBuilder("validation errors:");
 			for (ConstraintViolation<BusinessProfileDTO> violation : violationSet) {
+				// Format the message like: '"{property}" {message}.'
 				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
 			}
-			throw new RegistrationException(stringBuilder.toString());
+			throw new ValidationException(stringBuilder.toString());
 		}
 		
 		boolean dirty = false;

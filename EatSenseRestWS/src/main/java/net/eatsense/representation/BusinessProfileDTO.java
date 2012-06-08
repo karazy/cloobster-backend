@@ -11,6 +11,10 @@ public class BusinessProfileDTO extends BusinessDTO {
 	private String city;
 	private String address;
 	
+	/**
+	 * Maps to a json object images.{id}.
+	 * Containing {@link Business#images}
+	 */
 	private LinkedHashMap<String,ImageDTO> images;
 	private List<PaymentMethod> paymentMethods;
 	private String phone;
@@ -28,6 +32,8 @@ public class BusinessProfileDTO extends BusinessDTO {
 		super(business);
 		this.address = business.getAddress();
 		this.city = business.getCity();
+		// Convert the images List to a Map, use id as the key.
+		// Useful so that we can access image objects directly by id in the JSON output.
 		if(business.getImages() != null && !business.getImages().isEmpty()) {
 			this.images = new LinkedHashMap<String, ImageDTO>();
 			for(ImageDTO image : business.getImages()) {
