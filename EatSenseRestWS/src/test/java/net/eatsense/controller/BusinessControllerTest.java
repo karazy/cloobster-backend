@@ -1,20 +1,28 @@
 package net.eatsense.controller;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.controller.ImageController.UpdateImagesResult;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.CheckInStatus;
@@ -32,6 +40,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
@@ -54,6 +63,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.googlecode.objectify.Key;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BusinessControllerTest {
@@ -103,6 +113,7 @@ public class BusinessControllerTest {
 
 	private CheckInRepository checkInrepo;
 
+	@Mock
 	private ImageController imageController;
 
 	@Before
@@ -123,7 +134,6 @@ public class BusinessControllerTest {
 		transform = injector.getInstance(Transformer.class);
 		validator = injector.getInstance(Validator.class);
 		
-		ImageController imageController = new ImageController(blobstoreService, imagesService, accountRepo);
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
@@ -450,6 +460,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testUpdateBusinessPostcodeViolation() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(BusinessRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
@@ -462,6 +473,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testUpdateBusinessCityViolation() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(BusinessRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
@@ -474,6 +486,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testUpdateBusinessAddressViolation() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(BusinessRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
@@ -497,5 +510,115 @@ public class BusinessControllerTest {
 		businessData.setPostcode("11111");
 		businessData.setSlogan("testslogan is great!");
 		return businessData;
+	}
+	
+	@Test
+	public void testNewBussinessForAccount() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
+		rr = mock(BusinessRepository.class);
+		accountRepo = mock(AccountRepository.class);
+		business = mock(Business.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		// Mock arguments and stub method calls.
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		when(business.getKey()).thenReturn(businessKey);
+		// Return the mocked class, when the controller retrieves the new instance.
+		when(rr.newEntity()).thenReturn(business);
+		Account account = mock(Account.class);
+		// Create the list here to check the contents after the test.
+		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
+		when(account.getBusinesses()).thenReturn(businessesList );
+		
+		BusinessProfileDTO testProfileData = getTestProfileData();
+		
+		// Run the method.
+		businessCtrl.newBusinessForAccount(account, testProfileData);
+		
+		// Verify that save gets called for the entity and for the account.
+		verify(rr).saveOrUpdate(business);
+		verify(accountRepo).saveOrUpdate(account);
+		// The key for the new business should be added to the account.
+		assertThat(businessesList, hasItem(is(businessKey)));
+	}
+	
+	@Test
+	public void testNewBussinessForAccountNoBusinesses() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
+		rr = mock(BusinessRepository.class);
+		accountRepo = mock(AccountRepository.class);
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		when(business.getKey()).thenReturn(businessKey);
+		when(rr.newEntity()).thenReturn(business);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		Account account = mock(Account.class);
+		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
+		// First we return null, to test the case of no businesses added.
+		when(account.getBusinesses()).thenReturn(null, businessesList );
+		// Get test data object.
+		BusinessProfileDTO testProfileData = getTestProfileData();
+		// Run the method.
+		businessCtrl.newBusinessForAccount(account, testProfileData);
+		
+		verify(rr).saveOrUpdate(business);
+		verify(accountRepo).saveOrUpdate(account);
+		// Verify that the new list was set at the account.
+		verify(account).setBusinesses(anyList());
+		assertThat(businessesList, hasItem(is(businessKey)));
+	}
+	
+	@Test
+	public void testUpdateBusinessImage() throws Exception {
+		rr = mock(BusinessRepository.class);
+		accountRepo = mock(AccountRepository.class);
+		business = mock(Business.class);
+				
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		// Mocks for method arguments.
+		Account account = mock(Account.class);
+		
+		// Test data objects.
+		ImageDTO updatedImage = new ImageDTO();
+		updatedImage.setId("test");
+		
+		@SuppressWarnings("unchecked")
+		List<ImageDTO> images = mock(List.class);
+		// Mocks and stubs for dependencies.
+		when(imageController.updateImages(account, business.getImages(), updatedImage)).thenReturn(new UpdateImagesResult(images , true, updatedImage));
+		// Run the method.
+		
+		businessCtrl.updateBusinessImage(account, business, updatedImage);
+		
+		// Verify that we call the save for the entity and the setter for the image list.
+		verify(business).setImages(images);
+		verify(rr).saveOrUpdate(business);
+	}
+	
+	@Test
+	public void testUpdateBusinessImageNoChanges() throws Exception {
+		rr = mock(BusinessRepository.class);
+		accountRepo = mock(AccountRepository.class);
+		business = mock(Business.class);
+				
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		// Mocks for method arguments.
+		Account account = mock(Account.class);
+		
+		// Test data objects.
+		ImageDTO updatedImage = new ImageDTO();
+		updatedImage.setId("test");
+		
+		@SuppressWarnings("unchecked")
+		List<ImageDTO> images = mock(List.class);
+		// Mocks and stubs for dependencies.
+		when(imageController.updateImages(account, business.getImages(), updatedImage)).thenReturn(new UpdateImagesResult(images , false, updatedImage));
+		// Run the method.
+		businessCtrl.updateBusinessImage(account, business, updatedImage);
+		
+		// Verify that we don't save the entity and don't set the updated image list.
+		verify(business,never()).setImages(images);
+		verify(rr, never()).saveOrUpdate(business);
 	}
 }

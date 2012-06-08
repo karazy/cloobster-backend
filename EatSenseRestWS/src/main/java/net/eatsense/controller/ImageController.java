@@ -35,7 +35,7 @@ public class ImageController {
 		this.accountRepo = accountRepo;
 	}
 	
-	public class UpdateImagesResult {
+	public static class UpdateImagesResult {
 		private final List<ImageDTO> images;
 		private final boolean dirty;
 		private final ImageDTO updatedImage;
@@ -61,7 +61,8 @@ public class ImageController {
 	}
 
 	/**
-	 * Update an ImageDTO in a list or add, also manages deletion of old blobstore file.
+	 * Update the existing image or add a new to the given list,
+	 * also manages deletion of old blobstore file and update of serving url.
 	 * 
 	 * @param account - Account that uploaded the image.
 	 * @param images - List of images to update.

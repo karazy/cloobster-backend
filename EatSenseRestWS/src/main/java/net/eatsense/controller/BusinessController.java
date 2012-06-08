@@ -319,11 +319,10 @@ public class BusinessController {
 		if(account.getBusinesses() == null) {
 			account.setBusinesses(new ArrayList<Key<Business>>());	
 		}
-		Business business = new Business();
+		Business business = businessRepo.newEntity();
 		
-		updateBusiness(business, businessData);
-		businessData.setId(business.getId());
-		
+		businessData = updateBusiness(business, businessData);
+			
 		account.getBusinesses().add(business.getKey());
 		accountRepo.saveOrUpdate(account);
 		
