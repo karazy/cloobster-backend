@@ -357,42 +357,42 @@ public class BusinessController {
 		boolean dirty = false;
 		
 		// Check every property to allow partial updates.				
-		if(Objects.equal(business.getAddress(), businessData.getAddress())) {
+		if(!Objects.equal(business.getAddress(), businessData.getAddress())) {
 			dirty = true;
 			business.setAddress(businessData.getAddress());
 		}
 		
-		if(Objects.equal(business.getCity(), businessData.getCity())) {
+		if(!Objects.equal(business.getCity(), businessData.getCity())) {
 			dirty = true;
 			business.setCity(businessData.getCity());
 		}
 		
-		if(Objects.equal(business.getDescription(), businessData.getDescription())) {
+		if(!Objects.equal(business.getDescription(), businessData.getDescription())) {
 			dirty = true;
 			business.setDescription(businessData.getDescription());
 		}
 		
-		if(Objects.equal(business.getName(), businessData.getName())) {
+		if(!Objects.equal(business.getName(), businessData.getName())) {
 			dirty = true;
 			business.setName(businessData.getName());
 		}
 		
-		if(Objects.equal(business.getPhone(), businessData.getPhone())) {
+		if(!Objects.equal(business.getPhone(), businessData.getPhone())) {
 			dirty = true;
 			business.setPhone(businessData.getPhone());
 		}
 		
-		if(Objects.equal(business.getPhone(), businessData.getPhone())) {
+		if(!Objects.equal(business.getPhone(), businessData.getPhone())) {
 			dirty = true;
 			business.setPhone(businessData.getPhone());
 		}
 		
-		if(Objects.equal(business.getPostcode(), businessData.getPostcode())) {
+		if(!Objects.equal(business.getPostcode(), businessData.getPostcode())) {
 			dirty = true;
 			business.setPostcode(businessData.getPostcode());
 		}
 		
-		if(Objects.equal(business.getSlogan(), businessData.getSlogan())) {
+		if(!Objects.equal(business.getSlogan(), businessData.getSlogan())) {
 			dirty = true;
 			business.setSlogan(businessData.getSlogan());
 		}
