@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.Collection;
 import java.util.List;
@@ -399,13 +400,23 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testUpdateBusiness() throws Exception {
-		business = mock(Business.class);
 		rr = mock(BusinessRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
 		BusinessProfileDTO businessData = new BusinessProfileDTO();
-		
+		businessData.setAddress("test");
+		businessData.setCity("test");
+		businessData.setDescription("testesttest");
+		businessData.setName("testname");
+		businessData.setPhone("test phone");
+		businessData.setPostcode("11111");
+		businessData.setSlogan("testslogan is great!");
 		
 		businessCtrl.updateBusiness(business, businessData );
+		
+		verify(rr).saveOrUpdate(business);
+		assertThat(business.getAddress(), is(businessData.getAddress()));
+		assertThat(business.getCity(), is(businessData.getCity()));
+		assertThat(business.getDescription(), is(businessData.getDescription()));
 	}
 }
