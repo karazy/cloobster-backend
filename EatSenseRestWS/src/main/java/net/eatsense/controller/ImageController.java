@@ -126,7 +126,7 @@ public class ImageController {
 				}
 			}
 		}
-				
+		
 		return new UpdateImagesResult(images, dirty, image);
 	}
 }

@@ -426,6 +426,7 @@ public class BusinessController {
 		UpdateImagesResult result = imageController.updateImages(account, business.getImages(), updatedImage);
 
 		if (result.isDirty()) {
+			// Only save if we updated or added an image to the list.
 			business.setImages(result.getImages());
 			businessRepo.saveOrUpdate(business);
 		}

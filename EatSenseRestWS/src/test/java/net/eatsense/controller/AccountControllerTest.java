@@ -3,7 +3,6 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,9 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 
 import javax.mail.Message;
-import javax.validation.Validation;
 import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.auth.Role;
@@ -36,7 +33,6 @@ import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
 
 import org.apache.bval.guice.ValidationModule;
-import org.apache.bval.jsr303.ApacheValidationProvider;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -49,10 +45,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.channel.ChannelMessage;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
