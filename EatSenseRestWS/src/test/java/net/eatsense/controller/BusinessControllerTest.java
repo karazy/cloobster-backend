@@ -4,9 +4,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collection;
@@ -18,6 +18,7 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -39,7 +40,9 @@ import net.eatsense.util.DummyDataDumper;
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -54,51 +57,53 @@ import com.google.inject.Injector;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BusinessControllerTest {
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private final LocalServiceTestHelper helper =
 	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-	    
-	    private Injector injector;
-	    private CheckInController checkinCtrl;
-	    private BusinessRepository rr;
-	    private MenuRepository mr;
-	    private ProductRepository pr;
-	    private ChoiceRepository cr;
-	    private OrderRepository or;
-	    private DummyDataDumper ddd;
 
-		private SpotRepository br;
+	private Injector injector;
+	private CheckInController checkinCtrl;
+	private BusinessRepository rr;
+	private MenuRepository mr;
+	private ProductRepository pr;
+	private ChoiceRepository cr;
+	private OrderRepository or;
+	private DummyDataDumper ddd;
 
-		private Transformer transform;
+	private SpotRepository br;
 
-		private OrderChoiceRepository ocr;
+	private Transformer transform;
 
-		private CheckInDTO checkInData;
+	private OrderChoiceRepository ocr;
 
-		private BusinessController businessCtrl;
+	private CheckInDTO checkInData;
 
-		private CheckIn checkIn;
+	private BusinessController businessCtrl;
 
-		private Business business;
+	private CheckIn checkIn;
 
-		private AccountRepository accountRepo;
-		
-		@Mock
-		private ImagesService imagesService;
-		
-		@Mock
-		private BlobstoreService blobstoreService;
+	private Business business;
 
-		@Mock
-		private EventBus eventBus;
-		@Mock
-		private Validator validator;
+	private AccountRepository accountRepo;
 
-		private RequestRepository requestRepo;
+	@Mock
+	private ImagesService imagesService;
 
-		private CheckInRepository checkInrepo;
+	@Mock
+	private BlobstoreService blobstoreService;
 
-		private ImageController imageController;
+	@Mock
+	private EventBus eventBus;
+
+	private Validator validator;
+
+	private RequestRepository requestRepo;
+
+	private CheckInRepository checkInrepo;
+
+	private ImageController imageController;
 
 	@Before
 	public void setUp() throws Exception {
@@ -116,14 +121,13 @@ public class BusinessControllerTest {
 		ocr = injector.getInstance(OrderChoiceRepository.class);
 		accountRepo = injector.getInstance(AccountRepository.class);
 		transform = injector.getInstance(Transformer.class);
+		validator = injector.getInstance(Validator.class);
 		
 		ImageController imageController = new ImageController(blobstoreService, imagesService, accountRepo);
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
-		
-		
-		
+				
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
@@ -400,9 +404,90 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testUpdateBusiness() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(BusinessRepository.class);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
+		BusinessProfileDTO businessData = getTestProfileData();
+		
+		BusinessProfileDTO resultData = businessCtrl.updateBusiness(business, businessData );
+		
+		verify(rr).saveOrUpdate(business);
+		assertThat(resultData.getId(), is(business.getId()));
+		assertThat(business.getAddress(), is(businessData.getAddress()));
+		assertThat(business.getCity(), is(businessData.getCity()));
+		assertThat(business.getDescription(), is(businessData.getDescription()));
+		assertThat(business.getName(), is(businessData.getName()));
+		assertThat(business.getPhone(), is(businessData.getPhone()));
+		assertThat(business.getPostcode(), is(businessData.getPostcode()));
+		assertThat(business.getSlogan(), is(businessData.getSlogan()));
+	}
+	
+	@Test
+	public void testUpdateBusinessNoChanges() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
+		rr = mock(BusinessRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		
+		BusinessProfileDTO businessData = getTestProfileData();
+		businessCtrl.updateBusiness(business, businessData );
+		businessCtrl.updateBusiness(business, businessData );
+		verify(rr, times(1)).saveOrUpdate(business);
+	}
+	
+	@Test
+	public void testUpdateBusinessSingleProperty() throws Exception {
+		//TODO after refactoring of whole test suite remove this initializiation
+		rr = mock(BusinessRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		
+		BusinessProfileDTO businessData = getTestProfileData();
+		businessCtrl.updateBusiness(business, businessData );
+		businessData.setName("AnotherTest");
+		businessCtrl.updateBusiness(business, businessData );
+		verify(rr, times(2)).saveOrUpdate(business);
+	}
+	
+	@Test
+	public void testUpdateBusinessPostcodeViolation() throws Exception {
+		rr = mock(BusinessRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		
+		BusinessProfileDTO businessData = getTestProfileData();
+		businessData.setPostcode("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("postcode");
+		businessCtrl.updateBusiness(business, businessData );
+	}
+	
+	@Test
+	public void testUpdateBusinessCityViolation() throws Exception {
+		rr = mock(BusinessRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		
+		BusinessProfileDTO businessData = getTestProfileData();
+		businessData.setCity("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("city");
+		businessCtrl.updateBusiness(business, businessData );
+	}
+	
+	@Test
+	public void testUpdateBusinessAddressViolation() throws Exception {
+		rr = mock(BusinessRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		
+		BusinessProfileDTO businessData = getTestProfileData();
+		businessData.setAddress("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("address");
+		businessCtrl.updateBusiness(business, businessData );
+	}
+
+	/**
+	 * @return Test data to user for update or create business
+	 */
+	private BusinessProfileDTO getTestProfileData() {
 		BusinessProfileDTO businessData = new BusinessProfileDTO();
 		businessData.setAddress("test");
 		businessData.setCity("test");
@@ -411,12 +496,6 @@ public class BusinessControllerTest {
 		businessData.setPhone("test phone");
 		businessData.setPostcode("11111");
 		businessData.setSlogan("testslogan is great!");
-		
-		businessCtrl.updateBusiness(business, businessData );
-		
-		verify(rr).saveOrUpdate(business);
-		assertThat(business.getAddress(), is(businessData.getAddress()));
-		assertThat(business.getCity(), is(businessData.getCity()));
-		assertThat(business.getDescription(), is(businessData.getDescription()));
+		return businessData;
 	}
 }
