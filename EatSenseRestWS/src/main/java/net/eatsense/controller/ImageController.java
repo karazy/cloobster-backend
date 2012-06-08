@@ -60,6 +60,14 @@ public class ImageController {
 		}		
 	}
 
+	/**
+	 * Update an ImageDTO in a list or add, also manages deletion of old blobstore file.
+	 * 
+	 * @param account - Account that uploaded the image.
+	 * @param images - List of images to update.
+	 * @param updatedImage - Image object to update or create.
+	 * @return Result object, {@link UpdateImagesResult}.
+	 */
 	public UpdateImagesResult updateImages(Account account, List<ImageDTO> images, ImageDTO updatedImage) {
 		checkNotNull(updatedImage, "updatedImage was null ");
 		checkArgument(!Strings.isNullOrEmpty(updatedImage.getId()), "updatedImage id was null or empty");

@@ -9,6 +9,8 @@ import static org.junit.Assert.assertThat;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.Validator;
+
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -85,6 +87,8 @@ public class BusinessControllerTest {
 
 		@Mock
 		private EventBus eventBus;
+		@Mock
+		private Validator validator;
 
 	@Before
 	public void setUp() throws Exception {
@@ -106,7 +110,7 @@ public class BusinessControllerTest {
 		ImageController imageController = new ImageController(blobstoreService, imagesService, accountRepo);
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
-		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController );
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
 		
 		

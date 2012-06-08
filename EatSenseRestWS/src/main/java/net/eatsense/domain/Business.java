@@ -26,6 +26,10 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Frederik Reifschneider
  *
  */
+/**
+ * @author Nils
+ *
+ */
 @Cached
 public class Business extends GenericEntity {
  
@@ -39,8 +43,13 @@ public class Business extends GenericEntity {
 	/**
 	 * Description of location.
 	 */
+	@NotNull
+	@NotEmpty
 	private String description;
 	
+	/**
+	 * For marketing on front pages and links. (optional)
+	 */
 	private String slogan;
 	
 	@Embedded
@@ -51,9 +60,19 @@ public class Business extends GenericEntity {
 	@Embedded
 	private Set<Channel> channels;
 	
+	@NotNull
+	@NotEmpty
 	private String address;
+	@NotNull
+	@NotEmpty
 	private String city;
+	@NotNull
+	@NotEmpty
 	private String postcode;
+	
+	/**
+	 * Phone number to contact the location. (optional)
+	 */
 	private String phone;
 	
 	private Key<Company> company;

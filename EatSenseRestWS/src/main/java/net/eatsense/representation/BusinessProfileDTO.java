@@ -21,6 +21,9 @@ public class BusinessProfileDTO extends BusinessDTO {
 		super();
 	}
 
+	/**
+	 * @param business - Business entity to copy the data from.
+	 */
 	public BusinessProfileDTO(Business business) {
 		super(business);
 		this.address = business.getAddress();

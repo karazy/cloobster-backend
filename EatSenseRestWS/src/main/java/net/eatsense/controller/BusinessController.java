@@ -6,12 +6,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Company;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
@@ -19,6 +22,7 @@ import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.RegistrationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -33,6 +37,7 @@ import net.eatsense.representation.cockpit.SpotStatusDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.blobstore.BlobKey;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -45,7 +50,7 @@ import com.googlecode.objectify.Query;
  * Manages data concerning one business. 
  * 
  * @author Frederik Reifschneider
- *
+ * @author Nils Weiher
  */
 public class BusinessController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -56,11 +61,12 @@ public class BusinessController {
 	private EventBus eventBus;
 	private final AccountRepository accountRepo;
 	private final ImageController imageController;
+	private Validator validator;
 	
 	@Inject
 	public BusinessController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, BusinessRepository br, EventBus eventBus,
-			AccountRepository accountRepo, ImageController imageController) {
+			AccountRepository accountRepo, ImageController imageController, Validator validator) {
 		this.eventBus = eventBus;
 		this.requestRepo = rr;
 		this.spotRepo = sr;
@@ -298,6 +304,13 @@ public class BusinessController {
 		return businessDtos;
 	}
 	
+	/**
+	 * Create a new Business entity owned by the supplied Account.
+	 * 
+	 * @param account - The account that manages the new Business.
+	 * @param businessData - The profile data to use for the business.
+	 * @return The profile data updated with the id of the new entity.
+	 */
 	public BusinessProfileDTO newBusinessForAccount(Account account, BusinessProfileDTO businessData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(businessData, "businessData was null");
@@ -329,10 +342,19 @@ public class BusinessController {
 		checkNotNull(business, "business was null");
 		checkNotNull(businessData, "businessData was null");
 		
-		//TODO Add validation of businessData.
+		Set<ConstraintViolation<BusinessProfileDTO>> violationSet = validator.validate(businessData);
+		
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
+			for (ConstraintViolation<BusinessProfileDTO> violation : violationSet) {
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
+			}
+			throw new RegistrationException(stringBuilder.toString());
+		}
 		
 		boolean dirty = false;
 		
+		// Check every property to allow partial updates.				
 		if(Objects.equal(business.getAddress(), businessData.getAddress())) {
 			dirty = true;
 			business.setAddress(businessData.getAddress());
@@ -374,7 +396,7 @@ public class BusinessController {
 			businessRepo.saveOrUpdate(business);
 		}
 		
-		return new BusinessProfileDTO(business);		
+		return new BusinessProfileDTO(business);
 	}
 	
 	
@@ -387,7 +409,7 @@ public class BusinessController {
 	 * @param business
 	 *            - The Business for which the images will be updated.
 	 * @param updatedImage
-	 *            - Data transfer object, containing the blobkey and id of the
+	 *            - Data transfer object, containing the {@link BlobKey} string and string id ("logo","scrapbook",etc. ) of the
 	 *            image to save.
 	 * @return The saved image data.
 	 */
