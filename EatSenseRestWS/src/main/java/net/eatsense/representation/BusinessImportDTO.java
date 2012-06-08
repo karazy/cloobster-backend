@@ -25,6 +25,42 @@ public class BusinessImportDTO {
 	@NotEmpty
 	@Size(min=1)
 	private String name;
+	
+	@NotNull
+	@NotEmpty
+	private String city;
+	@NotEmpty
+	@NotNull
+	private String address;
+	
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPostcode() {
+		return postcode;
+	}
+
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
+	}
+
+	@NotEmpty
+	@NotNull
+	private String postcode;
+
 
 	/**
 	 * Description of location.

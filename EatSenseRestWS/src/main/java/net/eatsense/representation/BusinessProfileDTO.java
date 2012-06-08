@@ -19,6 +19,10 @@ public class BusinessProfileDTO extends BusinessDTO {
 	@NotNull
 	private String address;
 	
+	@NotEmpty
+	@NotNull
+	private String postcode;
+	
 	/**
 	 * Maps to a json object images.{id}.
 	 * Containing {@link Business#images}
@@ -26,9 +30,7 @@ public class BusinessProfileDTO extends BusinessDTO {
 	private LinkedHashMap<String,ImageDTO> images;
 	private List<PaymentMethod> paymentMethods;
 	private String phone;
-	@NotEmpty
-	@NotNull
-	private String postcode;
+
 	private String slogan;
 
 	public BusinessProfileDTO() {

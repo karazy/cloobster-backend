@@ -101,7 +101,7 @@ public class ImportController {
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
-		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getPayments() );
+		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
@@ -176,12 +176,15 @@ public class ImportController {
 		return kR.getId();
 	}
 	
-	private Key<Business> createAndSaveBusiness(String name, String desc, Collection<PaymentMethod> paymentMethods) {
+	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
 		logger.info("Creating new business with data: " + name + ", " + desc );
 		
 		Business business = new Business();
 		business.setName(name);
 		business.setDescription(desc);
+		business.setAddress(address);
+		business.setCity(city);
+		business.setPostcode(postcode);
 		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
 		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
