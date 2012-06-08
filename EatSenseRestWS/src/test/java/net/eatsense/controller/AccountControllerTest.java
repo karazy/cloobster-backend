@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import javax.mail.Message;
 import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import net.eatsense.EatSenseDomainModule;
@@ -98,6 +99,8 @@ public class AccountControllerTest {
 
 	@Mock
 	private ImageController imageCtrl;
+
+	private Validator validator;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -107,11 +110,9 @@ public class AccountControllerTest {
 		channelController = mock(ChannelController.class);
 		rr = injector.getInstance(BusinessRepository.class);
 		ar = injector.getInstance(AccountRepository.class);
-		ValidatorFactory avf = Validation
-				.byProvider(ApacheValidationProvider.class).configure()
-				.buildValidatorFactory();
+		validator = injector.getInstance(Validator.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, avf.getValidator(), facebookService, imageCtrl);
+				channelController, validator, facebookService, imageCtrl);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

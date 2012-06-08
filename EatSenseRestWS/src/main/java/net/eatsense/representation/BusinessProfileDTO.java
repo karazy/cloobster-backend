@@ -3,12 +3,20 @@ package net.eatsense.representation;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.PaymentMethod;
 
 public class BusinessProfileDTO extends BusinessDTO {
 
+	@NotNull
+	@NotEmpty
 	private String city;
+	@NotEmpty
+	@NotNull
 	private String address;
 	
 	/**
@@ -18,6 +26,8 @@ public class BusinessProfileDTO extends BusinessDTO {
 	private LinkedHashMap<String,ImageDTO> images;
 	private List<PaymentMethod> paymentMethods;
 	private String phone;
+	@NotEmpty
+	@NotNull
 	private String postcode;
 	private String slogan;
 

@@ -1,9 +1,17 @@
 package net.eatsense.representation;
 
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
+
 import net.eatsense.domain.Business;
 
 public class BusinessDTO {
+	@NotNull
+	@NotEmpty
 	String name;
+	@NotNull
+	@NotEmpty
 	String description;
 	Long id;
 	

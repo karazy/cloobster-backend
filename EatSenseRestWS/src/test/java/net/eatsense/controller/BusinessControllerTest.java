@@ -4,7 +4,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +27,7 @@ import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.SpotDTO;
@@ -89,6 +92,12 @@ public class BusinessControllerTest {
 		private EventBus eventBus;
 		@Mock
 		private Validator validator;
+
+		private RequestRepository requestRepo;
+
+		private CheckInRepository checkInrepo;
+
+		private ImageController imageController;
 
 	@Before
 	public void setUp() throws Exception {
@@ -386,5 +395,17 @@ public class BusinessControllerTest {
 		Collection<SpotStatusDTO> result = businessCtrl.getSpotStatusData(business);
 		
 		assertThat(result.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testUpdateBusiness() throws Exception {
+		business = mock(Business.class);
+		rr = mock(BusinessRepository.class);
+		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
+		
+		BusinessProfileDTO businessData = new BusinessProfileDTO();
+		
+		
+		businessCtrl.updateBusiness(business, businessData );
 	}
 }
