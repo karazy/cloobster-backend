@@ -3,6 +3,12 @@ package net.eatsense.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Transient;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.googlecode.objectify.Key;
+
 import net.eatsense.domain.embedded.FeedbackQuestion;
 
 public class FeedbackForm extends GenericEntity {
@@ -37,5 +43,18 @@ public class FeedbackForm extends GenericEntity {
 
 	public void setQuestions(List<FeedbackQuestion> questions) {
 		this.questions = questions;
+	}
+	
+	@Transient
+	@JsonIgnore
+	public Key<FeedbackForm> getKey() {
+		
+		return getKey(super.getId());
+	}
+	
+	@Transient
+	@JsonIgnore
+	public static Key<FeedbackForm> getKey(long id) {
+		return new Key<FeedbackForm>(FeedbackForm.class, id);
 	}
 }

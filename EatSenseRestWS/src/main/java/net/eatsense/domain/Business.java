@@ -51,6 +51,8 @@ public class Business extends GenericEntity {
 	
 	@Embedded
 	private Set<Channel> channels;
+	
+	private Key<FeedbackForm> feedbackForm;
 
 	public Business() {
 	}
@@ -109,6 +111,14 @@ public class Business extends GenericEntity {
 
 	public void setChannels(Set<Channel> channels) {
 		this.channels = channels;
+	}
+
+	public Key<FeedbackForm> getFeedbackForm() {
+		return feedbackForm;
+	}
+
+	public void setFeedbackForm(Key<FeedbackForm> feedbackForm) {
+		this.feedbackForm = feedbackForm;
 	}
 	
 	

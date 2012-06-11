@@ -1,6 +1,8 @@
 package net.eatsense.controller;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,19 +13,24 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.FeedbackQuestion;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
+import net.eatsense.persistence.FeedbackFormRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
@@ -32,6 +39,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
+import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.BusinessImportDTO;
@@ -71,6 +79,7 @@ public class ImportController {
     private Validator validator;
 	private OrderChoiceRepository orderChoiceRepo;
 	private BillRepository billRepo;
+	private FeedbackFormRepository feedbackFormRepo;
 	
 
 	@Inject
@@ -90,6 +99,28 @@ public class ImportController {
 	
     public void setValidator(Validator validator) {
         this.validator = validator;
+    }
+    
+    public FeedbackFormDTO importFeedbackForm(Business business, FeedbackFormDTO feedbackFormData) {
+    	checkNotNull(business, "business was null");
+    	checkNotNull(feedbackFormData, "feedbackFormData was null");
+    	checkNotNull(feedbackFormData.getQuestions(), "questions list was null");
+    	
+    	FeedbackForm feedbackForm = new FeedbackForm();
+    	feedbackForm.setDescription(feedbackFormData.getDescription());
+    	
+    	Long index = 1l;
+    	for (FeedbackQuestion question : feedbackFormData.getQuestions()) {
+			question.setId(index);
+			index++;
+		}
+    	feedbackForm.setQuestions(feedbackForm.getQuestions());
+    	feedbackForm.setTitle(feedbackForm.getTitle());
+    	
+    	feedbackFormRepo.saveOrUpdate(feedbackForm);
+    	business.setFeedbackForm(feedbackForm.getKey());
+    	    	
+    	return new FeedbackFormDTO(feedbackForm);
     }
 
 	public Long addBusiness(BusinessImportDTO businessData) {

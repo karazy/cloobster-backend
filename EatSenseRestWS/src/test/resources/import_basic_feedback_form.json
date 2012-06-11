@@ -1,0 +1,24 @@
+{
+	"title": "Feedback an Uns",
+	"description": "Einige Standardfragen",
+	"questions": [
+		{
+			"question": "Ambiente"
+		},
+		{
+			"question": "Geschmack"
+		},
+		{
+			"question": "Sortiment"
+		},
+		{
+			"question": "Preis-Leistung"
+		},
+		{
+			"question": "Service"
+		},
+		{
+			"question": "Geschwindkeit"
+		}
+	]
+}
