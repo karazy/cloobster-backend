@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +20,7 @@ import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.RegistrationException;
 import net.eatsense.exceptions.ServiceException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
@@ -280,6 +280,8 @@ public class AccountController {
 	 * @return
 	 */
 	public Account registerNewAccount(RegistrationDTO accountData) {
+		checkNotNull(accountData, "accountData was null");
+		
 		Set<ConstraintViolation<RegistrationDTO>> violationSet = validator.validate(accountData);
 		if(!violationSet.isEmpty()) {
 			StringBuilder stringBuilder = new StringBuilder("validation errors:");
@@ -414,30 +416,50 @@ public class AccountController {
 	
 	/**
 	 * @param company
-	 * @return data transfer object for company
+	 * @return new instance of a data transfer object
 	 */
 	public CompanyDTO toCompanyDTO(Company company) {
 		if(company == null)
 			return null;
-		CompanyDTO companyDto = new CompanyDTO();
 		
-		companyDto.setAddress(company.getAddress());
-		companyDto.setCity(company.getCity());
-		companyDto.setCountry(company.getCountry());
-		companyDto.setId(company.getId());
+		return new CompanyDTO(company);
+	}
+
+
+	/**
+	 * Update a Company entity with new data.
+	 * 
+	 * @param company - The entity to update.
+	 * @param companyData - The data to update the entity with.
+	 * @return updated transfer object for the Company entity
+	 */
+	public CompanyDTO updateCompany(Company company, CompanyDTO companyData) {
+		checkNotNull(company, "company was null");
+		checkNotNull(companyData, "companyData was null");
 		
-		if(company.getImages() != null && !company.getImages().isEmpty()) {
-			LinkedHashMap<String, ImageDTO> images = new LinkedHashMap<String, ImageDTO>();
-			
-			for(ImageDTO image : company.getImages()) {
-				images.put(image.getId(), image);
+		Set<ConstraintViolation<CompanyDTO>> violationSet = validator.validate(companyData);
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
+			for (ConstraintViolation<CompanyDTO> violation : violationSet) {
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
 			}
-			companyDto.setImages(images);
+			throw new ValidationException(stringBuilder.toString());
 		}
-		companyDto.setName(company.getName());
-		companyDto.setPhone(company.getPhone());
-		companyDto.setPostcode(company.getPostcode());
 		
-		return companyDto;
+		company.setAddress(companyData.getAddress());
+		company.setCity(companyData.getCity());
+		company.setCountry(companyData.getCountry());
+		company.setName(companyData.getName());
+		company.setPhone(companyData.getPhone());
+		company.setPostcode(companyData.getPostcode());
+		company.setUrl(companyData.getUrl());
+		
+		if(company.isDirty()) {
+			companyRepo.saveOrUpdate(company);
+			return new CompanyDTO(company);
+		}
+		else {
+			return companyData;
+		}
 	}
 }

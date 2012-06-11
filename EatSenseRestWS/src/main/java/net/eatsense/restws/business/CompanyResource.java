@@ -4,6 +4,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -12,6 +13,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.ImageDTO;
 
@@ -50,5 +52,16 @@ public class CompanyResource {
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO updatedImage) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return accountCtrl.updateCompanyImage(account, company, updatedImage);
+	}
+	
+	@PUT
+	@RolesAllowed(Role.COMPANYOWNER)
+	public CompanyDTO updateCompany(CompanyDTO companyData) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		if(account.getCompany().getId() == company.getId()) {
+			return accountCtrl.updateCompany(company, companyData);
+		}
+		else
+			throw new IllegalAccessException("account does not own the company to update");
 	}
 }

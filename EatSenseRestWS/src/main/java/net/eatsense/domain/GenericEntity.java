@@ -16,6 +16,16 @@ public abstract class GenericEntity{
 	 */
 	@Id
 	private Long id;
+	
+	private boolean dirty = false; 
+
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
+	}
 
 	public Long getId() {
 		return id;
@@ -24,4 +34,5 @@ public abstract class GenericEntity{
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
 }

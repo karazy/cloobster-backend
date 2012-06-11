@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,7 @@ import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.RegistrationException;
 import net.eatsense.exceptions.ServiceException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
@@ -93,6 +95,8 @@ public class AccountControllerTest {
 	private ImageController imageCtrl;
 
 	private Validator validator;
+
+	private Company company;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -113,6 +117,17 @@ public class AccountControllerTest {
 		// TODO update to use restaurant id
 		account = ar.createAndSaveAccount("admin",login, password, email, role,
 				rr.getAllKeys(), null, null, null, true, true);
+		
+		company = new Company();
+		CompanyDTO data = getCompanyTestData();
+		company.setAddress(data.getAddress());
+		company.setCity(data.getCity());
+		company.setCountry(data.getCountry());
+		company.setName(data.getName());
+		company.setPhone(data.getPhone());
+		company.setPostcode(data.getPostcode());
+		company.setUrl(data.getUrl());
+		company.setDirty(false);
 	}
 
 	@After
@@ -668,5 +683,139 @@ public class AccountControllerTest {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("uid");
 		ctr.authenticateFacebook(uid, accessToken );
+	}
+	
+	@Test
+	public void testUpdateCompanyUrl() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setUrl("http://www.google.com");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		assertThat(company.getUrl(), is(companyData.getUrl()));
+	}
+	
+	@Test
+	public void testUpdateCompanyPostcode() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setPostcode("23456");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		assertThat(company.getPostcode(), is(companyData.getPostcode()));
+	}
+	
+	@Test
+	public void testUpdateCompanyInvalidPostcode() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setPostcode("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("postcode");
+		
+		ctr.updateCompany(company, companyData);
+	}
+	
+	@Test
+	public void testUpdateCompanyPhone() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setPhone("020-test2");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		assertThat(company.getPhone(), is(companyData.getPhone()));
+	}
+	
+	@Test
+	public void testUpdateCompanyInvalidName() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setName("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("name");
+		
+		ctr.updateCompany(company, companyData);
+	}
+	
+	@Test
+	public void testUpdateCompanyName() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setName("New Test Company");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		assertThat(company.getName(), is(companyData.getName()));
+	}
+	
+	@Test
+	public void testUpdateCompanyInvalidCountry() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setCountry("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("country");
+		
+		ctr.updateCompany(company, companyData);
+	}
+	
+	@Test
+	public void testUpdateCompanyCountry() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setCountry("US");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		assertThat(company.getCountry(), is(companyData.getCountry()));
+	}
+	
+	@Test
+	public void testUpdateCompanyInvalidCity() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setCity("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("city");
+		
+		ctr.updateCompany(company, companyData);
+	}
+	
+	@Test
+	public void testUpdateCompanyCity() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setCity("another city");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		assertThat(company.getCity(), is(companyData.getCity()));
+	}
+	
+	@Test
+	public void testUpdateCompanyAddress() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setAddress("new test street 2");
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo).saveOrUpdate(company);
+		
+		assertThat(company.getAddress(), is(companyData.getAddress()));
+	}
+	
+	@Test
+	public void testUpdateCompanyInvalidAddress() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		companyData.setAddress("");
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("address");
+		
+		ctr.updateCompany(company, companyData);
+	}
+	
+	@Test
+	public void testUpdateCompanyNoChanges() throws Exception {
+		CompanyDTO companyData = getCompanyTestData();
+		ctr.updateCompany(company, companyData);
+		verify(companyRepo, never()).saveOrUpdate(company);
+	}
+	
+		
+	public CompanyDTO getCompanyTestData() {
+		CompanyDTO data = new CompanyDTO();
+		data.setAddress("test street 1");
+		data.setCity("test city");
+		data.setCountry("DE");
+		data.setName("test company");
+		data.setPhone("010101-TEST");
+		data.setPostcode("12345");
+		data.setUrl("http://www.karazy.net/");
+		return data;
 	}
 }
