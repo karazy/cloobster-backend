@@ -73,7 +73,7 @@ public class BusinessResource {
 	@Path("images/{id}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.COMPANYOWNER)
+	@RolesAllowed(Role.BUSINESSADMIN)
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO updatedImage) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return businessCtrl.updateBusinessImage(account, business, updatedImage);

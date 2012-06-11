@@ -188,7 +188,7 @@ public class SecurityFilter implements ContainerRequestFilter {
          */
         public boolean isUserInRole(String role) {
         	// guest role is for checkedin customers
-        	if( role.equals("guest") && checkIn != null && checkIn.getUserId() != null)
+        	if( role.equals(Role.GUEST) && checkIn != null && checkIn.getUserId() != null)
         		return true;
        	
         	if(accountCtrl.isAccountInRole(account, role)) {
