@@ -127,7 +127,7 @@ public class AccountController {
 				&& ( account.getRole().equals(Role.BUSINESSADMIN) || account.getRole().equals(Role.COMPANYOWNER) ))
 			return true;
 		
-    	// grant the businessadmin role too if the account is in companyowner role.		
+    	// grant the businessadmin role too if the account is in companyowner role.
 		if(role.equals(Role.BUSINESSADMIN) && ( account.getRole().equals(Role.COMPANYOWNER)))
 			return true;
 					
