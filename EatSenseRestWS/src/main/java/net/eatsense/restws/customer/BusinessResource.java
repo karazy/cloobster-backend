@@ -13,12 +13,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.BillController;
+import net.eatsense.controller.FeedbackController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.representation.BillDTO;
+import net.eatsense.representation.FeedbackDTO;
+import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
@@ -38,11 +41,14 @@ public class BusinessResource {
 	private MenuController menuCtrl;
 	private OrderController orderCtrl;
 	private BillController billCtrl;
+
+	private FeedbackController feedbackCtrl;
 	
 	@Inject
 	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl) {
+			BillController billCtrl, FeedbackController feedbackCtrl) {
 		super();
+		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
 		this.billCtrl = billCtrl;
@@ -126,5 +132,19 @@ public class BusinessResource {
 	public BillDTO createBill(BillDTO bill) {
 		return billCtrl.createBill(business, checkIn, bill);
 	}
-
+	
+	@GET
+	@Path("feedbackforms")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO getFeedbackForm() {
+		return feedbackCtrl.getFeedbackFormForBusiness(business);
+	}
+	
+	@POST
+	@Path("feedback")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO postFeedback(FeedbackDTO feedbackData) {
+		return feedbackCtrl.addFeedback(business, checkIn, feedbackData);
+	}
 }
