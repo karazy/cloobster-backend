@@ -3,11 +3,15 @@ package net.eatsense.representation;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 
 public class FeedbackDTO {
 
+	@Valid
+	@NotNull
 	private List<FeedbackQuestion> answers;
 	private long businessId;
 	private Long checkInId;

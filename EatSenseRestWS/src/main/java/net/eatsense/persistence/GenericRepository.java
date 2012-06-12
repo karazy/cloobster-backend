@@ -38,7 +38,7 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	public GenericRepository(Class<T> clazz) {
 		this.clazz = clazz;
 	}
-
+	
 	/**
 	 * Saves or update given object.
 	 * @param obj

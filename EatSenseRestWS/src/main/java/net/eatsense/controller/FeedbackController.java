@@ -3,6 +3,11 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.NotFoundException;
@@ -11,6 +16,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.representation.FeedbackDTO;
@@ -19,10 +25,12 @@ import net.eatsense.representation.FeedbackFormDTO;
 public class FeedbackController {
 	private final FeedbackFormRepository feedbackFormRepo;
 	private FeedbackRepository feedbackRepo;
+	private Validator validator;
 
 	@Inject
-	public FeedbackController(FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo) {
+	public FeedbackController(FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, Validator validator) {
 		super();
+		this.validator = validator;
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.feedbackRepo = feedbackRepo;
 	}
@@ -45,10 +53,20 @@ public class FeedbackController {
 		return new FeedbackFormDTO(feedbackForm);
 	}
 
-	public FeedbackFormDTO addFeedback(Business business, CheckIn checkIn,
+	public FeedbackDTO addFeedback(Business business, CheckIn checkIn,
 			FeedbackDTO feedbackData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(feedbackData, "feedbackData was null");
+		
+		Set<ConstraintViolation<FeedbackDTO>> violations = validator.validate(feedbackData);
+		if(!violations.isEmpty()) {
+			StringBuilder sb = new StringBuilder("validation errors:");
+			for (ConstraintViolation<FeedbackDTO> constraintViolation : violations) {
+				sb.append(String.format(" \"%s\" %s.", constraintViolation.getPropertyPath(), constraintViolation.getMessage()));
+			}
+			throw new ValidationException(sb.toString());
+		}
+			
 		
 		Feedback feedback = new Feedback();
 		
@@ -60,10 +78,11 @@ public class FeedbackController {
 		feedback.setComment(feedbackData.getComment());
 		feedback.setDate(new Date());
 		feedback.setEmail(feedbackData.getEmail());
-		feedback.setForm(FeedbackForm.getKey(feedbackData.getId()));
+		feedback.setForm(feedbackFormRepo.getKey(feedbackData.getFormId()));
 		
-		feedbackRepo		
+		feedbackRepo.saveOrUpdate(feedback);
+		
 						
-		return null;
+		return new FeedbackDTO(feedback);
 	}
 }

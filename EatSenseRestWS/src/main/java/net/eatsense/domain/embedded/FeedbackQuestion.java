@@ -7,12 +7,26 @@ import javax.validation.constraints.NotNull;
 import org.apache.bval.constraints.NotEmpty;
 
 public class FeedbackQuestion {
+	
+	public FeedbackQuestion(String question, Integer rating, Long id) {
+		super();
+		this.question = question;
+		this.rating = rating;
+		this.id = id;
+	}
+	
+	public FeedbackQuestion() {
+		super();
+	}
+
 	@NotNull
 	@NotEmpty
 	private String question;
 	@Min(0)
 	@Max(5)
 	private Integer rating;
+	
+	@NotNull
 	private Long id;
 	
 	public String getQuestion() {

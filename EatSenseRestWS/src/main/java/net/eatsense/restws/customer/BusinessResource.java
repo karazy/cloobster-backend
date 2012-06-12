@@ -144,7 +144,7 @@ public class BusinessResource {
 	@Path("feedback")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public FeedbackFormDTO postFeedback(FeedbackDTO feedbackData) {
+	public FeedbackDTO postFeedback(FeedbackDTO feedbackData) {
 		return feedbackCtrl.addFeedback(business, checkIn, feedbackData);
 	}
 }
