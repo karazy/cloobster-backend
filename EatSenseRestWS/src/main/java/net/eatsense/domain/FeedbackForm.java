@@ -3,6 +3,7 @@ package net.eatsense.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -12,7 +13,7 @@ import com.googlecode.objectify.Key;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 
 public class FeedbackForm extends GenericEntity {
-	
+	@Embedded
 	List<FeedbackQuestion> questions;
 	
 	String title;

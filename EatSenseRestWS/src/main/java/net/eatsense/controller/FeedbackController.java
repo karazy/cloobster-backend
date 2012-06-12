@@ -19,6 +19,12 @@ public class FeedbackController {
 		this.feedbackFormRepo = feedbackFormRepo;
 	}
 	
+	/**
+	 * Get the feedback form transfer object for the given Business entity.
+	 * 
+	 * @param business
+	 * @return The feedback form dto.
+	 */
 	public FeedbackFormDTO getFeedbackFormForBusiness(Business business) {
 		checkNotNull(business, "business was null");
 		FeedbackForm feedbackForm;

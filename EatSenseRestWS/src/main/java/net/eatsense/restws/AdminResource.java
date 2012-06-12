@@ -4,12 +4,14 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import com.google.inject.Inject;
 
 import net.eatsense.controller.ImportController;
 import net.eatsense.representation.BusinessImportDTO;
+import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.util.DummyDataDumper;
 
 @Path("admin/services")
@@ -49,6 +51,14 @@ public class AdminResource {
 			return "Error:\n" + importCtrl.getReturnMessage();
 		else
 		    return id.toString();
+	}
+	
+	@POST
+	@Path("businesses/{id}/feedbackforms")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO importNewBusinessFeedback(@PathParam("id") Long businessId, FeedbackFormDTO feedbackFormData ) {
+		return importCtrl.importFeedbackForm(businessId, feedbackFormData);
 	}
 	
 	/**

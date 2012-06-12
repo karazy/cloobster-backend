@@ -83,7 +83,7 @@ public class ImportController {
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr) {
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr, FeedbackFormRepository feedbackFormRepo) {
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -95,16 +95,27 @@ public class ImportController {
 		this.orderChoiceRepo = ocr;
 		this.requestRepo = reqr;
 		this.accountRepo = acr;
+		this.feedbackFormRepo = feedbackFormRepo;
 	}
 	
     public void setValidator(Validator validator) {
         this.validator = validator;
     }
     
-    public FeedbackFormDTO importFeedbackForm(Business business, FeedbackFormDTO feedbackFormData) {
-    	checkNotNull(business, "business was null");
+    /**
+     * Creates a new {@link FeedbackForm} entity based on the given data
+     * and adds it to a {@link Business} identified by the given id.
+     * 
+     * @param businessId - Id of the business to which the form will be added.
+     * @param feedbackFormData - Data for the new {@link FeedbackForm} entity.
+     * @return {@link FeedbackFormDTO} - Data object representing the new FeedbackForm.
+     */
+    public FeedbackFormDTO importFeedbackForm(Long businessId, FeedbackFormDTO feedbackFormData) {
+    	checkNotNull(businessId, "business id was null");
     	checkNotNull(feedbackFormData, "feedbackFormData was null");
     	checkNotNull(feedbackFormData.getQuestions(), "questions list was null");
+    	
+    	Business business = businessRepo.getById(businessId);
     	
     	FeedbackForm feedbackForm = new FeedbackForm();
     	feedbackForm.setDescription(feedbackFormData.getDescription());
@@ -114,11 +125,12 @@ public class ImportController {
 			question.setId(index);
 			index++;
 		}
-    	feedbackForm.setQuestions(feedbackForm.getQuestions());
-    	feedbackForm.setTitle(feedbackForm.getTitle());
+    	feedbackForm.setQuestions(feedbackFormData.getQuestions());
+    	feedbackForm.setTitle(feedbackFormData.getTitle());
     	
-    	feedbackFormRepo.saveOrUpdate(feedbackForm);
-    	business.setFeedbackForm(feedbackForm.getKey());
+    	Key<FeedbackForm> formKey = feedbackFormRepo.saveOrUpdate(feedbackForm);
+    	business.setFeedbackForm(formKey);
+    	businessRepo.saveOrUpdate(business);
     	    	
     	return new FeedbackFormDTO(feedbackForm);
     }
