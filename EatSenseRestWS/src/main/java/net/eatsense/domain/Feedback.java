@@ -3,6 +3,8 @@ package net.eatsense.domain;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Embedded;
+
 import net.eatsense.domain.embedded.FeedbackQuestion;
 
 import com.googlecode.objectify.Key;
@@ -13,6 +15,7 @@ public class Feedback extends GenericEntity {
 	private Key<Business> business;
 	private Key<CheckIn> checkIn;
 	private Key<FeedbackForm> form;
+	@Embedded
 	private List<FeedbackQuestion> answers;
 	
 	/**
