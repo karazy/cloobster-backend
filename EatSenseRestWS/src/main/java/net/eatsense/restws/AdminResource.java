@@ -5,17 +5,22 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.core.ResourceContext;
 
 import net.eatsense.controller.ImportController;
 import net.eatsense.representation.BusinessImportDTO;
+import net.eatsense.restws.business.BusinessResource;
 import net.eatsense.util.DummyDataDumper;
 
 @Path("admin/services")
 public class AdminResource {
 	
-	
+	@Context
+	private ResourceContext resourceContext;
+		
 	private DummyDataDumper ddd;
 	private ImportController importCtrl;
 
@@ -24,6 +29,11 @@ public class AdminResource {
 		super();
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
+	}
+	
+	@Path("nicknames")
+	public NicknameResource getNicknamesResource() {
+		return resourceContext.getResource(NicknameResource.class);
 	}
 	
 	@POST

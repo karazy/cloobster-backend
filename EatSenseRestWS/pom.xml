@@ -78,10 +78,25 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory>
 									<resources>
 										<resource>
 											<directory>src/main/frontend/admin-dev</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>copy-admin-new-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin2/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/admin</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -133,6 +148,21 @@
 						<artifactId>maven-resources-plugin</artifactId>
 						<version>2.4.2</version>
 						<executions>
+							<execution>
+								<id>copy-admin-new-prod</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin2/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/admin</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
 							<execution>
 								<id>copy-admin-prod</id>
 								<phase>compile</phase>

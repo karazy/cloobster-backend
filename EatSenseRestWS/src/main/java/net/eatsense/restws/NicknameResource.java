@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -17,7 +18,6 @@ import net.eatsense.util.NicknameGenerator;
 
 import com.google.inject.Inject;
 
-@Path("/nicknames")
 public class NicknameResource {
 	
 	private NicknameAdjectiveRepository adjectiveRepo;
@@ -31,15 +31,15 @@ public class NicknameResource {
 		this.nicknameGenerator = nnGen;
 	}
 	
-	@PUT
-	@Path("/adjective/list")
+	@POST
+	@Path("/adjectives")
 	@Consumes("application/json; charset=UTF-8")
 	public void addNicknameAdjectives(List<NicknameAdjective> adjectives) {
 		adjectiveRepo.ofy().put(adjectives);
 	}
 	
-	@PUT
-	@Path("/noun/list")
+	@POST
+	@Path("/nouns")
 	@Consumes("application/json; charset=UTF-8")
 	public void addNicknameNouns(List<NicknameNoun> nouns) {
 		nounRepo.ofy().put(nouns);
