@@ -3,18 +3,16 @@
  */
 package net.eatsense.controller;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Validator;
 
-import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
@@ -35,7 +33,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.appengine.api.channel.ChannelMessage;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
