@@ -5,6 +5,7 @@ package net.eatsense.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +20,7 @@ import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.representation.FeedbackDTO;
@@ -63,12 +65,15 @@ public class FeedbackControllerTest {
 	private Key<FeedbackForm> formKey;
 	@Mock
 	private Key<CheckIn> checkInKey;
+	
+	@Mock
+	private CheckInRepository checkInRepo;
 
 	@Before
 	public void setUp() throws Exception {
 		Injector injector = Guice.createInjector(new ValidationModule());
 		
-		ctrl = new FeedbackController(feedbackFormRepo, feedbackRepo, injector.getInstance(Validator.class));
+		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(Validator.class));
 		
 		businessId = 1l;
 		when(business.getKey()).thenReturn(businessKey);
@@ -83,21 +88,44 @@ public class FeedbackControllerTest {
 		
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		when(feedbackFormRepo.getKey(testFeedbackData.getFormId())).thenReturn(formKey);
+		Feedback feedback = new Feedback();
+		when(feedbackRepo.newEntity()).thenReturn(feedback );
 		ctrl.addFeedback(business, checkIn, testFeedbackData);
-		ArgumentCaptor<Feedback> saveArg = ArgumentCaptor.forClass(Feedback.class);
-		verify(feedbackRepo).saveOrUpdate(saveArg.capture());
-		Feedback result = saveArg.getValue();
+		verify(feedbackRepo).saveOrUpdate(feedback);
 		
-		assertThat(result.getAnswers(), is(testFeedbackData.getAnswers()));
-		assertThat(result.getBusiness(), is(businessKey));
-		assertThat(result.getCheckIn(), is(checkInKey));
-		assertThat(result.getComment(), is(testFeedbackData.getComment()));
-		assertThat(result.getEmail(), is(testFeedbackData.getEmail()));
-		assertThat(result.getForm(), is(formKey));
+		assertThat(feedback.getAnswers(), is(testFeedbackData.getAnswers()));
+		assertThat(feedback.getBusiness(), is(businessKey));
+		assertThat(feedback.getCheckIn(), is(checkInKey));
+		assertThat(feedback.getComment(), is(testFeedbackData.getComment()));
+		assertThat(feedback.getEmail(), is(testFeedbackData.getEmail()));
+		assertThat(feedback.getForm(), is(formKey));
+	}
+	
+	@Test
+	public void testUpdateFeedback() {
+		FeedbackDTO testFeedbackData = getTestFeedbackData();
+		Feedback feedback = new Feedback();
+		Key<Feedback> feedbackKey = mock(Key.class);
+		Long feedbackId = 1l;
+		testFeedbackData.setId(feedbackId);
+		when(feedbackKey.getId()).thenReturn(feedbackId );
+		when(checkIn.getFeedback()).thenReturn(feedbackKey );
+		when(feedbackRepo.getByKey(feedbackKey)).thenReturn(feedback);
+		
+		ctrl.updateFeedback(checkIn, testFeedbackData);
+	
+		verify(feedbackRepo).saveOrUpdate(feedback);
+		
+		assertThat(feedback.getAnswers(), is(testFeedbackData.getAnswers()));
+		assertThat(feedback.getComment(), is(testFeedbackData.getComment()));
+		assertThat(feedback.getEmail(), is(testFeedbackData.getEmail()));
 	}
 	
 	@Test
 	public void testAddFeedbackInvalidAnswer2() {
+		Feedback feedback = new Feedback();
+		when(feedbackRepo.newEntity()).thenReturn(feedback );
+
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		testFeedbackData.getAnswers().get(0).setRating(-1);
 		thrown.expect(ValidationException.class);
@@ -108,6 +136,9 @@ public class FeedbackControllerTest {
 	
 	@Test
 	public void testAddFeedbackInvalidAnswer() {
+		Feedback feedback = new Feedback();
+		when(feedbackRepo.newEntity()).thenReturn(feedback );
+
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		testFeedbackData.getAnswers().get(0).setRating(10);
 		thrown.expect(ValidationException.class);

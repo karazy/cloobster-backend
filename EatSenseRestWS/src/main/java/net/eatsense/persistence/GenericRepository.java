@@ -40,6 +40,21 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	}
 	
 	/**
+	 * Create a new instance of an entity.
+	 * 
+	 * @return new instance of class of T
+	 */
+	public T newEntity() {
+		try {
+			return clazz.newInstance();
+		} catch (InstantiationException e) {
+			throw new RuntimeException("Unable to create new "+clazz.getSimpleName(),e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Unable to create new "+clazz.getSimpleName(),e);
+		}
+	}
+
+	/**
 	 * Saves or update given object.
 	 * @param obj
 	 * 		Object to save.
@@ -246,6 +261,26 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 		q.filter(propName, propValue);
 
 		return q.get();
+	}
+	
+	/**
+	 * Convenience method to get the Key of the first object matching a single property.
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return Key of matching Object or <code>null</code> if no match found
+	 */
+	public Key<T> getKeyByProperty(String propName, Object propValue)
+	{
+		logger.info("{}, property: {}", clazz, propName);
+		Query<T> q = ofy().query(clazz);
+
+		q.filter(propName, propValue);
+
+		return q.getKey();
 	}
 	
 	/**

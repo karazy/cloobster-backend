@@ -78,6 +78,11 @@ public class CheckIn extends GenericEntity{
 	@NotNull
 	private Key<Spot> spot;
 	
+	/**
+	 * Links to saved Feedback entity if given.
+	 */
+	private Key<Feedback> feedback;
+	
 	private boolean archived = false;
 	
 	private String channelId;
@@ -170,6 +175,14 @@ public class CheckIn extends GenericEntity{
 
 	public void setChannelId(String channelId) {
 		this.channelId = channelId;
+	}
+
+	public Key<Feedback> getFeedback() {
+		return feedback;
+	}
+
+	public void setFeedback(Key<Feedback> feedback) {
+		this.feedback = feedback;
 	}
 	
 	

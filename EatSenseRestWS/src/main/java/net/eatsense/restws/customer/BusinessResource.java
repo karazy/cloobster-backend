@@ -6,6 +6,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -145,6 +146,30 @@ public class BusinessResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public FeedbackDTO postFeedback(FeedbackDTO feedbackData) {
-		return feedbackCtrl.addFeedback(business, checkIn, feedbackData);
+		return new FeedbackDTO(feedbackCtrl.addFeedback(business, checkIn, feedbackData));
 	}
+	
+	@GET
+	@Path("feedback/{id}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
+	public FeedbackDTO getPreviousFeedback(@PathParam("id") long id) {
+		return feedbackCtrl.getFeedbackForCheckIn(checkIn, id);
+	}
+	
+	@PUT
+	@Path("feedback/{id}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
+	public FeedbackDTO updatePreviousFeedback(@PathParam("id") long id,FeedbackDTO feedbackData) {
+		if(checkIn.getFeedback() != null && checkIn.getFeedback().getId() == id) {
+			return new FeedbackDTO(feedbackCtrl.updateFeedback(checkIn, feedbackData));
+		}
+		else {
+			throw new net.eatsense.exceptions.NotFoundException("unknown feedback id");
+		}
+	}
+		
 }

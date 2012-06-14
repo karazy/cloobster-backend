@@ -74,4 +74,7 @@ public class Feedback extends GenericEntity {
 	public void setCheckIn(Key<CheckIn> checkIn) {
 		this.checkIn = checkIn;
 	}
+	public Key<Feedback> getKey() {
+		return new Key<Feedback>(business, Feedback.class, getId());
+	}
 }
