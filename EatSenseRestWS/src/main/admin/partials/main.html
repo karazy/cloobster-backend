@@ -1,19 +1,28 @@
 <div class="row-fluid">
-    <div class="span3" ng-controller="CloobsterAdmin.Functions">
-      <div class="well sidebar-nav">
-        <ul class="nav nav-list">
-          <li class="nav-header">Datastore Functions</li>
-          <li ng-hide="showDeleteAll"><button type="button" class="btn btn-small btn-danger span12" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button></li>
-          <li ng-show="showDeleteAll"><button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button></li>
-          <li ng-hide="showDeleteLive"><button type="button" class="btn btn-small btn-danger span12" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button></li>
-          <li ng-show="showDeleteLive"><button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button></li>
-          <li class="nav-header">Account Functions</li>
-          <li><button type="button" class="btn btn-small span12" ng-click="createDummieAccounts()" ng-bind="createDummieAccountsText" ng-disabled="createDummieAccountsDisabled" ng-init="createDummieAccountsText='Create Dummie Accounts'"></button></li>
-        </ul>
+    <div class="span4" ng-controller="CloobsterAdmin.Functions">
+      <div class="well">
+        <h1>General Functions</h1>
+        <h6 class="nav-header">Datastore Functions</h6>
+        <p ng-hide="showDeleteAll">
+        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button>
+        </p>
+        <p ng-show="showDeleteAll">
+        	<button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button>
+        </p>
+        <p ng-hide="showDeleteLive">
+        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button>
+        </p>
+        <p ng-show="showDeleteLive">
+        	<button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button>
+        </p>
+        <h6 class="nav-header">Account Functions</h6>
+        <p>
+        	<button type="button" class="btn btn-small" ng-click="createDummieAccounts()" ng-bind="createDummieAccountsText" ng-disabled="createDummieAccountsDisabled" ng-init="createDummieAccountsText='Create Dummie Accounts'"></button>
+        </p>
       </div><!--/.well -->
     </div><!--/span-->
 
-	<div class="span9">
+	<div class="span8">
 		<div class="row-fluid" id="importbusiness" ng-init="importUrl='/admin/services/businesses'" ng-controller="CloobsterAdmin.Import">
 			<div class="well span12">
 				<h1>Import Business <small>Import business complete with spots, menus and products.</small></h1>

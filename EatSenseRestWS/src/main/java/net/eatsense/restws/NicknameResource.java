@@ -19,7 +19,7 @@ public class NicknameResource {
 	}
 	
 	@GET	
-	@Produces	
+	@Produces("text/plain; charset=UTF-8")
 	public String generateNickname(@QueryParam("random") String random) {
 		String nickname = "";
 		if(random != null) {
