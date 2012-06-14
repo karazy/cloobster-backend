@@ -11,39 +11,55 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
-import com.google.inject.Inject;
-import com.sun.jersey.api.core.ResourceContext;
-
 import net.eatsense.controller.ImportController;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.NicknameAdjective;
+import net.eatsense.domain.NicknameNoun;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.NicknameAdjectiveRepository;
+import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessImportDTO;
-import net.eatsense.restws.business.BusinessResource;
 import net.eatsense.util.DummyDataDumper;
+
+import com.google.inject.Inject;
+import com.sun.jersey.api.core.ResourceContext;
 
 @Path("admin/services")
 public class AdminResource {
 	
 	@Context
 	private ResourceContext resourceContext;
-		
+	private NicknameAdjectiveRepository adjectiveRepo;
+	private NicknameNounRepository nounRepo;
 	private DummyDataDumper ddd;
 	private ImportController importCtrl;
 
 	private final BusinessRepository businessRepo;
 
 	@Inject
-	public AdminResource(DummyDataDumper ddd, ImportController importCtr, BusinessRepository businessRepo) {
+	public AdminResource(DummyDataDumper ddd, ImportController importCtr, BusinessRepository businessRepo, NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo) {
 		super();
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
+		this.adjectiveRepo = adjRepo;
+		this.nounRepo = nounRepo;
 		this.businessRepo = businessRepo;
 	}
 	
-	@Path("nicknames")
-	public NicknameResource getNicknamesResource() {
-		return resourceContext.getResource(NicknameResource.class);
+	
+	@POST
+	@Path("nicknames/adjectives")
+	@Consumes("application/json; charset=UTF-8")
+	public void addNicknameAdjectives(List<NicknameAdjective> adjectives) {
+		adjectiveRepo.ofy().put(adjectives);
+	}
+	
+	@POST
+	@Path("nicknames/nouns")
+	@Consumes("application/json; charset=UTF-8")
+	public void addNicknameNouns(List<NicknameNoun> nouns) {
+		nounRepo.ofy().put(nouns);
 	}
 	
 	@POST
