@@ -106,10 +106,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/frontend/admin-dev</directory>
+											<directory>src/main/admin</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -197,7 +197,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/frontend/admin-prod</directory>
+											<directory>src/main/admin</directory>
 										</resource>
 									</resources>
 								</configuration>
