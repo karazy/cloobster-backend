@@ -1,0 +1,117 @@
+<div class="row-fluid">
+    <div class="span3" ng-controller="CloobsterAdmin.Functions">
+      <div class="well sidebar-nav">
+        <ul class="nav nav-list">
+          <li class="nav-header">Datastore Functions</li>
+          <li ng-hide="showDeleteAll"><button type="button" class="btn btn-small btn-danger span12" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button></li>
+          <li ng-show="showDeleteAll"><button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button></li>
+          <li ng-hide="showDeleteLive"><button type="button" class="btn btn-small btn-danger span12" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button></li>
+          <li ng-show="showDeleteLive"><button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button></li>
+          <li class="nav-header">Account Functions</li>
+          <li><button type="button" class="btn btn-small span12" ng-click="createDummieAccounts()" ng-bind="createDummieAccountsText" ng-disabled="createDummieAccountsDisabled" ng-init="createDummieAccountsText='Create Dummie Accounts'"></button></li>
+        </ul>
+      </div><!--/.well -->
+    </div><!--/span-->
+
+	<div class="span9">
+		<div class="row-fluid" id="importbusiness" ng-init="importUrl='/admin/services/businesses'" ng-controller="CloobsterAdmin.Import">
+			<div class="well span12">
+				<h1>Import Business <small>Import business complete with spots, menus and products.</small></h1>
+				<form ng-submit="import()" name="importBusinessForm" ng-hide="importProgress">
+					<fieldset>
+						<div class="control-group">
+		  					<label class="control-label" for="businessjson">JSON data:</label>
+		  						<div class="controls">
+		    						<textarea class="span9" name="business-json" id="businessjson" placeholder="Paste JSON import file here ..." ng-model="jsonData" required/>
+		    					</div>
+						</div>
+						</fieldset>
+						<button type="submit" ng-disabled="importBusinessForm.$invalid" class="btn btn-primary btn-large">Import Business</button>
+				</form>
+				<div>
+					<div class="progress" ng-show="importProgress">
+		        		<div class="bar" ng-style="importProgressStyle"></div>
+		    		</div>
+		    		<div import-alert alert="importAlert"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row-fluid" id="importnicknames">
+			<div class="span12 well">
+				<h1>Import Nicknames <small>Import list auf nickname nouns and adjectives.</small></h1>
+				<div class="row-fluid">
+					<div class="span6" ng-init="importUrl='/admin/services/nicknames/adjectives'" ng-controller="CloobsterAdmin.Import">
+						<form ng-submit="import()" name="importBusinessForm" ng-hide="importProgress">
+							<fieldset>
+								<div class="control-group">
+				  					<label class="control-label" for="adjectivesjson">Nickname adjectives JSON data:</label>
+				  						<div class="controls">
+				    						<textarea name="adjectivesjson" id="adjectivesjson" placeholder="Paste JSON import file here ..." ng-model="jsonData" required/>
+				    					</div>
+								</div>
+								</fieldset>
+								<button type="submit" ng-disabled="importBusinessForm.$invalid" class="btn btn-primary btn-large">Import adjectives</button>
+						</form>
+						<div>
+							<div class="progress" ng-show="importProgress">
+				        		<div class="bar" ng-style="importProgressStyle"></div>
+				    		</div>
+				    		<div import-alert alert="importAlert"></div>
+						</div>
+					</div>
+					<div class="span6" ng-init="importUrl='/admin/services/nicknames/nouns'" ng-controller="CloobsterAdmin.Import">
+						<form ng-submit="import()" name="importBusinessForm" ng-hide="importProgress">
+							<fieldset>
+								<div class="control-group">
+				  					<label class="control-label" for="nounjson">Nickname nouns JSON data:</label>
+				  						<div class="controls">
+				    						<textarea name="nounjson" id="nounjson" placeholder="Paste JSON import file here ..." ng-model="jsonData" required/>
+				    					</div>
+								</div>
+								</fieldset>
+								<button type="submit" ng-disabled="importBusinessForm.$invalid" class="btn btn-primary btn-large">Import nouns</button>
+						</form>
+						<div>
+							<div class="progress" ng-show="importProgress">
+				        		<div class="bar" ng-style="importProgressStyle"></div>
+				    		</div>
+				    		<div import-alert alert="importAlert"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row-fluid" id="importfeedbackform" >
+			<div class="span12 well" ng-controller="CloobsterAdmin.SelectBusiness">
+				<h1>Import feedback form <small>Import feedback form for a selected businesses.</small></h1>
+				<div class="row-fluid">
+					<div class="span12">
+					Upload feedback for <select ng-hide="message" ng-model="business" ng-options="(b.name+' id: '+b.id ) for b in businesses"></select>
+					<span ng-bind="message">Loading businesses ...</span>
+					</div>
+				</div>
+				<div class="row-fluid"  ng-controller="CloobsterAdmin.Import" ng-show="businessSelected">
+					<div class="span12">
+					<form ng-submit="import()" name="importFeedbackForm" ng-hide="importProgress" >
+						<fieldset>
+							<div class="control-group">
+			  					<label class="control-label" for="feedbackformjson">JSON data:</label>
+			  						<div class="controls">
+			    						<textarea name="business-json" id="feedbackformjson" placeholder="Paste JSON import file here ..." ng-model="jsonData" required/>
+			    					</div>
+							</div>
+							</fieldset>
+							<button type="submit" ng-disabled="importFeedbackForm.$invalid" class="btn btn-primary btn-large">Import feedback form</button>
+					</form>
+					<div>
+						<div class="progress" ng-show="importProgress">
+			        		<div class="bar" ng-style="importProgressStyle"></div>
+			    		</div>
+			    		<div import-alert alert="importAlert"></div>
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
