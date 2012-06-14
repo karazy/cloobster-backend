@@ -65,7 +65,7 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 
 	function importSuccess() {
 		setProgress("100%");
-		showAlert("alert-success", "Done!", "Business import done.", "Import another", resetForm);
+		showAlert("alert-success", "Done!", "Import done.", "Import more", resetForm);
 	}
 
 	function resetForm() {
@@ -97,8 +97,60 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 }
 CloobsterAdmin.Import.$inject = ['$scope', '$http', '$anchorScroll'];
 
-CloobsterAdmin.Functions = function($scope, $http, $anchorScroll) {
+CloobsterAdmin.Functions = function($scope, $http) {
+	$scope.confirmDeleteAllDisabled = false;
+	$scope.confirmDeleteLiveDisabled = false;
 
+	$scope.deleteAllData = function() {
+		$scope.confirmDeleteAllText = "Deleting ...";
+		$scope.confirmDeleteAllDisabled = true;
+		$http.delete('/admin/services/datastore/all').success(function() {
+				$scope.confirmDeleteAllText = "All data deleted.";
+			}).error(function (data, status) {
+				$scope.confirmDeleteAllText = status + " error.";
+			});
+	};
+
+	$scope.deleteLiveData = function() {
+		$scope.confirmDeleteLiveText = "Deleting ...";
+		$scope.confirmDeleteLiveDisabled = true;
+		$http.delete('/admin/services/datastore/live').success(function() {
+				$scope.confirmDeleteLiveText = "Live data deleted.";
+			}).error(function (data, status) {
+				$scope.confirmDeleteLiveText = status + " error.";
+			});
+	};
+
+	$scope.createDummieAccounts = function() {
+		$scope.createDummieAccountsText = "Creating ...";
+		$scope.createDummieAccountsDisabled = true;
+		$http.post('/admin/services/accounts/dummies', {}).success(function() {
+				$scope.createDummieAccountsText = "Accounts created.";
+			}).error(function (data, status) {
+				$scope.createDummieAccountsText = status + " error.";
+			});	
+	};
 }
 
-CloobsterAdmin.Functions.$inject = ['$scope', '$http', '$anchorScroll'];
+CloobsterAdmin.Functions.$inject = ['$scope', '$http'];
+
+CloobsterAdmin.SelectBusiness = function($scope, $http) {
+	$scope.businessSelected = false;
+	$scope.message = "Loading businesses ...";
+	$scope.business = {};
+
+	$http.get('/admin/services/businesses').success( function(data ) {
+		delete $scope.message;
+		$scope.businesses = data;
+		$scope.$watch('business', function(newVal, old, scope) {
+			if(newVal.hasOwnProperty('id')) {
+				scope.businessSelected = true;
+			scope.importUrl = '/admin/services/businesses/'+newVal.id+'/feedbackforms';	
+			}
+		});
+		$scope.business = $scope.businesses[0];
+	}).error(function(status, data ) {
+		$scope.message = status + " Error loading businesses."
+	});
+}
+CloobsterAdmin.SelectBusiness.$inject = ['$scope', '$http'];

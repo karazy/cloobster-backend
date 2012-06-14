@@ -7,9 +7,8 @@ var CloobsterAdmin =  {};
 CloobsterAdmin.module = angular.module('CloobsterAdmin', []).
   config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
   	$locationProvider.hashPrefix = '!';
-  	$routeProvider.when('/import/:section', {template: 'partials/import.html'});
-  	$routeProvider.when('/import', {template: 'partials/import.html'});
-    $routeProvider.otherwise({redirectTo: '/import'});
+  	$routeProvider.when('/main', {template: 'partials/main.html'});
+    $routeProvider.otherwise({redirectTo: '/main'});
  }]);
 
 CloobsterAdmin.module.directive('importAlert', function(){
