@@ -11,7 +11,6 @@
 		<property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties" />
 		<property name="net.karazy.channels.cockpit.timeout" value="480"/>
 		<property name="net.karazy.channels.app.timeout" value="240"/>
-		<property name="net.karazy.environment" value="${karazy.environment}"/>
 	</system-properties>
 
 	<inbound-services>
