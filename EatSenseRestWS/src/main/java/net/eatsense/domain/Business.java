@@ -62,6 +62,8 @@ public class Business extends GenericEntity {
 	public String getAddress() {
 		return address;
 	}
+	
+	private Key<FeedbackForm> feedbackForm;
 
 	public void setAddress(String address) {
 		this.address = address;
@@ -156,6 +158,14 @@ public class Business extends GenericEntity {
 
 	public void setCompany(Key<Company> company) {
 		this.company = company;
+	}
+
+	public Key<FeedbackForm> getFeedbackForm() {
+		return feedbackForm;
+	}
+
+	public void setFeedbackForm(Key<FeedbackForm> feedbackForm) {
+		this.feedbackForm = feedbackForm;
 	}
 	
 	

@@ -89,12 +89,11 @@ public class AccountControllerTest {
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
 		ctr = new AccountController(ar, rr,recipientRepo, companyRepo, channelController, avf.getValidator());
 		
-		
-		 password = "diesisteintestpasswort";
-		 login = "testlogin";
-		 email = "wurst@wurst.de";
-		 role = "admin";
-		 //TODO update to use restaurant id
+		password = "diesisteintestpasswort";
+		login = "testlogin";
+		email = "wurst@wurst.de";
+		role = "admin";
+		//TODO update to use restaurant id
 		account = ar.createAndSaveAccount( login, password,
 				email, role, rr.getAllKeys(), true, true);		 
 	}
