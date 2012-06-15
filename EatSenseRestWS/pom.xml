@@ -441,7 +441,7 @@
                 					<directory>${basedir}/src/main/webapp</directory>
                 					<filtering>true</filtering>
                 					<includes>
-                    					<include>WEB-INF/**/*</include>
+                    					<include>WEB-INF/web.xml</include>
                 					</includes>
 								</resource>
 								<resource>
@@ -451,7 +451,7 @@
 										<exclude>app/**/*.phone.*</exclude>
 										<exclude>app/**/*.iphone.*</exclude>
 										<exclude>app/**/*.ignore.*</exclude>
-										<exclude>WEB-INF/**/*</exclude>
+										<exclude>WEB-INF/web.xml</exclude>
 									</excludes>
 								</resource>
 								<!-- Add filtering of appengine-web.xml for system properties -->

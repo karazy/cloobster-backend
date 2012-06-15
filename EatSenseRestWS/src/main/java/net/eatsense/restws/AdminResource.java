@@ -1,8 +1,10 @@
 package net.eatsense.restws;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,6 +13,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.eatsense.controller.ImportController;
 import net.eatsense.domain.Business;
@@ -29,26 +34,37 @@ import com.sun.jersey.api.core.ResourceContext;
 
 @Path("admin/services")
 public class AdminResource {
-	
-	@Context
-	private ResourceContext resourceContext;
-	private NicknameAdjectiveRepository adjectiveRepo;
-	private NicknameNounRepository nounRepo;
-	private DummyDataDumper ddd;
-	private ImportController importCtrl;
+	private final NicknameAdjectiveRepository adjectiveRepo;
+	private final NicknameNounRepository nounRepo;
+	private final DummyDataDumper ddd;
+	private final ImportController importCtrl;
 
 	private final BusinessRepository businessRepo;
+	private final ServletContext servletContext;
+	protected final Logger logger;
 
 	@Inject
-	public AdminResource(DummyDataDumper ddd, ImportController importCtr, BusinessRepository businessRepo, NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo) {
+	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
+			ImportController importCtr, BusinessRepository businessRepo,
+			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo) {
 		super();
+		this.logger =  LoggerFactory.getLogger(this.getClass());
+		this.servletContext = servletContext;
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
 		this.adjectiveRepo = adjRepo;
 		this.nounRepo = nounRepo;
 		this.businessRepo = businessRepo;
+		String env = servletContext.getInitParameter("karazy.environment");
+		
+		Enumeration params = servletContext.getInitParameterNames();
+		while( params.hasMoreElements() ) {
+			logger.info("initparameter: ", params.nextElement());
+		}
+		
+		logger.info("karazy.enironment: ", env);
+		
 	}
-	
 	
 	@POST
 	@Path("nicknames/adjectives")

@@ -1,6 +1,7 @@
 package net.eatsense;
 
 
+import java.util.Enumeration;
 import java.util.HashMap;
 
 import net.eatsense.auth.SecurityFilter;
@@ -18,6 +19,8 @@ import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
@@ -49,11 +52,19 @@ public class EatSenseGuiceServletContextListener extends
 				new JerseyServletModule() { 
 					@Override 					
 					protected void configureServlets() {
+						Logger logger = LoggerFactory.getLogger(this.getClass());
 						HashMap<String, String> parameters = new HashMap<String, String>();
+						
+						Enumeration env = getServletContext().getInitParameterNames();
+						while( env.hasMoreElements() ) {
+							logger.info("initparameter: ", env.nextElement());
+						}
+						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
+						
 						bind(BusinessesResource.class);
 						bind(net.eatsense.restws.customer.BusinessesResource.class);
 						bind(NicknameResource.class);
