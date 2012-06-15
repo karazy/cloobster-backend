@@ -102,6 +102,26 @@ public class FeedbackControllerTest {
 	}
 	
 	@Test
+	public void testUpdateFeedbackUnknownId() {
+		FeedbackDTO testFeedbackData = getTestFeedbackData();
+		Feedback feedback = new Feedback();
+		Key<Feedback> feedbackKey = mock(Key.class);
+		Long feedbackId = 1l;
+		testFeedbackData.setId(feedbackId);
+		when(feedbackKey.getId()).thenReturn(2l );
+		when(checkIn.getFeedback()).thenReturn(feedbackKey );
+		when(feedbackRepo.getByKey(feedbackKey)).thenReturn(feedback);
+		
+		ctrl.updateFeedback(checkIn, testFeedbackData);
+	
+		verify(feedbackRepo).saveOrUpdate(feedback);
+		
+		assertThat(feedback.getAnswers(), is(testFeedbackData.getAnswers()));
+		assertThat(feedback.getComment(), is(testFeedbackData.getComment()));
+		assertThat(feedback.getEmail(), is(testFeedbackData.getEmail()));
+	}
+	
+	@Test
 	public void testUpdateFeedback() {
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		Feedback feedback = new Feedback();
