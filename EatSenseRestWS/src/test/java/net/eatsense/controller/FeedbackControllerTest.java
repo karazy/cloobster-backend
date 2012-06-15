@@ -19,6 +19,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.embedded.FeedbackQuestion;
+import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
@@ -112,13 +113,9 @@ public class FeedbackControllerTest {
 		when(checkIn.getFeedback()).thenReturn(feedbackKey );
 		when(feedbackRepo.getByKey(feedbackKey)).thenReturn(feedback);
 		
-		ctrl.updateFeedback(checkIn, testFeedbackData);
-	
-		verify(feedbackRepo).saveOrUpdate(feedback);
+		thrown.expect(NotFoundException.class);
 		
-		assertThat(feedback.getAnswers(), is(testFeedbackData.getAnswers()));
-		assertThat(feedback.getComment(), is(testFeedbackData.getComment()));
-		assertThat(feedback.getEmail(), is(testFeedbackData.getEmail()));
+		ctrl.updateFeedback(checkIn, testFeedbackData);
 	}
 	
 	@Test
