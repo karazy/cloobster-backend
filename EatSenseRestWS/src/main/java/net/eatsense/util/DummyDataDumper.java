@@ -1,10 +1,8 @@
 package net.eatsense.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import net.eatsense.auth.Role;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -49,14 +47,21 @@ public class DummyDataDumper {
 		this.cr = cr;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		ar.createAndSaveAccount("admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), true, true);
-		Key<Business> kaiBusiness = rr.getKeyByProperty("name", "Kai's Lounge");
-		if(kaiBusiness != null) {
-			ar.createAndSaveAccount("kai", "kk123", "kai.krupka@gmail.com", Role.COMPANYOWNER, Arrays.asList(kaiBusiness), true, true);
+		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
+		if(!testBusinesses.isEmpty()) {
+			logger.info("Create account for Cloobster Club");
+			ar.createAndSaveAccount("cloobster", "test!1", "developer@karazy.net", "restaurantadmin", testBusinesses);
 		}
+			
+		List<Key<Business>> hup = rr.getKeysByProperty("name", "Heidi und Paul");
+		if(!hup.isEmpty()) {
+			logger.info("Create account for Heidi und Paul");
+			ar.createAndSaveAccount("hup", "test", "info@cloobster.com", "restaurantadmin", hup);
+		}
+		
+		ar.createAndSaveAccount("admin", "cl00bster!", "developer@karazy.net", "restaurantadmin", rr.getAllKeys());
 	}	
 
 	public void generateDummyBusinesses() {

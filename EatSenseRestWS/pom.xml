@@ -16,8 +16,8 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.6.5</gae.version>
-		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
+		<gae.version>1.6.6</gae.version>
+		<!-- <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home> -->
 		<gae.application.version>1</gae.application.version>
 
 		<!-- Don't let your Mac use a crazy non-standard encoding -->
@@ -39,7 +39,12 @@
 
 		<!-- ant run plugin -->
 		<antrun.version>1.7</antrun.version>
-
+		
+		<!-- Cloobster Projects -->
+		<cloobster.app>../../cloobster_app/app</cloobster.app>
+		<cloobster.cockpit>../../cloobster_cockpit</cloobster.cockpit>
+		<cloobster.frontend>../../cloobster_frontend</cloobster.frontend>
+		
 	</properties>
 
 	<profiles>
@@ -53,6 +58,9 @@
 		<profile>
 			<id>dev</id>
 			<build>
+				<filters>
+                    <filter>${basedir}/src/main/filters/dev.properties</filter>
+                </filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -68,7 +76,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src</directory>
+											<directory>${cloobster.frontend}/src</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -80,10 +88,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/frontend/admin-dev</directory>
+											<directory>src/main/admin</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -98,10 +106,10 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_cockpit/src</directory>
+											<directory>${cloobster.cockpit}/src</directory>
 										</resource>
 									</resources>
-								</configuration>
+								</configuration>	
 							</execution>
 							<execution>
 								<id>copy-app-dev</id>
@@ -113,7 +121,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/dev</directory>
+											<directory>${cloobster.app}/src</directory>
 												<excludes>
 												<exclude>**/*.phone.*</exclude>
 												<exclude>**/*.iphone.*</exclude>
@@ -128,8 +136,11 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>	
-			<build>			
+			<id>prod</id>
+			<build>
+				<filters>
+            		<filter>${basedir}/src/main/filters/prod.properties</filter>
+            	</filters>	
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -145,7 +156,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/frontend/admin-prod</directory>
+											<directory>src/main/admin</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -160,7 +171,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_cockpit/prod</directory>
+											<directory>${cloobster.cockpit}/prod</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -175,7 +186,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/app/prod/desktop</directory>
+											<directory>${cloobster.app}/prod/desktop</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -380,7 +391,6 @@
 	<build>
 		<!-- Generate compiled stuff in the folder used for development mode -->
 		<outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
-
 		<plugins>
 			<!-- Add source folders to test classpath in order to run gwt-tests as 
 				normal junit-tests -->
@@ -440,13 +450,24 @@
 							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>src/main/webapp</directory>
+                					<directory>${basedir}/src/main/webapp</directory>
+                					<filtering>true</filtering>
+                					<includes>
+                    					<include>WEB-INF/web.xml</include>
+                					</includes>
+								</resource>
+								<resource>
+									<directory>${basedir}/src/main/webapp</directory>
+									<filtering>false</filtering>
 									<excludes>
 										<exclude>app/**/*.phone.*</exclude>
 										<exclude>app/**/*.iphone.*</exclude>
 										<exclude>app/**/*.ignore.*</exclude>
+										<exclude>WEB-INF/web.xml</exclude>
 									</excludes>
 								</resource>
+								<!-- Add filtering of appengine-web.xml for system properties -->
+
 							</resources>
 						</configuration>
 					</execution>

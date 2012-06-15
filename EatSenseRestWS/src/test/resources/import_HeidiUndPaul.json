@@ -9,36 +9,17 @@
         {
             "name": "Bar",
             "order": 1
-        },
-        {
-            "name": "Kreditkarte",
-            "order": 3
         }
     ],
     "spots": [
         {
-            "name": "Tisch 1",
-            "barcode": "hup001",
+            "name": "Tisch A",
+            "barcode": "heidiundpaul001",
             "groupTag": null
         },
         {
-            "name": "Tisch 2",
-            "barcode": "hup002",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 3",
-            "barcode": "hup003",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 4",
-            "barcode": "hup004",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 5",
-            "barcode": "hup005",
+            "name": "Tisch B",
+            "barcode": "heidiundpaul002",
             "groupTag": null
         }
     ],
