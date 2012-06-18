@@ -139,6 +139,19 @@ public class FeedbackControllerTest {
 	}
 	
 	@Test
+	public void testAddFeedbackInvalidFormId() {
+		Feedback feedback = new Feedback();
+		when(feedbackRepo.newEntity()).thenReturn(feedback );
+
+		FeedbackDTO testFeedbackData = getTestFeedbackData();
+		testFeedbackData.setFormId(0);
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("formId");
+				
+		ctrl.addFeedback(business, checkIn, testFeedbackData);
+	}
+	
+	@Test
 	public void testAddFeedbackInvalidAnswer2() {
 		Feedback feedback = new Feedback();
 		when(feedbackRepo.newEntity()).thenReturn(feedback );

@@ -1,5 +1,6 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
@@ -17,7 +18,6 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
-import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
@@ -70,6 +70,7 @@ public class FeedbackController {
 			FeedbackDTO feedbackData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(feedbackData, "feedbackData was null");
+		checkArgument(feedbackData.getFormId() != 0, "feedbackData formId was zero");
 		
 		Feedback feedback = feedbackRepo.newEntity();
 		
