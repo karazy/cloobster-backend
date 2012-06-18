@@ -48,6 +48,9 @@ public class FeedbackController {
 	 */
 	public FeedbackFormDTO getFeedbackFormForBusiness(Business business) {
 		checkNotNull(business, "business was null");
+		if(business.getFeedbackForm() == null) {
+			throw new net.eatsense.exceptions.NotFoundException("business has no feedback form");
+		}
 		FeedbackForm feedbackForm;
 		try {
 			feedbackForm = feedbackFormRepo.getByKey(business.getFeedbackForm());

@@ -1,7 +1,6 @@
 package net.eatsense;
 
 
-import java.util.Enumeration;
 import java.util.HashMap;
 
 import net.eatsense.auth.SecurityFilter;
@@ -19,8 +18,6 @@ import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
