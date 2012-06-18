@@ -348,7 +348,7 @@ public class ImportController {
 		choiceRepo.ofy().delete(choiceRepo.getAllKeys());
 		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
-		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 		accountRepo.ofy().delete(accountRepo.getAllKeys());
@@ -363,7 +363,7 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.ofy().query(CheckIn.class).fetchKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
-		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
 }

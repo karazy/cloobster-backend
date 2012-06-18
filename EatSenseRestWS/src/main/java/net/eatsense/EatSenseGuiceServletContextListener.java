@@ -52,13 +52,7 @@ public class EatSenseGuiceServletContextListener extends
 				new JerseyServletModule() { 
 					@Override 					
 					protected void configureServlets() {
-						Logger logger = LoggerFactory.getLogger(this.getClass());
 						HashMap<String, String> parameters = new HashMap<String, String>();
-						
-						Enumeration env = getServletContext().getInitParameterNames();
-						while( env.hasMoreElements() ) {
-							logger.info("initparameter: ", env.nextElement());
-						}
 						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());

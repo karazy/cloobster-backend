@@ -5,7 +5,7 @@
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 	<context-param>
-    	<param-name>test</param-name>
+    	<param-name>net.karazy.environment</param-name>
     	<param-value>${karazy.environment}</param-value>
 	</context-param>
 
@@ -18,7 +18,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 		<filter-name>guiceFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-‚
+	
 	<listener>
 		<listener-class>net.eatsense.EatSenseGuiceServletContextListener</listener-class>
 	</listener>

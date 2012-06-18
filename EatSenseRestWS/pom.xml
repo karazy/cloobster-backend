@@ -85,6 +85,18 @@
 									<resources>
 										<resource>
 											<directory>src/main/admin</directory>
+											<includes>
+												<include>js/app.js</include>
+											</includes>
+											<!-- Filter app.js with properties. -->
+											<filtering>true</filtering>
+										</resource>
+										<resource>
+											<directory>src/main/admin</directory>
+											<excludes>
+												<exclude>js/app.js</exclude>
+											</excludes>
+											<filtering>false</filtering>
 										</resource>
 									</resources>
 								</configuration>
