@@ -17,6 +17,7 @@
 	        	<button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button>
 	        </p>
         </div>
+        <p ng-show="deleteFunctionsDisabled">Delete functions disabled in production environment.</p>
         <h6 class="nav-header">Account Functions</h6>
         <p>
         	<button type="button" class="btn btn-small" ng-click="createDummieAccounts()" ng-bind="createDummieAccountsText" ng-disabled="createDummieAccountsDisabled" ng-init="createDummieAccountsText='Create Dummie Accounts'"></button>
