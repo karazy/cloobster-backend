@@ -62,6 +62,10 @@ public class EatSenseGuiceServletContextListener extends
 						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());
+						// add cross origin headers filter
+						parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CrossOriginResourceSharingFilter.class.getName());
+						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
+						
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
 						bind(AccountsResource.class);
