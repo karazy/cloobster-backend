@@ -18,8 +18,7 @@ CloobsterAdmin.Navigation = function($scope, $location) {
 
 		location = $location.path();
 		return (location.indexOf(path) === 0) ? "active" : "";
-	}
-
+	};
 };
 CloobsterAdmin.Navigation.$inject = ['$scope', '$location'];
 
@@ -38,10 +37,7 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 		$scope.importAlert.message = message;
 		$scope.importAlert.title = title;
 		$scope.importAlert.buttonText = buttonText;
-		$scope.importAlert.continueFn =  function() {
-			dismissAlert();
-			continueFn();
-		};
+		$scope.importAlert.continueFn =  continueFn;
 	}
 
 	function dismissAlert() {
@@ -98,6 +94,7 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 CloobsterAdmin.Import.$inject = ['$scope', '$http', '$anchorScroll'];
 
 CloobsterAdmin.Functions = function($scope, $http) {
+	$scope.deleteFunctionsDisabled = (Karazy.environment === "prod")? true : false;
 	$scope.confirmDeleteAllDisabled = false;
 	$scope.confirmDeleteLiveDisabled = false;
 

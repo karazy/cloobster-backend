@@ -59,6 +59,7 @@ public class EatSenseGuiceServletContextListener extends
 					@Override 					
 					protected void configureServlets() {
 						HashMap<String, String> parameters = new HashMap<String, String>();
+						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,

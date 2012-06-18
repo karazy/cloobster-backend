@@ -6,6 +6,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -13,12 +14,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.BillController;
+import net.eatsense.controller.FeedbackController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.representation.BillDTO;
+import net.eatsense.representation.FeedbackDTO;
+import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
@@ -38,11 +42,14 @@ public class BusinessResource {
 	private MenuController menuCtrl;
 	private OrderController orderCtrl;
 	private BillController billCtrl;
+
+	private FeedbackController feedbackCtrl;
 	
 	@Inject
 	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl) {
+			BillController billCtrl, FeedbackController feedbackCtrl) {
 		super();
+		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
 		this.billCtrl = billCtrl;
@@ -128,5 +135,43 @@ public class BusinessResource {
 	public BillDTO createBill(BillDTO bill) {
 		return billCtrl.createBill(business, checkIn, bill);
 	}
-
+	
+	@GET
+	@Path("feedbackforms")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO getFeedbackForm() {
+		return feedbackCtrl.getFeedbackFormForBusiness(business);
+	}
+	
+	@POST
+	@Path("feedback")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackDTO postFeedback(FeedbackDTO feedbackData) {
+		return new FeedbackDTO(feedbackCtrl.addFeedback(business, checkIn, feedbackData));
+	}
+	
+	@GET
+	@Path("feedback/{id}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
+	public FeedbackDTO getPreviousFeedback(@PathParam("id") long id) {
+		return feedbackCtrl.getFeedbackForCheckIn(checkIn, id);
+	}
+	
+	@PUT
+	@Path("feedback/{id}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({"guest"})
+	public FeedbackDTO updatePreviousFeedback(@PathParam("id") long id,FeedbackDTO feedbackData) {
+		if(checkIn.getFeedback() != null && checkIn.getFeedback().getId() == id) {
+			return new FeedbackDTO(feedbackCtrl.updateFeedback(checkIn, feedbackData));
+		}
+		else {
+			throw new net.eatsense.exceptions.NotFoundException("unknown feedback id");
+		}
+	}
+		
 }

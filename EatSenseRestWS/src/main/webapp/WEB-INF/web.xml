@@ -4,6 +4,10 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
+	<context-param>
+    	<param-name>net.karazy.environment</param-name>
+    	<param-value>${karazy.environment}</param-value>
+	</context-param>
 
 	<filter>
 		<filter-name>guiceFilter</filter-name>
@@ -27,16 +31,16 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 <!--         </auth-constraint> -->
 <!--     </security-constraint> -->
 
-		<security-constraint>
-	        <web-resource-collection>
-	            <url-pattern>/admin/*</url-pattern>
-	            <url-pattern>/templates/*</url-pattern>
-	        </web-resource-collection>
-	        <auth-constraint>
-	            <role-name>admin</role-name>
-	        </auth-constraint>
-    	</security-constraint>
-    	
+	<security-constraint>
+        <web-resource-collection>
+            <url-pattern>/admin/*</url-pattern>
+            <url-pattern>/templates/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+   	</security-constraint>
+   	
 		
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

@@ -3,13 +3,15 @@ package net.eatsense.restws;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.WebApplicationException;
 
 import net.eatsense.controller.ImportController;
 import net.eatsense.domain.Business;
@@ -20,33 +22,40 @@ import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessImportDTO;
+import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.util.DummyDataDumper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
-import com.sun.jersey.api.core.ResourceContext;
 
 @Path("admin/services")
 public class AdminResource {
-	
-	@Context
-	private ResourceContext resourceContext;
-	private NicknameAdjectiveRepository adjectiveRepo;
-	private NicknameNounRepository nounRepo;
-	private DummyDataDumper ddd;
-	private ImportController importCtrl;
+	private final NicknameAdjectiveRepository adjectiveRepo;
+	private final NicknameNounRepository nounRepo;
+	private final DummyDataDumper ddd;
+	private final ImportController importCtrl;
 
 	private final BusinessRepository businessRepo;
+	protected final Logger logger;
+	private boolean devEnvironment;
 
 	@Inject
-	public AdminResource(DummyDataDumper ddd, ImportController importCtr, BusinessRepository businessRepo, NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo) {
+	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
+			ImportController importCtr, BusinessRepository businessRepo,
+			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo) {
 		super();
+		this.logger =  LoggerFactory.getLogger(this.getClass());
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
 		this.adjectiveRepo = adjRepo;
 		this.nounRepo = nounRepo;
 		this.businessRepo = businessRepo;
+		String environment = servletContext.getInitParameter("net.karazy.environment");
+		// Check for dev environment
+		devEnvironment = environment.equals("dev");
 	}
-	
 	
 	@POST
 	@Path("nicknames/adjectives")
@@ -98,13 +107,24 @@ public class AdminResource {
 		    return id.toString();
 	}
 	
+	@POST
+	@Path("businesses/{id}/feedbackforms")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO importNewBusinessFeedback(@PathParam("id") Long businessId, FeedbackFormDTO feedbackFormData ) {
+		return importCtrl.importFeedbackForm(businessId, feedbackFormData);
+	}
+	
 	/**
 	 * Deletes all data. Use at your own risk.
 	 */
 	@DELETE
 	@Path("datastore/all")
 	public void deleteAllData() {
-		importCtrl.deleteAllData();
+		if(devEnvironment)
+			importCtrl.deleteAllData();
+		else
+			throw new WebApplicationException(405);
 	}
 	
 	/**
@@ -113,6 +133,9 @@ public class AdminResource {
 	@DELETE
 	@Path("datastore/live")
 	public void deleteLiveData() {
-		importCtrl.deleteLiveData();
+		if(devEnvironment)
+			importCtrl.deleteLiveData();
+		else
+			throw new WebApplicationException(405);
 	}
 }

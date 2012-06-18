@@ -3,18 +3,21 @@
       <div class="well">
         <h2>Admin Functions</h2>
         <h6 class="nav-header">Datastore Functions</h6>
-        <p ng-hide="showDeleteAll">
-        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button>
-        </p>
-        <p ng-show="showDeleteAll">
-        	<button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button>
-        </p>
-        <p ng-hide="showDeleteLive">
-        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button>
-        </p>
-        <p ng-show="showDeleteLive">
-        	<button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button>
-        </p>
+        <div ng-hide="deleteFunctionsDisabled">
+	        <p ng-hide="showDeleteAll">
+	        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button>
+	        </p>
+	        <p ng-show="showDeleteAll">
+	        	<button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button>
+	        </p>
+	        <p ng-hide="showDeleteLive">
+	        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button>
+	        </p>
+	        <p ng-show="showDeleteLive">
+	        	<button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button>
+	        </p>
+        </div>
+        <p ng-show="deleteFunctionsDisabled">Delete functions disabled in production environment.</p>
         <h6 class="nav-header">Account Functions</h6>
         <p>
         	<button type="button" class="btn btn-small" ng-click="createDummieAccounts()" ng-bind="createDummieAccountsText" ng-disabled="createDummieAccountsDisabled" ng-init="createDummieAccountsText='Create Dummie Accounts'"></button>

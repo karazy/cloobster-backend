@@ -79,6 +79,9 @@
 		<profile>
 			<id>dev</id>
 			<build>
+				<filters>
+                    <filter>${basedir}/src/main/filters/dev.properties</filter>
+                </filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -110,6 +113,18 @@
 									<resources>
 										<resource>
 											<directory>src/main/admin</directory>
+											<includes>
+												<include>js/app.js</include>
+											</includes>
+											<!-- Filter app.js with properties. -->
+											<filtering>true</filtering>
+										</resource>
+										<resource>
+											<directory>src/main/admin</directory>
+											<excludes>
+												<exclude>js/app.js</exclude>
+											</excludes>
+											<filtering>false</filtering>
 										</resource>
 									</resources>
 								</configuration>
@@ -127,7 +142,7 @@
 											<directory>${cloobster.cockpit}/src</directory>
 										</resource>
 									</resources>
-								</configuration>
+								</configuration>	
 							</execution>
 							<execution>
 								<id>copy-app-dev</id>
@@ -180,8 +195,11 @@
 			</build>
 		</profile>
 		<profile>
-			<id>prod</id>	
-			<build>			
+			<id>prod</id>
+			<build>
+				<filters>
+            		<filter>${basedir}/src/main/filters/prod.properties</filter>
+            	</filters>	
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -213,6 +231,18 @@
 									<resources>
 										<resource>
 											<directory>src/main/admin</directory>
+											<includes>
+												<include>js/app.js</include>
+											</includes>
+											<!-- Filter app.js with properties. -->
+											<filtering>true</filtering>
+										</resource>
+										<resource>
+											<directory>src/main/admin</directory>
+											<excludes>
+												<exclude>js/app.js</exclude>
+											</excludes>
+											<filtering>false</filtering>
 										</resource>
 									</resources>
 								</configuration>
@@ -468,7 +498,6 @@
 	<build>
 		<!-- Generate compiled stuff in the folder used for development mode -->
 		<outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
-
 		<plugins>
 			<!-- Add source folders to test classpath in order to run gwt-tests as 
 				normal junit-tests -->
@@ -528,13 +557,24 @@
 							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>src/main/webapp</directory>
+                					<directory>${basedir}/src/main/webapp</directory>
+                					<filtering>true</filtering>
+                					<includes>
+                    					<include>WEB-INF/web.xml</include>
+                					</includes>
+								</resource>
+								<resource>
+									<directory>${basedir}/src/main/webapp</directory>
+									<filtering>false</filtering>
 									<excludes>
 										<exclude>app/**/*.phone.*</exclude>
 										<exclude>app/**/*.iphone.*</exclude>
 										<exclude>app/**/*.ignore.*</exclude>
+										<exclude>WEB-INF/web.xml</exclude>
 									</excludes>
 								</resource>
+								<!-- Add filtering of appengine-web.xml for system properties -->
+
 							</resources>
 						</configuration>
 					</execution>

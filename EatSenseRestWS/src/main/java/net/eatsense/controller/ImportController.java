@@ -1,6 +1,8 @@
 package net.eatsense.controller;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,19 +13,24 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
+import net.eatsense.domain.embedded.FeedbackQuestion;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
+import net.eatsense.persistence.FeedbackFormRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
@@ -32,6 +39,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
+import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.BusinessImportDTO;
@@ -71,10 +79,11 @@ public class ImportController {
     private Validator validator;
 	private OrderChoiceRepository orderChoiceRepo;
 	private BillRepository billRepo;
+	private FeedbackFormRepository feedbackFormRepo;
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr) {
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr, FeedbackFormRepository feedbackFormRepo) {
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -86,10 +95,44 @@ public class ImportController {
 		this.orderChoiceRepo = ocr;
 		this.requestRepo = reqr;
 		this.accountRepo = acr;
+		this.feedbackFormRepo = feedbackFormRepo;
 	}
 	
     public void setValidator(Validator validator) {
         this.validator = validator;
+    }
+    
+    /**
+     * Creates a new {@link FeedbackForm} entity based on the given data
+     * and adds it to a {@link Business} identified by the given id.
+     * 
+     * @param businessId - Id of the business to which the form will be added.
+     * @param feedbackFormData - Data for the new {@link FeedbackForm} entity.
+     * @return {@link FeedbackFormDTO} - Data object representing the new FeedbackForm.
+     */
+    public FeedbackFormDTO importFeedbackForm(Long businessId, FeedbackFormDTO feedbackFormData) {
+    	checkNotNull(businessId, "business id was null");
+    	checkNotNull(feedbackFormData, "feedbackFormData was null");
+    	checkNotNull(feedbackFormData.getQuestions(), "questions list was null");
+    	
+    	Business business = businessRepo.getById(businessId);
+    	
+    	FeedbackForm feedbackForm = new FeedbackForm();
+    	feedbackForm.setDescription(feedbackFormData.getDescription());
+    	
+    	Long index = 1l;
+    	for (FeedbackQuestion question : feedbackFormData.getQuestions()) {
+			question.setId(index);
+			index++;
+		}
+    	feedbackForm.setQuestions(feedbackFormData.getQuestions());
+    	feedbackForm.setTitle(feedbackFormData.getTitle());
+    	
+    	Key<FeedbackForm> formKey = feedbackFormRepo.saveOrUpdate(feedbackForm);
+    	business.setFeedbackForm(formKey);
+    	businessRepo.saveOrUpdate(business);
+    	    	
+    	return new FeedbackFormDTO(feedbackForm);
     }
 
 	public Long addBusiness(BusinessImportDTO businessData) {
@@ -308,7 +351,7 @@ public class ImportController {
 		choiceRepo.ofy().delete(choiceRepo.getAllKeys());
 		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
-		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 		accountRepo.ofy().delete(accountRepo.getAllKeys());
@@ -323,7 +366,7 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.ofy().query(CheckIn.class).fetchKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
-		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
 }

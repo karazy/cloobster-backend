@@ -1,5 +1,10 @@
 'use strict';
 
+/* Config parameters */
+var Karazy = {
+		environment : "${karazy.environment}"
+};
+
 /* Cloobster namespace. Create if not exists.*/
 var CloobsterAdmin =  {};
 
@@ -20,14 +25,17 @@ CloobsterAdmin.module.directive('importAlert', function(){
       template: '<div class="alert alert-block" ng-class="alert().type" ng-show="alert().show">'+
 	  				'<h4 class="alert-heading" ng-bind="alert().title">Error!</h4>'+
 	  				'<span ng-bind="alert().message"></span>'+
-	  				'<p><button type="button" class="btn" ng-click="continue()" ng-bind="alert().buttonText"></button></p>'+
+	  				'<p><button type="button" class="btn" ng-click="dismissAlert()" ng-bind="alert().buttonText"></button></p>'+
 				'</div>',
       // The linking function will add behavior to the template
       link: function(scope, element, attrs) {
-      	scope.continue = function() {
-      		scope.alert.show = false;
-      		scope.alert().continueFn();
-      	}
+      	scope.dismissAlert = function() {
+      		scope.alert().show = false;
+      		
+      		if(angular.isFunction(scope.alert().continueFn)) {
+      			scope.alert().continueFn();
+      		}
+      	};
       }
-    }
+    };
   });
