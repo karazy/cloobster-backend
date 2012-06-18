@@ -3,6 +3,7 @@ package net.eatsense.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -52,16 +53,16 @@ public class DummyDataDumper {
 		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
 		if(!testBusinesses.isEmpty()) {
 			logger.info("Create account for Cloobster Club");
-			ar.createAndSaveAccount("cloobster", "test!1", "developer@karazy.net", "restaurantadmin", testBusinesses);
+			ar.createAndSaveAccount("cloobster", "test!1", "developer@karazy.net", Role.COMPANYOWNER, testBusinesses, true, true);
 		}
 			
 		List<Key<Business>> hup = rr.getKeysByProperty("name", "Heidi und Paul");
 		if(!hup.isEmpty()) {
 			logger.info("Create account for Heidi und Paul");
-			ar.createAndSaveAccount("hup", "test", "info@cloobster.com", "restaurantadmin", hup);
+			ar.createAndSaveAccount("hup", "test", "info@cloobster.com", Role.COMPANYOWNER, hup, true, true);
 		}
 		
-		ar.createAndSaveAccount("admin", "cl00bster!", "developer@karazy.net", "restaurantadmin", rr.getAllKeys());
+		ar.createAndSaveAccount("admin", "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), true, true);
 	}	
 
 	public void generateDummyBusinesses() {
