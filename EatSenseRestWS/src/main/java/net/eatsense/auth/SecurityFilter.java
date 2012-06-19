@@ -55,6 +55,10 @@ public class SecurityFilter implements ContainerRequestFilter {
 	 */
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
+		// If we receive an OPTIONS request, do nothing.
+		if(request.getMethod().equals("OPTIONS"))
+			return request;
+		
 		String checkInId = request.getHeaderValue("checkInId");
 		if(checkInId == null)
 			checkInId = request.getQueryParameters(true).getFirst("checkInId");
