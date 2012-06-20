@@ -30,7 +30,7 @@
     "menus": [
         {
             "description": "100% saftiges, lockeres Bio-Rinderhackfleisch",
-            "title": "Die Rindfleischburger",
+            "title": "Rindfleischburger",
             "order": 1,
             "products": [
                 {
@@ -309,7 +309,7 @@
         },
         {
             "description": "100% zartes Hühnchenbrustfilet aus der Region, saftig und mild im Geschmack",
-            "title": "Die Geflügelburger",
+            "title": "Geflügelburger",
             "order": 2,
             "products": [
                 {
@@ -588,7 +588,7 @@
         },
         {
             "description": null,
-            "title": "Die Vegetarischen Burger",
+            "title": "Vegetarische Burger",
             "order": 3,
             "products": [
                 {
@@ -731,7 +731,7 @@
         },
         {
             "description": null,
-            "title": "Unsere Salate",
+            "title": "Salate",
             "order": 6,
             "products": [
                 {

@@ -50,7 +50,19 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		ar.createAndSaveAccount( "Admin User", "admin", "test", "weiher@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), null, null, null, true, true);
+		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
+		if(!testBusinesses.isEmpty()) {
+			logger.info("Create account for Cloobster Club");
+			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "developer@karazy.net", Role.COMPANYOWNER, testBusinesses, null, null, null, true, true);
+		}
+			
+		List<Key<Business>> hup = rr.getKeysByProperty("name", "Heidi und Paul");
+		if(!hup.isEmpty()) {
+			logger.info("Create account for Heidi und Paul");
+			ar.createAndSaveAccount("HuP Account","hup", "test", "info@cloobster.com", Role.COMPANYOWNER,  hup, null, null, null, true, true);
+		}
+		
+		ar.createAndSaveAccount("Administrator","admin", "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), null, null, null, true, true);
 	}	
 
 	public void generateDummyBusinesses() {
