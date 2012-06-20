@@ -1,6 +1,7 @@
 package net.eatsense.domain;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 /**
  * Base class for all entities.
@@ -17,8 +18,10 @@ public abstract class GenericEntity{
 	@Id
 	private Long id;
 	
+	@Transient
 	private boolean dirty = false; 
-
+	
+	@Transient
 	public boolean isDirty() {
 		return dirty;
 	}

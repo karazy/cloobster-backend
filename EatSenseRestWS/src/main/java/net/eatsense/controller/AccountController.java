@@ -121,7 +121,9 @@ public class AccountController {
 		
 		if(role.equals(account.getRole()))
 			return true;
-	
+		
+		//TODO Refactor roles to explicity only check for the role owned.
+		
     	// grant the cockpituser role too if the account is in businessadmin or companyowner role.
 		if(role.equals(Role.COCKPITUSER)
 				&& ( account.getRole().equals(Role.BUSINESSADMIN) || account.getRole().equals(Role.COMPANYOWNER) ))
@@ -146,6 +148,9 @@ public class AccountController {
 		
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
+			return null;
+		
+		if(!account.isActive())
 			return null;
 		
 		if( account.getHashedPassword().equals(hashedPassword) ) {
@@ -179,6 +184,9 @@ public class AccountController {
 		
 		Account account = accountRepo.getByProperty("login", login);
 		if(account == null)
+			return null;
+		
+		if(!account.isActive())
 			return null;
 		
 		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
@@ -389,6 +397,8 @@ public class AccountController {
 		
 		if(!account.isEmailConfirmed() ) {
 			account.setEmailConfirmed(true);
+			// Activate account.
+			account.setActive(true);
 			// Clear the token from the account, so that we get lesser conflicts in the future.
 			account.setEmailConfirmationHash(null);
 			accountRepo.saveOrUpdate(account);
