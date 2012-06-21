@@ -573,7 +573,7 @@
 										<exclude>WEB-INF/web.xml</exclude>
 									</excludes>
 								</resource>
-								<!-- Add filtering of appengine-web.xml for system properties -->
+								<!-- Add filtering of web.xml for system properties -->
 
 							</resources>
 						</configuration>

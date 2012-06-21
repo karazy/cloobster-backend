@@ -8,6 +8,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.MailController;
@@ -34,10 +36,10 @@ public class NewsletterResource {
 	
 	@POST
 	@Consumes("application/json; charset=UTF-8")
-	public void saveRecipient(RecipientDTO recipientData) {
+	public void saveRecipient(RecipientDTO recipientData, @Context UriInfo uriInfo) {
 		NewsletterRecipient recipient = accountCtrl.addNewsletterRecipient(recipientData);
 		try {
-			mailCtrl.sendWelcomeMessage(recipient);
+			mailCtrl.sendWelcomeMessage(uriInfo, recipient);
 		} catch (AddressException e) {
 			logger.error("sending welcome mail failed", e);
 			if(recipient.getEmail().equals(e.getRef())) {

@@ -109,7 +109,7 @@ public class AccountControllerTest {
 		ar = injector.getInstance(AccountRepository.class);
 		validator = injector.getInstance(Validator.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, validator, facebookService, imageCtrl);
+				channelController, validator, facebookService, imageCtrl, mailCtrl);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

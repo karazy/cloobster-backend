@@ -9,6 +9,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.MailController;
@@ -40,10 +41,10 @@ public class AccountsResource {
 	@POST
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public RegistrationDTO registerAccount(RegistrationDTO accountData) {
+	public RegistrationDTO registerAccount(RegistrationDTO accountData, @Context UriInfo uriInfo) {
 		Account account = accountCtr.registerNewAccount(accountData);
 		try {
-			mailCtrl.sendRegistrationConfirmation(account);
+			mailCtrl.sendRegistrationConfirmation(uriInfo, account);
 		} catch (AddressException e) {
 			logger.error("sending confirmation mail failed", e);
 			if(account.getEmail().equals(e.getRef())) {

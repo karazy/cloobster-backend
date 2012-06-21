@@ -1,8 +1,5 @@
 package net.eatsense.controller;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
@@ -18,90 +15,91 @@ import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
-import net.eatsense.representation.RegistrationDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.CharStreams;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 public class MailController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private Session session = Session.getDefaultInstance( new Properties(), null);
-	private UriInfo uriInfo;
+	private TemplateController templateCtrl;
 	
 	@Inject
-	public MailController(UriInfo uriInfo) {
+	public MailController( TemplateController templateCtrl) {
 		super();
-		this.uriInfo = uriInfo;
-		// TODO Auto-generated constructor stub
+		this.templateCtrl = templateCtrl;
 	}
 
-	public Message sendWelcomeMessage(NewsletterRecipient recipient) throws MessagingException {
-		Message mail = new MimeMessage(session);
+	public MimeMessage sendWelcomeMessage(UriInfo uriInfo, NewsletterRecipient recipient) throws MessagingException {
+		MimeMessage mail = new MimeMessage(session);
 		URI unsubscribeUri = uriInfo.getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient.getEmail()).build(recipient.getId());
 		
 		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
 		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
-		mail.setSubject("Thanks for subcribing to the eatSense newsletter.");
+		String welcomeMail = templateCtrl.getAndReplace("newsletter-email-registered", unsubscribeUri.toString());
 		
-		String welcomeText = readWelcomeTextTemplate();
-		welcomeText = welcomeText.replaceAll("\\{unsubscribeurl\\}", unsubscribeUri.toString());
-		logger.info("welcomeText: {}", welcomeText);
-		mail.setText(welcomeText);
+		// Treat first line as subject.
+		int firstNewline = welcomeMail.indexOf("\n");
+		String subject = welcomeMail.substring(0, firstNewline);
+		String body = welcomeMail.substring(firstNewline);
+		
+		mail.setSubject(subject, "utf-8");
+
+		logger.info("welcomeMail: {}", welcomeMail);
+		mail.setText(body, "utf-8");
 		
 		Transport.send(mail);
 		return mail;
 	}
 	
-	public Message sendRegistrationConfirmation(Account account) throws MessagingException {
-		Message mail = new MimeMessage(session);
+	public Message sendRegistrationConfirmation(UriInfo uriInfo, Account account) throws MessagingException {
+		MimeMessage mail = new MimeMessage(session);
 		URI confirmationUri = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(account.getEmailConfirmationHash());
 		
 		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
 		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
-		mail.setSubject("Cloobster account confirmation.");
+				
+		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmationUri.toString());
 		
-		String confirmationText = readEmailConfirmationTextTemplate();
-		confirmationText = confirmationText.replaceAll("\\{confirmationurl\\}", confirmationUri.toString());
-		confirmationText = confirmationText.replaceAll("\\{name\\}", account.getName());
-		logger.info("welcomeText: {}", confirmationText);
-		mail.setText(confirmationText);
+		int firstNewline = confirmationText.indexOf("\n");
+		String subject = confirmationText.substring(0, firstNewline);
+		String body = confirmationText.substring(firstNewline);
+		
+		mail.setSubject(subject, "utf-8");
+		logger.info("confirmationText: {}", confirmationText);
+		mail.setText(body, "utf-8");
 		
 		Transport.send(mail);
 		return mail;
 	}
 	
-	public String readEmailConfirmationTextTemplate() {
-		String welcomeText;
-		try {
-			welcomeText = CharStreams.toString(  new FileReader(new File("WEB-INF/templates/confirmationmail")));
-		} catch (IOException e) {
-			logger.error("error reading email confirmation template", e);
-			welcomeText = "Welcome to the Cloobster service,\n" +
-					"this is an automated message. Confirm your account with this link:\n" +
-					"{confirmationurl}";
-		}
+	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {
+		MimeMessage mail = new MimeMessage(session);
+				
+		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
+		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
+				
+		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
+				account.getName(), account.getLogin(), account.getEmail(),
+				Strings.nullToEmpty(account.getPhone()), company.getName());
 		
-		return welcomeText;
-	}
-	
-	public String readWelcomeTextTemplate() {
-		String welcomeText;
-		try {
-			welcomeText = CharStreams.toString(  new FileReader(new File("WEB-INF/templates/welcomemail")));
-		} catch (IOException e) {
-			logger.error("error reading welcome template", e);
-			welcomeText = "Welcome to the cloobster Newsletter,\n" +
-					"this is an automated message. If you did not register for the newsletter, unsubscribe here:\n" +
-					"{unsubscribeurl}";
-		}
+		int firstNewline = confirmationText.indexOf("\n");
+		String subject = confirmationText.substring(0, firstNewline);
+		String body = confirmationText.substring(firstNewline);
 		
-		return welcomeText;
+		mail.setSubject(subject, "utf-8");
+		logger.info("confirmationText: {}", confirmationText);
+		mail.setText(body, "utf-8");
+		
+		Transport.send(mail);
+		return mail;
 	}
 	
 	public Message newMimeMessage() {

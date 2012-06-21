@@ -1,0 +1,38 @@
+<div class="row-fluid">
+	<div class="well span12">
+		<h1>Manage Templates <small>Import business complete with spots, menus and products.</small></h1>
+		<div class="row-fluid">
+			<div class="span12">
+				<p ng-hide="templates.length == 0">
+					Select Template ...<br/>
+					<select ng-model="template" ng-options="(t.id) for t in templates"></select>
+				</p>
+				<p ng-show="templates.length == 0">
+					<button type="button" ng-click="initTemplates()" class="btn btn-primary btn-large">Init Templates</button>
+				</p>
+				<div ng-show="templates.length > 0">
+					<h2>Edit Template "{{template.id}}"</h2>
+					<form ng-submit="saveTemplate()" name="editTemplateForm">
+						<fieldset>
+							<div class="control-group">
+			  					<label class="control-label" for="template-desc">Template description (optional):</label>
+		  						<div class="controls">
+		    						<textarea class="span4" name="description" id="template-desc" placeholder="Enter optional description ..." ng-model="template.description" />
+		    					</div>
+							</div>
+							<div class="control-group" >
+			  					<label class="control-label" for="template-text">Template text (required):</label>
+		  						<div class="controls">
+		  							<textarea class="span6" rows="8" name="templateText" id="template-text" ng-model="template.templateText" placeholder="Enter the template Text here ..." required/>
+		    					</div>
+		    					<p class="help-block">The first line will be treated as the subject for e-mails.</p>
+							</div >
+						</fieldset>
+						<button type="submit" ng-disabled="editTemplateForm.$invalid" class="btn btn-primary btn-large">Save Template</button>
+					</form>
+					<div importAlert alter="importAlert"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

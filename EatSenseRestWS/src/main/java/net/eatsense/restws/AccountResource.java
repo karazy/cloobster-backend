@@ -103,7 +103,4 @@ public class AccountResource {
 			throw new NotFoundException();
 		return token;
 	};
-	
-	
-	
 }

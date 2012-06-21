@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.mail.MessagingException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 /**
  * Manages Account creation, updates and authentication.
@@ -60,13 +62,15 @@ public class AccountController {
 	private CompanyRepository companyRepo;
 	private FacebookService facebookService;
 	private ImageController imageController;
+	private MailController mailCtrl;
 	
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ChannelController cctrl, Validator validator, FacebookService facebookService,
-			ImageController imageController) {
+			ImageController imageController, MailController mailCtrl) {
 		super();
+		this.mailCtrl = mailCtrl;
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
 		this.channelCtrl = cctrl;
@@ -402,6 +406,12 @@ public class AccountController {
 			// Clear the token from the account, so that we get lesser conflicts in the future.
 			account.setEmailConfirmationHash(null);
 			accountRepo.saveOrUpdate(account);
+			
+			try {
+				mailCtrl.sendAccountConfirmedMessage(account, companyRepo.getByKey(account.getCompany()));
+			} catch (MessagingException e) {
+				logger.error("error sending confirmation notice", e);
+			}
 		}
 		
 		confirmationData.setLogin(account.getLogin());

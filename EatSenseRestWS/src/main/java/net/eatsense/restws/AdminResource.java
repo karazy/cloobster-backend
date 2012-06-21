@@ -8,12 +8,14 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 
 import net.eatsense.controller.ImportController;
+import net.eatsense.controller.TemplateController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
@@ -23,6 +25,7 @@ import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 
 import org.slf4j.Logger;
@@ -39,13 +42,15 @@ public class AdminResource {
 
 	private final BusinessRepository businessRepo;
 	protected final Logger logger;
-	private boolean devEnvironment;
+	private final boolean devEnvironment;
+	private final TemplateController templateCtrl;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
-			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo) {
+			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo, TemplateController templateCtrl) {
 		super();
+		this.templateCtrl = templateCtrl;
 		this.logger =  LoggerFactory.getLogger(this.getClass());
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
@@ -53,8 +58,31 @@ public class AdminResource {
 		this.nounRepo = nounRepo;
 		this.businessRepo = businessRepo;
 		String environment = servletContext.getInitParameter("net.karazy.environment");
+		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
-		devEnvironment = environment.equals("dev");
+		devEnvironment = "dev".equals(environment);
+	}
+	
+	@PUT
+	@Path("templates/{id}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public Template addOrSaveTemplate(@PathParam("id") String id, Template template) {
+		return templateCtrl.saveOrUpdateTemplate(template);
+	}
+	
+	@GET
+	@Path("templates")
+	@Produces("application/json; charset=UTF-8")
+	public List<Template> getTemplates() {
+		return templateCtrl.getTemplates();
+	}
+	
+	@POST
+	@Path("templates")
+	@Produces("application/json; charset=UTF-8")
+	public List<Template> createTemplates() {
+		return templateCtrl.initTemplates("account-confirm-email","newsletter-email-registered","account-confirmed");
 	}
 	
 	@POST

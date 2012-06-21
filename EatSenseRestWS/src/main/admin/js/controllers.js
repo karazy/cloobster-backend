@@ -151,3 +151,43 @@ CloobsterAdmin.SelectBusiness = function($scope, $http) {
 	});
 }
 CloobsterAdmin.SelectBusiness.$inject = ['$scope', '$http'];
+
+CloobsterAdmin.Templates = function($scope, Template) {
+
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setTemplate() {
+		if($scope.templates.length > 0) {
+			$scope.template = $scope.templates[0];
+		}
+	}
+
+	$scope.templates = Template.query(setTemplate);
+
+	$scope.initTemplates = function() {
+		$scope.templates = Template.init({}, setTemplate);
+	};
+
+	$scope.saveTemplate = function() {
+		if($scope.editTemplateForm.$valid) {
+			$scope.template.$save({}, angular.noop, function(data, status) {
+				// Error callback.
+				showAlert("alert-error", "Error code"+ status, "Error", "Close");
+			});
+		}
+	};
+
+	dismissAlert();
+}
+CloobsterAdmin.Templates.$inject = ['$scope', 'Template'];
