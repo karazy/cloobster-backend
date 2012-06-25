@@ -3,6 +3,7 @@ package net.eatsense.restws.business;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -58,5 +59,11 @@ public class MenusResource {
 	@Produces("application/json; charset=UTF-8")
 	public MenuDTO updateMenu(@PathParam("id") long id, MenuDTO menuData) {
 		return menuCtrl.updateMenu(menuCtrl.getMenu(business, id), menuData);
-	}	
+	}
+	
+	@DELETE
+	@Path("{id}")
+	public void deleteMenu(@PathParam("id") long id) {
+		menuCtrl.deleteMenu(business, id);
+	}
 }

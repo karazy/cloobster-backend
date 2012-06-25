@@ -152,6 +152,19 @@ public class MenuController {
 				
 		return new MenuDTO(menu);
 	}
+	
+	/**
+	 * Delete Menu entity from the datastore.
+	 * 
+	 * @param business
+	 * @param id
+	 */
+	public void deleteMenu(Business business, long id) {
+		checkNotNull(business, "business was null");
+		checkArgument(id != 0, "id was 0");
+		
+		menuRepo.delete(menuRepo.getKey(business.getKey(), id));
+	}
 
 	/**
 	 * Retrieve all products saved for the given business.
@@ -180,5 +193,4 @@ public class MenuController {
 			return null;
 		}
 	}
-
 }
