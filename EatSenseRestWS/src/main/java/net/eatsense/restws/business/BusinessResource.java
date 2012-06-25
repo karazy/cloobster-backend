@@ -78,6 +78,13 @@ public class BusinessResource {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return businessCtrl.updateBusinessImage(account, business, updatedImage);
 	}
+	
+	@Path("menus")
+	public MenusResource getMenusResource() {
+		MenusResource menusResource = resourceContext.getResource(MenusResource.class);
+		menusResource.setBusiness(business);
+		return menusResource;
+	}
 
 	@Path("orders")
 	public OrdersResource getOrdersResource() {

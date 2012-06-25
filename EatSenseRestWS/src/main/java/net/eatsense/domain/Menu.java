@@ -2,6 +2,7 @@ package net.eatsense.domain;
 
 import javax.persistence.Transient;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
@@ -23,7 +24,10 @@ public class Menu extends GenericEntity{
 
 
 	public void setTitle(String title) {
-		this.title = title;
+		if(!Objects.equal(title, this.title)) {
+			this.setDirty(true);
+			this.title = title;
+		}
 	}
 
 
@@ -35,7 +39,10 @@ public class Menu extends GenericEntity{
 
 
 	public void setDescription(String description) {
-		this.description = description;
+		if(!Objects.equal(this.description, description)) {
+			this.setDirty(true);
+			this.description = description;
+		}
 	}
 
 
@@ -47,7 +54,10 @@ public class Menu extends GenericEntity{
 
 
 	public void setBusiness(Key<Business> business) {
-		this.business = business;
+		if(!Objects.equal(this.business, business)) {
+			this.setDirty(true);
+			this.business = business;
+		}
 	}
 
 
@@ -66,7 +76,10 @@ public class Menu extends GenericEntity{
 
 
 	public void setOrder(Integer order) {
-		this.order = order;
+		if(!Objects.equal(this.order, order)) {
+			this.setDirty(true);
+			this.order = order;
+		}
 	}
 	
 }

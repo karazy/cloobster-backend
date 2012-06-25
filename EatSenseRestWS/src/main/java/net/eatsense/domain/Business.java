@@ -80,6 +80,8 @@ public class Business extends GenericEntity {
 	 */
 	@Embedded
 	private List<ImageDTO> images;
+
+	private Key<Business> key;
 	
 	public String getAddress() {
 		return address;
@@ -135,8 +137,9 @@ public class Business extends GenericEntity {
 	@Transient
 	@JsonIgnore
 	public Key<Business> getKey() {
-		
-		return getKey(super.getId());
+		if(key == null)
+			this.key = getKey(super.getId());
+		return key;
 	}
 	
 	@Transient

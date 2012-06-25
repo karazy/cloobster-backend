@@ -209,12 +209,14 @@ public class GetBillTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testGetBillNullBusinessId() {
-		business.setId(null);
+		business = new Business();
+		
 		billCtrl.getBill(business, billData.getId());
 	}
 	
 	@Test
 	public void testGetBillUnknownBusinessId() {
+		business = new Business();
 		business.setId(12345l);
 		assertThat(billCtrl.getBill(business, billData.getId()), nullValue());
 	}

@@ -1,12 +1,20 @@
 package net.eatsense.controller;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.hamcrest.CoreMatchers.*;
 
 
 import java.util.Collection;
+
+import javax.validation.Validator;
+
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
@@ -19,6 +27,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
@@ -30,22 +39,22 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.googlecode.objectify.Key;
 
 public class MenuControllerTest {
 	
 	private final LocalServiceTestHelper helper =
 	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-	    
-	    private Injector injector;
-	    private MenuController ctr;
-	    private BusinessRepository rr;
-	    private MenuRepository mr;
-	    private ProductRepository pr;
-	    private ChoiceRepository cr;
-	    private DummyDataDumper ddd;
-		private SpotRepository br;
-
-		private Business business;
+    
+    private Injector injector;
+    private MenuController ctr;
+    private BusinessRepository rr;
+    private MenuRepository mr;
+    private ProductRepository pr;
+    private ChoiceRepository cr;
+    private DummyDataDumper ddd;
+	
+	private Business business;
 
 	@Before
 	public void setUp() throws Exception {
@@ -56,18 +65,101 @@ public class MenuControllerTest {
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
-		br = injector.getInstance(SpotRepository.class);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
 		business = rr.getByProperty("name", "Sergio");
 	}
+	
+	public void newSetUp() throws Exception {
+		mr = mock(MenuRepository.class);
+		pr = mock(ProductRepository.class);
+		cr = mock(ChoiceRepository.class);
+		Transformer trans = mock(Transformer.class);
+		Validator validator = injector.getInstance(Validator.class);
+		
+		ctr = new MenuController(mr, pr, cr, trans, validator);
+	}
 
 	@After
 	public void tearDown() throws Exception {
 		helper.tearDown();
 	}
+	
+	
+	public MenuDTO getTestMenuData() {
+		
+		MenuDTO menuData = new MenuDTO();
+		menuData.setDescription("test description");
+		menuData.setOrder(1);
+		menuData.setTitle("test title");
+		return menuData ;
+	}
+	
+	@Test
+	public void testCreateMenu() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		when(business.getKey()).thenReturn(businessKey );
+		MenuDTO testMenuData = getTestMenuData();
+		Menu newMenu = new Menu();
+		when(mr.newEntity()).thenReturn(newMenu );		
+		
+		ctr.createMenu(business, testMenuData);
+		assertThat(newMenu.getBusiness(), is(businessKey));
+		
+		verify(mr).saveOrUpdate(newMenu);
+	}
+	
+	@Test
+	public void testUpdateMenuTitle() throws Exception {
+		newSetUp();
+		MenuDTO testMenuData = getTestMenuData();
+		Menu menu = new Menu();
+		menu.setDescription(testMenuData.getDescription());
+		menu.setOrder(testMenuData.getOrder());
+		menu.setTitle("another title");
+		
+		MenuDTO result = ctr.updateMenu(menu, testMenuData);
+		
+		verify(mr).saveOrUpdate(menu);
+		assertThat(result.getTitle(), is(testMenuData.getTitle()));
+	}
+	
+	@Test
+	public void testUpdateMenuDescription() throws Exception {
+		newSetUp();
+		MenuDTO testMenuData = getTestMenuData();
+		Menu menu = new Menu();
+		menu.setDescription("another description");
+		menu.setOrder(testMenuData.getOrder());
+		menu.setTitle(testMenuData.getDescription());
+		
+		MenuDTO result = ctr.updateMenu(menu, testMenuData);
+		
+		verify(mr).saveOrUpdate(menu);
+		assertThat(result.getDescription(), is(testMenuData.getDescription()));
+	}
+	
+	@Test
+	public void testUpdateMenuOrder() throws Exception {
+		newSetUp();
+		MenuDTO testMenuData = getTestMenuData();
+		Menu menu = new Menu();
+		menu.setDescription(testMenuData.getDescription());
+		menu.setOrder(123);
+		menu.setTitle(testMenuData.getTitle());
+		
+		MenuDTO result = ctr.updateMenu(menu, testMenuData);
+		
+		verify(mr).saveOrUpdate(menu);
+		assertThat(result.getOrder(), is(testMenuData.getOrder()));
+	}
+
+	
 	@Test
 	public void testGetProduct() {
 		
@@ -85,7 +177,7 @@ public class MenuControllerTest {
 	@Test
 	public void testGetMenus() {
 		// retrieve all menus saved for this restaurant
-		Collection<MenuDTO> menusdto = ctr.getMenus(business);
+		Collection<MenuDTO> menusdto = ctr.getMenusWithProducts(business);
 		
 		// check if we have three menus
 		assertEquals(3 , menusdto.size() );

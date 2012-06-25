@@ -4,6 +4,10 @@ import java.util.Collection;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
+
+import net.eatsense.domain.Menu;
+import net.eatsense.validation.CreationChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -18,13 +22,30 @@ public class MenuDTO {
 	/**
 	 * Title of the menu entry.
 	 */
-	@NotNull
+	@NotNull(groups= { Default.class, CreationChecks.class})
 	@NotEmpty
 	private String title;
 	
 	private String description;
 	
 	private Integer order;
+	
+	private Long id;
+	
+	public MenuDTO() {
+		super();
+	}
+	
+	/**
+	 * @param menu Entity to copy property values from.
+	 */
+	public MenuDTO(Menu menu) {
+		this();
+		this.title = menu.getTitle();
+		this.description = menu.getDescription();
+		this.order = menu.getOrder();
+		this.id = menu.getId();
+	}
 	
 	/**
 	 * All products that are listed under this menu entry.
@@ -57,6 +78,12 @@ public class MenuDTO {
 	}
 	public void setOrder(Integer order) {
 		this.order = order;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 }

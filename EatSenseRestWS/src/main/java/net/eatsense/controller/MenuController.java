@@ -1,18 +1,27 @@
 package net.eatsense.controller;
 
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.validation.CreationChecks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +42,14 @@ public class MenuController {
 	private MenuRepository menuRepo;
 	private ProductRepository productRepo;
 	private Transformer transform;
+	private Validator validator;
 
 	@Inject
-	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans) {
+	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
+		this.validator = validator;
 	}
 	
 	/**
@@ -47,7 +58,7 @@ public class MenuController {
 	 * @param business entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenus(Business business){
+	public Collection<MenuDTO> getMenusWithProducts(Business business){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		if(business == null )
 			return menuDTOs;
@@ -62,15 +73,84 @@ public class MenuController {
 		}
 
 		for ( Menu menu : menus) {
-			MenuDTO menuDTO = new MenuDTO();
-			menuDTO.setTitle(menu.getTitle());
-			menuDTO.setOrder(menu.getOrder());
+			MenuDTO menuDTO = new MenuDTO(menu);
 			// Get products for this menu from the product map.		
 			menuDTO.setProducts(menuToProductsMap.get(menu.getId())); 
 			menuDTOs.add(menuDTO);
 		}
 		
 		return menuDTOs;
+	}
+	
+	/**
+	 * @param business 
+	 * @return List of transfer objects without embedded Products.
+	 */
+	public List<MenuDTO> getMenus(Business business) {
+		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
+		if(business == null )
+			return menuDTOs;
+		List<Menu> menus = menuRepo.getByParent( business );
+		
+		for ( Menu menu : menus) {
+			MenuDTO menuDTO = new MenuDTO(menu);
+ 
+			menuDTOs.add(menuDTO);
+		}
+		
+		return menuDTOs;
+	}
+	
+	public Menu getMenu(Business business, long id) {
+		checkNotNull(business, "business was null");
+		checkArgument(id != 0, "id was 0");
+		
+		try {
+			return menuRepo.getById(id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+	}
+	
+	public MenuDTO createMenu(Business business, MenuDTO menuData) {
+		checkNotNull(business, "business was null");
+		checkNotNull(menuData, "menuData was null");
+				
+		Menu menu = menuRepo.newEntity();
+		menu.setBusiness(business.getKey());
+		menuData = updateMenu(menu, menuData);
+		
+		return menuData;
+	}
+
+	/**
+	 * @param menu
+	 * @param menuData
+	 * @return
+	 */
+	public MenuDTO updateMenu(Menu menu, MenuDTO menuData) {
+		checkNotNull(menu, "menu was null");
+		checkNotNull(menuData, "menuData was null");
+		
+		Set<ConstraintViolation<MenuDTO>> violationSet = validator.validate(menuData, CreationChecks.class);
+		
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
+			for (ConstraintViolation<MenuDTO> violation : violationSet) {
+				// Format the message like: '"{property}" {message}.'
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
+			}
+			throw new ValidationException(stringBuilder.toString());
+		}
+		
+		menu.setDescription(menuData.getDescription());
+		menu.setOrder(menuData.getOrder());
+		menu.setTitle(menuData.getTitle());
+		
+		if(menu.isDirty())
+			menuRepo.saveOrUpdate(menu);
+				
+		return new MenuDTO(menu);
 	}
 
 	/**
