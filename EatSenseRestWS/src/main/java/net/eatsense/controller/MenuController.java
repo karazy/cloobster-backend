@@ -14,6 +14,7 @@ import javax.validation.Validator;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
+import net.eatsense.domain.Product;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -101,17 +102,54 @@ public class MenuController {
 		return menuDTOs;
 	}
 	
+	/**
+	 * @param business
+	 * @param id
+	 * @return
+	 */
 	public Menu getMenu(Business business, long id) {
 		checkNotNull(business, "business was null");
 		checkArgument(id != 0, "id was 0");
 		
+		Menu menu;
 		try {
-			return menuRepo.getById(id);
+			menu = menuRepo.getById(business.getKey(), id);
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
+		
+		return menu;
 	}
 	
+	/**
+	 * Load and transform Menu entity with the supplied id,
+	 * also loads associated products.
+	 * 
+	 * @param business
+	 * @param id
+	 * @return
+	 */
+	public MenuDTO getMenuDTOWithProducts(Business business, long id) {
+		Menu menu = getMenu(business, id);
+		MenuDTO menuData = new MenuDTO(menu);
+		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
+		
+		for (Product product : productRepo.getListByProperty("menu", menu)) {
+			productsData.add(new ProductDTO(product));
+		}
+		menuData.setProducts(productsData);
+		
+		return menuData;
+	}
+	
+	/**
+	 * Create and save new Menu entity populated with
+	 * data from the supplied transfer object.
+	 * 
+	 * @param business
+	 * @param menuData Transfer object
+	 * @return
+	 */
 	public MenuDTO createMenu(Business business, MenuDTO menuData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(menuData, "menuData was null");
@@ -124,6 +162,8 @@ public class MenuController {
 	}
 
 	/**
+	 * Update and save changes to the Menu entity.
+	 * 
 	 * @param menu
 	 * @param menuData
 	 * @return
@@ -184,8 +224,7 @@ public class MenuController {
 	 * @return product DTO
 	 */
 	public ProductDTO getProduct(Business business, Long id) {
-		if(business == null)
-			return null;
+		
 		try {
 			return transform.productToDto(productRepo.getById(business.getKey(), id));
 		} catch (NotFoundException e) {

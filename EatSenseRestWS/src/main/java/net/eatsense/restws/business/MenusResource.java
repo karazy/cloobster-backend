@@ -50,7 +50,7 @@ public class MenusResource {
 	@Path("{id}")
 	@Produces("application/json; charset=UTF-8")
 	public MenuDTO getMenu(@PathParam("id") long id) {
-		return new MenuDTO(menuCtrl.getMenu(business, id));
+		return menuCtrl.getMenuDTOWithProducts(business, id);
 	}
 	
 	@PUT

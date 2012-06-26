@@ -193,17 +193,7 @@ public class Transformer {
 	public ProductDTO productToDtoOmitChoices(Product product) {
 		if(product == null)
 			return null;
-		ProductDTO dto = new ProductDTO();
-		
-		dto.setMenuId(product.getMenu().getId());
-		dto.setId(product.getId());		 
-		dto.setName( product.getName() );
-		dto.setLongDesc( product.getLongDesc() );
-		dto.setShortDesc( product.getShortDesc() );
-		dto.setPrice( product.getPrice() );
-		dto.setOrder(product.getOrder());
-		 
-		return dto;
+		return new ProductDTO(product);
 	}
 	
 	public ChoiceDTO choiceToDto(Choice choice) {

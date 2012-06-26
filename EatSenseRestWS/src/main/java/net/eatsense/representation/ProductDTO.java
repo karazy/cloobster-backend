@@ -6,6 +6,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Product;
+
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -34,6 +36,31 @@ public class ProductDTO {
 	
 	private Integer order;
 	
+	
+	
+	public ProductDTO() {
+		super();
+	}
+	
+	/**
+	 * @param product Entity to copy property values from.
+	 */
+	public ProductDTO(Product product) {
+		super();
+		if(product == null)
+			return;
+		this.id = product.getId();
+		
+		this.menuId = product.getMenu() != null ? product.getMenu().getId():null;
+		this.name = product.getName();
+		this.shortDesc = product.getShortDesc();
+		this.longDesc = product.getLongDesc();
+		this.price = product.getPrice();
+		this.order = product.getOrder();
+	}
+
+
+
 	public String getName() {
 		return name;
 	}
