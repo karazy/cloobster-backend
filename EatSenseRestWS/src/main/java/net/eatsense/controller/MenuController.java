@@ -240,6 +240,8 @@ public class MenuController {
 	 * @return
 	 */
 	public List<ProductDTO> getProductsForMenu(Business business, long menuId) {
+		checkNotNull(business, "business was null");
+		checkArgument(menuId != 0, "menuId was 0");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
 		for (Product product : productRepo.getListByProperty("menu", menuRepo.getKey(business.getKey(), menuId))) {
