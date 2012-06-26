@@ -159,7 +159,8 @@ public class FeedbackControllerTest {
 		testFeedbackData.getAnswers().get(0).setRating(-1);
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("rating");
-				
+		
+		
 		ctrl.addFeedback(business, checkIn, testFeedbackData);
 	}
 	
@@ -181,8 +182,8 @@ public class FeedbackControllerTest {
 		List<FeedbackQuestion> answers = new ArrayList<FeedbackQuestion>();
 		answers.add(new FeedbackQuestion("Frage1", 1, 1l));
 		answers.add(new FeedbackQuestion("Frage2", 2, 2l));
-		answers.add(new FeedbackQuestion("Frage3", 0, 2l));
-		answers.add(new FeedbackQuestion("Frage4", 5, 2l));
+		answers.add(new FeedbackQuestion("Frage3", 0, 3l));
+		answers.add(new FeedbackQuestion("Frage4", 5, 4l));
 		data.setAnswers(answers );
 		data.setComment("comment");
 		data.setEmail("email");

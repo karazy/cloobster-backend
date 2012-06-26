@@ -16,8 +16,8 @@ public class ProductDTO {
 //	@NotEmpty
 	private Long id;
 	
-	@JsonIgnore
 	private Long menuId;
+	
 	@NotNull
 	@NotEmpty
 	private String name;

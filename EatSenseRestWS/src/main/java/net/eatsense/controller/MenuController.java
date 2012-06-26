@@ -189,7 +189,7 @@ public class MenuController {
 		
 		if(menu.isDirty())
 			menuRepo.saveOrUpdate(menu);
-				
+		
 		return new MenuDTO(menu);
 	}
 	
@@ -217,18 +217,100 @@ public class MenuController {
 	}
 	
 	/**
-	 * Retrieve the saved product.
+	 * Retrieve Product entity.
+	 * 
+	 * @param business
+	 * @param id
+	 * @return Product entity with the given id.
+	 */
+	public Product getProduct(Business business, long id) {
+		checkNotNull(business, "business was null");
+		checkArgument(id != 0, "id was 0");
+		
+		try {
+			return productRepo.getById(business.getKey(), id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+	}
+	
+	/**
+	 * @param business
+	 * @param menuId
+	 * @return
+	 */
+	public List<ProductDTO> getProductsForMenu(Business business, long menuId) {
+		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
+		
+		for (Product product : productRepo.getListByProperty("menu", menuRepo.getKey(business.getKey(), menuId))) {
+			productsData.add(new ProductDTO(product));
+		}
+		
+		return productsData;
+	}
+	
+	/**
+	 * Retrieve and transform Product entity.
 	 * 
 	 * @param business
 	 * @param id
 	 * @return product DTO
 	 */
-	public ProductDTO getProductWithChoices(Business business, Long id) {
-		
+	public ProductDTO getProductWithChoices(Business business, long id) {
 		try {
-			return transform.productToDto(productRepo.getById(business.getKey(), id));
+			return transform.productToDto(getProduct(business,id));
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
+	}
+	
+	/**
+	 * @param business
+	 * @param productData
+	 * @return
+	 */
+	public ProductDTO createProduct(Business business, ProductDTO productData) {
+		checkNotNull(business, "business was null");
+		checkNotNull(productData, "productData was null");
+		
+		Product product = productRepo.newEntity();
+		product.setBusiness(business.getKey());
+		productData = updateProduct(product, productData);
+		
+		return productData;
+	}
+
+	/**
+	 * @param product
+	 * @param productData
+	 * @return
+	 */
+	public ProductDTO updateProduct(Product product, ProductDTO productData) {
+		checkNotNull(product, "product was null");
+		checkNotNull(productData, "productData was null");
+		
+		Set<ConstraintViolation<ProductDTO>> violationSet = validator.validate(productData);
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
+			for (ConstraintViolation<ProductDTO> violation : violationSet) {
+				// Format the message like: '"{property}" {message}.'
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
+			}
+			throw new ValidationException(stringBuilder.toString());
+		}
+		
+		if(productData.getMenuId() != null)
+			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
+		
+		product.setLongDesc(productData.getLongDesc());
+		product.setName(productData.getName());
+		product.setOrder(productData.getOrder());
+		product.setPrice(productData.getPrice());
+		product.setShortDesc(productData.getShortDesc());
+		
+		if(product.isDirty())
+			productRepo.saveOrUpdate(product);
+		
+		return new ProductDTO(product);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.Transient;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -35,7 +36,10 @@ public class Product extends GenericEntity {
 
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 
@@ -45,7 +49,10 @@ public class Product extends GenericEntity {
 
 
 	public void setShortDesc(String shortDesc) {
-		this.shortDesc = shortDesc;
+		if(!Objects.equal(this.shortDesc, shortDesc)) {
+			this.setDirty(true);
+			this.shortDesc = shortDesc;
+		}
 	}
 
 
@@ -55,7 +62,10 @@ public class Product extends GenericEntity {
 
 
 	public void setLongDesc(String longDesc) {
-		this.longDesc = longDesc;
+		if(!Objects.equal(this.longDesc, longDesc)) {
+			this.setDirty(true);
+			this.longDesc = longDesc;
+		}
 	}
 
 
@@ -65,7 +75,10 @@ public class Product extends GenericEntity {
 
 
 	public void setPrice(Float price) {
-		this.price = price;
+		if(!Objects.equal(this.price, price)) {
+			this.setDirty(true);
+			this.price = price;
+		}
 	}
 
 
@@ -75,7 +88,10 @@ public class Product extends GenericEntity {
 
 
 	public void setMenu(Key<Menu> menu) {
-		this.menu = menu;
+		if(!Objects.equal(this.menu, menu)) {
+			this.setDirty(true);
+			this.menu = menu;
+		}
 	}
 
 
@@ -91,7 +107,10 @@ public class Product extends GenericEntity {
 
 
 	public void setChoices(List<Key<Choice>> choices) {
-		this.choices = choices;
+		if(!Objects.equal(this.choices, choices)) {
+			this.setDirty(true);
+			this.choices = choices;
+		}
 	}
 
 
@@ -115,7 +134,10 @@ public class Product extends GenericEntity {
 
 
 	public void setOrder(Integer order) {
-		this.order = order;
+		if(!Objects.equal(this.order, order)) {
+			this.setDirty(true);
+			this.order = order;
+		}
 	}
 	
 }

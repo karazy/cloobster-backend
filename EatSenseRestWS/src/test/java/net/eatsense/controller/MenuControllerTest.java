@@ -104,12 +104,71 @@ public class MenuControllerTest {
 	}
 	
 	@Test
+	public void testUpdateProductName() throws Exception {
+		newSetUp();
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Menu> menuKey = mock (Key.class);
+			
+		ProductDTO testProductData = getTestProductData();
+		when(mr.getKey(businessKey, testProductData.getMenuId())).thenReturn(menuKey);
+		
+		Product product = new Product();
+		product.setBusiness(businessKey);
+		product.setLongDesc(testProductData.getLongDesc());
+		product.setName("another name");
+		product.setOrder(testProductData.getOrder());
+		product.setPrice(testProductData.getPrice());
+		product.setMenu(menuKey);
+		product.setShortDesc(testProductData.getShortDesc());
+		product.setDirty(false);
+				
+		ProductDTO result = ctr.updateProduct(product, testProductData);
+		verify(pr).saveOrUpdate(product);
+		
+		assertThat(product.getName(), is(testProductData.getName()));
+		assertThat(result.getName(), is(testProductData.getName()));
+	}
+	
+	@Test
+	public void testCreateProduct() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		when(business.getKey()).thenReturn(businessKey );
+
+		ProductDTO testProductData = getTestProductData();
+		Product newProduct = new Product();
+		when(pr.newEntity()).thenReturn(newProduct );		
+		
+		ctr.createProduct(business, testProductData);
+		assertThat(newProduct.getBusiness(), is(businessKey));
+		
+		verify(pr).saveOrUpdate(newProduct);
+	}
+	
+	private ProductDTO getTestProductData() {
+		ProductDTO data = new ProductDTO();
+		data.setLongDesc("test long description");
+		data.setShortDesc("test short desc");
+		data.setMenuId(1l);
+		data.setName("test name");
+		data.setOrder(1);
+		data.setPrice(1.0f);
+		data.setShortDesc("test short description");
+		return data;
+	}
+
+	@Test
 	public void testCreateMenu() throws Exception {
 		newSetUp();
 		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock (Key.class);
 		when(business.getKey()).thenReturn(businessKey );
+		
 		MenuDTO testMenuData = getTestMenuData();
 		Menu newMenu = new Menu();
 		when(mr.newEntity()).thenReturn(newMenu );		
@@ -128,6 +187,7 @@ public class MenuControllerTest {
 		menu.setDescription(testMenuData.getDescription());
 		menu.setOrder(testMenuData.getOrder());
 		menu.setTitle("another title");
+		menu.setDirty(false);
 		
 		MenuDTO result = ctr.updateMenu(menu, testMenuData);
 		
@@ -143,6 +203,7 @@ public class MenuControllerTest {
 		menu.setDescription("another description");
 		menu.setOrder(testMenuData.getOrder());
 		menu.setTitle(testMenuData.getDescription());
+		menu.setDirty(false);
 		
 		MenuDTO result = ctr.updateMenu(menu, testMenuData);
 		
@@ -158,6 +219,7 @@ public class MenuControllerTest {
 		menu.setDescription(testMenuData.getDescription());
 		menu.setOrder(123);
 		menu.setTitle(testMenuData.getTitle());
+		menu.setDirty(false);
 		
 		MenuDTO result = ctr.updateMenu(menu, testMenuData);
 		
@@ -168,20 +230,9 @@ public class MenuControllerTest {
 	@Test
 	public void testGetProductWithUnknownId() {
 		thrown.expect(NotFoundException.class);
-		ctr.getProductWithChoices(business, 123456l);
+		ctr.getProduct(business, 123456l);
 	}
 
-	
-	@Test
-	public void testGetProduct() {
-		
-		Product product = pr.getByProperty("name", "Classic Burger");
-		
-		ProductDTO productDto = ctr.getProductWithChoices(business, product.getId());
-		
-		assertThat(productDto.getName(), is(product.getName()));
-		assertThat(productDto.getChoices().size(), is(product.getChoices().size()));
-	}
 	
 	@Test
 	public void testGetMenus() {
