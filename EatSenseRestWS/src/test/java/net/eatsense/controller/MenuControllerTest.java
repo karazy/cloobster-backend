@@ -19,6 +19,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -33,7 +34,9 @@ import net.eatsense.util.DummyDataDumper;
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -42,6 +45,9 @@ import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
 
 public class MenuControllerTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private final LocalServiceTestHelper helper =
 	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -158,6 +164,12 @@ public class MenuControllerTest {
 		verify(mr).saveOrUpdate(menu);
 		assertThat(result.getOrder(), is(testMenuData.getOrder()));
 	}
+	
+	@Test
+	public void testGetProductWithUnknownId() {
+		thrown.expect(NotFoundException.class);
+		ctr.getProductWithChoices(business, 123456l);
+	}
 
 	
 	@Test
@@ -165,13 +177,10 @@ public class MenuControllerTest {
 		
 		Product product = pr.getByProperty("name", "Classic Burger");
 		
-		ProductDTO productDto = ctr.getProduct(business, product.getId());
+		ProductDTO productDto = ctr.getProductWithChoices(business, product.getId());
 		
 		assertThat(productDto.getName(), is(product.getName()));
 		assertThat(productDto.getChoices().size(), is(product.getChoices().size()));
-		
-		productDto = ctr.getProduct(business, new Long(123456));
-		assertThat(productDto, equalTo(null));
 	}
 	
 	@Test

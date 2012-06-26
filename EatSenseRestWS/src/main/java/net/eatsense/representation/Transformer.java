@@ -217,17 +217,6 @@ public class Transformer {
 		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
 			dto.setOptions(choice.getOptions());						
 		}
-		//	else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {
-		//		ArrayList<ProductOption> options = new ArrayList<ProductOption>();
-		//		Map<Key<Product>,Product> products =  productRepo.getOfy().get(choice.getAvailableProducts());
-		//		
-		//		for (Product choiceProduct : products.values() ) {
-		//			options.add(new ProductOption(choiceProduct.getName(), choiceProduct.getPrice(), choiceProduct.getId()));
-		//		}
-		//		
-		//		dto.setOptions(options);
-		//	}
-	
 		
 		return dto;
 	}

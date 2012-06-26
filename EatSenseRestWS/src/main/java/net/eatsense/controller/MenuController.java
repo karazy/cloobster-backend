@@ -223,13 +223,12 @@ public class MenuController {
 	 * @param id
 	 * @return product DTO
 	 */
-	public ProductDTO getProduct(Business business, Long id) {
+	public ProductDTO getProductWithChoices(Business business, Long id) {
 		
 		try {
 			return transform.productToDto(productRepo.getById(business.getKey(), id));
 		} catch (NotFoundException e) {
-			logger.error("Unable to retrieve product, no matching entity found");
-			return null;
+			throw new net.eatsense.exceptions.NotFoundException();
 		}
 	}
 }
