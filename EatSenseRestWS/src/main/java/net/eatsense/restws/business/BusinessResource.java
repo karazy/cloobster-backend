@@ -92,6 +92,13 @@ public class BusinessResource {
 		resource.setBusiness(business);
 		return resource;
 	}
+	
+	@Path("choices")
+	public ChoicesResource getChoicesResource() {
+		ChoicesResource resource = resourceContext.getResource(ChoicesResource.class);
+		resource.setBusiness(business);
+		return resource;
+	}
 
 	@Path("orders")
 	public OrdersResource getOrdersResource() {
