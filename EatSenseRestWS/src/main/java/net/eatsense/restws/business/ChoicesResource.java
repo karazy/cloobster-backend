@@ -30,6 +30,7 @@ public class ChoicesResource {
 	public void setBusiness(Business business) {
 		this.business = business;
 	}
+	
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public List<ChoiceDTO> getChoices(@QueryParam("productId") long productId) {
