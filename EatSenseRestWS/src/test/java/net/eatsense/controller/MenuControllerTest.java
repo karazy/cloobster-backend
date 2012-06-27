@@ -2,18 +2,23 @@ package net.eatsense.controller;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
@@ -92,6 +97,44 @@ public class MenuControllerTest {
 		helper.tearDown();
 	}
 	
+	@Test
+	public void testCreateChoice() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		
+		when(business.getKey()).thenReturn(businessKey);
+		Product product = new Product();
+		when(pr.getById(businessKey, data.getProductId())).thenReturn(product );
+		Choice newChoice = new Choice();
+		when(cr.newEntity()).thenReturn(newChoice );
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		when(cr.saveOrUpdate(newChoice)).thenReturn(choiceKey );
+
+		ctr.createChoice(business, data);
+		
+		assertThat(product.getChoices(), hasItem(choiceKey));
+	}
+	
+	public ChoiceDTO getTestChoiceData() {
+		ChoiceDTO data =  new ChoiceDTO();
+		data.setParent(1l);
+		data.setIncluded(1);
+		data.setMaxOccurence(1);
+		data.setMinOccurence(0);
+		List<ProductOption> options = new ArrayList<ProductOption>();
+		options.add( new ProductOption("Option 1", 1f));
+		options.add( new ProductOption("Option 2", 2f));
+		data.setOptions(options );
+		data.setOverridePrice(ChoiceOverridePrice.NONE);
+		data.setPrice(0f);
+		data.setProductId(1l);
+		data.setText("test text");
+		return data;
+	}
 	
 	public MenuDTO getTestMenuData() {
 		

@@ -230,7 +230,7 @@ public class MenuController {
 	 * @return Product entity with the given id.
 	 */
 	public Product getProduct(Key<Business> businessKey, long id) {
-		checkNotNull(businessKey, "business was null");
+		checkNotNull(businessKey, "businessKey was null");
 		checkArgument(id != 0, "id was 0");
 		
 		try {
@@ -436,7 +436,7 @@ public class MenuController {
 		
 		Product product = getProduct(choice.getBusiness(), choiceData.getProductId().longValue());
 		
-		// Add the Choice to product specified by the productId and check if it was added.
+		// Add the Choice to the product and check if it was added.
 		if(product.addChoice(choiceKey)) {
 			// Only save if the choice was not already in the list.
 			productRepo.saveOrUpdate(product);
