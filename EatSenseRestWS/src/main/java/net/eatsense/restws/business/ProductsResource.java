@@ -40,6 +40,13 @@ public class ProductsResource {
 		return menuCtrl.getProductsForMenu(business, id);
 	}
 	
+	@POST
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public ProductDTO createProduct(ProductDTO productData) {
+		return menuCtrl.createProduct(business, productData);
+	}
+	
 	@GET
 	@Path("{id}")
 	@Produces("application/json; charset=UTF-8")

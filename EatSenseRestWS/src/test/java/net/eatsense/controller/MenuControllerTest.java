@@ -7,11 +7,13 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Validator;
@@ -98,6 +100,670 @@ public class MenuControllerTest {
 	}
 	
 	@Test
+	public void testUpdateChoiceEmptyOptionsName() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.getOptions().get(0).setName("");
+		Choice choice = new Choice();
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+	
+	@Test
+	public void testUpdateChoiceNullOptionsName() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.getOptions().get(0).setName(null);
+		Choice choice = new Choice();
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+	
+	@Test
+	public void testUpdateChoiceEmptyOptions() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.setOptions(Collections.<ProductOption>emptyList());
+		Choice choice = new Choice();
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+
+	@Test
+	public void testUpdateChoiceNullOptions() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.setOptions(null);
+		Choice choice = new Choice();
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+	
+	@Test
+	public void testUpdateChoiceNullText() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.setText(null);
+		Choice choice = new Choice();
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+	
+	@Test
+	public void testUpdateChoiceEmptyText() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.setText("");
+		Choice choice = new Choice();
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+	
+	@Test
+	public void testUpdateChoiceInvalidPrice() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		ChoiceDTO data = getTestChoiceData();
+		data.setPrice(-1f);
+		Choice choice = new Choice();
+		thrown.expect(ValidationException.class);
+		ctr.updateChoice(choice, data);
+	}
+	
+	@Test
+	public void testUpdateChoiceProductExistinLink() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		// Change text of original entity, so it will updated with the test data.
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey2 = mock(Key.class);
+		Long productId2 = 2l;
+		when(productKey2.getId()).thenReturn(productId2 );
+		choice.setProduct(productKey2 );
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+	
+		Product product = new Product();
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock (Key.class);
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		when(cr.getKey(businessKey, choice.getId())).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		//verify that the product didnot change
+		assertThat(result.getProductId(), is(productId2));
+		assertThat(choice.getProduct(), is(productKey2));
+		
+		// Check that we saved the product with the choice.
+		verify(pr).saveOrUpdate(product);
+		assertThat(product.getChoices(), hasItem(choiceKey));
+		
+		// Check that we never saved the choice.
+		// Because we did not update any data.
+		verify(cr, never()).saveOrUpdate(choice);
+	}
+	
+	@Test
+	public void testUpdateChoiceProduct() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		// Change text of original entity, so it will updated with the test data.
+		choice.setText(data.getText());
+		choice.setProduct(null);
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+	
+		Product product = new Product();
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock (Key.class);
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getProductId(), is(data.getProductId()));
+		assertThat(choice.getProduct(), is(productKey));
+		
+		// Check that we saved the product with the choice.
+		verify(pr).saveOrUpdate(product);
+		assertThat(product.getChoices(), hasItem(choiceKey));
+	}
+	
+	@Test
+	public void testUpdateChoicePrice() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		// Change text of original entity, so it will updated with the test data.
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(99f);
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getText(), is(data.getText()));
+		assertThat(choice.getText(), is(data.getText()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceText() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		// Change text of original entity, so it will updated with the test data.
+		choice.setText("another test text");
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getText(), is(data.getText()));
+		assertThat(choice.getText(), is(data.getText()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceOverridePriceFlag() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		// Change override price of original entity, so it will updated with the test data.
+		choice.setOverridePrice(ChoiceOverridePrice.OVERRIDE_FIXED_SUM);
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getOverridePrice(), is(data.getOverridePrice()));
+		assertThat(choice.getOverridePrice(), is(data.getOverridePrice()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceOptions() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		List<ProductOption> options = new ArrayList<ProductOption>(data.getOptions());
+		options.remove(0);
+		// Change options of original entity, so it will updated with the test data.
+		choice.setOptions(options );
+		choice.setOverridePrice(data.getOverridePrice());
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getOptions(), is(data.getOptions()));
+		assertThat(choice.getOptions(), is(data.getOptions()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceMinOccurence() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		// Change min occurence of original entity, so it will updated with the test data.
+		choice.setMinOccurence(1);
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getMinOccurence(), is(data.getMinOccurence()));
+		assertThat(choice.getMinOccurence(), is(data.getMinOccurence()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceMaxOccurence() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(0);
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getMaxOccurence(), is(data.getMaxOccurence()));
+		assertThat(choice.getMaxOccurence(), is(data.getMaxOccurence()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceIncluded() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(3);
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		assertThat(result.getIncluded(), is(data.getIncluded()));
+		assertThat(choice.getIncludedChoices(), is(data.getIncluded()));
+		
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
+	public void testUpdateChoiceNoChanges() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.getKey(businessKey, choice.getId())).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ctr.updateChoice(choice, data);
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+		
+		verify(cr, never()).saveOrUpdate(choice);
+	}
+	
+	@Test
+	public void testUpdateChoiceParent() throws Exception {
+		newSetUp();
+		business = mock(Business.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		ChoiceDTO data = getTestChoiceData();
+		when(business.getKey()).thenReturn(businessKey);
+		Choice choice = new Choice();
+		choice.setId(1l);
+		choice.setBusiness(businessKey);
+		choice.setIncludedChoices(data.getIncluded());
+		choice.setMaxOccurence(data.getMaxOccurence());
+		choice.setMinOccurence(data.getMinOccurence());
+		choice.setOptions(data.getOptions());
+		choice.setOverridePrice(data.getOverridePrice());
+		choice.setText(data.getText());
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice = mock(Key.class);
+		
+		choice.setParentChoice(parentChoice );
+		choice.setPrice(data.getPrice());
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock(Key.class);
+		choice.setProduct(productKey );
+		Product product = new Product();
+		
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> parentChoice2 = mock(Key.class);
+		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice2);
+		
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		// Add the Choice to the list of choices for the product.
+		product.addChoice(choiceKey);
+		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
+		// Reset dirty flag.
+		choice.setDirty(false);
+		
+		ChoiceDTO result = ctr.updateChoice(choice, data);
+		
+		assertThat(result.getIncluded(), is(data.getIncluded()));
+		assertThat(choice.getIncludedChoices(), is(data.getIncluded()));
+		// Check that we did not touch the Product, because the Choice was already in the list.
+		verify(pr, never()).saveOrUpdate(product);
+	}
+	
+	@Test
 	public void testCreateChoice() throws Exception {
 		newSetUp();
 		business = mock(Business.class);
@@ -107,7 +773,13 @@ public class MenuControllerTest {
 		
 		when(business.getKey()).thenReturn(businessKey);
 		Product product = new Product();
-		when(pr.getById(businessKey, data.getProductId())).thenReturn(product );
+		@SuppressWarnings("unchecked")
+		Key<Product> productKey = mock (Key.class);
+		when(productKey.getId()).thenReturn(data.getProductId());
+		
+		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
+		when(pr.getByKey(productKey)).thenReturn(product );
+
 		Choice newChoice = new Choice();
 		when(cr.newEntity()).thenReturn(newChoice );
 		@SuppressWarnings("unchecked")
@@ -121,7 +793,7 @@ public class MenuControllerTest {
 	
 	public ChoiceDTO getTestChoiceData() {
 		ChoiceDTO data =  new ChoiceDTO();
-		data.setParent(1l);
+		data.setParent(3l);
 		data.setIncluded(1);
 		data.setMaxOccurence(1);
 		data.setMinOccurence(0);

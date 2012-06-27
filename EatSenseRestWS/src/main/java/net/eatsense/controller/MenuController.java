@@ -431,10 +431,10 @@ public class MenuController {
 		if(choice.isDirty()) {
 			choiceKey = choiceRepo.saveOrUpdate(choice);
 		} else {
-			choiceKey = choice.getKey();			
+			choiceKey = choiceRepo.getKey(choice.getBusiness(), choice.getId());			
 		}
 		
-		Product product = getProduct(choice.getBusiness(), choiceData.getProductId().longValue());
+		Product product = productRepo.getByKey(newProductKey);
 		
 		// Add the Choice to the product and check if it was added.
 		if(product.addChoice(choiceKey)) {
