@@ -11,6 +11,7 @@ import net.eatsense.domain.embedded.ProductOption;
 
 import org.apache.bval.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -77,7 +78,10 @@ public class Choice extends GenericEntity {
 	}
 
 	public void setParentChoice(Key<Choice> parentChoice) {
-		this.parentChoice = parentChoice;
+		if(!Objects.equal(this.parentChoice, parentChoice)) {
+			this.setDirty(true);
+			this.parentChoice = parentChoice;
+		}
 	}
 
 	public Key<Business> getBusiness() {
@@ -126,35 +130,59 @@ public class Choice extends GenericEntity {
 	}
 	
 	public void setIncludedChoices(int includedChoices) {
-		this.includedChoices = includedChoices;
+		if(!Objects.equal(this.includedChoices, includedChoices)) {
+			this.setDirty(true);
+			this.includedChoices = includedChoices;
+		}
 	}
 	
 	public void setMaxOccurence(int maxOccurence) {
-		this.maxOccurence = maxOccurence;
+		if(!Objects.equal(this.maxOccurence, maxOccurence)) {
+			this.setDirty(true);
+			this.maxOccurence = maxOccurence;
+		}
 	}
 
 	public void setMinOccurence(int minOccurence) {
-		this.minOccurence = minOccurence;
+		if(!Objects.equal(this.minOccurence, minOccurence)) {
+			this.setDirty(true);
+			this.minOccurence = minOccurence;
+		}
 	}
 
-	public void setOptions(List<ProductOption> availableChoices) {
-		this.options = availableChoices;
+	public void setOptions(List<ProductOption> options) {
+		if(!Objects.equal(this.options, options)) {
+			this.setDirty(true);
+			this.options = options;
+		}
 	}
 		
 	public void setOverridePrice(ChoiceOverridePrice overridePrice) {
-		this.overridePrice = overridePrice;
+		if(!Objects.equal(this.overridePrice, overridePrice)) {
+			this.setDirty(true);
+			this.overridePrice = overridePrice;
+		}
 	}
 	
 	public void setPrice(Float price) {
-		this.price = price;
+		if(!Objects.equal(this.price, price)) {
+			this.setDirty(true);
+			this.price = price;
+		}
 	}
 	
 	public void setProduct(Key<Product> product) {
-		this.product = product;
+		if(!Objects.equal(this.product, product)) {
+			this.setDirty(true);
+			this.product = product;
+		}
 	}
 	
 	public void setText(String text) {
-		this.text = text;
+		if(!Objects.equal(this.text, text)) {
+			this.setDirty(true);
+			this.text = text;
+		}
 	}
 	
 	public static Key<Choice> getKey(Key<Business> parent, long id) {

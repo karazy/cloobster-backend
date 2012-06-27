@@ -1,6 +1,7 @@
 package net.eatsense.representation;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
 
+import net.eatsense.domain.Choice;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
 
@@ -31,11 +33,55 @@ public class ChoiceDTO {
 	@NotNull
 	@NotEmpty
 	@Valid
-	Collection<ProductOption> options; 
+	List<ProductOption> options; 
 	
 	Collection<ProductOption> selected;
 	
 	Long parent;
+	
+	private Long productId;
+	
+	/**
+	 * @param choice Entity
+	 */
+	public ChoiceDTO(Choice choice) {
+		super();
+		if(choice == null)
+			return;
+		
+		this.id = choice.getId();
+
+		this.included = choice.getIncludedChoices();
+		this.maxOccurence = choice.getMaxOccurence();
+		this.minOccurence = choice.getMinOccurence();
+		this.overridePrice = choice.getOverridePrice();
+		
+		if(choice.getParentChoice() != null)
+			this.parent = choice.getParentChoice().getId();
+		
+		this.price = (choice.getPrice() == null ? 0 : choice.getPrice());
+		this.text = choice.getText();
+		
+		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
+			this.options = choice.getOptions();						
+		}
+		
+		if(choice.getProduct() != null)
+			this.productId = choice.getProduct().getId(); 
+	}
+	
+	/**
+	 * @param choice Entity
+	 * @param productId Override for productId in the Choice entity.
+	 */
+	public ChoiceDTO(Choice choice, long productId) {
+		this(choice);
+		this.productId = productId;
+	}
+	
+	public ChoiceDTO() {
+		super();
+	}
 	
 	public Long getParent() {
 		return parent;
@@ -101,10 +147,10 @@ public class ChoiceDTO {
 	public void setOverridePrice(ChoiceOverridePrice overridePrice) {
 		this.overridePrice = overridePrice;
 	}
-	public Collection<ProductOption> getOptions() {
+	public List<ProductOption> getOptions() {
 		return options;
 	}
-	public void setOptions(Collection<ProductOption> options) {
+	public void setOptions(List<ProductOption> options) {
 		this.options = options;
 	}
 	public Collection<ProductOption> getSelected() {
@@ -112,6 +158,14 @@ public class ChoiceDTO {
 	}
 	public void setSelected(Collection<ProductOption> selected) {
 		this.selected = selected;
+	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
 	}
 	
 }

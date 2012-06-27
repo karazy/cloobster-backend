@@ -44,7 +44,7 @@ public class ProductsResource {
 	@Path("{id}")
 	@Produces("application/json; charset=UTF-8")
 	public ProductDTO getProduct(@PathParam("id") long id) {
-		return new ProductDTO(menuCtrl.getProduct(business, id));
+		return new ProductDTO(menuCtrl.getProduct(business.getKey(), id));
 	}
 	
 	@PUT
@@ -52,6 +52,6 @@ public class ProductsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public ProductDTO updateProduct(@PathParam("id") long id, ProductDTO productData) {
-		return menuCtrl.updateProduct(menuCtrl.getProduct(business, id), productData);
+		return menuCtrl.updateProduct(menuCtrl.getProduct(business.getKey(), id), productData);
 	}
 }

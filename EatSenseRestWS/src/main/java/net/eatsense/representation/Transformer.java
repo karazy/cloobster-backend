@@ -200,25 +200,7 @@ public class Transformer {
 		if(choice == null)
 			return null;
 		
-		ChoiceDTO dto = new ChoiceDTO();
-		
-		dto.setId(choice.getId());
-
-		dto.setIncluded(choice.getIncludedChoices());
-		dto.setMaxOccurence(choice.getMaxOccurence());
-		dto.setMinOccurence(choice.getMinOccurence());
-		dto.setOverridePrice(choice.getOverridePrice());
-		if(choice.getParentChoice() != null)
-			dto.setParent(choice.getParentChoice().getId());
-		
-		dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
-		dto.setText(choice.getText());
-		
-		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
-			dto.setOptions(choice.getOptions());						
-		}
-		
-		return dto;
+		return new ChoiceDTO(choice);
 	}
 	
 	public Collection<ChoiceDTO> getChoicesForProduct(Product p)

@@ -82,11 +82,7 @@ public class BusinessResource {
 	@Path("products/{productId}")
 	@Produces("application/json; charset=UTF-8")
 	public ProductDTO getProduct( @PathParam("productId") Long productId) {
-		ProductDTO product = menuCtrl.getProductWithChoices(business, productId);
-		
-		if(product == null)
-			throw new NotFoundException(productId + " id not found.");
-		else return product;
+		return menuCtrl.getProductWithChoices(business.getKey(), productId);
 	}
 	
 	@POST

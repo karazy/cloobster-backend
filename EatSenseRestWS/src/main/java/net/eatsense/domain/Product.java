@@ -1,5 +1,8 @@
 package net.eatsense.domain;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Transient;
@@ -140,4 +143,26 @@ public class Product extends GenericEntity {
 		}
 	}
 	
+	/**
+	 * Add a Key for a Choice entity to the list of choices.
+	 * 
+	 * @param choice
+	 * @return true
+	 */
+	public boolean addChoice(Key<Choice> choice) {
+		checkNotNull(choice, "choice key was null");
+		
+		if(choices == null)
+			choices = new ArrayList<Key<Choice>>();
+		boolean result = false;
+		
+		if(!choices.contains(choice)) {
+			result = choices.add(choice);
+			if(result) {
+				this.setDirty(true);
+			}
+		}
+		
+		return result;
+	}
 }

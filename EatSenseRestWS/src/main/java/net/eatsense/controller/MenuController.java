@@ -13,12 +13,14 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
@@ -27,9 +29,11 @@ import net.eatsense.validation.CreationChecks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
 /**
@@ -44,9 +48,11 @@ public class MenuController {
 	private ProductRepository productRepo;
 	private Transformer transform;
 	private Validator validator;
+	private ChoiceRepository choiceRepo;
 
 	@Inject
 	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
+		this.choiceRepo = cr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
@@ -219,16 +225,16 @@ public class MenuController {
 	/**
 	 * Retrieve Product entity.
 	 * 
-	 * @param business
+	 * @param businessKey
 	 * @param id
 	 * @return Product entity with the given id.
 	 */
-	public Product getProduct(Business business, long id) {
-		checkNotNull(business, "business was null");
+	public Product getProduct(Key<Business> businessKey, long id) {
+		checkNotNull(businessKey, "business was null");
 		checkArgument(id != 0, "id was 0");
 		
 		try {
-			return productRepo.getById(business.getKey(), id);
+			return productRepo.getById(businessKey, id);
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
@@ -258,12 +264,8 @@ public class MenuController {
 	 * @param id
 	 * @return product DTO
 	 */
-	public ProductDTO getProductWithChoices(Business business, long id) {
-		try {
-			return transform.productToDto(getProduct(business,id));
-		} catch (NotFoundException e) {
-			throw new net.eatsense.exceptions.NotFoundException();
-		}
+	public ProductDTO getProductWithChoices(Key<Business> businessKey, long id) {
+		return transform.productToDto(getProduct(businessKey,id));
 	}
 	
 	/**
@@ -315,4 +317,132 @@ public class MenuController {
 		
 		return new ProductDTO(product);
 	}
+	
+	/**
+	 * @param businessKey
+	 * @param id
+	 * @return Entity
+	 */
+	public Choice getChoice(Key<Business> businessKey, long id) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkArgument(id != 0, "id was 0");
+		
+		Choice choice;
+		try {
+			choice = choiceRepo.getById(businessKey, id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		
+		return choice;
+	}
+	
+	/**
+	 * Retrieve all Choices saved for the Product given by the id.
+	 * 
+	 * @param businessKey
+	 * @param productId
+	 * @return
+	 */
+	public List<ChoiceDTO> getChoicesForProduct(Key<Business> businessKey, long productId) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkArgument(productId != 0,  "productId was 0");
+		
+		ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
+		Product product;
+		try {
+			product = getProduct(businessKey, productId);
+		} catch (net.eatsense.exceptions.NotFoundException e) {
+			logger.warn("No product found with id {}", productId);
+			return choiceDtos;
+		}
+		
+		if(product.getChoices() != null && !product.getChoices().isEmpty()) {
+			Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
+			
+			for (Choice choice : choices)  {
+				choiceDtos.add( new ChoiceDTO(choice , productId) );
+			}
+		}
+			
+		return choiceDtos;
+	}
+	
+	/**
+	 * Create and save new Choice entity.
+	 * 
+	 * @param business
+	 * @param choiceData
+	 * @return
+	 */
+	public ChoiceDTO createChoice(Business business, ChoiceDTO choiceData) {
+		checkNotNull(business, "business was null");
+		checkNotNull(choiceData, "choiceData was null");
+		
+		Choice choice = choiceRepo.newEntity();
+		choice.setBusiness(business.getKey());
+		
+		choiceData = updateChoice(choice, choiceData);
+		
+		return choiceData;
+	}
+
+	/**
+	 * Update Choice data and add add to Product specified by the id if not already added.
+	 * 
+	 * @param choice
+	 * @param choiceData
+	 * @return
+	 */
+	public ChoiceDTO updateChoice(Choice choice, ChoiceDTO choiceData) {
+		checkNotNull(choice, "choice was null");
+		checkNotNull(choiceData, "choicedata was null");
+		
+		Set<ConstraintViolation<ChoiceDTO>> violationSet = validator.validate(choiceData);
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
+			for (ConstraintViolation<ChoiceDTO> violation : violationSet) {
+				// Format the message like: '"{property}" {message}.'
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
+			}
+			throw new ValidationException(stringBuilder.toString());
+		}
+		
+		choice.setIncludedChoices(choiceData.getIncluded());
+		choice.setMaxOccurence(choiceData.getMaxOccurence());
+		choice.setMinOccurence(choiceData.getMinOccurence());
+		choice.setOptions(choiceData.getOptions());
+		choice.setOverridePrice(choiceData.getOverridePrice());
+		
+		if(choiceData.getParent() != null)
+			choice.setParentChoice(choiceRepo.getKey(choice.getBusiness(), choiceData.getParent()));
+		choice.setPrice(choiceData.getPrice());
+		
+		Key<Product> newProductKey = productRepo.getKey(choice.getBusiness(), choiceData.getProductId());
+		
+		if(choice.getProduct() == null) {
+			// Only set the Product if this was the first Product to be set.
+			choice.setProduct(newProductKey);	
+		}
+		
+		choice.setText(choiceData.getText());
+		
+		Key<Choice> choiceKey;
+		if(choice.isDirty()) {
+			choiceKey = choiceRepo.saveOrUpdate(choice);
+		} else {
+			choiceKey = choice.getKey();			
+		}
+		
+		Product product = getProduct(choice.getBusiness(), choiceData.getProductId().longValue());
+		
+		// Add the Choice to product specified by the productId and check if it was added.
+		if(product.addChoice(choiceKey)) {
+			// Only save if the choice was not already in the list.
+			productRepo.saveOrUpdate(product);
+		}
+		
+		return new ChoiceDTO(choice);
+	}
+
 }
