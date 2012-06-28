@@ -65,13 +65,13 @@ public class MenuController {
 	 * @param business entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenusWithProducts(Business business){
+	public Collection<MenuDTO> getMenusWithProducts(Key<Business> businessKey){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
-		if(business == null )
+		if(businessKey == null )
 			return menuDTOs;
 		
-		List<Menu> menus = menuRepo.getByParent( business );
-		List<ProductDTO> products = transform.productsToDto(productRepo.getByParentOrdered(business, "name"));
+		List<Menu> menus = menuRepo.getActiveMenusForBusiness(businessKey);
+		List<ProductDTO> products = transform.productsToDto(productRepo.getActiveProductsForBusiness(businessKey));
 		
 		ListMultimap<Long, ProductDTO> menuToProductsMap = ArrayListMultimap.create();
 		

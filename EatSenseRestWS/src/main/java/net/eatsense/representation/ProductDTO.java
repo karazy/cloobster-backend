@@ -57,6 +57,7 @@ public class ProductDTO {
 		this.longDesc = product.getLongDesc();
 		this.price = product.getPrice();
 		this.order = product.getOrder();
+		this.active = product.isActive();
 	}
 
 

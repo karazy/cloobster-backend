@@ -67,7 +67,7 @@ public class BusinessResource {
 	@Path("menus")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<MenuDTO> getMenus() {
-		return menuCtrl.getMenusWithProducts(business);
+		return menuCtrl.getMenusWithProducts(business.getKey());
 	}
 	
 

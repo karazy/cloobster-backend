@@ -1,5 +1,10 @@
 package net.eatsense.persistence;
 
+import java.util.List;
+
+import com.googlecode.objectify.Key;
+
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
 
 public class MenuRepository extends GenericRepository<Menu> {
@@ -10,5 +15,9 @@ public class MenuRepository extends GenericRepository<Menu> {
 	}
 	public MenuRepository() {
 		super(Menu.class);
+	}
+	
+	public List<Menu> getActiveMenusForBusiness(Key<Business> businessKey) {
+		return ofy().query(Menu.class).ancestor(businessKey).filter("active", true).list();
 	}
 }

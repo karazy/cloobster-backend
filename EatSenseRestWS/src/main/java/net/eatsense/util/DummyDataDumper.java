@@ -212,6 +212,7 @@ public class DummyDataDumper {
 		menu.setTitle(title);
 		menu.setBusiness(business);
 		menu.setDescription(description);
+		menu.setActive(true);
 		
 		return mr.saveOrUpdate(menu);
 	}
@@ -225,6 +226,7 @@ public class DummyDataDumper {
 		product.setPrice(price);
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
+		product.setActive(true);
 		
 		return product;
 	}

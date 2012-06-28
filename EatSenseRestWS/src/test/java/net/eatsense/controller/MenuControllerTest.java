@@ -814,6 +814,7 @@ public class MenuControllerTest {
 		menuData.setDescription("test description");
 		menuData.setOrder(1);
 		menuData.setTitle("test title");
+		menuData.setActive(true);
 		return menuData ;
 	}
 	
@@ -868,6 +869,35 @@ public class MenuControllerTest {
 		thrown.expect(ValidationException.class);
 				
 		ctr.updateProduct(product, testProductData);
+	}
+	
+	@Test
+	public void testUpdateProductActiveStatus() throws Exception {
+		newSetUp();
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Menu> menuKey = mock (Key.class);
+			
+		ProductDTO testProductData = getTestProductData();
+		when(mr.getKey(businessKey, testProductData.getMenuId())).thenReturn(menuKey);
+		
+		Product product = new Product();
+		product.setBusiness(businessKey);
+		product.setName(testProductData.getName());
+		product.setOrder(testProductData.getOrder());
+		product.setPrice(testProductData.getPrice());
+		product.setMenu(menuKey);
+		product.setShortDesc(testProductData.getShortDesc());
+		product.setLongDesc(testProductData.getLongDesc());
+		product.setActive(false);
+		product.setDirty(false);
+				
+		ProductDTO result = ctr.updateProduct(product, testProductData);
+		verify(pr).saveOrUpdate(product);
+		
+		assertThat(product.isActive(), is(testProductData.isActive()));
+		assertThat(result.isActive(), is(testProductData.isActive()));
 	}
 
 	@Test
@@ -1067,6 +1097,7 @@ public class MenuControllerTest {
 		data.setOrder(1);
 		data.setPrice(1.0f);
 		data.setShortDesc("test short description");
+		data.setActive(true);
 		return data;
 	}
 
@@ -1087,6 +1118,25 @@ public class MenuControllerTest {
 		
 		verify(mr).saveOrUpdate(newMenu);
 	}
+	
+	@Test
+	public void testUpdateMenuActiveStatus() throws Exception {
+		newSetUp();
+		MenuDTO testMenuData = getTestMenuData();
+		Menu menu = new Menu();
+		menu.setDescription(testMenuData.getDescription());
+		menu.setOrder(testMenuData.getOrder());
+		menu.setTitle(testMenuData.getTitle());
+		menu.setActive(false);
+		menu.setDirty(false);
+		
+		MenuDTO result = ctr.updateMenu(menu, testMenuData);
+		
+		verify(mr).saveOrUpdate(menu);
+		assertThat(result.isActive(), is(testMenuData.isActive()));
+		assertThat(menu.isActive(), is(testMenuData.isActive()));
+	}
+	
 	
 	@Test
 	public void testUpdateMenuTitle() throws Exception {
@@ -1146,7 +1196,7 @@ public class MenuControllerTest {
 	@Test
 	public void testGetMenus() {
 		// retrieve all menus saved for this restaurant
-		Collection<MenuDTO> menusdto = ctr.getMenusWithProducts(business);
+		Collection<MenuDTO> menusdto = ctr.getMenusWithProducts(business.getKey());
 		
 		// check if we have three menus
 		assertEquals(3 , menusdto.size() );
