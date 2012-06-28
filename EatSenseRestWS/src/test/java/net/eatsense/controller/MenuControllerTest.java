@@ -218,7 +218,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 	
 		Product product = new Product();
 		@SuppressWarnings("unchecked")
@@ -274,7 +274,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 	
 		Product product = new Product();
 		@SuppressWarnings("unchecked")
@@ -324,7 +324,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(9900);
+		choice.setPrice(9900l);
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -376,7 +376,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -428,7 +428,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -482,7 +482,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -534,7 +534,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -584,7 +584,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -634,7 +634,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -684,7 +684,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -733,7 +733,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPrice());
+		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -825,26 +825,12 @@ public class MenuControllerTest {
 			
 		ProductDTO testProductData = getTestProductData();
 		Product product = new Product();
-		testProductData.setPrice(-1f);
+		testProductData.setPrice(-1);
 		
 		thrown.expect(ValidationException.class);
 				
 		ctr.updateProduct(product, testProductData);
 	}
-	
-	@Test
-	public void testUpdateProductWithNullPrice() throws Exception {
-		newSetUp();
-			
-		ProductDTO testProductData = getTestProductData();
-		Product product = new Product();
-		testProductData.setPrice(null);
-		
-		thrown.expect(ValidationException.class);
-				
-		ctr.updateProduct(product, testProductData);
-	}
-
 	
 	@Test
 	public void testUpdateProductWithEmptyName() throws Exception {
@@ -1011,7 +997,7 @@ public class MenuControllerTest {
 		ProductDTO result = ctr.updateProduct(product, testProductData);
 		verify(pr).saveOrUpdate(product);
 		
-		assertThat(product.getPrice(), is(Money.of(CurrencyUnit.EUR, testProductData.getPrice()).getAmountMinorInt()));
+		assertThat(product.getPrice()/100d, is(testProductData.getPrice()));
 		assertThat(result.getPrice(), is(testProductData.getPrice()));
 	}
 	
@@ -1096,7 +1082,7 @@ public class MenuControllerTest {
 		data.setMenuId(1l);
 		data.setName("test name");
 		data.setOrder(1);
-		data.setPrice(1.0f);
+		data.setPrice(100);
 		data.setShortDesc("test short description");
 		data.setActive(true);
 		return data;

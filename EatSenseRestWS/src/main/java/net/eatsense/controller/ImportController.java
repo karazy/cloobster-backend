@@ -3,6 +3,7 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -157,13 +158,16 @@ public class ImportController {
 				logger.info("Error while saving spot with name: " + spot.getName());
 		}
 		
+		CurrencyUnit currencyUnit = CurrencyUnit.of(businessData.getCurrency());
+		
 		for(MenuDTO menu : businessData.getMenus()) {
 			Key<Menu> kM = createAndSaveMenu(kR, menu.getTitle(), menu.getDescription(), menu.getOrder());
 			
 			if(kM != null) {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
-					Product newProduct = createProduct(kM,kR, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder(), businessData.getCurrency());
+					
+					Product newProduct = createProduct(kM,kR, productData.getName(), Money.of(currencyUnit, productData.getPrice() ), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
@@ -184,18 +188,18 @@ public class ImportController {
 								}
 								else {
 									// no group name set, just save the choice
-									Key<Choice> choiceKey = createAndSaveChoice(kP,kR, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
+									Key<Choice> choiceKey = createAndSaveChoice(kP,kR, choiceData.getText(), Money.ofMinor(currencyUnit, choiceData.getPriceMinor()), choiceData.getOverridePrice(),
 											choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions(), null);
 									choices.add(choiceKey);
 								}
 							}
 							
 							for (ChoiceDTO parentChoice : parentMap.values()) {
-								Key<Choice> parentKey = createAndSaveChoice(kP,kR, parentChoice.getText(), parentChoice.getPrice(), parentChoice.getOverridePrice(),
+								Key<Choice> parentKey = createAndSaveChoice(kP,kR, parentChoice.getText(),Money.ofMinor(currencyUnit, parentChoice.getPriceMinor()), parentChoice.getOverridePrice(),
 										parentChoice.getMinOccurence(), parentChoice.getMaxOccurence(), parentChoice.getIncluded(), parentChoice.getOptions(), null);
 								choices.add(parentKey);
 								for (ChoiceDTO childChoice : groupMap.get(parentChoice.getGroup())) {
-									Key<Choice> childKey = createAndSaveChoice(kP,kR, childChoice.getText(), childChoice.getPrice(), childChoice.getOverridePrice(),
+									Key<Choice> childKey = createAndSaveChoice(kP,kR, childChoice.getText(), Money.ofMinor(currencyUnit, childChoice.getPriceMinor()), childChoice.getOverridePrice(),
 											childChoice.getMinOccurence(), childChoice.getMaxOccurence(), childChoice.getIncluded(), childChoice.getOptions(), parentKey);
 									choices.add(childKey);
 								} 
@@ -270,7 +274,7 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Float price, String shortDesc, String longDesc, Integer order, String currencyCode)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
@@ -280,8 +284,7 @@ public class ImportController {
 		product.setMenu(menuKey);
 		product.setBusiness(business);
 		product.setName(name);
-		Money money = Money.of(CurrencyUnit.of(currencyCode), price);
-		product.setPrice(money.getAmountMinorInt());
+		product.setPrice(price.getAmountMinorInt());
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
 		product.setOrder(order);
@@ -290,7 +293,7 @@ public class ImportController {
 	}
 	
 	private Key<Choice> createAndSaveChoice(Key<Product> productKey,
-			Key<Business> businessKey, String text, int price,
+			Key<Business> businessKey, String text, Money price,
 			ChoiceOverridePrice overridePrice, int minOccurence,
 			int maxOccurence, int includedChoices,
 			Collection<ProductOption> availableOptions,
@@ -303,7 +306,7 @@ public class ImportController {
 		choice.setProduct(productKey);
 		choice.setBusiness(businessKey);
 		choice.setText(text);
-		choice.setPrice(price);
+		choice.setPrice(price.getAmountMinorLong());
 		choice.setOverridePrice(overridePrice);
 		choice.setMinOccurence(minOccurence);
 		choice.setMaxOccurence(maxOccurence);

@@ -251,7 +251,7 @@ public class UpdateBillTest {
 			assertThat(bill.getId(), is(billData.getId()));
 			assertThat(bill.getCreationTime(), notNullValue());
 			assertThat(bill.getPaymentMethod().getName(), is(billData.getPaymentMethod().getName()));
-			assertThat(bill.getTotal(), is(2150));
+			assertThat(bill.getTotal(), is(2150l));
 			assertThat(bill.isCleared(), is(true));
 		}
 		// Check orders again to see if they are linked ...

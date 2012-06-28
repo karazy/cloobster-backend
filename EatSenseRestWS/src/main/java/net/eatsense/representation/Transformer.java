@@ -60,8 +60,10 @@ public class Transformer {
 			return null;
 		
 		BillDTO billData = new BillDTO();
-		
-		billData.setTotal(bill.getTotal());
+		// convert from sotred minor values to decimal
+		if(billData.getTotal() != null) {
+			billData.setTotal( (bill.getTotal() == 0) ? 0 : bill.getTotal() / 100d );
+		}
 		billData.setCheckInId(bill.getCheckIn().getId());
 		billData.setCleared(bill.isCleared());
 		billData.setId(bill.getId());

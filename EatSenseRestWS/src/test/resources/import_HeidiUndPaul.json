@@ -4,6 +4,7 @@
     "city": "Eschborn",
     "address": "Unterortstraße 29",
     "postcode": "65760",
+    "currency": "EUR",
     "payments": [
         {
             "name": "EC",

@@ -29,9 +29,8 @@ public class ProductDTO {
 	 */
 	private String longDesc;
 	
-	@NotNull
 	@Min(0)
-	private Float price;
+	private double price;
 	
 	@Valid
 	private Collection<ChoiceDTO> choices;
@@ -57,7 +56,7 @@ public class ProductDTO {
 		this.name = product.getName();
 		this.shortDesc = product.getShortDesc();
 		this.longDesc = product.getLongDesc();
-		this.price = Money.ofMinor(CurrencyUnit.EUR,product.getPrice()).getAmount().floatValue();
+		this.price = product.getPrice() / 100d;
 		this.order = product.getOrder();
 		this.active = product.isActive();
 	}
@@ -94,12 +93,19 @@ public class ProductDTO {
 	}
 
 
-	public Float getPrice() {
+	public double getPrice() {
 		return price;
 	}
+	
+	/**
+	 * @return price*100 rounded to the closest integer
+	 */
+	@JsonIgnore
+	public long getPriceMinor() {
+		return Math.round(price * 100);
+	}
 
-
-	public void setPrice(Float price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
 

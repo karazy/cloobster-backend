@@ -63,7 +63,7 @@ public class GetBillTest {
 
 	private BillDTO billData;
 
-	private Integer billTotal;
+	private Long billTotal;
 
 	@Before
 	public void setUp() throws Exception {
@@ -104,7 +104,7 @@ public class GetBillTest {
 		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		billTotal = billCtrl.calculateTotalPrice(placedOrder, CurrencyUnit.EUR).getAmountMinorInt();
+		billTotal = billCtrl.calculateTotalPrice(placedOrder, CurrencyUnit.EUR).getAmountMinorLong();
 		
 		placedOrderDto.setStatus(OrderStatus.PLACED);
 		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);

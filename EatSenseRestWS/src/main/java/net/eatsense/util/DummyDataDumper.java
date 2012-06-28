@@ -114,39 +114,39 @@ public class DummyDataDumper {
 		one.setMinOccurence(1);
 		one.setProduct(kP);
 		one.setBusiness(kR);
-		one.setPrice(0);
+		one.setPrice(0l);
 		
 		Key<Choice> oneKey = cr.saveOrUpdate(one);
 		
 		Choice two = new Choice();
 		two.setText("Extras");
 		options = new ArrayList<ProductOption>();
-		options.add(new ProductOption("Extra Käse", 100));
-		options.add(new ProductOption("Chili Sauce", 50));
-		options.add(new ProductOption("Salatgurken", 50));
-		options.add(new ProductOption("Ei", 100));
+		options.add(new ProductOption("Extra Käse", 1));
+		options.add(new ProductOption("Chili Sauce", 0.5));
+		options.add(new ProductOption("Salatgurken", 0.5));
+		options.add(new ProductOption("Ei", 1));
 		
 		two.setOptions(options);
 		two.setMaxOccurence(0);
 		two.setMinOccurence(0);
 		two.setProduct(kP);
 		two.setBusiness(kR);
-		two.setPrice(0);
+		two.setPrice(0l);
 		
 		Key<Choice> twoKey = cr.saveOrUpdate(two);
 		
 		Choice three = new Choice();
 		three.setText("Menü");
 		options = new ArrayList<ProductOption>();
-		options.add(new ProductOption("Cola", 300));
-		options.add(new ProductOption("Cola Light", 300));
+		options.add(new ProductOption("Cola", 3));
+		options.add(new ProductOption("Cola Light", 3));
 		
 		three.setOptions(options);
 		three.setMaxOccurence(1);
 		three.setMinOccurence(0);
 		three.setProduct(kP);
 		three.setBusiness(kR);
-		three.setPrice(3);
+		three.setPrice(3l);
 		
 		Key<Choice> threeKey = cr.saveOrUpdate(three);
 		
@@ -154,7 +154,7 @@ public class DummyDataDumper {
 		four.setText("Menü Beilage");
 		options = new ArrayList<ProductOption>();
 		options.add(new ProductOption("mit Pommes", 0));
-		options.add(new ProductOption("mit Salat", 50));
+		options.add(new ProductOption("mit Salat", 0.50));
 		
 		four.setOptions(options);
 		four.setMaxOccurence(1);
@@ -162,7 +162,7 @@ public class DummyDataDumper {
 		four.setParentChoice(threeKey);
 		four.setProduct(kP);
 		four.setBusiness(kR);
-		four.setPrice(300);
+		four.setPrice(300l);
 		
 		Key<Choice> fourKey = cr.saveOrUpdate(four);
 		

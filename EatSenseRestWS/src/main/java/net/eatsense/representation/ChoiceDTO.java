@@ -8,6 +8,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
@@ -24,7 +27,7 @@ public class ChoiceDTO {
 	
 	int maxOccurence;
 	@Min(0)
-	int price;
+	double price;
 	
 	int included;
 	
@@ -59,7 +62,7 @@ public class ChoiceDTO {
 		if(choice.getParentChoice() != null)
 			this.parent = choice.getParentChoice().getId();
 		
-		this.price = (choice.getPrice() == null ? 0 : choice.getPrice());
+		this.price = (choice.getPrice() == null ? 0 : choice.getPrice().doubleValue() / 100.0);
 		this.text = choice.getText();
 		
 		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
@@ -129,10 +132,16 @@ public class ChoiceDTO {
 	public void setMaxOccurence(int maxOccurence) {
 		this.maxOccurence = maxOccurence;
 	}
-	public int getPrice() {
+	
+	@JsonIgnore
+	public long getPriceMinor() {
+		return Math.round(price * 100);
+	}
+		
+	public double getPrice() {
 		return price;
 	}
-	public void setPrice(int price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 	public int getIncluded() {

@@ -312,8 +312,7 @@ public class MenuController {
 		product.setLongDesc(productData.getLongDesc());
 		product.setName(productData.getName());
 		product.setOrder(productData.getOrder());
-		Money money = Money.of(CurrencyUnit.EUR, productData.getPrice());
-		product.setPrice(money.getAmountMinorInt());
+		product.setPrice(productData.getPriceMinor());
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
 		
@@ -429,7 +428,8 @@ public class MenuController {
 		
 		if(choiceData.getParent() != null)
 			choice.setParentChoice(choiceRepo.getKey(choice.getBusiness(), choiceData.getParent()));
-		choice.setPrice(choiceData.getPrice());
+		
+		choice.setPrice(choiceData.getPriceMinor());
 		
 		Key<Product> newProductKey = productRepo.getKey(choice.getBusiness(), choiceData.getProductId());
 		

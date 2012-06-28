@@ -131,7 +131,7 @@ public class BillController {
 				order.setBill(bill.getKey());
 			}
 		}
-		bill.setTotal(billTotal.getAmountMinorInt());
+		bill.setTotal(billTotal.getAmountMinorLong());
 		bill.setCleared(billData.isCleared());
 		orderRepo.saveOrUpdate(orders);
 		billRepo.saveOrUpdate(bill);
@@ -305,7 +305,7 @@ public class BillController {
 					if(orderChoice.getChoice().getOverridePrice() == ChoiceOverridePrice.OVERRIDE_SINGLE_PRICE)
 						total = total.plusMinor(orderChoice.getChoice().getPrice());
 					else
-						total = total.plusMinor(option.getPrice());
+						total = total.plusMinor(option.getPriceMinor());
 				}
 			}
 		}

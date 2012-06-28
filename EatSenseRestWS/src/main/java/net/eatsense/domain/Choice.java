@@ -35,7 +35,7 @@ public class Choice extends GenericEntity {
 	/**
 	 * Only used if overridePrice is different to NONE.
 	 */
-	Integer price;
+	Long price;
 
 	/**
 	 * Determines how to calculate the price of the options.
@@ -113,7 +113,7 @@ public class Choice extends GenericEntity {
 		return overridePrice;
 	}
 
-	public Integer getPrice() {
+	public Long getPrice() {
 		return price;
 	}
 	
@@ -164,7 +164,7 @@ public class Choice extends GenericEntity {
 		}
 	}
 	
-	public void setPrice(Integer price) {
+	public void setPrice(Long price) {
 		if(!Objects.equal(this.price, price)) {
 			this.setDirty(true);
 			this.price = price;

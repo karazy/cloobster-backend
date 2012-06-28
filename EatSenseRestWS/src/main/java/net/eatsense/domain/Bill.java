@@ -33,7 +33,7 @@ public class Bill extends GenericEntity {
 	
 	@NotNull
 	@Min(0)
-	private Integer total;
+	private Long total;
 	
 	private boolean cleared;
 
@@ -69,11 +69,11 @@ public class Bill extends GenericEntity {
 		this.paymentMethod = paymentMethod;
 	}
 
-	public Integer getTotal() {
+	public Long getTotal() {
 		return total;
 	}
 
-	public void setTotal(Integer total) {
+	public void setTotal(Long total) {
 		this.total = total;
 	}
 	
