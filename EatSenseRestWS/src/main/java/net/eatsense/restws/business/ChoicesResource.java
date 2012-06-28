@@ -34,7 +34,6 @@ public class ChoicesResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public List<ChoiceDTO> getChoices(@QueryParam("productId") long productId) {
-		
 		return menuCtrl.getChoicesForProduct(business.getKey(), productId);
 	}
 	

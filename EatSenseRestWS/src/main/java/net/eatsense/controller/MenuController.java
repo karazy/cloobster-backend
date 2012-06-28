@@ -346,25 +346,33 @@ public class MenuController {
 	 */
 	public List<ChoiceDTO> getChoicesForProduct(Key<Business> businessKey, long productId) {
 		checkNotNull(businessKey, "businessKey was null");
-		checkArgument(productId != 0,  "productId was 0");
-		
+				
 		ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
-		Product product;
-		try {
-			product = getProduct(businessKey, productId);
-		} catch (net.eatsense.exceptions.NotFoundException e) {
-			logger.warn("No product found with id {}", productId);
-			return choiceDtos;
+		Collection<Choice> choices = null;
+		if(productId != 0) {
+			// Load only the choices for the given productId.
+			Product product;
+			try {
+				product = getProduct(businessKey, productId);
+			} catch (net.eatsense.exceptions.NotFoundException e) {
+				logger.warn("No product found with id {}", productId);
+				return choiceDtos;
+			}
+			
+			if(product.getChoices() != null && !product.getChoices().isEmpty()) {
+				choices = choiceRepo.getByKeys(product.getChoices());
+			}
+		}
+		else {
+			// Load all choices for this business.
+			choices = choiceRepo.getByParent(businessKey);
 		}
 		
-		if(product.getChoices() != null && !product.getChoices().isEmpty()) {
-			Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
-			
+		if(choices != null) {
 			for (Choice choice : choices)  {
 				choiceDtos.add( new ChoiceDTO(choice , productId) );
 			}
 		}
-			
 		return choiceDtos;
 	}
 	
