@@ -33,6 +33,8 @@ public class Product extends GenericEntity {
 	@Unindexed
 	private List<Key<Choice>> choices;
 	
+	private boolean active = false;
+	
 	public String getName() {
 		return name;
 	}
@@ -164,5 +166,18 @@ public class Product extends GenericEntity {
 		}
 		
 		return result;
+	}
+
+
+	public boolean isActive() {
+		return active;
+	}
+
+
+	public void setActive(boolean active) {
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
 	}
 }

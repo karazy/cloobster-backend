@@ -17,11 +17,11 @@ public class Menu extends GenericEntity{
 	
 	private Integer order;
 	
+	private boolean active = false;
+	
 	public String getTitle() {
 		return title;
 	}
-
-
 
 	public void setTitle(String title) {
 		if(!Objects.equal(title, this.title)) {
@@ -30,13 +30,9 @@ public class Menu extends GenericEntity{
 		}
 	}
 
-
-
 	public String getDescription() {
 		return description;
 	}
-
-
 
 	public void setDescription(String description) {
 		if(!Objects.equal(this.description, description)) {
@@ -45,13 +41,9 @@ public class Menu extends GenericEntity{
 		}
 	}
 
-
-
 	public Key<Business> getBusiness() {
 		return business;
 	}
-
-
 
 	public void setBusiness(Key<Business> business) {
 		if(!Objects.equal(this.business, business)) {
@@ -60,25 +52,30 @@ public class Menu extends GenericEntity{
 		}
 	}
 
-
-
 	@Transient
 	public Key<Menu> getKey() {
 		return new Key<Menu>(getBusiness(), Menu.class, super.getId());
 	}
 
-
-
 	public Integer getOrder() {
 		return order;
 	}
-
-
 
 	public void setOrder(Integer order) {
 		if(!Objects.equal(this.order, order)) {
 			this.setDirty(true);
 			this.order = order;
+		}
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
 		}
 	}
 	

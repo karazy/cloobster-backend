@@ -36,7 +36,7 @@ public class ProductDTO {
 	
 	private Integer order;
 	
-	
+	private boolean active;	
 	
 	public ProductDTO() {
 		super();
@@ -139,5 +139,13 @@ public class ProductDTO {
 
 	public void setOrder(Integer order) {
 		this.order = order;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

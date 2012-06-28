@@ -192,6 +192,7 @@ public class MenuController {
 		menu.setDescription(menuData.getDescription());
 		menu.setOrder(menuData.getOrder());
 		menu.setTitle(menuData.getTitle());
+		menu.setActive(menuData.isActive());
 		
 		if(menu.isDirty())
 			menuRepo.saveOrUpdate(menu);
@@ -311,6 +312,7 @@ public class MenuController {
 		product.setOrder(productData.getOrder());
 		product.setPrice(productData.getPrice());
 		product.setShortDesc(productData.getShortDesc());
+		product.setActive(productData.isActive());
 		
 		if(product.isDirty())
 			productRepo.saveOrUpdate(product);

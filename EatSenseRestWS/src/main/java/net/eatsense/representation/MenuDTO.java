@@ -32,6 +32,8 @@ public class MenuDTO {
 	
 	private Long id;
 	
+	private boolean active;
+	
 	public MenuDTO() {
 		super();
 	}
@@ -45,6 +47,7 @@ public class MenuDTO {
 		this.description = menu.getDescription();
 		this.order = menu.getOrder();
 		this.id = menu.getId();
+		this.active = menu.isActive();
 	}
 	
 	/**
@@ -84,6 +87,14 @@ public class MenuDTO {
 	}
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 	
 }

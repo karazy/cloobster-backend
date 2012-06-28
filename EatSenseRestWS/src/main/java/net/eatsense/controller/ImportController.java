@@ -257,6 +257,7 @@ public class ImportController {
 		logger.info("Creating new menu for business ("+ businessKey.getId() + ") with title: " + title );
 		
 		Menu menu = new Menu();
+		menu.setActive(true);
 		menu.setTitle(title);
 		menu.setBusiness(businessKey);
 		menu.setDescription(description);
@@ -273,6 +274,7 @@ public class ImportController {
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
 		
 		Product product = new Product();
+		product.setActive(true);
 		product.setMenu(menuKey);
 		product.setBusiness(business);
 		product.setName(name);
