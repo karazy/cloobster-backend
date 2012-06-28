@@ -24,7 +24,7 @@ public class ChoiceDTO {
 	
 	int maxOccurence;
 	@Min(0)
-	float price;
+	int price;
 	
 	int included;
 	
@@ -129,10 +129,10 @@ public class ChoiceDTO {
 	public void setMaxOccurence(int maxOccurence) {
 		this.maxOccurence = maxOccurence;
 	}
-	public float getPrice() {
+	public int getPrice() {
 		return price;
 	}
-	public void setPrice(float price) {
+	public void setPrice(int price) {
 		this.price = price;
 	}
 	public int getIncluded() {

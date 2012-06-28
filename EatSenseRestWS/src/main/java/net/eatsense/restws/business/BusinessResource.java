@@ -66,7 +66,9 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.BUSINESSADMIN)
 	public BusinessProfileDTO updateBusinessProfile(BusinessProfileDTO businessData) {
-		return businessCtrl.updateBusiness(business, businessData);
+		//Update Business synchronizes data between the entity and transfer object.
+		businessCtrl.updateBusiness(business, businessData);
+		return businessData;
 	}
 	
 	@POST

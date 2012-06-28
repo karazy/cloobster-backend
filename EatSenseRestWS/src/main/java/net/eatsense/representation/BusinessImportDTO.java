@@ -32,6 +32,10 @@ public class BusinessImportDTO {
 	@NotEmpty
 	@NotNull
 	private String address;
+
+	@NotEmpty
+	@NotNull
+	private String currency;
 	
 	public String getCity() {
 		return city;
@@ -134,5 +138,13 @@ public class BusinessImportDTO {
 
 	public void setPayments(Collection<PaymentMethod> payments) {
 		this.payments = payments;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 }

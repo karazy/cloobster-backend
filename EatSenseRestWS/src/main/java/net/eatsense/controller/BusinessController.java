@@ -321,9 +321,7 @@ public class BusinessController {
 		}
 		Business business = businessRepo.newEntity();
 		
-		businessData = updateBusiness(business, businessData);
-			
-		account.getBusinesses().add(business.getKey());
+		account.getBusinesses().add(updateBusiness(business, businessData));
 		accountRepo.saveOrUpdate(account);
 		
 		return businessData;
@@ -332,13 +330,11 @@ public class BusinessController {
 	/**
 	 * Update and save the Business entity with new data.
 	 * 
-	 * @param business
-	 * 				- Entity to update.
-	 * @param businessData
-	 * 				- The data transfer object to update the entity with.
-	 * @return Updated data transfer object.
+	 * @param business - Entity to update.
+	 * @param businessData - The data transfer object to update the entity with.
+	 * @return Datastore key of the business.
 	 */
-	public BusinessProfileDTO updateBusiness(Business business,	BusinessProfileDTO businessData) {
+	public Key<Business> updateBusiness(Business business,	BusinessProfileDTO businessData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(businessData, "businessData was null");
 		
@@ -353,54 +349,28 @@ public class BusinessController {
 			throw new ValidationException(stringBuilder.toString());
 		}
 		
-		boolean dirty = false;
+		business.setAddress(businessData.getAddress());
+		business.setCity(businessData.getCity());
+		business.setDescription(businessData.getDescription());
+		business.setName(businessData.getName());
+		business.setPhone(businessData.getPhone());
+		business.setPhone(businessData.getPhone());
+		business.setPostcode(businessData.getPostcode());
+		business.setSlogan(businessData.getSlogan());
+		business.setCurrency(businessData.getCurrency());
+
+		Key<Business> key;
 		
-		// Check every property to allow partial updates.				
-		if(!Objects.equal(business.getAddress(), businessData.getAddress())) {
-			dirty = true;
-			business.setAddress(businessData.getAddress());
+		if(business.isDirty()) {
+			key = businessRepo.saveOrUpdate(business);
+		}
+		else {
+			key = businessRepo.getKey(business);
 		}
 		
-		if(!Objects.equal(business.getCity(), businessData.getCity())) {
-			dirty = true;
-			business.setCity(businessData.getCity());
-		}
+		businessData = new BusinessProfileDTO(business);
 		
-		if(!Objects.equal(business.getDescription(), businessData.getDescription())) {
-			dirty = true;
-			business.setDescription(businessData.getDescription());
-		}
-		
-		if(!Objects.equal(business.getName(), businessData.getName())) {
-			dirty = true;
-			business.setName(businessData.getName());
-		}
-		
-		if(!Objects.equal(business.getPhone(), businessData.getPhone())) {
-			dirty = true;
-			business.setPhone(businessData.getPhone());
-		}
-		
-		if(!Objects.equal(business.getPhone(), businessData.getPhone())) {
-			dirty = true;
-			business.setPhone(businessData.getPhone());
-		}
-		
-		if(!Objects.equal(business.getPostcode(), businessData.getPostcode())) {
-			dirty = true;
-			business.setPostcode(businessData.getPostcode());
-		}
-		
-		if(!Objects.equal(business.getSlogan(), businessData.getSlogan())) {
-			dirty = true;
-			business.setSlogan(businessData.getSlogan());
-		}
-								
-		if(dirty) {
-			businessRepo.saveOrUpdate(business);
-		}
-		
-		return new BusinessProfileDTO(business);
+		return key;
 	}
 	
 	

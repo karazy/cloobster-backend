@@ -471,7 +471,11 @@
 <!-- 			<version>${antrun.version}</version> -->
 <!-- 			<scope>provided</scope> -->
 <!-- 		</dependency> -->
-
+		<dependency>
+			<groupId>org.joda</groupId>
+			<artifactId>joda-money</artifactId>
+			<version>0.6</version>
+		</dependency>
 
 		<!-- Unit tests -->
 
@@ -483,7 +487,7 @@
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<artifactId>junit-dep</artifactId>
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>

@@ -31,6 +31,8 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
 
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +110,9 @@ public class BillController {
 		
 		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
 		List<Order> orders = orderRepo.query().ancestor(business).filter("checkIn", bill.getCheckIn()).list();
-		Float billTotal= 0f;
+		// Currency used for this business.
+		CurrencyUnit currencyUnit = CurrencyUnit.of(business.getCurrency());
+		Money billTotal = Money.of(currencyUnit, 0);
 		
 		if(orders.isEmpty())
 			throw new BillFailureException("Bill cannot be updated, no orders found.");
@@ -122,12 +126,12 @@ public class BillController {
 					iterator.remove();
 			}
 			else {
-				billTotal += calculateTotalPrice(order);
+				billTotal = billTotal.plus(calculateTotalPrice(order, currencyUnit));
 				order.setStatus(OrderStatus.COMPLETE);
 				order.setBill(bill.getKey());
 			}
 		}
-		bill.setTotal(billTotal);
+		bill.setTotal(billTotal.getAmountMinorInt());
 		bill.setCleared(billData.isCleared());
 		orderRepo.saveOrUpdate(orders);
 		billRepo.saveOrUpdate(bill);
@@ -254,18 +258,17 @@ public class BillController {
 	 * @param order
 	 * @return total price of the order
 	 */
-	public Float calculateTotalPrice(Order order) {
+	public Money calculateTotalPrice(Order order, CurrencyUnit currencyUnit) {
 		checkNotNull(order, "order is null");
 		checkNotNull(order.getId(), "id for order is null");
 		checkNotNull(order.getProduct(), "product for oder is null");
 		
-		Float total = 0f;
+		Money total = Money.of(currencyUnit, 0);
 		
 		List<OrderChoice> choices = orderChoiceRepo.getByParent(order.getKey());
 		if(choices != null && !choices.isEmpty() ) {
 			for (OrderChoice orderChoice : choices) {
-				Float choicePrice = calculateTotalPrice(orderChoice );
-				total += choicePrice;
+				total = total.plus(calculateTotalPrice(orderChoice, currencyUnit));
 			}
 		}
 		
@@ -276,9 +279,9 @@ public class BillController {
 			throw new IllegalArgumentException("Product " + order.getProduct() + " not found for order with id: " + order.getId() ,e);
 		}
 		
-		total += product.getPrice();
+		total = total.plusMinor(product.getPrice());
 		
-		return total * order.getAmount();
+		return total.multipliedBy( order.getAmount() );
 	}
 
 	/**
@@ -287,28 +290,28 @@ public class BillController {
 	 * @param orderChoice
 	 * @return
 	 */
-	private Float calculateTotalPrice(OrderChoice orderChoice) {
+	private Money calculateTotalPrice(OrderChoice orderChoice, CurrencyUnit currencyUnit) {
 		checkNotNull(orderChoice, "orderchoice is null");
 		checkNotNull(orderChoice.getChoice(), "choice is null for orderChoice with id %s",orderChoice.getId());
 		checkNotNull(orderChoice.getChoice().getOptions(), "options are null for choice with id %s",orderChoice.getChoice().getId());
 		checkArgument(!orderChoice.getChoice().getOptions().isEmpty(), "options are empty for choice with id %s", orderChoice.getChoice().getId());
 		
 		int selected = 0;
-		Float total = 0f;
+		Money total = Money.of(currencyUnit, 0);
 		for (ProductOption option : orderChoice.getChoice().getOptions()) {
 			if(option.getSelected() != null && option.getSelected()) {
 				selected++;
 				if(selected > orderChoice.getChoice().getIncludedChoices()) {
 					if(orderChoice.getChoice().getOverridePrice() == ChoiceOverridePrice.OVERRIDE_SINGLE_PRICE)
-						total += orderChoice.getChoice().getPrice();
+						total = total.plusMinor(orderChoice.getChoice().getPrice());
 					else
-						total += option.getPrice();
+						total = total.plusMinor(option.getPrice());
 				}
 			}
 		}
 		
 		if(selected > 0 && orderChoice.getChoice().getOverridePrice() == ChoiceOverridePrice.OVERRIDE_FIXED_SUM)
-			return orderChoice.getChoice().getPrice();
+			return Money.ofMinor(currencyUnit, orderChoice.getChoice().getPrice());
 		
 		return total;
 	}

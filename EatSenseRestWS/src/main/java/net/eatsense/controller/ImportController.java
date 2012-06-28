@@ -45,6 +45,8 @@ import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.SpotDTO;
 
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,7 +163,7 @@ public class ImportController {
 			if(kM != null) {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
-					Product newProduct = createProduct(kM,kR, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
+					Product newProduct = createProduct(kM,kR, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder(), businessData.getCurrency());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
@@ -268,7 +270,7 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Float price, String shortDesc, String longDesc, Integer order)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Float price, String shortDesc, String longDesc, Integer order, String currencyCode)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
@@ -278,7 +280,8 @@ public class ImportController {
 		product.setMenu(menuKey);
 		product.setBusiness(business);
 		product.setName(name);
-		product.setPrice(price);
+		Money money = Money.of(CurrencyUnit.of(currencyCode), price);
+		product.setPrice(money.getAmountMinorInt());
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
 		product.setOrder(order);
@@ -287,7 +290,7 @@ public class ImportController {
 	}
 	
 	private Key<Choice> createAndSaveChoice(Key<Product> productKey,
-			Key<Business> businessKey, String text, float price,
+			Key<Business> businessKey, String text, int price,
 			ChoiceOverridePrice overridePrice, int minOccurence,
 			int maxOccurence, int includedChoices,
 			Collection<ProductOption> availableOptions,

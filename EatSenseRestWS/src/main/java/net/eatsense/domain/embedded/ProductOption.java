@@ -11,7 +11,7 @@ public class ProductOption {
 	@NotEmpty
 	String name;
 	
-	float price;
+	int price;
 	
 	Boolean selected;
 	
@@ -32,15 +32,15 @@ public class ProductOption {
 		this.name = name;
 	}
 	
-	public float getPrice() {
+	public int getPrice() {
 		return price;
 	}
 
-	public void setPrice(float price) {
+	public void setPrice(int price) {
 		this.price = price;
 	}
 	
-	public ProductOption(String name, float price) {
+	public ProductOption(String name, int price) {
 		super();
 		this.name = name;
 		this.price = price;
@@ -89,6 +89,4 @@ public class ProductOption {
 			return false;
 		return true;
 	}
-	
-	
 }

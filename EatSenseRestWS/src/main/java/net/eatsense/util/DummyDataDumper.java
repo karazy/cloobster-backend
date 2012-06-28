@@ -18,6 +18,8 @@ import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.SpotRepository;
 
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,47 +114,47 @@ public class DummyDataDumper {
 		one.setMinOccurence(1);
 		one.setProduct(kP);
 		one.setBusiness(kR);
-		one.setPrice(0f);
+		one.setPrice(0);
 		
 		Key<Choice> oneKey = cr.saveOrUpdate(one);
 		
 		Choice two = new Choice();
 		two.setText("Extras");
 		options = new ArrayList<ProductOption>();
-		options.add(new ProductOption("Extra Käse", 1f));
-		options.add(new ProductOption("Chili Sauce", 0.5f));
-		options.add(new ProductOption("Salatgurken", 0.5f));
-		options.add(new ProductOption("Ei", 1.0f));
+		options.add(new ProductOption("Extra Käse", 100));
+		options.add(new ProductOption("Chili Sauce", 50));
+		options.add(new ProductOption("Salatgurken", 50));
+		options.add(new ProductOption("Ei", 100));
 		
 		two.setOptions(options);
 		two.setMaxOccurence(0);
 		two.setMinOccurence(0);
 		two.setProduct(kP);
 		two.setBusiness(kR);
-		two.setPrice(0f);
+		two.setPrice(0);
 		
 		Key<Choice> twoKey = cr.saveOrUpdate(two);
 		
 		Choice three = new Choice();
 		three.setText("Menü");
 		options = new ArrayList<ProductOption>();
-		options.add(new ProductOption("Cola", 3f));
-		options.add(new ProductOption("Cola Light", 3f));
+		options.add(new ProductOption("Cola", 300));
+		options.add(new ProductOption("Cola Light", 300));
 		
 		three.setOptions(options);
 		three.setMaxOccurence(1);
 		three.setMinOccurence(0);
 		three.setProduct(kP);
 		three.setBusiness(kR);
-		three.setPrice(3f);
+		three.setPrice(3);
 		
 		Key<Choice> threeKey = cr.saveOrUpdate(three);
 		
 		Choice four = new Choice();
 		four.setText("Menü Beilage");
 		options = new ArrayList<ProductOption>();
-		options.add(new ProductOption("mit Pommes", 0f));
-		options.add(new ProductOption("mit Salat", 0.5f));
+		options.add(new ProductOption("mit Pommes", 0));
+		options.add(new ProductOption("mit Salat", 50));
 		
 		four.setOptions(options);
 		four.setMaxOccurence(1);
@@ -160,7 +162,7 @@ public class DummyDataDumper {
 		four.setParentChoice(threeKey);
 		four.setProduct(kP);
 		four.setBusiness(kR);
-		four.setPrice(3f);
+		four.setPrice(300);
 		
 		Key<Choice> fourKey = cr.saveOrUpdate(four);
 		
@@ -223,7 +225,8 @@ public class DummyDataDumper {
 		product.setMenu(menu);
 		product.setBusiness(business);
 		product.setName(name);
-		product.setPrice(price);
+		Money money = Money.of(CurrencyUnit.EUR, price);
+		product.setPrice(money.getAmountMinorInt());
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
 		product.setActive(true);

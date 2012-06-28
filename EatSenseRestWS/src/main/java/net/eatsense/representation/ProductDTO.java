@@ -10,6 +10,8 @@ import net.eatsense.domain.Product;
 
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 
 public class ProductDTO {
 //	@NotNull
@@ -55,7 +57,7 @@ public class ProductDTO {
 		this.name = product.getName();
 		this.shortDesc = product.getShortDesc();
 		this.longDesc = product.getLongDesc();
-		this.price = product.getPrice();
+		this.price = Money.ofMinor(CurrencyUnit.EUR,product.getPrice()).getAmount().floatValue();
 		this.order = product.getOrder();
 		this.active = product.isActive();
 	}

@@ -26,6 +26,8 @@ import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.validation.CreationChecks;
 
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -310,7 +312,8 @@ public class MenuController {
 		product.setLongDesc(productData.getLongDesc());
 		product.setName(productData.getName());
 		product.setOrder(productData.getOrder());
-		product.setPrice(productData.getPrice());
+		Money money = Money.of(CurrencyUnit.EUR, productData.getPrice());
+		product.setPrice(money.getAmountMinorInt());
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
 		

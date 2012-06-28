@@ -63,8 +63,9 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	 */
 	public Key<T> saveOrUpdate(T obj) {
 		logger.info("{}", obj);
-		
-		return ofy().put(obj);
+		Key<T> key = ofy().put(obj);
+		obj.setDirty(false);
+		return key;
 	}
 	
 	/**
@@ -413,5 +414,15 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	 */
 	public Key<T> getKey(long id) {
 		return new Key<T>( clazz, id);
+	}
+	
+	/**
+	 * Create a typesafe wrapper for the datastore key object.
+	 * 
+	 * @param id numerical identifier
+	 * @return {@link Key} of type T
+	 */
+	public Key<T> getKey(T obj) {
+		return new Key<T>( clazz, obj.getId());
 	}
 }

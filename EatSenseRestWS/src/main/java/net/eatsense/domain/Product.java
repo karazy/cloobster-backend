@@ -19,7 +19,7 @@ public class Product extends GenericEntity {
 	 * Detailed description of this product.
 	 */
 	private String longDesc;
-	private Float price;
+	private Integer price;
 	private Integer order;
 	
 	/**
@@ -74,12 +74,12 @@ public class Product extends GenericEntity {
 	}
 
 
-	public Float getPrice() {
+	public Integer getPrice() {
 		return price;
 	}
 
 
-	public void setPrice(Float price) {
+	public void setPrice(Integer price) {
 		if(!Objects.equal(this.price, price)) {
 			this.setDirty(true);
 			this.price = price;

@@ -4,6 +4,7 @@
     "city": "Test",
     "postcode": "12345",
     "address": "Test",
+    "currency": "EUR",
     "payments": [
         {
             "name": "EC",

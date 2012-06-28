@@ -10,7 +10,7 @@ public class BillDTO {
 	private Long id;
 	private PaymentMethod paymentMethod;
 	private Date time;
-	private Float total;
+	private Integer total;
 	@JsonIgnore
 	private String billnumber;
 	private boolean cleared;
@@ -34,10 +34,10 @@ public class BillDTO {
 	public void setTime(Date time) {
 		this.time = time;
 	}
-	public Float getTotal() {
+	public Integer getTotal() {
 		return total;
 	}
-	public void setTotal(Float total) {
+	public void setTotal(Integer total) {
 		this.total = total;
 	}
 	

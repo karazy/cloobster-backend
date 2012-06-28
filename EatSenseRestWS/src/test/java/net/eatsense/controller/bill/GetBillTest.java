@@ -33,6 +33,7 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
+import org.joda.money.CurrencyUnit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,7 +63,7 @@ public class GetBillTest {
 
 	private BillDTO billData;
 
-	private Float billTotal;
+	private Integer billTotal;
 
 	@Before
 	public void setUp() throws Exception {
@@ -103,7 +104,7 @@ public class GetBillTest {
 		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		billTotal = billCtrl.calculateTotalPrice(placedOrder);
+		billTotal = billCtrl.calculateTotalPrice(placedOrder, CurrencyUnit.EUR).getAmountMinorInt();
 		
 		placedOrderDto.setStatus(OrderStatus.PLACED);
 		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
@@ -137,7 +138,7 @@ public class GetBillTest {
 		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		billTotal += billCtrl.calculateTotalPrice(placedOrder);
+		billTotal += billCtrl.calculateTotalPrice(placedOrder, CurrencyUnit.EUR).getAmountMinorInt();
 		
 		// Set order to placed and confirm in restaurant.
 		placedOrderDto.setStatus(OrderStatus.PLACED);

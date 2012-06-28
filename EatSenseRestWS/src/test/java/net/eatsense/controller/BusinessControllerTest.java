@@ -1,8 +1,8 @@
 package net.eatsense.controller;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -419,10 +419,14 @@ public class BusinessControllerTest {
 		
 		BusinessProfileDTO businessData = getTestProfileData();
 		
-		BusinessProfileDTO resultData = businessCtrl.updateBusiness(business, businessData );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey= mock(Key.class);
+		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
+		
+		Key<Business> key = businessCtrl.updateBusiness(business, businessData );
 		
 		verify(rr).saveOrUpdate(business);
-		assertThat(resultData.getId(), is(business.getId()));
+		assertThat(key, is(businessKey));
 		assertThat(business.getAddress(), is(businessData.getAddress()));
 		assertThat(business.getCity(), is(businessData.getCity()));
 		assertThat(business.getDescription(), is(businessData.getDescription()));
@@ -440,6 +444,7 @@ public class BusinessControllerTest {
 		
 		BusinessProfileDTO businessData = getTestProfileData();
 		businessCtrl.updateBusiness(business, businessData );
+		business.setDirty(false);
 		businessCtrl.updateBusiness(business, businessData );
 		verify(rr, times(1)).saveOrUpdate(business);
 	}
@@ -502,6 +507,7 @@ public class BusinessControllerTest {
 	private BusinessProfileDTO getTestProfileData() {
 		BusinessProfileDTO businessData = new BusinessProfileDTO();
 		businessData.setAddress("test");
+		businessData.setCurrency("EUR");
 		businessData.setCity("test");
 		businessData.setDescription("testesttest");
 		businessData.setName("testname");
@@ -516,29 +522,28 @@ public class BusinessControllerTest {
 		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(BusinessRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = mock(Business.class);
+		business = new Business();
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		// Mock arguments and stub method calls.
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock(Key.class);
-		when(business.getKey()).thenReturn(businessKey);
+		when(rr.getKey(business)).thenReturn(businessKey);
 		// Return the mocked class, when the controller retrieves the new instance.
 		when(rr.newEntity()).thenReturn(business);
 		Account account = mock(Account.class);
 		// Create the list here to check the contents after the test.
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		when(account.getBusinesses()).thenReturn(businessesList );
-		
+		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		BusinessProfileDTO testProfileData = getTestProfileData();
 		
 		// Run the method.
 		businessCtrl.newBusinessForAccount(account, testProfileData);
 		
 		// Verify that save gets called for the entity and for the account.
-		verify(rr).saveOrUpdate(business);
 		verify(accountRepo).saveOrUpdate(account);
 		// The key for the new business should be added to the account.
-		assertThat(businessesList, hasItem(is(businessKey)));
+		assertThat(businessesList, hasItem(businessKey));
 	}
 	
 	@Test
@@ -546,26 +551,27 @@ public class BusinessControllerTest {
 		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(BusinessRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = mock(Business.class);
+		business = new Business();
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock(Key.class);
-		when(business.getKey()).thenReturn(businessKey);
+		when(rr.getKey(business)).thenReturn(businessKey);
 		when(rr.newEntity()).thenReturn(business);
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		Account account = mock(Account.class);
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		// First we return null, to test the case of no businesses added.
 		when(account.getBusinesses()).thenReturn(null, businessesList );
+		
+		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		// Get test data object.
 		BusinessProfileDTO testProfileData = getTestProfileData();
 		// Run the method.
 		businessCtrl.newBusinessForAccount(account, testProfileData);
 		
-		verify(rr).saveOrUpdate(business);
 		verify(accountRepo).saveOrUpdate(account);
 		// Verify that the new list was set at the account.
 		verify(account).setBusinesses(anyList());
-		assertThat(businessesList, hasItem(is(businessKey)));
+		assertThat(businessesList, hasItem(businessKey));
 	}
 	
 	@Test

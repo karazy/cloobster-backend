@@ -3,7 +3,6 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -38,6 +37,8 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -183,7 +184,7 @@ public class MenuControllerTest {
 		newSetUp();
 		
 		ChoiceDTO data = getTestChoiceData();
-		data.setPrice(-1f);
+		data.setPrice(-1);
 		Choice choice = new Choice();
 		thrown.expect(ValidationException.class);
 		ctr.updateChoice(choice, data);
@@ -323,7 +324,7 @@ public class MenuControllerTest {
 		Key<Choice> parentChoice = mock(Key.class);
 		
 		choice.setParentChoice(parentChoice );
-		choice.setPrice(99f);
+		choice.setPrice(9900);
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -798,11 +799,11 @@ public class MenuControllerTest {
 		data.setMaxOccurence(1);
 		data.setMinOccurence(0);
 		List<ProductOption> options = new ArrayList<ProductOption>();
-		options.add( new ProductOption("Option 1", 1f));
-		options.add( new ProductOption("Option 2", 2f));
+		options.add( new ProductOption("Option 1", 100));
+		options.add( new ProductOption("Option 2", 200));
 		data.setOptions(options );
 		data.setOverridePrice(ChoiceOverridePrice.NONE);
-		data.setPrice(0f);
+		data.setPrice(0);
 		data.setProductId(1l);
 		data.setText("test text");
 		return data;
@@ -886,7 +887,7 @@ public class MenuControllerTest {
 		product.setBusiness(businessKey);
 		product.setName(testProductData.getName());
 		product.setOrder(testProductData.getOrder());
-		product.setPrice(testProductData.getPrice());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setLongDesc(testProductData.getLongDesc());
@@ -915,7 +916,7 @@ public class MenuControllerTest {
 		product.setBusiness(businessKey);
 		product.setName(testProductData.getName());
 		product.setOrder(testProductData.getOrder());
-		product.setPrice(testProductData.getPrice());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setLongDesc("another long desc");
@@ -944,7 +945,7 @@ public class MenuControllerTest {
 		product.setLongDesc(testProductData.getLongDesc());
 		product.setName(testProductData.getName());
 		product.setOrder(testProductData.getOrder());
-		product.setPrice(testProductData.getPrice());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc("another short desc");
 		product.setDirty(false);
@@ -974,7 +975,7 @@ public class MenuControllerTest {
 		product.setLongDesc(testProductData.getLongDesc());
 		product.setName(testProductData.getName());
 		product.setOrder(testProductData.getOrder());
-		product.setPrice(testProductData.getPrice());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey2);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setDirty(false);
@@ -1002,7 +1003,7 @@ public class MenuControllerTest {
 		product.setLongDesc(testProductData.getLongDesc());
 		product.setName(testProductData.getName());
 		product.setOrder(testProductData.getOrder());
-		product.setPrice(999.9f);
+		product.setPrice(999);
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setDirty(false);
@@ -1010,7 +1011,7 @@ public class MenuControllerTest {
 		ProductDTO result = ctr.updateProduct(product, testProductData);
 		verify(pr).saveOrUpdate(product);
 		
-		assertThat(product.getPrice(), is(testProductData.getPrice()));
+		assertThat(product.getPrice(), is(Money.of(CurrencyUnit.EUR, testProductData.getPrice()).getAmountMinorInt()));
 		assertThat(result.getPrice(), is(testProductData.getPrice()));
 	}
 	
@@ -1030,7 +1031,7 @@ public class MenuControllerTest {
 		product.setLongDesc(testProductData.getLongDesc());
 		product.setName(testProductData.getName());
 		product.setOrder(999);
-		product.setPrice(testProductData.getPrice());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setDirty(false);
@@ -1058,7 +1059,7 @@ public class MenuControllerTest {
 		product.setLongDesc(testProductData.getLongDesc());
 		product.setName("another name");
 		product.setOrder(testProductData.getOrder());
-		product.setPrice(testProductData.getPrice());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setDirty(false);

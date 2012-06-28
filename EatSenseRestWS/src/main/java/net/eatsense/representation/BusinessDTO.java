@@ -14,6 +14,10 @@ public class BusinessDTO {
 	@NotEmpty
 	String description;
 	Long id;
+
+	@NotNull
+	@NotEmpty
+	private String currency;
 	
 	public BusinessDTO() {
 		super();
@@ -44,5 +48,13 @@ public class BusinessDTO {
 	}
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 }

@@ -16,6 +16,7 @@ import net.eatsense.representation.ImageDTO;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -83,12 +84,20 @@ public class Business extends GenericEntity {
 
 	private Key<Business> key;
 	
+	private String currency;
+	
+	public Business() {
+	}
+	
 	public String getAddress() {
 		return address;
 	}
 
 	public void setAddress(String address) {
-		this.address = address;
+		if(!Objects.equal(this.address, address)) {
+			this.setDirty(true);
+			this.address = address;
+		}
 	}
 
 	public String getCity() {
@@ -96,7 +105,10 @@ public class Business extends GenericEntity {
 	}
 
 	public void setCity(String city) {
-		this.city = city;
+		if(!Objects.equal(this.city, city)) {
+			this.setDirty(true);
+			this.city = city;
+		}
 	}
 
 	public String getPostcode() {
@@ -104,7 +116,10 @@ public class Business extends GenericEntity {
 	}
 
 	public void setPostcode(String postcode) {
-		this.postcode = postcode;
+		if(!Objects.equal(this.postcode, postcode)) {
+			this.setDirty(true);
+			this.postcode = postcode;
+		}
 	}
 
 	public String getPhone() {
@@ -112,18 +127,22 @@ public class Business extends GenericEntity {
 	}
 
 	public void setPhone(String phone) {
-		this.phone = phone;
+		if(!Objects.equal(this.phone, phone)) {
+			this.setDirty(true);
+			this.phone = phone;
+		}
 	}
 
-	public Business() {
-	}
 
 	public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 	public String getDescription() {
@@ -131,7 +150,10 @@ public class Business extends GenericEntity {
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		if(!Objects.equal(this.description, description)) {
+			this.setDirty(true);
+			this.description = description;
+		}
 	}
 
 	@Transient
@@ -154,7 +176,10 @@ public class Business extends GenericEntity {
 	}
 
 	public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
-		this.paymentMethods = paymentMethods;
+		if(!Objects.equal(this.paymentMethods, paymentMethods)) {
+			this.setDirty(true);
+			this.paymentMethods = paymentMethods;
+		}
 	}
 
 	public Set<Channel> getChannels() {
@@ -195,6 +220,23 @@ public class Business extends GenericEntity {
 	}
 
 	public void setSlogan(String slogan) {
-		this.slogan = slogan;
+		if(!Objects.equal(this.slogan, slogan)) {
+			this.setDirty(true);
+			this.slogan = slogan;
+		}
+	}
+
+	public String getCurrency() {
+		if(currency == null) {
+			currency = "EUR";
+		}
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		if(!Objects.equal(this.currency, currency)) {
+			this.setDirty(true);
+			this.currency = currency;
+		}
 	}
 }

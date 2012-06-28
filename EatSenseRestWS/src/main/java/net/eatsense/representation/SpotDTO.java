@@ -40,6 +40,8 @@ public class SpotDTO {
 	
 	private Collection<PaymentMethod> payments;
 	
+	private String currency;
+	
 	public String getBusiness() {
 		return business;
 	}
@@ -93,6 +95,14 @@ public class SpotDTO {
 
 	public void setPayments(Collection<PaymentMethod> payments) {
 		this.payments = payments;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 	
 }
