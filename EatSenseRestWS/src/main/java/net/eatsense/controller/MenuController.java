@@ -352,7 +352,8 @@ public class MenuController {
 	}
 	
 	/**
-	 * Retrieve all Choices saved for the Product given by the id, or all choices for the business if productId is 0.
+	 * Retrieve all Choices saved for the Product given by the id,
+	 * or all choices for the business if productId is 0.
 	 * 
 	 * @param businessKey
 	 * @param productId

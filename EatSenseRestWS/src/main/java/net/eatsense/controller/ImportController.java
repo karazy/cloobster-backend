@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
@@ -45,6 +46,7 @@ import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.SpotDTO;
+import net.eatsense.validation.ImportChecks;
 
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
@@ -325,7 +327,7 @@ public class ImportController {
 		StringBuilder messageBuilder = new StringBuilder();
 		boolean isValid = true;
 		if( business != null ) {
-			Set<ConstraintViolation<BusinessImportDTO>> violation = validator.validate(business);
+			Set<ConstraintViolation<BusinessImportDTO>> violation = validator.validate(business,Default.class, ImportChecks.class);
 			
 			if(violation.isEmpty()) {
 				isValid = true;

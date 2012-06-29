@@ -7,7 +7,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Product;
+import net.eatsense.validation.CreationChecks;
+import net.eatsense.validation.ImportChecks;
 
+import org.apache.bval.Validate;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.joda.money.CurrencyUnit;
@@ -32,7 +35,7 @@ public class ProductDTO {
 	@Min(0)
 	private double price;
 	
-	@Valid
+	@Validate(groups = {ImportChecks.class})
 	private Collection<ChoiceDTO> choices;
 	
 	private Integer order;
