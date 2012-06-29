@@ -2,19 +2,15 @@ package net.eatsense.representation;
 
 import java.util.Collection;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Product;
-import net.eatsense.validation.CreationChecks;
 import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.Validate;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.joda.money.CurrencyUnit;
-import org.joda.money.Money;
 
 public class ProductDTO {
 //	@NotNull

@@ -320,7 +320,7 @@ public class MenuController {
 			// Update Choices
 			ArrayList<Key<Choice>> choices = new ArrayList<Key<Choice>>();
 			for (ChoiceDTO choice : productData.getChoices()) {
-				choices.add(new Key<Choice>(product.getBusiness(),Choice.class,choice.getId()));
+				choices.add(choiceRepo.getKey(product.getBusiness(),choice.getId()));
 			}
 			product.setChoices(choices);
 		}

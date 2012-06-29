@@ -1030,6 +1030,44 @@ public class MenuControllerTest {
 	}
 	
 	@Test
+	public void testUpdateProductChoices() throws Exception {
+		newSetUp();
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Menu> menuKey = mock (Key.class);
+			
+		ProductDTO testProductData = getTestProductData();
+		testProductData.setChoices(new ArrayList<ChoiceDTO>());
+		// Add choice dto with only id set.
+		ChoiceDTO choice = new ChoiceDTO();
+		long choiceId = 2l;
+		choice.setId(choiceId);
+		testProductData.getChoices().add(choice);
+		when(mr.getKey(businessKey, testProductData.getMenuId())).thenReturn(menuKey);
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		when(cr.getKey(businessKey, choiceId)).thenReturn(choiceKey);
+		
+		Product product = new Product();
+		product.setBusiness(businessKey);
+		product.setLongDesc(testProductData.getLongDesc());
+		product.setName(testProductData.getName());
+		product.setOrder(testProductData.getOrder());
+		product.setPrice(testProductData.getPriceMinor());
+		product.setMenu(menuKey);
+		product.setChoices(Collections.<Key<Choice>>emptyList());
+		product.setShortDesc(testProductData.getShortDesc());
+		product.setDirty(false);
+				
+		ProductDTO result = ctr.updateProduct(product, testProductData);
+		verify(pr).saveOrUpdate(product);
+		
+		assertThat(product.getChoices(), hasItem(choiceKey));
+		assertThat(result.getName(), is(testProductData.getName()));
+	}
+	
+	@Test
 	public void testUpdateProductName() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
