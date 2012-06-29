@@ -352,13 +352,13 @@ public class MenuController {
 	}
 	
 	/**
-	 * Retrieve all Choices saved for the Product given by the id.
+	 * Retrieve all Choices saved for the Product given by the id, or all choices for the business if productId is 0.
 	 * 
 	 * @param businessKey
 	 * @param productId
 	 * @return
 	 */
-	public List<ChoiceDTO> getChoicesForProduct(Key<Business> businessKey, long productId) {
+	public List<ChoiceDTO> getChoices(Key<Business> businessKey, long productId) {
 		checkNotNull(businessKey, "businessKey was null");
 				
 		ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
