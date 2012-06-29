@@ -115,11 +115,12 @@ public class CheckInController {
     	if(spot == null)
     		return null;
 		Business business = businessRepo.getByKey(spot.getBusiness());
-    	SpotDTO spotDto = new SpotDTO();    	
+    	SpotDTO spotDto = new SpotDTO();
     	spotDto.setBarcode(spot.getBarcode());
     	spotDto.setName(spot.getName());
     	spotDto.setBusiness(business.getName());
     	spotDto.setBusinessId(business.getId());
+    	spotDto.setCurrency(business.getCurrency());
     	spotDto.setPayments(business.getPaymentMethods());
     	spotDto.setGroupTag(spot.getGroupTag());
 		return spotDto;
