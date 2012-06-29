@@ -316,6 +316,16 @@ public class MenuController {
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
 		
+		if(productData.getChoices() != null) {
+			// Update Choices
+			ArrayList<Key<Choice>> choices = new ArrayList<Key<Choice>>();
+			for (ChoiceDTO choice : productData.getChoices()) {
+				choices.add(new Key<Choice>(product.getBusiness(),Choice.class,choice.getId()));
+			}
+			product.setChoices(choices);
+		}
+		
+		
 		if(product.isDirty())
 			productRepo.saveOrUpdate(product);
 		
