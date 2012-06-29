@@ -441,6 +441,8 @@ public class MenuController {
 		
 		if(choiceData.getParent() != null)
 			choice.setParentChoice(choiceRepo.getKey(choice.getBusiness(), choiceData.getParent()));
+		else
+			choice.setParentChoice(null);
 		
 		choice.setPrice(choiceData.getPriceMinor());
 		
