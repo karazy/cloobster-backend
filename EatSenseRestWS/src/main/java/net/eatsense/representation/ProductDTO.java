@@ -2,6 +2,7 @@ package net.eatsense.representation;
 
 import java.util.Collection;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +32,7 @@ public class ProductDTO {
 	@Min(0)
 	private double price;
 	
-	@Validate(groups = {ImportChecks.class})
+	@Validate(groups=ImportChecks.class)
 	private Collection<ChoiceDTO> choices;
 	
 	private Integer order;

@@ -15,6 +15,7 @@ import org.joda.money.Money;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.validation.ImportChecks;
 
 public class ChoiceDTO {
 	Long id;
@@ -26,7 +27,7 @@ public class ChoiceDTO {
 	int minOccurence;
 	
 	int maxOccurence;
-	@Min(0)
+	@Min(value=0)
 	double price;
 	
 	int included;

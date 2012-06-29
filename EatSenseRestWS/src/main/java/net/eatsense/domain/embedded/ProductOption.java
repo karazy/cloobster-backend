@@ -2,6 +2,8 @@ package net.eatsense.domain.embedded;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.validation.ImportChecks;
+
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;

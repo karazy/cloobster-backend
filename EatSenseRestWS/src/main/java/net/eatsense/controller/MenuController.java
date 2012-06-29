@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
@@ -296,7 +297,7 @@ public class MenuController {
 		checkNotNull(product, "product was null");
 		checkNotNull(productData, "productData was null");
 		
-		Set<ConstraintViolation<ProductDTO>> violationSet = validator.validate(productData);
+		Set<ConstraintViolation<ProductDTO>> violationSet = validator.validate(productData, Default.class);
 		if(!violationSet.isEmpty()) {
 			StringBuilder stringBuilder = new StringBuilder("validation errors:");
 			for (ConstraintViolation<ProductDTO> violation : violationSet) {
