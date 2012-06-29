@@ -169,7 +169,7 @@ public class ImportController {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
 					
-					Product newProduct = createProduct(kM,kR, productData.getName(), Money.of(currencyUnit, productData.getPrice() ), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
+					Product newProduct = createProduct(kM,kR, productData.getName(), Money.ofMinor(currencyUnit, productData.getPriceMinor() ), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
