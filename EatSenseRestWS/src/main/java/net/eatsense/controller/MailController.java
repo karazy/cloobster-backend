@@ -84,7 +84,7 @@ public class MailController {
 		MimeMessage mail = new MimeMessage(session);
 				
 		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
+		mail.addRecipient(Message.RecipientType.TO, new InternetAddress("info@cloobster.com"));
 				
 		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
 				account.getName(), account.getLogin(), account.getEmail(),
