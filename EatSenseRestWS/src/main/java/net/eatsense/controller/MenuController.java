@@ -400,7 +400,7 @@ public class MenuController {
 	}
 
 	/**
-	 * Update Choice data and add add to Product specified by the id if not already added.
+	 * Update Choice data and add to Product specified by the id if not already added.
 	 * 
 	 * @param choice
 	 * @param choiceData
@@ -425,6 +425,7 @@ public class MenuController {
 		choice.setMinOccurence(choiceData.getMinOccurence());
 		choice.setOptions(choiceData.getOptions());
 		choice.setOverridePrice(choiceData.getOverridePrice());
+		choice.setOrder(choiceData.getOrder());
 		
 		if(choiceData.getParent() != null)
 			choice.setParentChoice(choiceRepo.getKey(choice.getBusiness(), choiceData.getParent()));

@@ -71,6 +71,11 @@ public class Choice extends GenericEntity {
 	 */
 	int includedChoices;
 	
+	/**
+	 * Order of choice for UI.
+	 */
+	private Integer order;
+	
 	Key<Choice> parentChoice;
 
 	public Key<Choice> getParentChoice() {
@@ -123,6 +128,10 @@ public class Choice extends GenericEntity {
 
 	public String getText() {
 		return text;
+	}
+	
+	public Integer getOrder() {
+		return order;
 	}
 	
 	public void setBusiness(Key<Business> business) {
@@ -184,7 +193,14 @@ public class Choice extends GenericEntity {
 			this.text = text;
 		}
 	}
-	
+
+	public void setOrder(Integer order) {
+		if(!Objects.equal(this.order, order)) {
+			this.setDirty(true);
+			this.order = order;
+		}		
+	}
+
 	public static Key<Choice> getKey(Key<Business> parent, long id) {
 		return new Key<Choice>(parent,Choice.class, id);
 	}

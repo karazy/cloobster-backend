@@ -42,6 +42,8 @@ public class ChoiceDTO {
 	
 	Long parent;
 	
+	private Integer order;
+	
 	private Long productId;
 	
 	/**
@@ -58,6 +60,7 @@ public class ChoiceDTO {
 		this.maxOccurence = choice.getMaxOccurence();
 		this.minOccurence = choice.getMinOccurence();
 		this.overridePrice = choice.getOverridePrice();
+		this.order = choice.getOrder();
 		
 		if(choice.getParentChoice() != null)
 			this.parent = choice.getParentChoice().getId();
@@ -176,5 +179,21 @@ public class ChoiceDTO {
 	public void setProductId(Long productId) {
 		this.productId = productId;
 	}
+
+	/**
+	 * @return the order
+	 */
+	public Integer getOrder() {
+		return order;
+	}
+
+	/**
+	 * @param order the order to set
+	 */
+	public void setOrder(Integer order) {
+		this.order = order;
+	}
+	
+	
 	
 }
