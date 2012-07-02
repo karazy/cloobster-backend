@@ -2,6 +2,7 @@ package net.eatsense.restws.business;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -12,6 +13,7 @@ import javax.ws.rs.QueryParam;
 
 import com.google.inject.Inject;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.ChoiceDTO;
@@ -33,23 +35,27 @@ public class ChoicesResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public List<ChoiceDTO> getChoices(@QueryParam("productId") long productId) {
 		return menuCtrl.getChoices(business.getKey(), productId);
 	}
 	
 	@POST
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ChoiceDTO createChoice(ChoiceDTO choiceData) {
 		return menuCtrl.createChoice(business, choiceData);
 	}
 	
 	@GET
 	@Path("{id}")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ChoiceDTO getChoice(@PathParam("id") long id) {
 		return new ChoiceDTO(menuCtrl.getChoice(business.getKey(), id));
 	}
 	
 	@PUT
 	@Path("{id}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ChoiceDTO updateChoice(@PathParam("id") long id, ChoiceDTO choiceData) {
 		return menuCtrl.updateChoice(menuCtrl.getChoice(business.getKey(), id), choiceData);
 	}

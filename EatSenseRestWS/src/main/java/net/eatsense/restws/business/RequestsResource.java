@@ -2,6 +2,7 @@ package net.eatsense.restws.business;
 
 import java.util.Collection;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.CustomerRequestDTO;
@@ -33,12 +35,14 @@ public class RequestsResource {
 
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<CustomerRequestDTO> getCustomerRequest(@QueryParam("checkInId") Long checkInId, @QueryParam("spotId") Long spotId) {
 		return businessCtrl.getCustomerRequestData(business, checkInId, spotId);
 	}
 	
 	@DELETE
 	@Path("{requestId}")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void deleteCustomerRequest(@PathParam("requestId") Long requestId) {
 		try {
 			businessCtrl.deleteCustomerRequest(business, requestId);

@@ -50,7 +50,7 @@ public class BusinessesResource {
 	}
 	
 	@GET
-	@RolesAllowed(Role.COCKPITUSER)
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<BusinessDTO> getBusinessesForAccount(@QueryParam("account") Long accountId) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		//TODO Don't ignore the accountId and implement methods to view businesses of subordinate accounts.
@@ -68,7 +68,6 @@ public class BusinessesResource {
 	
 	
 	@Path("{businessId}")
-	@RolesAllowed({"cockpituser"})
 	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
 		Business business;
 		try {

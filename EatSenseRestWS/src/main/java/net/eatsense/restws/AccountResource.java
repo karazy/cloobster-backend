@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.domain.Account;
@@ -45,6 +46,11 @@ public class AccountResource {
 		this.accountCtr = accountCtr;
 	}
 	
+	/**
+	 * @param clientId
+	 * @param businessId
+	 * @return
+	 */
 	@GET
 	@Path("channels")
 	@Produces("text/plain; charset=UTF-8")
@@ -56,7 +62,7 @@ public class AccountResource {
 	@GET
 	@Path("{login}")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"user"})
+	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		logger.info("Authenticated request from user :" + account.getLogin());
@@ -66,7 +72,7 @@ public class AccountResource {
 	@GET
 	@Path("login")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"user"})
+	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public AccountDTO getAccount() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		logger.info("Authenticated request from user :" + account.getLogin());
@@ -85,8 +91,9 @@ public class AccountResource {
 	@GET
 	@Path("{login}/businesses")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"user"})
+	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<BusinessDTO> getBusinessesForAccount(@PathParam("login") String login) {
+		//TODO Refactor call to getBusinessesForAccount
 		return accountCtr.getBusinessDtos(login);
 	}
 	
@@ -94,8 +101,9 @@ public class AccountResource {
 	@Path("{login}/tokens")
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
-	@RolesAllowed({"cockpituser"})
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
+		//TODO Move method to "/b/businesses/{businessId}/channels"
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
 		
 		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, timeout);

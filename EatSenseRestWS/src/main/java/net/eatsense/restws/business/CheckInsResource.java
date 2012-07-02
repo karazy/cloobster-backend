@@ -2,6 +2,7 @@ package net.eatsense.restws.business;
 
 import java.util.Collection;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
@@ -29,6 +31,10 @@ public class CheckInsResource {
 	private Business business;
 	private final Provider<OrderController> orderCtrlProvider;
 	
+	public void setBusiness(Business business) {
+		this.business = business;
+	}
+	
 	@Inject
 	public CheckInsResource(CheckInController checkInController, Provider<OrderController> orderControllerProvider) {
 		super();
@@ -38,6 +44,7 @@ public class CheckInsResource {
 
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<CheckInStatusDTO> getCheckIns(@QueryParam("spotId") Long spotId) {
 		return checkInController.getCheckInStatusesBySpot(business, spotId);	
 	}
@@ -45,6 +52,7 @@ public class CheckInsResource {
 	@DELETE
 	@Path("{checkInId}")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CheckInStatusDTO cancelAndDeleteCheckIn(@PathParam("checkInId") Long checkInId) {
 		return checkInController.deleteCheckIn(business, checkInId);
 	}
@@ -53,18 +61,15 @@ public class CheckInsResource {
 	@Path("{checkInId}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CheckInStatusDTO updateCheckin(@PathParam("checkInId") Long checkInId, CheckInStatusDTO checkInData) {
 		return checkInController.updateCheckInAsBusiness(business, checkInId, checkInData);
 	}
 	
 	@PUT
 	@Path("{checkInId}/cart")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void updateCheckInOrders(@PathParam("checkInId") long checkInId) {
 		orderCtrlProvider.get().confirmPlacedOrdersForCheckIn(business, checkInId);
 	}
-
-	public void setBusiness(Business business) {
-		this.business = business;
-	}
-	
 }

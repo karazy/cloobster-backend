@@ -1,10 +1,12 @@
 package net.eatsense.restws.business;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Order;
@@ -43,6 +45,7 @@ public class OrderResource {
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public OrderDTO updateOrder(OrderDTO orderData) {
 		return orderController.updateOrderForBusiness(business, order, orderData);
 	}

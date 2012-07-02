@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.CheckIn;
@@ -50,7 +51,7 @@ public class CheckInsResource {
 
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotBarcode, @QueryParam("checkInId") String checkInId) {
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		return checkInCtrl.getOtherUsersAtSpot(checkIn, spotBarcode);
@@ -64,7 +65,6 @@ public class CheckInsResource {
 
 	
 	@Path("{checkInUid}")
-	@RolesAllowed({"guest"})
 	public CheckInResource getCheckInResource(@PathParam("checkInUid") String checkInUid) {
 		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");

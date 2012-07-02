@@ -1,5 +1,6 @@
 package net.eatsense.restws.business;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -7,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
@@ -30,6 +32,7 @@ public class BillsResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BillDTO getBills(@QueryParam("checkInId") Long checkInId) {
 		BillDTO billData = billController.getBillForCheckIn(business, checkInId);
 		if(billData == null)

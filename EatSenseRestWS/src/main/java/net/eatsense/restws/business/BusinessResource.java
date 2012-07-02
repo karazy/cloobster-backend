@@ -54,6 +54,7 @@ public class BusinessResource {
 
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessDTO getBusiness() {
 		if(business == null)
 			throw new NotFoundException();
@@ -64,7 +65,7 @@ public class BusinessResource {
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.BUSINESSADMIN)
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessProfileDTO updateBusinessProfile(BusinessProfileDTO businessData) {
 		//Update Business synchronizes data between the entity and transfer object.
 		businessCtrl.updateBusiness(business, businessData);
@@ -75,7 +76,7 @@ public class BusinessResource {
 	@Path("images/{id}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.BUSINESSADMIN)
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO imageData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return businessCtrl.updateBusinessImage(account, business, imageData);

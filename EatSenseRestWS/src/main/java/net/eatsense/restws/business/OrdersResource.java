@@ -2,6 +2,7 @@ package net.eatsense.restws.business;
 
 import java.util.Collection;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -12,6 +13,7 @@ import javax.ws.rs.core.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Order;
@@ -42,6 +44,7 @@ public class OrdersResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<OrderDTO> getOrders(@QueryParam("spotId") Long spotId, @QueryParam("checkInId") Long checkInId) {
 		return orderController.getOrdersBySpotAsDto(business, spotId, checkInId);
 	}

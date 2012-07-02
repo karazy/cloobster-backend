@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
@@ -65,7 +66,7 @@ public class CheckInResource {
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public CheckInDTO updateCheckIn( CheckInDTO checkInData) {
 		if(authenticated)
 			return checkInCtrlprovider.get().updateCheckIn(checkIn, checkInData);
@@ -75,12 +76,13 @@ public class CheckInResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.GUEST)
 	public CheckInDTO getCheckIn() {
 		return checkInCtrlprovider.get().getCheckInDto(checkIn);
 	}
 	
 	@DELETE
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public void deleteCheckIn() {
 		if(authenticated)
 			checkInCtrlprovider.get().checkOut(checkIn);
@@ -91,7 +93,7 @@ public class CheckInResource {
 	@GET
 	@Path("requests")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public Collection<CustomerRequestDTO> getRequests() {
 		if(authenticated)
 			return businessCtrlProvider.get().getCustomerRequestsForCheckIn(checkIn);
@@ -103,7 +105,7 @@ public class CheckInResource {
 	@Path("requests")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public CustomerRequestDTO postRequest(CustomerRequestDTO requestData) {
 		if(authenticated)
 			return businessCtrlProvider.get().saveCustomerRequest( checkIn, requestData);
@@ -112,9 +114,9 @@ public class CheckInResource {
 	}
 	
 	@DELETE
-	@RolesAllowed({"guest"})
 	@Produces("application/json; charset=UTF-8")
 	@Path("requests/{requestId}")
+	@RolesAllowed(Role.GUEST)
 	public CustomerRequestDTO deleteRequest(@PathParam("requestId") long requestId) {
 		if(authenticated)
 			try {
@@ -129,7 +131,7 @@ public class CheckInResource {
 	@POST
 	@Path("tokens")
 	@Produces("text/plain; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public String requestToken() {
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.app.timeout")));
 		return channelCtrlProvider.get().createCustomerChannel(checkIn, timeout);
@@ -137,7 +139,7 @@ public class CheckInResource {
 	
 	@PUT
 	@Path("cart")
-	@RolesAllowed({"guest"}) 
+	@RolesAllowed(Role.GUEST)
 	public void updateAllCartOrders() {
 		if(authenticated)
 			orderCtrlProvider.get().updateCartOrdersToPlaced(checkIn);
@@ -147,7 +149,7 @@ public class CheckInResource {
 	
 	@DELETE
 	@Path("cart")
-	@RolesAllowed({"guest"}) 
+	@RolesAllowed(Role.GUEST)
 	public void deleteAllCartOrders() {
 		if(authenticated)
 			orderCtrlProvider.get().deleteCartOrders(checkIn);
