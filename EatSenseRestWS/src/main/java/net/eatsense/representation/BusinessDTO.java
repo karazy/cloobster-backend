@@ -28,6 +28,7 @@ public class BusinessDTO {
 			return;
 		this.name = business.getName();
 		this.description = business.getDescription();
+		this.currency = business.getCurrency();
 		this.id = business.getId();
 	}
 	
