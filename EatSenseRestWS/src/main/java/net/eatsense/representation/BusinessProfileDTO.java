@@ -3,6 +3,7 @@ package net.eatsense.representation;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -28,6 +29,8 @@ public class BusinessProfileDTO extends BusinessDTO {
 	 * Containing {@link Business#images}
 	 */
 	private LinkedHashMap<String,ImageDTO> images;
+	
+	@Valid
 	private List<PaymentMethod> paymentMethods;
 	private String phone;
 

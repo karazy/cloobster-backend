@@ -29,7 +29,6 @@ public class ProductOption {
 		this.selected = selected;
 	}
 
-
 	public String getName() {
 		return name;
 	}

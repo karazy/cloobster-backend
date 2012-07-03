@@ -359,6 +359,10 @@ public class BusinessController {
 		business.setPostcode(businessData.getPostcode());
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
+		
+		if(businessData.getPaymentMethods() != null && !businessData.getPaymentMethods().isEmpty()) {
+			business.setPaymentMethods(businessData.getPaymentMethods());
+		}
 
 		Key<Business> key;
 		

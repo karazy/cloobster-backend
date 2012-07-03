@@ -1,7 +1,9 @@
 package net.eatsense.restws.business;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -30,6 +32,10 @@ public class BillsResource {
 		this.billController = billController;
 	}
 	
+	public void setBusiness(Business business) {
+		this.business = business;
+	}
+	
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
@@ -41,18 +47,16 @@ public class BillsResource {
 	}
 	
 	@Path("{id}")
-	public BillResource getBillResource(@PathParam("id") Long billId) {
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public BillDTO updateBill(@PathParam("id") Long billId, BillDTO billData) {
 		Bill bill = billController.getBill(business, billId);
 		if(bill == null)
 			throw new NotFoundException();
-		
-		BillResource billResource = resourceContext.getResource(BillResource.class);
-		billResource.setBusiness(business);
-		billResource.setBill(bill);
-		return billResource;
+
+		return billController.updateBill(business, bill, billData);
 	}
 
-	public void setBusiness(Business business) {
-		this.business = business;
-	}
 }
