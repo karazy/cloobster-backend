@@ -19,8 +19,6 @@ public class PaymentMethod {
 	@NotEmpty
 	private String name;
 	
-	@NotNull
-	@NotEmpty	
 	private Integer order;
 	
 	public String getName() {

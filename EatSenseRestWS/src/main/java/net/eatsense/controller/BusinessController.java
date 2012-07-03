@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +20,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
+import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.exceptions.IllegalAccessException;
@@ -41,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -313,7 +317,7 @@ public class BusinessController {
 	 * @param businessData - The profile data to use for the business.
 	 * @return The profile data updated with the id of the new entity.
 	 */
-	public BusinessProfileDTO newBusinessForAccount(Account account, BusinessProfileDTO businessData) {
+	public BusinessProfileDTO createBusinessForAccount(Account account, BusinessProfileDTO businessData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(businessData, "businessData was null");
 		
@@ -321,6 +325,9 @@ public class BusinessController {
 			account.setBusinesses(new ArrayList<Key<Business>>());	
 		}
 		Business business = businessRepo.newEntity();
+		
+		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
+		business.getPaymentMethods().add(new PaymentMethod("Bar"));
 		
 		account.getBusinesses().add(updateBusiness(business, businessData));
 		accountRepo.saveOrUpdate(account);

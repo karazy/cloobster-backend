@@ -58,7 +58,7 @@ public class BusinessResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public BusinessDTO getBusiness() {
+	public BusinessProfileDTO getBusiness() {
 		if(business == null)
 			throw new NotFoundException();
 		

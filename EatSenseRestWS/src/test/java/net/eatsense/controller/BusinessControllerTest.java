@@ -25,6 +25,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
@@ -418,6 +419,11 @@ public class BusinessControllerTest {
 		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, validator );
 		
 		BusinessProfileDTO businessData = getTestProfileData();
+		List<PaymentMethod> paymentMethods = new ArrayList<PaymentMethod>();
+		paymentMethods.add(new PaymentMethod("Visa"));
+		paymentMethods.add(new PaymentMethod("EC"));
+		paymentMethods.add(new PaymentMethod("Bar"));
+		businessData.setPaymentMethods(paymentMethods );
 		
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey= mock(Key.class);
@@ -434,6 +440,7 @@ public class BusinessControllerTest {
 		assertThat(business.getPhone(), is(businessData.getPhone()));
 		assertThat(business.getPostcode(), is(businessData.getPostcode()));
 		assertThat(business.getSlogan(), is(businessData.getSlogan()));
+		assertThat(business.getPaymentMethods(), is(paymentMethods));
 	}
 	
 	@Test
@@ -538,10 +545,12 @@ public class BusinessControllerTest {
 		BusinessProfileDTO testProfileData = getTestProfileData();
 		
 		// Run the method.
-		businessCtrl.newBusinessForAccount(account, testProfileData);
+		businessCtrl.createBusinessForAccount(account, testProfileData);
 		
 		// Verify that save gets called for the entity and for the account.
 		verify(accountRepo).saveOrUpdate(account);
+		// check that we have at least "bar" payment method
+		assertThat(business.getPaymentMethods().get(0).getName(), is("Bar"));
 		// The key for the new business should be added to the account.
 		assertThat(businessesList, hasItem(businessKey));
 	}
@@ -566,7 +575,7 @@ public class BusinessControllerTest {
 		// Get test data object.
 		BusinessProfileDTO testProfileData = getTestProfileData();
 		// Run the method.
-		businessCtrl.newBusinessForAccount(account, testProfileData);
+		businessCtrl.createBusinessForAccount(account, testProfileData);
 		
 		verify(accountRepo).saveOrUpdate(account);
 		// Verify that the new list was set at the account.

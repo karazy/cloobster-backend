@@ -63,7 +63,7 @@ public class BusinessesResource {
 	@Produces("application/json; charset=UTF-8")
 	public BusinessProfileDTO newBusiness(BusinessProfileDTO businessData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		return businessCtrl.newBusinessForAccount(account, businessData);
+		return businessCtrl.createBusinessForAccount(account, businessData);
 	}
 	
 	
