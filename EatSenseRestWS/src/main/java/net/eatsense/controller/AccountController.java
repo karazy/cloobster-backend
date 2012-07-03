@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
 
 /**
  * Manages Account creation, updates and authentication.
