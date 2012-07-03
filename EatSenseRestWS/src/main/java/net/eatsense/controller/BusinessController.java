@@ -32,12 +32,14 @@ import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.ImageDTO;
+import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.common.base.Functions;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -402,5 +404,76 @@ public class BusinessController {
 		}
 
 		return result.getUpdatedImage();
+	}
+	
+	
+	/**
+	 * @param businessKey
+	 * @return List of spots for the business.
+	 */
+	public List<SpotDTO> getSpots(Key<Business> businessKey) {
+		checkNotNull(businessKey, "businessKey was null");
+		
+		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
+		
+		for(Spot spot : spotRepo.getByParent(businessKey) ) {
+			spotDTOList.add(new SpotDTO(spot));
+		}
+		
+		return spotDTOList;
+	}
+	
+	/**
+	 * @param business
+	 * @param spotData
+	 * @return 
+	 */
+	public SpotDTO createSpot(Key<Business> businessKey, SpotDTO spotData) {
+		checkNotNull(businessKey, "businessKey was null");
+		
+		Spot spot = spotRepo.newEntity();
+		spot.setBusiness(businessKey);
+		
+		spotData = updateSpot(spot, spotData);
+		
+		return spotData;
+	}
+
+	/**
+	 * @param spot
+	 * @param spotData
+	 * @return updated spotData
+	 */
+	public SpotDTO updateSpot(Spot spot, SpotDTO spotData) {
+		checkNotNull(spot, "spot was null");
+		checkNotNull(spotData, "spotData was null");
+		
+		if(spotRepo.getByProperty("barcode", spotData.getBarcode()) != null)
+			throw new ValidationException("Spot with this barcode already exists");
+		
+		spot.setBarcode(spotData.getBarcode());
+		spot.setGroupTag(spotData.getGroupTag());
+		spot.setName(spotData.getName());
+		
+		if(spot.isDirty()) {
+			spotRepo.saveOrUpdate(spot);
+		}
+		
+		return new SpotDTO(spot);
+	}
+
+	/**
+	 * @param businessKey
+	 * @param spotId
+	 * @return Spot
+	 */
+	public Spot getSpot(Key<Business> businessKey, long spotId) {
+		checkNotNull(businessKey, "businessKey was null");
+		
+		try {
+			return spotRepo.getById(businessKey, spotId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new NotFoundException();
+		}
 	}
 }

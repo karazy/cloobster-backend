@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -26,6 +27,8 @@ public class SpotDTO {
 	@NotEmpty
 	private String barcode;
 	
+	private Long id;
+	
 	/**
 	 * A human readable identifier for the spot where the barcode is located.
 	 * E.g. Table no. 4, Lounge etc.
@@ -42,6 +45,26 @@ public class SpotDTO {
 	
 	private String currency;
 	
+	public SpotDTO(Spot spot) {
+		super();
+		if(spot == null)
+			return;
+		
+		if(spot.getBusiness() != null) {
+			this.businessId = spot.getBusiness().getId();
+		}
+		this.id = spot.getId();
+		this.barcode = spot.getBarcode();
+		this.name = spot.getName();
+		this.groupTag = spot.getBarcode();
+	}
+	
+	
+	public SpotDTO() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	public String getBusiness() {
 		return business;
 	}
@@ -103,6 +126,16 @@ public class SpotDTO {
 
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 }

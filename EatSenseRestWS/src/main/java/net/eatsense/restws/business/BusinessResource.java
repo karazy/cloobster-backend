@@ -1,5 +1,7 @@
 package net.eatsense.restws.business;
 
+import java.util.List;
+
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -19,6 +21,7 @@ import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.ImageDTO;
+import net.eatsense.representation.SpotDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +131,7 @@ public class BusinessResource {
 		return spotsResource;
 	}
 	
+	
 	@Path("bills")
 	public BillsResource getBillsResource() {
 		BillsResource billsResource = resourceContext.getResource(BillsResource.class);
@@ -144,4 +148,38 @@ public class BusinessResource {
 		requestsResource.setBusiness(business);
 		return requestsResource;
 	}
+	
+	@Path("spotsdata")
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public List<SpotDTO> getSpots() {
+		return businessCtrl.getSpots(business.getKey());
+	}
+	
+	@Path("spotsdata")
+	@POST
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public SpotDTO createSpot(SpotDTO spotData) {
+		return businessCtrl.createSpot(business.getKey(), spotData);
+	}
+	
+	@Path("spotsdata/{spotId}")
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public SpotDTO updateSpot(@PathParam("spotId") long spotId, SpotDTO spotData) {
+		return businessCtrl.updateSpot(businessCtrl.getSpot(business.getKey(), spotId), spotData);
+	}
+	
+	@Path("spotsdata/{spotId}")
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
+		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
+	}	
 }

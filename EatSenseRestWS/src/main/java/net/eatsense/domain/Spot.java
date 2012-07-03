@@ -2,6 +2,7 @@ package net.eatsense.domain;
 
 import javax.persistence.Transient;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
@@ -43,8 +44,11 @@ public class Spot extends GenericEntity{
 		return barcode;
 	}
 
-	public void setBarcode(String code) {
-		this.barcode = code;
+	public void setBarcode(String barcode) {
+		if(!Objects.equal(this.barcode, barcode)) {
+			this.setDirty(true);
+			this.barcode = barcode;
+		}
 	}	
 
 	public String getName() {
@@ -52,7 +56,10 @@ public class Spot extends GenericEntity{
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 	public Key<Business> getBusiness() {
@@ -68,7 +75,10 @@ public class Spot extends GenericEntity{
 	}
 
 	public void setGroupTag(String groupTag) {
-		this.groupTag = groupTag;
+		if(!Objects.equal(this.groupTag, groupTag)) {
+			this.setDirty(true);
+			this.groupTag = groupTag;
+		}
 	}
 	
 	@Transient
