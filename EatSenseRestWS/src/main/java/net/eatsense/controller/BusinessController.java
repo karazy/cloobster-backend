@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
-import com.google.common.base.Functions;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -448,7 +447,18 @@ public class BusinessController {
 		checkNotNull(spot, "spot was null");
 		checkNotNull(spotData, "spotData was null");
 		
-		if(spotRepo.getByProperty("barcode", spotData.getBarcode()) != null)
+		Set<ConstraintViolation<SpotDTO>> violationSet = validator.validate(spotData);
+		
+		if(!violationSet.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder("validation errors:");
+			for (ConstraintViolation<SpotDTO> violation : violationSet) {
+				// Format the message like: '"{property}" {message}.'
+				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
+			}
+			throw new ValidationException(stringBuilder.toString());
+		}
+		
+		if(!Objects.equal(spot.getBarcode(), spotData.getBarcode()) && spotRepo.getByProperty("barcode", spotData.getBarcode()) != null)
 			throw new ValidationException("Spot with this barcode already exists");
 		
 		spot.setBarcode(spotData.getBarcode());
