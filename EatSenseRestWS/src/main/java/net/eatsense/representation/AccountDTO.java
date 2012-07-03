@@ -10,6 +10,8 @@ public class AccountDTO {
 	
 	private Long companyId;
 	private Long id;
+	private String name;
+	private String phone;
 		
 	public AccountDTO() {
 		super();
@@ -17,9 +19,14 @@ public class AccountDTO {
 	
 	public AccountDTO(Account account) {
 		super();
+		if(account == null)
+			return;
+		
 		this.id = account.getId();
 		this.login = account.getLogin();
 		this.email = account.getEmail();
+		this.setName(account.getName());
+		this.setPhone(account.getPhone());
 		this.passwordHash = account.getHashedPassword();
 		this.role = account.getRole();
 		if(account.getCompany() != null)
@@ -64,5 +71,21 @@ public class AccountDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

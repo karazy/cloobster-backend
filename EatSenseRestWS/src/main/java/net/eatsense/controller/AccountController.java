@@ -126,17 +126,6 @@ public class AccountController {
 		if(role.equals(account.getRole()))
 			return true;
 		
-		//TODO Refactor roles to explicity only check for the role owned.
-		
-    	// grant the cockpituser role too if the account is in businessadmin or companyowner role.
-		if(role.equals(Role.COCKPITUSER)
-				&& ( account.getRole().equals(Role.BUSINESSADMIN) || account.getRole().equals(Role.COMPANYOWNER) ))
-			return true;
-		
-    	// grant the businessadmin role too if the account is in companyowner role.
-		if(role.equals(Role.BUSINESSADMIN) && ( account.getRole().equals(Role.COMPANYOWNER)))
-			return true;
-					
 		return false;
 	}
 	

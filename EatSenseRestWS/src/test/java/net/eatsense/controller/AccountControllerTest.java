@@ -272,7 +272,7 @@ public class AccountControllerTest {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("companyowner");
 		
-		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(true));
+		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(false));
 	}
 	
 	@Test
@@ -280,7 +280,7 @@ public class AccountControllerTest {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("companyowner");
 		
-		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(true));
+		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(false));
 	}
 	
 	@Test
@@ -336,7 +336,7 @@ public class AccountControllerTest {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("businessadmin");
 		
-		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(true));
+		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(false));
 	}
 	
 	@Test
