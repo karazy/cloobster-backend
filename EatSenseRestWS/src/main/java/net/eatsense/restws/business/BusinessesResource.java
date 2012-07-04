@@ -73,7 +73,7 @@ public class BusinessesResource {
 		try {
 			business = businessRepo.getById(businessId);
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new NotFoundException();
+			throw new net.eatsense.exceptions.NotFoundException();
 		}
 
 		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class); 
