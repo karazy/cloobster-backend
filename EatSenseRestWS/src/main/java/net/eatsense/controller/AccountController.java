@@ -217,7 +217,7 @@ public class AccountController {
 	public List<BusinessDTO> getBusinessDtos(String login) {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
-		if(account != null && account.getBusinesses() != null && isAccountInRole(account, "cockpituser")) {
+		if(account != null && account.getBusinesses() != null) {
 			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
 				BusinessDTO businessData = new BusinessDTO();
 				businessData.setId(business.getId());
