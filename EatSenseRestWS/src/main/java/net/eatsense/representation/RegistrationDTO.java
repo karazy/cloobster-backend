@@ -30,11 +30,11 @@ public class RegistrationDTO {
 	String facebookToken;
 	
 	/**
-	 * Password pattern matches a password with at least one number, one symbolic and one unicode
+	 * Password pattern matches a password with at least one number or one unicode/symbolic and one alphabetical character.
 	 */
 	@NotNull
 	@Size(min = 6)
-	@Pattern(regexp= "^(?=[!-~]{6,}$)(?=.*\\d)(?=.*[^A-Za-z0-9]).*$")
+	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$")
 	String password;
 	
 	String phone;

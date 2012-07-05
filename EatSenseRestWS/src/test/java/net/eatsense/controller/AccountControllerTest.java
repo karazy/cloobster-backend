@@ -514,12 +514,12 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void testRegisterNewAccountInvalidPassword2() throws Exception {
+	public void testRegisterNewAccountInvalidPassword() throws Exception {
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
 		data.setName("Test Person");
-		data.setPassword("test1");
+		data.setPassword("testtest");
 		CompanyDTO company = new CompanyDTO();
 		company.setName("Test Company");
 		company.setAddress("Street 1");
@@ -536,12 +536,12 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void testRegisterNewAccountInvalidPassword() throws Exception {
+	public void testRegisterNewAccountValidPassword() throws Exception {
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
 		data.setName("Test Person");
-		data.setPassword("test");
+		data.setPassword("testtest!");
 		CompanyDTO company = new CompanyDTO();
 		company.setName("Test Company");
 		company.setAddress("Street 1");
@@ -550,10 +550,7 @@ public class AccountControllerTest {
 		company.setPostcode("12345");
 		
 		data.setCompany(company);
-		
-		thrown.expect(RegistrationException.class);
-		thrown.expectMessage("password");
-		
+
 		ctr.registerNewAccount(data);
 	}
 	
@@ -563,7 +560,7 @@ public class AccountControllerTest {
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
 		data.setName("Test Person");
-		data.setPassword("test!1");
+		data.setPassword("testt1");
 		CompanyDTO company = new CompanyDTO();
 		company.setName("Test Company");
 		company.setAddress("Street 1");
