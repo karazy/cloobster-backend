@@ -644,6 +644,27 @@
 					</additionalProjectnatures>
 				</configuration>
 			</plugin>
+			      <plugin>
+			        <groupId>org.codehaus.enunciate</groupId>
+			        <artifactId>maven-enunciate-plugin</artifactId>
+			        <!-- check for the latest version -->
+			        <version>1.25</version>
+					<configuration>
+						<configFile>enunciate.xml</configFile>
+					</configuration>
+			        <executions>
+			          <execution>
+			            <goals>
+			              <goal>docs</goal>
+			            </goals>
+			            <configuration>
+			              <!-- the directory where to put the docs -->
+			              <docsDir>${project.build.directory}/docs</docsDir>
+			 
+			            </configuration>
+			          </execution>
+			        </executions>
+			      </plugin>
 		</plugins>
 
 		<!-- Required by m2e for import into eclipse. No effect on command line 
@@ -657,6 +678,20 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.enunciate</groupId>
+										<artifactId>maven-enunciate-plugin</artifactId>
+										<!-- check for the latest version -->
+										<versionRange>[1.17,)</versionRange>
+			        					<goals>
+			              					<goal>docs</goal>
+			            				</goals>
+			            			</pluginExecutionFilter>
+			            			<action>
+										<execute />
+									</action>
+			           			</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>org.apache.maven.plugins</groupId>
@@ -709,6 +744,7 @@
 					                	<execute />
 					                </action>
 				                </pluginExecution>
+				                
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
