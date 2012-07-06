@@ -36,11 +36,20 @@ public class ProductsResource {
 		
 	}
 	
+	/**
+	 * Get Products, filtered by the menuId if different from zero.
+	 * 
+	 * @param menuId If different from 0, return only Products for the menu with this id.
+	 * @return List of Product objects.
+	 */
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public List<ProductDTO> getProductsForMenu(@QueryParam("menuId") long id) {
-		return menuCtrl.getProductsForMenu(business, id);
+	public List<ProductDTO> getProducts(@QueryParam("menuId") long menuId) {
+		if(menuId != 0)
+			return menuCtrl.getProductsForMenu(business, menuId);
+		else
+			return menuCtrl.getProducts(business);
 	}
 	
 	@POST

@@ -74,7 +74,7 @@ public class MenuController {
 			return menuDTOs;
 		
 		List<Menu> menus = menuRepo.getActiveMenusForBusiness(businessKey);
-		List<ProductDTO> products = transform.productsToDto(productRepo.getActiveProductsForBusiness(businessKey));
+		List<ProductDTO> products = transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(businessKey));
 		
 		ListMultimap<Long, ProductDTO> menuToProductsMap = ArrayListMultimap.create();
 		
@@ -222,8 +222,8 @@ public class MenuController {
 	 * @param business
 	 * @return
 	 */
-	public Collection<ProductDTO> getAllProducts(Business business) {
-		return transform.productsToDto(productRepo.getByParent(business));
+	public Collection<ProductDTO> getProductsWithChoices(Business business) {
+		return transform.productsToDtoWithChoices(productRepo.getByParent(business));
 	}
 	
 	/**
@@ -255,6 +255,24 @@ public class MenuController {
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
 		for (Product product : productRepo.getListByProperty("menu", menuRepo.getKey(business.getKey(), menuId))) {
+			productsData.add(new ProductDTO(product));
+		}
+		
+		return productsData;
+	}
+	
+	/**
+	 * Get all Product entities for this Business.
+	 * 
+	 * @param business
+	 * @param menuId
+	 * @return List of Product transfer objects.
+	 */
+	public List<ProductDTO> getProducts(Business business) {
+		checkNotNull(business, "business was null");
+		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
+		
+		for (Product product : productRepo.getByParent(business.getKey())) {
 			productsData.add(new ProductDTO(product));
 		}
 		

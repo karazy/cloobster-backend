@@ -153,7 +153,7 @@ public class Transformer {
 		return dto;
 	}
 
-	public List<ProductDTO> productsToDto(List<Product> products) {
+	public List<ProductDTO> productsToDtoWithChoices(List<Product> products) {
 		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
 		if(products != null) {
 			List<Key<Choice>> choiceKeys = new ArrayList<Key<Choice>>();

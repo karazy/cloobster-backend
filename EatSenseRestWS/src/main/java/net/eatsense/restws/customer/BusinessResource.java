@@ -76,7 +76,7 @@ public class BusinessResource {
 	@Path("products")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<ProductDTO> getAll() {
-		return menuCtrl.getAllProducts(business);
+		return menuCtrl.getProductsWithChoices(business);
 	}
 	
 	@GET
