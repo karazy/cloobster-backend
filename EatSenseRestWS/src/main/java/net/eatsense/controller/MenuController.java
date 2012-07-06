@@ -351,7 +351,10 @@ public class MenuController {
 		if(product.isDirty())
 			productRepo.saveOrUpdate(product);
 		
-		return new ProductDTO(product);
+		// Return the choices sent to return the updated state.
+		ProductDTO productDTO = new ProductDTO(product);
+		productDTO.setChoices(productData.getChoices());
+		return productDTO;
 	}
 	
 	/**
