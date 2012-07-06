@@ -5,9 +5,11 @@ import java.util.Date;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import net.eatsense.domain.embedded.OrderStatus;
 
+@XmlRootElement
 public class OrderDTO {
 	Long id;
 	@Min(1)

@@ -86,6 +86,12 @@ public class BusinessResource {
 		return menuCtrl.getProductWithChoices(business.getKey(), productId);
 	}
 	
+	/**
+	 * Save a new Order for this customer, status will be cart.
+	 * 
+	 * @param order Data object to use for the new Order.
+	 * @return The id of the created Order entity.
+	 */
 	@POST
 	@Path("orders")
 	@Produces("text/plain; charset=UTF-8")
@@ -98,6 +104,12 @@ public class BusinessResource {
 	}
 	
 	
+	/**
+	 * Get orders for the checkedIn customer, optionally filtered by status.
+	 * 
+	 * @param status Order status to filter the list by.
+	 * @return List of Order transfer objects.
+	 */
 	@GET
 	@Path("orders")
 	@Produces("application/json; charset=UTF-8")
