@@ -342,10 +342,7 @@ public class MenuController {
 				if(choice.getId() == null) {
 					choice = createChoice(product.getBusiness(), choice);
 				}
-				else {
-					choices.add(choiceRepo.getKey(product.getBusiness(),choice.getId()));
-				}
-				
+				choices.add(choiceRepo.getKey(product.getBusiness(),choice.getId()));
 			}
 			product.setChoices(choices);
 		}
