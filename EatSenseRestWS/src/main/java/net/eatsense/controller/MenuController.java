@@ -339,7 +339,13 @@ public class MenuController {
 			// Update Choices
 			ArrayList<Key<Choice>> choices = new ArrayList<Key<Choice>>();
 			for (ChoiceDTO choice : productData.getChoices()) {
-				choices.add(choiceRepo.getKey(product.getBusiness(),choice.getId()));
+				if(choice.getId() == null) {
+					choice = createChoice(product.getBusiness(), choice);
+				}
+				else {
+					choices.add(choiceRepo.getKey(product.getBusiness(),choice.getId()));
+				}
+				
 			}
 			product.setChoices(choices);
 		}
@@ -413,16 +419,16 @@ public class MenuController {
 	/**
 	 * Create and save new Choice entity.
 	 * 
-	 * @param business
+	 * @param businessKey
 	 * @param choiceData
 	 * @return
 	 */
-	public ChoiceDTO createChoice(Business business, ChoiceDTO choiceData) {
-		checkNotNull(business, "business was null");
+	public ChoiceDTO createChoice(Key<Business> businessKey, ChoiceDTO choiceData) {
+		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(choiceData, "choiceData was null");
 		
 		Choice choice = choiceRepo.newEntity();
-		choice.setBusiness(business.getKey());
+		choice.setBusiness(businessKey);
 		
 		choiceData = updateChoice(choice, choiceData);
 		

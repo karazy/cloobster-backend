@@ -787,7 +787,7 @@ public class MenuControllerTest {
 		Key<Choice> choiceKey = mock(Key.class);
 		when(cr.saveOrUpdate(newChoice)).thenReturn(choiceKey );
 
-		ctr.createChoice(business, data);
+		ctr.createChoice(business.getKey(), data);
 		
 		assertThat(product.getChoices(), hasItem(choiceKey));
 	}

@@ -43,7 +43,7 @@ public class ChoicesResource {
 	@POST
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ChoiceDTO createChoice(ChoiceDTO choiceData) {
-		return menuCtrl.createChoice(business, choiceData);
+		return menuCtrl.createChoice(business.getKey(), choiceData);
 	}
 	
 	@GET
