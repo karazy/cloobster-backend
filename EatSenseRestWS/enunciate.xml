@@ -13,5 +13,7 @@
     </modules>
     <api-classes>
         <include pattern="net.eatsense.restws.*" />
+        <include pattern="net.eatsense.restws.business.*" />
+        <include pattern="net.eatsense.restws.customer.*" />
     </api-classes>
 </enunciate>
