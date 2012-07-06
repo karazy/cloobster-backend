@@ -19,6 +19,12 @@ import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.ProductDTO;
 
+/**
+ * Contains method to create update and query for Products with a business account.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class ProductsResource {
 
 	private final MenuController menuCtrl;
@@ -40,14 +46,19 @@ public class ProductsResource {
 	 * Get Products, filtered by the menuId if different from zero.
 	 * 
 	 * @param menuId If different from 0, return only Products for the menu with this id.
+	 * @param choiceId If menuId is not set and different from 0,
+	 * 		return only Products with a choice with this Id.
 	 * @return List of Product objects.
 	 */
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public List<ProductDTO> getProducts(@QueryParam("menuId") long menuId) {
+	public List<ProductDTO> getProducts(@QueryParam("menuId") long menuId, @QueryParam("choiceId") long choiceId) {
 		if(menuId != 0)
 			return menuCtrl.getProductsForMenu(business, menuId);
+		else if(choiceId != 0) {
+			return menuCtrl.getProductsForChoice(business, choiceId);
+		}
 		else
 			return menuCtrl.getProducts(business);
 	}

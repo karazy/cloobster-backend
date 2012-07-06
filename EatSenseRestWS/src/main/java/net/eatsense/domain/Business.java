@@ -82,6 +82,7 @@ public class Business extends GenericEntity {
 	@Embedded
 	private List<ImageDTO> images;
 
+	@Transient
 	private Key<Business> key;
 	
 	private String currency;

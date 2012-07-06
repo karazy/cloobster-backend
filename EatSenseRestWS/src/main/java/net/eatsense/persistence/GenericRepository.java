@@ -306,6 +306,28 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	}
 	
 	/**
+	 * Convenience method to get all objects matching a single property and Parent
+	 * @param <V> Type of the parent entity.
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public <V extends GenericEntity> List<T> getListByParentAndProperty(Key<V> parent, String propName, Object propValue)
+	{
+		logger.info("{}, property: {}", clazz, propName);
+		Query<T> q = ofy().query(clazz).ancestor(parent);
+
+		q.filter(propName, propValue);
+
+		return q.list();
+
+	}
+	
+	/**
 	 * Convenience method to get all object keys matching a single property
 	 * 
 	 * 

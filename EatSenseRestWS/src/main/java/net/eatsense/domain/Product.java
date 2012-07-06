@@ -30,7 +30,6 @@ public class Product extends GenericEntity {
 	@Parent
 	private Key<Business> business;
 	
-	@Unindexed
 	private List<Key<Choice>> choices;
 	
 	private boolean active = false;

@@ -268,6 +268,26 @@ public class MenuController {
 	 * @param menuId
 	 * @return List of Product transfer objects.
 	 */
+	public List<ProductDTO> getProductsForChoice(Business business, long choiceId) {
+		checkNotNull(business, "business was null");
+		checkArgument(choiceId != 0, "choiceId was 0");
+		
+		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
+		
+		for (Product product : productRepo.getListByParentAndProperty(business.getKey(), "choices", choiceRepo.getKey(business.getKey(), choiceId))) {
+			productsData.add(new ProductDTO(product));
+		}
+		
+		return productsData;
+	}
+	
+	/**
+	 * Get all Product entities for this Business.
+	 * 
+	 * @param business
+	 * @param menuId
+	 * @return List of Product transfer objects.
+	 */
 	public List<ProductDTO> getProducts(Business business) {
 		checkNotNull(business, "business was null");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
