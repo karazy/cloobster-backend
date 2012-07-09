@@ -6,7 +6,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +22,6 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.TrashRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
@@ -36,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
@@ -53,16 +50,14 @@ public class MenuController {
 	private final Transformer transform;
 	private final Validator validator;
 	private final ChoiceRepository choiceRepo;
-	private final Provider<TrashRepository> trashRepoProvider;
 
 	@Inject
-	public MenuController(MenuRepository mr, ProductRepository pr, Provider<TrashRepository> trashRepoProvider, ChoiceRepository cr, Transformer trans, Validator validator) {
+	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
 		this.validator = validator;
-		this.trashRepoProvider = trashRepoProvider;
 	}
 	
 	/**
@@ -261,13 +256,13 @@ public class MenuController {
 	 * @param noMenu If true list Products with no menu associated.
 	 * @return
 	 */
-	public List<ProductDTO> getProductsForMenu(Business business, long menuId, boolean noMenu) {
+	public List<ProductDTO> getProductsForMenu(Business business, long menuId) {
 		checkNotNull(business, "business was null");
-		checkArgument(menuId != 0 || noMenu, "menuId was 0, and noMenu was not set to true");
+		checkArgument(menuId != 0, "menuId was 0");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
 		Key<Menu> menuKey = menuRepo.getKey(business.getKey(), menuId);
-		for (Product product : productRepo.getListByProperty("menu", noMenu ? null : menuKey )) {
+		for (Product product : productRepo.getListByProperty("menu", menuKey )) {
 			if(!product.isTrash()) {
 				productsData.add(new ProductDTO(product));
 			}			
@@ -276,6 +271,24 @@ public class MenuController {
 		return productsData;
 	}
 	
+	/**
+	 * @param business
+	 * @param menuId
+	 * @param noMenu If true list Products with no menu associated.
+	 * @return
+	 */
+	public List<ProductDTO> getProductsWithNoMenu(Business business) {
+		checkNotNull(business, "business was null");
+		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
+		
+		for (Product product : productRepo.getListByProperty("menu", null )) {
+			if(!product.isTrash()) {
+				productsData.add(new ProductDTO(product));
+			}			
+		}
+		
+		return productsData;
+	}
 	/**
 	 * Get all Product entities for this Business.
 	 * 
@@ -409,8 +422,7 @@ public class MenuController {
 		product.setTrash(true);
 		product.setActive(false);
 		Key<Product> productKey = productRepo.saveOrUpdate(product);
-		TrashRepository trashRepo = trashRepoProvider.get();
-		trashRepo.saveNewTrashEntry(productKey, account.getLogin());
+		productRepo.trashEntity(productKey, account.getLogin());
 	}
 	
 	/**

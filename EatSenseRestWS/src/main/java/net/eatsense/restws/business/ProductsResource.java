@@ -56,10 +56,10 @@ public class ProductsResource {
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public List<ProductDTO> getProducts(@QueryParam("menuId") long menuId, @QueryParam("choiceId") long choiceId,@QueryParam("noMenu") boolean noMenu) {
 		if(noMenu) {
-			return menuCtrl.getProductsForMenu(business, menuId, noMenu);
+			return menuCtrl.getProductsWithNoMenu(business);
 		}
 		if(menuId != 0) {
-			return menuCtrl.getProductsForMenu(business, menuId, false);
+			return menuCtrl.getProductsForMenu(business, menuId);
 		}
 		if(choiceId != 0) {
 			return menuCtrl.getProductsForChoice(business, choiceId);

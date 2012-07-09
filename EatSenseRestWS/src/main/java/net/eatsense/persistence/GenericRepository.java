@@ -1,10 +1,13 @@
 package net.eatsense.persistence;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import net.eatsense.domain.GenericEntity;
+import net.eatsense.domain.TrashEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,10 @@ import com.googlecode.objectify.util.DAOBase;
 public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected Class<T> clazz;
+	
+	static {
+		ObjectifyService.register(TrashEntry.class);
+	}
 
 	public GenericRepository(Class<T> clazz) {
 		this.clazz = clazz;
@@ -108,7 +115,41 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 		logger.info("{}", keyIterable);
 		ofy().delete(keyIterable);
 	}
-
+	
+	/**
+	 * @param entityKey
+	 * @param loginResponsible
+	 * @return The entry saved for trash.
+	 */
+	public TrashEntry trashEntity(Key<T> entityKey, String loginResponsible) {
+		TrashEntry trashEntry = new TrashEntry(entityKey, Key.getKind(clazz), new Date(), loginResponsible);
+		ofy().put(trashEntry);
+		return trashEntry;
+	}
+	
+	/**
+	 * @param trashEntries
+	 */
+	private List<TrashEntry> deleteTrash(Iterable<TrashEntry> trashEntries) {
+		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
+		List<TrashEntry> trashList = new ArrayList<TrashEntry>();
+		for (TrashEntry trashEntry : trashEntries) {
+			keysToDelete.add(trashEntry.getEntityKey());
+			trashEntry.setDeletionDate(new Date());
+			
+			trashList.add(trashEntry);
+		}
+		ofy().put(trashList);
+		
+		ofy().delete(keysToDelete);
+		
+		return trashList;
+	}
+	
+	public List<TrashEntry> deleteAllTrash() {
+		return deleteTrash(ofy().query(TrashEntry.class));
+	}
+	
 	/**
 	 * Finds an object by id. ONLY WORKING WITH OBJECTS WITH NO PARENT ANNOTATION
 	 * @param id

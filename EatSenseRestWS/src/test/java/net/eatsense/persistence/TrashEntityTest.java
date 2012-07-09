@@ -20,10 +20,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
 
-public class TrashRepositoryTest {
+public class TrashEntityTest {
 	private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-	private TrashRepository trashRepo;
 	private ProductRepository productRepo;
 	private BusinessRepository businessRepo;
 	
@@ -31,7 +30,6 @@ public class TrashRepositoryTest {
 	public void setUp() {
 		helper.setUp();
 		Injector injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-		trashRepo = injector.getInstance(TrashRepository.class);
 		productRepo = injector.getInstance(ProductRepository.class);
 		businessRepo = injector.getInstance(BusinessRepository.class);
 	}
@@ -48,9 +46,9 @@ public class TrashRepositoryTest {
 		product.setName("test product");
 		productRepo.saveOrUpdate(product);
 		assertThat(productRepo.getAll().isEmpty(), is(false));
-		trashRepo.saveNewTrashEntry(product.getKey(), "admin");
+		productRepo.trashEntity(product.getKey(), "admin");
 		
-		trashRepo.deleteTrash(trashRepo.getAll());
+		productRepo.deleteAllTrash();
 		assertThat(productRepo.getAll().isEmpty(), is(true));
 	}
 	
@@ -64,10 +62,10 @@ public class TrashRepositoryTest {
 		product.setName("test product");
 		productRepo.saveOrUpdate(product);
 		
-		trashRepo.saveNewTrashEntry(product.getKey(), "admin");
-		trashRepo.saveNewTrashEntry(business.getKey(), "admin");
+		productRepo.trashEntity(product.getKey(), "admin");
+		businessRepo.trashEntity(business.getKey(), "admin");
 		
-		trashRepo.deleteTrash(trashRepo.getAll());
+		productRepo.deleteAllTrash();
 		assertThat(productRepo.getAll().isEmpty(), is(true));
 		assertThat(businessRepo.getAll().isEmpty(), is(true));
 	}

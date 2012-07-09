@@ -6,6 +6,7 @@ import com.googlecode.objectify.Key;
 
 public class TrashEntry extends GenericEntity {
 	private Key<?> entityKey;
+	private String kind;
 	private Date deletionDate;
 	private Date markedForDeletionDate;
 	private String loginResponsible;
@@ -17,7 +18,7 @@ public class TrashEntry extends GenericEntity {
 		super();
 	}
 
-	public TrashEntry(Key<?> entityKey, Date markedForDeletionDate,String loginResponsible) {
+	public TrashEntry(Key<?> entityKey, String kind, Date markedForDeletionDate,String loginResponsible) {
 		super();
 		this.entityKey = entityKey;
 		this.markedForDeletionDate = markedForDeletionDate;
@@ -49,6 +50,14 @@ public class TrashEntry extends GenericEntity {
 
 	public void setMarkedForDeletionDate(Date markedForDeletionDate) {
 		this.markedForDeletionDate = markedForDeletionDate;
+	}
+
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
 	}
 	
 }
