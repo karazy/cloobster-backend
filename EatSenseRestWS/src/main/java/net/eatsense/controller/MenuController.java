@@ -283,7 +283,7 @@ public class MenuController {
 		checkNotNull(business, "business was null");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
-		for (Product product : productRepo.getListByProperty("menu", null )) {
+		for (Product product : productRepo.getListByParentAndProperty(business.getKey(), "menu", null )) {
 			if(!product.isTrash()) {
 				productsData.add(new ProductDTO(product));
 			}			
