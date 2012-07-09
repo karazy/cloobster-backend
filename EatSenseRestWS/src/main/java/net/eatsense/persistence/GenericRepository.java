@@ -4,9 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import net.eatsense.domain.Business;
 import net.eatsense.domain.GenericEntity;
-import net.eatsense.domain.Spot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,21 +20,21 @@ import com.googlecode.objectify.util.DAOBase;
  * Generic repository. Acts as intermediate layer between datastore and domain
  * objects. Similar to a DAO.
  * 
- * @author freifschneider, Nils Weiher
+ * @author Frederik Reifschneider, Nils Weiher
  * 
  * @param <T>
  */
 public class GenericRepository<T extends GenericEntity> extends DAOBase{
-
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected Class<T> clazz;
 
-	static public <T> void register(Class<T> clazz) {
-		ObjectifyService.register(clazz);
-	}
-
 	public GenericRepository(Class<T> clazz) {
 		this.clazz = clazz;
+		try {
+			ObjectifyService.register(clazz);
+		} catch (IllegalArgumentException e) {
+			logger.info("registered twice",e);
+		}
 	}
 	
 	/**

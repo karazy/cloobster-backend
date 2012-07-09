@@ -41,7 +41,7 @@ public class DummyDataCreator {
     		Spot b = new Spot();
     		b.setBarcode("b4rc0de");
     		b.setBusiness(kR);
-    		Key<Spot> kB = br.saveOrUpdate(b); 
+    		Key<Spot> kB = br.saveOrUpdate(b);
     	}
 
 

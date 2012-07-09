@@ -17,10 +17,6 @@ public class AccountRepository extends GenericRepository<Account> {
 
 	final static Class<Account> entityClass = Account.class;
 	
-	static {
-		GenericRepository.register(entityClass);
-	}
-	
 	public AccountRepository() {
 		super(entityClass);
 	}

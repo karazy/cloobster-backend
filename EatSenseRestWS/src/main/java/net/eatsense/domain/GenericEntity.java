@@ -21,6 +21,8 @@ public abstract class GenericEntity{
 	@Transient
 	private boolean dirty = false; 
 	
+	private boolean trash = false;
+	
 	@Transient
 	public boolean isDirty() {
 		return dirty;
@@ -38,4 +40,11 @@ public abstract class GenericEntity{
 		this.id = id;
 	}
 	
+	public boolean isTrash() {
+		return trash;
+	}
+
+	public void setTrash(boolean trash) {
+		this.trash = trash;
+	}
 }

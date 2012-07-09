@@ -48,19 +48,24 @@ public class ProductsResource {
 	 * @param menuId If different from 0, return only Products for the menu with this id.
 	 * @param choiceId If menuId is not set and different from 0,
 	 * 		return only Products with a choice with this Id.
+	 * @param noMenu If true, return Products with no menu associated.
 	 * @return List of Product objects.
 	 */
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public List<ProductDTO> getProducts(@QueryParam("menuId") long menuId, @QueryParam("choiceId") long choiceId) {
-		if(menuId != 0)
-			return menuCtrl.getProductsForMenu(business, menuId);
-		else if(choiceId != 0) {
+	public List<ProductDTO> getProducts(@QueryParam("menuId") long menuId, @QueryParam("choiceId") long choiceId,@QueryParam("noMenu") boolean noMenu) {
+		if(noMenu) {
+			return menuCtrl.getProductsForMenu(business, menuId, noMenu);
+		}
+		if(menuId != 0) {
+			return menuCtrl.getProductsForMenu(business, menuId, false);
+		}
+		if(choiceId != 0) {
 			return menuCtrl.getProductsForChoice(business, choiceId);
 		}
-		else
-			return menuCtrl.getProducts(business);
+		
+		return menuCtrl.getProducts(business);
 	}
 	
 	@POST

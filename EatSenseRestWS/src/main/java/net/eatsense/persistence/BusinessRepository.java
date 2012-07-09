@@ -10,10 +10,6 @@ public class BusinessRepository extends GenericRepository<Business> {
 	
 	final static Class<Business> entityClass = Business.class;
 	
-	static {
-		GenericRepository.register(entityClass);
-	}
-	
 	public BusinessRepository() {
 		super(Business.class);
 	}

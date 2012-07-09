@@ -18,7 +18,6 @@ import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;

@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -21,21 +23,20 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.TrashRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.validation.CreationChecks;
 
-import org.joda.money.CurrencyUnit;
-import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
@@ -47,19 +48,21 @@ import com.googlecode.objectify.NotFoundException;
  */
 public class MenuController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private MenuRepository menuRepo;
-	private ProductRepository productRepo;
-	private Transformer transform;
-	private Validator validator;
-	private ChoiceRepository choiceRepo;
+	private final MenuRepository menuRepo;
+	private final ProductRepository productRepo;
+	private final Transformer transform;
+	private final Validator validator;
+	private final ChoiceRepository choiceRepo;
+	private final Provider<TrashRepository> trashRepoProvider;
 
 	@Inject
-	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
+	public MenuController(MenuRepository mr, ProductRepository pr, Provider<TrashRepository> trashRepoProvider, ChoiceRepository cr, Transformer trans, Validator validator) {
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
 		this.validator = validator;
+		this.trashRepoProvider = trashRepoProvider;
 	}
 	
 	/**
@@ -213,7 +216,15 @@ public class MenuController {
 		checkNotNull(business, "business was null");
 		checkArgument(id != 0, "id was 0");
 		
-		menuRepo.delete(menuRepo.getKey(business.getKey(), id));
+		Key<Menu> menuKey = menuRepo.getKey(business.getKey(), id);
+		List<Product> productList = productRepo.getListByProperty("menu", menuKey);
+		// Get all products associated with the menu and set the link property to null.
+		for (Product product : productList) {
+			product.setMenu(null);
+		}
+		productRepo.saveOrUpdate(productList);
+		
+		menuRepo.delete(menuKey);
 	}
 
 	/**
@@ -223,7 +234,7 @@ public class MenuController {
 	 * @return
 	 */
 	public Collection<ProductDTO> getProductsWithChoices(Business business) {
-		return transform.productsToDtoWithChoices(productRepo.getByParent(business));
+		return transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(business.getKey()));
 	}
 	
 	/**
@@ -247,15 +258,19 @@ public class MenuController {
 	/**
 	 * @param business
 	 * @param menuId
+	 * @param noMenu If true list Products with no menu associated.
 	 * @return
 	 */
-	public List<ProductDTO> getProductsForMenu(Business business, long menuId) {
+	public List<ProductDTO> getProductsForMenu(Business business, long menuId, boolean noMenu) {
 		checkNotNull(business, "business was null");
-		checkArgument(menuId != 0, "menuId was 0");
+		checkArgument(menuId != 0 || noMenu, "menuId was 0, and noMenu was not set to true");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
-		for (Product product : productRepo.getListByProperty("menu", menuRepo.getKey(business.getKey(), menuId))) {
-			productsData.add(new ProductDTO(product));
+		Key<Menu> menuKey = menuRepo.getKey(business.getKey(), menuId);
+		for (Product product : productRepo.getListByProperty("menu", noMenu ? null : menuKey )) {
+			if(!product.isTrash()) {
+				productsData.add(new ProductDTO(product));
+			}			
 		}
 		
 		return productsData;
@@ -275,7 +290,9 @@ public class MenuController {
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
 		for (Product product : productRepo.getListByParentAndProperty(business.getKey(), "choices", choiceRepo.getKey(business.getKey(), choiceId))) {
-			productsData.add(new ProductDTO(product));
+			if(!product.isTrash()) {
+				productsData.add(new ProductDTO(product));
+			}
 		}
 		
 		return productsData;
@@ -293,7 +310,9 @@ public class MenuController {
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
 		for (Product product : productRepo.getByParent(business.getKey())) {
-			productsData.add(new ProductDTO(product));
+			if(!product.isTrash()) {
+				productsData.add(new ProductDTO(product));
+			}
 		}
 		
 		return productsData;
@@ -360,7 +379,8 @@ public class MenuController {
 			ArrayList<Key<Choice>> choices = new ArrayList<Key<Choice>>();
 			for (ChoiceDTO choice : productData.getChoices()) {
 				if(choice.getId() == null) {
-					choice = createChoice(product.getBusiness(), choice);
+					// Create choice but set a flag, that we dont load and update the product for each new choice.
+					choice = createChoice(product.getBusiness(), choice, true);
 				}
 				choices.add(choiceRepo.getKey(product.getBusiness(),choice.getId()));
 			}
@@ -375,6 +395,22 @@ public class MenuController {
 		ProductDTO productDTO = new ProductDTO(product);
 		productDTO.setChoices(productData.getChoices());
 		return productDTO;
+	}
+	
+	/**
+	 * Mark a Product for deletion.
+	 * 
+	 * @param product
+	 */
+	public void trashProduct(Product product, Account account) {
+		checkNotNull(product, "product was null");
+		checkArgument(!product.isTrash(), "product already in trash");
+		
+		product.setTrash(true);
+		product.setActive(false);
+		Key<Product> productKey = productRepo.saveOrUpdate(product);
+		TrashRepository trashRepo = trashRepoProvider.get();
+		trashRepo.saveNewTrashEntry(productKey, account.getLogin());
 	}
 	
 	/**
@@ -437,13 +473,27 @@ public class MenuController {
 	}
 	
 	/**
-	 * Create and save new Choice entity.
+	 * Create and save new Choice entity and add the Choice to the product.
+	 * (specifed by productId in choiceData).
 	 * 
 	 * @param businessKey
 	 * @param choiceData
 	 * @return
 	 */
 	public ChoiceDTO createChoice(Key<Business> businessKey, ChoiceDTO choiceData) {
+		return createChoice(businessKey, choiceData, false);
+	}
+	
+	
+	/**
+	 * Create and save new Choice entity.
+	 * 
+	 * @param businessKey
+	 * @param choiceData
+	 * @param dontUpdateProduct 
+	 * @return
+	 */
+	public ChoiceDTO createChoice(Key<Business> businessKey, ChoiceDTO choiceData, boolean dontUpdateProduct) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(choiceData, "choiceData was null");
 		
@@ -451,6 +501,16 @@ public class MenuController {
 		choice.setBusiness(businessKey);
 		
 		choiceData = updateChoice(choice, choiceData);
+		
+		if(choice.getProduct() != null && !dontUpdateProduct) {
+			Product product = productRepo.getByKey(choice.getProduct());
+			
+			// Add the Choice to the product and check if it was added.
+			if(product.addChoice(choiceRepo.getKey(choice))) {
+				// Only save if the choice was not already in the list.
+				productRepo.saveOrUpdate(product);
+			}
+		}
 		
 		return choiceData;
 	}
@@ -482,39 +542,23 @@ public class MenuController {
 		choice.setOptions(choiceData.getOptions());
 		choice.setOverridePrice(choiceData.getOverridePrice());
 		choice.setOrder(choiceData.getOrder());
+		choice.setPrice(choiceData.getPriceMinor());
+		choice.setText(choiceData.getText());
 		
 		if(choiceData.getParent() != null)
 			choice.setParentChoice(choiceRepo.getKey(choice.getBusiness(), choiceData.getParent()));
 		else
 			choice.setParentChoice(null);
 		
-		choice.setPrice(choiceData.getPriceMinor());
-		
-		Key<Product> newProductKey = productRepo.getKey(choice.getBusiness(), choiceData.getProductId());
-		
-		if(choice.getProduct() == null) {
+		if(choice.getProduct() == null && choiceData.getProductId() != null) {
 			// Only set the Product if this was the first Product to be set.
-			choice.setProduct(newProductKey);	
+			choice.setProduct(productRepo.getKey(choice.getBusiness(), choiceData.getProductId()));
 		}
 		
-		choice.setText(choiceData.getText());
-		
-		Key<Choice> choiceKey;
 		if(choice.isDirty()) {
-			choiceKey = choiceRepo.saveOrUpdate(choice);
-		} else {
-			choiceKey = choiceRepo.getKey(choice.getBusiness(), choice.getId());			
-		}
-		
-		Product product = productRepo.getByKey(newProductKey);
-		
-		// Add the Choice to the product and check if it was added.
-		if(product.addChoice(choiceKey)) {
-			// Only save if the choice was not already in the list.
-			productRepo.saveOrUpdate(product);
+			choiceRepo.saveOrUpdate(choice);
 		}
 		
 		return new ChoiceDTO(choice);
 	}
-
 }
