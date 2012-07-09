@@ -2,6 +2,8 @@ package net.eatsense.domain;
 
 import javax.validation.constraints.NotNull;
 
+import com.googlecode.objectify.Key;
+
 import net.eatsense.domain.embedded.Gender;
 
 /**
@@ -11,7 +13,7 @@ import net.eatsense.domain.embedded.Gender;
  * @author Frederik Reifschneider
  * 
  */
-public class NicknameNoun extends GenericEntity {
+public class NicknameNoun extends GenericEntity<NicknameNoun> {
 
 	@NotNull
 	private String fragment;
@@ -47,7 +49,9 @@ public class NicknameNoun extends GenericEntity {
 	public void setGender(Gender gender) {
 		this.gender = gender;
 	}
-	
-	
 
+	@Override
+	public Key<NicknameNoun> getKey() {
+		return new Key<NicknameNoun>(NicknameNoun.class, getId());
+	}
 }

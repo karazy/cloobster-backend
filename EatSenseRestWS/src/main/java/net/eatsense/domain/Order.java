@@ -25,7 +25,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  *
  */
 @Cached
-public class Order extends GenericEntity {
+public class Order extends GenericEntity<Order> {
 	@Min(1)
 	int amount;
 	

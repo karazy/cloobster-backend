@@ -28,7 +28,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Nils Weiher
  */
 @Cached
-public class Business extends GenericEntity {
+public class Business extends GenericEntity<Business> {
  
 	/**
 	 * Name of location.

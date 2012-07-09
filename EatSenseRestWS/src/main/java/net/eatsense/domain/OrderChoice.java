@@ -16,7 +16,7 @@ import com.googlecode.objectify.annotation.Parent;
  *
  */
 @Cached
-public class OrderChoice extends GenericEntity {
+public class OrderChoice extends GenericEntity<OrderChoice> {
 	
 	@Transient
 	public Key<OrderChoice> getKey() {

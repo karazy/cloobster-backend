@@ -142,7 +142,9 @@ public class MenuController {
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
 		for (Product product : productRepo.getListByProperty("menu", menu)) {
-			productsData.add(new ProductDTO(product));
+			if(!product.isTrash()) {
+				productsData.add(new ProductDTO(product));
+			}
 		}
 		menuData.setProducts(productsData);
 		
@@ -419,10 +421,8 @@ public class MenuController {
 		checkNotNull(product, "product was null");
 		checkArgument(!product.isTrash(), "product already in trash");
 		
-		product.setTrash(true);
 		product.setActive(false);
-		Key<Product> productKey = productRepo.saveOrUpdate(product);
-		productRepo.trashEntity(productKey, account.getLogin());
+		productRepo.trashEntity(product, account.getLogin());
 	}
 	
 	/**

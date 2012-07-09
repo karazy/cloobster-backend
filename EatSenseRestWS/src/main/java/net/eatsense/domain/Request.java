@@ -11,7 +11,7 @@ import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
 @Cached
-public class Request extends GenericEntity {
+public class Request extends GenericEntity<Request> {
 	public enum RequestType {
 		ORDER,
 		BILL,

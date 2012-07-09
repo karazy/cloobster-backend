@@ -3,6 +3,8 @@ package net.eatsense.domain;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+import com.googlecode.objectify.Key;
+
 /**
  * Base class for all entities.
  * Provides some common fields.
@@ -10,7 +12,7 @@ import javax.persistence.Transient;
  * @author Frederik Reifschneider
  *
  */
-public abstract class GenericEntity{
+public abstract class GenericEntity<T> {
 	
 	/**
 	 * Unique identifier for this entity.
@@ -47,4 +49,6 @@ public abstract class GenericEntity{
 	public void setTrash(boolean trash) {
 		this.trash = trash;
 	}
+	
+	public abstract Key<T> getKey();
 }

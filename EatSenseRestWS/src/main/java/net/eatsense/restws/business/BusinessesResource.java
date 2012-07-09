@@ -78,6 +78,7 @@ public class BusinessesResource {
 
 		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class); 
 		businessResource.setBusiness(business);
+		businessResource.setAccount((Account)servletRequest.getAttribute("net.eatsense.domain.Account"));
 		
 		return businessResource;
 	}
