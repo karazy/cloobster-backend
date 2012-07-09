@@ -30,7 +30,6 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.TrashRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
@@ -50,7 +49,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 
 public class MenuControllerTest {
@@ -94,12 +92,7 @@ public class MenuControllerTest {
 		Transformer trans = mock(Transformer.class);
 		Validator validator = injector.getInstance(Validator.class);
 		
-		ctr = new MenuController(mr, pr, new Provider<TrashRepository>() {
-			@Override
-			public TrashRepository get() {
-				return mock(TrashRepository.class);
-			}
-		}, cr, trans, validator);
+		ctr = new MenuController(mr, pr, cr, trans, validator);
 	}
 
 	@After
