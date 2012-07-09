@@ -14,7 +14,7 @@ import com.googlecode.objectify.annotation.Parent;
  * @author Frederik Reifschneider
  *
  */
-public class Spot extends GenericEntity{
+public class Spot extends GenericEntity<Spot>{
 	
 	/**
 	 * The business this spot belongs to.

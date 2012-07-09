@@ -14,7 +14,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
-public class Bill extends GenericEntity {
+public class Bill extends GenericEntity<Bill> {
 	@Parent
 	@NotNull
 	private Key<Business> business;

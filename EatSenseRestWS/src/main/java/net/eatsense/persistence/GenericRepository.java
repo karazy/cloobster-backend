@@ -27,7 +27,7 @@ import com.googlecode.objectify.util.DAOBase;
  * 
  * @param <T>
  */
-public class GenericRepository<T extends GenericEntity> extends DAOBase{
+public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected Class<T> clazz;
 	
@@ -117,12 +117,29 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	}
 	
 	/**
+	 * Shortcut for getting and an entity and saving as trash.
+	 * 
 	 * @param entityKey
 	 * @param loginResponsible
 	 * @return The entry saved for trash.
 	 */
 	public TrashEntry trashEntity(Key<T> entityKey, String loginResponsible) {
-		TrashEntry trashEntry = new TrashEntry(entityKey, Key.getKind(clazz), new Date(), loginResponsible);
+		return trashEntity(ofy().get(entityKey), loginResponsible);
+	}
+	
+	/**
+	 * Save the Entity as trash, creates a TrashEntry for this entity, for later deletion.
+	 * 
+	 * @param entity
+	 * @param loginResponsible
+	 * @return The TrashEntry for this entity.
+	 */
+	public TrashEntry trashEntity(T entity, String loginResponsible) {
+		Key<T> key = entity.getKey();
+		logger.info("{}", key);
+		TrashEntry trashEntry = new TrashEntry(key, Key.getKind(clazz), new Date(), loginResponsible);
+		entity.setTrash(true);
+		ofy().put(entity);
 		ofy().put(trashEntry);
 		return trashEntry;
 	}
@@ -146,6 +163,11 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 		return trashList;
 	}
 	
+	/**
+	 * Permanently delete entities in the trash.
+	 * 
+	 * @return List of TrashEntries for the deleted Entities.
+	 */
 	public List<TrashEntry> deleteAllTrash() {
 		return deleteTrash(ofy().query(TrashEntry.class));
 	}
@@ -355,7 +377,7 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	 * 
 	 * @return List<T> of matching objects
 	 */
-	public <V extends GenericEntity> List<T> getListByParentAndProperty(Key<V> parent, String propName, Object propValue)
+	public <V extends GenericEntity<V>> List<T> getListByParentAndProperty(Key<V> parent, String propName, Object propValue)
 	{
 		logger.info("{}, property: {}", clazz, propName);
 		Query<T> q = ofy().query(clazz).ancestor(parent);
@@ -389,11 +411,12 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	
 	/**
 	 * Convenience method to get all object keys matching a single property
+	 * @param <V>
 	 * 
 	 * @param parentKey
 	 * @return List<Key<T>> of matching entity keys
 	 */
-	public List<Key<T>> getKeysByParent(Key<? extends GenericEntity> parentKey)
+	public <V> List<Key<T>> getKeysByParent(Key<? extends GenericEntity<V>> parentKey)
 	{
 		logger.info("{}, parent: {}", clazz, parentKey);
 		Query<T> q = ofy().query(clazz);
@@ -458,12 +481,13 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 
 	/**
 	 * Create a typesafe wrapper for the datastore key object.
+	 * @param <V>
 	 * 
 	 * @param parent parent {@link Key}
 	 * @param id numerical identifier
 	 * @return {@link Key}
 	 */
-	public Key<T> getKey(Key<? extends GenericEntity> parent, long id) {
+	public <V> Key<T> getKey(Key<? extends GenericEntity<V>> parent, long id) {
 		return new Key<T>(parent , clazz, id);
 	}
 	

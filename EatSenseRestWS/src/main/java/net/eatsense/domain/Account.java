@@ -18,7 +18,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 
 @Cached
-public class Account extends GenericEntity {
+public class Account extends GenericEntity<Account> {
 	@NotNull
 	@NotEmpty
 	String login;

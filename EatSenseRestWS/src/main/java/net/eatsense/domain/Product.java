@@ -11,7 +11,7 @@ import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
-public class Product extends GenericEntity {
+public class Product extends GenericEntity<Product> {
 	private String name;
 	private String shortDesc;
 	/**

@@ -22,7 +22,7 @@ import com.googlecode.objectify.annotation.Cached;
  *
  */
 @Cached
-public class CheckIn extends GenericEntity{
+public class CheckIn extends GenericEntity<CheckIn>{
 		
 	/**
 	 * Unique UserId. Generated on checkIn if this user doesn't have a 

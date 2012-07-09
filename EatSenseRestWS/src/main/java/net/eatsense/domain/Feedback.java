@@ -10,7 +10,7 @@ import net.eatsense.domain.embedded.FeedbackQuestion;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
-public class Feedback extends GenericEntity {
+public class Feedback extends GenericEntity<Feedback> {
 	@Parent
 	private Key<Business> business;
 	private Key<CheckIn> checkIn;

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -16,6 +17,7 @@ import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.ProductDTO;
 
@@ -31,6 +33,8 @@ public class ProductsResource {
 
 	private Business business;
 
+	private Account account;
+
 	@Inject
 	public ProductsResource(MenuController menuCtrl) {
 		super();
@@ -41,6 +45,11 @@ public class ProductsResource {
 		this.business = business;
 		
 	}
+
+	public void setAccount(Account account) {
+		this.account = account;	
+	}
+
 	
 	/**
 	 * Get Products, filtered by the menuId if different from zero.
@@ -91,5 +100,12 @@ public class ProductsResource {
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ProductDTO updateProduct(@PathParam("id") long id, ProductDTO productData) {
 		return menuCtrl.updateProduct(menuCtrl.getProduct(business.getKey(), id), productData);
+	}
+	
+	@DELETE
+	@Path("{id}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void markProductForDeletion(@PathParam("id") long id) {
+		menuCtrl.trashProduct(menuCtrl.getProduct(business.getKey(), id), account);
 	}
 }

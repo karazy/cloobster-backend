@@ -43,9 +43,14 @@ public class BusinessResource {
 	
 	private Business business;
 	private BusinessController businessCtrl;
+	private Account account;
 			
 	public void setBusiness(Business business) {
 		this.business = business;
+	}
+	
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 	
 	@Inject
@@ -80,7 +85,6 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO imageData) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return businessCtrl.updateBusinessImage(account, business, imageData);
 	}
 	
@@ -95,6 +99,7 @@ public class BusinessResource {
 	public ProductsResource getProductsResource() {
 		ProductsResource resource = resourceContext.getResource(ProductsResource.class);
 		resource.setBusiness(business);
+		resource.setAccount(account);
 		return resource;
 	}
 	

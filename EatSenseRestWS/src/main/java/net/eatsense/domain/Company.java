@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Embedded;
 
 import com.google.common.base.Objects;
+import com.googlecode.objectify.Key;
 
 import net.eatsense.representation.ImageDTO;
 
@@ -14,7 +15,7 @@ import net.eatsense.representation.ImageDTO;
  * @author Nils Weiher
  *
  */
-public class Company extends GenericEntity {
+public class Company extends GenericEntity<Company> {
 	String name;
 	String address;
 	String city;
@@ -94,5 +95,13 @@ public class Company extends GenericEntity {
 			this.setDirty(true);
 			this.url = url;
 		}
+	}
+	@Override
+	public Key<Company> getKey() {
+		return getKey(getId());
+	}
+	
+	public static Key<Company> getKey(long id) {
+		return new Key<Company>(Company.class, id);
 	}
 }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.googlecode.objectify.Key;
 
-public class TrashEntry extends GenericEntity {
+public class TrashEntry extends GenericEntity<TrashEntry> {
 	private Key<?> entityKey;
 	private String kind;
 	private Date deletionDate;
@@ -28,7 +28,7 @@ public class TrashEntry extends GenericEntity {
 	public Key<?> getEntityKey() {
 		return entityKey;
 	}
-	public void setEntityKey(Key<? extends GenericEntity> entityKey) {
+	public void setEntityKey(Key<?> entityKey) {
 		this.entityKey = entityKey;
 	}
 	public Date getDeletionDate() {
@@ -58,6 +58,11 @@ public class TrashEntry extends GenericEntity {
 
 	public void setKind(String kind) {
 		this.kind = kind;
+	}
+
+	@Override
+	public Key<TrashEntry> getKey() {
+		return new Key<TrashEntry>(TrashEntry.class, getId());
 	}
 	
 }

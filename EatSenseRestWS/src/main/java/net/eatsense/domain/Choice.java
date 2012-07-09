@@ -22,7 +22,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Nils Weiher
  *
  */
-public class Choice extends GenericEntity {
+public class Choice extends GenericEntity<Choice> {
 	
 	/**
 	 * Description of the choice to show on the product page.
