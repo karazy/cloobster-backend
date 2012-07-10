@@ -20,6 +20,7 @@ public class TrashEntry extends GenericEntity<TrashEntry> {
 
 	public TrashEntry(Key<?> entityKey, String kind, Date markedForDeletionDate,String loginResponsible) {
 		super();
+		this.kind = kind;
 		this.entityKey = entityKey;
 		this.markedForDeletionDate = markedForDeletionDate;
 		this.loginResponsible = loginResponsible;

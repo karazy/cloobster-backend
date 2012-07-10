@@ -40,7 +40,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		try {
 			ObjectifyService.register(clazz);
 		} catch (IllegalArgumentException e) {
-			logger.info("registered twice",e);
+			logger.info("registered more than once {}",clazz);
 		}
 	}
 	
@@ -150,6 +150,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	private List<TrashEntry> deleteTrash(Iterable<TrashEntry> trashEntries) {
 		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
 		List<TrashEntry> trashList = new ArrayList<TrashEntry>();
+		
 		for (TrashEntry trashEntry : trashEntries) {
 			keysToDelete.add(trashEntry.getEntityKey());
 			trashEntry.setDeletionDate(new Date());
@@ -508,6 +509,6 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * @return {@link Key} of type T
 	 */
 	public Key<T> getKey(T obj) {
-		return new Key<T>( clazz, obj.getId());
+		return obj.getKey();
 	}
 }

@@ -214,7 +214,7 @@ public class MenuController {
 		checkArgument(id != 0, "id was 0");
 		
 		Key<Menu> menuKey = menuRepo.getKey(business.getKey(), id);
-		List<Product> productList = productRepo.getListByProperty("menu", menuKey);
+		List<Product> productList = productRepo.getListByParentAndProperty(business.getKey(), "menu", menuKey);
 		// Get all products associated with the menu and set the link property to null.
 		for (Product product : productList) {
 			product.setMenu(null);
