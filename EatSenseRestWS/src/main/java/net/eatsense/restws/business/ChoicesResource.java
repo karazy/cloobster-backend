@@ -3,6 +3,7 @@ package net.eatsense.restws.business;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -58,5 +59,18 @@ public class ChoicesResource {
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ChoiceDTO updateChoice(@PathParam("id") long id, ChoiceDTO choiceData) {
 		return menuCtrl.updateChoice(menuCtrl.getChoice(business.getKey(), id), choiceData);
+	}
+	
+	/**
+	 * Delete a Choice from a Product, and eventually from the data store.
+	 * 
+	 * @param id Id of the Choice entity.
+	 * @param productId Id of the Product entity, from which the choice should be removed.
+	 */
+	@DELETE
+	@Path("{id}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void deleteChoice(@PathParam("id") long id, @QueryParam("productId") long productId) {
+		menuCtrl.deleteChoice(business.getKey(), id, productId);
 	}
 }

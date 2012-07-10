@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -454,7 +455,7 @@ public class MenuController {
 	 */
 	public List<ChoiceDTO> getChoices(Key<Business> businessKey, long productId) {
 		checkNotNull(businessKey, "businessKey was null");
-				
+
 		ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
 		Collection<Choice> choices = null;
 		if(productId != 0) {
@@ -495,7 +496,6 @@ public class MenuController {
 	public ChoiceDTO createChoice(Key<Business> businessKey, ChoiceDTO choiceData) {
 		return createChoice(businessKey, choiceData, false);
 	}
-	
 	
 	/**
 	 * Create and save new Choice entity.
@@ -572,5 +572,53 @@ public class MenuController {
 		}
 		
 		return new ChoiceDTO(choice);
+	}
+	
+	/**
+	 * @param business
+	 * @param choiceId
+	 */
+	public void deleteChoice(Key<Business> businessKey, long choiceId, long productId) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkArgument(choiceId != 0, "choiceId was 0");
+		
+		Key<Choice> choiceKey = choiceRepo.getKey(businessKey, choiceId);
+		List<Key<Choice>> choiceKeysToDelete = new ArrayList<Key<Choice>>();
+		
+		choiceKeysToDelete.add(choiceKey);
+		
+		if(productId != 0) {
+			Product product = getProduct(businessKey, productId);
+			product.getChoices().remove(choiceKey);
+			
+			Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
+			
+			for (Choice choice : choices) {
+				if(choice.getParentChoice().equals(choiceKey)) {
+					// This is a child choice for this product.
+					Key<Choice> childChoiceKey = choice.getKey();
+					
+					product.getChoices().remove(childChoiceKey);
+					
+					choiceKeysToDelete.add(childChoiceKey);
+				}
+			}
+			
+			productRepo.saveOrUpdate(product);
+		}
+		
+		List<Key<Product>> productsUsingChoice = productRepo.getKeysByParentAndProperty(businessKey, "choices", choiceKey);
+		if(productsUsingChoice.isEmpty()) {
+			// No more products using this choice.
+			// It's safe to delete it.
+			choiceRepo.delete(choiceKeysToDelete);
+		}
+		else {
+			if(productsUsingChoice.get(0).getId() == productId) {
+				// This happens if the datastore is not yet consistently updated.
+				// We still remove the choice.
+				choiceRepo.delete(choiceKeysToDelete);
+			}
+		}
 	}
 }
