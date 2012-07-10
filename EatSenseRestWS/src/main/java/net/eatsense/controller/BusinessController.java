@@ -443,10 +443,12 @@ public class BusinessController {
 		
 		Spot spot = spotRepo.newEntity();
 		spot.setBusiness(businessKey);
+		updateSpot(spot, spotData);
+		// Generate the barcode like this: {businessId}-{spotId}
+		spot.setBarcode(String.format("%d-%d", businessKey.getId(), spot.getId()));
+		spotRepo.saveOrUpdate(spot);
 		
-		spotData = updateSpot(spot, spotData);
-		
-		return spotData;
+		return new SpotDTO(spot);
 	}
 
 	/**
@@ -454,7 +456,7 @@ public class BusinessController {
 	 * @param spotData
 	 * @return updated spotData
 	 */
-	public SpotDTO updateSpot(Spot spot, SpotDTO spotData) {
+	public Spot updateSpot(Spot spot, SpotDTO spotData) {
 		checkNotNull(spot, "spot was null");
 		checkNotNull(spotData, "spotData was null");
 		
@@ -469,10 +471,6 @@ public class BusinessController {
 			throw new ValidationException(stringBuilder.toString());
 		}
 		
-		if(!Objects.equal(spot.getBarcode(), spotData.getBarcode()) && spotRepo.getByProperty("barcode", spotData.getBarcode()) != null)
-			throw new ValidationException("Spot with this barcode already exists");
-		
-		spot.setBarcode(spotData.getBarcode());
 		spot.setGroupTag(spotData.getGroupTag());
 		spot.setName(spotData.getName());
 		
@@ -480,7 +478,7 @@ public class BusinessController {
 			spotRepo.saveOrUpdate(spot);
 		}
 		
-		return new SpotDTO(spot);
+		return spot;
 	}
 
 	/**
