@@ -176,7 +176,7 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO updateSpot(@PathParam("spotId") long spotId, SpotDTO spotData) {
-		return businessCtrl.updateSpot(businessCtrl.getSpot(business.getKey(), spotId), spotData);
+		return new SpotDTO(businessCtrl.updateSpot(businessCtrl.getSpot(business.getKey(), spotId), spotData));
 	}
 	
 	@Path("spotsdata/{spotId}")

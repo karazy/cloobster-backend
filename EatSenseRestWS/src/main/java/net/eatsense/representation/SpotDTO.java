@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -23,9 +24,11 @@ public class SpotDTO {
 	/**
 	 * Barcode identifying this spot.
 	 */
-	@NotNull
-	@NotEmpty
+	@NotNull(groups={ImportChecks.class})
+	@NotEmpty(groups={ImportChecks.class})
 	private String barcode;
+	
+	private String qrImageUrl;
 	
 	private Long id;
 	
@@ -55,6 +58,7 @@ public class SpotDTO {
 		}
 		this.id = spot.getId();
 		this.barcode = spot.getBarcode();
+		this.qrImageUrl = spot.getQrImageUrl();
 		this.name = spot.getName();
 		this.groupTag = spot.getBarcode();
 	}
@@ -136,6 +140,16 @@ public class SpotDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+
+	public String getQrImageUrl() {
+		return qrImageUrl;
+	}
+
+
+	public void setQrImageUrl(String qrImageUrl) {
+		this.qrImageUrl = qrImageUrl;
 	}
 	
 }

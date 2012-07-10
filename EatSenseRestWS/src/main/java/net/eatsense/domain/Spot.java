@@ -1,6 +1,11 @@
 package net.eatsense.domain;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.persistence.Transient;
+
+import net.eatsense.exceptions.ServiceException;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
@@ -89,5 +94,18 @@ public class Spot extends GenericEntity<Spot>{
 	@Transient
 	public static Key<Spot> getKey(Key<Business> business, Long spotId) {
 		return new Key<Spot>(business ,Spot.class,spotId);
+	}
+	
+	public String getQrImageUrl() {
+		if(barcode != null) {
+			try {
+				return "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=" + URLEncoder.encode(barcode,"UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new ServiceException(e);
+			}
+
+		}
+		else
+			return null;
 	}
 }
