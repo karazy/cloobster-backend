@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +45,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
 
+import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
@@ -99,6 +102,100 @@ public class MenuControllerTest {
 	public void tearDown() throws Exception {
 		helper.tearDown();
 	}
+	
+	@Test
+	public void testDeleteChoiceFromProductChoiceInUse() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		long choiceId = 1l;
+		long productId = 1l;
+		Product product = mock(Product.class);
+		List<Key<Choice>> choiceList = new ArrayList<Key<Choice>>();
+		@SuppressWarnings("unchecked")
+		Key<Choice> choiceKey = mock(Key.class);
+		choiceList.add(choiceKey);
+		when(cr.getKey(businessKey, choiceId)).thenReturn(choiceKey );
+		when(product.getChoices()).thenReturn(choiceList );
+		when(pr.getById(businessKey, productId)).thenReturn(product );
+		@SuppressWarnings("unchecked")
+		List<Key<Product>> productsUsingChoice = mock(List.class);
+		when(pr.getKeysByParentAndProperty(businessKey, "choices", choiceKey)).thenReturn(productsUsingChoice);
+		when(productsUsingChoice.isEmpty()).thenReturn(false);
+		@SuppressWarnings("unchecked")
+		Key<Product> anotherProduct = mock(Key.class);
+		when(anotherProduct.getId()).thenReturn(2l);
+		when(productsUsingChoice.get(0)).thenReturn(anotherProduct );
+		ctr.deleteChoice(businessKey, choiceId, productId);
+		
+		// Check the Choice key was removed, and we saved the product.
+		assertThat(choiceList.contains(choiceKey), is(false));
+		verify(pr).saveOrUpdate(product);
+		ArgumentCaptor<List> deleteArgument = ArgumentCaptor.forClass(List.class);
+		verify(cr, never()).delete(deleteArgument.capture());
+	}
+	
+	@Test
+	public void testDeleteChoiceFromProductWithChildChoices() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		Key<Business> businessKey = mock(Key.class);
+		long choiceId = 1l;
+		long productId = 1l;
+		Product product = mock(Product.class);
+		List<Key<Choice>> choiceList = new ArrayList<Key<Choice>>();
+		Key<Choice> choiceKey = mock(Key.class);
+		Key<Choice> childChoiceKey = mock(Key.class);
+		choiceList.add(choiceKey);
+		choiceList.add(childChoiceKey);
+		when(cr.getKey(businessKey, choiceId)).thenReturn(choiceKey );
+		when(product.getChoices()).thenReturn(choiceList );
+		when(pr.getById(businessKey, productId)).thenReturn(product );
+		Collection<Choice> choices = new ArrayList<Choice>();
+		Choice childChoice = mock(Choice.class);
+		when(childChoice.getParentChoice()).thenReturn(choiceKey);
+		when(childChoice.getKey()).thenReturn(childChoiceKey);
+		choices.add(childChoice);
+		when(cr.getByKeys(choiceList)).thenReturn(choices );
+		ctr.deleteChoice(businessKey, choiceId, productId);
+		
+		assertThat(choiceList.contains(choiceKey), is(false));
+		assertThat(choiceList.contains(childChoiceKey), is(false));
+		verify(pr).saveOrUpdate(product);
+		ArgumentCaptor<List> deleteArgument = ArgumentCaptor.forClass(List.class);
+		verify(cr).delete(deleteArgument.capture());
+		assertThat(deleteArgument.getValue().contains(choiceKey),is(true));
+		assertThat(deleteArgument.getValue().contains(childChoiceKey),is(true));
+	}
+
+	
+	@Test
+	public void testDeleteChoiceFromProduct() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		Key<Business> businessKey = mock(Key.class);
+		long choiceId = 1l;
+		long productId = 1l;
+		Product product = mock(Product.class);
+		List<Key<Choice>> choiceList = new ArrayList<Key<Choice>>();
+		Key<Choice> choiceKey = mock(Key.class);
+		choiceList.add(choiceKey);
+		when(cr.getKey(businessKey, choiceId)).thenReturn(choiceKey );
+		when(product.getChoices()).thenReturn(choiceList );
+		when(pr.getById(businessKey, productId)).thenReturn(product );
+		ctr.deleteChoice(businessKey, choiceId, productId);
+		
+		assertThat(choiceList.contains(choiceKey), is(false));
+		verify(pr).saveOrUpdate(product);
+		ArgumentCaptor<List> deleteArgument = ArgumentCaptor.forClass(List.class);
+		verify(cr).delete(deleteArgument.capture());
+		assertThat(deleteArgument.getValue().contains(choiceKey),is(true));
+	}
+
 	
 	@Test
 	public void testUpdateChoiceEmptyOptionsName() throws Exception {
