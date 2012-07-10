@@ -609,6 +609,8 @@ public class MenuController {
 		
 		List<Key<Product>> productsUsingChoice = productRepo.getKeysByParentAndProperty(businessKey, "choices", choiceKey);
 		if(productsUsingChoice.isEmpty()) {
+			// No more products using this choice.
+			// It's safe to delete it.
 			choiceRepo.delete(choiceKeysToDelete);
 		}
 		else {
