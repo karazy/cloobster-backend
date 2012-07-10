@@ -4,8 +4,10 @@ import javax.persistence.Transient;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
+@Cached
 public class Menu extends GenericEntity<Menu>{
 	
 	private String title;

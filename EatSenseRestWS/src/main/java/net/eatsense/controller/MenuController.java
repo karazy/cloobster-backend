@@ -594,7 +594,7 @@ public class MenuController {
 			Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
 			
 			for (Choice choice : choices) {
-				if(choice.getParentChoice().equals(choiceKey)) {
+				if(choiceKey.equals(choice.getParentChoice())) {
 					// This is a child choice for this product.
 					Key<Choice> childChoiceKey = choice.getKey();
 					
@@ -608,6 +608,7 @@ public class MenuController {
 		}
 		
 		List<Key<Product>> productsUsingChoice = productRepo.getKeysByParentAndProperty(businessKey, "choices", choiceKey);
+		
 		if(productsUsingChoice.isEmpty()) {
 			// No more products using this choice.
 			// It's safe to delete it.

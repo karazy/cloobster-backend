@@ -13,6 +13,7 @@ import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
@@ -22,6 +23,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Nils Weiher
  *
  */
+@Cached
 public class Choice extends GenericEntity<Choice> {
 	
 	/**

@@ -9,8 +9,10 @@ import javax.persistence.Transient;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
+@Cached
 public class Product extends GenericEntity<Product> {
 	private String name;
 	private String shortDesc;
