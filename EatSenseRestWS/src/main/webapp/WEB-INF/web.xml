@@ -8,7 +8,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     	<param-name>net.karazy.environment</param-name>
     	<param-value>${karazy.environment}</param-value>
 	</context-param>
-	
+	<mime-mapping>
+        <extension>manifest</extension>
+        <mime-type>text/cache-manifest</mime-type>
+	</mime-mapping>
 	<filter>
 		<filter-name>guiceFilter</filter-name>
 		<filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
