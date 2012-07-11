@@ -42,11 +42,7 @@ public class SpotResource {
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
 	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
-		SpotDTO spot = checkInCtr.getSpotInformation(barcode);
-		if(spot == null)
-			throw new NotFoundException("barcode not found");
-		else
-			return spot;
+		return checkInCtr.getSpotInformation(barcode);
 	}
 	
 	

@@ -263,7 +263,9 @@ public class CheckInControllerTest {
 	@Test
 	public void testGetSpotInformationUnknown() throws Exception {
 		String barcode = "bla";
-		assertThat(ctr.getSpotInformation(barcode), nullValue());
+		
+		thrown.expect(net.eatsense.exceptions.NotFoundException.class);
+		ctr.getSpotInformation(barcode);
 		verify(spotRepo).getByProperty("barcode", barcode);
 	}
 	
@@ -280,10 +282,23 @@ public class CheckInControllerTest {
 	}
 	
 	@Test
+	public void testGetSpotInactive() throws Exception {
+		String barcode = "abarcode";
+
+		when(spotRepo.getByProperty("barcode", barcode )).thenReturn(spot);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		thrown.expect(net.eatsense.exceptions.NotFoundException.class);
+		
+		ctr.getSpotInformation(barcode);
+	}
+	
+	@Test
 	public void testGetSpotInformation() throws Exception {
 		String barcode = "abarcode";
 
 		when(spotRepo.getByProperty("barcode", barcode )).thenReturn(spot);
+		when(spot.isActive()).thenReturn(true);
 		when(spot.getBusiness()).thenReturn( businessKey);
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		

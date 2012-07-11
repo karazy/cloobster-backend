@@ -26,6 +26,7 @@ import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -108,21 +109,21 @@ public class CheckInController {
     	if(barcode == null || barcode.isEmpty() )
     		return null;
     	
-    	return toSpotDto(spotRepo.getByProperty("barcode", barcode)) ;
+    	Spot spot = spotRepo.getByProperty("barcode", barcode);
+    	if(spot == null || !spot.isActive()) {
+    		throw new NotFoundException();
+    	}
+		return toSpotDto(spot) ;
     }
 
     public SpotDTO toSpotDto(Spot spot) {
     	if(spot == null)
     		return null;
 		Business business = businessRepo.getByKey(spot.getBusiness());
-    	SpotDTO spotDto = new SpotDTO();
-    	spotDto.setBarcode(spot.getBarcode());
-    	spotDto.setName(spot.getName());
+    	SpotDTO spotDto = new SpotDTO(spot);
     	spotDto.setBusiness(business.getName());
-    	spotDto.setBusinessId(business.getId());
     	spotDto.setCurrency(business.getCurrency());
     	spotDto.setPayments(business.getPaymentMethods());
-    	spotDto.setGroupTag(spot.getGroupTag());
 		return spotDto;
 	}
 	
