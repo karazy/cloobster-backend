@@ -285,7 +285,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.cockpit}/prod</directory>
+											<directory>${cloobster.cockpit}/build/production</directory>
 										</resource>
 									</resources>
 								</configuration>
