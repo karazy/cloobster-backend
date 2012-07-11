@@ -19,6 +19,8 @@ public class BusinessDTO {
 	@NotEmpty
 	private String currency;
 	
+	private boolean trash;
+	
 	public BusinessDTO() {
 		super();
 	}
@@ -29,6 +31,7 @@ public class BusinessDTO {
 		this.name = business.getName();
 		this.description = business.getDescription();
 		this.currency = business.getCurrency();
+		this.trash = business.isTrash();
 		this.id = business.getId();
 	}
 	
@@ -57,5 +60,13 @@ public class BusinessDTO {
 
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+
+	public boolean isTrash() {
+		return trash;
+	}
+
+	public void setTrash(boolean trash) {
+		this.trash = trash;
 	}
 }

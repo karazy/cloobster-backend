@@ -1,14 +1,23 @@
 package net.eatsense.restws.customer;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.HttpMethods;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.BusinessRepository;
 
+import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
+import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
@@ -43,9 +52,18 @@ public class BusinessesResource{
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new NotFoundException();
 		}
+		
+		if(business.isTrash()) {
+			if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
+				throw new IllegalAccessException("Can not modified trashed resource");
+			}
+		}
+		
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		
 		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class);
+		
+		
 		businessResource.setBusiness(business);
 		businessResource.setCheckIn(checkIn);
 		

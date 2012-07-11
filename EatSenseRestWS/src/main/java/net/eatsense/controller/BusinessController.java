@@ -417,6 +417,24 @@ public class BusinessController {
 		return result.getUpdatedImage();
 	}
 	
+	/**
+	 * @param business
+	 * @param account
+	 */
+	public void trashBusiness(Business business, Account account) {
+		checkNotNull(business, "business was null");
+		checkNotNull(account, "account was null");
+		checkArgument(!business.isTrash(), "business was already trashed");
+		
+		businessRepo.trashEntity(business, account.getLogin());
+		
+		List<Spot> spots = spotRepo.getByParent(business.getKey());
+		for (Spot spot : spots) {
+			spot.setActive(false);
+		}
+		spotRepo.saveOrUpdate(spots);
+	}
+	
 	
 	/**
 	 * @param businessKey

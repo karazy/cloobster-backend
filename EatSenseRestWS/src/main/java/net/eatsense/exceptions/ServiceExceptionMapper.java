@@ -20,6 +20,8 @@ public class ServiceExceptionMapper implements
 		ResponseBuilder builder;
 		if(arg0 instanceof NotFoundException)
 			builder = Response.status(Status.NOT_FOUND);
+		else if(arg0 instanceof IllegalAccessException)
+			builder = Response.status(Status.FORBIDDEN);
 		else
 			builder = Response.status(Status.INTERNAL_SERVER_ERROR);
 		

@@ -79,6 +79,12 @@ public class BusinessResource {
 		return businessData;
 	}
 	
+	@DELETE
+	@RolesAllowed({Role.COMPANYOWNER})
+	public void deleteBusiness() {
+		businessCtrl.trashBusiness(business, account);
+	}
+	
 	@POST
 	@Path("images/{id}")
 	@Consumes("application/json; charset=UTF-8")
