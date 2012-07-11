@@ -43,7 +43,12 @@ public class Spot extends GenericEntity<Spot>{
 	 * E. g. Outside, Upper floor
 	 */
 	private String groupTag;
-
+	
+	/**
+	 * Determines if the customer is able to checkin on that spot.
+	 * (Default is true, for downwards combatibility).
+	 */
+	private boolean active = true;
 
 	public String getBarcode() {
 		return barcode;
@@ -107,5 +112,13 @@ public class Spot extends GenericEntity<Spot>{
 		}
 		else
 			return null;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

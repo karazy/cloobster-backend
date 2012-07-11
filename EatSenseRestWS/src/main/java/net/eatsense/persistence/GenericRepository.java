@@ -117,7 +117,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	}
 	
 	/**
-	 * Shortcut for getting and an entity and saving as trash.
+	 * Shortcut for getting an entity and saving as trash.
 	 * 
 	 * @param entityKey
 	 * @param loginResponsible

@@ -89,5 +89,4 @@ public class Bill extends GenericEntity<Bill> {
 	public void setCleared(boolean cleared) {
 		this.cleared = cleared;
 	}
-
 }

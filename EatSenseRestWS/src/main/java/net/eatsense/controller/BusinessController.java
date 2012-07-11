@@ -328,6 +328,7 @@ public class BusinessController {
 		
 		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
 		business.getPaymentMethods().add(new PaymentMethod("Bar"));
+		business.setCompany(account.getCompany());
 		
 		account.getBusinesses().add(updateBusiness(business, businessData));
 		accountRepo.saveOrUpdate(account);
@@ -427,7 +428,9 @@ public class BusinessController {
 		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
 		
 		for(Spot spot : spotRepo.getByParent(businessKey) ) {
-			spotDTOList.add(new SpotDTO(spot));
+			if(!spot.isTrash()) {
+				spotDTOList.add(new SpotDTO(spot));
+			}
 		}
 		
 		return spotDTOList;
@@ -471,6 +474,7 @@ public class BusinessController {
 			throw new ValidationException(stringBuilder.toString());
 		}
 		
+		spot.setActive(spotData.isActive());
 		spot.setGroupTag(spotData.getGroupTag());
 		spot.setName(spotData.getName());
 		
@@ -479,6 +483,20 @@ public class BusinessController {
 		}
 		
 		return spot;
+	}
+	
+	/**
+	 * Deactivate and save a Spot as trash.
+	 * 
+	 * @param spot
+	 * @param account
+	 */
+	public void trashSpot(Spot spot, Account account) {
+		checkNotNull(spot, "spot was null");
+		checkNotNull(account, "account was null");
+		
+		spot.setActive(false);
+		spotRepo.trashEntity(spot, account.getLogin());
 	}
 
 	/**

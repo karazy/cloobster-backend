@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -34,7 +35,6 @@ import com.sun.jersey.api.core.ResourceContext;
  *
  */
 public class BusinessResource {
-	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Context
 	ResourceContext resourceContext;
@@ -44,7 +44,7 @@ public class BusinessResource {
 	private Business business;
 	private BusinessController businessCtrl;
 	private Account account;
-			
+	
 	public void setBusiness(Business business) {
 		this.business = business;
 	}
@@ -180,10 +180,17 @@ public class BusinessResource {
 	}
 	
 	@Path("spotsdata/{spotId}")
+	@DELETE
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void deleteSpot(@PathParam("spotId") long spotId) {
+		businessCtrl.trashSpot(businessCtrl.getSpot(business.getKey(), spotId), account);
+	}
+	
+	@Path("spotsdata/{spotId}")
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
 		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
-	}	
+	}
 }

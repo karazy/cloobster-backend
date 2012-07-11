@@ -48,6 +48,8 @@ public class SpotDTO {
 	
 	private String currency;
 	
+	private boolean active;
+	
 	public SpotDTO(Spot spot) {
 		super();
 		if(spot == null)
@@ -57,6 +59,7 @@ public class SpotDTO {
 			this.businessId = spot.getBusiness().getId();
 		}
 		this.id = spot.getId();
+		this.active = spot.isActive();
 		this.barcode = spot.getBarcode();
 		this.qrImageUrl = spot.getQrImageUrl();
 		this.name = spot.getName();
@@ -150,6 +153,16 @@ public class SpotDTO {
 
 	public void setQrImageUrl(String qrImageUrl) {
 		this.qrImageUrl = qrImageUrl;
+	}
+
+
+	public boolean isActive() {
+		return active;
+	}
+
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 	
 }
