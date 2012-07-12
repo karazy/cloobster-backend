@@ -23,6 +23,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
+import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
@@ -439,6 +440,8 @@ public class BusinessController {
 			spot.setActive(false);
 		}
 		spotRepo.saveOrUpdate(spots);
+		
+		eventBus.post(new TrashBusinessEvent(business));
 	}
 	
 	

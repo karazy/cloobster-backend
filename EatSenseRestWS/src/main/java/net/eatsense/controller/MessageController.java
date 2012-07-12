@@ -15,11 +15,13 @@ import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
+import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -33,6 +35,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
+/**
+ * Listens to specific events from controllers and notifies clients with messages.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class MessageController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private ChannelController channelCtrl;
@@ -50,6 +58,11 @@ public class MessageController {
 		this.checkInRepo = checkInRepo;
 		this.transform = transform;
 		this.channelCtrl = channelCtrl;
+	}
+	
+	@Subscribe
+	public void sendTrashBusinessMessage(TrashBusinessEvent event) {
+		channelCtrl.sendMessage(event.getBusiness(), new MessageDTO("business", "delete", new BusinessDTO(event.getBusiness())));
 	}
 	
 	@Subscribe
