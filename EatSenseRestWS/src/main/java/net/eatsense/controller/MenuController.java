@@ -589,8 +589,12 @@ public class MenuController {
 		if(productId != 0) {
 			Product product = getProduct(businessKey, productId);
 			if(product.getChoices() != null) {
+				boolean dirty = false;
 				if(!product.getChoices().remove(choiceKey) ) {
-					logger.warn("Product not associated with choice id: {}", choiceId);
+					logger.warn("Product has no choice with id: {}", choiceId);
+				}
+				else {
+					dirty = true;
 				}
 				
 				Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
@@ -599,13 +603,16 @@ public class MenuController {
 						// This is a child choice for this product.
 						Key<Choice> childChoiceKey = choice.getKey();
 						
-						product.getChoices().remove(childChoiceKey);
+						if(product.getChoices().remove(childChoiceKey)) {
+							dirty = true;
+						}
 						
 						choiceKeysToDelete.add(childChoiceKey);
 					}
 				}
 				
-				productRepo.saveOrUpdate(product);
+				if(dirty)
+					productRepo.saveOrUpdate(product);
 			}
 			else {
 				// We received delete for choice from product, but no choices found.
