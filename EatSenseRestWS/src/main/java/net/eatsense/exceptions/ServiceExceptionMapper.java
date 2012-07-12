@@ -25,6 +25,10 @@ public class ServiceExceptionMapper implements
 			builder = Response.status(Status.NOT_FOUND);
 		else if(arg0 instanceof IllegalAccessException)
 			builder = Response.status(Status.FORBIDDEN);
+		else if(arg0 instanceof ValidationException)
+			builder = Response.status(Status.BAD_REQUEST);
+		else if(arg0 instanceof DataConflictException)
+			builder = Response.status(Status.CONFLICT);
 		else if(arg0 instanceof ReadOnlyException)
 			builder = Response.status(405).header("Allow", "GET, HEAD, OPTIONS");
 		else

@@ -30,7 +30,9 @@ import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.event.ConfirmAllOrdersEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateOrderEvent;
+import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -95,11 +97,11 @@ public class OrderController {
 		int selected = countSelected(choiceDto);
 		// Validate choice selection
 		if(selected < originalChoice.getMinOccurence() ) {
-			throw new IllegalArgumentException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
+			throw new ValidationException("Order cannot be placed, minOccurence of "+ originalChoice.getMinOccurence() + " not satisfied. selected="+ selected);
 		}
 		
 		if(originalChoice.getMaxOccurence() > 0 && selected > originalChoice.getMaxOccurence() ) {
-			throw new IllegalArgumentException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
+			throw new ValidationException("Order cannot be placed, maxOccurence of "+ originalChoice.getMaxOccurence() + " not satisfied. selected="+ selected);
 		}
 		
 		return selected;
@@ -427,6 +429,13 @@ public class OrderController {
 		List<OrderChoice> choices = null;
 		if(orderData.getProduct().getChoices() != null
 				&& !orderData.getProduct().getChoices().isEmpty()) {
+			
+			if(product.getChoices() == null || product.getChoices().isEmpty()) {
+				// The product did not contain any choices any more, but the client sent some.
+				// That can only mean the choice was removed from the product by the business and a checkin was added.
+				throw new DataConflictException("Conflict while placing order, refresh resource.");
+			}
+				
 			choices = new ArrayList<OrderChoice>();
 			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
 			Map<Key<Choice>, Choice> originalChoiceMap = choiceRepo.getByKeysAsMap(product.getChoices());
@@ -440,7 +449,7 @@ public class OrderController {
 					
 					Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
 					if(originalChoice == null)
-						throw new IllegalArgumentException("Order cannot be placed, unknown choice id " + choiceDto.getId());
+						throw new DataConflictException("Conflict while placing order, unknown choice id " + choiceDto.getId() + ". Refresh resource.");
 					
 					if(choiceDto.getOptions() != null ) {
 						selected = checkOptions(choiceDto, originalChoice);

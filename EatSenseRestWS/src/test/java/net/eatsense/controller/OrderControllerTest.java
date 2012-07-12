@@ -16,6 +16,7 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -202,7 +203,7 @@ public class OrderControllerTest {
 		try {
 			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
+			assertThat(e, instanceOf(ValidationException.class));
 		}
 		assertThat(orderId, nullValue());
 		selected = orderDto.getProduct().getChoices().iterator().next().getOptions().iterator().next();
@@ -227,7 +228,7 @@ public class OrderControllerTest {
 		try {
 			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
 		} catch (Exception e) {
-			assertThat(e, instanceOf(IllegalArgumentException.class));
+			assertThat(e, instanceOf(ValidationException.class));
 		}
 		assertThat(orderId, nullValue());
 		
