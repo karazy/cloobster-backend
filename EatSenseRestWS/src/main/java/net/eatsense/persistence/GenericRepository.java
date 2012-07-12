@@ -37,10 +37,11 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 
 	public GenericRepository(Class<T> clazz) {
 		this.clazz = clazz;
+		//OPTIMIZE This part is still not the best way to handle the entity registration.
 		try {
 			ObjectifyService.register(clazz);
 		} catch (IllegalArgumentException e) {
-			logger.info("registered more than once {}",clazz);
+			// We already registered the entity, okay to skip this.
 		}
 	}
 	
