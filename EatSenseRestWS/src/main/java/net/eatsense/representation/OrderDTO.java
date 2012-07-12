@@ -46,7 +46,6 @@ public class OrderDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
 	public int getAmount() {
 		return amount;
 	}
@@ -71,6 +70,4 @@ public class OrderDTO {
 	public void setCheckInId(Long checkInId) {
 		this.checkInId = checkInId;
 	}
-	
-	
 }

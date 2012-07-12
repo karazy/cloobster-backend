@@ -72,7 +72,6 @@ public class OrderController {
 
 	private EventBus eventBus;
 	
-	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,

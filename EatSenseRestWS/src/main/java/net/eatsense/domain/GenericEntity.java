@@ -50,5 +50,6 @@ public abstract class GenericEntity<T> {
 		this.trash = trash;
 	}
 	
+	@Transient
 	public abstract Key<T> getKey();
 }

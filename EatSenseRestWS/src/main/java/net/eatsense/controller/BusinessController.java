@@ -100,14 +100,20 @@ public class BusinessController {
 			spotDto.setId(spot.getId());
 			spotDto.setName(spot.getName());
 			spotDto.setGroupTag(spot.getGroupTag());
-			spotDto.setCheckInCount(checkInRepo.countActiveCheckInsAtSpot(spot.getKey()));
-			Request request = requestRepo.ofy().query(Request.class).filter("spot",spot.getKey()).order("-receivedTime").get();
+			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(spot.getKey());
+			spotDto.setCheckInCount(checkInCount);
 			
-			if(request != null) {
-				spotDto.setStatus(request.getStatus());
+			if(checkInCount > 0) {
+				// Only check the request status if there are checkins.
+				Request request = requestRepo.ofy().query(Request.class).filter("spot",spot.getKey()).order("-receivedTime").get();
+				if(request != null) {
+					spotDto.setStatus(request.getStatus());
+				}
 			}
 			
-			spotDtos.add(spotDto);
+			// Dont add the spot if it is not active and there are 0 checkins.
+			if(spot.isActive() || checkInCount > 0)
+				spotDtos.add(spotDto);
 		}
 		
 		return spotDtos;
