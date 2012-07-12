@@ -55,7 +55,7 @@ public class BusinessesResource{
 		
 		if(business.isTrash()) {
 			if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
-				throw new IllegalAccessException("Can not modified trashed resource");
+				throw new IllegalAccessException("Can not modified trashed resource.");
 			}
 		}
 		

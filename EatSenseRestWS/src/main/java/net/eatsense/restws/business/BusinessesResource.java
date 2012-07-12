@@ -19,6 +19,7 @@ import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.ReadOnlyException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessProfileDTO;
@@ -80,7 +81,7 @@ public class BusinessesResource {
 		
 		if(business.isTrash()) {
 			if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
-				throw new IllegalAccessException("Can not modify trashed resource");
+				throw new ReadOnlyException("Can not modify trashed business.");
 			}
 		}
 

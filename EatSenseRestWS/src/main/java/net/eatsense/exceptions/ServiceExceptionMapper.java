@@ -1,5 +1,6 @@
 package net.eatsense.exceptions;
 
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -13,6 +14,7 @@ import net.eatsense.representation.ErrorDTO;
 
 @Provider
 @Singleton
+@Produces(MediaType.APPLICATION_JSON)
 public class ServiceExceptionMapper implements
 		ExceptionMapper<ServiceException> {
 
@@ -23,6 +25,8 @@ public class ServiceExceptionMapper implements
 			builder = Response.status(Status.NOT_FOUND);
 		else if(arg0 instanceof IllegalAccessException)
 			builder = Response.status(Status.FORBIDDEN);
+		else if(arg0 instanceof ReadOnlyException)
+			builder = Response.status(405).header("Allow", "GET, HEAD, OPTIONS");
 		else
 			builder = Response.status(Status.INTERNAL_SERVER_ERROR);
 		
