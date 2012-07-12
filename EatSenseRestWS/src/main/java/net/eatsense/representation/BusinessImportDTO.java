@@ -5,17 +5,19 @@ import java.util.Collection;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
 
 /**
- * POJO for data transfer, which represents a location where you can check in and order food/drinks what ever.
+ * POJO for data import, which represents a location where you can check in and order food/drinks what ever.
  * 
  * @author Nils Weiher
  *
  */
+@XmlRootElement
 public class BusinessImportDTO {
 
 	/**
