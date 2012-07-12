@@ -103,17 +103,27 @@ public class CheckInController {
      * Get spot data for a given barcode.
      * 
      * @param barcode
+     * @param checkInResume If not null spot can be loaded
      * @return <code>null</code> if not found or SpotDTO containing all relevant data for the client
      */
-    public SpotDTO getSpotInformation(String barcode) {
+    public SpotDTO getSpotInformation(String barcode, boolean checkInResume) {
     	if(barcode == null || barcode.isEmpty() )
     		return null;
     	
     	Spot spot = spotRepo.getByProperty("barcode", barcode);
-    	if(spot == null || !spot.isActive()) {
+    	if(spot == null || (!spot.isActive() && !checkInResume) ) {
     		throw new NotFoundException();
     	}
 		return toSpotDto(spot) ;
+    }
+    
+    /**
+     * Calls {@link CheckInController#getSpotInformation(String, boolean)} with checkInResume=false.
+     * @param barcode
+     * @return
+     */
+    public SpotDTO getSpotInformation(String barcode) {
+    	return getSpotInformation(barcode, false);
     }
 
     public SpotDTO toSpotDto(Spot spot) {
