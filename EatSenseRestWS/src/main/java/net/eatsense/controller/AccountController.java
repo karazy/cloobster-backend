@@ -219,14 +219,11 @@ public class AccountController {
 		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
 		if(account != null && account.getBusinesses() != null) {
 			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
-				BusinessDTO businessData = new BusinessDTO();
-				businessData.setId(business.getId());
-				businessData.setName(business.getName());
-				businessData.setDescription(business.getDescription());
+				BusinessDTO businessData = new BusinessDTO(business);
 				businessDtos.add(businessData);
 			}
 		}
-			
+		
 		return businessDtos;
 	}
 	

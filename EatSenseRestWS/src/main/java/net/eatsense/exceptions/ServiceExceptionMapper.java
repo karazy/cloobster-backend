@@ -1,5 +1,6 @@
 package net.eatsense.exceptions;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -25,6 +26,6 @@ public class ServiceExceptionMapper implements
 		else
 			builder = Response.status(Status.INTERNAL_SERVER_ERROR);
 		
-		return builder.entity(new ErrorDTO(arg0.getErrorKey(), arg0.getMessage(), arg0.getSubstitutions())).build();
+		return builder.entity(new ErrorDTO(arg0.getErrorKey(), arg0.getMessage(), arg0.getSubstitutions())).type(MediaType.APPLICATION_JSON).build();
 	}
 }
