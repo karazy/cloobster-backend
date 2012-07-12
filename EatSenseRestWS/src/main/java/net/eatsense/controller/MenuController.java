@@ -588,22 +588,29 @@ public class MenuController {
 		
 		if(productId != 0) {
 			Product product = getProduct(businessKey, productId);
-			product.getChoices().remove(choiceKey);
-			
-			Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
-			
-			for (Choice choice : choices) {
-				if(choiceKey.equals(choice.getParentChoice())) {
-					// This is a child choice for this product.
-					Key<Choice> childChoiceKey = choice.getKey();
-					
-					product.getChoices().remove(childChoiceKey);
-					
-					choiceKeysToDelete.add(childChoiceKey);
+			if(product.getChoices() != null) {
+				if(!product.getChoices().remove(choiceKey) ) {
+					logger.warn("Product not associated with choice id: {}", choiceId);
 				}
+				
+				Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
+				for (Choice choice : choices) {
+					if(choiceKey.equals(choice.getParentChoice())) {
+						// This is a child choice for this product.
+						Key<Choice> childChoiceKey = choice.getKey();
+						
+						product.getChoices().remove(childChoiceKey);
+						
+						choiceKeysToDelete.add(childChoiceKey);
+					}
+				}
+				
+				productRepo.saveOrUpdate(product);
 			}
-			
-			productRepo.saveOrUpdate(product);
+			else {
+				// We received delete for choice from product, but no choices found.
+				logger.warn("No choice found for product {}", productId);
+			}
 		}
 		
 		List<Key<Product>> productsUsingChoice = productRepo.getKeysByParentAndProperty(businessKey, "choices", choiceKey);
