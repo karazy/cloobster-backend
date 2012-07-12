@@ -196,6 +196,26 @@ public class MenuControllerTest {
 		verify(cr).delete(deleteArgument.capture());
 		assertThat(deleteArgument.getValue().contains(choiceKey),is(true));
 	}
+	
+	@Test
+	public void testDeleteChoiceFromProductWithNoChoices() throws Exception {
+		//TODO Remove after refactoring test class.
+		newSetUp();
+		
+		Key<Business> businessKey = mock(Key.class);
+		long choiceId = 1l;
+		long productId = 1l;
+		Product product = mock(Product.class);
+		Key<Choice> choiceKey = mock(Key.class);
+		when(cr.getKey(businessKey, choiceId)).thenReturn(choiceKey );
+		when(pr.getById(businessKey, productId)).thenReturn(product );
+		ctr.deleteChoice(businessKey, choiceId, productId);
+		
+		verify(pr,never()).saveOrUpdate(product);
+		ArgumentCaptor<List> deleteArgument = ArgumentCaptor.forClass(List.class);
+		verify(cr).delete(deleteArgument.capture());
+		assertThat(deleteArgument.getValue().contains(choiceKey),is(true));
+	}
 
 	
 	@Test
