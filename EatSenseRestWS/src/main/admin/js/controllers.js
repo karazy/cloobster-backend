@@ -229,7 +229,7 @@ CloobsterAdmin.TrashCan = function($scope, TrashEntry) {
 			$scope.trashEntries.splice(index,1);
 		}, function(response) {
 			$scope.restoring[index] = true;
-			setError("Could not restore entity: " + response.message);
+			setError("Could not restore entity, http code:" + response.status+ ", message: " + response.message);
 		});
 	};
 
