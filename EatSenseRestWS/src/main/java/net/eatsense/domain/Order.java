@@ -28,9 +28,6 @@ import com.googlecode.objectify.annotation.Unindexed;
 public class Order extends GenericEntity<Order> {
 	@Min(1)
 	int amount;
-	
-
-
 	private boolean archived;
 	
 	Key<Bill> bill;

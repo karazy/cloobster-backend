@@ -74,6 +74,35 @@
 			        	</executions>
 			      </plugin>
 				</plugins>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.codehaus.enunciate</groupId>
+												<artifactId>maven-enunciate-plugin</artifactId>
+												<!-- check for the latest version -->
+												<versionRange>[1.25,)</versionRange>
+					        					<goals>
+					              					<goal>docs</goal>
+					            				</goals>
+					            			</pluginExecutionFilter>
+					            			<action>			            
+												<execute />
+											</action>
+					           			</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
 			</build>
 		</profile>
 		<profile>
@@ -333,6 +362,7 @@
 							</replacements>
 						</configuration>
 					</plugin>
+					
 				</plugins>
 			</build>
 		</profile>
@@ -672,7 +702,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 		<!-- Required by m2e for import into eclipse. No effect on command line 
 			builds -->
 		<pluginManagement>
@@ -684,20 +713,6 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.enunciate</groupId>
-										<artifactId>maven-enunciate-plugin</artifactId>
-										<!-- check for the latest version -->
-										<versionRange>[1.17,)</versionRange>
-			        					<goals>
-			              					<goal>docs</goal>
-			            				</goals>
-			            			</pluginExecutionFilter>
-			            			<action>
-										<execute />
-									</action>
-			           			</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>org.apache.maven.plugins</groupId>
