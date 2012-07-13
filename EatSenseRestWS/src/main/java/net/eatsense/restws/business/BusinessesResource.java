@@ -18,7 +18,6 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
-import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ReadOnlyException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.BusinessDTO;
@@ -28,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
 @Path("b/businesses")

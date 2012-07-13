@@ -119,11 +119,7 @@ public class CheckInResource {
 	@RolesAllowed(Role.GUEST)
 	public CustomerRequestDTO deleteRequest(@PathParam("requestId") long requestId) {
 		if(authenticated)
-			try {
-				return businessCtrlProvider.get().deleteCustomerRequestForCheckIn(checkIn, requestId);
-			} catch (IllegalAccessException e) {
-				throw new WebApplicationException(e, Status.FORBIDDEN);
-			}
+			return businessCtrlProvider.get().deleteCustomerRequestForCheckIn(checkIn, requestId);
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}

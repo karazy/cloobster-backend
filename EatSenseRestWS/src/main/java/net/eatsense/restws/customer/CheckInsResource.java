@@ -13,11 +13,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
+import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.CheckInDTO;
 
 import com.google.inject.Inject;
@@ -33,12 +37,14 @@ public class CheckInsResource {
 	private ResourceContext resourceContext;
 	@Context
 	HttpServletRequest servletRequest;
+	private final BusinessRepository businessRepo;	
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl) {
+	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl, BusinessRepository businessRepo) {
 		super();
 		this.channelCtrlProvider = channelCtrl;
 		this.checkInCtrl = checkInCtr;
+		this.businessRepo = businessRepo;
 	}
 	
 	@POST
@@ -70,7 +76,14 @@ public class CheckInsResource {
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		// Check that the authenticated checkin owns the entity
 		boolean authenticated = checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId());
-
+		
+		if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
+			// Check for read-only mode.
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
+			if(business.isTrash())
+				throw new IllegalAccessException("Business for this CheckIn has been deleted.");
+		}
+		
 		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
 		checkInResource.setCheckIn(checkInFromPath);
 
