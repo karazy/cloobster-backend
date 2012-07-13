@@ -1,11 +1,15 @@
 package net.eatsense.persistence;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.GenericEntity;
 import net.eatsense.domain.TrashEntry;
 
@@ -143,6 +147,33 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		ofy().put(entity);
 		ofy().put(trashEntry);
 		return trashEntry;
+	}
+	
+	/**
+	 * @param trashEntryKey
+	 * @return
+	 */
+	public T restoreTrashedEntity(Key<TrashEntry> trashEntryKey) {
+		checkNotNull(trashEntryKey, "trashEntryKey was null");
+		TrashEntry trashEntry = ofy().get(trashEntryKey);
+		checkArgument(trashEntry.getEntityKey().getKind().equals(Key.getKind(clazz)), "Trashed entity not of correct type");
+		
+		T entity = ofy().get((Key<T>)trashEntry.getEntityKey());
+		entity.setTrash(false);
+		
+		ofy().put(entity);
+		
+		ofy().delete(trashEntryKey);
+		
+		return entity;
+	}
+
+	
+	/**
+	 * @return All TrashEntry items in the store.
+	 */
+	public List<TrashEntry> getAllTrash() {
+		return ofy().query(TrashEntry.class).list();
 	}
 	
 	/**

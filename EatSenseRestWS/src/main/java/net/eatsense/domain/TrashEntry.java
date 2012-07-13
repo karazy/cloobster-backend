@@ -2,6 +2,10 @@ package net.eatsense.domain;
 
 import java.util.Date;
 
+import javax.persistence.Transient;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.googlecode.objectify.Key;
 
 public class TrashEntry extends GenericEntity<TrashEntry> {
@@ -26,9 +30,15 @@ public class TrashEntry extends GenericEntity<TrashEntry> {
 		this.loginResponsible = loginResponsible;
 	}
 	
+	public Long getEntityId() {
+		return entityKey != null? entityKey.getId(): null;
+	}
+	
+	@JsonIgnore
 	public Key<?> getEntityKey() {
 		return entityKey;
 	}
+	@JsonIgnore
 	public void setEntityKey(Key<?> entityKey) {
 		this.entityKey = entityKey;
 	}
@@ -62,6 +72,8 @@ public class TrashEntry extends GenericEntity<TrashEntry> {
 	}
 
 	@Override
+	@Transient
+	@JsonIgnore
 	public Key<TrashEntry> getKey() {
 		return new Key<TrashEntry>(TrashEntry.class, getId());
 	}

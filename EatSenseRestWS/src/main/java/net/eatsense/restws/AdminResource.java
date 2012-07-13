@@ -12,6 +12,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 
 import net.eatsense.controller.ImportController;
@@ -19,6 +20,7 @@ import net.eatsense.controller.TemplateController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
+import net.eatsense.domain.TrashEntry;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
@@ -32,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 @Path("admin/services")
 public class AdminResource {
@@ -62,6 +66,28 @@ public class AdminResource {
 		// Check for dev environment
 		devEnvironment = "dev".equals(environment);
 	}
+	
+	@GET
+	@Path("trash")
+	@Produces("application/json; charset=UTF-8")
+	public List<TrashEntry> getAllTrash() {
+		return businessRepo.getAllTrash();
+	}
+
+	@DELETE
+	@Path("trash/{id}")
+	@Produces("application/json; charset=UTF-8")
+	public void restoreTrash(@PathParam("id") Long trashEntryId, @QueryParam("restore") boolean restore) {
+		if(restore == true) {
+			// For the moment only business.
+			try {
+				businessRepo.restoreTrashedEntity(new Key<TrashEntry>(TrashEntry.class, trashEntryId));
+			} catch (NotFoundException e) {
+				throw new net.eatsense.exceptions.NotFoundException();
+		}
+		}
+	}
+	
 	
 	@PUT
 	@Path("templates/{id}")

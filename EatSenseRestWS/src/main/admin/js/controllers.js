@@ -191,3 +191,48 @@ CloobsterAdmin.Templates = function($scope, Template) {
 	dismissAlert();
 }
 CloobsterAdmin.Templates.$inject = ['$scope', 'Template'];
+
+
+CloobsterAdmin.TrashCan = function($scope, TrashEntry) {
+	$scope.restoring = [];
+	$scope.trashEntries = TrashEntry.query( function() {
+		angular.forEach($scope.trashEntries, function(value, index) {
+			$scope.restoring[index] = false;
+		});
+	});
+	
+	
+
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setError(message) {
+		showAlert("alert-error", "Error!", message, "Close");
+	}
+
+
+	$scope.restore = function(index) {
+		var entry = $scope.trashEntries[index];
+		$scope.restoring[index] = true;
+		entry.$restore(function() {
+			$scope.restoring[index] = false;
+			$scope.trashEntries.splice(index,1);
+		}, function(response) {
+			$scope.restoring[index] = true;
+			setError("Could not restore entity: " + response.message);
+		});
+	};
+
+	dismissAlert();
+}
+CloobsterAdmin.TrashCan.$inject = ['$scope','TrashEntry'];

@@ -1,8 +1,12 @@
 package net.eatsense.persistence;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.TrashEntry;
 
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
 
@@ -25,5 +29,23 @@ public class BusinessRepository extends GenericRepository<Business> {
 		return business;
 	}
 	
-	
+	/**
+	 * @param trashEntryKey
+	 * @return
+	 */
+	public Business restoreBusiness(Key<TrashEntry> trashEntryKey) {
+		checkNotNull(trashEntryKey, "trashEntryKey was null");
+		TrashEntry trashEntry = ofy().get(trashEntryKey);
+		checkArgument(trashEntry.getEntityKey().getKind() == Key.getKind(Business.class), "Trashed entity not of type Business");
+		
+		@SuppressWarnings("unchecked")
+		Business business = ofy().get((Key<Business>)trashEntry.getEntityKey());
+		business.setTrash(false);
+		
+		saveOrUpdate(business);
+		
+		ofy().delete(trashEntryKey);
+		
+		return business;
+	}
 }

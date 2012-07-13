@@ -14,6 +14,7 @@ CloobsterAdmin.module = angular.module('CloobsterAdmin', ['ngResource']).
   	$locationProvider.hashPrefix = '!';
   	$routeProvider.when('/main', {template: 'partials/main.html'});
     $routeProvider.when('/templates', {template: 'partials/templates.html', controller: CloobsterAdmin.Templates});
+    $routeProvider.when('/trash', {template: 'partials/trash.html', controller: CloobsterAdmin.TrashCan});
     $routeProvider.otherwise({redirectTo: '/main'});
  }]);
 
@@ -49,6 +50,17 @@ CloobsterAdmin.module.factory('Template', ['$resource', function($resource){
       {
         save: {method:'PUT'},
         init: {method:'POST', isArray: true}
+      }
+    );
+}]);
+
+CloobsterAdmin.module.factory('TrashEntry', ['$resource', function($resource){
+    return $resource('/admin/services/trash/:id',
+      {
+        'id': '@id'
+      },
+      {
+        restore: {method:'DELETE', params: {'restore':'true'}}
       }
     );
 }]);
