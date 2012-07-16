@@ -66,7 +66,7 @@ public class AccountResource {
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		logger.info("Authenticated request from user :" + account.getLogin());
-		return accountCtr.toDto(account);
+		return accountCtr.toDtoWithHash(account);
 	}
 	
 	@GET
@@ -76,7 +76,7 @@ public class AccountResource {
 	public AccountDTO getAccount() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		logger.info("Authenticated request from user :" + account.getLogin());
-		return accountCtr.toDto(account);
+		return accountCtr.toDtoWithHash(account);
 	}
 	
 	@GET
@@ -85,7 +85,7 @@ public class AccountResource {
 	public AccountDTO getAccountFacebook(@QueryParam("uid") String uid, @QueryParam("token") String accessToken) {
 		Account account = accountCtr.authenticateFacebook(uid, accessToken);
 		logger.info("Authenticated request from user :" + account.getLogin());
-		return accountCtr.toDto(account);
+		return accountCtr.toDtoWithHash(account);
 	}
 	
 	@GET

@@ -46,6 +46,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 /**
  * Manages Account creation, updates and authentication.
@@ -203,12 +204,14 @@ public class AccountController {
 		}
 	}
 	
-	public AccountDTO toDto(Account account) {
+	public AccountDTO toDtoWithHash(Account account) {
 		if(account == null) {
 			return null;
 		}
 		
-		return new AccountDTO(account);
+		AccountDTO accountDTO = new AccountDTO(account);
+		accountDTO.setPasswordHash(account.getHashedPassword());
+		return accountDTO;
 	}
 	
 	/**
@@ -484,10 +487,10 @@ public class AccountController {
 	 * Create a new cockpit user for a company and grant permission for specified businesses.
 	 * 
 	 * @param ownerAccount Account entity initiating the creation.
-	 * @param accountData Containing login, password and business ids, which the account can access.
+	 * @param accountData Containing login, password, business id (for which the account should have access), and an optional name.
 	 * @return a new Account entity
 	 */
-	public Account createUserAccount(Account ownerAccount, CockpitAccountDTO accountData) {
+	public CockpitAccountDTO createUserAccount(Account ownerAccount, CockpitAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -497,11 +500,15 @@ public class AccountController {
 		account.setEmailConfirmed(false);
 		account.setActive(true);
 		
-		updateUserAccount(account, ownerAccount, accountData);
-		
-		return account;
+		return updateUserAccount(account, ownerAccount, accountData);
 	}
 	
+	/**
+	 * @param account
+	 * @param ownerAccount Account entity initiating the update.
+	 * @param accountData Updated fields for login, password,name and/or business ids.
+	 * @return Updated transfer object.
+	 */
 	public CockpitAccountDTO updateUserAccount(Account account, Account ownerAccount, CockpitAccountDTO accountData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(accountData, "accountData was null");
@@ -539,5 +546,42 @@ public class AccountController {
 		}
 				
 		return new CockpitAccountDTO(account);
+	}
+	
+	/**
+	 * @param companyKey
+	 * @param role If specified, only return Accounts with this role.
+	 * @return List of Account transfer objects for the company filtered by role if specified. 
+	 */
+	public List<AccountDTO> getCompanyAccounts(Key<Company> companyKey, String role) {
+		checkNotNull(companyKey, "companyKey was null");
+		
+		ArrayList<AccountDTO> accountDtos = new ArrayList<AccountDTO>();
+				
+		List<Account> accounts;
+		if(!Strings.isNullOrEmpty(role)) {
+			accounts = accountRepo.getAccountsByCompanyAndRole(companyKey, role);
+		}
+		else {
+			accounts = accountRepo.getListByProperty("company", companyKey);
+		}
+		
+		for (Account account : accounts) {
+			accountDtos.add(new AccountDTO(account));
+		}
+		
+		return accountDtos;
+	}
+	
+	/**
+	 * @param id
+	 * @return Account entity saved with the specified id.
+	 */
+	public Account getAccount(long id) {
+		try {
+			return accountRepo.getById(id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
 	}
 }

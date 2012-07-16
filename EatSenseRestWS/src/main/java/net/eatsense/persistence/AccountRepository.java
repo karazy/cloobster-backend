@@ -70,6 +70,15 @@ public class AccountRepository extends GenericRepository<Account> {
 	}
 	
 	/**
+	 * @param companyKey
+	 * @param role
+	 * @return Accounts belonging to the company with the specified role.
+	 */
+	public List<Account> getAccountsByCompanyAndRole(Key<Company> companyKey, String role) {
+		return ofy().query(Account.class).filter("company", companyKey).filter("role", role).list();
+	}
+	
+	/**
 	 * 
 	 *  
 	 * @return new Token valid 

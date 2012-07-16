@@ -1,6 +1,12 @@
 package net.eatsense.representation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.googlecode.objectify.Key;
+
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
 
 public class AccountDTO {
 	String login;
@@ -12,6 +18,9 @@ public class AccountDTO {
 	private Long id;
 	private String name;
 	private String phone;
+	
+	private List<Long> businessIds;
+
 		
 	public AccountDTO() {
 		super();
@@ -32,11 +41,17 @@ public class AccountDTO {
 		this.email = account.getEmail();
 		this.setName(account.getName());
 		this.setPhone(account.getPhone());
-		//TODO: Do not automatically return the password hash.
-		this.passwordHash = account.getHashedPassword();
+		
 		this.role = account.getRole();
 		if(account.getCompany() != null)
-			this.companyId = account.getCompany().getId(); 
+			this.companyId = account.getCompany().getId();
+		
+		if(account.getBusinesses()!=null) {
+			businessIds = new ArrayList<Long>();
+			for (Key<Business> businessKey : account.getBusinesses()) {
+				businessIds.add(businessKey.getId());
+			}
+		}
 	}
 	
 	public String getLogin() {
@@ -93,5 +108,13 @@ public class AccountDTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public List<Long> getBusinessIds() {
+		return businessIds;
+	}
+
+	public void setBusinessIds(List<Long> businessIds) {
+		this.businessIds = businessIds;
 	}
 }
