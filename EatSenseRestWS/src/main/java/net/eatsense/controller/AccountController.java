@@ -28,6 +28,7 @@ import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.CockpitAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.ImageDTO;
@@ -40,6 +41,8 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -466,5 +469,75 @@ public class AccountController {
 		else {
 			return companyData;
 		}
+	}
+	
+	public boolean checkLoginDoesNotExist(String login) {
+		checkNotNull(login, "login was null");
+		
+		if(accountRepo.getByProperty("login", login) == null)
+			throw new ValidationException("Login already in use.");
+		else
+			return true;
+	}
+	
+	/**
+	 * Create a new cockpit user for a company and grant permission for specified businesses.
+	 * 
+	 * @param ownerAccount Account entity initiating the creation.
+	 * @param accountData Containing login, password and business ids, which the account can access.
+	 * @return a new Account entity
+	 */
+	public Account createUserAccount(Account ownerAccount, CockpitAccountDTO accountData) {
+		checkNotNull(ownerAccount, "ownerAccount was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		Account account = accountRepo.newEntity();
+		account.setCompany(ownerAccount.getCompany());
+		account.setRole(Role.COCKPITUSER);
+		account.setEmailConfirmed(false);
+		account.setActive(true);
+		
+		updateUserAccount(account, ownerAccount, accountData);
+		
+		return account;
+	}
+	
+	public CockpitAccountDTO updateUserAccount(Account account, Account ownerAccount, CockpitAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		if(!Objects.equal(account.getLogin(),accountData.getLogin())) {
+			checkLoginDoesNotExist(accountData.getLogin());
+			account.setLogin(accountData.getLogin());
+		}
+		
+		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
+		
+		if(accountData.getBusinessIds() != null) {
+			for (Long businessId : accountData.getBusinessIds()) {
+				Key<Business> businessKey = businessRepo.getKey(businessId);
+				// Check that we only add business keys, that come from the owner account.
+				if(ownerAccount.getBusinesses().contains(businessKey)) {
+					businessKeys.add(businessKey);
+				}
+				else {
+					throw new ValidationException("Cannot create account with a business id that is not from the owner account.");
+				}
+			}
+		}
+		
+		account.setName(accountData.getName());
+		
+		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+			account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		}
+		
+		account.setBusinesses(businessKeys);
+		
+		if(account.isDirty()) {
+			accountRepo.saveOrUpdate(account);
+		}
+				
+		return new CockpitAccountDTO(account);
 	}
 }

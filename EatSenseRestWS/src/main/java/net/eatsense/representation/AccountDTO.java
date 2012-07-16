@@ -17,6 +17,11 @@ public class AccountDTO {
 		super();
 	}
 	
+	/**
+	 * Construct a new AccountDTO from the given Account entity.
+	 * 
+	 * @param account
+	 */
 	public AccountDTO(Account account) {
 		super();
 		if(account == null)
@@ -27,6 +32,7 @@ public class AccountDTO {
 		this.email = account.getEmail();
 		this.setName(account.getName());
 		this.setPhone(account.getPhone());
+		//TODO: Do not automatically return the password hash.
 		this.passwordHash = account.getHashedPassword();
 		this.role = account.getRole();
 		if(account.getCompany() != null)

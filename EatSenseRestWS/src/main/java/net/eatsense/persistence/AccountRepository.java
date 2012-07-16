@@ -11,6 +11,7 @@ import net.eatsense.util.IdHelper;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import com.google.common.base.Strings;
 import com.googlecode.objectify.Key;
 
 public class AccountRepository extends GenericRepository<Account> {
@@ -43,7 +44,7 @@ public class AccountRepository extends GenericRepository<Account> {
 		account.setEmail(email);
 		account.setRole(role);
 		account.setBusinesses(businessKeys);
-		if(emailConfirmed == false) {
+		if(emailConfirmed == false && !Strings.isNullOrEmpty(email)) {
 			account.setEmailConfirmationHash(IdHelper.generateId());
 		}
 		account.setCompany(companyKey);
@@ -56,6 +57,16 @@ public class AccountRepository extends GenericRepository<Account> {
 			return null;
 		
 		return account;
+	}
+	
+	/**
+	 * Hash the password with the bcrypt algorithm and a generated salt.
+	 * 
+	 * @param password
+	 * @return hashed password string
+	 */
+	public String hashPassword(String password) {
+		return BCrypt.hashpw(password, BCrypt.gensalt());
 	}
 	
 	/**

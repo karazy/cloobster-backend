@@ -14,6 +14,7 @@ import org.apache.bval.constraints.Email;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 
@@ -35,7 +36,7 @@ public class Account extends GenericEntity<Account> {
 	Date lastFailedLogin;
 	int failedLoginAttempts;
 	
-	List<Key<Business>> businessess;
+	List<Key<Business>> businesses;
 	
 	@NotNull
 	@NotEmpty
@@ -64,7 +65,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setFacebookUid(String facebookUid) {
-		this.facebookUid = facebookUid;
+		if(!Objects.equal(this.facebookUid, facebookUid)) {
+			this.setDirty(true);
+			this.facebookUid = facebookUid;
+		}
 	}
 
 	public boolean isEmailConfirmed() {
@@ -72,7 +76,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setEmailConfirmed(boolean emailConfirmed) {
-		this.emailConfirmed = emailConfirmed;
+		if(!Objects.equal(this.emailConfirmed, emailConfirmed)) {
+			this.setDirty(true);
+			this.emailConfirmed = emailConfirmed;
+		}
 	}
 
 	public boolean isActive() {
@@ -80,7 +87,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setActive(boolean active) {
-		this.active = active;
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
 	}
 
 	public Key<Company> getCompany() {
@@ -88,7 +98,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setCompany(Key<Company> company) {
-		this.company = company;
+		if(!Objects.equal(this.company, company)) {
+			this.setDirty(true);
+			this.company = company;
+		}
 	}
 
 	public String getName() {
@@ -96,15 +109,21 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 	public List<Key<Business>> getBusinesses() {
-		return businessess;
+		return businesses;
 	}
 
 	public void setBusinesses(List<Key<Business>> businesses) {
-		this.businessess = businesses;
+		if(!Objects.equal(this.businesses, businesses)) {
+			this.setDirty(true);
+			this.businesses = businesses;
+		}
 	}
 
 	public Date getLastFailedLogin() {
@@ -112,7 +131,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setLastFailedLogin(Date lastFailedLogin) {
-		this.lastFailedLogin = lastFailedLogin;
+		if(!Objects.equal(this.lastFailedLogin, lastFailedLogin)) {
+			this.setDirty(true);
+			this.lastFailedLogin = lastFailedLogin;
+		}
 	}
 
 	public int getFailedLoginAttempts() {
@@ -120,7 +142,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setFailedLoginAttempts(int failedLoginAttempts) {
-		this.failedLoginAttempts = failedLoginAttempts;
+		if(!Objects.equal(this.failedLoginAttempts, failedLoginAttempts)) {
+			this.setDirty(true);
+			this.failedLoginAttempts = failedLoginAttempts;
+		}
 	}
 
 	public String getLogin() {
@@ -128,7 +153,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setLogin(String login) {
-		this.login = login;
+		if(!Objects.equal(this.login, login)) {
+			this.setDirty(true);
+			this.login = login;
+		}
 	}
 
 	public String getHashedPassword() {
@@ -136,7 +164,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setHashedPassword(String hashedPassword) {
-		this.hashedPassword = hashedPassword;
+		if(!Objects.equal(this.hashedPassword, hashedPassword)) {
+			this.setDirty(true);
+			this.hashedPassword = hashedPassword;
+		}
 	}
 
 	public String getEmail() {
@@ -144,7 +175,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setEmail(String email) {
-		this.email = email;
+		if(!Objects.equal(this.email, email)) {
+			this.setDirty(true);
+			this.email = email;
+		}
 	}
 
 	public String getRole() {
@@ -152,7 +186,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setRole(String role) {
-		this.role = role;
+		if(!Objects.equal(this.role, role)) {
+			this.setDirty(true);
+			this.role = role;
+		}
 	}
 		
 	@JsonIgnore
@@ -166,7 +203,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setPhone(String phone) {
-		this.phone = phone;
+		if(!Objects.equal(this.phone, phone)) {
+			this.setDirty(true);
+			this.phone = phone;
+		}
 	}
 
 	public Date getCreationDate() {
@@ -182,7 +222,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setEmailConfirmationHash(String emailConfirmationHash) {
-		this.emailConfirmationHash = emailConfirmationHash;
+		if(!Objects.equal(this.emailConfirmationHash, emailConfirmationHash)) {
+			this.setDirty(true);
+			this.emailConfirmationHash = emailConfirmationHash;
+		}
 	}
 
 	public UploadToken getUploadToken() {
@@ -190,7 +233,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setUploadToken(UploadToken uploadToken) {
-		this.uploadToken = uploadToken;
+		if(!Objects.equal(this.uploadToken, uploadToken)) {
+			this.setDirty(true);
+			this.uploadToken = uploadToken;
+		}
 	}
 
 	public List<ImageUploadDTO> getImageUploads() {
