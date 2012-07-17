@@ -61,12 +61,24 @@ public class AccountRepository extends GenericRepository<Account> {
 	
 	/**
 	 * Hash the password with the bcrypt algorithm and a generated salt.
+	 * <p>Calls {@link BCrypt#hashpw(String, String)}</p>
 	 * 
 	 * @param password
-	 * @return hashed password string
+	 * @return bcrypt hashed password
 	 */
 	public String hashPassword(String password) {
 		return BCrypt.hashpw(password, BCrypt.gensalt());
+	}
+	
+	/**
+	 * Calls {@link BCrypt#checkpw(String, String)} and return the result.
+	 * 
+	 * @param password
+	 * @param passwordHashed
+	 * @return <code>true</code> if the passwords match, false otherwise.
+	 */
+	public boolean checkPassword(String password, String passwordHashed) {
+		return BCrypt.checkpw(password, passwordHashed);
 	}
 	
 	/**

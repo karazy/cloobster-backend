@@ -186,7 +186,7 @@ public class AccountController {
 		if(!account.isActive())
 			return null;
 		
-		if( BCrypt.checkpw(password, account.getHashedPassword() )) {
+		if( accountRepo.checkPassword(password, account.getHashedPassword())) {
 			// Reset failed attempts counter
 			if(account.getFailedLoginAttempts() > 0) {
 				account.setFailedLoginAttempts(0);

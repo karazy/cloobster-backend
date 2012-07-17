@@ -3,6 +3,8 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -10,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.mail.Message;
 import javax.validation.Validator;
@@ -95,6 +98,11 @@ public class AccountControllerTest {
 
 	private Company company;
 	
+	@Mock
+	private Key<Company> companyKey;
+
+	private String hashedPassword;
+	
 	@Before
 	public void setUp() throws Exception {
 		injector = Guice.createInjector(new EatSenseDomainModule(),
@@ -107,6 +115,7 @@ public class AccountControllerTest {
 		login = "testlogin";
 		email = "wurst@wurst.de";
 		role = "admin";
+		hashedPassword = "normallyareallystronghashedpassword";
 		// TODO update to use restaurant id
 		
 		account = new Account();
@@ -115,8 +124,10 @@ public class AccountControllerTest {
 		account.setLogin(login);
 		account.setRole(role);
 		account.setEmailConfirmed(true);
-		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+		account.setHashedPassword(hashedPassword);
+		account.setCompany(companyKey);
 		when(ar.getByProperty("login", login)).thenReturn(account);
+		when(ar.checkPassword(password, hashedPassword)).thenReturn(true);
 		
 		company = new Company();
 		CompanyDTO data = getCompanyTestData();
@@ -136,6 +147,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testAuthenticate() {
+		when(ar.checkPassword(password, hashedPassword)).thenReturn(true);
 		//#1 Test correct password
 		Account test = ctr.authenticate(login, password);
 		
@@ -166,7 +178,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testAuthenticateCaseInsensitive() {
-		String loginWithUpperCase = "TestLogin";		
+		String loginWithUpperCase = "TestLogin";
 		Account test = ctr.authenticate(loginWithUpperCase, password);
 		
 		assertThat(test.getLogin(), is(login));
@@ -837,6 +849,34 @@ public class AccountControllerTest {
 	}
 	
 	@Test
+	public void testUpdateUserAccount() throws Exception {
+		@SuppressWarnings("unchecked")
+		List<Key<Business>> businesses = mock(List.class);
+		account.setBusinesses(businesses );
+		Account newAccount = new Account();
+		CockpitAccountDTO accountData = new CockpitAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password");
+		List<Long> businessIds = new ArrayList<Long>();
+		long businessId1 = 1;
+		businessIds.add(businessId1 );
+		accountData.setBusinessIds(businessIds );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey1 = mock(Key.class);
+		when(rr.getKey(businessId1)).thenReturn(businessKey1 );
+		when(businesses.contains(businessKey1)).thenReturn(true);
+		when(ar.hashPassword(accountData.getPassword())).thenReturn("hashedpassword");
+		
+		ctr.updateUserAccount(newAccount, account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.getLogin(),is(accountData.getLogin()));
+		assertThat(newAccount.getHashedPassword(), is("hashedpassword"));
+		assertThat(newAccount.getBusinesses(), hasItem(businessKey1));
+		
+	}
+	
+	@Test
 	public void testCreateUserAccount() throws Exception {
 		
 		CockpitAccountDTO accountData = new CockpitAccountDTO();
@@ -849,5 +889,9 @@ public class AccountControllerTest {
 		ctr.createUserAccount(account, accountData );
 		
 		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.isActive(),is(true));
+		assertThat(newAccount.getRole(), is(Role.COCKPITUSER));
+		assertThat(newAccount.getCompany(), is(companyKey));
+		assertThat(newAccount.isEmailConfirmed(), is(false));
 	}
 }
