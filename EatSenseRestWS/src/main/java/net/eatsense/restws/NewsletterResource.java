@@ -39,7 +39,8 @@ public class NewsletterResource {
 	public void saveRecipient(RecipientDTO recipientData, @Context UriInfo uriInfo) {
 		NewsletterRecipient recipient = accountCtrl.addNewsletterRecipient(recipientData);
 		try {
-			mailCtrl.sendWelcomeMessage(uriInfo, recipient);
+			String unsubscribeUrl = uriInfo.getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient.getEmail()).build(recipient.getId()).toString();
+			mailCtrl.sendWelcomeMessage(unsubscribeUrl, recipient);
 		} catch (AddressException e) {
 			logger.error("sending welcome mail failed", e);
 			if(recipient.getEmail().equals(e.getRef())) {

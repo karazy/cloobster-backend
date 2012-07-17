@@ -44,7 +44,8 @@ public class AccountsResource {
 	public RegistrationDTO registerAccount(RegistrationDTO accountData, @Context UriInfo uriInfo) {
 		Account account = accountCtr.registerNewAccount(accountData);
 		try {
-			mailCtrl.sendRegistrationConfirmation(uriInfo, account);
+			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(account.getEmailConfirmationHash()).toString();
+			mailCtrl.sendRegistrationConfirmation(unsubcribeUrl, account);
 		} catch (AddressException e) {
 			logger.error("sending confirmation mail failed", e);
 			if(account.getEmail().equals(e.getRef())) {

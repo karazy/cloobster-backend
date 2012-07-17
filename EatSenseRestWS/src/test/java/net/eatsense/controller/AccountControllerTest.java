@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.mail.Message;
+import javax.mail.internet.MimeMessage;
 import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
@@ -29,7 +30,7 @@ import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
-import net.eatsense.representation.CockpitAccountDTO;
+import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RecipientDTO;
@@ -47,6 +48,7 @@ import org.junit.runner.RunWith;
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.internal.util.ArrayUtils;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.inject.Guice;
@@ -246,7 +248,7 @@ public class AccountControllerTest {
 		String email = "email@host.de";
 		RecipientDTO recipientDto = mock(RecipientDTO.class);
 		when(recipientDto.getEmail()).thenReturn(email);
-		when(mailCtrl.newMimeMessage()).thenReturn(mock(Message.class));
+		when(mailCtrl.newMimeMessage()).thenReturn(mock(MimeMessage.class));
 				
 		ctr.addNewsletterRecipient(recipientDto);
 		
@@ -849,12 +851,62 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void testUpdateUserAccount() throws Exception {
+	public void testUpdateUserAccountUnknownBusiness() throws Exception {
 		@SuppressWarnings("unchecked")
 		List<Key<Business>> businesses = mock(List.class);
 		account.setBusinesses(businesses );
 		Account newAccount = new Account();
-		CockpitAccountDTO accountData = new CockpitAccountDTO();
+		newAccount.setCompany(companyKey);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password");
+		List<Long> businessIds = new ArrayList<Long>();
+		long businessId1 = 1;
+		long businessId2 = 2;
+		businessIds.add(businessId2 );
+		accountData.setBusinessIds(businessIds );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey1 = mock(Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey2 = mock(Key.class);
+		when(rr.getKey(businessId1)).thenReturn(businessKey1 );
+		when(rr.getKey(businessId2)).thenReturn(businessKey2 );
+		when(businesses.contains(businessKey1)).thenReturn(true);
+		// We expect the method to thrown an exception if we try to add a
+		// business id that was not managed by the owner account.
+		thrown.expect(ValidationException.class);
+		
+		ctr.updateCompanyAccount(newAccount, account, accountData);
+	}
+	
+	@Test
+	public void testUpdateUserAccountLoginAlreadyExists() throws Exception {
+		Account newAccount = new Account();
+		newAccount.setRole(Role.COCKPITUSER);
+		newAccount.setCompany(companyKey);
+		
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password");
+		
+		@SuppressWarnings("unchecked")
+		Key<Account> value = mock(Key.class);
+		when(ar.getKeyByProperty("login", "testuser")).thenReturn(value );
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateCompanyAccount(newAccount, account, accountData);
+	}
+	
+	@Test
+	public void testUpdateCockpitUserAccount() throws Exception {
+		@SuppressWarnings("unchecked")
+		List<Key<Business>> businesses = mock(List.class);
+		account.setBusinesses(businesses );
+		Account newAccount = new Account();
+		// We test the update of a cockpit account.
+		newAccount.setRole(Role.COCKPITUSER);
+		newAccount.setCompany(companyKey);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
 		accountData.setLogin("testuser");
 		accountData.setPassword("password");
 		List<Long> businessIds = new ArrayList<Long>();
@@ -867,7 +919,7 @@ public class AccountControllerTest {
 		when(businesses.contains(businessKey1)).thenReturn(true);
 		when(ar.hashPassword(accountData.getPassword())).thenReturn("hashedpassword");
 		
-		ctr.updateUserAccount(newAccount, account, accountData);
+		ctr.updateCompanyAccount(newAccount, account, accountData);
 		
 		verify(ar).saveOrUpdate(newAccount);
 		assertThat(newAccount.getLogin(),is(accountData.getLogin()));
@@ -877,9 +929,26 @@ public class AccountControllerTest {
 	}
 	
 	@Test
+	public void testCreateAdminAccount() throws Exception {
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setEmail("test@cloobster.com");
+		
+		ctr.createAdminAccount(account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.getEmail(), is(accountData.getEmail()));
+		assertThat(newAccount.getCompany(), is(account.getCompany()));
+		assertThat(newAccount.isActive(), is(false));
+		assertThat(newAccount.isEmailConfirmed(), is(false));
+		assertThat(newAccount.getRole(),is(Role.BUSINESSADMIN));
+	}
+	
+	@Test
 	public void testCreateUserAccount() throws Exception {
 		
-		CockpitAccountDTO accountData = new CockpitAccountDTO();
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
 		accountData.setLogin("testuser");
 		accountData.setPassword("password");
 		

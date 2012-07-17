@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -28,7 +29,7 @@ import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.CockpitAccountDTO;
+import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.ImageDTO;
@@ -522,32 +523,74 @@ public class AccountController {
 	 * @param accountData Containing login, password, business id (for which the account should have access), and an optional name.
 	 * @return a new Account entity
 	 */
-	public CockpitAccountDTO createUserAccount(Account ownerAccount, CockpitAccountDTO accountData) {
+	public CompanyAccountDTO createUserAccount(Account ownerAccount, CompanyAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
 		Account account = accountRepo.newEntity();
+		account.setCreationDate(new Date());
 		account.setCompany(ownerAccount.getCompany());
 		account.setRole(Role.COCKPITUSER);
-		account.setEmailConfirmed(false);
 		account.setActive(true);
 		
-		return updateUserAccount(account, ownerAccount, accountData);
+		return updateCompanyAccount(account, ownerAccount, accountData);
+	}
+	
+	public AccountDTO createAdminAccount(Account ownerAccount, AccountDTO accountData) {
+		checkNotNull(ownerAccount, "ownerAccount was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		checkEmailDoesNotExist(accountData.getEmail());
+
+		Account account = accountRepo.newEntity();
+		account.setCreationDate(new Date());
+		account.setCompany(ownerAccount.getCompany());
+		account.setRole(Role.BUSINESSADMIN);
+		account.setActive(false);
+		account.setEmail(accountData.getEmail());
+		
+		accountRepo.saveOrUpdate(account);
+		
+		return new AccountDTO(account);
 	}
 	
 	/**
+	 * Add an existing Account to the company and grant permissions.
+	 * 
+	 * @param account
+	 * @param ownerAccount
+	 * @param accountData
+	 * @return Updated account data including the new permissions.
+	 */
+	public CompanyAccountDTO addAccountToCompany(Account account, Account ownerAccount, CompanyAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		if(account.getCompany() != null) {
+			throw new ValidationException("Account already belongs to another company");
+		}
+		else {
+			account.setCompany(ownerAccount.getCompany());
+		}
+		
+		return updateCompanyAccount(account, ownerAccount, accountData);
+	}
+	
+	/**
+	 * Update permissions and/or account data.
+	 * 
 	 * @param account
 	 * @param ownerAccount Account entity initiating the update.
 	 * @param accountData Updated fields for login, password,name and/or business ids.
 	 * @return Updated transfer object.
 	 */
-	public CockpitAccountDTO updateUserAccount(Account account, Account ownerAccount, CockpitAccountDTO accountData) {
+	public CompanyAccountDTO updateCompanyAccount(Account account, Account ownerAccount, CompanyAccountDTO accountData) {
 		checkNotNull(account, "account was null");
+		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
-		if(!Objects.equal(account.getLogin(),accountData.getLogin())) {
-			checkLoginDoesNotExist(accountData.getLogin());
-			account.setLogin(accountData.getLogin());
+		if(!account.getCompany().equals(ownerAccount.getCompany())) {
+			throw new IllegalAccessException("Can only update company accounts");
 		}
 		
 		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
@@ -564,21 +607,29 @@ public class AccountController {
 				}
 			}
 		}
-		
-		account.setName(accountData.getName());
-		
-		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
-			// If we get a new password supplied, hash and save it.
-			account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
-		}
-		
 		account.setBusinesses(businessKeys);
+		
+		if(account.getRole().equals(Role.COCKPITUSER)) {
+			// Update of Account Data by the company owner is only allowed for
+			// cockpit user accounts.
+			account.setName(accountData.getName());
+
+			if(!Objects.equal(account.getLogin(),accountData.getLogin())) {
+				checkLoginDoesNotExist(accountData.getLogin());
+				account.setLogin(accountData.getLogin());
+			}
+
+			if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+				// If we get a new password supplied, hash and save it.
+				account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+			}
+		}
 		
 		if(account.isDirty()) {
 			accountRepo.saveOrUpdate(account);
 		}
 				
-		return new CockpitAccountDTO(account);
+		return new CompanyAccountDTO(account);
 	}
 	
 	/**
@@ -608,13 +659,20 @@ public class AccountController {
 	
 	/**
 	 * @param id
+	 * @param companyKey 
 	 * @return Account entity saved with the specified id.
 	 */
-	public Account getAccount(long id) {
+	public Account getAccountForCompany(long id, Key<Company> companyKey) {
+		Account account;
 		try {
-			return accountRepo.getById(id);
+			account = accountRepo.getById(id);
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
+		
+		if(companyKey.equals(account.getCompany()))
+			return account;
+		else
+			throw new net.eatsense.exceptions.NotFoundException();
 	}
 }

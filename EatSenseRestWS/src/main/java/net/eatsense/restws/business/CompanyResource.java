@@ -19,8 +19,9 @@ import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.representation.AccountDTO;
-import net.eatsense.representation.CockpitAccountDTO;
+import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.ImageDTO;
 
@@ -102,9 +103,17 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed(Role.COMPANYOWNER)
-	public AccountDTO createUserAccount(CockpitAccountDTO accountData) {
+	public AccountDTO createUserAccount(CompanyAccountDTO accountData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		return accountCtrl.createUserAccount(account, accountData);
+		if(Role.COCKPITUSER.equals(accountData.getRole())) {
+			return accountCtrl.createUserAccount(account, accountData);
+		}
+		else if(Role.BUSINESSADMIN.equals(accountData.getRole())) {
+			return accountCtrl.createAdminAccount(account, accountData);
+		}
+		else {
+			throw new ValidationException("Invalid role specified: "+ accountData.getRole());
+		}
 	}
 	
 	/**
@@ -119,8 +128,8 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed(Role.COMPANYOWNER)
-	public AccountDTO updateUserAccount(@PathParam("id") long accountId, CockpitAccountDTO accountData) {
+	public AccountDTO updateUserAccount(@PathParam("id") long accountId, CompanyAccountDTO accountData) {
 		Account ownerAccount = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		return accountCtrl.updateUserAccount(accountCtrl.getAccount(accountId), ownerAccount, accountData);
+		return accountCtrl.updateCompanyAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()), ownerAccount, accountData);
 	}
 }

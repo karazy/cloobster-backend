@@ -9,10 +9,10 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 
 public class AccountDTO {
-	String login;
-	String email;
-	String passwordHash;
-	String role;
+	private String login;
+	private String email;
+	private String passwordHash;
+	private String role;
 	
 	private Long companyId;
 	private Long id;

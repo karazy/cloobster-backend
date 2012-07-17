@@ -29,84 +29,70 @@ public class MailController {
 	private Session session = Session.getDefaultInstance( new Properties(), null);
 	private TemplateController templateCtrl;
 	
+	public static final String FROM_ADDRESS = "reifschneider@karazy.net";
+	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
+	
 	@Inject
 	public MailController( TemplateController templateCtrl) {
 		super();
 		this.templateCtrl = templateCtrl;
 	}
-
-	public MimeMessage sendWelcomeMessage(UriInfo uriInfo, NewsletterRecipient recipient) throws MessagingException {
-		MimeMessage mail = new MimeMessage(session);
-		URI unsubscribeUri = uriInfo.getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient.getEmail()).build(recipient.getId());
-		
-		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
-		String welcomeMail = templateCtrl.getAndReplace("newsletter-email-registered", unsubscribeUri.toString());
-		
-		// Treat first line as subject.
-		int firstNewline = welcomeMail.indexOf("\n");
-		String subject = welcomeMail.substring(0, firstNewline);
-		String body = welcomeMail.substring(firstNewline);
+	
+	/**
+	 * @param mail
+	 * @param text The first line will be treated as subject.
+	 * @throws MessagingException
+	 */
+	private void applyTextAndSubject(MimeMessage mail, String text)
+			throws MessagingException {
+		int firstNewline = text.indexOf("\n");
+		String subject = text.substring(0, firstNewline);
+		String body = text.substring(firstNewline);
 		
 		mail.setSubject(subject, "utf-8");
-
-		logger.info("welcomeMail: {}", welcomeMail);
+		logger.info("mail text: {}", text);
 		mail.setText(body, "utf-8");
+	}
+	
+	public MimeMessage newMimeMessage() {
+		return new MimeMessage(session); 
+	}
+	
+	public MimeMessage sendMail(String emailTo, String text) throws AddressException, MessagingException {
+		MimeMessage mail = new MimeMessage(session);
+		
+		mail.setFrom(new InternetAddress(FROM_ADDRESS));
+		mail.setReplyTo(new Address[]{new InternetAddress(REPLY_TO_ADDRESS)});
+		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
+		
+		applyTextAndSubject(mail, text);
 		
 		Transport.send(mail);
 		return mail;
 	}
+
+	public MimeMessage sendWelcomeMessage(String unsubscribeUrl, NewsletterRecipient recipient) throws MessagingException {
+		String welcomeMail = templateCtrl.getAndReplace("newsletter-email-registered", unsubscribeUrl);
+
+		return sendMail(recipient.getEmail(), welcomeMail);
+	}
 	
-	public Message sendRegistrationConfirmation(UriInfo uriInfo, Account account) throws MessagingException {
-		MimeMessage mail = new MimeMessage(session);
-		URI confirmationUri = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(account.getEmailConfirmationHash());
+	public Message sendRegistrationConfirmation(String unsubcribeUrl, Account account) throws MessagingException {
+		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), unsubcribeUrl);
 		
-		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
-				
-		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmationUri.toString());
-		
-		int firstNewline = confirmationText.indexOf("\n");
-		String subject = confirmationText.substring(0, firstNewline);
-		String body = confirmationText.substring(firstNewline);
-		
-		mail.setSubject(subject, "utf-8");
-		logger.info("confirmationText: {}", confirmationText);
-		mail.setText(body, "utf-8");
-		
-		Transport.send(mail);
-		return mail;
+		return sendMail(account.getEmail(), confirmationText);
 	}
 	
 	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {
-		MimeMessage mail = new MimeMessage(session);
-				
-		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress("info@cloobster.com"));
-				
 		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
 				account.getName(), account.getLogin(), account.getEmail(),
 				Strings.nullToEmpty(account.getPhone()), company.getName());
 		
-		int firstNewline = confirmationText.indexOf("\n");
-		String subject = confirmationText.substring(0, firstNewline);
-		String body = confirmationText.substring(firstNewline);
-		
-		mail.setSubject(subject, "utf-8");
-		logger.info("confirmationText: {}", confirmationText);
-		mail.setText(body, "utf-8");
-		
-		Transport.send(mail);
-		return mail;
+		return sendMail("info@cloobster.com", confirmationText);
 	}
-	
-	public Message newMimeMessage() {
-		return new MimeMessage(session); 
-	}
-	
-	public void sendMail(Message message) throws MessagingException, SendFailedException, AddressException {
-		Transport.send(message);
+
+	public MimeMessage sendAccountSetupMail(Account account, Account ownerAccount, String setupUrl) throws AddressException, MessagingException {
+		String text = templateCtrl.getAndReplace("account-setup-email", account.getName(), ownerAccount.getName(), setupUrl);
+		return sendMail(account.getEmail(), text);
 	}
 }

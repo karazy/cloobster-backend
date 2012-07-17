@@ -2,17 +2,17 @@ package net.eatsense.representation;
 
 import net.eatsense.domain.Account;
 
-public class CockpitAccountDTO extends AccountDTO {
+public class CompanyAccountDTO extends AccountDTO {
 	/**
 	 * Only supplied during account creation of a new cockpit user.
 	 */
 	private String password;
 	
-	public CockpitAccountDTO() {
+	public CompanyAccountDTO() {
 		super();
 	}
 
-	public CockpitAccountDTO(Account account) {
+	public CompanyAccountDTO(Account account) {
 		super(account);
 
 	}
