@@ -3,6 +3,7 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -29,6 +30,7 @@ import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
+import net.eatsense.representation.CockpitAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RecipientDTO;
@@ -64,7 +66,10 @@ public class AccountControllerTest {
 	
 	private Injector injector;
 	private AccountController ctr;
+	
+	@Mock
 	private BusinessRepository rr;
+	@Mock
 	private ChannelController channelController;
 	
 	private String password;
@@ -101,12 +106,8 @@ public class AccountControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(),
 				new ValidationModule());
-		channelController = mock(ChannelController.class);
-		rr = injector.getInstance(BusinessRepository.class);
-		ar = injector.getInstance(AccountRepository.class);
 		validator = injector.getInstance(Validator.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
 				channelController, validator, facebookService, imageCtrl, mailCtrl);
@@ -116,8 +117,15 @@ public class AccountControllerTest {
 		email = "wurst@wurst.de";
 		role = "admin";
 		// TODO update to use restaurant id
-		account = ar.createAndSaveAccount("admin",login, password, email, role,
-				rr.getAllKeys(), null, null, null, true, true);
+		
+		account = new Account();
+		account.setActive(true);
+		account.setEmail(email);
+		account.setLogin(login);
+		account.setRole(role);
+		account.setEmailConfirmed(true);
+		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+		when(ar.getByProperty("login", login)).thenReturn(account);
 		
 		company = new Company();
 		CompanyDTO data = getCompanyTestData();
@@ -133,7 +141,6 @@ public class AccountControllerTest {
 
 	@After
 	public void tearDown() throws Exception {
-		helper.tearDown();
 	}
 	
 	@Test
@@ -396,7 +403,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -418,7 +425,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -440,7 +447,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -463,7 +470,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -485,7 +492,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -507,7 +514,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
 		ctr.registerNewAccount(data);
@@ -529,7 +536,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
 		ctr.registerNewAccount(data);
@@ -537,6 +544,10 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testRegisterNewAccountValidPassword() throws Exception {
+		Company newCompany = new Company();
+		when(companyRepo.newEntity()).thenReturn(newCompany );
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount);
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
@@ -556,6 +567,11 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testRegisterNewAccount() throws Exception {
+		Company newCompany = new  Company();
+		when(companyRepo.newEntity()).thenReturn(newCompany );
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount );
+		
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
@@ -570,7 +586,12 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
+		when(ar.hashPassword(data.getPassword())).thenReturn(BCrypt.hashpw(data.getPassword(), BCrypt.gensalt()));
+		
 		account = ctr.registerNewAccount(data);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		
 		assertThat(account.getEmail(), is(data.getEmail()));
 		assertThat(account.getLogin(), is(data.getLogin()));
 		assertThat(account.getName(), is(data.getName()));
@@ -581,7 +602,6 @@ public class AccountControllerTest {
 		assertThat(account.isEmailConfirmed(), is(false));
 		assertThat(account.getBusinesses(), nullValue());
 		assertThat(account.getRole(), is(Role.COMPANYOWNER));
-		assertThat(account.getId(), notNullValue());
 		assertThat(account.getPhone(), is(data.getPhone()));
 		ArgumentCaptor<Company> companyArg = ArgumentCaptor.forClass(Company.class);
 		verify(companyRepo).saveOrUpdate(companyArg.capture());
@@ -597,12 +617,19 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testConfirmAccountEmail() throws Exception {
-		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
+		account.setActive(false);
+		account.setEmailConfirmed(false);
+		account.setEmailConfirmationHash("Auniquehashgeneratedbytheserver");
 		EmailConfirmationDTO data = new EmailConfirmationDTO();
 		String confirmationToken = account.getEmailConfirmationHash();
 		data.setConfirmationToken(confirmationToken);
+		when(ar.getByProperty("emailConfirmationHash", confirmationToken)).thenReturn(account);
 		
 		ctr.confirmAccountEmail(data);
+		
+		assertThat(account.isActive(), is(true));
+		assertThat(account.isEmailConfirmed(), is(true));
+		verify(ar).saveOrUpdate(account);
 	}
 	
 	@Test
@@ -615,12 +642,13 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testConfirmAccountEmailInvalidToken() throws Exception {
-		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
+		account.setActive(false);
+		account.setEmailConfirmed(false);
+		account.setEmailConfirmationHash("Auniquehashgeneratedbytheserver");
 		EmailConfirmationDTO data = new EmailConfirmationDTO();
-		String confirmationToken = account.getEmailConfirmationHash();
-		data.setConfirmationToken("not"+confirmationToken);
+		data.setConfirmationToken(account.getEmailConfirmationHash() + "not");
 		
-		thrown.expect(ServiceException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("token");
 		ctr.confirmAccountEmail(data);
 	}
@@ -628,7 +656,8 @@ public class AccountControllerTest {
 	@Test
 	public void testAuthenticateFacebook() throws Exception {
 		String uid = "100000164823174";
-		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, uid, true, true);
+		account.setFacebookUid(uid);
+		when(ar.getByProperty("facebookUid", uid)).thenReturn(account);
 		String accessToken = "test";
 		JSONObject jsonMe = new JSONObject();
 		jsonMe.put("id", uid);
@@ -802,8 +831,7 @@ public class AccountControllerTest {
 		CompanyDTO companyData = getCompanyTestData();
 		ctr.updateCompany(company, companyData);
 		verify(companyRepo, never()).saveOrUpdate(company);
-	}
-	
+	}	
 		
 	public CompanyDTO getCompanyTestData() {
 		CompanyDTO data = new CompanyDTO();
@@ -815,5 +843,20 @@ public class AccountControllerTest {
 		data.setPostcode("12345");
 		data.setUrl("http://www.karazy.net/");
 		return data;
+	}
+	
+	@Test
+	public void testCreateUserAccount() throws Exception {
+		
+		CockpitAccountDTO accountData = new CockpitAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password");
+		
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount );
+		
+		ctr.createUserAccount(account, accountData );
+		
+		verify(ar).saveOrUpdate(newAccount);
 	}
 }

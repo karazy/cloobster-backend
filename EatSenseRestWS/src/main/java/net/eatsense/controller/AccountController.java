@@ -35,6 +35,7 @@ import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
+import net.eatsense.util.IdHelper;
 
 import org.codehaus.jettison.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
@@ -291,17 +292,13 @@ public class AccountController {
 			for (ConstraintViolation<RegistrationDTO> violation : violationSet) {
 				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
 			}
-			throw new RegistrationException(stringBuilder.toString());
+			throw new ValidationException(stringBuilder.toString());
 		}
 		
-		if( accountRepo.getKeyByProperty("email", accountData.getEmail()) != null ) {
-			throw new RegistrationException("email already in use", "registrationErrorEmailExists");
-		}
-		if( accountRepo.getKeyByProperty("login", accountData.getLogin()) != null ) {
-			throw new RegistrationException("login already in use", "registrationErrorLoginExists");
-		}
+		checkLoginDoesNotExist(accountData.getLogin());
+		checkEmailDoesNotExist(accountData.getEmail());		
 		
-		Company company = new Company();
+		Company company = companyRepo.newEntity();
 		
 		company.setAddress(accountData.getCompany().getAddress());
 		company.setCity(accountData.getCompany().getCity());
@@ -312,11 +309,23 @@ public class AccountController {
 		
 		Key<Company> companyKey = companyRepo.saveOrUpdate(company);
 		
-		Account account = accountRepo.createAndSaveAccount(accountData.getName(), 
-				accountData.getLogin(),	accountData.getPassword(), accountData.getEmail(),
-				Role.COMPANYOWNER, null, companyKey, accountData.getPhone(),
-				accountData.getFacebookUID(), false, false);
-
+		Account account = accountRepo.newEntity();
+		
+		account.setActive(false);
+		account.setCreationDate(new Date());
+		account.setName(accountData.getName());
+		account.setLogin(accountData.getLogin());
+		account.setEmail(accountData.getEmail());
+		account.setRole(Role.COMPANYOWNER);
+		account.setCompany(companyKey);
+		account.setPhone(accountData.getPhone());
+		
+		account.setEmailConfirmed(false);
+		account.setEmailConfirmationHash(IdHelper.generateId());
+		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		
+		accountRepo.saveOrUpdate(account);
+		
 		return account;
 	}
 	
@@ -388,7 +397,7 @@ public class AccountController {
 		
 		Account account = accountRepo.getByProperty("emailConfirmationHash", confirmationData.getConfirmationToken());
 		if(account == null)
-			throw new ServiceException("Unknown confirmation token");
+			throw new ValidationException("Unknown confirmation token");
 		
 		if(!account.isEmailConfirmed() ) {
 			account.setEmailConfirmed(true);
@@ -474,11 +483,34 @@ public class AccountController {
 		}
 	}
 	
-	public boolean checkLoginDoesNotExist(String login) {
+	/**
+	 * Ensures a given login is not already in-use.
+	 * 
+	 * @param login
+	 * @return <code>true</code>
+	 * @throws ValidationException If the "login" is already in-use.
+	 */
+	public boolean checkLoginDoesNotExist(String login) throws ValidationException {
 		checkNotNull(login, "login was null");
 		
-		if(accountRepo.getByProperty("login", login) == null)
+		if(accountRepo.getKeyByProperty("login", login) != null)
 			throw new ValidationException("Login already in use.");
+		else
+			return true;
+	}
+	
+	/**
+	 * Ensures a given email is not already in-use.
+	 * 
+	 * @param email
+	 * @return <code>true</code>
+	 * @throws ValidationException If the "email" is already in-use.
+	 */
+	public boolean checkEmailDoesNotExist(String email) throws ValidationException {
+		checkNotNull(email, "login was null");
+		
+		if(accountRepo.getKeyByProperty("email", email) != null)
+			throw new ValidationException("E-mail adress already in use.");
 		else
 			return true;
 	}
@@ -536,6 +568,7 @@ public class AccountController {
 		account.setName(accountData.getName());
 		
 		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+			// If we get a new password supplied, hash and save it.
 			account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 		}
 		
