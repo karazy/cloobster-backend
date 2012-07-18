@@ -6,6 +6,7 @@ import java.util.List;
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
@@ -14,6 +15,7 @@ import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
+import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -40,14 +42,17 @@ public class DummyDataDumper {
 
 	private AccountRepository ar;
 
+	private final CompanyRepository companyRepo;
+
 	@Inject
-	public DummyDataDumper(BusinessRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar) {
+	public DummyDataDumper(BusinessRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo) {
 		this.ar = ar;
 		this.rr = rr;
 		this.br = br;
 		this.mr = mr;
 		this.pr = pr;
 		this.cr = cr;
+		this.companyRepo = companyRepo;
 	}
 	
 	public void generateDummyUsers() {
@@ -63,8 +68,10 @@ public class DummyDataDumper {
 			logger.info("Create account for Heidi und Paul");
 			ar.createAndSaveAccount("HuP Account","hup", "test", "info@cloobster.com", Role.COMPANYOWNER,  hup, null, null, null, true, true);
 		}
-		
-		ar.createAndSaveAccount("Administrator","admin", "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), null, null, null, true, true);
+		Company company = new Company();
+		company.setName("Karazy GmbH");
+		Key<Company> key = companyRepo.saveOrUpdate(company);
+		ar.createAndSaveAccount("Administrator","admin", "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), key, null, null, true, true);
 	}	
 
 	public void generateDummyBusinesses() {
