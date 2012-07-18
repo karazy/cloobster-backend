@@ -25,7 +25,7 @@ public class Account extends GenericEntity<Account> {
 	String login;
 	String hashedPassword;
 	
-	@NotNull
+	@NotNull 
 	@Email
 	String email;
 	

@@ -55,8 +55,8 @@ public class EatSenseGuiceServletContextListener extends
 	@Override
 	protected Injector getInjector() {
 		Injector injector = Guice.createInjector(
-				new JerseyServletModule() { 
-					@Override 					
+				new JerseyServletModule() {
+					@Override 		
 					protected void configureServlets() {
 						HashMap<String, String> parameters = new HashMap<String, String>();
 						
