@@ -536,46 +536,46 @@ public class AccountController {
 		return updateCompanyAccount(account, ownerAccount, accountData);
 	}
 	
-	public AccountDTO createAdminAccount(Account ownerAccount, AccountDTO accountData) {
+	/**
+	 * Create a new account with a supplied e-mail address or add an existing
+	 * account with that e-mail address to the company and grant the
+	 * {@link Role#BUSINESSADMIN}.
+	 * 
+	 * @param ownerAccount {@link Account} initiating the creation/addition.
+	 * @param accountData Only "email" and "name" will be used.
+	 * @return The newly created or updated {@link Account}.
+	 */
+	public Account createOrAddAdminAccount(Account ownerAccount, AccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
-		checkEmailDoesNotExist(accountData.getEmail());
-
-		Account account = accountRepo.newEntity();
-		account.setCreationDate(new Date());
+		Account account = accountRepo.getByProperty("email", accountData.getEmail());
+		
+		if(account== null) {
+			account = accountRepo.newEntity();
+			account.setCreationDate(new Date());
+			account.setActive(false);
+			account.setEmail(accountData.getEmail());
+			account.setName(accountData.getName());
+		}
+		else {
+			if(account.getCompany() != null) {
+				throw new ValidationException("Account with that e-mail belongs to a different company.");
+			}
+			if(!account.isActive()) {
+				throw new ValidationException("Existing account must be active to add as administrator.");
+			}
+		}
+		
 		account.setCompany(ownerAccount.getCompany());
 		account.setRole(Role.BUSINESSADMIN);
-		account.setActive(false);
-		account.setEmail(accountData.getEmail());
 		
 		accountRepo.saveOrUpdate(account);
 		
-		return new AccountDTO(account);
+		return account;
 	}
 	
-	/**
-	 * Add an existing Account to the company and grant permissions.
-	 * 
-	 * @param account
-	 * @param ownerAccount
-	 * @param accountData
-	 * @return Updated account data including the new permissions.
-	 */
-	public CompanyAccountDTO addAccountToCompany(Account account, Account ownerAccount, CompanyAccountDTO accountData) {
-		checkNotNull(account, "account was null");
-		checkNotNull(accountData, "accountData was null");
 		
-		if(account.getCompany() != null) {
-			throw new ValidationException("Account already belongs to another company");
-		}
-		else {
-			account.setCompany(ownerAccount.getCompany());
-		}
-		
-		return updateCompanyAccount(account, ownerAccount, accountData);
-	}
-	
 	/**
 	 * Update permissions and/or account data.
 	 * 
@@ -674,5 +674,27 @@ public class AccountController {
 			return account;
 		else
 			throw new net.eatsense.exceptions.NotFoundException();
+	}
+	
+	/**
+	 * Return accounts with that e-mail, should always return one element in the list or an empty list.
+	 * 
+	 * @param email
+	 * @return
+	 */
+	public List<AccountDTO> getAccountsByEmail(String email) {
+		ArrayList<AccountDTO> accountDTOs = new ArrayList<AccountDTO>();
+		
+		for(Account account : accountRepo.getListByProperty("email", email)) {
+			AccountDTO accountDTO = new AccountDTO();
+			if(account.getCompany() != null) {
+				accountDTO.setCompanyId(account.getCompany().getId());
+			}
+			accountDTO.setName(account.getName());
+			accountDTO.setEmail(account.getEmail());
+			
+			accountDTOs.add(accountDTO);
+		}
+		return accountDTOs;
 	}
 }

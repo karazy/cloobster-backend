@@ -3,6 +3,8 @@ package net.eatsense.restws.business;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,9 +15,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
+import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.exceptions.IllegalAccessException;
@@ -31,6 +38,7 @@ import com.sun.jersey.api.core.ResourceContext;
 public class CompanyResource {
 	@Context
 	ResourceContext resourceContext;
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Context
 	HttpServletRequest servletRequest;
@@ -38,10 +46,13 @@ public class CompanyResource {
 	private final AccountController accountCtrl;
 	
 	private Company company;
+
+	private final MailController mailCtrl;
 	
 	@Inject
-	public CompanyResource(AccountController accountCtrl) {
+	public CompanyResource(AccountController accountCtrl, MailController mailController) {
 		super();
+		this.mailCtrl = mailController;
 		this.accountCtrl = accountCtrl;
 	}
 
@@ -103,13 +114,24 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed(Role.COMPANYOWNER)
-	public AccountDTO createUserAccount(CompanyAccountDTO accountData) {
+	public AccountDTO createUserAccount(CompanyAccountDTO accountData, @Context UriInfo uriInfo) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		if(Role.COCKPITUSER.equals(accountData.getRole())) {
 			return accountCtrl.createUserAccount(account, accountData);
 		}
 		else if(Role.BUSINESSADMIN.equals(accountData.getRole())) {
-			return accountCtrl.createAdminAccount(account, accountData);
+			Account newAccount = accountCtrl.createOrAddAdminAccount(account, accountData);
+			
+			//TODO: Unify path to frontend.
+			String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/setup/{token}").build().toString();
+			try {
+				mailCtrl.sendAccountSetupMail(newAccount, account, setupUrl);
+			} catch (AddressException e) {
+				logger.error("Error in e-mail address",e);
+			} catch (MessagingException e) {
+				logger.error("Error sending mail",e);
+			}
+			return new AccountDTO(newAccount);
 		}
 		else {
 			throw new ValidationException("Invalid role specified: "+ accountData.getRole());

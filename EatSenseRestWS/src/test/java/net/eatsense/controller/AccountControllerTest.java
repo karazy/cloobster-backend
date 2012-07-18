@@ -929,13 +929,47 @@ public class AccountControllerTest {
 	}
 	
 	@Test
+	public void testAddAdminAccountWithDifferentCompany() throws Exception {
+		Account newAccount = new Account();
+		newAccount.setCompany(mock(Key.class));
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setEmail("test@cloobster.com");
+		when(ar.getByProperty("email", accountData.getEmail())).thenReturn(newAccount);
+		
+		thrown.expect(ValidationException.class);
+
+		ctr.createOrAddAdminAccount(account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		
+		assertThat(newAccount.getCompany(), is(account.getCompany()));
+		assertThat(newAccount.getRole(), is(Role.BUSINESSADMIN));
+	}
+	
+	@Test
+	public void testAddAdminAccountWithNoCompany() throws Exception {
+		Account newAccount = new Account();
+		newAccount.setActive(true);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setEmail("test@cloobster.com");
+		when(ar.getByProperty("email", accountData.getEmail())).thenReturn(newAccount);
+		
+		ctr.createOrAddAdminAccount(account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		
+		assertThat(newAccount.getCompany(), is(account.getCompany()));
+		assertThat(newAccount.getRole(), is(Role.BUSINESSADMIN));
+	}
+	
+	@Test
 	public void testCreateAdminAccount() throws Exception {
 		Account newAccount = new Account();
 		when(ar.newEntity()).thenReturn(newAccount);
 		CompanyAccountDTO accountData = new CompanyAccountDTO();
 		accountData.setEmail("test@cloobster.com");
 		
-		ctr.createAdminAccount(account, accountData);
+		ctr.createOrAddAdminAccount(account, accountData);
 		
 		verify(ar).saveOrUpdate(newAccount);
 		assertThat(newAccount.getEmail(), is(accountData.getEmail()));

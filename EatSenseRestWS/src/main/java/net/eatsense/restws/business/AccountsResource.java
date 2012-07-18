@@ -1,19 +1,26 @@
 package net.eatsense.restws.business;
 
+import java.util.List;
+
+import javax.annotation.security.RolesAllowed;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
+import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RegistrationDTO;
 
@@ -55,6 +62,19 @@ public class AccountsResource {
 			logger.error("sending confirmation mail failed", e);
 		}
 		return accountData;
+	}
+	
+	/**
+	 * Retrieve Accounts 
+	 * 
+	 * @param email Must be specified.
+	 * @return Accounts saved with the specified e-mail address.
+	 */
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.COMPANYOWNER)
+	public List<AccountDTO> getAccounts(@QueryParam("email") String email) {
+		return accountCtr.getAccountsByEmail(email);
 	}
 	
 	@PUT

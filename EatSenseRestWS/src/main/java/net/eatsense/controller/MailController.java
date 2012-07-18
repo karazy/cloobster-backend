@@ -17,6 +17,7 @@ import javax.ws.rs.core.UriInfo;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.representation.AccountDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class MailController {
 		String body = text.substring(firstNewline);
 		
 		mail.setSubject(subject, "utf-8");
-		logger.info("mail text: {}", text);
+		logger.info("send mail: {}", text);
 		mail.setText(body, "utf-8");
 	}
 	
@@ -91,8 +92,8 @@ public class MailController {
 		return sendMail("info@cloobster.com", confirmationText);
 	}
 
-	public MimeMessage sendAccountSetupMail(Account account, Account ownerAccount, String setupUrl) throws AddressException, MessagingException {
-		String text = templateCtrl.getAndReplace("account-setup-email", account.getName(), ownerAccount.getName(), setupUrl);
-		return sendMail(account.getEmail(), text);
+	public MimeMessage sendAccountSetupMail(Account newAccount, Account ownerAccount, String setupUrl) throws AddressException, MessagingException {
+		String text = templateCtrl.getAndReplace("account-setup-email", newAccount.getName(), ownerAccount.getName(), setupUrl);
+		return sendMail(newAccount.getEmail(), text);
 	}
 }
