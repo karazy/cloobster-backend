@@ -62,7 +62,7 @@ public class MailController {
 	}
 	
 	public MimeMessage sendMail(String emailTo, String text) throws AddressException, MessagingException {
-		checkArgument(Strings.isNullOrEmpty(emailTo), "emailTo was null or empty");
+		checkArgument(!Strings.isNullOrEmpty(emailTo), "emailTo was null or empty");
 		
 		if(Strings.isNullOrEmpty(text)) {
 			logger.error("No template found, skipped sending mail to {}", emailTo);
