@@ -1,5 +1,7 @@
 package net.eatsense.auth;
 
+import java.util.Date;
+
 import javax.persistence.Id;
 
 import net.eatsense.domain.Account;
@@ -18,6 +20,7 @@ public class AccessToken {
 	@Id
 	private String token;
 	private TokenType type;
+	private Date expires;
 	private Key<Account> account;
 	
 	public AccessToken() {
@@ -60,5 +63,13 @@ public class AccessToken {
 
 	public void setAccount(Key<Account> account) {
 		this.account = account;
+	}
+
+	public Date getExpires() {
+		return expires;
+	}
+
+	public void setExpires(Date expires) {
+		this.expires = expires;
 	}
 }
