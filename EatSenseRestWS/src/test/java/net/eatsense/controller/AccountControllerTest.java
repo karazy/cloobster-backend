@@ -909,7 +909,7 @@ public class AccountControllerTest {
 		newAccount.setCompany(companyKey);
 		CompanyAccountDTO accountData = new CompanyAccountDTO();
 		accountData.setLogin("testuser");
-		accountData.setPassword("password");
+		accountData.setPassword("password1");
 		List<Long> businessIds = new ArrayList<Long>();
 		long businessId1 = 1;
 		businessIds.add(businessId1 );
@@ -985,7 +985,7 @@ public class AccountControllerTest {
 		
 		CompanyAccountDTO accountData = new CompanyAccountDTO();
 		accountData.setLogin("testuser");
-		accountData.setPassword("password");
+		accountData.setPassword("password!1");
 		
 		Account newAccount = new Account();
 		when(ar.newEntity()).thenReturn(newAccount );

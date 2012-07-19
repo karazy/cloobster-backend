@@ -33,7 +33,7 @@ public class ValidationHelper {
 	 * @throws ValidationException If a violation was found.
 	 */
 	public <T> Set<ConstraintViolation<T>> validate(T object, Class<?>... groups) throws ValidationException {
-		Set<ConstraintViolation<T>> violationSet = validator.validate(object);
+		Set<ConstraintViolation<T>> violationSet = validator.validate(object, groups);
 		if(!violationSet.isEmpty()) {
 			StringBuilder stringBuilder = new StringBuilder("validation errors:");
 			for (ConstraintViolation<T> violation : violationSet) {
