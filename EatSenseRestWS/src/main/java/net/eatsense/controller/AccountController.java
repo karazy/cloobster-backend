@@ -39,6 +39,7 @@ import net.eatsense.service.FacebookService;
 import net.eatsense.util.IdHelper;
 import net.eatsense.validation.BusinessAdminChecks;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
 
 import org.codehaus.jettison.json.JSONObject;
@@ -608,6 +609,7 @@ public class AccountController {
 			}
 
 			if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+				validator.validate(accountData, PasswordChecks.class);
 				// If we get a new password supplied, hash and save it.
 				account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 			}

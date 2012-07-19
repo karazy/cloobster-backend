@@ -6,6 +6,7 @@ import javax.validation.constraints.Size;
 
 import net.eatsense.domain.Account;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.PasswordChecks;
 
 public class CompanyAccountDTO extends AccountDTO {
 	/**
@@ -14,9 +15,8 @@ public class CompanyAccountDTO extends AccountDTO {
 	/**
 	 * Password pattern matches a password with at least one number or one unicode/symbolic and one alphabetical character.
 	 */
-	@NotNull(groups={CockpitUserChecks.class})
-	@Size(min = 6,groups={CockpitUserChecks.class})
-	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$",groups={CockpitUserChecks.class})
+	@Size(min = 6,groups={PasswordChecks.class})
+	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$",groups={PasswordChecks.class})
 	private String password;
 	
 	public CompanyAccountDTO() {
