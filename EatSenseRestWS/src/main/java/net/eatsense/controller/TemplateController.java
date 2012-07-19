@@ -82,7 +82,7 @@ public class TemplateController {
 				replacement = substitutions[ Integer.parseInt(matcher.group(1)) ];
 			}
         	catch(NumberFormatException e) {
-        		logger.warn("invalid template {}, expected decimal between 0 and ", template.getId());
+        		logger.warn("invalid template {}, expected decimal betwwen '{' and '}' got {}", template.getId(), matcher.group(1));
         	}
         	catch (ArrayIndexOutOfBoundsException e) {
 				logger.warn("not enough substitution given for template: {}", template.getId());
@@ -111,6 +111,8 @@ public class TemplateController {
 		
 		Template template = templateRepo.getById(id);
 		if(template == null) {
+			logger.error("No template found for {} ", id);
+			logger.info("Tmplate substitutions supplied: {}", substitutions);
 			return null;
 		}
 		
