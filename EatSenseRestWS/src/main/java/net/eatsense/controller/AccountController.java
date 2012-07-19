@@ -37,6 +37,9 @@ import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
 import net.eatsense.util.IdHelper;
+import net.eatsense.validation.BusinessAdminChecks;
+import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.ValidationHelper;
 
 import org.codehaus.jettison.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
@@ -63,7 +66,7 @@ public class AccountController {
 	private BusinessRepository businessRepo;
 	private ChannelController channelCtrl;
 	private NewsletterRecipientRepository recipientRepo;
-	private Validator validator;
+	private final ValidationHelper validator;
 	private CompanyRepository companyRepo;
 	private FacebookService facebookService;
 	private ImageController imageController;
@@ -72,7 +75,7 @@ public class AccountController {
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
-			ChannelController cctrl, Validator validator, FacebookService facebookService,
+			ChannelController cctrl, ValidationHelper validator, FacebookService facebookService,
 			ImageController imageController, MailController mailCtrl) {
 		super();
 		this.mailCtrl = mailCtrl;
@@ -260,17 +263,11 @@ public class AccountController {
 		recipient.setEmail(recipientDto.getEmail());
 		recipient.setEntryDate(new Date());
 		
-		Set<ConstraintViolation<NewsletterRecipient>> violations = validator.validate(recipient);
-		
-		if(!violations.isEmpty()) {
-			for (ConstraintViolation<NewsletterRecipient> constraintViolation : violations) {
-				throw new IllegalArgumentException(String.format("%s %s",constraintViolation.getPropertyPath(), constraintViolation.getMessage()));
-			}
-		}
+		validator.validate(recipient);
 		
 		NewsletterRecipient duplicateRecipient = recipientRepo.getByProperty("email", recipient.getEmail());
 		if(duplicateRecipient != null) {
-			throw new IllegalArgumentException("email already registered");
+			throw new ValidationException("email already registered");
 		}
 		
 		recipientRepo.saveOrUpdate(recipient);
@@ -287,14 +284,7 @@ public class AccountController {
 	public Account registerNewAccount(RegistrationDTO accountData) {
 		checkNotNull(accountData, "accountData was null");
 		
-		Set<ConstraintViolation<RegistrationDTO>> violationSet = validator.validate(accountData);
-		if(!violationSet.isEmpty()) {
-			StringBuilder stringBuilder = new StringBuilder("validation errors:");
-			for (ConstraintViolation<RegistrationDTO> violation : violationSet) {
-				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
-			}
-			throw new ValidationException(stringBuilder.toString());
-		}
+		validator.validate(accountData);
 		
 		checkLoginDoesNotExist(accountData.getLogin());
 		checkEmailDoesNotExist(accountData.getEmail());		
@@ -458,14 +448,7 @@ public class AccountController {
 		checkNotNull(company, "company was null");
 		checkNotNull(companyData, "companyData was null");
 		
-		Set<ConstraintViolation<CompanyDTO>> violationSet = validator.validate(companyData);
-		if(!violationSet.isEmpty()) {
-			StringBuilder stringBuilder = new StringBuilder("validation errors:");
-			for (ConstraintViolation<CompanyDTO> violation : violationSet) {
-				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
-			}
-			throw new ValidationException(stringBuilder.toString());
-		}
+		validator.validate(companyData);
 		
 		company.setAddress(companyData.getAddress());
 		company.setCity(companyData.getCity());
@@ -549,6 +532,8 @@ public class AccountController {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
+		validator.validate(accountData, BusinessAdminChecks.class);
+		
 		Account account = accountRepo.getByProperty("email", accountData.getEmail());
 		
 		if(account== null) {
@@ -610,6 +595,9 @@ public class AccountController {
 		account.setBusinesses(businessKeys);
 		
 		if(account.getRole().equals(Role.COCKPITUSER)) {
+			// Validate data for cockpit user update.
+			validator.validate(accountData, CockpitUserChecks.class);
+			
 			// Update of Account Data by the company owner is only allowed for
 			// cockpit user accounts.
 			account.setName(accountData.getName());

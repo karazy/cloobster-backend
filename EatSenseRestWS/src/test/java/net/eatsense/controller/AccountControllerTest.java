@@ -36,6 +36,7 @@ import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
+import net.eatsense.validation.ValidationHelper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.codehaus.jettison.json.JSONObject;
@@ -96,7 +97,7 @@ public class AccountControllerTest {
 	@Mock
 	private ImageController imageCtrl;
 
-	private Validator validator;
+	private ValidationHelper validator;
 
 	private Company company;
 	
@@ -109,7 +110,7 @@ public class AccountControllerTest {
 	public void setUp() throws Exception {
 		injector = Guice.createInjector(new EatSenseDomainModule(),
 				new ValidationModule());
-		validator = injector.getInstance(Validator.class);
+		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
 				channelController, validator, facebookService, imageCtrl, mailCtrl);
 
@@ -233,7 +234,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testAddNewsletterRecipientDuplicateEntry() throws Exception {
-		thrown.expect(IllegalArgumentException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("already registered");
 		String email = "email@host.de";
 		RecipientDTO recipientDto = mock(RecipientDTO.class);
