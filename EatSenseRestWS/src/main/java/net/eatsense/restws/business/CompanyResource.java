@@ -150,7 +150,7 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed(Role.COMPANYOWNER)
-	public AccountDTO updateUserAccount(@PathParam("id") long accountId, CompanyAccountDTO accountData) {
+	public AccountDTO updateUserAccount(@PathParam("accountId") long accountId, CompanyAccountDTO accountData) {
 		Account ownerAccount = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return accountCtrl.updateCompanyAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()), ownerAccount, accountData);
 	}

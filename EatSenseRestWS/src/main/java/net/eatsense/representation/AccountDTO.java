@@ -3,13 +3,30 @@ package net.eatsense.representation;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.apache.bval.constraints.Email;
+
 import com.googlecode.objectify.Key;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.validation.BusinessAdminChecks;
+import net.eatsense.validation.CockpitUserChecks;
 
 public class AccountDTO {
+	/**
+	 * Login name must be between 4 and 30 characters with only lowercase letters, numbers, undercore, hyphen and dot.
+	 */
+	@NotNull(groups={CockpitUserChecks.class})
+	@Size(min = 4, max = 30 ,groups={CockpitUserChecks.class})
+	@Pattern(regexp = "^[a-z0-9_\\.-]+$",groups={CockpitUserChecks.class})
 	private String login;
+	
+	@NotNull(groups={BusinessAdminChecks.class})
+	@Email(groups={BusinessAdminChecks.class})
 	private String email;
 	private String passwordHash;
 	private String role;

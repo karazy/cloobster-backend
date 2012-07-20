@@ -1,5 +1,7 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.net.URI;
 import java.util.Properties;
 
@@ -60,6 +62,13 @@ public class MailController {
 	}
 	
 	public MimeMessage sendMail(String emailTo, String text) throws AddressException, MessagingException {
+		checkArgument(!Strings.isNullOrEmpty(emailTo), "emailTo was null or empty");
+		
+		if(Strings.isNullOrEmpty(text)) {
+			logger.error("No template found, skipped sending mail to {}", emailTo);
+			return null;
+		}
+
 		MimeMessage mail = new MimeMessage(session);
 		
 		mail.setFrom(new InternetAddress(FROM_ADDRESS));
@@ -94,6 +103,7 @@ public class MailController {
 
 	public MimeMessage sendAccountSetupMail(Account newAccount, Account ownerAccount, String setupUrl) throws AddressException, MessagingException {
 		String text = templateCtrl.getAndReplace("account-setup-email", newAccount.getName(), ownerAccount.getName(), setupUrl);
+			
 		return sendMail(newAccount.getEmail(), text);
 	}
 }
