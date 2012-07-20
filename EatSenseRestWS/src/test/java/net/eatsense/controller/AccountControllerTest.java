@@ -981,6 +981,34 @@ public class AccountControllerTest {
 	}
 	
 	@Test
+	public void testDeleteCockpituserAccount() throws Exception {
+		Account newAccount = new Account();
+		// We test the update of a cockpit account.
+		newAccount.setRole(Role.COCKPITUSER);
+		newAccount.setCompany(companyKey);
+		
+		ctr.deleteCompanyUserAccount(newAccount);
+		verify(ar).delete(newAccount);
+	}
+	
+	@Test
+	public void testDeleteBusinessAdminAccount() throws Exception {
+		Account newAccount = new Account();
+		// We test the update of a cockpit account.
+		newAccount.setRole(Role.BUSINESSADMIN);
+		newAccount.setCompany(companyKey);
+		List<Key<Business>> businesses = mock(List.class);
+		newAccount.setBusinesses(businesses);
+		
+		ctr.deleteCompanyUserAccount(newAccount);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.getCompany(),nullValue());
+		assertThat(newAccount.getBusinesses(), nullValue());
+		verify(ar,never()).delete(newAccount);
+	}
+	
+	@Test
 	public void testCreateUserAccount() throws Exception {
 		
 		CompanyAccountDTO accountData = new CompanyAccountDTO();

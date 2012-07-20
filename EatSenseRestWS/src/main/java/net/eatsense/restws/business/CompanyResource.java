@@ -7,6 +7,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -48,6 +49,8 @@ public class CompanyResource {
 	private Company company;
 
 	private final MailController mailCtrl;
+	private Account account;
+	private boolean authorized;
 	
 	@Inject
 	public CompanyResource(AccountController accountCtrl, MailController mailController) {
@@ -72,7 +75,9 @@ public class CompanyResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO updatedImage) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		if(!authorized) {
+			throw new IllegalAccessException();
+		}
 		return accountCtrl.updateCompanyImage(account, company, updatedImage);
 	}
 	
@@ -81,12 +86,11 @@ public class CompanyResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CompanyDTO updateCompany(CompanyDTO companyData) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		if(account.getCompany().getId() == company.getId()) {
-			return accountCtrl.updateCompany(company, companyData);
-		}
-		else
+		if(!authorized) {
 			throw new IllegalAccessException("account does not own the company to update");
+		}
+		
+		return accountCtrl.updateCompany(company, companyData);	
 	}
 	
 	/**
@@ -151,7 +155,32 @@ public class CompanyResource {
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed(Role.COMPANYOWNER)
 	public AccountDTO updateUserAccount(@PathParam("accountId") long accountId, CompanyAccountDTO accountData) {
-		Account ownerAccount = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		return accountCtrl.updateCompanyAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()), ownerAccount, accountData);
+		if(!authorized) {
+			throw new IllegalAccessException();
+		}
+		return accountCtrl.updateCompanyAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()), account, accountData);
+	}
+	
+	/**
+	 * Delete an account from the company, also delete the account from the data store if it was a cockpituser.
+	 * 
+	 * @param accountId Id of the account to delete.
+	 */
+	@DELETE
+	@Path("accounts/{accountId}")
+	@RolesAllowed(Role.COMPANYOWNER)
+	public void updateUserAccount(@PathParam("accountId") long accountId) {
+		if(!authorized) {
+			throw new IllegalAccessException();
+		}
+		accountCtrl.deleteCompanyUserAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()));
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
+	public void setAuthorized(boolean authorized) {
+		this.authorized = authorized;
 	}
 }

@@ -618,8 +618,34 @@ public class AccountController {
 		if(account.isDirty()) {
 			accountRepo.saveOrUpdate(account);
 		}
-				
+		
 		return new CompanyAccountDTO(account);
+	}
+	
+	/**
+	 * Delete the account if it is a cokpituser account. If it is a business
+	 * admin account, just remove the association to the company and company
+	 * businesses.
+	 * 
+	 * @param account
+	 */
+	public void deleteCompanyUserAccount(Account account) {
+		checkNotNull(account, "account was null");
+		
+		// Delete the account if it was a cockpituser.
+		if(account.getRole().equals(Role.COCKPITUSER)) {
+			accountRepo.delete(account);
+			return;
+		}
+		
+		// Don't delete the account, only delete the association with the
+		// company and businesses.
+		if(account.getRole().equals(Role.BUSINESSADMIN)) {
+			account.setCompany(null);
+			account.setBusinesses(null);
+			accountRepo.saveOrUpdate(account);
+			return;
+		}
 	}
 	
 	/**

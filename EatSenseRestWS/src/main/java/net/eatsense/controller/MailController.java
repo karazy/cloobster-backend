@@ -2,24 +2,20 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.net.URI;
 import java.util.Properties;
 
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
-import net.eatsense.representation.AccountDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
