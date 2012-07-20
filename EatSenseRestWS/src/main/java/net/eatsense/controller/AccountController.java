@@ -6,12 +6,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
@@ -20,8 +16,6 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.exceptions.RegistrationException;
-import net.eatsense.exceptions.ServiceException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
@@ -43,11 +37,9 @@ import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
