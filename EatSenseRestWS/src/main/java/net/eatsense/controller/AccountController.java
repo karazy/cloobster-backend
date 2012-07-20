@@ -72,7 +72,7 @@ public class AccountController {
 	private FacebookService facebookService;
 	private ImageController imageController;
 	private MailController mailCtrl;
-	
+
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
