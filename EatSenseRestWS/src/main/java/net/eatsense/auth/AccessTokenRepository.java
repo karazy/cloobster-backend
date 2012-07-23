@@ -1,5 +1,6 @@
 package net.eatsense.auth;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import net.eatsense.auth.AccessToken.TokenType;
@@ -18,13 +19,22 @@ public class AccessTokenRepository extends DAOBase {
 		ObjectifyService.register(AccessToken.class);
 	}
 	
+	public AccessToken createAuthToken(Key<Account> accountKey) {
+		Calendar cal = Calendar.getInstance();
+		//TODO: Extract the number of hours an authentication token is valid to the web.xml config.
+        cal.add(Calendar.HOUR_OF_DAY, 120);
+        AccessToken token = new AccessToken(IdHelper.generateId(), TokenType.AUTHENTICATION, cal.getTime(), accountKey);
+        ofy().put(token);
+        return token;
+	}
+	
 	public AccessToken create(TokenType type, Key<Account> accountKey, Date expires) {
-		AccessToken token = new AccessToken(IdHelper.generateId(), type, accountKey);
+		AccessToken token = new AccessToken(IdHelper.generateId(), type, expires, accountKey);
 		ofy().put(token);
 		return token;
 	}
 	
-	public AccessToken get(String token) {
+	public AccessToken get(String token) throws net.eatsense.exceptions.NotFoundException {
 		try {
 			return ofy().get(AccessToken.class, token);
 		} catch (NotFoundException e) {

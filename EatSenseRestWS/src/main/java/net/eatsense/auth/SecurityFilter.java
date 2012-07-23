@@ -42,6 +42,8 @@ public class SecurityFilter implements ContainerRequestFilter {
     @Context
     HttpServletRequest servletRequest;
     
+    private @Context SecurityContext securityContext;
+    
 	private CheckInRepository checkInRepo;
 	
 	@Inject
@@ -58,6 +60,13 @@ public class SecurityFilter implements ContainerRequestFilter {
 		// If we receive an OPTIONS request, do nothing.
 		if(request.getMethod().equals("OPTIONS"))
 			return request;
+		
+		if(securityContext.getAuthenticationScheme() == Authorizer.TOKEN_AUTH) {
+			// Request was authenticated with an access token, do nothing.
+			return request;
+		}
+		
+
 				
 		String checkInId = request.getHeaderValue("checkInId");
 		if(checkInId == null)
@@ -93,7 +102,6 @@ public class SecurityFilter implements ContainerRequestFilter {
 		if(checkInId != null && !checkInId.isEmpty()) {
 			 Authorizer auth = authenticateCheckIn(checkInId);
 			 if(auth != null) {
-				 
 				 request.setSecurityContext(auth);
 				 return request;
 			 }
@@ -107,28 +115,18 @@ public class SecurityFilter implements ContainerRequestFilter {
 			if(passwordHash != null && !passwordHash.isEmpty()) {
 				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticateHashed(login, passwordHash);
-				
-				if(account != null) {
-					request.setSecurityContext(new Authorizer(account, businessId));
-					servletRequest.setAttribute("net.eatsense.domain.Account", account);
-					logger.info("authentication success for user: "+login);
-					return request;
-				}	
 			}
 			
 			if(password != null && !password.isEmpty()) {
-				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticate(login, password);
-				
-				if(account != null) {
-					request.setSecurityContext(new Authorizer(account, businessId));
-					servletRequest.setAttribute("net.eatsense.domain.Account", account);
-					logger.info("authentication success for user: "+login);
-					return request;
-				}	
 			}
-			
-			
+
+			if(account != null) {
+				request.setSecurityContext(new Authorizer(account, businessId, null));
+				servletRequest.setAttribute("net.eatsense.domain.Account", account);
+				logger.info("authentication success for user: "+login);
+				return request;
+			}			
 		}
 		return request;
 	}
@@ -151,12 +149,17 @@ public class SecurityFilter implements ContainerRequestFilter {
      * <p>SecurityContext used to perform authorization checks.</p>
      */
     public class Authorizer implements SecurityContext {
-    	
+    	public static final String TOKEN_AUTH = "TOKEN";
+    	private final String authScheme;
     	private final CheckIn checkIn;
 		private final Account account;
 		private final Long businessId;
 
+		private final AccessToken token;
+
         public Authorizer(final CheckIn checkIn) {
+        	this.authScheme = FORM_AUTH;
+        	this.token = null;
         	this.account = null;
         	this.businessId = null;
         	this.checkIn = checkIn;
@@ -167,18 +170,29 @@ public class SecurityFilter implements ContainerRequestFilter {
             };
         }
         
-        public Authorizer(final Account account, Long businessId) {
+        public Authorizer(final Account account, Long businessId, final AccessToken token) {
         	this.checkIn = null;
+        	if(token != null) {
+        		this.authScheme = TOKEN_AUTH;
+        	}
+        	else {
+        		this.authScheme = BASIC_AUTH;
+        	}
+        	this.token = token;
+        	 
         	this.account = account;
         	this.businessId = businessId;
             this.principal = new Principal() {
                 public String getName() {
+                	if(account.getLogin() != null)
                 		return account.getLogin();
+                	else
+                		return account.getEmail();
                 }
             };
         }
 
-        private Principal principal;
+        private final Principal principal;
 
         public Principal getUserPrincipal() {
         	
@@ -210,7 +224,7 @@ public class SecurityFilter implements ContainerRequestFilter {
         }
 
         public String getAuthenticationScheme() {
-            return SecurityContext.FORM_AUTH;
+            return this.authScheme;
         }
     }
 

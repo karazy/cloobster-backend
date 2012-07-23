@@ -14,6 +14,7 @@ public class AccessToken {
 	public enum TokenType {
 		AUTHENTICATION,
 		EMAIL_CONFIRMATION,
+		PASSWORD_RESET,
 		ACCOUNTSETUP
 	}
 
@@ -27,10 +28,12 @@ public class AccessToken {
 		super();
 	}
 
-	public AccessToken(String token, TokenType type, Key<Account> account) {
+	public AccessToken(String token, TokenType type, Date expires,
+			Key<Account> account) {
 		super();
 		this.token = token;
 		this.type = type;
+		this.expires = expires;
 		this.account = account;
 	}
 
