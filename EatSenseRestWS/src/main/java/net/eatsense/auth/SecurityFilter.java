@@ -62,12 +62,10 @@ public class SecurityFilter implements ContainerRequestFilter {
 			return request;
 		
 		if(securityContext.getAuthenticationScheme() == Authorizer.TOKEN_AUTH) {
-			// Request was authenticated with an access token, do nothing.
+			// Request was already authenticated with an access token, do nothing.
 			return request;
 		}
-		
-
-				
+			
 		String checkInId = request.getHeaderValue("checkInId");
 		if(checkInId == null)
 			checkInId = request.getQueryParameters(true).getFirst("checkInId");
