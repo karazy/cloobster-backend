@@ -56,17 +56,6 @@ public class ChannelController {
 	}
 	
 	/**
-	 * Create a new message channel for push notification.
-	 * 
-	 * @param businessId id of a business
-	 * @param clientId
-	 * @return
-	 */
-	public String createCockpitChannel(long businessId, String clientId) throws ChannelFailureException {
-		return createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
-	}
-	
-	/**
 	 * Create a new message channel for push notification, with a default timeout of 2h,
 	 * and register the client id in the business.
 	 * 
@@ -102,28 +91,6 @@ public class ChannelController {
 		token = (timeout.isPresent())?channelService.createChannel(clientId, timeout.get()):channelService.createChannel(clientId);
 
 		return token;
-	}
-	
-	/**
-	 * Create a new message channel for push notification, with the given timeout.
-	 * 
-	 * @param businessId
-	 * @param clientId
-	 * @param timeout
-	 * @return the token to send to the client
-	 * @throws ChannelFailureException if channel creation failed
-	 * @throws IllegalArgumentException if unknown businessId has been passed
-	 */
-	public String createCockpitChannel(long businessId, String clientId , Optional<Integer> timeout) throws ChannelFailureException, IllegalArgumentException {
-		checkArgument(businessId != 0, "businessId was 0");
-		Business business;
-		try {
-			business = businessRepo.getById(businessId);
-		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("unknown businessId", e);
-		}
-		
-		return createCockpitChannel(business, clientId, timeout);
 	}
 	
 	/**

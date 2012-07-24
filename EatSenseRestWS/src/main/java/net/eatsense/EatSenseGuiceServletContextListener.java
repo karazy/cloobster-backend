@@ -3,6 +3,8 @@ package net.eatsense;
 
 import java.util.HashMap;
 
+import net.eatsense.auth.AuthorizerFactory;
+import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.controller.MessageController;
 import net.eatsense.exceptions.ServiceExceptionMapper;
@@ -84,6 +86,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(NicknameGenerator.class);
 						bind(UploadsResource.class);
 						bind(CompaniesResource.class);
+						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*b/companies(.)*",

@@ -232,18 +232,6 @@ public class AccountController {
 	}
 	
 	/**
-	 * Generates and returns a new channel token.
-	 * 
-	 * @param businessId 
-	 * @param clientId to use for token creation 
-	 * @return the generated channel token
-	 */
-	public String requestToken (Long businessId, String clientId) {
-		logger.debug("new token requested for "+clientId);
-		return channelCtrl.createCockpitChannel(businessId, clientId);
-	}
-	
-	/**
 	 * Save an email address as a newsletter recipient.
 	 * 
 	 * @param recipientDto must contain valid email

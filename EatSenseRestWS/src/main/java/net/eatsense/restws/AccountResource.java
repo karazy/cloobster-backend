@@ -96,19 +96,4 @@ public class AccountResource {
 		//TODO Refactor call to getBusinessesForAccount
 		return accountCtr.getBusinessDtos(login);
 	}
-	
-	@POST
-	@Path("{login}/tokens")
-	@Produces("text/plain; charset=UTF-8")
-	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
-	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public String requestToken(@PathParam("login") String login, @FormParam("businessId") long businessId, @FormParam("clientId") String clientId) {
-		//TODO Move method to "/b/businesses/{businessId}/channels"
-		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
-		
-		String token = channelCtrlProvider.get().createCockpitChannel(businessId, clientId, timeout);
-		if(token == null)
-			throw new NotFoundException();
-		return token;
-	};
 }

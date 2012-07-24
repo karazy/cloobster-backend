@@ -604,38 +604,6 @@ public class ChannelControllerTest {
 		assertThat(messages.get(0).getMessage(), is(messageString));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
-	public void testCreateCockpitChannelWithIdZero() throws Exception {
-		long businessId = 0;
-		String clientId = "test";
-		ctr.createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test(expected= IllegalArgumentException.class)
-	public void testCreateCockpitChannelWithIdUnknown() throws Exception {
-		long businessId = 1;
-		String clientId = "test";
-		when(business.getId()).thenReturn(businessId);
-		when(rr.getById(businessId)).thenThrow(NotFoundException.class);
-							
-		ctr.createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
-	}
-	
-	@Test
-	public void testCreateCockpitChannelWithId() throws Exception {
-		long businessId = 1;
-		String clientId = "test";
-		when(business.getId()).thenReturn(businessId);
-		when(rr.getById(businessId)).thenReturn(business);
-		when(channelService.createChannel(ctr.buildCockpitClientId(businessId, clientId))).thenReturn("newclienttoken");
-				
-		//#2 Request token with valid uid ...
-		
-		String result = ctr.createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
-		assertThat(result, is("newclienttoken"));
-	}
-	
 	@Test
 	public void testCreateCockpitChannelWithTimeout() throws Exception {
 		long businessId = 1;
@@ -695,7 +663,7 @@ public class ChannelControllerTest {
 		Optional<Integer> timeout = Optional.absent();
 		when(business.getId()).thenReturn(businessId);
 		when(channelService.createChannel(ctr.buildCockpitClientId(businessId, clientId))).thenReturn("newclienttoken");
-				
+		
 		//#2 Request token with valid uid ...
 		
 		String result = ctr.createCockpitChannel(business, clientId, timeout);

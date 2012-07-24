@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.eatsense.auth.AccessToken.TokenType;
-import net.eatsense.auth.SecurityFilter.Authorizer;
 import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
@@ -53,8 +52,8 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
 		String stringToken = request.getHeaderValue(TOKEN_HEADER);
-		AbstractResourceMethod method = resourceContext.matchUriInfo(request.getRequestUri()).getMatchedMethod();
-		TokenType requiredToken = null;
+		//AbstractResourceMethod method = resourceContext.matchUriInfo(request.getRequestUri()).getMatchedMethod();
+		//TokenType requiredToken = null;
 		
 		Long businessId = null;
 		
@@ -76,16 +75,15 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 				} catch (NumberFormatException e) {
 					logger.error("businessId invalid");
 				}
-				
 		}
 		
-		if(method != null) {
-			TokenRequired tr = method.getAnnotation(TokenRequired.class);
-			if(tr != null) {
-				requiredToken = tr.value();
-			}
-		}
-		
+//		if(method != null) {
+//			TokenRequired tr = method.getAnnotation(TokenRequired.class);
+//			if(tr != null) {
+//				requiredToken = tr.value();
+//			}
+//		}
+//		
 		if(!Strings.isNullOrEmpty(stringToken)) {
 			final AccessToken accessToken;
 			try {
@@ -104,16 +102,16 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 				throw new IllegalAccessException("Access token invalid, account no longer exists.");	
 			}
 			
-			if(requiredToken != null) {
-				if ( accessToken.getType() != requiredToken) {
-					logger.info("Token {},type={} invalid for requested uri.", stringToken, accessToken.getType());
-					throw new IllegalAccessException("Access denied, access token not valid for this request.");
-				}
-				else {
-					servletRequest.setAttribute("net.eatsense.domain.Account", account);
-				}
-			}
-			
+//			if(requiredToken != null) {
+//				if ( accessToken.getType() != requiredToken) {
+//					logger.info("Token {},type={} invalid for requested uri.", stringToken, accessToken.getType());
+//					throw new IllegalAccessException("Access denied, access token not valid for this request.");
+//				}
+//				else {
+//					servletRequest.setAttribute("net.eatsense.domain.Account", account);
+//				}
+//			}
+//			
 //TODO: find a way to use Authorizer for both filters.
 //			if(accessToken.getType() == TokenType.AUTHENTICATION) {
 //				request.setSecurityContext(new Authorizer(account, businessId, accessToken));
@@ -121,11 +119,11 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 //				logger.info("Request authenticated success for user: "+account.getLogin());
 //			}
 		}
-		else if(requiredToken != null) {
-			logger.info("No token supplied, but method requires access token of type: {}", requiredToken);
-			throw new IllegalAccessException("Access denied, access token required for this request.");
-		}
-		
+//		else if(requiredToken != null) {
+//			logger.info("No token supplied, but method requires access token of type: {}", requiredToken);
+//			throw new IllegalAccessException("Access denied, access token required for this request.");
+//		}
+//		
 		return request;
 	}
 
