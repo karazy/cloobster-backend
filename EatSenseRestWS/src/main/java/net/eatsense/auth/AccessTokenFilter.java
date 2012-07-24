@@ -41,10 +41,13 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 	
     @Context
     HttpServletRequest servletRequest;
+
+	private final AuthorizerFactory authorizerFactory;
 	
 	@Inject
-	public AccessTokenFilter(AccessTokenRepository accessTokenRepo, AccountRepository accountRepo) {
+	public AccessTokenFilter(AccessTokenRepository accessTokenRepo, AccountRepository accountRepo, AuthorizerFactory authorizerFactory) {
 		super();
+		this.authorizerFactory = authorizerFactory;
 		this.accountRepo = accountRepo;
 		this.accessTokenRepo = accessTokenRepo;
 	}
@@ -112,12 +115,11 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 //				}
 //			}
 //			
-//TODO: find a way to use Authorizer for both filters.
-//			if(accessToken.getType() == TokenType.AUTHENTICATION) {
-//				request.setSecurityContext(new Authorizer(account, businessId, accessToken));
-//				servletRequest.setAttribute("net.eatsense.domain.Account", account);
-//				logger.info("Request authenticated success for user: "+account.getLogin());
-//			}
+			if(accessToken.getType() == TokenType.AUTHENTICATION) {
+				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken));
+				servletRequest.setAttribute("net.eatsense.domain.Account", account);
+				logger.info("Request authenticated success for user: "+account.getLogin());
+			}
 		}
 //		else if(requiredToken != null) {
 //			logger.info("No token supplied, but method requires access token of type: {}", requiredToken);

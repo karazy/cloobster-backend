@@ -11,16 +11,20 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+import net.eatsense.auth.AccessToken;
+import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
 import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RegistrationDTO;
 
@@ -28,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 @Path("b/accounts")
 public class AccountsResource {
@@ -37,10 +42,12 @@ public class AccountsResource {
 	@Context
 	HttpServletRequest servletRequest;
 	private MailController mailCtrl;
+	private final Provider<AccessTokenRepository> accessTokenRepoProvider;
 	
 	@Inject
-	public AccountsResource(AccountController accountCtr, MailController mailCtr) {
+	public AccountsResource(AccountController accountCtr, MailController mailCtr, Provider<AccessTokenRepository> accessTokenRepoProvider) {
 		super();
+		this.accessTokenRepoProvider = accessTokenRepoProvider;
 		this.mailCtrl = mailCtr;
 		this.accountCtr = accountCtr;
 	}
@@ -83,5 +90,15 @@ public class AccountsResource {
 	@Produces("application/json; charset=UTF-8")
 	public EmailConfirmationDTO confirmEmail(EmailConfirmationDTO emailData) {
 		return accountCtr.confirmAccountEmail(emailData);
+	}
+	
+	@PUT
+	@Path("setup/{accessToken}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public AccountDTO setupAccount(@PathParam("accessToken") String accessToken, CompanyAccountDTO accountData) {
+		AccessToken token = accessTokenRepoProvider.get().get(accessToken);
+		
+		return accountCtr.setupAdminAccount(token.getAccount(), accountData);
 	}
 }

@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.mail.MessagingException;
 
+import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
@@ -57,24 +58,24 @@ public class AccountController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private AccountRepository accountRepo;
 	private BusinessRepository businessRepo;
-	private ChannelController channelCtrl;
 	private NewsletterRecipientRepository recipientRepo;
 	private final ValidationHelper validator;
 	private CompanyRepository companyRepo;
 	private FacebookService facebookService;
 	private ImageController imageController;
 	private MailController mailCtrl;
+	private final AccessTokenRepository accessTokenRepo;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
-			ChannelController cctrl, ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, MailController mailCtrl) {
+			ValidationHelper validator, FacebookService facebookService,
+			ImageController imageController, MailController mailCtrl, AccessTokenRepository accessTokenRepo) {
 		super();
+		this.accessTokenRepo = accessTokenRepo;
 		this.mailCtrl = mailCtrl;
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
-		this.channelCtrl = cctrl;
 		this.businessRepo = businessRepository;
 		this.accountRepo = accountRepo;
 		this.companyRepo = companyRepo;
@@ -692,5 +693,29 @@ public class AccountController {
 			accountDTOs.add(accountDTO);
 		}
 		return accountDTOs;
+	}
+
+
+	/**
+	 * @param accessToken
+	 * @param accountData
+	 * @return
+	 */
+	public AccountDTO setupAdminAccount(Key<Account> accountKey, CompanyAccountDTO accountData) {
+		checkNotNull(accountKey, "accountKey was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		Account account = accountRepo.getByKey(accountKey);
+		
+		validator.validate(accountData, PasswordChecks.class);
+		
+		// If we get a new password supplied, hash and save it.
+		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		account.setActive(true);
+		account.setEmailConfirmed(true);
+		
+		accountRepo.saveOrUpdate(account);
+		
+		return new AccountDTO(account);
 	}
 }

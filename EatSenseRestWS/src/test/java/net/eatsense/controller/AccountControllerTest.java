@@ -19,6 +19,7 @@ import javax.mail.internet.MimeMessage;
 import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
@@ -106,13 +107,16 @@ public class AccountControllerTest {
 
 	private String hashedPassword;
 	
+	@Mock
+	private AccessTokenRepository accessTokenRepo;
+	
 	@Before
 	public void setUp() throws Exception {
 		injector = Guice.createInjector(new EatSenseDomainModule(),
 				new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, validator, facebookService, imageCtrl, mailCtrl);
+				validator, facebookService, imageCtrl, mailCtrl, accessTokenRepo);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

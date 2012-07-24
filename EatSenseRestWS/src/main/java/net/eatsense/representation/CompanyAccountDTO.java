@@ -1,11 +1,9 @@
 package net.eatsense.representation;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import net.eatsense.domain.Account;
-import net.eatsense.validation.CockpitUserChecks;
 import net.eatsense.validation.PasswordChecks;
 
 public class CompanyAccountDTO extends AccountDTO {

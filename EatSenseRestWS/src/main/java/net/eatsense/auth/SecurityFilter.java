@@ -3,11 +3,9 @@
  */
 package net.eatsense.auth;
 
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
