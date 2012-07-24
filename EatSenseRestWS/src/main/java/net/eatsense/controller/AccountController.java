@@ -145,8 +145,14 @@ public class AccountController {
 		login = Strings.nullToEmpty(login).toLowerCase();
 		
 		Account account = accountRepo.getByProperty("login", login);
-		if(account == null)
+		
+		if(account == null) {
+			account = accountRepo.getByProperty("email", login);
+		}
+		
+		if(account == null) {
 			return null;
+		}
 		
 		if(!account.isActive())
 			return null;
@@ -181,6 +187,11 @@ public class AccountController {
 		login = Strings.nullToEmpty(login).toLowerCase();
 		
 		Account account = accountRepo.getByProperty("login", login);
+		
+		if(account == null) {
+			account = accountRepo.getByProperty("email", login);
+		}
+		
 		if(account == null)
 			return null;
 		
