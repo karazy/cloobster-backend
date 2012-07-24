@@ -742,4 +742,8 @@ public class AccountController {
 	public AccessToken createSetupAccountToken(Account account) {
 		return accessTokenRepo.create(TokenType.ACCOUNTSETUP, account.getKey(), null);
 	}
+	
+	public AccessToken createAuthenticationToken(Account account) {
+		return accessTokenRepo.createAuthToken(account.getKey());
+	}
 }

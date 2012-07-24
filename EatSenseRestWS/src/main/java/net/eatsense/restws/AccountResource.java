@@ -15,10 +15,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.AccessToken;
+import net.eatsense.auth.AccessTokenFilter;
+import net.eatsense.auth.Authorizer;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.domain.Account;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
 
@@ -64,9 +68,7 @@ public class AccountResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		logger.info("Authenticated request from user :" + account.getLogin());
-		return accountCtr.toDtoWithHash(account);
+		return this.getAccount();
 	}
 	
 	@GET
@@ -76,7 +78,25 @@ public class AccountResource {
 	public AccountDTO getAccount() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		logger.info("Authenticated request from user :" + account.getLogin());
-		return accountCtr.toDtoWithHash(account);
+		AccountDTO accountDto = accountCtr.toDtoWithHash(account);
+		return accountDto;
+	}
+	
+	@POST
+	@Path("tokens")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public AccountDTO createToken() {
+		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
+			throw new IllegalAccessException("Must re-authenticate with user credentials.");
+		}
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		AccountDTO accountDto = accountCtr.toDtoWithHash(account);
+		AccessToken authToken = accountCtr.createAuthenticationToken(account);
+		logger.info("Token created, expires on {}", authToken.getExpires());
+		accountDto.setAccessToken(authToken.getToken());
+		
+		return accountDto;
 	}
 	
 	@GET

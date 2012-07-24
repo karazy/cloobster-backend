@@ -3,6 +3,7 @@ package net.eatsense;
 
 import java.util.HashMap;
 
+import net.eatsense.auth.AccessTokenFilter;
 import net.eatsense.auth.AuthorizerFactory;
 import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
@@ -63,7 +64,9 @@ public class EatSenseGuiceServletContextListener extends
 						HashMap<String, String> parameters = new HashMap<String, String>();
 						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
-						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());
+						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
+								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName());
+						
 						// add cross origin headers filter, deactivated for now.
 						// parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CrossOriginResourceSharingFilter.class.getName());
 						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");

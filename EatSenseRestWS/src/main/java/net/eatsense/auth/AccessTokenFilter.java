@@ -95,7 +95,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 				throw new IllegalAccessException("Access token invalid, please re-authenticate.");
 			}
 			
-			if(accessToken.getExpires().after(new Date()) ) {
+			if(accessToken.getExpires().before(new Date()) ) {
 				throw new IllegalAccessException("Access token exired, please re-authenticate.");	
 			}
 			

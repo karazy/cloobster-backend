@@ -35,6 +35,7 @@ public class AccountDTO {
 	private Long id;
 	private String name;
 	private String phone;
+	private String accessToken;
 	
 	private List<Long> businessIds;
 
@@ -133,5 +134,13 @@ public class AccountDTO {
 
 	public void setBusinessIds(List<Long> businessIds) {
 		this.businessIds = businessIds;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
 }
