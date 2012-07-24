@@ -15,6 +15,9 @@ public class AccessToken {
 		AUTHENTICATION,
 		EMAIL_CONFIRMATION,
 		PASSWORD_RESET,
+		/**
+		 * Token used for setup of a new administrator account.
+		 */
 		ACCOUNTSETUP
 	}
 

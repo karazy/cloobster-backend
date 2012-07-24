@@ -125,9 +125,10 @@ public class CompanyResource {
 		}
 		else if(Role.BUSINESSADMIN.equals(accountData.getRole())) {
 			Account newAccount = accountCtrl.createOrAddAdminAccount(account, accountData);
+			String accessToken = accountCtrl.createSetupAccountToken(newAccount).getToken();
+			//TODO: Extract url strings as a config parameter.
+			String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/setup/{token}").build(accessToken).toString();
 			
-			//TODO: Unify path to frontend.
-			String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/setup/{token}").build().toString();
 			try {
 				mailCtrl.sendAccountSetupMail(newAccount, account, setupUrl);
 			} catch (AddressException e) {

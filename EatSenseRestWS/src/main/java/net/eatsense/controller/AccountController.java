@@ -9,8 +9,10 @@ import java.util.List;
 
 import javax.mail.MessagingException;
 
+import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
+import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
@@ -41,6 +43,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.images.ImagesServicePb.ImagesServiceTransform.Type;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -717,5 +720,15 @@ public class AccountController {
 		accountRepo.saveOrUpdate(account);
 		
 		return new AccountDTO(account);
+	}
+	
+	/**
+	 * Return a new unique access token for account setup.
+	 * 
+	 * @param account
+	 * @return {@link AccessToken} with {@link TokenType#ACCOUNTSETUP}
+	 */
+	public AccessToken createSetupAccountToken(Account account) {
+		return accessTokenRepo.create(TokenType.ACCOUNTSETUP, account.getKey(), null);
 	}
 }

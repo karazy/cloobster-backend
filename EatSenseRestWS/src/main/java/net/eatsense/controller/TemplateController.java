@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -111,8 +112,7 @@ public class TemplateController {
 		
 		Template template = templateRepo.getById(id);
 		if(template == null) {
-			logger.error("No template found for {} ", id);
-			logger.info("Tmplate substitutions supplied: {}", substitutions);
+			logger.info("{} Template substitutions supplied: {}" , id, Arrays.toString(substitutions));
 			return null;
 		}
 		
