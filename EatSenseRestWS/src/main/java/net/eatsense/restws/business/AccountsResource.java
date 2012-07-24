@@ -97,8 +97,11 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public AccountDTO setupAccount(@PathParam("accessToken") String accessToken, CompanyAccountDTO accountData) {
-		AccessToken token = accessTokenRepoProvider.get().get(accessToken);
+		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
+		AccessToken token = accessTokenRepository.get(accessToken);
 		
-		return accountCtr.setupAdminAccount(token.getAccount(), accountData);
+		AccountDTO accountDto = accountCtr.setupAdminAccount(token.getAccount(), accountData);
+		accessTokenRepository.delete(token);
+		return accountDto;
 	}
 }

@@ -118,6 +118,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			if(accessToken.getType() == TokenType.AUTHENTICATION) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken));
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
+				servletRequest.setAttribute(AccessToken.class.getName(), accessToken);
 				logger.info("Request authenticated success for user: "+account.getLogin());
 			}
 		}

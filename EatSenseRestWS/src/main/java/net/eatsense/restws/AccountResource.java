@@ -4,8 +4,6 @@ import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -16,7 +14,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.AccessToken;
-import net.eatsense.auth.AccessTokenFilter;
 import net.eatsense.auth.Authorizer;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
@@ -29,10 +26,8 @@ import net.eatsense.representation.BusinessDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.sun.jersey.api.NotFoundException;
 
 @Path("accounts")
 public class AccountResource {
@@ -77,9 +72,11 @@ public class AccountResource {
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public AccountDTO getAccount() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		logger.info("Authenticated request from user :" + account.getLogin());
-		AccountDTO accountDto = accountCtr.toDtoWithHash(account);
-		return accountDto;
+		AccessToken token = (AccessToken)servletRequest.getAttribute(AccessToken.class.getName());
+		
+		AccountDTO accountDTO = new AccountDTO(account);
+		accountDTO.setAccessToken(token != null ? token.getToken() : null);
+		return accountDTO;
 	}
 	
 	@POST
@@ -91,7 +88,7 @@ public class AccountResource {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		AccountDTO accountDto = accountCtr.toDtoWithHash(account);
+		AccountDTO accountDto = new AccountDTO(account);
 		AccessToken authToken = accountCtr.createAuthenticationToken(account);
 		logger.info("Token created, expires on {}", authToken.getExpires());
 		accountDto.setAccessToken(authToken.getToken());
@@ -105,7 +102,7 @@ public class AccountResource {
 	public AccountDTO getAccountFacebook(@QueryParam("uid") String uid, @QueryParam("token") String accessToken) {
 		Account account = accountCtr.authenticateFacebook(uid, accessToken);
 		logger.info("Authenticated request from user :" + account.getLogin());
-		return accountCtr.toDtoWithHash(account);
+		return new AccountDTO(account);
 	}
 	
 	@GET

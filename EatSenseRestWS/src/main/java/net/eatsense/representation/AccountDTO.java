@@ -28,7 +28,6 @@ public class AccountDTO {
 	@NotNull(groups={BusinessAdminChecks.class})
 	@Email(groups={BusinessAdminChecks.class})
 	private String email;
-	private String passwordHash;
 	private String role;
 	
 	private Long companyId;
@@ -83,12 +82,6 @@ public class AccountDTO {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	public String getPasswordHash() {
-		return passwordHash;
-	}
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
 	}
 	public String getRole() {
 		return role;

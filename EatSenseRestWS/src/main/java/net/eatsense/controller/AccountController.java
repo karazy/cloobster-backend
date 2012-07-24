@@ -217,16 +217,6 @@ public class AccountController {
 		}
 	}
 	
-	public AccountDTO toDtoWithHash(Account account) {
-		if(account == null) {
-			return null;
-		}
-		
-		AccountDTO accountDTO = new AccountDTO(account);
-		accountDTO.setPasswordHash(account.getHashedPassword());
-		return accountDTO;
-	}
-	
 	/**
 	 * Get a list of businesses the given account manages.
 	 * 
