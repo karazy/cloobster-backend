@@ -52,6 +52,7 @@ public class BusinessesResource {
 	
 	@GET
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@Produces("application/json; charset=UTF-8")
 	public Collection<BusinessDTO> getBusinessesForAccount(@QueryParam("account") Long accountId) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		//TODO Don't ignore the accountId and implement methods to view businesses of subordinate accounts.
