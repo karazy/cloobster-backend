@@ -98,7 +98,6 @@ public class BusinessResource {
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public String requestToken( @FormParam("clientId") String clientId ) {
-		//TODO Move method to "/b/businesses/{businessId}/channels"
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
 		
 		String token = channelCtrlProvider.get().createCockpitChannel(business, clientId, timeout);

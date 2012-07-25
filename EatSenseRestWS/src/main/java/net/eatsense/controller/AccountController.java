@@ -4,15 +4,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import javax.mail.MessagingException;
 
 import net.eatsense.auth.AccessToken;
+import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
-import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
@@ -43,9 +44,9 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.images.ImagesServicePb.ImagesServiceTransform.Type;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -638,21 +639,35 @@ public class AccountController {
 	 * @param role If specified, only return Accounts with this role.
 	 * @return List of Account transfer objects for the company filtered by role if specified. 
 	 */
-	public List<AccountDTO> getCompanyAccounts(Key<Company> companyKey, String role) {
+	public List<AccountDTO> getCompanyAccounts(Account authenticatedAccount, Key<Company> companyKey, String role) {
 		checkNotNull(companyKey, "companyKey was null");
 		
 		ArrayList<AccountDTO> accountDtos = new ArrayList<AccountDTO>();
-				
 		List<Account> accounts;
+		
 		if(!Strings.isNullOrEmpty(role)) {
-			accounts = accountRepo.getAccountsByCompanyAndRole(companyKey, role);
+			if(!Role.BUSINESSADMIN.equals(role) && !Role.COCKPITUSER.equals(role)) {
+				throw new ValidationException("Invalid role specified.");
+			}
+			
+			if(Role.BUSINESSADMIN.equals(role) && !authenticatedAccount.getRole().equals(Role.COMPANYOWNER)) {
+				// Business admins cannot get other business admin accounts.
+				accounts = Collections.emptyList();
+			}
+			else {
+				accounts = accountRepo.getAccountsByCompanyAndRole(companyKey, role);
+			}
+			
 		}
 		else {
 			accounts = accountRepo.getListByProperty("company", companyKey);
 		}
 		
 		for (Account account : accounts) {
-			accountDtos.add(new AccountDTO(account));
+			if(!account.getId().equals(authenticatedAccount.getId())) {
+				// Filter the account making the request.
+				accountDtos.add(new AccountDTO(account));
+			}
 		}
 		
 		return accountDtos;
@@ -733,6 +748,12 @@ public class AccountController {
 		return accessTokenRepo.create(TokenType.ACCOUNTSETUP, account.getKey(), null);
 	}
 	
+	/**
+	 * Return a new access token for authentication, valid for several days.
+	 * 
+	 * @param account
+	 * @return {@link AccessToken} with {@link TokenType#AUTHENTICATION}
+	 */
 	public AccessToken createAuthenticationToken(Account account) {
 		return accessTokenRepo.createAuthToken(account.getKey());
 	}

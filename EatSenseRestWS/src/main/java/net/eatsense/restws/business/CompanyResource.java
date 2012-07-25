@@ -102,9 +102,9 @@ public class CompanyResource {
 	@GET
 	@Path("accounts")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.COMPANYOWNER)
+	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
 	public List<AccountDTO> getAccounts(@QueryParam("role")String role) {
-		return accountCtrl.getCompanyAccounts(company.getKey(), role);
+		return accountCtrl.getCompanyAccounts(account, company.getKey(), role);
 	}
 	
 	/**
@@ -117,13 +117,16 @@ public class CompanyResource {
 	@Path("accounts")
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	@RolesAllowed(Role.COMPANYOWNER)
+	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
 	public AccountDTO createUserAccount(CompanyAccountDTO accountData, @Context UriInfo uriInfo) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		
 		if(Role.COCKPITUSER.equals(accountData.getRole())) {
 			return accountCtrl.createUserAccount(account, accountData);
 		}
 		else if(Role.BUSINESSADMIN.equals(accountData.getRole())) {
+			if(!account.getRole().equals(Role.COMPANYOWNER)) {
+				throw new IllegalAccessException();
+			}
 			Account newAccount = accountCtrl.createOrAddAdminAccount(account, accountData);
 			String accessToken = accountCtrl.createSetupAccountToken(newAccount).getToken();
 			//TODO: Extract url strings as a config parameter.
@@ -154,12 +157,17 @@ public class CompanyResource {
 	@Path("accounts/{accountId}")
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	@RolesAllowed(Role.COMPANYOWNER)
+	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
 	public AccountDTO updateUserAccount(@PathParam("accountId") long accountId, CompanyAccountDTO accountData) {
 		if(!authorized) {
 			throw new IllegalAccessException();
 		}
-		return accountCtrl.updateCompanyAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()), account, accountData);
+		Account accountForCompany = accountCtrl.getAccountForCompany(accountId, company.getKey());
+		if(account.getRole().equals(Role.BUSINESSADMIN) && !accountForCompany.getRole().equals(Role.COCKPITUSER)){
+			throw new IllegalAccessException();
+		}
+		
+		return accountCtrl.updateCompanyAccount(accountForCompany, account, accountData);
 	}
 	
 	/**
@@ -169,12 +177,18 @@ public class CompanyResource {
 	 */
 	@DELETE
 	@Path("accounts/{accountId}")
-	@RolesAllowed(Role.COMPANYOWNER)
-	public void updateUserAccount(@PathParam("accountId") long accountId) {
+	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
+	public void deleteUserAccount(@PathParam("accountId") long accountId) {
 		if(!authorized) {
 			throw new IllegalAccessException();
 		}
-		accountCtrl.deleteCompanyUserAccount(accountCtrl.getAccountForCompany(accountId, company.getKey()));
+		Account accountForCompany = accountCtrl.getAccountForCompany(accountId, company.getKey());
+		
+		if(account.getRole().equals(Role.BUSINESSADMIN) && !accountForCompany.getRole().equals(Role.COCKPITUSER)){
+			throw new IllegalAccessException();
+		}
+		
+		accountCtrl.deleteCompanyUserAccount(accountForCompany);
 	}
 
 	public void setAccount(Account account) {
