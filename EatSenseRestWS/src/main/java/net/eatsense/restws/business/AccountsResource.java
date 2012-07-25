@@ -3,8 +3,6 @@ package net.eatsense.restws.business;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -18,21 +16,23 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
+import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
-import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.controller.AccountController;
-import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
+import net.eatsense.event.ConfirmedAccountEvent;
+import net.eatsense.event.NewAccountEvent;
+import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.CompanyAccountDTO;
-import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RegistrationDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -43,35 +43,48 @@ public class AccountsResource {
 	
 	@Context
 	HttpServletRequest servletRequest;
-	private MailController mailCtrl;
 	private final Provider<AccessTokenRepository> accessTokenRepoProvider;
+	private final EventBus eventBus;
+	@Context
+	private UriInfo uriInfo;
 	
 	@Inject
-	public AccountsResource(AccountController accountCtr, MailController mailCtr, Provider<AccessTokenRepository> accessTokenRepoProvider) {
+	public AccountsResource(AccountController accountCtr, Provider<AccessTokenRepository> accessTokenRepoProvider, EventBus eventBus) {
 		super();
+		this.eventBus = eventBus;
 		this.accessTokenRepoProvider = accessTokenRepoProvider;
-		this.mailCtrl = mailCtr;
 		this.accountCtr = accountCtr;
 	}
 	
 	@POST
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public RegistrationDTO registerAccount(RegistrationDTO accountData, @Context UriInfo uriInfo) {
+	public RegistrationDTO registerAccount(RegistrationDTO accountData) {
 		Account newAccount = accountCtr.registerNewAccount(accountData);
-		String accessToken = accountCtr.createConfirmAccountToken(newAccount).getToken();
-		try {
-			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(accessToken).toString();
-			mailCtrl.sendRegistrationConfirmation(unsubcribeUrl, newAccount);
-		} catch (AddressException e) {
-			logger.error("sending confirmation mail failed", e);
-			if(newAccount.getEmail().equals(e.getRef())) {
-				throw new IllegalArgumentException("invalid email", e);
-			}
-		} catch (MessagingException e) {
-			logger.error("sending confirmation mail failed", e);
-		}
+		eventBus.post(new NewAccountEvent(newAccount, uriInfo));
 		return accountData;
+	}
+	
+	/**
+	 * @param accountId
+	 * @param accountData
+	 * @return
+	 */
+	@PUT
+	@Path("{accountId}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
+	public AccountDTO updateAccountProfile(@PathParam("accountId") Long accountId, CompanyAccountDTO accountData) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		if(!account.getId().equals(accountId)) {
+			throw new IllegalAccessException("Can only update the authenticated account.");
+		}
+		Account updateAccount = accountCtr.updateAccount(account, accountData);
+		if(account.getNewEmail() != null) {
+			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
+		}
+		return new AccountDTO(updateAccount);
 	}
 	
 	/**
@@ -88,6 +101,20 @@ public class AccountsResource {
 	}
 	
 	@PUT
+	@Path("email-confirmation/{accessToken}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public AccountDTO confirmNewEmail(@PathParam("accessToken") String accessToken) {
+		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
+		AccessToken token = accessTokenRepository.get(accessToken);
+		
+		Account account = accountCtr.confirmAccountEmail(token.getAccount());
+		accessTokenRepository.delete(token);
+		
+		return new AccountDTO(account);
+	}
+	
+	@PUT
 	@Path("confirmation/{accessToken}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
@@ -95,10 +122,11 @@ public class AccountsResource {
 		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
 		AccessToken token = accessTokenRepository.get(accessToken);
 		
-		AccountDTO accountDTO = new AccountDTO(accountCtr.confirmAccountEmail(token.getAccount()));
-		
+		Account account = accountCtr.confirmAccountEmail(token.getAccount());
 		accessTokenRepository.delete(token);
-		return accountDTO;
+		
+		eventBus.post(new ConfirmedAccountEvent(account));
+		return new AccountDTO(account);
 	}
 	
 	@PUT

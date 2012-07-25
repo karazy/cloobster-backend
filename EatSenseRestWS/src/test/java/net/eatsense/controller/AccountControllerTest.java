@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -14,9 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
-import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.auth.AccessTokenRepository;
@@ -33,7 +30,6 @@ import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
-import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
@@ -50,7 +46,6 @@ import org.junit.runner.RunWith;
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.internal.util.ArrayUtils;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.inject.Guice;
@@ -68,8 +63,6 @@ public class AccountControllerTest {
 	
 	@Mock
 	private BusinessRepository rr;
-	@Mock
-	private ChannelController channelController;
 	
 	private String password;
 	
@@ -117,7 +110,7 @@ public class AccountControllerTest {
 				new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				validator, facebookService, imageCtrl, mailCtrl, accessTokenRepo);
+				validator, facebookService, imageCtrl, accessTokenRepo);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

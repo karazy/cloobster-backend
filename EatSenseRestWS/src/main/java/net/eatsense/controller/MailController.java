@@ -12,28 +12,42 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.ws.rs.core.UriInfo;
 
+import net.eatsense.auth.AccessToken.TokenType;
+import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.event.ConfirmedAccountEvent;
+import net.eatsense.event.NewAccountEvent;
+import net.eatsense.event.NewCompanyAccountEvent;
+import net.eatsense.event.NewNewsletterRecipientEvent;
+import net.eatsense.event.UpdateAccountEmailEvent;
+import net.eatsense.persistence.CompanyRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 public class MailController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private Session session = Session.getDefaultInstance( new Properties(), null);
-	private TemplateController templateCtrl;
+	private final Session session = Session.getDefaultInstance( new Properties(), null);
+	private final TemplateController templateCtrl;
+	private final AccessTokenRepository accessTokenRepo;
+	private final CompanyRepository companyRepo;
 	
 	public static final String FROM_ADDRESS = "reifschneider@karazy.net";
 	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
 	
 	@Inject
-	public MailController( TemplateController templateCtrl) {
+	public MailController( TemplateController templateCtrl, AccessTokenRepository accessTokenRepository, CompanyRepository companyRepo) {
 		super();
+		this.companyRepo = companyRepo;
+		this.accessTokenRepo = accessTokenRepository;
 		this.templateCtrl = templateCtrl;
 	}
 	
@@ -79,14 +93,101 @@ public class MailController {
 
 	public MimeMessage sendWelcomeMessage(String unsubscribeUrl, NewsletterRecipient recipient) throws MessagingException {
 		String welcomeMail = templateCtrl.getAndReplace("newsletter-email-registered", unsubscribeUrl);
+		
 
 		return sendMail(recipient.getEmail(), welcomeMail);
+	}
+	
+	@Subscribe
+	public void sendWelcomeMessage(NewNewsletterRecipientEvent event) {
+		NewsletterRecipient recipient = event.getRecipient();
+		UriInfo uriInfo = event.getUriInfo();
+		
+		String unsubscribeUrl = uriInfo .getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient .getEmail()).build(recipient.getId()).toString();
+		try {
+			sendWelcomeMessage(unsubscribeUrl, recipient);
+		} catch (AddressException e) {
+			logger.error("sending welcome mail failed", e);
+		} catch (MessagingException e) {
+			logger.error("sending welcome mail failed", e);
+		}
 	}
 	
 	public Message sendRegistrationConfirmation(String unsubcribeUrl, Account account) throws MessagingException {
 		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), unsubcribeUrl);
 		
 		return sendMail(account.getEmail(), confirmationText);
+	}
+	
+	@Subscribe
+	public void sendRegistrationConfirmationMail(NewAccountEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		
+		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		
+		try {
+			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
+			sendRegistrationConfirmation(unsubcribeUrl, account);
+		} catch (AddressException e) {
+			logger.error("sending confirmation mail failed", e);
+		} catch (MessagingException e) {
+			logger.error("sending confirmation mail failed", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendAccountSetupMail(NewCompanyAccountEvent event) {
+		Account newAccount = event.getAccount();
+		Account ownerAccount = event.getOwnerAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		String accessToken = accessTokenRepo.create(TokenType.ACCOUNTSETUP, newAccount.getKey(), null).getToken();
+		
+		//TODO: Extract url strings as a config parameter.
+		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/setup/{token}").build(accessToken).toString();
+		
+		try {
+			sendAccountSetupMail(newAccount, ownerAccount, setupUrl);
+		} catch (AddressException e) {
+			logger.error("Error in e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error sending mail",e);
+		}
+
+	}
+	
+	@Subscribe
+	public void sendAccountConfirmedMessage(ConfirmedAccountEvent event) {
+		Account account = event.getAccount();
+		Company company = companyRepo.getByKey(account.getCompany());
+		
+		try {
+			sendAccountConfirmedMessage(account, company);
+		} catch (MessagingException e) {
+			logger.error("error sending confirmation notice", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendUpdateAccountEmailMessage(UpdateAccountEmailEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-email/{token}").build(accessToken).toString();
+		
+		String text = templateCtrl.getAndReplace("account-confirm-email-update", account.getName(), setupUrl);
+		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", account.getName(), account.getNewEmail());
+		
+		try {
+			// Send e-mail asking for confirmation to new address.
+			sendMail(account.getNewEmail(), text);
+			// Send notice of e-mail update to old address.
+			sendMail(account.getEmail(), textNotice);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
 	}
 	
 	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {

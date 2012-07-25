@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
@@ -29,12 +27,10 @@ import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
-import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
-import net.eatsense.util.IdHelper;
 import net.eatsense.validation.BusinessAdminChecks;
 import net.eatsense.validation.CockpitUserChecks;
 import net.eatsense.validation.PasswordChecks;
@@ -46,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -60,24 +55,22 @@ import com.googlecode.objectify.NotFoundException;
 public class AccountController {
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private AccountRepository accountRepo;
-	private BusinessRepository businessRepo;
-	private NewsletterRecipientRepository recipientRepo;
+	private final AccountRepository accountRepo;
+	private final BusinessRepository businessRepo;
+	private final NewsletterRecipientRepository recipientRepo;
 	private final ValidationHelper validator;
-	private CompanyRepository companyRepo;
-	private FacebookService facebookService;
-	private ImageController imageController;
-	private MailController mailCtrl;
+	private final CompanyRepository companyRepo;
+	private final FacebookService facebookService;
+	private final ImageController imageController;
 	private final AccessTokenRepository accessTokenRepo;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, MailController mailCtrl, AccessTokenRepository accessTokenRepo) {
+			ImageController imageController, AccessTokenRepository accessTokenRepo) {
 		super();
 		this.accessTokenRepo = accessTokenRepo;
-		this.mailCtrl = mailCtrl;
 		this.validator = validator;
 		this.recipientRepo = recipientRepo;
 		this.businessRepo = businessRepository;
@@ -297,7 +290,7 @@ public class AccountController {
 		account.setRole(Role.COMPANYOWNER);
 		account.setCompany(companyKey);
 		account.setPhone(accountData.getPhone());
-		
+			
 		account.setEmailConfirmed(false);
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 		
@@ -379,16 +372,14 @@ public class AccountController {
 		}
 		
 		if(!account.isEmailConfirmed() ) {
+			if(!Strings.isNullOrEmpty(account.getNewEmail())) {
+				account.setEmail(account.getNewEmail());
+				account.setNewEmail(null);
+			}
 			account.setEmailConfirmed(true);
 			// Activate account.
 			account.setActive(true);
 			accountRepo.saveOrUpdate(account);
-			
-			try {
-				mailCtrl.sendAccountConfirmedMessage(account, companyRepo.getByKey(account.getCompany()));
-			} catch (MessagingException e) {
-				logger.error("error sending confirmation notice", e);
-			}
 		}
 		
 		return account;
@@ -540,6 +531,46 @@ public class AccountController {
 		account.setRole(Role.BUSINESSADMIN);
 		
 		accountRepo.saveOrUpdate(account);
+		
+		return account;
+	}
+	
+	/**
+	 * Update account profile data.
+	 * 
+	 * @param account
+	 * @param accountData
+	 * @return
+	 */
+	public Account updateAccount(Account account, CompanyAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		account.setName(accountData.getName());
+		
+		// Validate data for cockpit user update.
+		validator.validate(accountData, CockpitUserChecks.class, BusinessAdminChecks.class);
+		
+		if(!Objects.equal(account.getEmail(),accountData.getEmail())) {
+			checkEmailDoesNotExist(accountData.getEmail());
+			account.setNewEmail(accountData.getEmail());
+			account.setEmailConfirmed(false);
+		}
+
+		if(!Objects.equal(account.getLogin(),accountData.getLogin())) {
+			checkLoginDoesNotExist(accountData.getLogin());
+			account.setLogin(accountData.getLogin());
+		}
+
+		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+			validator.validate(accountData, PasswordChecks.class);
+			// If we get a new password supplied, hash and save it.
+			account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		}
+
+		if(account.isDirty()) {
+			accountRepo.saveOrUpdate(account);
+		}
 		
 		return account;
 	}

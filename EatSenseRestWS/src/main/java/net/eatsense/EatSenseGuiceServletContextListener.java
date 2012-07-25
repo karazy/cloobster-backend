@@ -7,6 +7,7 @@ import net.eatsense.auth.AccessTokenFilter;
 import net.eatsense.auth.AuthorizerFactory;
 import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
+import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.restws.AccountResource;
@@ -137,6 +138,7 @@ public class EatSenseGuiceServletContextListener extends
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
 		eventBus.register(injector.getInstance(MessageController.class));
+		eventBus.register(injector.getInstance(MailController.class));
 		
 		return injector;
 	}

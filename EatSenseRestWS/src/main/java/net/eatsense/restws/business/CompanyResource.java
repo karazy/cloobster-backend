@@ -3,8 +3,6 @@ package net.eatsense.restws.business;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -18,14 +16,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
-import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
+import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.representation.AccountDTO;
@@ -33,6 +28,10 @@ import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.ImageDTO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
@@ -48,14 +47,14 @@ public class CompanyResource {
 	
 	private Company company;
 
-	private final MailController mailCtrl;
 	private Account account;
 	private boolean authorized;
+	private final EventBus eventBus;
 	
 	@Inject
-	public CompanyResource(AccountController accountCtrl, MailController mailController) {
+	public CompanyResource(AccountController accountCtrl, EventBus eventBus) {
 		super();
-		this.mailCtrl = mailController;
+		this.eventBus = eventBus;
 		this.accountCtrl = accountCtrl;
 	}
 
@@ -128,17 +127,9 @@ public class CompanyResource {
 				throw new IllegalAccessException();
 			}
 			Account newAccount = accountCtrl.createOrAddAdminAccount(account, accountData);
-			String accessToken = accountCtrl.createSetupAccountToken(newAccount).getToken();
-			//TODO: Extract url strings as a config parameter.
-			String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/setup/{token}").build(accessToken).toString();
 			
-			try {
-				mailCtrl.sendAccountSetupMail(newAccount, account, setupUrl);
-			} catch (AddressException e) {
-				logger.error("Error in e-mail address",e);
-			} catch (MessagingException e) {
-				logger.error("Error sending mail",e);
-			}
+			eventBus.post(new NewCompanyAccountEvent(newAccount, uriInfo, account));
+			
 			return new AccountDTO(newAccount);
 		}
 		else {

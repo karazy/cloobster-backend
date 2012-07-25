@@ -28,6 +28,7 @@ public class AccountDTO {
 	@NotNull(groups={BusinessAdminChecks.class})
 	@Email(groups={BusinessAdminChecks.class})
 	private String email;
+	private boolean emailConfirmed;
 	private String role;
 	
 	private Long companyId;
@@ -60,6 +61,7 @@ public class AccountDTO {
 		this.setPhone(account.getPhone());
 		
 		this.role = account.getRole();
+		this.emailConfirmed = account.isEmailConfirmed();
 		if(account.getCompany() != null)
 			this.companyId = account.getCompany().getId();
 		
@@ -135,5 +137,13 @@ public class AccountDTO {
 
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
+	}
+
+	public boolean isEmailConfirmed() {
+		return emailConfirmed;
+	}
+
+	public void setEmailConfirmed(boolean emailConfirmed) {
+		this.emailConfirmed = emailConfirmed;
 	}
 }

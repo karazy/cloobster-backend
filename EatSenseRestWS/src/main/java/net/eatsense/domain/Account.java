@@ -17,6 +17,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Account extends GenericEntity<Account> {
@@ -28,6 +29,9 @@ public class Account extends GenericEntity<Account> {
 	@NotNull 
 	@Email
 	String email;
+	
+	@Unindexed
+	private String newEmail;
 	
 	@NotNull
 	@NotEmpty
@@ -233,5 +237,13 @@ public class Account extends GenericEntity<Account> {
 
 	public void setImageUploads(List<ImageUploadDTO> imageUploads) {
 		this.imageUploads = imageUploads;
+	}
+
+	public String getNewEmail() {
+		return newEmail;
+	}
+
+	public void setNewEmail(String newEmail) {
+		this.newEmail = newEmail;
 	}
 }
