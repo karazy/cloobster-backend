@@ -20,9 +20,11 @@ import javax.ws.rs.core.UriInfo;
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
+import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.MailController;
 import net.eatsense.domain.Account;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.EmailConfirmationDTO;
@@ -56,13 +58,14 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public RegistrationDTO registerAccount(RegistrationDTO accountData, @Context UriInfo uriInfo) {
-		Account account = accountCtr.registerNewAccount(accountData);
+		Account newAccount = accountCtr.registerNewAccount(accountData);
+		String accessToken = accountCtr.createConfirmAccountToken(newAccount).getToken();
 		try {
-			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(account.getEmailConfirmationHash()).toString();
-			mailCtrl.sendRegistrationConfirmation(unsubcribeUrl, account);
+			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(accessToken).toString();
+			mailCtrl.sendRegistrationConfirmation(unsubcribeUrl, newAccount);
 		} catch (AddressException e) {
 			logger.error("sending confirmation mail failed", e);
-			if(account.getEmail().equals(e.getRef())) {
+			if(newAccount.getEmail().equals(e.getRef())) {
 				throw new IllegalArgumentException("invalid email", e);
 			}
 		} catch (MessagingException e) {
@@ -85,11 +88,17 @@ public class AccountsResource {
 	}
 	
 	@PUT
-	@Path("emailconfirmation")
+	@Path("confirmation/{accessToken}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public EmailConfirmationDTO confirmEmail(EmailConfirmationDTO emailData) {
-		return accountCtr.confirmAccountEmail(emailData);
+	public AccountDTO confirmEmail(@PathParam("accessToken") String accessToken) {
+		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
+		AccessToken token = accessTokenRepository.get(accessToken);
+		
+		AccountDTO accountDTO = new AccountDTO(accountCtr.confirmAccountEmail(token.getAccount()));
+		
+		accessTokenRepository.delete(token);
+		return accountDTO;
 	}
 	
 	@PUT
@@ -100,6 +109,9 @@ public class AccountsResource {
 		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
 		AccessToken token = accessTokenRepository.get(accessToken);
 		
+		if(token.getType() != TokenType.ACCOUNTSETUP) {
+			throw new IllegalAccessException("Invalid token.");
+		}
 		AccountDTO accountDto = accountCtr.setupAdminAccount(token.getAccount(), accountData);
 		accessTokenRepository.delete(token);
 		return accountDto;

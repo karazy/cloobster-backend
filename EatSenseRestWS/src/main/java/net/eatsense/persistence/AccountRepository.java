@@ -44,9 +44,6 @@ public class AccountRepository extends GenericRepository<Account> {
 		account.setEmail(email);
 		account.setRole(role);
 		account.setBusinesses(businessKeys);
-		if(emailConfirmed == false && !Strings.isNullOrEmpty(email)) {
-			account.setEmailConfirmationHash(IdHelper.generateId());
-		}
 		account.setCompany(companyKey);
 		account.setPhone(phone);
 		account.setFacebookUid(facebookUID);

@@ -54,7 +54,6 @@ public class Account extends GenericEntity<Account> {
 	private List<ImageUploadDTO> imageUploads;
 	
 	private String facebookUid;
-	private String emailConfirmationHash;
 	private boolean emailConfirmed = false;
 	private boolean active = false;
 	
@@ -215,17 +214,6 @@ public class Account extends GenericEntity<Account> {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	public String getEmailConfirmationHash() {
-		return emailConfirmationHash;
-	}
-
-	public void setEmailConfirmationHash(String emailConfirmationHash) {
-		if(!Objects.equal(this.emailConfirmationHash, emailConfirmationHash)) {
-			this.setDirty(true);
-			this.emailConfirmationHash = emailConfirmationHash;
-		}
 	}
 
 	public UploadToken getUploadToken() {

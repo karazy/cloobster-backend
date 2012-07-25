@@ -299,7 +299,6 @@ public class AccountController {
 		account.setPhone(accountData.getPhone());
 		
 		account.setEmailConfirmed(false);
-		account.setEmailConfirmationHash(IdHelper.generateId());
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 		
 		accountRepo.saveOrUpdate(account);
@@ -364,25 +363,25 @@ public class AccountController {
 	}
 	
 	/**
-	 * Confirms an account with the generated token, which was send to the user during registration.
+	 * Set an account email confirmed.
 	 * 
 	 * @param confirmationData
 	 * @return
 	 */
-	public EmailConfirmationDTO confirmAccountEmail(EmailConfirmationDTO confirmationData) {
-		checkNotNull(confirmationData, "confirmationData was null");
-		checkArgument(!Strings.nullToEmpty(confirmationData.getConfirmationToken()).isEmpty(), "confirmationToken was null or empty");
+	public Account confirmAccountEmail(Key<Account> accountKey) {
+		checkNotNull(accountKey, "accountKey was null");
 		
-		Account account = accountRepo.getByProperty("emailConfirmationHash", confirmationData.getConfirmationToken());
-		if(account == null)
-			throw new ValidationException("Unknown confirmation token");
+		Account account;
+		try {
+			account = accountRepo.getByKey(accountKey);
+		} catch (NotFoundException e1) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
 		
 		if(!account.isEmailConfirmed() ) {
 			account.setEmailConfirmed(true);
 			// Activate account.
 			account.setActive(true);
-			// Clear the token from the account, so that we get lesser conflicts in the future.
-			account.setEmailConfirmationHash(null);
 			accountRepo.saveOrUpdate(account);
 			
 			try {
@@ -392,9 +391,7 @@ public class AccountController {
 			}
 		}
 		
-		confirmationData.setLogin(account.getLogin());
-		confirmationData.setEmailConfirmed(true);
-		return confirmationData;
+		return account;
 	}
 	
 	public ImageDTO updateCompanyImage(Account account, Company company, ImageDTO updatedImage) {
@@ -756,5 +753,10 @@ public class AccountController {
 	 */
 	public AccessToken createAuthenticationToken(Account account) {
 		return accessTokenRepo.createAuthToken(account.getKey());
+	}
+
+
+	public AccessToken createConfirmAccountToken(Account account) {
+		return accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null);
 	}
 }

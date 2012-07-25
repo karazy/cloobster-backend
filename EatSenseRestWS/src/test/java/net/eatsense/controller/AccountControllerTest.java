@@ -56,6 +56,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {
@@ -608,7 +609,6 @@ public class AccountControllerTest {
 		assertThat(BCrypt.checkpw(data.getPassword(), account.getHashedPassword()), is(true));
 		assertThat(account.getCreationDate(), notNullValue());
 		assertThat(account.isActive(), is(false));
-		assertThat(account.getEmailConfirmationHash(), notNullValue());
 		assertThat(account.isEmailConfirmed(), is(false));
 		assertThat(account.getBusinesses(), nullValue());
 		assertThat(account.getRole(), is(Role.COMPANYOWNER));
@@ -629,13 +629,11 @@ public class AccountControllerTest {
 	public void testConfirmAccountEmail() throws Exception {
 		account.setActive(false);
 		account.setEmailConfirmed(false);
-		account.setEmailConfirmationHash("Auniquehashgeneratedbytheserver");
-		EmailConfirmationDTO data = new EmailConfirmationDTO();
-		String confirmationToken = account.getEmailConfirmationHash();
-		data.setConfirmationToken(confirmationToken);
-		when(ar.getByProperty("emailConfirmationHash", confirmationToken)).thenReturn(account);
+		@SuppressWarnings("unchecked")
+		Key<Account> accountKey = mock(Key.class);
+		when(ar.getByKey(accountKey )).thenReturn(account);
 		
-		ctr.confirmAccountEmail(data);
+		ctr.confirmAccountEmail(accountKey);
 		
 		assertThat(account.isActive(), is(true));
 		assertThat(account.isEmailConfirmed(), is(true));
@@ -643,24 +641,21 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void testConfirmAccountEmailNullConfirmationData() throws Exception {
-		EmailConfirmationDTO data = null;
+	public void testConfirmAccountEmailNullKey() throws Exception {
+		
 		thrown.expect(NullPointerException.class);
-		thrown.expectMessage("confirmationData");
-		ctr.confirmAccountEmail(data);
+		thrown.expectMessage("accountKey");
+		ctr.confirmAccountEmail(null);
 	}
 	
 	@Test
 	public void testConfirmAccountEmailInvalidToken() throws Exception {
-		account.setActive(false);
-		account.setEmailConfirmed(false);
-		account.setEmailConfirmationHash("Auniquehashgeneratedbytheserver");
-		EmailConfirmationDTO data = new EmailConfirmationDTO();
-		data.setConfirmationToken(account.getEmailConfirmationHash() + "not");
+		@SuppressWarnings("unchecked")
+		Key<Account> accountKey = mock(Key.class);
+		when(ar.getByKey(accountKey )).thenThrow(NotFoundException.class);
 		
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("token");
-		ctr.confirmAccountEmail(data);
+		thrown.expect(net.eatsense.exceptions.NotFoundException.class);
+		ctr.confirmAccountEmail(accountKey);
 	}
 	
 	@Test
