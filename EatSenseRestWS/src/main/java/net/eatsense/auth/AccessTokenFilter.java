@@ -96,12 +96,16 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			}
 			
 			if(accessToken.getExpires().before(new Date()) ) {
+				accessTokenRepo.delete(accessToken);
+				logger.info("Deleted expired access token for account {}", accessToken.getAccount());
 				throw new IllegalAccessException("Access token exired, please re-authenticate.");	
 			}
 			
 			Account account = accountRepo.getByKey(accessToken.getAccount());
 			
 			if(account == null) {
+				accessTokenRepo.delete(accessToken);
+				logger.info("Deleted invalid access token, account no longer exists {}", accessToken.getAccount());
 				throw new IllegalAccessException("Access token invalid, account no longer exists.");	
 			}
 			
@@ -114,11 +118,12 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 //					servletRequest.setAttribute("net.eatsense.domain.Account", account);
 //				}
 //			}
-//			
+//
+			servletRequest.setAttribute(AccessToken.class.getName(), accessToken);
+			
 			if(accessToken.getType() == TokenType.AUTHENTICATION) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken));
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
-				servletRequest.setAttribute(AccessToken.class.getName(), accessToken);
 				logger.info("Request authenticated success for user: "+account.getLogin());
 			}
 		}

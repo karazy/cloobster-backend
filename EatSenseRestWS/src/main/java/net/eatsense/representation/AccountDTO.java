@@ -28,6 +28,7 @@ public class AccountDTO {
 	@NotNull(groups={BusinessAdminChecks.class})
 	@Email(groups={BusinessAdminChecks.class})
 	private String email;
+	private String newEmail;
 	private boolean emailConfirmed;
 	private String role;
 	
@@ -57,6 +58,7 @@ public class AccountDTO {
 		this.id = account.getId();
 		this.login = account.getLogin();
 		this.email = account.getEmail();
+		this.newEmail = account.getNewEmail();
 		this.setName(account.getName());
 		this.setPhone(account.getPhone());
 		
@@ -145,5 +147,13 @@ public class AccountDTO {
 
 	public void setEmailConfirmed(boolean emailConfirmed) {
 		this.emailConfirmed = emailConfirmed;
+	}
+
+	public String getNewEmail() {
+		return newEmail;
+	}
+
+	public void setNewEmail(String newEmail) {
+		this.newEmail = newEmail;
 	}
 }

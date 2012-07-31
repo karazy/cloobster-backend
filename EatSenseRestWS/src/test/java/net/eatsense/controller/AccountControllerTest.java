@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -1017,5 +1018,10 @@ public class AccountControllerTest {
 		assertThat(newAccount.getRole(), is(Role.COCKPITUSER));
 		assertThat(newAccount.getCompany(), is(companyKey));
 		assertThat(newAccount.isEmailConfirmed(), is(false));
+	}
+	
+	@Test
+	public void testUpdateAccount() throws Exception {
+		
 	}
 }

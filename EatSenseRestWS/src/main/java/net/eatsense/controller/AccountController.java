@@ -552,6 +552,14 @@ public class AccountController {
 		validator.validate(accountData, CockpitUserChecks.class, BusinessAdminChecks.class);
 		
 		if(!Objects.equal(account.getEmail(),accountData.getEmail())) {
+			if(account.getNewEmail() != null && !Objects.equal(account.getNewEmail(), accountData.getEmail())) {
+				// User wants to set a new email while already in the process of
+				// confirming another address.
+				List<Key<AccessToken>> tokenKeys = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.EMAIL_CONFIRMATION);
+				// Delete all previous confirmation tokens.
+				accessTokenRepo.delete(tokenKeys);
+			}
+			
 			checkEmailDoesNotExist(accountData.getEmail());
 			account.setNewEmail(accountData.getEmail());
 			account.setEmailConfirmed(false);

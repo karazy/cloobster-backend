@@ -18,6 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
+import net.eatsense.auth.Authorizer;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
@@ -32,6 +33,7 @@ import net.eatsense.representation.RegistrationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -80,7 +82,13 @@ public class AccountsResource {
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only update the authenticated account.");
 		}
+		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+			if(servletRequest.getAuthType().equals(Authorizer.TOKEN_AUTH)) {
+				throw new IllegalAccessException("Must re-authenticate to change password.");
+			}
+		}
 		Account updateAccount = accountCtr.updateAccount(account, accountData);
+		
 		if(account.getNewEmail() != null) {
 			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
 		}

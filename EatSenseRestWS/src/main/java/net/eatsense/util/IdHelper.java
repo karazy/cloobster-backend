@@ -17,5 +17,4 @@ public class IdHelper {
 	public static String generateId() {
 		return UUID.randomUUID().toString();
 	}
-
 }

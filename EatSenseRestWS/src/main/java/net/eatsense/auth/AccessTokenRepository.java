@@ -2,6 +2,7 @@ package net.eatsense.auth;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.domain.Account;
@@ -59,6 +60,32 @@ public class AccessTokenRepository extends DAOBase {
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
+	}
+	
+	/**
+	 * @param accountKey
+	 * @return All access tokens for the account.
+	 */
+	public List<AccessToken> getForAccount(Key<Account> accountKey) {
+		return ofy().query(AccessToken.class).filter("account", accountKey).list();
+	}
+	
+	/**
+	 * @param accountKey
+	 * @param type
+	 * @return All access token keys for the type and account.
+	 */
+	public List<Key<AccessToken>> getKeysForAccountAndType(Key<Account> accountKey, TokenType type) {
+		return ofy().query(AccessToken.class).filter("account", accountKey).filter("type", type).listKeys();
+	}
+	
+	/**
+	 * Delete tokens in a parallel operation.
+	 * 
+	 * @param tokensOrKeys
+	 */
+	public void delete(Iterable<?> tokensOrKeys) {
+		ofy().delete(tokensOrKeys);
 	}
 	
 	/**

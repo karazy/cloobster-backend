@@ -55,6 +55,7 @@ public class Account extends GenericEntity<Account> {
 	private UploadToken uploadToken;
 	
 	@Embedded
+	@Unindexed
 	private List<ImageUploadDTO> imageUploads;
 	
 	private String facebookUid;
