@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -12,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.Authorizer;
@@ -94,6 +96,15 @@ public class AccountResource {
 		accountDto.setAccessToken(authToken.getToken());
 		
 		return accountDto;
+	}
+	
+	@POST
+	@Path("password-reset")
+	@Produces("text/plain; charset=UTF-8")
+	@Consumes("application/json; charset=UTF-8")
+	public String createPasswordReset(AccountDTO accountData,  @Context UriInfo uriInfo) {
+		accountCtr.createAndSendPasswordResetToken(accountData.getEmail(), uriInfo);
+		return "OK";
 	}
 	
 	@GET

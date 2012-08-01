@@ -23,7 +23,9 @@ import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
+import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
+import net.eatsense.event.UpdateAccountPasswordEvent;
 import net.eatsense.persistence.CompanyRepository;
 
 import org.slf4j.Logger;
@@ -190,6 +192,21 @@ public class MailController {
 		}
 	}
 	
+	@Subscribe
+	public void sendAccountPasswordUpdateNotification(UpdateAccountPasswordEvent event) {
+		Account account = event.getAccount();
+		String textNotice = templateCtrl.getAndReplace("account-notice-password-update", account.getName());
+		
+		try {
+			// Send notice of password update to user.
+			sendMail(account.getEmail(), textNotice);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
 	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {
 		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
 				account.getName(), account.getLogin(), account.getEmail(),
@@ -202,5 +219,25 @@ public class MailController {
 		String text = templateCtrl.getAndReplace("account-setup-email", newAccount.getName(), ownerAccount.getName(), setupUrl);
 			
 		return sendMail(newAccount.getEmail(), text);
+	}
+	
+	@Subscribe
+	public void sendAcountPasswordResetMail(ResetAccountPasswordEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		//TODO: Add expiration time, and externalize to config file.
+		String accessToken = accessTokenRepo.create(TokenType.PASSWORD_RESET, account.getKey(), null).getToken();
+		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
+
+		String text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getName(), setupUrl);
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(account.getEmail(), text);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
 	}
 }

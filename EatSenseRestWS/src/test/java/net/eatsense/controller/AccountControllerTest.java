@@ -49,6 +49,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
@@ -104,6 +105,9 @@ public class AccountControllerTest {
 	
 	@Mock
 	private AccessTokenRepository accessTokenRepo;
+
+	@Mock
+	private EventBus eventBus;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -111,7 +115,7 @@ public class AccountControllerTest {
 				new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				validator, facebookService, imageCtrl, accessTokenRepo);
+				validator, facebookService, imageCtrl, accessTokenRepo, eventBus);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

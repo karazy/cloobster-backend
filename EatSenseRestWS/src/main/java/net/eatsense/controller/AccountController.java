@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.UriInfo;
+
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
@@ -17,6 +19,8 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.event.ResetAccountPasswordEvent;
+import net.eatsense.event.UpdateAccountPasswordEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
@@ -42,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -63,12 +68,13 @@ public class AccountController {
 	private final FacebookService facebookService;
 	private final ImageController imageController;
 	private final AccessTokenRepository accessTokenRepo;
+	private final EventBus eventBus;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, AccessTokenRepository accessTokenRepo) {
+			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus) {
 		super();
 		this.accessTokenRepo = accessTokenRepo;
 		this.validator = validator;
@@ -78,6 +84,7 @@ public class AccountController {
 		this.companyRepo = companyRepo;
 		this.facebookService = facebookService;
 		this.imageController = imageController;
+		this.eventBus = eventBus;
 	}
 	
 	
@@ -574,6 +581,8 @@ public class AccountController {
 			validator.validate(accountData, PasswordChecks.class);
 			// If we get a new password supplied, hash and save it.
 			account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+			// MailController listens for this type of event.
+			eventBus.post(new UpdateAccountPasswordEvent(account));
 		}
 
 		if(account.isDirty()) {
@@ -797,5 +806,20 @@ public class AccountController {
 
 	public AccessToken createConfirmAccountToken(Account account) {
 		return accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null);
+	}
+
+
+	public void createAndSendPasswordResetToken(String email, UriInfo uriInfo) {
+		if(Strings.isNullOrEmpty(email)) {
+			throw new ValidationException("No e-mail address provided.");
+		}
+		
+		Account account = accountRepo.getByProperty("email", email);
+		
+		if(account == null) {
+			throw new ValidationException("Unknown e-mail address.");
+		}
+		
+		eventBus.post(new ResetAccountPasswordEvent(account, uriInfo));
 	}
 }
