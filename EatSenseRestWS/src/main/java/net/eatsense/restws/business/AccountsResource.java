@@ -34,6 +34,7 @@ import net.eatsense.representation.RegistrationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -91,10 +92,11 @@ public class AccountsResource {
 				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
 			}
 		}
+		String previousNewEmail = account.getNewEmail();
 		
 		Account updateAccount = accountCtr.updateAccount(account, accountData);
 		
-		if(account.getNewEmail() != null) {
+		if(account.getNewEmail() != null && !Objects.equal(previousNewEmail, account.getNewEmail()) ) {
 			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
 		}
 		return new AccountDTO(updateAccount);
