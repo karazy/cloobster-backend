@@ -374,7 +374,11 @@ public class BusinessController {
 		business.setPostcode(businessData.getPostcode());
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
-		business.setTheme(businessData.getTheme());
+		
+		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
+			// Do not override default theme
+			business.setTheme(businessData.getTheme());
+		}
 		
 		if(businessData.getPaymentMethods() != null && !businessData.getPaymentMethods().isEmpty()) {
 			business.setPaymentMethods(businessData.getPaymentMethods());
