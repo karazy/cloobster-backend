@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
@@ -44,7 +45,9 @@ public class AccountsResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Context
-	HttpServletRequest servletRequest;
+	private HttpServletRequest servletRequest;
+	private @Context SecurityContext securityContext;
+	
 	private final Provider<AccessTokenRepository> accessTokenRepoProvider;
 	private final EventBus eventBus;
 	@Context
@@ -82,11 +85,13 @@ public class AccountsResource {
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only update the authenticated account.");
 		}
+		
 		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
-			if(servletRequest.getAuthType().equals(Authorizer.TOKEN_AUTH)) {
-				throw new IllegalAccessException("Must re-authenticate to change password.");
+			if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
+				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
 			}
 		}
+		
 		Account updateAccount = accountCtr.updateAccount(account, accountData);
 		
 		if(account.getNewEmail() != null) {

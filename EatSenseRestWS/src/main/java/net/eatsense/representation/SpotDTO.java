@@ -42,6 +42,8 @@ public class SpotDTO {
 	
 	private String business;
 	
+	private String theme;
+	
 	private Long businessId;
 	
 	private Collection<PaymentMethod> payments;
@@ -163,6 +165,16 @@ public class SpotDTO {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+
+	public String getTheme() {
+		return theme;
+	}
+
+
+	public void setTheme(String theme) {
+		this.theme = theme;
 	}
 	
 }

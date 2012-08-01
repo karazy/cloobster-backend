@@ -374,6 +374,7 @@ public class BusinessController {
 		business.setPostcode(businessData.getPostcode());
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
+		business.setTheme(businessData.getTheme());
 		
 		if(businessData.getPaymentMethods() != null && !businessData.getPaymentMethods().isEmpty()) {
 			business.setPaymentMethods(businessData.getPaymentMethods());

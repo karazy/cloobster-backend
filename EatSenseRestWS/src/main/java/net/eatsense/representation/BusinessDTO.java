@@ -21,6 +21,8 @@ public class BusinessDTO {
 	
 	private boolean trash;
 	
+	private String theme;
+	
 	public BusinessDTO() {
 		super();
 	}
@@ -33,6 +35,7 @@ public class BusinessDTO {
 		this.currency = business.getCurrency();
 		this.trash = business.isTrash();
 		this.id = business.getId();
+		this.theme = business.getTheme();
 	}
 	
 	public String getName() {
@@ -68,5 +71,13 @@ public class BusinessDTO {
 
 	public void setTrash(boolean trash) {
 		this.trash = trash;
+	}
+
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
 	}
 }
