@@ -15,14 +15,15 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.validation.BusinessAdminChecks;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.LoginNameChecks;
 
 public class AccountDTO {
 	/**
 	 * Login name must be between 4 and 30 characters with only lowercase letters, numbers, undercore, hyphen and dot.
 	 */
 	@NotNull(groups={CockpitUserChecks.class})
-	@Size(min = 4, max = 30 ,groups={CockpitUserChecks.class})
-	@Pattern(regexp = "^[a-z0-9_\\.-]+$",groups={CockpitUserChecks.class})
+	@Size(min = 4, max = 30 ,groups={CockpitUserChecks.class, LoginNameChecks.class})
+	@Pattern(regexp = "^[a-z0-9_\\.-]+$",groups={CockpitUserChecks.class,LoginNameChecks.class})
 	private String login;
 	
 	@NotNull(groups={BusinessAdminChecks.class})

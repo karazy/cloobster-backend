@@ -38,6 +38,7 @@ import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
 import net.eatsense.validation.BusinessAdminChecks;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.LoginNameChecks;
 import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
 
@@ -554,11 +555,11 @@ public class AccountController {
 		checkNotNull(account, "account was null");
 		checkNotNull(accountData, "accountData was null");
 		
+		// Validate data for cockpit user update.
+		validator.validate(accountData, BusinessAdminChecks.class);
+		
 		account.setName(accountData.getName());
 		account.setPhone(accountData.getPhone());
-		
-		// Validate data for cockpit user update.
-		validator.validate(accountData, CockpitUserChecks.class, BusinessAdminChecks.class);
 		
 		if(!Objects.equal(account.getEmail(),accountData.getEmail()) || 
 				!Objects.equal(account.getNewEmail(), accountData.getEmail())) {
@@ -580,9 +581,9 @@ public class AccountController {
 				account.setEmailConfirmed(false);
 			}
 		}
-			
 
-		if(!Objects.equal(account.getLogin(),accountData.getLogin())) {
+		if(!Objects.equal(account.getLogin(), Strings.emptyToNull(accountData.getLogin()))) {
+			validator.validate(accountData, LoginNameChecks.class);
 			checkLoginDoesNotExist(accountData.getLogin());
 			account.setLogin(accountData.getLogin());
 		}
@@ -591,6 +592,9 @@ public class AccountController {
 			validator.validate(accountData, PasswordChecks.class);
 			// If we get a new password supplied, hash and save it.
 			account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+			//Invalidate all session tokens.
+			List<Key<AccessToken>> authTokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.AUTHENTICATION);
+			accessTokenRepo.delete(authTokens);
 			// MailController listens for this type of event.
 			eventBus.post(new UpdateAccountPasswordEvent(account));
 		}
@@ -832,7 +836,7 @@ public class AccountController {
 		// Delete old tokens.
 		List<Key<AccessToken>> tokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.PASSWORD_RESET);
 		accessTokenRepo.delete(tokens);
-						
+		
 		eventBus.post(new ResetAccountPasswordEvent(account, uriInfo));
 	}
 
