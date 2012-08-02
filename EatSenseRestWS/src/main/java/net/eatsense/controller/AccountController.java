@@ -836,7 +836,6 @@ public class AccountController {
 		eventBus.post(new ResetAccountPasswordEvent(account, uriInfo));
 	}
 
-
 	public void resetPassword(String token, CompanyAccountDTO accountData) {
 		checkArgument(!Strings.isNullOrEmpty(token), "token was null or empty");
 		checkNotNull(accountData, "accountData was null");
@@ -847,11 +846,14 @@ public class AccountController {
 		}
 		
 		Account account = accountRepo.getByKey(accessToken.getAccount());
+		
 		if(account == null) {
 			accessTokenRepo.delete(accessToken);
 			throw new ValidationException("Token invalid or account no longer exists.");
 		}
+		
 		validator.validate(accountData, PasswordChecks.class);
+		
 		// If we get a new password supplied, hash and save it.
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 		

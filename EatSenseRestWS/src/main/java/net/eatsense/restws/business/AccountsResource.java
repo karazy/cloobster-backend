@@ -73,6 +73,23 @@ public class AccountsResource {
 	
 	/**
 	 * @param accountId
+	 * @return retrieve profile
+	 */
+	@GET
+	@Path("{accountId}")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
+	public AccountDTO getAccountProfile(@PathParam("accountId") Long accountId) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		if(!account.getId().equals(accountId)) {
+			throw new IllegalAccessException("Can only read own account.");
+		}
+		
+		return new AccountDTO(account);
+	}
+	
+	/**
+	 * @param accountId
 	 * @param accountData
 	 * @return
 	 */
