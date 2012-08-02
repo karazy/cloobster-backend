@@ -555,6 +555,7 @@ public class AccountController {
 		checkNotNull(accountData, "accountData was null");
 		
 		account.setName(accountData.getName());
+		account.setPhone(accountData.getPhone());
 		
 		// Validate data for cockpit user update.
 		validator.validate(accountData, CockpitUserChecks.class, BusinessAdminChecks.class);
