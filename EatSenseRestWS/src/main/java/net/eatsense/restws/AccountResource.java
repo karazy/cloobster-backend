@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -24,6 +25,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.CompanyAccountDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +109,15 @@ public class AccountResource {
 		return "OK";
 	}
 	
+	@PUT
+	@Path("password-reset/{token}")
+	@Produces("text/plain; charset=UTF-8")
+	@Consumes("application/json; charset=UTF-8")
+	public String passwordReset(@PathParam("token")String token, CompanyAccountDTO accountData,  @Context UriInfo uriInfo) {
+		accountCtr.resetPassword(token, accountData);
+		return "OK";
+	}
+
 	@GET
 	@Path("loginfb")
 	@Produces("application/json; charset=UTF-8")
