@@ -41,6 +41,7 @@ public class TemplateController {
 	 * @return The list of new Template entities.
 	 */
 	public List<Template> initTemplates(String ... templates) {
+		//TODO: Add default Templates.
 		checkArgument(templates.length > 0, "templates must at least have one element");
 		
 		ArrayList<Template> templateList = new ArrayList<Template>();

@@ -108,7 +108,11 @@ public class AdminResource {
 	@Path("templates")
 	@Produces("application/json; charset=UTF-8")
 	public List<Template> createTemplates() {
-		return templateCtrl.initTemplates("account-confirm-email","newsletter-email-registered","account-confirmed");
+		return templateCtrl.initTemplates("account-confirm-email",
+				"newsletter-email-registered", "account-confirmed",
+				"account-forgotpassword-email", "account-setup-email",
+				"account-notice-password-update",
+				"account-confirm-email-update", "account-notice-email-update");
 	}
 	
 	@POST

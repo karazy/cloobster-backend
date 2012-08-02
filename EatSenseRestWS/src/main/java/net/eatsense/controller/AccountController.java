@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.mockito.Mockito.reset;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -827,7 +828,34 @@ public class AccountController {
 		if(account == null) {
 			throw new ValidationException("Unknown e-mail address.");
 		}
-		
+		// Delete old tokens.
+		List<Key<AccessToken>> tokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.PASSWORD_RESET);
+		accessTokenRepo.delete(tokens);
+						
 		eventBus.post(new ResetAccountPasswordEvent(account, uriInfo));
+	}
+
+
+	public void resetPassword(String token, CompanyAccountDTO accountData) {
+		checkArgument(!Strings.isNullOrEmpty(token), "token was null or empty");
+		checkNotNull(accountData, "accountData was null");
+		
+		AccessToken accessToken = accessTokenRepo.get(token);
+		if(accessToken.getExpires()!= null && accessToken.getExpires().before(new Date())) {
+			throw new IllegalAccessException("Token expired, request a new token.");
+		}
+		
+		Account account = accountRepo.getByKey(accessToken.getAccount());
+		if(account == null) {
+			accessTokenRepo.delete(accessToken);
+			throw new ValidationException("Token invalid or account no longer exists.");
+		}
+		validator.validate(accountData, PasswordChecks.class);
+		// If we get a new password supplied, hash and save it.
+		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		
+		accountRepo.saveOrUpdate(account);
+		
+		accessTokenRepo.delete(accessToken);
 	}
 }
