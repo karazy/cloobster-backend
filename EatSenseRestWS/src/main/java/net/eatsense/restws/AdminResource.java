@@ -1,6 +1,7 @@
 package net.eatsense.restws;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -17,10 +18,12 @@ import javax.ws.rs.WebApplicationException;
 
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
@@ -48,12 +51,14 @@ public class AdminResource {
 	protected final Logger logger;
 	private final boolean devEnvironment;
 	private final TemplateController templateCtrl;
+	private final AccountRepository accountRepo;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
-			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo, TemplateController templateCtrl) {
+			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo) {
 		super();
+		this.accountRepo = accountRepo;
 		this.templateCtrl = templateCtrl;
 		this.logger =  LoggerFactory.getLogger(this.getClass());
 		this.ddd = ddd;
@@ -136,6 +141,20 @@ public class AdminResource {
 	public void dummyData() {
 		ddd.generateDummyBusinesses();
 	}
+	
+	/**
+	 * Fix for a temporary bug, reload all accounts.
+	 */
+	@PUT
+	@Path("accounts/fixbusinesses")
+	public void reloadAccounts() {
+		Collection<Account> allAccounts = accountRepo.getAll();
+		for (Account account : allAccounts) {
+			account.getBusinesses();
+		}
+		accountRepo.saveOrUpdate(allAccounts);
+	}
+		
 	
 	@GET
 	@Path("businesses")

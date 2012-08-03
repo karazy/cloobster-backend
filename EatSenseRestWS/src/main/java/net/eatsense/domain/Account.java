@@ -16,6 +16,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
+import com.googlecode.objectify.annotation.NotSaved;
 
 @Cached
 public class Account extends GenericEntity<Account> {
@@ -35,7 +36,12 @@ public class Account extends GenericEntity<Account> {
 	Date lastFailedLogin;
 	int failedLoginAttempts;
 	
+	/**
+	 * (DEPRECATED) We keep this because we got a typo in this field.
+	 */
+	@NotSaved
 	List<Key<Business>> businessess;
+	List<Key<Business>> businesses;
 	
 	@NotNull
 	@NotEmpty
@@ -100,11 +106,16 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public List<Key<Business>> getBusinesses() {
-		return businessess;
+		//Temporary: Remove after all entities are converted.
+		if(businessess != null && !businessess.isEmpty()) {
+			businesses.addAll(businessess);
+			businessess = null;
+		}
+		return businesses;
 	}
 
 	public void setBusinesses(List<Key<Business>> businesses) {
-		this.businessess = businesses;
+		this.businesses = businesses;
 	}
 
 	public Date getLastFailedLogin() {
