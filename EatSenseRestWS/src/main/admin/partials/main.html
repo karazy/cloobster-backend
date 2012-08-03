@@ -122,5 +122,18 @@
 				</div>
 			</div>
 		</div>
+		<div class="row-fluid" id="fixes">
+			<div class="span12 well" ng-controller="CloobsterAdmin.Fixes">
+				<h1>Hotfixes <small>This section executes fixes for known bugs. E.g. problems with datastore structure which need to be adressed.</small></h1>
+				<div class="row-fluid" >
+					<div class="span12">
+						<div>
+							<button type="button" class="btn btn-primary btn-large" ng-click="fixBusinessesTypo()">Fix Businesses(s) Typo</button>
+							<p>Fixes bug in net.eatsense.domain.Account. Instead of businesses it was businessess. After fixing this all assigned businesses weren't visible anymore.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
