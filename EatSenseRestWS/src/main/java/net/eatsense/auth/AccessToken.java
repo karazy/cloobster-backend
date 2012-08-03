@@ -78,4 +78,8 @@ public class AccessToken {
 	public void setExpires(Date expires) {
 		this.expires = expires;
 	}
+	
+	public Key<AccessToken> getKey() {
+		return new Key<AccessToken>(AccessToken.class, token);
+	}
 }

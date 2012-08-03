@@ -860,9 +860,10 @@ public class AccountController {
 		
 		// If we get a new password supplied, hash and save it.
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
-		
 		accountRepo.saveOrUpdate(account);
 		
-		accessTokenRepo.delete(accessToken);
+		List<Key<AccessToken>> authTokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.AUTHENTICATION);
+		authTokens.add(accessToken.getKey());
+		accessTokenRepo.delete(authTokens);
 	}
 }
