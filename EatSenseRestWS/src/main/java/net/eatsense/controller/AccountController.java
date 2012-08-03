@@ -840,6 +840,11 @@ public class AccountController {
 		eventBus.post(new ResetAccountPasswordEvent(account, uriInfo));
 	}
 
+	/**
+	 * 
+	 * @param token
+	 * @param accountData
+	 */
 	public void resetPassword(String token, CompanyAccountDTO accountData) {
 		checkArgument(!Strings.isNullOrEmpty(token), "token was null or empty");
 		checkNotNull(accountData, "accountData was null");
