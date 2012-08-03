@@ -840,6 +840,11 @@ public class AccountController {
 		eventBus.post(new ResetAccountPasswordEvent(account, uriInfo));
 	}
 
+	/**
+	 * 
+	 * @param token
+	 * @param accountData
+	 */
 	public void resetPassword(String token, CompanyAccountDTO accountData) {
 		checkArgument(!Strings.isNullOrEmpty(token), "token was null or empty");
 		checkNotNull(accountData, "accountData was null");
@@ -860,9 +865,10 @@ public class AccountController {
 		
 		// If we get a new password supplied, hash and save it.
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
-		
 		accountRepo.saveOrUpdate(account);
 		
-		accessTokenRepo.delete(accessToken);
+		List<Key<AccessToken>> authTokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.AUTHENTICATION);
+		authTokens.add(accessToken.getKey());
+		accessTokenRepo.delete(authTokens);
 	}
 }
