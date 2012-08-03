@@ -159,7 +159,6 @@ public class AdminResource {
 		accountRepo.saveOrUpdate(allAccounts);
 	}
 		
-	
 	@GET
 	@Path("businesses")
 	@Produces("application/json; charset=UTF-8")
