@@ -12,6 +12,7 @@
 		<property name="net.karazy.channels.cockpit.timeout" value="480"/>
 		<property name="net.karazy.channels.app.timeout" value="240"/>
 		<property name="net.karazy.uploads.token.timeout" value="120"/>
+		<property name="net.karazy.app.download.url" value="http://www.cloobster.com/download"/>
 	</system-properties>
 
 	<inbound-services>

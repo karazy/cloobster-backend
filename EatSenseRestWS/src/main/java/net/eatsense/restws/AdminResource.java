@@ -154,6 +154,18 @@ public class AdminResource {
 	public void reloadAccounts() {
 		Collection<Account> allAccounts = accountRepo.getAll();
 		for (Account account : allAccounts) {
+			// Readd Oriental to demo account.
+			logger.info("Rewriting account with id: {}", account.getId());
+			if(account.getId().longValue() == 12) {
+				if(account.getBusinesses() == null) {
+					account.setBusinesses(new ArrayList<Key<Business>>());
+				}
+				 Key<Business> orientalKey = new Key<Business>(Business.class, 10002);
+				 logger.info("adding business {} to demo account", orientalKey);
+				 if(!account.getBusinesses().contains(orientalKey)) {
+					 account.getBusinesses().add(orientalKey);
+				 }
+			}
 			account.getBusinesses();
 		}
 		accountRepo.saveOrUpdate(allAccounts);
