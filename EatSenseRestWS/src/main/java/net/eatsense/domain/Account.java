@@ -1,5 +1,6 @@
 package net.eatsense.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -128,6 +129,9 @@ public class Account extends GenericEntity<Account> {
 	public List<Key<Business>> getBusinesses() {
 		//Temporary: Remove after all entities are converted.
 		if(businessess != null && !businessess.isEmpty()) {
+			if(businesses == null) {
+				businesses = new ArrayList<Key<Business>>();
+			}
 			businesses.addAll(businessess);
 			businessess = null;
 		}
