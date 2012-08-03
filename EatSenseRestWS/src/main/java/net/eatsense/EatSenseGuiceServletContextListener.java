@@ -14,6 +14,7 @@ import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.AdminResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
+import net.eatsense.restws.DownloadResource;
 import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
@@ -89,6 +90,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(ServiceExceptionMapper.class);
 						bind(NicknameGenerator.class);
 						bind(UploadsResource.class);
+						bind(DownloadResource.class);
 						bind(CompaniesResource.class);
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						
@@ -104,8 +106,9 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*accounts(.)*",
 								"(.)*spots(.)*",
 								"(.)*nickname(.)*",
+								"(.)*download(.)*",
 								"(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*",
+								"(.)*_ah/channel/disconnected(.)*",								
 								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
