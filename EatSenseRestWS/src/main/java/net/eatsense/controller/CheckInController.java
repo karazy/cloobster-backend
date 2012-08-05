@@ -134,6 +134,7 @@ public class CheckInController {
     	spotDto.setBusiness(business.getName());
     	spotDto.setCurrency(business.getCurrency());
     	spotDto.setPayments(business.getPaymentMethods());
+    	spotDto.setTheme(business.getTheme());
 		return spotDto;
 	}
 	

@@ -11,6 +11,7 @@ import net.eatsense.util.IdHelper;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import com.google.common.base.Strings;
 import com.googlecode.objectify.Key;
 
 public class AccountRepository extends GenericRepository<Account> {
@@ -43,9 +44,6 @@ public class AccountRepository extends GenericRepository<Account> {
 		account.setEmail(email);
 		account.setRole(role);
 		account.setBusinesses(businessKeys);
-		if(emailConfirmed == false) {
-			account.setEmailConfirmationHash(IdHelper.generateId());
-		}
 		account.setCompany(companyKey);
 		account.setPhone(phone);
 		account.setFacebookUid(facebookUID);
@@ -56,6 +54,37 @@ public class AccountRepository extends GenericRepository<Account> {
 			return null;
 		
 		return account;
+	}
+	
+	/**
+	 * Hash the password with the bcrypt algorithm and a generated salt.
+	 * <p>Calls {@link BCrypt#hashpw(String, String)}</p>
+	 * 
+	 * @param password
+	 * @return bcrypt hashed password
+	 */
+	public String hashPassword(String password) {
+		return BCrypt.hashpw(password, BCrypt.gensalt());
+	}
+	
+	/**
+	 * Calls {@link BCrypt#checkpw(String, String)} and return the result.
+	 * 
+	 * @param password
+	 * @param passwordHashed
+	 * @return <code>true</code> if the passwords match, false otherwise.
+	 */
+	public boolean checkPassword(String password, String passwordHashed) {
+		return BCrypt.checkpw(password, passwordHashed);
+	}
+	
+	/**
+	 * @param companyKey
+	 * @param role
+	 * @return Accounts belonging to the company with the specified role.
+	 */
+	public List<Account> getAccountsByCompanyAndRole(Key<Company> companyKey, String role) {
+		return ofy().query(Account.class).filter("company", companyKey).filter("role", role).list();
 	}
 	
 	/**

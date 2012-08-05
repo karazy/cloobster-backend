@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ public class TemplateController {
 	 * @return The list of new Template entities.
 	 */
 	public List<Template> initTemplates(String ... templates) {
+		//TODO: Add default Templates.
 		checkArgument(templates.length > 0, "templates must at least have one element");
 		
 		ArrayList<Template> templateList = new ArrayList<Template>();
@@ -82,7 +84,7 @@ public class TemplateController {
 				replacement = substitutions[ Integer.parseInt(matcher.group(1)) ];
 			}
         	catch(NumberFormatException e) {
-        		logger.warn("invalid template {}, expected decimal between 0 and ", template.getId());
+        		logger.warn("invalid template {}, expected decimal betwwen '{' and '}' got {}", template.getId(), matcher.group(1));
         	}
         	catch (ArrayIndexOutOfBoundsException e) {
 				logger.warn("not enough substitution given for template: {}", template.getId());
@@ -111,6 +113,7 @@ public class TemplateController {
 		
 		Template template = templateRepo.getById(id);
 		if(template == null) {
+			logger.info("{} Template substitutions supplied: {}" , id, Arrays.toString(substitutions));
 			return null;
 		}
 		

@@ -1,12 +1,12 @@
 package net.eatsense.controller;
 
-import java.net.URI;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.Properties;
 
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -14,99 +14,230 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.UriInfo;
 
+import net.eatsense.auth.AccessToken.TokenType;
+import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.event.ConfirmedAccountEvent;
+import net.eatsense.event.NewAccountEvent;
+import net.eatsense.event.NewCompanyAccountEvent;
+import net.eatsense.event.NewNewsletterRecipientEvent;
+import net.eatsense.event.ResetAccountPasswordEvent;
+import net.eatsense.event.UpdateAccountEmailEvent;
+import net.eatsense.event.UpdateAccountPasswordEvent;
+import net.eatsense.persistence.CompanyRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 public class MailController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private Session session = Session.getDefaultInstance( new Properties(), null);
-	private TemplateController templateCtrl;
+	private final Session session = Session.getDefaultInstance( new Properties(), null);
+	private final TemplateController templateCtrl;
+	private final AccessTokenRepository accessTokenRepo;
+	private final CompanyRepository companyRepo;
+	
+	public static final String FROM_ADDRESS = "reifschneider@karazy.net";
+	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
 	
 	@Inject
-	public MailController( TemplateController templateCtrl) {
+	public MailController( TemplateController templateCtrl, AccessTokenRepository accessTokenRepository, CompanyRepository companyRepo) {
 		super();
+		this.companyRepo = companyRepo;
+		this.accessTokenRepo = accessTokenRepository;
 		this.templateCtrl = templateCtrl;
 	}
-
-	public MimeMessage sendWelcomeMessage(UriInfo uriInfo, NewsletterRecipient recipient) throws MessagingException {
-		MimeMessage mail = new MimeMessage(session);
-		URI unsubscribeUri = uriInfo.getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient.getEmail()).build(recipient.getId());
-		
-		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient.getEmail()));
-		String welcomeMail = templateCtrl.getAndReplace("newsletter-email-registered", unsubscribeUri.toString());
-		
-		// Treat first line as subject.
-		int firstNewline = welcomeMail.indexOf("\n");
-		String subject = welcomeMail.substring(0, firstNewline);
-		String body = welcomeMail.substring(firstNewline);
+	
+	/**
+	 * @param mail
+	 * @param text The first line will be treated as subject.
+	 * @throws MessagingException
+	 */
+	private void applyTextAndSubject(MimeMessage mail, String text)
+			throws MessagingException {
+		int firstNewline = text.indexOf("\n");
+		String subject = text.substring(0, firstNewline);
+		String body = text.substring(firstNewline);
 		
 		mail.setSubject(subject, "utf-8");
-
-		logger.info("welcomeMail: {}", welcomeMail);
+		logger.info("send mail: {}", text);
 		mail.setText(body, "utf-8");
+	}
+	
+	public MimeMessage newMimeMessage() {
+		return new MimeMessage(session); 
+	}
+	
+	public MimeMessage sendMail(String emailTo, String text) throws AddressException, MessagingException {
+		checkArgument(!Strings.isNullOrEmpty(emailTo), "emailTo was null or empty");
+		
+		if(Strings.isNullOrEmpty(text)) {
+			logger.error("No template found, skipped sending mail to {}", emailTo);
+			return null;
+		}
+
+		MimeMessage mail = new MimeMessage(session);
+		
+		mail.setFrom(new InternetAddress(FROM_ADDRESS));
+		mail.setReplyTo(new Address[]{new InternetAddress(REPLY_TO_ADDRESS)});
+		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
+		
+		applyTextAndSubject(mail, text);
 		
 		Transport.send(mail);
 		return mail;
 	}
+
+	public MimeMessage sendWelcomeMessage(String unsubscribeUrl, NewsletterRecipient recipient) throws MessagingException {
+		String welcomeMail = templateCtrl.getAndReplace("newsletter-email-registered", unsubscribeUrl);
+		
+
+		return sendMail(recipient.getEmail(), welcomeMail);
+	}
 	
-	public Message sendRegistrationConfirmation(UriInfo uriInfo, Account account) throws MessagingException {
-		MimeMessage mail = new MimeMessage(session);
-		URI confirmationUri = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/account/confirm/{token}").build(account.getEmailConfirmationHash());
+	@Subscribe
+	public void sendWelcomeMessage(NewNewsletterRecipientEvent event) {
+		NewsletterRecipient recipient = event.getRecipient();
+		UriInfo uriInfo = event.getUriInfo();
 		
-		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.setReplyTo(new Address[]{new InternetAddress("info@cloobster.com")});
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
-				
-		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmationUri.toString());
+		String unsubscribeUrl = uriInfo .getAbsolutePathBuilder().path("unsubscribe/{id}").queryParam("email", recipient .getEmail()).build(recipient.getId()).toString();
+		try {
+			sendWelcomeMessage(unsubscribeUrl, recipient);
+		} catch (AddressException e) {
+			logger.error("sending welcome mail failed", e);
+		} catch (MessagingException e) {
+			logger.error("sending welcome mail failed", e);
+		}
+	}
+	
+	public Message sendRegistrationConfirmation(String unsubcribeUrl, Account account) throws MessagingException {
+		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), unsubcribeUrl);
 		
-		int firstNewline = confirmationText.indexOf("\n");
-		String subject = confirmationText.substring(0, firstNewline);
-		String body = confirmationText.substring(firstNewline);
+		return sendMail(account.getEmail(), confirmationText);
+	}
+	
+	@Subscribe
+	public void sendRegistrationConfirmationMail(NewAccountEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
 		
-		mail.setSubject(subject, "utf-8");
-		logger.info("confirmationText: {}", confirmationText);
-		mail.setText(body, "utf-8");
+		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
 		
-		Transport.send(mail);
-		return mail;
+		try {
+			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
+			sendRegistrationConfirmation(unsubcribeUrl, account);
+		} catch (AddressException e) {
+			logger.error("sending confirmation mail failed", e);
+		} catch (MessagingException e) {
+			logger.error("sending confirmation mail failed", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendAccountSetupMail(NewCompanyAccountEvent event) {
+		Account newAccount = event.getAccount();
+		Account ownerAccount = event.getOwnerAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		String accessToken = accessTokenRepo.create(TokenType.ACCOUNTSETUP, newAccount.getKey(), null).getToken();
+		
+		//TODO: Extract url strings as a config parameter.
+		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/setup/{token}").build(accessToken).toString();
+		
+		try {
+			sendAccountSetupMail(newAccount, ownerAccount, setupUrl);
+		} catch (AddressException e) {
+			logger.error("Error in e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error sending mail",e);
+		}
+
+	}
+	
+	@Subscribe
+	public void sendAccountConfirmedMessage(ConfirmedAccountEvent event) {
+		Account account = event.getAccount();
+		Company company = companyRepo.getByKey(account.getCompany());
+		
+		try {
+			sendAccountConfirmedMessage(account, company);
+		} catch (MessagingException e) {
+			logger.error("error sending confirmation notice", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendUpdateAccountEmailMessage(UpdateAccountEmailEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-email/{token}").build(accessToken).toString();
+		
+		String text = templateCtrl.getAndReplace("account-confirm-email-update", account.getName(), setupUrl);
+		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", account.getName(), account.getNewEmail());
+		
+		try {
+			// Send e-mail asking for confirmation to new address.
+			sendMail(account.getNewEmail(), text);
+			// Send notice of e-mail update to old address.
+			sendMail(account.getEmail(), textNotice);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendAccountPasswordUpdateNotification(UpdateAccountPasswordEvent event) {
+		Account account = event.getAccount();
+		String textNotice = templateCtrl.getAndReplace("account-notice-password-update", account.getName());
+		
+		try {
+			// Send notice of password update to user.
+			sendMail(account.getEmail(), textNotice);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
 	}
 	
 	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {
-		MimeMessage mail = new MimeMessage(session);
-				
-		mail.setFrom(new InternetAddress("reifschneider@karazy.net"));
-		mail.addRecipient(Message.RecipientType.TO, new InternetAddress("info@cloobster.com"));
-				
 		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
 				account.getName(), account.getLogin(), account.getEmail(),
 				Strings.nullToEmpty(account.getPhone()), company.getName());
 		
-		int firstNewline = confirmationText.indexOf("\n");
-		String subject = confirmationText.substring(0, firstNewline);
-		String body = confirmationText.substring(firstNewline);
-		
-		mail.setSubject(subject, "utf-8");
-		logger.info("confirmationText: {}", confirmationText);
-		mail.setText(body, "utf-8");
-		
-		Transport.send(mail);
-		return mail;
+		return sendMail("info@cloobster.com", confirmationText);
+	}
+
+	public MimeMessage sendAccountSetupMail(Account newAccount, Account ownerAccount, String setupUrl) throws AddressException, MessagingException {
+		String text = templateCtrl.getAndReplace("account-setup-email", newAccount.getName(), ownerAccount.getName(), setupUrl);
+			
+		return sendMail(newAccount.getEmail(), text);
 	}
 	
-	public Message newMimeMessage() {
-		return new MimeMessage(session); 
-	}
-	
-	public void sendMail(Message message) throws MessagingException, SendFailedException, AddressException {
-		Transport.send(message);
+	@Subscribe
+	public void sendAcountPasswordResetMail(ResetAccountPasswordEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		//TODO: Add expiration time, and externalize to config file.
+		String accessToken = accessTokenRepo.create(TokenType.PASSWORD_RESET, account.getKey(), null).getToken();
+		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
+
+		String text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getName(), setupUrl);
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(account.getEmail(), text);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
 	}
 }

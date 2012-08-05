@@ -1,22 +1,56 @@
 package net.eatsense.representation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.apache.bval.constraints.Email;
+
+import com.googlecode.objectify.Key;
+
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
+import net.eatsense.validation.BusinessAdminChecks;
+import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.LoginNameChecks;
 
 public class AccountDTO {
-	String login;
-	String email;
-	String passwordHash;
-	String role;
+	/**
+	 * Login name must be between 4 and 30 characters with only lowercase letters, numbers, undercore, hyphen and dot.
+	 */
+	@NotNull(groups={CockpitUserChecks.class})
+	@Size(min = 4, max = 30 ,groups={CockpitUserChecks.class, LoginNameChecks.class})
+	@Pattern(regexp = "^[a-z0-9_\\.-]+$",groups={CockpitUserChecks.class,LoginNameChecks.class})
+	private String login;
+	
+	@NotNull(groups={BusinessAdminChecks.class})
+	@Email(groups={BusinessAdminChecks.class})
+	private String email;
+	private String newEmail;
+	private boolean emailConfirmed;
+	private String role;
 	
 	private Long companyId;
 	private Long id;
 	private String name;
 	private String phone;
+	private String accessToken;
+	
+	private List<Long> businessIds;
+
 		
 	public AccountDTO() {
 		super();
 	}
 	
+	/**
+	 * Construct a new AccountDTO from the given Account entity.
+	 * 
+	 * @param account
+	 */
 	public AccountDTO(Account account) {
 		super();
 		if(account == null)
@@ -25,12 +59,21 @@ public class AccountDTO {
 		this.id = account.getId();
 		this.login = account.getLogin();
 		this.email = account.getEmail();
+		this.newEmail = account.getNewEmail();
 		this.setName(account.getName());
 		this.setPhone(account.getPhone());
-		this.passwordHash = account.getHashedPassword();
+		
 		this.role = account.getRole();
+		this.emailConfirmed = account.isEmailConfirmed();
 		if(account.getCompany() != null)
-			this.companyId = account.getCompany().getId(); 
+			this.companyId = account.getCompany().getId();
+		
+		if(account.getBusinesses()!=null) {
+			businessIds = new ArrayList<Long>();
+			for (Key<Business> businessKey : account.getBusinesses()) {
+				businessIds.add(businessKey.getId());
+			}
+		}
 	}
 	
 	public String getLogin() {
@@ -44,12 +87,6 @@ public class AccountDTO {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	public String getPasswordHash() {
-		return passwordHash;
-	}
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
 	}
 	public String getRole() {
 		return role;
@@ -87,5 +124,37 @@ public class AccountDTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public List<Long> getBusinessIds() {
+		return businessIds;
+	}
+
+	public void setBusinessIds(List<Long> businessIds) {
+		this.businessIds = businessIds;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public boolean isEmailConfirmed() {
+		return emailConfirmed;
+	}
+
+	public void setEmailConfirmed(boolean emailConfirmed) {
+		this.emailConfirmed = emailConfirmed;
+	}
+
+	public String getNewEmail() {
+		return newEmail;
+	}
+
+	public void setNewEmail(String newEmail) {
+		this.newEmail = newEmail;
 	}
 }

@@ -6,6 +6,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.ChannelController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
@@ -26,7 +28,9 @@ import net.eatsense.representation.SpotDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
 
 /**
@@ -44,6 +48,7 @@ public class BusinessResource {
 	private Business business;
 	private BusinessController businessCtrl;
 	private Account account;
+	private final Provider<ChannelController> channelCtrlProvider;
 	
 	public void setBusiness(Business business) {
 		this.business = business;
@@ -54,8 +59,9 @@ public class BusinessResource {
 	}
 	
 	@Inject
-	public BusinessResource(BusinessController businessCtrl) {
+	public BusinessResource(BusinessController businessCtrl, Provider<ChannelController> channelCtrlProvider) {
 		super();
+		this.channelCtrlProvider = channelCtrlProvider;
 		this.businessCtrl = businessCtrl;
 	}
 
@@ -84,6 +90,21 @@ public class BusinessResource {
 	public void deleteBusiness() {
 		businessCtrl.trashBusiness(business, account);
 	}
+	
+	
+	@POST
+	@Path("channels")
+	@Produces("text/plain; charset=UTF-8")
+	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public String requestToken( @FormParam("clientId") String clientId ) {
+		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
+		
+		String token = channelCtrlProvider.get().createCockpitChannel(business, clientId, timeout);
+		if(token == null)
+			throw new NotFoundException();
+		return token;
+	};
 	
 	@POST
 	@Path("images/{id}")

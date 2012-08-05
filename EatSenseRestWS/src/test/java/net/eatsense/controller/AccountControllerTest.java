@@ -3,37 +3,38 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.mail.Message;
-import javax.validation.Validator;
+import javax.mail.internet.MimeMessage;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.exceptions.RegistrationException;
-import net.eatsense.exceptions.ServiceException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
+import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
-import net.eatsense.representation.EmailConfirmationDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
+import net.eatsense.validation.ValidationHelper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.codehaus.jettison.json.JSONObject;
@@ -48,24 +49,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-
-	private final LocalServiceTestHelper helper =
-	    new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 	
 	private Injector injector;
 	private AccountController ctr;
+	
+	@Mock
 	private BusinessRepository rr;
-	private ChannelController channelController;
 	
 	private String password;
 	
@@ -95,29 +94,46 @@ public class AccountControllerTest {
 	@Mock
 	private ImageController imageCtrl;
 
-	private Validator validator;
+	private ValidationHelper validator;
 
 	private Company company;
 	
+	@Mock
+	private Key<Company> companyKey;
+
+	private String hashedPassword;
+	
+	@Mock
+	private AccessTokenRepository accessTokenRepo;
+
+	@Mock
+	private EventBus eventBus;
+	
 	@Before
 	public void setUp() throws Exception {
-		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(),
 				new ValidationModule());
-		channelController = mock(ChannelController.class);
-		rr = injector.getInstance(BusinessRepository.class);
-		ar = injector.getInstance(AccountRepository.class);
-		validator = injector.getInstance(Validator.class);
+		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				channelController, validator, facebookService, imageCtrl, mailCtrl);
+				validator, facebookService, imageCtrl, accessTokenRepo, eventBus);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";
 		email = "wurst@wurst.de";
 		role = "admin";
+		hashedPassword = "normallyareallystronghashedpassword";
 		// TODO update to use restaurant id
-		account = ar.createAndSaveAccount("admin",login, password, email, role,
-				rr.getAllKeys(), null, null, null, true, true);
+		
+		account = new Account();
+		account.setActive(true);
+		account.setEmail(email);
+		account.setLogin(login);
+		account.setRole(role);
+		account.setEmailConfirmed(true);
+		account.setHashedPassword(hashedPassword);
+		account.setCompany(companyKey);
+		when(ar.getByProperty("login", login)).thenReturn(account);
+		when(ar.checkPassword(password, hashedPassword)).thenReturn(true);
 		
 		company = new Company();
 		CompanyDTO data = getCompanyTestData();
@@ -133,11 +149,11 @@ public class AccountControllerTest {
 
 	@After
 	public void tearDown() throws Exception {
-		helper.tearDown();
 	}
 	
 	@Test
 	public void testAuthenticate() {
+		when(ar.checkPassword(password, hashedPassword)).thenReturn(true);
 		//#1 Test correct password
 		Account test = ctr.authenticate(login, password);
 		
@@ -168,7 +184,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testAuthenticateCaseInsensitive() {
-		String loginWithUpperCase = "TestLogin";		
+		String loginWithUpperCase = "TestLogin";
 		Account test = ctr.authenticate(loginWithUpperCase, password);
 		
 		assertThat(test.getLogin(), is(login));
@@ -221,7 +237,7 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testAddNewsletterRecipientDuplicateEntry() throws Exception {
-		thrown.expect(IllegalArgumentException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("already registered");
 		String email = "email@host.de";
 		RecipientDTO recipientDto = mock(RecipientDTO.class);
@@ -236,7 +252,7 @@ public class AccountControllerTest {
 		String email = "email@host.de";
 		RecipientDTO recipientDto = mock(RecipientDTO.class);
 		when(recipientDto.getEmail()).thenReturn(email);
-		when(mailCtrl.newMimeMessage()).thenReturn(mock(Message.class));
+		when(mailCtrl.newMimeMessage()).thenReturn(mock(MimeMessage.class));
 				
 		ctr.addNewsletterRecipient(recipientDto);
 		
@@ -396,7 +412,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -418,7 +434,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -440,7 +456,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -463,7 +479,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -485,7 +501,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
 		ctr.registerNewAccount(data);
@@ -507,7 +523,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
 		ctr.registerNewAccount(data);
@@ -529,7 +545,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
-		thrown.expect(RegistrationException.class);
+		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
 		ctr.registerNewAccount(data);
@@ -537,6 +553,10 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testRegisterNewAccountValidPassword() throws Exception {
+		Company newCompany = new Company();
+		when(companyRepo.newEntity()).thenReturn(newCompany );
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount);
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
@@ -556,6 +576,11 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testRegisterNewAccount() throws Exception {
+		Company newCompany = new  Company();
+		when(companyRepo.newEntity()).thenReturn(newCompany );
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount );
+		
 		RegistrationDTO data = new RegistrationDTO();
 		data.setEmail("test@test.de");
 		data.setLogin("testuser1");
@@ -570,18 +595,21 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 		
+		when(ar.hashPassword(data.getPassword())).thenReturn(BCrypt.hashpw(data.getPassword(), BCrypt.gensalt()));
+		
 		account = ctr.registerNewAccount(data);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		
 		assertThat(account.getEmail(), is(data.getEmail()));
 		assertThat(account.getLogin(), is(data.getLogin()));
 		assertThat(account.getName(), is(data.getName()));
 		assertThat(BCrypt.checkpw(data.getPassword(), account.getHashedPassword()), is(true));
 		assertThat(account.getCreationDate(), notNullValue());
 		assertThat(account.isActive(), is(false));
-		assertThat(account.getEmailConfirmationHash(), notNullValue());
 		assertThat(account.isEmailConfirmed(), is(false));
 		assertThat(account.getBusinesses(), nullValue());
 		assertThat(account.getRole(), is(Role.COMPANYOWNER));
-		assertThat(account.getId(), notNullValue());
 		assertThat(account.getPhone(), is(data.getPhone()));
 		ArgumentCaptor<Company> companyArg = ArgumentCaptor.forClass(Company.class);
 		verify(companyRepo).saveOrUpdate(companyArg.capture());
@@ -597,38 +625,42 @@ public class AccountControllerTest {
 	
 	@Test
 	public void testConfirmAccountEmail() throws Exception {
-		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
-		EmailConfirmationDTO data = new EmailConfirmationDTO();
-		String confirmationToken = account.getEmailConfirmationHash();
-		data.setConfirmationToken(confirmationToken);
+		account.setActive(false);
+		account.setEmailConfirmed(false);
+		@SuppressWarnings("unchecked")
+		Key<Account> accountKey = mock(Key.class);
+		when(ar.getByKey(accountKey )).thenReturn(account);
 		
-		ctr.confirmAccountEmail(data);
+		ctr.confirmAccountEmail(accountKey);
+		
+		assertThat(account.isActive(), is(true));
+		assertThat(account.isEmailConfirmed(), is(true));
+		verify(ar).saveOrUpdate(account);
 	}
 	
 	@Test
-	public void testConfirmAccountEmailNullConfirmationData() throws Exception {
-		EmailConfirmationDTO data = null;
+	public void testConfirmAccountEmailNullKey() throws Exception {
+		
 		thrown.expect(NullPointerException.class);
-		thrown.expectMessage("confirmationData");
-		ctr.confirmAccountEmail(data);
+		thrown.expectMessage("accountKey");
+		ctr.confirmAccountEmail(null);
 	}
 	
 	@Test
 	public void testConfirmAccountEmailInvalidToken() throws Exception {
-		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, null, false, false);
-		EmailConfirmationDTO data = new EmailConfirmationDTO();
-		String confirmationToken = account.getEmailConfirmationHash();
-		data.setConfirmationToken("not"+confirmationToken);
+		@SuppressWarnings("unchecked")
+		Key<Account> accountKey = mock(Key.class);
+		when(ar.getByKey(accountKey )).thenThrow(NotFoundException.class);
 		
-		thrown.expect(ServiceException.class);
-		thrown.expectMessage("token");
-		ctr.confirmAccountEmail(data);
+		thrown.expect(net.eatsense.exceptions.NotFoundException.class);
+		ctr.confirmAccountEmail(accountKey);
 	}
 	
 	@Test
 	public void testAuthenticateFacebook() throws Exception {
 		String uid = "100000164823174";
-		account = ar.createAndSaveAccount("Test User", login, password,	email, role, rr.getAllKeys(), null, null, uid, true, true);
+		account.setFacebookUid(uid);
+		when(ar.getByProperty("facebookUid", uid)).thenReturn(account);
 		String accessToken = "test";
 		JSONObject jsonMe = new JSONObject();
 		jsonMe.put("id", uid);
@@ -802,8 +834,7 @@ public class AccountControllerTest {
 		CompanyDTO companyData = getCompanyTestData();
 		ctr.updateCompany(company, companyData);
 		verify(companyRepo, never()).saveOrUpdate(company);
-	}
-	
+	}	
 		
 	public CompanyDTO getCompanyTestData() {
 		CompanyDTO data = new CompanyDTO();
@@ -815,5 +846,186 @@ public class AccountControllerTest {
 		data.setPostcode("12345");
 		data.setUrl("http://www.karazy.net/");
 		return data;
+	}
+	
+	@Test
+	public void testUpdateUserAccountUnknownBusiness() throws Exception {
+		@SuppressWarnings("unchecked")
+		List<Key<Business>> businesses = mock(List.class);
+		account.setBusinesses(businesses );
+		Account newAccount = new Account();
+		newAccount.setCompany(companyKey);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password");
+		List<Long> businessIds = new ArrayList<Long>();
+		long businessId1 = 1;
+		long businessId2 = 2;
+		businessIds.add(businessId2 );
+		accountData.setBusinessIds(businessIds );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey1 = mock(Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey2 = mock(Key.class);
+		when(rr.getKey(businessId1)).thenReturn(businessKey1 );
+		when(rr.getKey(businessId2)).thenReturn(businessKey2 );
+		when(businesses.contains(businessKey1)).thenReturn(true);
+		// We expect the method to thrown an exception if we try to add a
+		// business id that was not managed by the owner account.
+		thrown.expect(ValidationException.class);
+		
+		ctr.updateCompanyAccount(newAccount, account, accountData);
+	}
+	
+	@Test
+	public void testUpdateUserAccountLoginAlreadyExists() throws Exception {
+		Account newAccount = new Account();
+		newAccount.setRole(Role.COCKPITUSER);
+		newAccount.setCompany(companyKey);
+		
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password");
+		
+		@SuppressWarnings("unchecked")
+		Key<Account> value = mock(Key.class);
+		when(ar.getKeyByProperty("login", "testuser")).thenReturn(value );
+		
+		thrown.expect(ValidationException.class);
+		ctr.updateCompanyAccount(newAccount, account, accountData);
+	}
+	
+	@Test
+	public void testUpdateCockpitUserAccount() throws Exception {
+		@SuppressWarnings("unchecked")
+		List<Key<Business>> businesses = mock(List.class);
+		account.setBusinesses(businesses );
+		Account newAccount = new Account();
+		// We test the update of a cockpit account.
+		newAccount.setRole(Role.COCKPITUSER);
+		newAccount.setCompany(companyKey);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password1");
+		List<Long> businessIds = new ArrayList<Long>();
+		long businessId1 = 1;
+		businessIds.add(businessId1 );
+		accountData.setBusinessIds(businessIds );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey1 = mock(Key.class);
+		when(rr.getKey(businessId1)).thenReturn(businessKey1 );
+		when(businesses.contains(businessKey1)).thenReturn(true);
+		when(ar.hashPassword(accountData.getPassword())).thenReturn("hashedpassword");
+		
+		ctr.updateCompanyAccount(newAccount, account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.getLogin(),is(accountData.getLogin()));
+		assertThat(newAccount.getHashedPassword(), is("hashedpassword"));
+		assertThat(newAccount.getBusinesses(), hasItem(businessKey1));
+		
+	}
+	
+	@Test
+	public void testAddAdminAccountWithDifferentCompany() throws Exception {
+		Account newAccount = new Account();
+		newAccount.setCompany(mock(Key.class));
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setEmail("test@cloobster.com");
+		when(ar.getByProperty("email", accountData.getEmail())).thenReturn(newAccount);
+		
+		thrown.expect(ValidationException.class);
+
+		ctr.createOrAddAdminAccount(account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		
+		assertThat(newAccount.getCompany(), is(account.getCompany()));
+		assertThat(newAccount.getRole(), is(Role.BUSINESSADMIN));
+	}
+	
+	@Test
+	public void testAddAdminAccountWithNoCompany() throws Exception {
+		Account newAccount = new Account();
+		newAccount.setActive(true);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setEmail("test@cloobster.com");
+		when(ar.getByProperty("email", accountData.getEmail())).thenReturn(newAccount);
+		
+		ctr.createOrAddAdminAccount(account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		
+		assertThat(newAccount.getCompany(), is(account.getCompany()));
+		assertThat(newAccount.getRole(), is(Role.BUSINESSADMIN));
+	}
+	
+	@Test
+	public void testCreateAdminAccount() throws Exception {
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount);
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setEmail("test@cloobster.com");
+		
+		ctr.createOrAddAdminAccount(account, accountData);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.getEmail(), is(accountData.getEmail()));
+		assertThat(newAccount.getCompany(), is(account.getCompany()));
+		assertThat(newAccount.isActive(), is(false));
+		assertThat(newAccount.isEmailConfirmed(), is(false));
+		assertThat(newAccount.getRole(),is(Role.BUSINESSADMIN));
+	}
+	
+	@Test
+	public void testDeleteCockpituserAccount() throws Exception {
+		Account newAccount = new Account();
+		// We test the update of a cockpit account.
+		newAccount.setRole(Role.COCKPITUSER);
+		newAccount.setCompany(companyKey);
+		
+		ctr.deleteCompanyUserAccount(newAccount);
+		verify(ar).delete(newAccount);
+	}
+	
+	@Test
+	public void testDeleteBusinessAdminAccount() throws Exception {
+		Account newAccount = new Account();
+		// We test the update of a cockpit account.
+		newAccount.setRole(Role.BUSINESSADMIN);
+		newAccount.setCompany(companyKey);
+		List<Key<Business>> businesses = mock(List.class);
+		newAccount.setBusinesses(businesses);
+		
+		ctr.deleteCompanyUserAccount(newAccount);
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.getCompany(),nullValue());
+		assertThat(newAccount.getBusinesses(), nullValue());
+		verify(ar,never()).delete(newAccount);
+	}
+	
+	@Test
+	public void testCreateUserAccount() throws Exception {
+		
+		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		accountData.setLogin("testuser");
+		accountData.setPassword("password!1");
+		
+		Account newAccount = new Account();
+		when(ar.newEntity()).thenReturn(newAccount );
+		
+		ctr.createUserAccount(account, accountData );
+		
+		verify(ar).saveOrUpdate(newAccount);
+		assertThat(newAccount.isActive(),is(true));
+		assertThat(newAccount.getRole(), is(Role.COCKPITUSER));
+		assertThat(newAccount.getCompany(), is(companyKey));
+		assertThat(newAccount.isEmailConfirmed(), is(false));
+	}
+	
+	@Test
+	public void testUpdateAccount() throws Exception {
+		
 	}
 }

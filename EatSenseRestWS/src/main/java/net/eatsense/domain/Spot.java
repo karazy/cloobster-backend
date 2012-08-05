@@ -50,6 +50,8 @@ public class Spot extends GenericEntity<Spot>{
 	 */
 	private boolean active = true;
 
+	private String qrImageUrl;
+
 	public String getBarcode() {
 		return barcode;
 	}
@@ -103,12 +105,15 @@ public class Spot extends GenericEntity<Spot>{
 	
 	public String getQrImageUrl() {
 		if(barcode != null) {
-			try {
-				return "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=" + URLEncoder.encode(barcode,"UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new ServiceException(e);
+			if(qrImageUrl == null) {
+				try {
+					String barcodeWithUrl = System.getProperty("net.karazy.app.download.url") + "#" + barcode;
+					qrImageUrl = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=" + URLEncoder.encode(barcodeWithUrl,"UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					throw new ServiceException(e);
+				}
 			}
-
+			return qrImageUrl;
 		}
 		else
 			return null;

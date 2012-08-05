@@ -36,6 +36,8 @@ public class Business extends GenericEntity<Business> {
 	@NotNull
 	@NotEmpty
 	private String name;
+	
+	private String theme = "default";
 
 	/**
 	 * Description of location.
@@ -238,6 +240,17 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.currency, currency)) {
 			this.setDirty(true);
 			this.currency = currency;
+		}
+	}
+
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		if(!Objects.equal(this.theme, theme)) {
+			this.setDirty(true);
+			this.theme = theme;
 		}
 	}
 }

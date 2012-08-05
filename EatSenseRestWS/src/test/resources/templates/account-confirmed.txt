@@ -1,4 +1,4 @@
-Cloobster - Neues Konto bestätigt: {1}
+[Cloobster] Service Message: Neues Konto bestätigt - {1}
 Neues Konto angelegt:
 Name: {0}
 Login: {1}

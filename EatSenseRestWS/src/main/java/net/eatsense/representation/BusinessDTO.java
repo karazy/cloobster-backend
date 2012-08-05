@@ -4,6 +4,8 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
 
+import com.google.common.base.Strings;
+
 import net.eatsense.domain.Business;
 
 public class BusinessDTO {
@@ -21,6 +23,8 @@ public class BusinessDTO {
 	
 	private boolean trash;
 	
+	private String theme;
+	
 	public BusinessDTO() {
 		super();
 	}
@@ -33,6 +37,7 @@ public class BusinessDTO {
 		this.currency = business.getCurrency();
 		this.trash = business.isTrash();
 		this.id = business.getId();
+		this.theme = Strings.isNullOrEmpty(business.getTheme())?"default":business.getTheme();
 	}
 	
 	public String getName() {
@@ -68,5 +73,13 @@ public class BusinessDTO {
 
 	public void setTrash(boolean trash) {
 		this.trash = trash;
+	}
+
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
 	}
 }

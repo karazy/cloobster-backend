@@ -229,10 +229,24 @@ CloobsterAdmin.TrashCan = function($scope, TrashEntry) {
 			$scope.trashEntries.splice(index,1);
 		}, function(response) {
 			$scope.restoring[index] = true;
-			setError("Could not restore entity: " + response.message);
+			setError("Could not restore entity, http code:" + response.status+ ", message: " + response.message);
 		});
 	};
 
 	dismissAlert();
-}
+};
 CloobsterAdmin.TrashCan.$inject = ['$scope','TrashEntry'];
+
+CloobsterAdmin.Fixes = function($scope, $http) {
+	
+	$scope.fixBusinessesTypo = function() {
+		$http.put('/admin/services/accounts/fixbusinesses')
+		.success(function(data, status) {
+			alert('Successfully applied fix!');
+		}).error(function(data, status) {
+			alert('fix failed! ' + status);
+		});
+	};
+	
+};
+CloobsterAdmin.Fixes.$inject = ['$scope', '$http'];

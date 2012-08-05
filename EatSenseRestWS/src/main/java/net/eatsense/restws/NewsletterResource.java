@@ -1,7 +1,5 @@
 package net.eatsense.restws;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,13 +10,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.controller.AccountController;
-import net.eatsense.controller.MailController;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.event.NewNewsletterRecipientEvent;
 import net.eatsense.representation.RecipientDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
 @Path("/newsletter")
@@ -26,28 +25,20 @@ public class NewsletterResource {
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private AccountController accountCtrl;
-	private MailController mailCtrl;
+	private EventBus eventBus;
 
 	@Inject
-	public NewsletterResource(AccountController accountCtrl, MailController mailCtrl) {
+	public NewsletterResource(AccountController accountCtrl, EventBus eventBus) {
 		this.accountCtrl = accountCtrl;
-		this.mailCtrl = mailCtrl;
+		this.eventBus = eventBus; 
 	}
 	
 	@POST
 	@Consumes("application/json; charset=UTF-8")
 	public void saveRecipient(RecipientDTO recipientData, @Context UriInfo uriInfo) {
 		NewsletterRecipient recipient = accountCtrl.addNewsletterRecipient(recipientData);
-		try {
-			mailCtrl.sendWelcomeMessage(uriInfo, recipient);
-		} catch (AddressException e) {
-			logger.error("sending welcome mail failed", e);
-			if(recipient.getEmail().equals(e.getRef())) {
-				throw new IllegalArgumentException("invalid email", e);
-			}
-		} catch (MessagingException e) {
-			logger.error("sending welcome mail failed", e);
-		}
+		
+		eventBus.post(new NewNewsletterRecipientEvent(recipient, uriInfo));
 	}
 	
 	@Path("unsubscribe/{id}")
