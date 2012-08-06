@@ -70,8 +70,8 @@ public class TemplateControllerTest {
 		String templateId = "template1";
 		testTemplate.setTemplateText(null);
 		when(templateRepo.getById(templateId)).thenReturn(testTemplate);
-		thrown.expect(IllegalArgumentException.class);
-		ctrl.getAndReplace(templateId ,"test1");
+		
+		assertThat(ctrl.getAndReplace(templateId , "test1"), nullValue());
 		
 	}
 	
@@ -81,8 +81,7 @@ public class TemplateControllerTest {
 		testTemplate.setTemplateText("");
 		when(templateRepo.getById(templateId)).thenReturn(testTemplate);
 		
-		thrown.expect(IllegalArgumentException.class);
-		ctrl.getAndReplace(templateId , "test1");
+		assertThat(ctrl.getAndReplace(templateId , "test1"), nullValue());
 	}
 	
 	@Test

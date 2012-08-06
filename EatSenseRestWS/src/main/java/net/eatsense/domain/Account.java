@@ -47,6 +47,8 @@ public class Account extends GenericEntity<Account> {
 	 */
 	@NotSaved
 	List<Key<Business>> businessess;
+	
+	//TODO: Refactor to a Set.
 	List<Key<Business>> businesses;
 	
 	@NotNull

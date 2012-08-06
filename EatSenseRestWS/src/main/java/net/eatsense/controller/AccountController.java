@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
@@ -630,7 +631,7 @@ public class AccountController {
 			for (Long businessId : accountData.getBusinessIds()) {
 				Key<Business> businessKey = businessRepo.getKey(businessId);
 				// Check that we only add business keys, that come from the owner account.
-				if(ownerAccount.getBusinesses().contains(businessKey)) {
+				if(ownerAccount.getBusinesses().contains(businessKey) && !businessKeys.contains(businessKey)) {
 					businessKeys.add(businessKey);
 				}
 				else {
