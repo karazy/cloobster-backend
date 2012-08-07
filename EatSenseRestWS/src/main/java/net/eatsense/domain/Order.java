@@ -11,6 +11,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import net.eatsense.domain.embedded.OrderStatus;
@@ -51,6 +52,19 @@ public class Order extends GenericEntity<Order> {
 	
 	@NotNull
 	OrderStatus status;
+	
+	@NotNull
+	@NotEmpty
+	private String productName;
+	
+	@Unindexed
+	private String productShortDesc;
+	
+	@Unindexed
+	private String productLongDesc;
+	
+	@Min(0)
+	private long productPrice;
 	
 	@Unindexed
 	private List<Key<OrderChoice>> choices = new ArrayList<Key<OrderChoice>>();
@@ -162,6 +176,46 @@ public class Order extends GenericEntity<Order> {
 
 	public void setChoices(List<Key<OrderChoice>> choices) {
 		this.choices = choices;
+	}
+
+
+	public long getProductPrice() {
+		return productPrice;
+	}
+
+
+	public void setProductPrice(long productPrice) {
+		this.productPrice = productPrice;
+	}
+
+
+	public String getProductLongDesc() {
+		return productLongDesc;
+	}
+
+
+	public void setProductLongDesc(String productLongDesc) {
+		this.productLongDesc = productLongDesc;
+	}
+
+
+	public String getProductShortDesc() {
+		return productShortDesc;
+	}
+
+
+	public void setProductShortDesc(String productShortDesc) {
+		this.productShortDesc = productShortDesc;
+	}
+
+
+	public String getProductName() {
+		return productName;
+	}
+
+
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 }

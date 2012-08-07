@@ -43,6 +43,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class OrderController {
 	private OrderRepository orderRepo;
 	private ProductRepository productRepo;
 	private OrderChoiceRepository orderChoiceRepo;
-	private Validator validator;
+	private ValidationHelper validator;
 	private CheckInRepository checkInRepo;
 	private ChoiceRepository choiceRepo;
 	private Transformer transform;
@@ -79,7 +80,7 @@ public class OrderController {
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, BusinessRepository businessRepo,
 			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
-			RequestRepository rr, Transformer trans, Validator validator,
+			RequestRepository rr, Transformer trans, ValidationHelper validator,
 			EventBus eventBus) {
 		super();
 		this.eventBus = eventBus;
@@ -193,7 +194,8 @@ public class OrderController {
 	 * @param comment
 	 * @return key of the new entity
 	 */
-	public Key<Order> createAndSaveOrder(Key<Business> business, Key<CheckIn> checkIn, Key<Product> product, int amount, List<OrderChoice> choices, String comment) {
+	public Key<Order> createAndSaveOrder(Key<Business> business, Key<CheckIn> checkIn, Product product, int amount, List<OrderChoice> choices, String comment) {
+		checkNotNull(product, "product was null");
 		Key<Order> orderKey = null;
 		Order order = new Order();
 		order.setAmount(amount);
@@ -201,25 +203,20 @@ public class OrderController {
 		order.setCheckIn(checkIn);
 		order.setComment(comment);
 		order.setStatus(OrderStatus.CART);
-		order.setProduct(product);
 		order.setOrderTime(new Date());
+		
+		order.setProduct(product.getKey());
+		order.setProductName(product.getName());
+		order.setProductPrice(product.getPrice());
+		order.setProductShortDesc(product.getShortDesc());
+		order.setProductLongDesc(product.getLongDesc());
+		
 		
 		// validate order object
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		
 		if(violations.isEmpty()) {
 			orderKey = orderRepo.saveOrUpdate(order);
-		}
-		else { /// handle validation errors ...
-			StringBuilder sb = new StringBuilder();
-			sb.append("Order validation failed:\n");
-			//build an error message containing all violation messages
-			for (ConstraintViolation<Order> violation : violations) {
-				sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
-			}
-			String message = sb.toString();
-			logger.error(message);
-			throw new IllegalArgumentException(message);
 		}
 		
 		if(choices != null) {
@@ -228,20 +225,7 @@ public class OrderController {
 				orderChoice.setOrder(orderKey);
 				
 				// validate choices
-				Set<ConstraintViolation<OrderChoice>> choiceViolations = validator.validate(orderChoice);
-				
-				if ( !choiceViolations.isEmpty()) {
-					// handle validation errors ...
-					StringBuilder sb = new StringBuilder();
-					sb.append("Choice validation failed:\n");
-					
-					//build an error message containing all violation messages
-					for (ConstraintViolation<OrderChoice> violation : choiceViolations) {
-						sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
-					}
-					String message = sb.toString();
-					throw new IllegalArgumentException(message);
-				}
+				validator.validate(orderChoice);
 			}
 			order.getChoices().addAll(orderChoiceRepo.saveOrUpdate(choices).keySet());
 			
@@ -420,15 +404,14 @@ public class OrderController {
 		// Check if the product to be ordered exists	
 		Product product;
 		try {
-			product = productRepo.getById(checkIn.getBusiness(), orderData.getProduct().getId());
+			product = productRepo.getById(checkIn.getBusiness(), orderData.getProductId());
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new IllegalArgumentException("Order cannot be placed, productId unknown",e);
 		}
-		Key<Product> productKey = product.getKey();
 		Long orderId = null;
 		List<OrderChoice> choices = null;
-		if(orderData.getProduct().getChoices() != null
-				&& !orderData.getProduct().getChoices().isEmpty()) {
+		if(orderData.getChoices() != null
+				&& !orderData.getChoices().isEmpty()) {
 			
 			if(product.getChoices() == null || product.getChoices().isEmpty()) {
 				// The product did not contain any choices any more, but the client sent some.
@@ -437,64 +420,32 @@ public class OrderController {
 			}
 				
 			choices = new ArrayList<OrderChoice>();
-			ArrayList<ChoiceDTO> childChoiceDtos = new ArrayList<ChoiceDTO>();
 			Map<Key<Choice>, Choice> originalChoiceMap = choiceRepo.getByKeysAsMap(product.getChoices());
 			
-			HashMap<Long, ChoiceDTO> activeChoiceMap = new HashMap<Long, ChoiceDTO>();
-			for (ChoiceDTO choiceDto : orderData.getProduct().getChoices()) {
+			for (ChoiceDTO choiceDto : orderData.getChoices()) {
 				int selected = 0;
-				//TODO check for parent in the originalchoice
-				if(choiceDto.getParent() == null) {
-					OrderChoice choice = new OrderChoice();
-					
-					Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
-					if(originalChoice == null)
-						throw new DataConflictException("Conflict while placing order, unknown choice id " + choiceDto.getId() + ". Refresh resource.");
-					
-					if(choiceDto.getOptions() != null ) {
-						selected = checkOptions(choiceDto, originalChoice);
-						
-						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
-					}
-					
-					choice.setChoice(originalChoice);
-										
-					choices.add(choice);
-				}
-				else {
-					selected = countSelected(choiceDto);
-					childChoiceDtos.add(choiceDto);
-				}
 				
-				if(!activeChoiceMap.containsKey(choiceDto.getId())) {
-					if(selected > 0)
-						activeChoiceMap.put(choiceDto.getId(), choiceDto);
-				}
-			}
-			
-			for (ChoiceDTO choiceDto : childChoiceDtos) {
-				Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
-				if(originalChoice == null)
-					throw new IllegalArgumentException("Order cannot be placed, unknown choice id " + choiceDto.getId());
-				
-				// Check that the parent choice has been selected.
-				if(activeChoiceMap.containsKey(choiceDto.getParent())) {
-					if(choiceDto.getOptions() != null ) {
-						checkOptions(choiceDto, originalChoice);
-						
-						originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
-					}
-				}
 				OrderChoice choice = new OrderChoice();
 				
+				Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
+				if(originalChoice == null)
+					throw new DataConflictException("Conflict while placing order, unknown choice id " + choiceDto.getId() + ". Refresh resource.");
+				
+				if(choiceDto.getOptions() != null ) {
+					selected = checkOptions(choiceDto, originalChoice);
+					
+					originalChoice.setOptions(new ArrayList<ProductOption>(choiceDto.getOptions()));
+				}
+				
 				choice.setChoice(originalChoice);
-									
+										
 				choices.add(choice);
+				
 			}
 		}
 		
 
-		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), productKey, orderData.getAmount(), choices, orderData.getComment());
+		Key<Order> orderKey = createAndSaveOrder(business.getKey(), checkIn.getKey(), product, orderData.getAmount(), choices, orderData.getComment());
 		if(orderKey != null) {
 			// order successfully saved
 			orderId = orderKey.getId();
@@ -617,9 +568,9 @@ public class OrderController {
 		orderData.setCheckInId(checkIn.getId());
 		// Retrieve saved choices from the store
 		List<OrderChoice> savedChoices = orderChoiceRepo.getByParent(order.getKey());
-		if(orderData.getProduct().getChoices() != null ) {
+		if(orderData.getChoices() != null ) {
 			// iterate over all choices ... 
-			for( ChoiceDTO choiceData : orderData.getProduct().getChoices()) {
+			for( ChoiceDTO choiceData : orderData.getChoices()) {
 				for( OrderChoice savedChoice : savedChoices ) {
 					// ... and compare ids.
 					if(choiceData.getId().equals(savedChoice.getChoice().getId())) {
@@ -678,15 +629,7 @@ public class OrderController {
 				eventBus.post(updateEvent);
 			}
 		}
-		else {
-			// build validation error messages
-			String message = "Validation errors:\n";
-			for (ConstraintViolation<Order> constraintViolation : violations) {
-				message += constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() + "\n";
-				
-			}
-			throw new OrderFailureException(message);
-		}
+		
 
 		return orderData;
 	}

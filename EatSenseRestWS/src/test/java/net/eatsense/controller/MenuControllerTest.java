@@ -139,41 +139,6 @@ public class MenuControllerTest {
 	}
 	
 	@Test
-	public void testDeleteChoiceFromProductWithChildChoices() throws Exception {
-		//TODO Remove after refactoring test class.
-		newSetUp();
-		
-		Key<Business> businessKey = mock(Key.class);
-		long choiceId = 1l;
-		long productId = 1l;
-		Product product = mock(Product.class);
-		List<Key<Choice>> choiceList = new ArrayList<Key<Choice>>();
-		Key<Choice> choiceKey = mock(Key.class);
-		Key<Choice> childChoiceKey = mock(Key.class);
-		choiceList.add(choiceKey);
-		choiceList.add(childChoiceKey);
-		when(cr.getKey(businessKey, choiceId)).thenReturn(choiceKey );
-		when(product.getChoices()).thenReturn(choiceList );
-		when(pr.getById(businessKey, productId)).thenReturn(product );
-		Collection<Choice> choices = new ArrayList<Choice>();
-		Choice childChoice = mock(Choice.class);
-		when(childChoice.getParentChoice()).thenReturn(choiceKey);
-		when(childChoice.getKey()).thenReturn(childChoiceKey);
-		choices.add(childChoice);
-		when(cr.getByKeys(choiceList)).thenReturn(choices );
-		ctr.deleteChoice(businessKey, choiceId, productId);
-		
-		assertThat(choiceList.contains(choiceKey), is(false));
-		assertThat(choiceList.contains(childChoiceKey), is(false));
-		verify(pr).saveOrUpdate(product);
-		ArgumentCaptor<List> deleteArgument = ArgumentCaptor.forClass(List.class);
-		verify(cr).delete(deleteArgument.capture());
-		assertThat(deleteArgument.getValue().contains(choiceKey),is(true));
-		assertThat(deleteArgument.getValue().contains(childChoiceKey),is(true));
-	}
-
-	
-	@Test
 	public void testDeleteChoiceFromProduct() throws Exception {
 		//TODO Remove after refactoring test class.
 		newSetUp();
@@ -327,10 +292,7 @@ public class MenuControllerTest {
 		choice.setOverridePrice(data.getOverridePrice());
 		// Change text of original entity, so it will updated with the test data.
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
 		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(9900l);
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -341,8 +303,6 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
 		
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
@@ -379,10 +339,7 @@ public class MenuControllerTest {
 		choice.setOverridePrice(data.getOverridePrice());
 		// Change text of original entity, so it will updated with the test data.
 		choice.setText("another test text");
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
 		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -393,8 +350,6 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
 		
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
@@ -431,10 +386,6 @@ public class MenuControllerTest {
 		// Change override price of original entity, so it will updated with the test data.
 		choice.setOverridePrice(ChoiceOverridePrice.OVERRIDE_FIXED_SUM);
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -445,8 +396,6 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
 		
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
@@ -485,10 +434,6 @@ public class MenuControllerTest {
 		choice.setOptions(options );
 		choice.setOverridePrice(data.getOverridePrice());
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -499,9 +444,7 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
-		
+	
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
 		// Add the Choice to the list of choices for the product.
@@ -537,10 +480,6 @@ public class MenuControllerTest {
 		choice.setOptions(data.getOptions());
 		choice.setOverridePrice(data.getOverridePrice());
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -551,9 +490,7 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
-		
+			
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
 		// Add the Choice to the list of choices for the product.
@@ -587,10 +524,6 @@ public class MenuControllerTest {
 		choice.setOptions(data.getOptions());
 		choice.setOverridePrice(data.getOverridePrice());
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -601,9 +534,7 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
-		
+	
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
 		// Add the Choice to the list of choices for the product.
@@ -637,11 +568,8 @@ public class MenuControllerTest {
 		choice.setOptions(data.getOptions());
 		choice.setOverridePrice(data.getOverridePrice());
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
+		
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
 		choice.setProduct(productKey );
@@ -651,9 +579,7 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
-		
+				
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
 		// Add the Choice to the list of choices for the product.
@@ -687,10 +613,6 @@ public class MenuControllerTest {
 		choice.setOptions(data.getOptions());
 		choice.setOverridePrice(data.getOverridePrice());
 		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
 		choice.setPrice(data.getPriceMinor());
 		@SuppressWarnings("unchecked")
 		Key<Product> productKey = mock(Key.class);
@@ -701,8 +623,6 @@ public class MenuControllerTest {
 		
 		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
 		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice);
 		
 		@SuppressWarnings("unchecked")
 		Key<Choice> choiceKey = mock(Key.class);
@@ -719,57 +639,6 @@ public class MenuControllerTest {
 		verify(cr, never()).saveOrUpdate(choice);
 	}
 	
-	@Test
-	public void testUpdateChoiceParent() throws Exception {
-		newSetUp();
-		business = mock(Business.class);
-		@SuppressWarnings("unchecked")
-		Key<Business> businessKey = mock (Key.class);
-		ChoiceDTO data = getTestChoiceData();
-		when(business.getKey()).thenReturn(businessKey);
-		Choice choice = new Choice();
-		choice.setId(1l);
-		choice.setBusiness(businessKey);
-		choice.setIncludedChoices(data.getIncluded());
-		choice.setMaxOccurence(data.getMaxOccurence());
-		choice.setMinOccurence(data.getMinOccurence());
-		choice.setOptions(data.getOptions());
-		choice.setOverridePrice(data.getOverridePrice());
-		choice.setText(data.getText());
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice = mock(Key.class);
-		
-		choice.setParentChoice(parentChoice );
-		choice.setPrice(data.getPriceMinor());
-		@SuppressWarnings("unchecked")
-		Key<Product> productKey = mock(Key.class);
-		choice.setProduct(productKey );
-		Product product = new Product();
-		
-		when(productKey.getId()).thenReturn(data.getProductId());
-		
-		when(pr.getKey(businessKey, data.getProductId())).thenReturn(productKey );
-		when(pr.getByKey(productKey)).thenReturn(product );
-		
-		@SuppressWarnings("unchecked")
-		Key<Choice> parentChoice2 = mock(Key.class);
-		when(cr.getKey(businessKey, data.getParent())).thenReturn(parentChoice2);
-		
-		@SuppressWarnings("unchecked")
-		Key<Choice> choiceKey = mock(Key.class);
-		// Add the Choice to the list of choices for the product.
-		product.addChoice(choiceKey);
-		when(cr.saveOrUpdate(choice)).thenReturn(choiceKey );
-		// Reset dirty flag.
-		choice.setDirty(false);
-		
-		ChoiceDTO result = ctr.updateChoice(choice, data);
-		
-		assertThat(result.getIncluded(), is(data.getIncluded()));
-		assertThat(choice.getIncludedChoices(), is(data.getIncluded()));
-		// Check that we did not touch the Product, because the Choice was already in the list.
-		verify(pr, never()).saveOrUpdate(product);
-	}
 	
 	@Test
 	public void testCreateChoice() throws Exception {
@@ -801,7 +670,6 @@ public class MenuControllerTest {
 	
 	public ChoiceDTO getTestChoiceData() {
 		ChoiceDTO data =  new ChoiceDTO();
-		data.setParent(3l);
 		data.setIncluded(1);
 		data.setMaxOccurence(1);
 		data.setMinOccurence(0);
@@ -1244,7 +1112,7 @@ public class MenuControllerTest {
 				
 				for(ProductDTO p : menu.getProducts()) {
 					assertThat(p.getName(), is("Classic Burger") );
-					assertThat(p.getChoices().size(), is(4));
+					assertThat(p.getChoices().size(), is(3));
 					
 					for(ChoiceDTO c : p.getChoices())  {
 						assertThat(c.getText(), anyOf(is("Wählen sie einen Gargrad:"), is("Extras"), is("Menü"), is("Menü Beilage")));

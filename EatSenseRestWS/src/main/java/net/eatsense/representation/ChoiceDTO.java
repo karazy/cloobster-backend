@@ -41,8 +41,6 @@ public class ChoiceDTO {
 	
 	Collection<ProductOption> selected;
 	
-	Long parent;
-	
 	private Integer order;
 	
 	private Long productId;
@@ -62,9 +60,6 @@ public class ChoiceDTO {
 		this.minOccurence = choice.getMinOccurence();
 		this.overridePrice = choice.getOverridePrice();
 		this.order = choice.getOrder();
-		
-		if(choice.getParentChoice() != null)
-			this.parent = choice.getParentChoice().getId();
 		
 		this.price = (choice.getPrice() == null ? 0 : choice.getPrice().doubleValue() / 100.0);
 		this.text = choice.getText();
@@ -89,13 +84,7 @@ public class ChoiceDTO {
 	public ChoiceDTO() {
 		super();
 	}
-	
-	public Long getParent() {
-		return parent;
-	}
-	public void setParent(Long parent) {
-		this.parent = parent;
-	}
+
 	String group;
 	
 	boolean groupParent = false;

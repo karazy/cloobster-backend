@@ -95,7 +95,7 @@ public class CreateBillTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setProductId(frites.getId());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -128,7 +128,8 @@ public class CreateBillTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);

@@ -166,12 +166,11 @@ public class DummyDataDumper {
 		four.setOptions(options);
 		four.setMaxOccurence(1);
 		four.setMinOccurence(1);
-		four.setParentChoice(threeKey);
 		four.setProduct(kP);
 		four.setBusiness(kR);
 		four.setPrice(300l);
 		
-		Key<Choice> fourKey = cr.saveOrUpdate(four);
+		//Key<Choice> fourKey = cr.saveOrUpdate(four);
 		
 		
 		
@@ -182,7 +181,8 @@ public class DummyDataDumper {
 	    choices.add(oneKey);
 	    choices.add(twoKey);
 	    choices.add(threeKey);
-	    choices.add(fourKey);
+	    // Do not add this child choice.
+	    //choices.add(fourKey);
 	    
 	    burger.setChoices(choices);
 	    

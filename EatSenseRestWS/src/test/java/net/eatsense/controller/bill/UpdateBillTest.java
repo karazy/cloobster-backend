@@ -109,7 +109,10 @@ public class UpdateBillTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO fritesDto = transform.productToDto(frites);
+		
+		orderDto.setProductId(frites.getId());
+		orderDto.setChoices(fritesDto.getChoices());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -141,7 +144,8 @@ public class UpdateBillTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -149,7 +153,7 @@ public class UpdateBillTest {
 		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
+		for (ChoiceDTO orderChoice : placedOrderDto.getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));

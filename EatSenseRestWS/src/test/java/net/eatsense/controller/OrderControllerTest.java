@@ -112,7 +112,9 @@ public class OrderControllerTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO productDTO = transform.productToDto(frites);
+		orderDto.setChoices(productDTO.getChoices());
+		orderDto.setProductId(frites.getId());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -124,7 +126,7 @@ public class OrderControllerTest {
 		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrderDto.getOrderTime(), notNullValue());
 		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrderDto.getProduct().getId(), equalTo(frites.getId()));
+		assertThat(placedOrderDto.getProductId(), equalTo(frites.getId()));
 		
 		
 		//#2 Place an order with choices
@@ -136,7 +138,8 @@ public class OrderControllerTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -148,9 +151,9 @@ public class OrderControllerTest {
 		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrderDto.getOrderTime(), notNullValue());
 		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
+		assertThat(placedOrderDto.getProductId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
@@ -196,7 +199,8 @@ public class OrderControllerTest {
 		orderDto.setStatus(OrderStatus.CART);
 		orderDto .setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		Long orderId = null;
@@ -206,7 +210,7 @@ public class OrderControllerTest {
 			assertThat(e, instanceOf(ValidationException.class));
 		}
 		assertThat(orderId, nullValue());
-		selected = orderDto.getProduct().getChoices().iterator().next().getOptions().iterator().next();
+		selected = orderDto.getChoices().iterator().next().getOptions().iterator().next();
 		selected.setSelected(true);
 		// Place an order with correct choices
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -215,26 +219,8 @@ public class OrderControllerTest {
 		// Test validation of dependent choice
 		// Select the menu item next
 		boolean menuSelected = false;
-		for(ChoiceDTO choice : orderDto.getProduct().getChoices()) {
+		for(ChoiceDTO choice : orderDto.getChoices()) {
 			if(choice.getText().equals("Menü")) {
-				menuSelected = true;
-				choice.getOptions().iterator().next().setSelected(true);
-			}
-		}
-		assertThat(menuSelected, is(true));
-				
-		orderDto.setId(null);
-		orderId = null;
-		try {
-			orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
-		} catch (Exception e) {
-			assertThat(e, instanceOf(ValidationException.class));
-		}
-		assertThat(orderId, nullValue());
-		
-		menuSelected = false;
-		for(ChoiceDTO choice : orderDto.getProduct().getChoices()) {
-			if(choice.getText().equals("Menü Beilage")) {
 				menuSelected = true;
 				choice.getOptions().iterator().next().setSelected(true);
 			}
@@ -249,7 +235,9 @@ public class OrderControllerTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO fritesDto = transform.productToDto(frites);
+		orderDto.setProductId(frites.getId());
+		orderDto.setChoices(fritesDto.getChoices());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -289,7 +277,9 @@ public class OrderControllerTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO fritesDto = transform.productToDto(frites);
+		orderDto.setProductId(frites.getId());
+		orderDto.setChoices(fritesDto.getChoices());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -301,7 +291,7 @@ public class OrderControllerTest {
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
 		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(frites.getId()));
+		assertThat(placedOrder.getProductId(), equalTo(frites.getId()));
 		
 		
 		//#2 Place an order with choices
@@ -313,7 +303,8 @@ public class OrderControllerTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setChoices(burgerDto.getChoices());
+		orderDto.setProductId(burger.getId());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -324,9 +315,9 @@ public class OrderControllerTest {
 		assertThat(placedOrder.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrder.getOrderTime(), notNullValue());
 		assertThat(placedOrder.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrder.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrder.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrder.getProduct().getChoices()) {
+		assertThat(placedOrder.getProductId(), equalTo(burger.getId()));
+		assertThat(placedOrder.getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrder.getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
@@ -353,7 +344,9 @@ public class OrderControllerTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO fritesDto = transform.productToDto(frites);
+		orderDto.setChoices(fritesDto.getChoices());
+		orderDto.setProductId(frites.getId());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#2 Place an order with choices
@@ -365,7 +358,8 @@ public class OrderControllerTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setChoices(burgerDto.getChoices());
+		orderDto.setProductId(burger.getId());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		Long orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -377,9 +371,9 @@ public class OrderControllerTest {
 		assertThat(placedOrderDto.getAmount(), equalTo(orderDto.getAmount()));
 		assertThat(placedOrderDto.getOrderTime(), notNullValue());
 		assertThat(placedOrderDto.getComment(), equalTo(orderDto.getComment() ));
-		assertThat(placedOrderDto.getProduct().getId(), equalTo(burger.getId()));
-		assertThat(placedOrderDto.getProduct().getChoices(), notNullValue());
-		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
+		assertThat(placedOrderDto.getProductId(), equalTo(burger.getId()));
+		assertThat(placedOrderDto.getChoices(), notNullValue());
+		for (ChoiceDTO orderChoice : placedOrderDto.getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));

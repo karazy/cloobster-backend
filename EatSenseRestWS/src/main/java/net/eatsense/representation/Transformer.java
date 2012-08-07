@@ -91,22 +91,15 @@ public class Transformer {
 			Map<Key<OrderChoice>, OrderChoice> choicesMap = orderChoiceRepo.getByKeysAsMap(choiceKeys);
 			
 			for (Order order : orders) {
-				OrderDTO orderDto = new OrderDTO();
-				orderDto.setId(order.getId());
-				orderDto.setAmount(order.getAmount());
-				orderDto.setOrderTime(order.getOrderTime());
-				orderDto.setStatus(order.getStatus());
-				orderDto.setComment(order.getComment());
-				orderDto.setCheckInId(order.getCheckIn().getId());
-				orderDto.setProduct(productToDtoOmitChoices(productMap.get(order.getProduct())));
-				
+				OrderDTO orderDto = new OrderDTO(order, productMap.get(order.getProduct()));
+								
 				if( !order.getChoices().isEmpty() ) {
 					ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
 					
 					for (Key<OrderChoice> choiceKey : order.getChoices()) {
 						choiceDtos.add(choiceToDto( choicesMap.get(choiceKey).getChoice()));
 					}
-					orderDto.getProduct().setChoices(choiceDtos);
+					orderDto.setChoices(choiceDtos);
 				}
 					
 				dtos.add( orderDto );
@@ -121,15 +114,15 @@ public class Transformer {
 			return null;
 		}
 			
-		OrderDTO dto = new OrderDTO();
+		
 		Product product = productRepo.getByKey(order.getProduct());
 		if(product == null) {
 			logger.error("product not found: " +order.getProduct());
 			return null;
 		}
-			
-		dto.setProduct( productToDtoOmitChoices( product ) );
 		
+		OrderDTO dto = new OrderDTO(order, product);
+			
 		Collection<OrderChoice> orderChoices = orderChoiceRepo.getByKeys(order.getChoices());
 		if(orderChoices != null && !orderChoices.isEmpty()) {
 			ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
@@ -137,18 +130,12 @@ public class Transformer {
 			for (OrderChoice orderChoice : orderChoices) {
 				choiceDtos.add(choiceToDto(orderChoice.getChoice()));
 			}
-			dto.getProduct().setChoices(choiceDtos);
+			dto.setChoices(choiceDtos);
 			
 		}
 		else {
-			dto.getProduct().setChoices(getChoicesForProduct(product));
+			dto.setChoices(getChoicesForProduct(product));
 		}
-		dto.setId(order.getId());
-		dto.setAmount(order.getAmount());
-		dto.setOrderTime(order.getOrderTime());
-		dto.setStatus(order.getStatus());
-		dto.setComment(order.getComment());
-		dto.setCheckInId(order.getCheckIn().getId());
 				
 		return dto;
 	}
