@@ -644,6 +644,9 @@ public class BusinessController {
 				if(!menus.contains(menuKey)) {
 					menus.add(menuKey);
 				}
+				else {
+					logger.warn("Duplicate menu id: {}", menuId);
+				}
 			}
 		}
 		area.setMenus(menus);
