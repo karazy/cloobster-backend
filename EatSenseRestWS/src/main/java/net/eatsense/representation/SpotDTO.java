@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.validation.CreationChecks;
 import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -52,7 +53,7 @@ public class SpotDTO {
 	
 	private boolean active;
 	
-	@NotNull
+	@NotNull(groups= {CreationChecks.class})
 	private Long areaId;
 	
 	public SpotDTO(Spot spot) {

@@ -72,7 +72,10 @@ public class Area extends GenericEntity<Area> {
 	}
 
 	public void setActive(boolean active) {
-		this.active = active;
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
 	}
 
 }

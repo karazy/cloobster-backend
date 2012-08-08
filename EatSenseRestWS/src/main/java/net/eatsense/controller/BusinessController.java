@@ -4,14 +4,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
@@ -43,14 +42,13 @@ import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
+import net.eatsense.validation.CreationChecks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -628,7 +626,7 @@ public class BusinessController {
 		checkNotNull(area, "area was null");
 		checkNotNull(areaData, "areaData was null");
 		
-		validator.validate(areaData);
+		validator.validate(areaData, Default.class, CreationChecks.class);
 		
 		area.setActive(areaData.isActive());
 		area.setDescription(areaData.getDescription());
@@ -643,6 +641,9 @@ public class BusinessController {
 				
 				if(!menus.contains(menuKey)) {
 					menus.add(menuKey);
+				}
+				else {
+					logger.warn("Duplicate menu id: {}", menuId);
 				}
 			}
 		}

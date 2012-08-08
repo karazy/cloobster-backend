@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
@@ -23,7 +24,14 @@ public class MenuRepository extends GenericRepository<Menu> {
 	}
 	
 	public List<Menu> getActiveMenusForBusinessAndArea(Key<Business> businessKey, long areaId) {
-		Area area = ofy().get(new Key<Area>(businessKey, Area.class, areaId));
+		Area area;
+		try {
+			area = ofy().get(new Key<Area>(businessKey, Area.class, areaId));
+		} catch (NotFoundException e) {
+			logger.warn("No area found with id: {}",areaId);
+			return Collections.emptyList();
+		}
+		
 		if(area.getMenus() == null || area.getMenus().isEmpty()) {
 			return Collections.emptyList();
 		}
