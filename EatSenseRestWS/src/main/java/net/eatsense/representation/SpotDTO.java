@@ -52,6 +52,8 @@ public class SpotDTO {
 	
 	private boolean active;
 	
+	private Long areaId;
+	
 	public SpotDTO(Spot spot) {
 		super();
 		if(spot == null)
@@ -66,6 +68,9 @@ public class SpotDTO {
 		this.qrImageUrl = spot.getQrImageUrl();
 		this.name = spot.getName();
 		this.groupTag = spot.getBarcode();
+		if(spot.getArea()!=null) {
+			this.areaId = spot.getArea().getId();
+		}
 	}
 	
 	
@@ -175,6 +180,16 @@ public class SpotDTO {
 
 	public void setTheme(String theme) {
 		this.theme = theme;
+	}
+
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
 	}
 	
 }
