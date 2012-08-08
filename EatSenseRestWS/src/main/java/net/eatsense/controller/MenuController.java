@@ -14,11 +14,13 @@ import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -50,10 +52,12 @@ public class MenuController {
 	private final Transformer transform;
 	private final Validator validator;
 	private final ChoiceRepository choiceRepo;
+	private final AreaRepository areaRepo;
 
 	@Inject
-	public MenuController(MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
+	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
 		this.choiceRepo = cr;
+		this.areaRepo = areaRepo;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
@@ -66,10 +70,12 @@ public class MenuController {
 	 * @param business entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenusWithProducts(Key<Business> businessKey){
+	public Collection<MenuDTO> getMenusWithProducts(Key<Business> businessKey, long areaId){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
-		if(businessKey == null )
+		if(businessKey == null || areaId == 0)
 			return menuDTOs;
+		
+		Area area = areaRepo.getById(businessKey, areaId);
 		
 		List<Menu> menus = menuRepo.getActiveMenusForBusiness(businessKey);
 		List<ProductDTO> products = transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(businessKey));

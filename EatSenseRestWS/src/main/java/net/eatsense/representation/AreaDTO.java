@@ -1,5 +1,6 @@
 package net.eatsense.representation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -39,7 +40,8 @@ public class AreaDTO {
 			businessId = area.getBusiness().getId();
 		}
 		
-		if(area.getMenus() != null) {
+		if(area.getMenus() != null && !area.getMenus().isEmpty()) {
+			menuIds = new ArrayList<Long>();
 			for (Key<Menu> menuKey : area.getMenus()) {
 				menuIds.add(menuKey.getId());
 			}

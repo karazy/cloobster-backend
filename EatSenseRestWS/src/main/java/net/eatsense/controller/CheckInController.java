@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -27,6 +28,7 @@ import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -68,6 +70,7 @@ public class CheckInController {
 	private OrderRepository orderRepo;
 	private EventBus eventBus;
 	private OrderChoiceRepository orderChoiceRepo;
+	private final AreaRepository areaRepo;
 
 	/**
 	 * Constructor using injection for creation.
@@ -85,7 +88,7 @@ public class CheckInController {
 			CheckInRepository checkInRepository, SpotRepository spotRepository,
 			Transformer transformer,
 			ObjectMapper objectMapper, Validator validator,
-			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo,
+			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo, AreaRepository areaRepository,
 			EventBus eventBus) {
 		this.businessRepo = businessRepository;
 		this.eventBus = eventBus;
@@ -94,6 +97,7 @@ public class CheckInController {
 		this.requestRepo = requestRepository;
 		this.orderRepo = orderRepo;
 		this.transform = transformer;
+		this.areaRepo = areaRepository;
 		this.mapper = objectMapper;
 		this.validator = validator;
 		this.orderChoiceRepo = orderChoiceRepo;
@@ -111,9 +115,22 @@ public class CheckInController {
     		return null;
     	
     	Spot spot = spotRepo.getByProperty("barcode", barcode);
-    	if(spot == null || (!spot.isActive() && !checkInResume) ) {
+    	
+    	if(spot == null || (!spot.isActive() && !checkInResume)) {
     		throw new NotFoundException();
     	}
+    	
+    	if(spot.getArea() == null) {
+    		throw new NotFoundException(); 
+    	}
+    	else {
+    		Area area = areaRepo.getByKey(spot.getArea());
+    		if(!area.isActive() && !checkInResume) {
+    			throw new NotFoundException();
+    		}
+    	}
+    	
+
 		return toSpotDto(spot) ;
     }
     

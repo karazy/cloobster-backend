@@ -52,6 +52,7 @@ public class SpotDTO {
 	
 	private boolean active;
 	
+	@NotNull
 	private Long areaId;
 	
 	public SpotDTO(Spot spot) {
