@@ -199,6 +199,7 @@ public class DummyDataDumper {
 	    
 	    pr.saveOrUpdate(burger);
 	    
+	    areaRepo.saveOrUpdate(area);
 	}
 
 	private Key<Business> createAndSaveDummyBusiness(String name, String desc, String areaName, String barcode, Area area) {
