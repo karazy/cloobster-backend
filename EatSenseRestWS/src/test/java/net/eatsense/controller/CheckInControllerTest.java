@@ -23,6 +23,7 @@ import java.util.List;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -35,6 +36,7 @@ import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -96,12 +98,18 @@ public class CheckInControllerTest {
 	
 	@Mock
 	private OrderChoiceRepository orderChoiceRepo;
+	@Mock
+	private AreaRepository areaRepo;
+	@Mock
+	private Area area;
+	@Mock
+	private Key<Area> areaKey;
 
 	@Before
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, eventBus);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus);
 	}
 
 	@After
@@ -300,6 +308,10 @@ public class CheckInControllerTest {
 		when(spotRepo.getByProperty("barcode", barcode )).thenReturn(spot);
 		when(spot.isActive()).thenReturn(true);
 		when(spot.getBusiness()).thenReturn( businessKey);
+		
+		when(spot.getArea()).thenReturn(areaKey );
+		when(areaRepo.getByKey(areaKey)).thenReturn(area);
+		when(area.isActive()).thenReturn(true);
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		
 		assertThat(ctr.getSpotInformation(barcode), notNullValue());
