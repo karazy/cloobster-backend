@@ -16,6 +16,7 @@ import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.FeedbackForm;
@@ -156,7 +157,7 @@ public class ImportController {
 		}
 		
 		for(SpotDTO spot : businessData.getSpots()) {
-			if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), spot.getGroupTag()) == null )
+			if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), null) == null )
 				logger.info("Error while saving spot with name: " + spot.getName());
 		}
 		
@@ -243,7 +244,7 @@ public class ImportController {
 		return businessKey;
 	}
 	
-	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, String groupTag) {
+	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, Key<Area> areaKey) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new spot for business ("+ businessKey.getId() + ") with name: " + name );
@@ -252,7 +253,7 @@ public class ImportController {
 		s.setBusiness(businessKey);
 		s.setName(name);
 		s.setBarcode(barcode);
-		s.setGroupTag(groupTag);
+		s.setArea(areaKey);
 		
 		Key<Spot> kS = spotRepo.saveOrUpdate(s);
 		logger.info("Created new spot with id: " + kS.getId());
