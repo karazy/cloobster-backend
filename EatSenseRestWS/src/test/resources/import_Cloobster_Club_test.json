@@ -19,17 +19,21 @@
             "order": 3
         }
     ],
-    "spots": [
-        {
-            "name": "Tisch 1",
-            "barcode": "tst001",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 2",
-            "barcode": "tst002",
-            "groupTag": null
-        }
+    "areas": [
+    	{
+    		"name": "Restaurant",
+    		"description": "Der Restaurantbereich.",
+			"spots": [
+		        {
+		            "name": "Tisch 1",
+		            "barcode": "tst001"
+		        },
+		        {
+		            "name": "Tisch 2",
+		            "barcode": "tst002"
+		        }
+		    ]
+		}
     ],
     "menus": [
         {
