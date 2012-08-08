@@ -74,7 +74,12 @@ public class MailController {
 	}
 	
 	public MimeMessage sendMail(String emailTo, String text) throws AddressException, MessagingException {
+		return sendMail(emailTo, text, FROM_ADDRESS);
+	}
+	
+	public MimeMessage sendMail(String emailTo, String text, String emailFrom) throws AddressException, MessagingException {
 		checkArgument(!Strings.isNullOrEmpty(emailTo), "emailTo was null or empty");
+		checkArgument(!Strings.isNullOrEmpty(emailFrom), "emailFrom was null or empty");
 		
 		if(Strings.isNullOrEmpty(text)) {
 			logger.error("No template found, skipped sending mail to {}", emailTo);
@@ -83,7 +88,7 @@ public class MailController {
 
 		MimeMessage mail = new MimeMessage(session);
 		
-		mail.setFrom(new InternetAddress(FROM_ADDRESS));
+		mail.setFrom(new InternetAddress(emailFrom));
 		mail.setReplyTo(new Address[]{new InternetAddress(REPLY_TO_ADDRESS)});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
 		
@@ -118,7 +123,8 @@ public class MailController {
 	public Message sendRegistrationConfirmation(String unsubcribeUrl, Account account) throws MessagingException {
 		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), unsubcribeUrl);
 		
-		return sendMail(account.getEmail(), confirmationText);
+		// Send with "from" address set to welcome@cloobster.com.
+		return sendMail(account.getEmail(), confirmationText, "welcome@cloobster.com");
 	}
 	
 	@Subscribe

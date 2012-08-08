@@ -112,7 +112,7 @@ public class TemplateController {
 		checkArgument(!Strings.isNullOrEmpty(id), "id was null or empty");
 		
 		Template template = templateRepo.getById(id);
-		if(template == null) {
+		if(template == null || Strings.isNullOrEmpty(template.getTemplateText())) {
 			logger.info("{} Template substitutions supplied: {}" , id, Arrays.toString(substitutions));
 			return null;
 		}
