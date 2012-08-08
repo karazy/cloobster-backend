@@ -77,7 +77,7 @@ public class MenuController {
 		
 		Area area = areaRepo.getById(businessKey, areaId);
 		
-		List<Menu> menus = menuRepo.getActiveMenusForBusiness(businessKey);
+		List<Menu> menus = menuRepo.getActiveMenusForBusinessAndArea(businessKey, areaId);
 		List<ProductDTO> products = transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(businessKey));
 		
 		ListMultimap<Long, ProductDTO> menuToProductsMap = ArrayListMultimap.create();
