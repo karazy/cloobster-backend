@@ -107,6 +107,9 @@ public class BusinessController {
 			SpotStatusDTO spotDto = new SpotStatusDTO();
 			spotDto.setId(spot.getId());
 			spotDto.setName(spot.getName());
+			if(spot.getArea()!=null) {
+				spotDto.setAreaId(spot.getArea().getId());
+			}
 			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(spot.getKey());
 			spotDto.setCheckInCount(checkInCount);
 			
