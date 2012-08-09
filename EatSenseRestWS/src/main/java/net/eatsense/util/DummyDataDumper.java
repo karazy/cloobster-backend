@@ -63,9 +63,15 @@ public class DummyDataDumper {
 	public void generateDummyUsers() {
 		//generate admin user for businesses
 		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
+		
+
 		if(!testBusinesses.isEmpty()) {
+			Company company = new Company();
+			company.setName("Cloobster Test Company");
+			Key<Company> key = companyRepo.saveOrUpdate(company);
+
 			logger.info("Create account for Cloobster Club");
-			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "developer@karazy.net", Role.COMPANYOWNER, testBusinesses, null, null, null, true, true);
+			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "developer@karazy.net", Role.COMPANYOWNER, testBusinesses, key, null, null, true, true);
 		}
 			
 		List<Key<Business>> hup = rr.getKeysByProperty("name", "Heidi und Paul");
