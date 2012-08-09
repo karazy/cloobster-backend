@@ -595,7 +595,9 @@ public class BusinessController {
 		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
 		
 		for(Area area : areaRepo.getByParent(businessKey)) {
-			areaDtos.add(new AreaDTO(area));
+			if(!area.isTrash()) {
+				areaDtos.add(new AreaDTO(area));
+			}
 		}
 		
 		return areaDtos;
@@ -654,5 +656,25 @@ public class BusinessController {
 		}
 		
 		return area;
+	}
+	
+	/**
+	 * Mark area and the associated spots as trashed.
+	 *  
+	 * @param area
+	 * @param account
+	 */
+	public void deleteArea(Area area, Account account) {
+		checkNotNull(area, "area was null");
+		
+		List<Spot> spots = spotRepo.getListByParentAndProperty(area.getBusiness(), "area", area);
+		
+		for (Spot spot : spots) {
+			spot.setActive(false);
+			trashSpot(spot, account);
+		}
+		
+		area.setActive(false);
+		areaRepo.trashEntity(area, account.getLogin());
 	}
 }

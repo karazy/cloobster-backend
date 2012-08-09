@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -15,6 +16,7 @@ import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.AreaDTO;
 
@@ -27,6 +29,7 @@ public class AreasResource {
 	}
 
 	private final BusinessController businessCtrl;
+	private Account account;
 	
 	@Inject
 	public AreasResource(BusinessController businessCtrl) {
@@ -76,5 +79,16 @@ public class AreasResource {
 	@Consumes("application/json; charset=UTF-8")
 	public AreaDTO updateArea(@PathParam("areaId") long areaId, AreaDTO areaData) {
 		return new AreaDTO(businessCtrl.updateArea(businessCtrl.getArea(business.getKey(), areaId), areaData));
+	}
+	
+	@DELETE
+	@Path("{areaId}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void deleteArea(@PathParam("areaId") long areaId) {
+		businessCtrl.deleteArea(businessCtrl.getArea(business.getKey(), areaId), account);
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 }

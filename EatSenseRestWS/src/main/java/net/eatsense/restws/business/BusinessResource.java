@@ -184,7 +184,7 @@ public class BusinessResource {
 	@Path("areas")
 	public AreasResource getAreasResource() {
 		AreasResource areasResource = resourceContext.getResource(AreasResource.class);
-		
+		areasResource.setAccount(account);
 		areasResource.setBusiness(business);
 		return areasResource;
 	}
