@@ -58,7 +58,7 @@ public class AccessTokenRepository extends DAOBase {
 		try {
 			return ofy().get(AccessToken.class, token);
 		} catch (NotFoundException e) {
-			throw new net.eatsense.exceptions.NotFoundException("Unknown token supplied.");
+			throw new net.eatsense.exceptions.NotFoundException("Unknown token supplied.", "error.accesstoken.invalid");
 		}
 	}
 	

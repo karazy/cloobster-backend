@@ -463,7 +463,7 @@ public class AccountController {
 		checkNotNull(login, "login was null");
 		
 		if(accountRepo.getKeyByProperty("login", login) != null)
-			throw new ValidationException("Login already in use.");
+			throw new ValidationException("Login already in use.", "error.account.login.exists");
 		else
 			return true;
 	}
@@ -479,7 +479,7 @@ public class AccountController {
 		checkNotNull(email, "login was null");
 		
 		if(accountRepo.getKeyByProperty("email", email) != null)
-			throw new ValidationException("E-mail adress already in use.");
+			throw new ValidationException("E-mail adress already in use.", "error.account.email.exists");
 		else
 			return true;
 	}
