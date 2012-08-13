@@ -1,11 +1,14 @@
 package net.eatsense.domain;
 
+import java.util.List;
+
 import javax.persistence.Transient;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Menu extends GenericEntity<Menu>{
@@ -17,9 +20,16 @@ public class Menu extends GenericEntity<Menu>{
 	@Parent
 	private Key<Business> business;
 	
+	@Unindexed
 	private Integer order;
 	
 	private boolean active = false;
+	
+	
+	/**
+	 * Only for sorting of products for menu views.
+	 */
+	private List<Key<Product>> products;
 	
 	public String getTitle() {
 		return title;
@@ -79,6 +89,14 @@ public class Menu extends GenericEntity<Menu>{
 			this.setDirty(true);
 			this.active = active;
 		}
+	}
+
+	public List<Key<Product>> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<Key<Product>> products) {
+		this.products = products;
 	}
 	
 }

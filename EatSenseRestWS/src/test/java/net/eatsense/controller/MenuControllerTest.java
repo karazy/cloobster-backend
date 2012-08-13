@@ -39,6 +39,7 @@ import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
+import net.eatsense.validation.ValidationHelper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.joda.money.CurrencyUnit;
@@ -106,7 +107,7 @@ public class MenuControllerTest {
 		pr = mock(ProductRepository.class);
 		cr = mock(ChoiceRepository.class);
 		Transformer trans = mock(Transformer.class);
-		Validator validator = injector.getInstance(Validator.class);
+		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
 		
 		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator);
 	}
