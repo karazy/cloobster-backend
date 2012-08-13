@@ -24,6 +24,7 @@ public class MenuRepository extends GenericRepository<Menu> {
 	}
 	
 	public List<Menu> getActiveMenusForBusinessAndArea(Key<Business> businessKey, long areaId) {
+		logger.info("areaId: {}",areaId);
 		Area area;
 		try {
 			area = ofy().get(new Key<Area>(businessKey, Area.class, areaId));

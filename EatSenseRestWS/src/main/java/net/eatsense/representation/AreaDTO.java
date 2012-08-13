@@ -39,9 +39,8 @@ public class AreaDTO {
 		if(area.getBusiness() != null) {
 			businessId = area.getBusiness().getId();
 		}
-		
+		menuIds = new ArrayList<Long>();
 		if(area.getMenus() != null && !area.getMenus().isEmpty()) {
-			menuIds = new ArrayList<Long>();
 			for (Key<Menu> menuKey : area.getMenus()) {
 				menuIds.add(menuKey.getId());
 			}
