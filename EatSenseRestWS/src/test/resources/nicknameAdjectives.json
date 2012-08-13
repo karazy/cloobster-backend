@@ -74,21 +74,7 @@
         "fragment": "Schlankes",
         "lang" : "DE"
     },	
-    {
-        "gender": "M",
-        "fragment": "Tollwütiger",
-        "lang" : "DE"
-    },
-    {
-        "gender": "F",
-        "fragment": "Tollwütige",
-        "lang" : "DE"
-    },
-    {
-        "gender": "N",
-        "fragment": "Tollwütiges",
-        "lang" : "DE"
-    },    {
+	{
         "gender": "M",
         "fragment": "Cleverer",
         "lang" : "DE"
