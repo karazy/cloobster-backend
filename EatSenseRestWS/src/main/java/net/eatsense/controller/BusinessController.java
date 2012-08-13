@@ -203,14 +203,7 @@ public class BusinessController {
 		List<Request> requests = query.list();
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
-				
-				CustomerRequestDTO requestData = new CustomerRequestDTO();
-				requestData.setId(request.getId());
-				requestData.setCheckInId(request.getCheckIn().getId());
-				requestData.setSpotId(request.getSpot().getId());
-				requestData.setType(request.getStatus());
-				
-				requestDataList.add(requestData);
+				requestDataList.add(new CustomerRequestDTO(request));
 			}
 				
 		}

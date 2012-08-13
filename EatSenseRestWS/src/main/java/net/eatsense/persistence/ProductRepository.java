@@ -13,6 +13,7 @@ public class ProductRepository extends GenericRepository<Product> {
 	}
 
 	public List<Product> getActiveProductsForBusiness(Key<Business> businessKey){
+		logger.info("business: {}", businessKey);
 		return ofy().query(Product.class).ancestor(businessKey).filter("active", true).list();
 	}
 }

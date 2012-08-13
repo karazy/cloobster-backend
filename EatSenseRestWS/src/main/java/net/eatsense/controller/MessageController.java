@@ -119,13 +119,9 @@ public class MessageController {
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
-		requestData.setCheckInId(event.getRequest().getCheckIn().getId());
-		requestData.setId(event.getRequest().getId());
-		requestData.setType(event.getRequest().getStatus());
-		requestData.setSpotId(event.getRequest().getSpot().getId());
-		messages.add(new MessageDTO("request", "delete", requestData));
+		CustomerRequestDTO requestData =  new CustomerRequestDTO(event.getRequest());
 		
+		messages.add(new MessageDTO("request", "delete", requestData));
 		
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(event.getRequest().getSpot().getId());
@@ -156,14 +152,7 @@ public class MessageController {
 		spotData.setStatus(event.getRequest().getStatus());
 				
 		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
-		requestData.setCheckInId(event.getCheckIn().getId());
-		requestData.setId(event.getRequest().getId());
-		requestData.setType(event.getRequest().getStatus());
-		requestData.setSpotId(event.getCheckIn().getSpot().getId());
-		
-		messages.add(new MessageDTO("request", "new", requestData ));
+		messages.add(new MessageDTO("request", "new", new CustomerRequestDTO(event.getRequest()) ));
 		
 		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
