@@ -72,12 +72,22 @@ public class MenuController {
 	 */
 	public Collection<MenuDTO> getMenusWithProducts(Key<Business> businessKey, long areaId){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
-		if(businessKey == null || areaId == 0)
+		if(businessKey == null)
 			return menuDTOs;
 		
-		Area area = areaRepo.getById(businessKey, areaId);
+		List<Menu> menus;
 		
-		List<Menu> menus = menuRepo.getActiveMenusForBusinessAndArea(businessKey, areaId);
+		if(areaId == 0) {
+			menus = menuRepo.getActiveMenusForBusiness(businessKey);
+		}
+		else {
+			menus = menuRepo.getActiveMenusForBusinessAndArea(businessKey, areaId);
+		}
+		
+		if(menus.isEmpty()) {
+			return menuDTOs;
+		}
+		
 		List<ProductDTO> products = transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(businessKey));
 		
 		ListMultimap<Long, ProductDTO> menuToProductsMap = ArrayListMultimap.create();

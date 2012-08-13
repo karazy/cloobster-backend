@@ -20,6 +20,7 @@ public class MenuRepository extends GenericRepository<Menu> {
 	}
 	
 	public List<Menu> getActiveMenusForBusiness(Key<Business> businessKey) {
+		logger.info("business: {}", businessKey);
 		return ofy().query(Menu.class).ancestor(businessKey).filter("active", true).list();
 	}
 	

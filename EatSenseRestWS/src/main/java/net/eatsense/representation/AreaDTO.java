@@ -87,6 +87,4 @@ public class AreaDTO {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
-	
 }
