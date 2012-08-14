@@ -29,6 +29,7 @@ public class Menu extends GenericEntity<Menu>{
 	/**
 	 * Only for sorting of products for menu views.
 	 */
+	@Unindexed
 	private List<Key<Product>> products;
 	
 	public String getTitle() {

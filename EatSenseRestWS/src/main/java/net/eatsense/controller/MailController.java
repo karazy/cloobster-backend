@@ -42,7 +42,7 @@ public class MailController {
 	private final AccessTokenRepository accessTokenRepo;
 	private final CompanyRepository companyRepo;
 	
-	public static final String FROM_ADDRESS = "reifschneider@karazy.net";
+	public static final String FROM_ADDRESS = "info@cloobster.com";
 	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
 	
 	@Inject
