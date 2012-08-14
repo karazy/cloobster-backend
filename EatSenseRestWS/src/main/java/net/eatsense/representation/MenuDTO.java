@@ -1,15 +1,21 @@
 package net.eatsense.representation;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
 import net.eatsense.domain.Menu;
+import net.eatsense.domain.Product;
 import net.eatsense.validation.CreationChecks;
 
 import org.apache.bval.constraints.NotEmpty;
+
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
 
 /**
  * A POJO which represents a collection of products with a title.
@@ -34,8 +40,11 @@ public class MenuDTO {
 	
 	private boolean active;
 	
+	private List<Long> productIds;
+	
 	public MenuDTO() {
 		super();
+		this.productIds = new ArrayList<Long>();
 	}
 	
 	/**
@@ -48,6 +57,12 @@ public class MenuDTO {
 		this.order = menu.getOrder();
 		this.id = menu.getId();
 		this.active = menu.isActive();
+				
+		if(menu.getProducts() != null) {
+			for(Key<Product> productKey : menu.getProducts()) {
+				this.productIds.add(productKey.getId());
+			}
+		}
 	}
 	
 	/**
@@ -95,6 +110,14 @@ public class MenuDTO {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public List<Long> getProductIds() {
+		return productIds;
+	}
+
+	public void setProductIds(List<Long> productIds) {
+		this.productIds = productIds;
 	}
 	
 }

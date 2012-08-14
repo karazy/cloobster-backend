@@ -6,7 +6,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -29,6 +31,7 @@ import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.validation.CreationChecks;
+import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +53,12 @@ public class MenuController {
 	private final MenuRepository menuRepo;
 	private final ProductRepository productRepo;
 	private final Transformer transform;
-	private final Validator validator;
+	private final ValidationHelper validator;
 	private final ChoiceRepository choiceRepo;
 	private final AreaRepository areaRepo;
 
 	@Inject
-	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, Validator validator) {
+	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator) {
 		this.choiceRepo = cr;
 		this.areaRepo = areaRepo;
 		this.menuRepo = mr;
@@ -91,14 +94,32 @@ public class MenuController {
 		List<ProductDTO> products = transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(businessKey));
 		
 		ListMultimap<Long, ProductDTO> menuToProductsMap = ArrayListMultimap.create();
+		Map<Long, ProductDTO> productsMap = new HashMap<Long, ProductDTO>();
 		
 		for (ProductDTO productDTO : products) {
 			menuToProductsMap.put(productDTO.getMenuId(), productDTO);
+			productsMap.put(productDTO.getId(), productDTO);
 		}
 
 		for ( Menu menu : menus) {
+			
+			if(menu.getProducts() != null) {
+				// Build product order.
+				int index = 0;
+				for (Key<Product> productKey : menu.getProducts()) {
+					ProductDTO productDTO = productsMap.get(productKey.getId());
+					
+					if(productDTO != null) {
+						productDTO.setOrder(index);
+					}
+					
+					index++;
+				}
+			}
+			
 			MenuDTO menuDTO = new MenuDTO(menu);
-			// Get products for this menu from the product map.		
+			// Get products for this menu from the product map.
+			
 			menuDTO.setProducts(menuToProductsMap.get(menu.getId())); 
 			menuDTOs.add(menuDTO);
 		}
@@ -197,21 +218,25 @@ public class MenuController {
 		checkNotNull(menu, "menu was null");
 		checkNotNull(menuData, "menuData was null");
 		
-		Set<ConstraintViolation<MenuDTO>> violationSet = validator.validate(menuData, CreationChecks.class);
-		
-		if(!violationSet.isEmpty()) {
-			StringBuilder stringBuilder = new StringBuilder("validation errors:");
-			for (ConstraintViolation<MenuDTO> violation : violationSet) {
-				// Format the message like: '"{property}" {message}.'
-				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
-			}
-			throw new ValidationException(stringBuilder.toString());
-		}
+		validator.validate(menuData, CreationChecks.class);
 		
 		menu.setDescription(menuData.getDescription());
 		menu.setOrder(menuData.getOrder());
 		menu.setTitle(menuData.getTitle());
 		menu.setActive(menuData.isActive());
+		
+		if(!menuData.getProductIds().isEmpty()) {
+			menu.setProducts(new ArrayList<Key<Product>>());
+		}
+		
+		// Add product ids for odering.		
+		for( Long productId : menuData.getProductIds()) {
+			Key<Product> productKey = productRepo.getKey(menu.getBusiness(), productId);
+			
+			if(!menu.getProducts().contains(productKey)) {
+				menu.getProducts().add(productKey);
+			}
+		}
 		
 		if(menu.isDirty())
 			menuRepo.saveOrUpdate(menu);
@@ -283,7 +308,7 @@ public class MenuController {
 		for (Product product : productRepo.getListByProperty("menu", menuKey )) {
 			if(!product.isTrash()) {
 				productsData.add(new ProductDTO(product));
-			}			
+			}
 		}
 		
 		return productsData;
@@ -302,13 +327,14 @@ public class MenuController {
 		for (Product product : productRepo.getListByParentAndProperty(business.getKey(), "menu", null )) {
 			if(!product.isTrash()) {
 				productsData.add(new ProductDTO(product));
-			}			
+			}
 		}
 		
 		return productsData;
 	}
+	
 	/**
-	 * Get all Product entities for this Business.
+	 * Get all Product entities using this choice.
 	 * 
 	 * @param business
 	 * @param menuId
