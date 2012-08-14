@@ -225,9 +225,10 @@ public class MenuController {
 		menu.setTitle(menuData.getTitle());
 		menu.setActive(menuData.isActive());
 		
-		if(!menuData.getProductIds().isEmpty() && menu.getProducts() == null) {
+		if(!menuData.getProductIds().isEmpty()) {
 			menu.setProducts(new ArrayList<Key<Product>>());
 		}
+		
 		// Add product ids for odering.		
 		for( Long productId : menuData.getProductIds()) {
 			Key<Product> productKey = productRepo.getKey(menu.getBusiness(), productId);
@@ -307,7 +308,7 @@ public class MenuController {
 		for (Product product : productRepo.getListByProperty("menu", menuKey )) {
 			if(!product.isTrash()) {
 				productsData.add(new ProductDTO(product));
-			}			
+			}
 		}
 		
 		return productsData;
@@ -326,13 +327,14 @@ public class MenuController {
 		for (Product product : productRepo.getListByParentAndProperty(business.getKey(), "menu", null )) {
 			if(!product.isTrash()) {
 				productsData.add(new ProductDTO(product));
-			}			
+			}
 		}
 		
 		return productsData;
 	}
+	
 	/**
-	 * Get all Product entities for this Business.
+	 * Get all Product entities using this choice.
 	 * 
 	 * @param business
 	 * @param menuId

@@ -96,7 +96,10 @@ public class Menu extends GenericEntity<Menu>{
 	}
 
 	public void setProducts(List<Key<Product>> products) {
-		this.products = products;
+		if(!Objects.equal(this.products, products)) {
+			this.setDirty(true);
+			this.products = products;
+		}
 	}
 	
 }
