@@ -71,14 +71,9 @@ public class DummyDataDumper {
 			Key<Company> key = companyRepo.saveOrUpdate(company);
 
 			logger.info("Create account for Cloobster Club");
-			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "developer@karazy.net", Role.COMPANYOWNER, testBusinesses, key, null, null, true, true);
+			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "test@karazy.net", Role.COMPANYOWNER, testBusinesses, key, null, null, true, true);
 		}
-			
-		List<Key<Business>> hup = rr.getKeysByProperty("name", "Heidi und Paul");
-		if(!hup.isEmpty()) {
-			logger.info("Create account for Heidi und Paul");
-			ar.createAndSaveAccount("HuP Account","hup", "test", "info@cloobster.com", Role.COMPANYOWNER,  hup, null, null, null, true, true);
-		}
+
 		Company company = new Company();
 		company.setName("Karazy GmbH");
 		Key<Company> key = companyRepo.saveOrUpdate(company);
