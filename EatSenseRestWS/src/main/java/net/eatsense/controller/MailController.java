@@ -42,7 +42,7 @@ public class MailController {
 	private final AccessTokenRepository accessTokenRepo;
 	private final CompanyRepository companyRepo;
 	
-	public static final String FROM_ADDRESS = "reifschneider@karazy.net";
+	public static final String FROM_ADDRESS = "info@karazy.net";
 	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
 	
 	@Inject
@@ -74,12 +74,12 @@ public class MailController {
 	}
 	
 	public MimeMessage sendMail(String emailTo, String text) throws AddressException, MessagingException {
-		return sendMail(emailTo, text, FROM_ADDRESS);
+		return sendMail(emailTo, text, REPLY_TO_ADDRESS);
 	}
 	
-	public MimeMessage sendMail(String emailTo, String text, String emailFrom) throws AddressException, MessagingException {
+	public MimeMessage sendMail(String emailTo, String text, String replyTo) throws AddressException, MessagingException {
 		checkArgument(!Strings.isNullOrEmpty(emailTo), "emailTo was null or empty");
-		checkArgument(!Strings.isNullOrEmpty(emailFrom), "emailFrom was null or empty");
+		checkArgument(!Strings.isNullOrEmpty(replyTo), "replyTo was null or empty");
 		
 		if(Strings.isNullOrEmpty(text)) {
 			logger.error("No template found, skipped sending mail to {}", emailTo);
@@ -88,8 +88,8 @@ public class MailController {
 
 		MimeMessage mail = new MimeMessage(session);
 		
-		mail.setFrom(new InternetAddress(emailFrom));
-		mail.setReplyTo(new Address[]{new InternetAddress(REPLY_TO_ADDRESS)});
+		mail.setFrom(new InternetAddress(FROM_ADDRESS));
+		mail.setReplyTo(new Address[]{new InternetAddress(replyTo)});
 		mail.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
 		
 		applyTextAndSubject(mail, text);

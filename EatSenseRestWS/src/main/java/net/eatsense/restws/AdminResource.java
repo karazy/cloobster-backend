@@ -89,10 +89,9 @@ public class AdminResource {
 				businessRepo.restoreTrashedEntity(new Key<TrashEntry>(TrashEntry.class, trashEntryId));
 			} catch (NotFoundException e) {
 				throw new net.eatsense.exceptions.NotFoundException();
-		}
+			}
 		}
 	}
-	
 	
 	@PUT
 	@Path("templates/{id}")

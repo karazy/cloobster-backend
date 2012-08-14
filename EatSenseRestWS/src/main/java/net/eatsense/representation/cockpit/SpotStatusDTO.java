@@ -10,6 +10,7 @@ public class SpotStatusDTO {
 	private Long id;
 	private String status;
 	private Integer checkInCount;
+	private Long areaId;
 	
 	public String getGroupTag() {
 		return groupTag;
@@ -41,4 +42,14 @@ public class SpotStatusDTO {
 	public void setCheckInCount(Integer checkInCount) {
 		this.checkInCount = checkInCount;
 	}
+	
+	public Long getAreaId() {
+		return areaId;
+	}
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
+	
+	
 }

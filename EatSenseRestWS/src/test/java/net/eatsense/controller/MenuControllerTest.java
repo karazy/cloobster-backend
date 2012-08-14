@@ -23,19 +23,23 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
+import net.eatsense.validation.ValidationHelper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.joda.money.CurrencyUnit;
@@ -46,6 +50,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.datastore.Blob;
@@ -70,8 +75,14 @@ public class MenuControllerTest {
     private ProductRepository pr;
     private ChoiceRepository cr;
     private DummyDataDumper ddd;
+    private SpotRepository spotRepo;
 	
 	private Business business;
+
+	@Mock
+	private AreaRepository areaRepo;
+
+	private Spot spot;
 
 	@Before
 	public void setUp() throws Exception {
@@ -82,11 +93,13 @@ public class MenuControllerTest {
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
+		spotRepo = injector.getInstance(SpotRepository.class);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
 		ddd.generateDummyBusinesses();
 		business = rr.getByProperty("name", "Sergio");
+		spot = spotRepo.getByProperty("barcode", "serg2011");
 	}
 	
 	public void newSetUp() throws Exception {
@@ -94,9 +107,9 @@ public class MenuControllerTest {
 		pr = mock(ProductRepository.class);
 		cr = mock(ChoiceRepository.class);
 		Transformer trans = mock(Transformer.class);
-		Validator validator = injector.getInstance(Validator.class);
+		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
 		
-		ctr = new MenuController(mr, pr, cr, trans, validator);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator);
 	}
 
 	@After
@@ -1096,7 +1109,7 @@ public class MenuControllerTest {
 	@Test
 	public void testGetMenus() {
 		// retrieve all menus saved for this restaurant
-		Collection<MenuDTO> menusdto = ctr.getMenusWithProducts(business.getKey());
+		Collection<MenuDTO> menusdto = ctr.getMenusWithProducts(business.getKey(), spot.getArea().getId());
 		
 		// check if we have three menus
 		assertEquals(3 , menusdto.size() );

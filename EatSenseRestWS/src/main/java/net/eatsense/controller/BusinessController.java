@@ -4,19 +4,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Menu;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
@@ -28,24 +29,26 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.AreaDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.CustomerRequestDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
+import net.eatsense.validation.CreationChecks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -60,19 +63,23 @@ import com.googlecode.objectify.Query;
  */
 public class BusinessController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private CheckInRepository checkInRepo;
-	private SpotRepository spotRepo;
-	private RequestRepository requestRepo;
-	private BusinessRepository businessRepo;
-	private EventBus eventBus;
+	private final CheckInRepository checkInRepo;
+	private final SpotRepository spotRepo;
+	private final RequestRepository requestRepo;
+	private final BusinessRepository businessRepo;
+	private final EventBus eventBus;
 	private final AccountRepository accountRepo;
 	private final ImageController imageController;
-	private Validator validator;
+	private final Validator validator;
+	private final AreaRepository areaRepo;
+	private final MenuRepository menuRepo;
 	
 	@Inject
 	public BusinessController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, BusinessRepository br, EventBus eventBus,
-			AccountRepository accountRepo, ImageController imageController, Validator validator) {
+			AccountRepository accountRepo, ImageController imageController,AreaRepository areaRepository, Validator validator, MenuRepository menuRepository) {
+		this.areaRepo = areaRepository;
+		this.menuRepo = menuRepository;
 		this.validator = validator;
 		this.eventBus = eventBus;
 		this.requestRepo = rr;
@@ -100,7 +107,9 @@ public class BusinessController {
 			SpotStatusDTO spotDto = new SpotStatusDTO();
 			spotDto.setId(spot.getId());
 			spotDto.setName(spot.getName());
-			spotDto.setGroupTag(spot.getGroupTag());
+			if(spot.getArea()!=null) {
+				spotDto.setAreaId(spot.getArea().getId());
+			}
 			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(spot.getKey());
 			spotDto.setCheckInCount(checkInCount);
 			
@@ -194,14 +203,7 @@ public class BusinessController {
 		List<Request> requests = query.list();
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
-				
-				CustomerRequestDTO requestData = new CustomerRequestDTO();
-				requestData.setId(request.getId());
-				requestData.setCheckInId(request.getCheckIn().getId());
-				requestData.setSpotId(request.getSpot().getId());
-				requestData.setType(request.getStatus());
-				
-				requestDataList.add(requestData);
+				requestDataList.add(new CustomerRequestDTO(request));
 			}
 				
 		}
@@ -452,14 +454,24 @@ public class BusinessController {
 	
 	/**
 	 * @param businessKey
-	 * @return List of spots for the business.
+	 * @param areaId If different from 0, filter by area.
+	 * @return List of spots for the business and for the area if specified.
 	 */
-	public List<SpotDTO> getSpots(Key<Business> businessKey) {
+	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
 		
-		for(Spot spot : spotRepo.getByParent(businessKey) ) {
+		List<Spot> spots;
+		if(areaId != 0) {
+			Key<Area> areaKey = areaRepo.getKey(businessKey, areaId);
+			spots = spotRepo.getListByParentAndProperty(businessKey, "area", areaKey);
+		}
+		else {
+			spots = spotRepo.getByParent(businessKey);
+		}
+		
+		for(Spot spot :  spots) {
 			if(!spot.isTrash()) {
 				spotDTOList.add(new SpotDTO(spot));
 			}
@@ -507,8 +519,15 @@ public class BusinessController {
 		}
 		
 		spot.setActive(spotData.isActive());
-		spot.setGroupTag(spotData.getGroupTag());
 		spot.setName(spotData.getName());
+		
+		Key<Area> areaKey = null;
+		if(spotData.getAreaId() != null) {
+			areaKey = areaRepo.getKey(spot.getBusiness(), spotData.getAreaId());
+		}
+		spot.setArea(areaKey);
+		
+		
 		
 		if(spot.isDirty()) {
 			spotRepo.saveOrUpdate(spot);
@@ -544,5 +563,114 @@ public class BusinessController {
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new NotFoundException();
 		}
+	}
+	
+	/**
+	 * @param businessKey
+	 * @param id
+	 * @return
+	 */
+	public Area getArea(Key<Business> businessKey, long id) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkArgument(id != 0, "id was zero");
+		
+		try {
+			return areaRepo.getById(businessKey, id);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new NotFoundException();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param businessKey
+	 * @return List of areas as transfer objects.
+	 */
+	public List<AreaDTO> getAreas(Key<Business> businessKey) {
+		checkNotNull(businessKey, "businessKey was null");
+		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
+		
+		for(Area area : areaRepo.getByParent(businessKey)) {
+			if(!area.isTrash()) {
+				areaDtos.add(new AreaDTO(area));
+			}
+		}
+		
+		return areaDtos;
+	}
+	
+	/**
+	 * @param business
+	 * @param areaData
+	 * @return
+	 */
+	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(areaData, "areaData was null");
+		
+		Area area = areaRepo.newEntity();
+		area.setBusiness(businessKey);
+		updateArea(area, areaData);
+		
+		return area;
+	}
+
+	/**
+	 * @param area
+	 * @param areaData
+	 * @return
+	 */
+	public Area updateArea(Area area, AreaDTO areaData) {
+		checkNotNull(area, "area was null");
+		checkNotNull(areaData, "areaData was null");
+		
+		validator.validate(areaData, Default.class, CreationChecks.class);
+		
+		area.setActive(areaData.isActive());
+		area.setDescription(areaData.getDescription());
+		area.setName(areaData.getName());
+		
+		List<Key<Menu>> menus = null;
+		
+		if(areaData.getMenuIds() != null && !areaData.getMenuIds().isEmpty()) {
+			menus = new ArrayList<Key<Menu>>();
+			for (Long menuId : areaData.getMenuIds()) {
+				Key<Menu> menuKey = menuRepo.getKey(area.getBusiness(), menuId);
+				
+				if(!menus.contains(menuKey)) {
+					menus.add(menuKey);
+				}
+				else {
+					logger.warn("Duplicate menu id: {}", menuId);
+				}
+			}
+		}
+		area.setMenus(menus);
+		
+		if(area.isDirty()) {
+			areaRepo.saveOrUpdate(area);
+		}
+		
+		return area;
+	}
+	
+	/**
+	 * Mark area and the associated spots as trashed.
+	 *  
+	 * @param area
+	 * @param account
+	 */
+	public void deleteArea(Area area, Account account) {
+		checkNotNull(area, "area was null");
+		
+		List<Spot> spots = spotRepo.getListByParentAndProperty(area.getBusiness(), "area", area);
+		
+		for (Spot spot : spots) {
+			spot.setActive(false);
+			trashSpot(spot, account);
+		}
+		
+		area.setActive(false);
+		areaRepo.trashEntity(area, account.getLogin());
 	}
 }

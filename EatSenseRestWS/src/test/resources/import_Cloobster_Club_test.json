@@ -19,17 +19,21 @@
             "order": 3
         }
     ],
-    "spots": [
-        {
-            "name": "Tisch 1",
-            "barcode": "tst001",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 2",
-            "barcode": "tst002",
-            "groupTag": null
-        }
+    "areas": [
+    	{
+    		"name": "Restaurant",
+    		"description": "Der Restaurantbereich.",
+			"spots": [
+		        {
+		            "name": "Tisch 1",
+		            "barcode": "tst001"
+		        },
+		        {
+		            "name": "Tisch 2",
+		            "barcode": "tst002"
+		        }
+		    ]
+		}
     ],
     "menus": [
         {
@@ -149,27 +153,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 },
@@ -285,29 +269,8 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
-                    ]
                 }
             ]
         },
@@ -428,27 +391,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 },
@@ -564,27 +507,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 }
@@ -707,27 +630,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 }

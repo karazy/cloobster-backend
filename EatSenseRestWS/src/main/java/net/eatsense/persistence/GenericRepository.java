@@ -148,7 +148,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		ofy().put(trashEntry);
 		return trashEntry;
 	}
-	
+		
 	/**
 	 * @param trashEntryKey
 	 * @return

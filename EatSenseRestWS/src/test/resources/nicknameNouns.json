@@ -70,16 +70,6 @@
         "lang" : "DE"
     },
 	{
-        "gender": "N",
-        "fragment": "Meerschweinchen",
-        "lang" : "DE"
-    },
-	{
-        "gender": "N",
-        "fragment": "Erdmännchen",
-        "lang" : "DE"
-    },
-	{
         "gender": "M",
         "fragment": "Fuchs",
         "lang" : "DE"

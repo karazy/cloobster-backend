@@ -44,6 +44,8 @@ public class AccountDTO {
 		
 	public AccountDTO() {
 		super();
+		
+		businessIds = new ArrayList<Long>();
 	}
 	
 	/**
@@ -52,7 +54,7 @@ public class AccountDTO {
 	 * @param account
 	 */
 	public AccountDTO(Account account) {
-		super();
+		this();
 		if(account == null)
 			return;
 		
@@ -69,7 +71,6 @@ public class AccountDTO {
 			this.companyId = account.getCompany().getId();
 		
 		if(account.getBusinesses()!=null) {
-			businessIds = new ArrayList<Long>();
 			for (Key<Business> businessKey : account.getBusinesses()) {
 				businessIds.add(businessKey.getId());
 			}

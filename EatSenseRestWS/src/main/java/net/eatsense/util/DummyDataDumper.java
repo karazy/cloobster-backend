@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.eatsense.auth.Role;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Company;
@@ -13,6 +14,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.CompanyRepository;
@@ -44,9 +46,12 @@ public class DummyDataDumper {
 
 	private final CompanyRepository companyRepo;
 
+	private final AreaRepository areaRepo;
+
 	@Inject
-	public DummyDataDumper(BusinessRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo) {
+	public DummyDataDumper(BusinessRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo, AreaRepository areaRepo) {
 		this.ar = ar;
+		this.areaRepo = areaRepo;
 		this.rr = rr;
 		this.br = br;
 		this.mr = mr;
@@ -58,16 +63,17 @@ public class DummyDataDumper {
 	public void generateDummyUsers() {
 		//generate admin user for businesses
 		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
+		
+
 		if(!testBusinesses.isEmpty()) {
+			Company company = new Company();
+			company.setName("Cloobster Test Company");
+			Key<Company> key = companyRepo.saveOrUpdate(company);
+
 			logger.info("Create account for Cloobster Club");
-			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "developer@karazy.net", Role.COMPANYOWNER, testBusinesses, null, null, null, true, true);
+			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "test@karazy.net", Role.COMPANYOWNER, testBusinesses, key, null, null, true, true);
 		}
-			
-		List<Key<Business>> hup = rr.getKeysByProperty("name", "Heidi und Paul");
-		if(!hup.isEmpty()) {
-			logger.info("Create account for Heidi und Paul");
-			ar.createAndSaveAccount("HuP Account","hup", "test", "info@cloobster.com", Role.COMPANYOWNER,  hup, null, null, null, true, true);
-		}
+
 		Company company = new Company();
 		company.setName("Karazy GmbH");
 		Key<Company> key = companyRepo.saveOrUpdate(company);
@@ -76,28 +82,34 @@ public class DummyDataDumper {
 
 	public void generateDummyBusinesses() {
 		logger.info("Generate Dummy Businesses.");
-		createAndSaveDummyBusiness("Mc Donald's", "Fast food burger", "Fressecke", "mc123");
-		createAndSaveDummyBusiness("Vappiano", "Pizza und Nudeln, schnell und lecker", "Hauptraum", "vp987");
-		
-		createSergioMenu( createAndSaveDummyBusiness("Sergio", "Bester Spanier Darmstadts", "Keller", "serg2011") );
+		Area area1 = new Area();
+		createAndSaveDummyBusiness("Mc Donald's", "Fast food burger", "Fressecke", "mc123",area1);
+		Area area2 = new Area();
+		createAndSaveDummyBusiness("Vappiano", "Pizza und Nudeln, schnell und lecker", "Hauptraum", "vp987",area2);
+		Area area3 = new Area();
+		createSergioMenu( createAndSaveDummyBusiness("Sergio", "Bester Spanier Darmstadts", "Keller", "serg2011", area3), area3 );
 
 	}
 
-	private void createSergioMenu(Key<Business> kR) {
+	private void createSergioMenu(Key<Business> kR, Area area) {
 
 		//Getränke
 		Key<Menu> kM = createMenu(kR, "Getränke", "Alkoholische, nicht-Alkoholische, heisse und kalte Getränke.");
+		area.setMenus(new ArrayList<Key<Menu>>());
+		area.getMenus().add(kM);
 		createAndSaveProduct(kM,kR, "kalte Milch", 1.5f, "lecker Milch", "Frische Bio-Milch von glücklichen Kühen direkt aus dem Schloss Bauernhof");
 		createAndSaveProduct(kM,kR, "Weizen", 3.0f, "helles Hefeweizen vom Fass 0,5l",
 				"Helles Hefeweizen vom Fass aus der Darmstädter Hofbrauerei im 0.5l Glas, 4.9% vol. Alkohol.");
 		
 		kM = createMenu(kR, "Hauptgerichte", "Schwein, Rind und vegetarische Speisen");
+		area.getMenus().add(kM);
 		Product burger = createProduct(kM,kR, "Classic Burger", 8.5f, "Burger mit Salat, Tomate, Zwiebel und Käse.",
 				"Dies ist eine lange Beschreibung eines Burgers der Herstellung, seiner Zutaten und den Inhaltstoffen.");
 		
 		Key<Product> kP = pr.saveOrUpdate(burger);
 		
 		kM = createMenu(kR, "Beilagen", "Kartoffelprodukte und sonstiges");
+		area.getMenus().add(kM);
 		Product fries = createProduct(kM,kR, "Pommes Frites", 1.5f, "Pommes Frites",
 				"Super geile Pommes Frites.");
 		Product kraut = createProduct(kM,kR, "Krautsalat", 1f, "Weisskraut Salat mit Karotten (Coleslaw)",
@@ -188,9 +200,10 @@ public class DummyDataDumper {
 	    
 	    pr.saveOrUpdate(burger);
 	    
+	    areaRepo.saveOrUpdate(area);
 	}
 
-	private Key<Business> createAndSaveDummyBusiness(String name, String desc, String areaName, String barcode) {
+	private Key<Business> createAndSaveDummyBusiness(String name, String desc, String areaName, String barcode, Area area) {
 		logger.info("Create dummy with data " + name + " " + desc + " " + areaName + " " + barcode);
 		Business r = new Business();
 		r.setName(name);
@@ -206,9 +219,12 @@ public class DummyDataDumper {
 		spot.setBarcode(barcode);
 		spot.setBusiness(kR);
 		spot.setName(areaName);
+		spot.setActive(true);
 		
+		area.setBusiness(kR);
 		
-		
+		Key<Area> areaKey = areaRepo.saveOrUpdate(area);
+		spot.setArea(areaKey);
 		Key<Spot> kB = br.saveOrUpdate(spot);
 		
 		return kR;

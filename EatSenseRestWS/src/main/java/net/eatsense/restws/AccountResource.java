@@ -88,9 +88,11 @@ public class AccountResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public AccountDTO createToken() {
+		
 		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
+		
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		AccountDTO accountDto = new AccountDTO(account);
 		AccessToken authToken = accountCtr.createAuthenticationToken(account);

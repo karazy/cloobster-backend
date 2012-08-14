@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.validation.CreationChecks;
 import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -52,6 +53,9 @@ public class SpotDTO {
 	
 	private boolean active;
 	
+	@NotNull(groups= {CreationChecks.class})
+	private Long areaId;
+	
 	public SpotDTO(Spot spot) {
 		super();
 		if(spot == null)
@@ -66,6 +70,9 @@ public class SpotDTO {
 		this.qrImageUrl = spot.getQrImageUrl();
 		this.name = spot.getName();
 		this.groupTag = spot.getBarcode();
+		if(spot.getArea()!=null) {
+			this.areaId = spot.getArea().getId();
+		}
 	}
 	
 	
@@ -175,6 +182,16 @@ public class SpotDTO {
 
 	public void setTheme(String theme) {
 		this.theme = theme;
+	}
+
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
 	}
 	
 }

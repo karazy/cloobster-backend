@@ -16,6 +16,7 @@ import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.FeedbackForm;
@@ -27,7 +28,9 @@ import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -40,6 +43,7 @@ import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.AreaImportDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
@@ -85,10 +89,17 @@ public class ImportController {
 	private OrderChoiceRepository orderChoiceRepo;
 	private BillRepository billRepo;
 	private FeedbackFormRepository feedbackFormRepo;
+	private AreaRepository areaRepo;
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr, FeedbackFormRepository feedbackFormRepo) {
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr,
+			MenuRepository mr, ProductRepository pr, ChoiceRepository cr,
+			CheckInRepository chkr, OrderRepository or,
+			OrderChoiceRepository ocr, BillRepository br,
+			RequestRepository reqr, AccountRepository acr,
+			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo) {
+		this.areaRepo = areaRepo;
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -102,7 +113,7 @@ public class ImportController {
 		this.accountRepo = acr;
 		this.feedbackFormRepo = feedbackFormRepo;
 	}
-	
+
     public void setValidator(Validator validator) {
         this.validator = validator;
     }
@@ -142,9 +153,9 @@ public class ImportController {
 
 	public Long addBusiness(BusinessImportDTO businessData) {
 		if (!isValidBusinessData(businessData)) {
-			logger.info("Invalid business data, import aborted.");
-			logger.info(returnMessage);
-			return null;
+			logger.error("Invalid business data, import aborted.");
+			logger.error(returnMessage);
+			throw new ValidationException(returnMessage);
 		}
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
@@ -155,10 +166,16 @@ public class ImportController {
 			return null;
 		}
 		
-		for(SpotDTO spot : businessData.getSpots()) {
-			if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), spot.getGroupTag()) == null )
-				logger.info("Error while saving spot with name: " + spot.getName());
+		// Create service area and spots.
+		for(AreaImportDTO area : businessData.getAreas()) {
+			Key<Area> kA = createAndSaveArea(kR, area.getName(), area.getDescription());
+			
+			for(SpotDTO spot : area.getSpots()) {
+				if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), kA) == null )
+					logger.info("Error while saving spot with name: " + spot.getName());
+			}
 		}
+		
 		
 		CurrencyUnit currencyUnit = CurrencyUnit.of(businessData.getCurrency());
 		
@@ -220,7 +237,20 @@ public class ImportController {
 		return businessKey;
 	}
 	
-	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, String groupTag) {
+	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description) {
+		checkNotNull(businessKey, "businessKey was null");
+		Area area = new Area();
+		area.setBusiness(businessKey);
+		area.setDescription(description);
+		area.setName(name);
+		area.setActive(true);
+		
+		Key<Area> kA = areaRepo.saveOrUpdate(area);
+		logger.info("Created new area with id: " + kA.getId());
+		return kA;
+	}
+	
+	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, Key<Area> areaKey) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new spot for business ("+ businessKey.getId() + ") with name: " + name );
@@ -229,7 +259,7 @@ public class ImportController {
 		s.setBusiness(businessKey);
 		s.setName(name);
 		s.setBarcode(barcode);
-		s.setGroupTag(groupTag);
+		s.setArea(areaKey);
 		
 		Key<Spot> kS = spotRepo.saveOrUpdate(s);
 		logger.info("Created new spot with id: " + kS.getId());

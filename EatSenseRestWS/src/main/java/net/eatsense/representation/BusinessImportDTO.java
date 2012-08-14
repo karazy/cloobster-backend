@@ -67,7 +67,6 @@ public class BusinessImportDTO {
 	@NotNull
 	private String postcode;
 
-
 	/**
 	 * Description of location.
 	 */
@@ -82,12 +81,12 @@ public class BusinessImportDTO {
 	private Collection<MenuDTO> menus;
 	
 	/**
-	 * All different spots (e.g. tables, seats, areas) where a customer is able to checkin. 
+	 * All different service areas, containing the spots.
 	 */
 	@NotNull
 	@NotEmpty
 	@Valid
-	private Collection<SpotDTO> spots;
+	private Collection<AreaImportDTO> areas;
 	
 	/**
 	 * All payment methods the business accepts.
@@ -96,7 +95,6 @@ public class BusinessImportDTO {
 	@NotEmpty
 	@Valid
 	private Collection<PaymentMethod> payments;
-	
 
 	public BusinessImportDTO() {
 	}
@@ -125,15 +123,6 @@ public class BusinessImportDTO {
 		this.menus = menus;
 	}
 
-
-	public Collection<SpotDTO> getSpots() {
-		return spots;
-	}
-
-	public void setSpots(Collection<SpotDTO> spots) {
-		this.spots = spots;
-	}
-
 	public Collection<PaymentMethod> getPayments() {
 		return payments;
 	}
@@ -148,5 +137,13 @@ public class BusinessImportDTO {
 
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+
+	public Collection<AreaImportDTO> getAreas() {
+		return areas;
+	}
+
+	public void setAreas(Collection<AreaImportDTO> areas) {
+		this.areas = areas;
 	}
 }

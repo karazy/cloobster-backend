@@ -13,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
@@ -180,12 +181,20 @@ public class BusinessResource {
 		return requestsResource;
 	}
 	
+	@Path("areas")
+	public AreasResource getAreasResource() {
+		AreasResource areasResource = resourceContext.getResource(AreasResource.class);
+		areasResource.setAccount(account);
+		areasResource.setBusiness(business);
+		return areasResource;
+	}
+	
 	@Path("spotsdata")
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public List<SpotDTO> getSpots() {
-		return businessCtrl.getSpots(business.getKey());
+	public List<SpotDTO> getSpots(@QueryParam("areaId") long areaId) {
+		return businessCtrl.getSpots(business.getKey(), areaId);
 	}
 	
 	@Path("spotsdata")

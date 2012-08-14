@@ -39,16 +39,24 @@ public class Spot extends GenericEntity<Spot>{
 	private String name;
 	
 	/**
-	 * A tag which can be used to group spots for easier organisation.
-	 * E. g. Outside, Upper floor
-	 */
-	private String groupTag;
-	
-	/**
 	 * Determines if the customer is able to checkin on that spot.
 	 * (Default is true, for downwards combatibility).
 	 */
 	private boolean active = true;
+	
+	private Key<Area> area;
+
+	public Key<Area> getArea() {
+		return area;
+	}
+
+	public void setArea(Key<Area> area) {
+		
+		if(!Objects.equal(this.area, area)) {
+			this.setDirty(true);
+			this.area = area;
+		}
+	}
 
 	private String qrImageUrl;
 
@@ -79,20 +87,12 @@ public class Spot extends GenericEntity<Spot>{
 	}
 
 	public void setBusiness(Key<Business> business) {
-		this.business = business;
-	}
-
-	public String getGroupTag() {
-		return groupTag;
-	}
-
-	public void setGroupTag(String groupTag) {
-		if(!Objects.equal(this.groupTag, groupTag)) {
+		if(!Objects.equal(this.business, business)) {
 			this.setDirty(true);
-			this.groupTag = groupTag;
+			this.business = business;
 		}
 	}
-	
+
 	@Transient
 	public Key<Spot> getKey() {
 	   return getKey(getBusiness(), getId());
@@ -124,6 +124,9 @@ public class Spot extends GenericEntity<Spot>{
 	}
 
 	public void setActive(boolean active) {
-		this.active = active;
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
 	}
 }

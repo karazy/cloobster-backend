@@ -75,6 +75,11 @@ h3.subtitle {
 	left: 30px
 }
 
+.app-ios {
+	position: absolute;
+	right: 30px;
+}
+
 .about {
 	position: absolute;
 	text-align: center;
