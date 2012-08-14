@@ -31,6 +31,7 @@ import net.eatsense.event.ConfirmAllOrdersEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.DataConflictException;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.BusinessRepository;
@@ -94,7 +95,13 @@ public class OrderController {
 		this.transform = trans;
 	}
 
-	private int checkOptions(ChoiceDTO choiceDto, Choice originalChoice) throws IllegalArgumentException {
+	/**
+	 * @param choiceDto
+	 * @param originalChoice
+	 * @return
+	 * @throws ValidationException
+	 */
+	private int checkOptions(ChoiceDTO choiceDto, Choice originalChoice) throws ValidationException {
 		int selected = countSelected(choiceDto);
 		// Validate choice selection
 		if(selected < originalChoice.getMinOccurence() ) {
@@ -108,6 +115,10 @@ public class OrderController {
 		return selected;
 	}
 	
+	/**
+	 * @param business
+	 * @param checkInId Id of CheckIn entity
+	 */
 	public void confirmPlacedOrdersForCheckIn(Business business, long checkInId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
@@ -381,12 +392,8 @@ public class OrderController {
 	 * @return id of the order
 	 */
 	public Long placeOrderInCart(Business business, CheckIn checkIn, OrderDTO orderData) {
-		if(business == null) {
-			throw new IllegalArgumentException("Order cannot be placed, business is null");
-		}
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Order cannot be placed, checkin is null");
-		}
+		checkNotNull(business, "business was null");
+		checkNotNull(checkIn, "checkIn was null");
 		
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
@@ -398,7 +405,7 @@ public class OrderController {
 
 		// Check that the order will be placed at the correct business.
 		if(business.getId() != checkIn.getBusiness().getId()) {
-			throw new IllegalArgumentException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
+			throw new ValidationException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
 		}
 		
 		// Check if the product to be ordered exists	
@@ -406,7 +413,7 @@ public class OrderController {
 		try {
 			product = productRepo.getById(checkIn.getBusiness(), orderData.getProductId());
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			throw new IllegalArgumentException("Order cannot be placed, productId unknown",e);
+			throw new ValidationException("Order cannot be placed, productId unknown",e);
 		}
 		Long orderId = null;
 		List<OrderChoice> choices = null;
@@ -427,9 +434,9 @@ public class OrderController {
 				
 				OrderChoice choice = new OrderChoice();
 				
-				Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getId()));
+				Choice originalChoice = originalChoiceMap.get(Choice.getKey(business.getKey(), choiceDto.getOriginalChoiceId()));
 				if(originalChoice == null)
-					throw new DataConflictException("Conflict while placing order, unknown choice id " + choiceDto.getId() + ". Refresh resource.");
+					throw new DataConflictException("Conflict while placing order, unknown originalChoiceId " + choiceDto.getOriginalChoiceId() + ". Reload product resource.");
 				
 				if(choiceDto.getOptions() != null ) {
 					selected = checkOptions(choiceDto, originalChoice);
@@ -534,22 +541,16 @@ public class OrderController {
 	 * @return the updated OrderDTO
 	 */
 	public OrderDTO updateOrder(Business business, Order order, OrderDTO orderData, CheckIn checkIn) {
-		//
-		// Check preconditions and retrieve entities.
-		//
-		if(business == null) {
-			throw new IllegalArgumentException("Order cannot be updated, business is null");
-		}
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Order cannot be updated, checkin is null");
-		}
-		if(order == null) {
-			throw new IllegalArgumentException("Order cannot be updated, order is null.");
-		}
+		checkNotNull(business, "business was null");
+		checkNotNull(order, "order was null");
+		checkNotNull(orderData, "orderData was null");
+		checkNotNull(checkIn, "checkIn was null");
+		
 		// Check if the order belongs to the specified checkin.
 		if(! checkIn.getId().equals(order.getCheckIn().getId()) ) {
-			throw new IllegalArgumentException("Order cannot be updated, checkIn does not own the order.");
+			throw new IllegalAccessException("Order cannot be updated, checkIn does not own the order.");
 		}
+		
 		// Check that the checkin is allowed to update the order.
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new OrderFailureException("Order cannot be updated, payment already requested or not checked in");
@@ -568,13 +569,14 @@ public class OrderController {
 		orderData.setCheckInId(checkIn.getId());
 		// Retrieve saved choices from the store
 		List<OrderChoice> savedChoices = orderChoiceRepo.getByParent(order.getKey());
+		
 		if(orderData.getChoices() != null ) {
 			// iterate over all choices ... 
 			for( ChoiceDTO choiceData : orderData.getChoices()) {
 				for( OrderChoice savedChoice : savedChoices ) {
 					// ... and compare ids.
-					if(choiceData.getId().equals(savedChoice.getChoice().getId())) {
-						// Save all made choices for the option.
+					if(choiceData.getOriginalChoiceId().equals(savedChoice.getChoice().getId())) {
+						// Create map for options.
 						HashSet<ProductOption> optionSet = new HashSet<ProductOption>(savedChoice.getChoice().getOptions());
 						// Check if any of the options were changed
 						if ( ! optionSet.containsAll(choiceData.getOptions()) ) {

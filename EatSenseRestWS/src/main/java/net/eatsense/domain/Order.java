@@ -43,7 +43,6 @@ public class Order extends GenericEntity<Order> {
 	
 	String comment;
 
-
 	@NotNull
 	Date orderTime;
 	

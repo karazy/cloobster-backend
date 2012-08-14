@@ -35,7 +35,7 @@ public class OrderDTO {
 	
 	private Collection<ChoiceDTO> choices;
 	
-	public OrderDTO(Order order, Product product) {
+	public OrderDTO(Order order) {
 		super();
 		if(order == null)
 			return;
@@ -53,19 +53,14 @@ public class OrderDTO {
 		if(order.getProduct() != null) {
 			productId = order.getProduct().getId();
 		}
-	
-		if(product == null)
+		else {
 			return;
+		}
 		
-		productName = product.getName();
-		
-		productShortDesc = product.getShortDesc();
-		productLongDesc = product.getLongDesc();
-		productPrice = product.getPrice() / 100d;
-	}
-	
-	public OrderDTO(Order order) {
-		this(order, null);
+		productName = order.getProductName();
+		productShortDesc = order.getProductShortDesc();
+		productLongDesc = order.getProductLongDesc();
+		productPrice = order.getProductPrice() / 100d;
 	}
 	
 	public OrderDTO() {
