@@ -13,26 +13,65 @@ import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Request extends GenericEntity<Request> {
+	
 	public enum RequestType {
 		ORDER,
 		BILL,
 		CUSTOM
 	}
-	RequestType type;
-	String status;
-	// Represents the datastore id of the corresponding of this request (type == RequestType.ORDER means objectId is id of the order object)
-	Long objectId;
-	Key<Spot> spot;
-	Key<CheckIn> checkIn;
-	@Unindexed
 	
+	private RequestType type;
+	private String status;
+	// Represents the datastore id of the corresponding of this request (type == RequestType.ORDER means objectId is id of the order object)
+	private Long objectId;
+	private Key<Spot> spot;
+	private Key<CheckIn> checkIn;
+	private Key<Area> area;
+	@Unindexed
 	private String spotName;
 	@Unindexed
 	private String checkInName;
 	
 	@Parent
-	Key<Business> business;
-	Date receivedTime;
+	private Key<Business> business;
+	
+	private Date receivedTime;
+	
+	public Request() {
+		super();
+		this.receivedTime = new Date();
+		this.type = RequestType.CUSTOM;
+	}
+	
+	public Request(CheckIn checkIn, Spot spot) {
+		this();
+		
+		if(checkIn != null) {
+			this.checkIn = checkIn.getKey();
+			this.checkInName = checkIn.getNickname();
+		}
+		
+		if(spot != null) {
+			this.spot = spot.getKey();
+			this.spotName = spot.getName();
+			this.area = spot.getArea();
+		}
+	}
+	
+	public Request(CheckIn checkIn, Spot spot, Order order) {
+		this(checkIn, spot);
+		
+		this.type = RequestType.ORDER;
+		this.objectId = order.getId();
+	}
+	
+	public Request(CheckIn checkIn, Spot spot, Bill bill) {
+		this(checkIn, spot);
+		
+		this.type = RequestType.BILL;
+		this.objectId = bill.getId();
+	}
+	
 	
 	public Key<CheckIn> getCheckIn() {
 		return checkIn;
@@ -101,5 +140,13 @@ public class Request extends GenericEntity<Request> {
 	}
 	public void setSpotName(String spotName) {
 		this.spotName = spotName;
+	}
+
+	public Key<Area> getArea() {
+		return area;
+	}
+
+	public void setArea(Key<Area> area) {
+		this.area = area;
 	}
 }
