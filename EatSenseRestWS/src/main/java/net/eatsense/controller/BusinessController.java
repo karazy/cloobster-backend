@@ -38,7 +38,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.AreaDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessProfileDTO;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
@@ -136,7 +136,7 @@ public class BusinessController {
 	 * @param requestData
 	 * @return requestData
 	 */
-	public CustomerRequestDTO saveCustomerRequest(CheckIn checkIn, CustomerRequestDTO requestData) {
+	public RequestDTO saveCustomerRequest(CheckIn checkIn, RequestDTO requestData) {
 		checkNotNull(checkIn, "checkin cannot be null");
 		checkNotNull(checkIn.getId(), "checkin id cannot be null");
 		checkNotNull(checkIn.getBusiness(), "business for checkin cannot be null");
@@ -185,11 +185,11 @@ public class BusinessController {
 	 * @param spotId can be null
 	 * @return list of found request dtos or empty list if none found
 	 */
-	public List<CustomerRequestDTO> getCustomerRequestData(Business business, Long checkInId, Long spotId) {
+	public List<RequestDTO> getCustomerRequestData(Business business, Long checkInId, Long spotId) {
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
 		
-		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
+		List<RequestDTO> requestDataList = new ArrayList<RequestDTO>();
 		Query<Request> query = requestRepo.query().ancestor(business);
 
 		if( spotId != null) {
@@ -203,7 +203,7 @@ public class BusinessController {
 		List<Request> requests = query.list();
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
-				requestDataList.add(new CustomerRequestDTO(request));
+				requestDataList.add(new RequestDTO(request));
 			}
 				
 		}
@@ -241,23 +241,18 @@ public class BusinessController {
 	 * @param checkIn
 	 * @return list of found request dtos or empty list if none found
 	 */
-	public List<CustomerRequestDTO> getCustomerRequestsForCheckIn(CheckIn checkIn) {
+	public List<RequestDTO> getCustomerRequestsForCheckIn(CheckIn checkIn) {
 		checkNotNull(checkIn, "checkIn cannot be null");
 		checkNotNull(checkIn.getId(), "checkIn id cannot be null");
 		checkNotNull(checkIn.getBusiness(), "checkIn business cannot be null");
 		
-		List<CustomerRequestDTO> requestDataList = new ArrayList<CustomerRequestDTO>();
+		List<RequestDTO> requestDataList = new ArrayList<RequestDTO>();
 		List<Request> requests = requestRepo.query().ancestor(checkIn.getBusiness()).filter("checkIn", checkIn).list();
 		
 		for (Request request : requests) {
 			if(request.getType() == RequestType.CUSTOM && request.getStatus().equals("CALL_WAITER")) {
 				
-				CustomerRequestDTO requestData = new CustomerRequestDTO();
-				requestData.setId(request.getId());
-				requestData.setCheckInId(request.getCheckIn().getId());
-				requestData.setSpotId(request.getSpot().getId());
-				requestData.setType(request.getStatus());
-				
+				RequestDTO requestData = new RequestDTO(request);
 				requestDataList.add(requestData);
 			}
 				
@@ -274,7 +269,7 @@ public class BusinessController {
 	 * @return 
 	 * @throws IllegalAccessException if the checkin does not own the request
 	 */
-	public CustomerRequestDTO deleteCustomerRequestForCheckIn(CheckIn checkIn, long requestId) throws IllegalAccessException {
+	public RequestDTO deleteCustomerRequestForCheckIn(CheckIn checkIn, long requestId) throws IllegalAccessException {
 		checkNotNull(checkIn, "checkIn cannot be null");
 		checkNotNull(checkIn.getId(), "checkIn id cannot be null");
 		checkNotNull(checkIn.getBusiness(), "checkIn business cannot be null");
@@ -290,7 +285,7 @@ public class BusinessController {
 		if( !checkIn.getId().equals(request.getCheckIn().getId())) {
 			throw new IllegalAccessException("checkIn does not own the request");
 		}
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setCheckInId(request.getCheckIn().getId());
 		requestData.setId(request.getId());
 		requestData.setSpotId(request.getSpot().getId());

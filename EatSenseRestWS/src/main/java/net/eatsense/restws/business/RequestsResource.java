@@ -14,7 +14,7 @@ import javax.ws.rs.core.Context;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Business;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
@@ -36,7 +36,7 @@ public class RequestsResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public Collection<CustomerRequestDTO> getCustomerRequest(@QueryParam("checkInId") Long checkInId, @QueryParam("spotId") Long spotId) {
+	public Collection<RequestDTO> getCustomerRequest(@QueryParam("checkInId") Long checkInId, @QueryParam("spotId") Long spotId) {
 		return businessCtrl.getCustomerRequestData(business, checkInId, spotId);
 	}
 	

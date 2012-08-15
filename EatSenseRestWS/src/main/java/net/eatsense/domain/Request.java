@@ -9,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Request extends GenericEntity<Request> {
@@ -23,6 +24,11 @@ public class Request extends GenericEntity<Request> {
 	Long objectId;
 	Key<Spot> spot;
 	Key<CheckIn> checkIn;
+	@Unindexed
+	
+	private String spotName;
+	@Unindexed
+	private String checkInName;
 	
 	@Parent
 	Key<Business> business;
@@ -83,5 +89,17 @@ public class Request extends GenericEntity<Request> {
 	public static Key<Request> getKey(Key<Business> parent, Long id) {
 		
 		return new Key<Request>(parent, Request.class, id);
+	}
+	public String getCheckInName() {
+		return checkInName;
+	}
+	public void setCheckInName(String checkInName) {
+		this.checkInName = checkInName;
+	}
+	public String getSpotName() {
+		return spotName;
+	}
+	public void setSpotName(String spotName) {
+		this.spotName = spotName;
 	}
 }

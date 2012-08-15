@@ -23,7 +23,7 @@ import net.eatsense.controller.OrderController;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,11 +94,11 @@ public class CheckInResource {
 	@Path("requests")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
-	public Collection<CustomerRequestDTO> getRequests() {
+	public Collection<RequestDTO> getRequests() {
 		if(authenticated)
 			return businessCtrlProvider.get().getCustomerRequestsForCheckIn(checkIn);
 		else
-			throw new WebApplicationException(Status.FORBIDDEN);
+			throw new IllegalAccessException();
 	}
 	
 	@POST
@@ -106,7 +106,7 @@ public class CheckInResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
-	public CustomerRequestDTO postRequest(CustomerRequestDTO requestData) {
+	public RequestDTO postRequest(RequestDTO requestData) {
 		if(authenticated)
 			return businessCtrlProvider.get().saveCustomerRequest( checkIn, requestData);
 		else
@@ -117,7 +117,7 @@ public class CheckInResource {
 	@Produces("application/json; charset=UTF-8")
 	@Path("requests/{requestId}")
 	@RolesAllowed(Role.GUEST)
-	public CustomerRequestDTO deleteRequest(@PathParam("requestId") long requestId) {
+	public RequestDTO deleteRequest(@PathParam("requestId") long requestId) {
 		if(authenticated)
 			return businessCtrlProvider.get().deleteCustomerRequestForCheckIn(checkIn, requestId);
 		else

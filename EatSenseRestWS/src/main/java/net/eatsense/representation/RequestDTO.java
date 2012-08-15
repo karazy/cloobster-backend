@@ -4,7 +4,7 @@ import java.util.Date;
 
 import net.eatsense.domain.Request;
 
-public class CustomerRequestDTO {
+public class RequestDTO {
 	private String type;
 	private Long id;
 	
@@ -13,19 +13,26 @@ public class CustomerRequestDTO {
 	
 	private Date receivedTime;
 	
-	public CustomerRequestDTO() {
+	public RequestDTO() {
 		super();
 	}
 	
 	/**
-	 * @param request Domain object to use as data source.
+	 * @param request Entity to use as data source.
 	 */
-	public CustomerRequestDTO(Request request) {
+	public RequestDTO(Request request) {
 		this();
+		if(request == null)
+			return;
 		
 		this.setId(request.getId());
-		this.setCheckInId(request.getCheckIn().getId());
-		this.setSpotId(request.getSpot().getId());
+		
+		if(request.getCheckIn() != null)
+			this.setCheckInId(request.getCheckIn().getId());
+		
+		if(request.getSpot() != null)
+			this.setSpotId(request.getSpot().getId());
+		
 		this.setType(request.getStatus());
 		this.setReceivedTime(request.getReceivedTime());
 	}

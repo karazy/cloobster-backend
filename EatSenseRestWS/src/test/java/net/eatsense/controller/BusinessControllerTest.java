@@ -45,7 +45,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.AreaDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
@@ -168,11 +168,11 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testSaveCustomerRequest() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		RequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
 		
 		assertThat(result.getCheckInId(), is(checkIn.getId()));
 		assertThat(result.getSpotId(), is(checkIn.getSpot().getId()));
@@ -190,7 +190,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testSaveCustomerRequestNullCheckIn() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		businessCtrl.saveCustomerRequest(null, requestData);
 	}
@@ -202,21 +202,21 @@ public class BusinessControllerTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testSaveCustomerRequestInvalidType() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("NOTCALL_WAITER");
 		businessCtrl.saveCustomerRequest(checkIn, requestData);
 	}
 	
 	@Test(expected=NullPointerException.class)
 	public void testSaveCustomerRequestNullType() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType(null);
 		businessCtrl.saveCustomerRequest(checkIn, requestData);
 	}
 	
 	@Test(expected=NullPointerException.class)
 	public void testSaveCustomerRequestNullCheckInId() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		checkIn.setId(null);
 		businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -224,7 +224,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void testSaveCustomerRequestNullCheckInSpot() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		checkIn.setSpot(null);
 		businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -232,7 +232,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void testSaveCustomerRequestNullCheckInBusiness() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		checkIn.setBusiness(null);
 		businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -240,10 +240,10 @@ public class BusinessControllerTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testDeleteRequestNullBusiness() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		RequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
 
 		businessCtrl.deleteCustomerRequest(null, result.getId());
 
@@ -251,10 +251,10 @@ public class BusinessControllerTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testDeleteRequestNullBusinessId() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		RequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
 		business.setId(null);
 		businessCtrl.deleteCustomerRequest(business, result.getId());
 	}
@@ -271,10 +271,10 @@ public class BusinessControllerTest {
 
 	@Test
 	public void testDeleteRequest() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
-		CustomerRequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
+		RequestDTO result = businessCtrl.saveCustomerRequest(checkIn, requestData);
 
 		businessCtrl.deleteCustomerRequest(business, result.getId());
 		
@@ -289,14 +289,14 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testGetRequestDataForCheckIn() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
 
-		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, checkIn.getId(), null);
+		List<RequestDTO> result = businessCtrl.getCustomerRequestData(business, checkIn.getId(), null);
 		assertThat(result, hasSize(1));
-		for (CustomerRequestDTO customerRequestDTO : result) {
+		for (RequestDTO customerRequestDTO : result) {
 			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
 			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
 			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
@@ -305,14 +305,14 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testGetRequestDataForSpot() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
 
-		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, null, checkIn.getSpot().getId());
+		List<RequestDTO> result = businessCtrl.getCustomerRequestData(business, null, checkIn.getSpot().getId());
 		assertThat(result, hasSize(1));
-		for (CustomerRequestDTO customerRequestDTO : result) {
+		for (RequestDTO customerRequestDTO : result) {
 			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
 			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
 			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
@@ -321,14 +321,14 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testGetRequestDataForSpotAndCheckIn() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
 
-		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, checkIn.getId(), checkIn.getSpot().getId());
+		List<RequestDTO> result = businessCtrl.getCustomerRequestData(business, checkIn.getId(), checkIn.getSpot().getId());
 		assertThat(result, hasSize(1));
-		for (CustomerRequestDTO customerRequestDTO : result) {
+		for (RequestDTO customerRequestDTO : result) {
 			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
 			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
 			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
@@ -337,15 +337,15 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testGetRequestDataAll() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
 
-		List<CustomerRequestDTO> result = businessCtrl.getCustomerRequestData(business, null, null);
+		List<RequestDTO> result = businessCtrl.getCustomerRequestData(business, null, null);
 		
 		assertThat(result, hasSize(1));
-		for (CustomerRequestDTO customerRequestDTO : result) {
+		for (RequestDTO customerRequestDTO : result) {
 			assertThat(customerRequestDTO.getId(), is(requestData.getId()));
 			assertThat(customerRequestDTO.getSpotId(), is(requestData.getSpotId()));
 			assertThat(customerRequestDTO.getType(), is(requestData.getType()));
@@ -354,7 +354,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void testGetRequestNullBusiness() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -363,7 +363,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void testGetRequestNullBusinessId() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -373,7 +373,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testGetSpotStatus() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -388,7 +388,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testGetSpotStatusNullBusiness() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -399,7 +399,7 @@ public class BusinessControllerTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testGetSpotStatusNullBusinessId() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
@@ -410,7 +410,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testGetSpotStatusUnknownBusiness() {
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		requestData.setType("CALL_WAITER");
 		// Save a call waiter request.
 		requestData = businessCtrl.saveCustomerRequest(checkIn, requestData);
