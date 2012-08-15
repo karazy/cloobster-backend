@@ -97,7 +97,7 @@ public class Transformer {
 					ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
 					
 					for (Key<OrderChoice> choiceKey : order.getChoices()) {
-						choiceDtos.add(choiceToDto( choicesMap.get(choiceKey).getChoice()));
+						choiceDtos.add(new ChoiceDTO( choicesMap.get(choiceKey)));
 					}
 					orderDto.setChoices(choiceDtos);
 				}

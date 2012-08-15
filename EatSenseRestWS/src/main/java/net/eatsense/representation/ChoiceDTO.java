@@ -74,7 +74,7 @@ public class ChoiceDTO {
 		}
 		
 		if(choice.getProduct() != null)
-			this.productId = choice.getProduct().getId(); 
+			this.productId = choice.getProduct().getId();
 	}
 	
 	public ChoiceDTO(OrderChoice orderChoice) {
