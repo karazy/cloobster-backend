@@ -215,21 +215,21 @@ public class CheckInController {
 				}	
 			}
 		}			
- 		
-		List<CheckIn> checkInsAtSpot = checkInRepo.getBySpot(checkIn.getSpot());
-		// count checkins at spot
-		int checkInCount = 1;
-		if(checkInsAtSpot != null) {
-			Iterator<CheckIn> it = checkInsAtSpot.iterator();
-			while(it.hasNext()) {
-				checkInCount++;
-				CheckIn next = it.next();
-				
-				if(next.getNickname().equals(checkIn.getNickname() ) ) {
-					throw new CheckInFailureException("nickname already exists", "checkInErrorNicknameExists");
-				}
-			}
-		}
+		// Check for double nickname is deactivated for now.
+//		List<CheckIn> checkInsAtSpot = checkInRepo.getBySpot(checkIn.getSpot());
+//		// count checkins at spot
+//		int checkInCount = 1;
+//		if(checkInsAtSpot != null) {
+//			Iterator<CheckIn> it = checkInsAtSpot.iterator();
+//			while(it.hasNext()) {
+//				checkInCount++;
+//				CheckIn next = it.next();
+//				
+//				if(next.getNickname().equals(checkIn.getNickname() ) ) {
+//					throw new CheckInFailureException("nickname already exists", "checkInErrorNicknameExists");
+//				}
+//			}
+//		}
 
 		checkInRepo.saveOrUpdate(checkIn);
 		checkInDto.setUserId(checkInId);
@@ -237,7 +237,7 @@ public class CheckInController {
 		
 		// send the event
 		CheckInEvent newCheckInEvent = new NewCheckInEvent(checkIn, business);
-		newCheckInEvent.setCheckInCount(checkInCount);
+//		newCheckInEvent.setCheckInCount(checkInCount);
 		eventBus.post(newCheckInEvent);
 		return checkInDto;
 	}
