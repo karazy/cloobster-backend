@@ -12,11 +12,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
