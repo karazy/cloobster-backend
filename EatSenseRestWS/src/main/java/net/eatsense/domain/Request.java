@@ -11,9 +11,21 @@ import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
+/**
+ * Represents an active request issued by the customer, waiting to be acknowledged.
+ * 
+ * @author Nils Weiher
+ *
+ */
 @Cached
 public class Request extends GenericEntity<Request> {
 	
+	/**
+	 * 
+	 * 
+	 * @author Nils Weiher
+	 *
+	 */
 	public enum RequestType {
 		ORDER,
 		BILL,
@@ -22,7 +34,9 @@ public class Request extends GenericEntity<Request> {
 	
 	private RequestType type;
 	private String status;
-	// Represents the datastore id of the corresponding of this request (type == RequestType.ORDER means objectId is id of the order object)
+	/**
+	 * Represents the datastore id of the corresponding of this request ( {@link Request#type}=={@link RequestType#ORDER} means objectId is id of the order object)
+	 */
 	private Long objectId;
 	private Key<Spot> spot;
 	private Key<CheckIn> checkIn;
@@ -43,10 +57,18 @@ public class Request extends GenericEntity<Request> {
 		this.type = RequestType.CUSTOM;
 	}
 	
+	/**
+	 * Create a Request linked to the given Spot and CheckIn.
+	 * Default type is {@link RequestType#CUSTOM}.
+	 *  
+	 * @param checkIn
+	 * @param spot
+	 */
 	public Request(CheckIn checkIn, Spot spot) {
 		this();
 		
 		if(checkIn != null) {
+			this.business = checkIn.getBusiness();
 			this.checkIn = checkIn.getKey();
 			this.checkInName = checkIn.getNickname();
 		}
@@ -71,7 +93,6 @@ public class Request extends GenericEntity<Request> {
 		this.type = RequestType.BILL;
 		this.objectId = bill.getId();
 	}
-	
 	
 	public Key<CheckIn> getCheckIn() {
 		return checkIn;

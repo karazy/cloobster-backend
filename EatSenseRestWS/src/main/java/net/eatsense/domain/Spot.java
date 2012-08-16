@@ -9,6 +9,7 @@ import net.eatsense.exceptions.ServiceException;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
 
@@ -19,6 +20,7 @@ import com.googlecode.objectify.annotation.Parent;
  * @author Frederik Reifschneider
  *
  */
+@Cached
 public class Spot extends GenericEntity<Spot>{
 	
 	/**

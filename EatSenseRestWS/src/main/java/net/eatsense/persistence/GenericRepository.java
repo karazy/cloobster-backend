@@ -521,7 +521,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * @return
 	 */
 	public Query<T> query() {
-		logger.info("{}", clazz);
+		logger.info("entity: {}", clazz);
 		return ofy().query(clazz);
 	}
 		

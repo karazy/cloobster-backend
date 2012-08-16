@@ -9,7 +9,10 @@ public class RequestDTO {
 	private Long id;
 	
 	private Long checkInId;
+	private String checkInName;
 	private Long spotId;
+	private String spotName;
+	private Long areaId;
 	
 	private Date receivedTime;
 	
@@ -29,9 +32,15 @@ public class RequestDTO {
 		
 		if(request.getCheckIn() != null)
 			this.setCheckInId(request.getCheckIn().getId());
+		this.checkInName = request.getCheckInName();
 		
 		if(request.getSpot() != null)
 			this.setSpotId(request.getSpot().getId());
+		
+		this.spotName = request.getSpotName();
+		
+		if(request.getArea() != null)
+			this.areaId = request.getArea().getId();
 		
 		this.setType(request.getStatus());
 		this.setReceivedTime(request.getReceivedTime());
@@ -69,6 +78,30 @@ public class RequestDTO {
 		this.spotId = spotId;
 	}
 
+	public String getCheckInName() {
+		return checkInName;
+	}
+
+	public void setCheckInName(String checkInName) {
+		this.checkInName = checkInName;
+	}
+
+	public String getSpotName() {
+		return spotName;
+	}
+
+	public void setSpotName(String spotName) {
+		this.spotName = spotName;
+	}
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
+
 	public Date getReceivedTime() {
 		return receivedTime;
 	}
@@ -76,6 +109,4 @@ public class RequestDTO {
 	public void setReceivedTime(Date receivedTime) {
 		this.receivedTime = receivedTime;
 	}
-	
-	
 }

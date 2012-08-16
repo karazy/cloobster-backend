@@ -24,6 +24,7 @@ import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
@@ -40,6 +41,7 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -61,18 +63,17 @@ import com.googlecode.objectify.Query;
  *
  */
 public class OrderController {
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	private OrderRepository orderRepo;
-	private ProductRepository productRepo;
-	private OrderChoiceRepository orderChoiceRepo;
-	private Validator validator;
-	private CheckInRepository checkInRepo;
-	private ChoiceRepository choiceRepo;
-	private Transformer transform;
-	private RequestRepository requestRepo;
-
-	private EventBus eventBus;
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final OrderRepository orderRepo;
+	private final ProductRepository productRepo;
+	private final OrderChoiceRepository orderChoiceRepo;
+	private final Validator validator;
+	private final CheckInRepository checkInRepo;
+	private final ChoiceRepository choiceRepo;
+	private final Transformer transform;
+	private final RequestRepository requestRepo;
+	private final EventBus eventBus;
+	private final SpotRepository spotRepo;
 	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
@@ -80,8 +81,9 @@ public class OrderController {
 			ProductRepository productRepo, BusinessRepository businessRepo,
 			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
 			RequestRepository rr, Transformer trans, Validator validator,
-			EventBus eventBus) {
+			EventBus eventBus, SpotRepository spotRepo) {
 		super();
+		this.spotRepo = spotRepo;
 		this.eventBus = eventBus;
 		this.validator = validator;
 		this.requestRepo = rr;
@@ -522,6 +524,10 @@ public class OrderController {
 		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
 		checkArgument(checkIn.getStatus() == CheckInStatus.CHECKEDIN ||
 				checkIn.getStatus() == CheckInStatus.ORDER_PLACED, "" );
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot == null) {
+			throw new OrderFailureException("Unable to find Spot for this CheckIn.");
+		}
 		
 		List<Order> orders = orderRepo.query().ancestor(checkIn.getBusiness())
 				.filter("checkIn", checkIn.getKey())
@@ -539,17 +545,12 @@ public class OrderController {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}
 		
+		
 		List<Request> requests = new ArrayList<Request>();
 		for (Order order : orders) {
 			order.setStatus(OrderStatus.PLACED);
 			
-			Request request = new Request();
-			request.setCheckIn(checkIn.getKey());
-			request.setBusiness(checkIn.getBusiness());
-			request.setObjectId(order.getId());
-			request.setType(RequestType.ORDER);
-			request.setReceivedTime(new Date());
-			request.setSpot(checkIn.getSpot());
+			Request request = new Request(checkIn, spot, order);
 			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 			
 			requests.add(request);
@@ -583,18 +584,11 @@ public class OrderController {
 	 * @return the updated OrderDTO
 	 */
 	public OrderDTO updateOrder(Business business, Order order, OrderDTO orderData, CheckIn checkIn) {
-		//
-		// Check preconditions and retrieve entities.
-		//
-		if(business == null) {
-			throw new IllegalArgumentException("Order cannot be updated, business is null");
-		}
-		if(checkIn == null) {
-			throw new IllegalArgumentException("Order cannot be updated, checkin is null");
-		}
-		if(order == null) {
-			throw new IllegalArgumentException("Order cannot be updated, order is null.");
-		}
+		checkNotNull(business, "business was null");
+		checkNotNull(order, "order was null");
+		checkNotNull(orderData, "orderData was null");
+		checkNotNull(checkIn, "checkIn was null");
+		
 		// Check if the order belongs to the specified checkin.
 		if(! checkIn.getId().equals(order.getCheckIn().getId()) ) {
 			throw new IllegalArgumentException("Order cannot be updated, checkIn does not own the order.");
@@ -644,6 +638,10 @@ public class OrderController {
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		//Check that we have no violations.
 		if(violations.isEmpty()) {
+			Spot spot = spotRepo.getByKey(checkIn.getSpot());
+			if(spot == null) {
+				throw new OrderFailureException("Unable to find Spot for CheckIn.");
+			}
 			// save order
 			orderRepo.saveOrUpdate(order);
 			
@@ -659,19 +657,13 @@ public class OrderController {
 					updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED);
 				}
 				
-				Request request = new Request();
-				request.setCheckIn(checkIn.getKey());
-				request.setBusiness(business.getKey());
-				request.setObjectId(order.getId());
-				request.setType(RequestType.ORDER);
-				request.setReceivedTime(new Date());
-				request.setSpot(checkIn.getSpot());
+				Request request = new Request(checkIn, spot, order);
 				request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 				requestRepo.saveOrUpdate(request);
 				
 				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 				// If we have no older request in the database or the new request is the oldest...
-				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+				if( oldestRequest == null || oldestRequest.getId() == request.getId().longValue() ) {
 					updateEvent.setNewSpotStatus(request.getStatus());
 				}
 

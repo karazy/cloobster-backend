@@ -27,6 +27,8 @@ import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.exceptions.ServiceException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
@@ -146,6 +148,11 @@ public class BusinessController {
 		checkArgument("CALL_WAITER".equals(requestData.getType()), "invalid request type %s", requestData.getType());
 		checkArgument(!checkIn.isArchived(), "checkin cannot be archived entity");
 		
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot == null) {
+			throw new ServiceException("Unable to find Spot for this CheckIn.");
+		}
+		
 		requestData.setCheckInId(checkIn.getId());
 		requestData.setSpotId(checkIn.getSpot().getId());
 		
@@ -153,7 +160,7 @@ public class BusinessController {
 		
 		for (Request oldRequest : requests) {
 			if(oldRequest.getType() == RequestType.CUSTOM && oldRequest.getStatus().equals("CALL_WAITER")) {
-				logger.info("{} already registered.", oldRequest.getKey());
+				logger.info("{} already saved.", oldRequest.getKey());
 				oldRequest.setReceivedTime(new Date());
 				requestData.setId(oldRequest.getId());
 				requestRepo.saveOrUpdate(oldRequest);
@@ -161,13 +168,8 @@ public class BusinessController {
 			}	
 		}
 		
-		Request request = new Request();
-		request.setBusiness(checkIn.getBusiness());
-		request.setCheckIn(checkIn.getKey());
-		request.setReceivedTime(new Date());
-		request.setSpot(checkIn.getSpot());
+		Request request = new Request(checkIn, spot);
 		request.setStatus(requestData.getType());
-		request.setType(RequestType.CUSTOM);
 		
 		requestRepo.saveOrUpdate(request);
 		

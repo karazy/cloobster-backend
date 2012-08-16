@@ -14,6 +14,7 @@ import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
@@ -22,12 +23,15 @@ import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
+import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
 
@@ -49,21 +53,23 @@ import com.googlecode.objectify.NotFoundException;
  */
 public class BillController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private OrderRepository orderRepo;
-	private ProductRepository productRepo;
-	private OrderChoiceRepository orderChoiceRepo;
-	private BillRepository billRepo;
-	private CheckInRepository checkInRepo;
-	private RequestRepository requestRepo;
-	private Transformer transform;
-	private EventBus eventBus;
+	private final OrderRepository orderRepo;
+	private final ProductRepository productRepo;
+	private final OrderChoiceRepository orderChoiceRepo;
+	private final BillRepository billRepo;
+	private final CheckInRepository checkInRepo;
+	private final RequestRepository requestRepo;
+	private final Transformer transform;
+	private final EventBus eventBus;
+	private final SpotRepository spotRepo;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, Transformer transformer, EventBus eventBus) {
+			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo) {
 		super();
+		this.spotRepo = spotRepo;
 		this.eventBus = eventBus;
 		this.transform = transformer;
 		this.requestRepo = rr;
@@ -194,6 +200,11 @@ public class BillController {
 		
 		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
 		
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot == null) {
+			throw new OrderFailureException("Unable to find Spot for CheckIn.");
+		}
+		
 		Long billId = null;
 		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
 			Order order = iterator.next();
@@ -223,14 +234,8 @@ public class BillController {
 		
 			billData = transform.billToDto(bill);
 			
-			Request request = new Request();
-			request.setBusiness(business.getKey());
-			request.setCheckIn(checkIn.getKey());
-			request.setSpot(checkIn.getSpot());
-			request.setType(RequestType.BILL);
-			request.setReceivedTime(new Date());
+			Request request = new Request(checkIn,spot, bill);
 			request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
-			request.setObjectId(bill.getId());
 			requestRepo.saveOrUpdate(request);
 			
 			if(checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
@@ -243,7 +248,7 @@ public class BillController {
 			Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have no older request in the database ...
-			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+			if( oldestRequest == null || oldestRequest.getId() == request.getId().longValue() ) {
 				newEvent.setNewSpotStatus(request.getStatus());
 			}
 			
