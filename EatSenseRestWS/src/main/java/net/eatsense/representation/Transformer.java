@@ -20,8 +20,6 @@ import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
-import org.joda.money.CurrencyUnit;
-import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
