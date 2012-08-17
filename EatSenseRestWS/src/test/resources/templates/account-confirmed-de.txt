@@ -1,7 +1,0 @@
-[Cloobster] Service Message: Neues Konto bestätigt - {1}
-Neues Konto angelegt:
-Name: {0}
-Login: {1}
-E-Mail: {2}
-Phone: {3}
-Firmenname: {4}

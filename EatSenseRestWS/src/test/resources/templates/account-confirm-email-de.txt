@@ -1,9 +1,11 @@
-Cloobster Konto E-Mail Bestätigung für {0}
+[Cloobster] Konto E-Mail Bestätigung für {0}
 Hallo {0},
 
-danke für die Registrierung bei Cloobster.
+haben Sie vielen Dank für Ihre Registrierung bei Cloobster.
 
-Dies ist eine automatische Nachricht. Um die Registrierung zu bestätigen, folgen Sie bitte diesem Link:
+Dies ist eine automatische Nachricht. Um Ihre Registrierung zu bestätigen, folgen Sie bitte diesem Link:
 {1}
 
-Dein Cloobster Team.
+
+Ihr cloobster Team
+Sirko Polster
