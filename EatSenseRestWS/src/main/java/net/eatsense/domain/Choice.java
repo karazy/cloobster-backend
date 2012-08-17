@@ -78,19 +78,6 @@ public class Choice extends GenericEntity<Choice> {
 	 */
 	private Integer order;
 	
-	Key<Choice> parentChoice;
-
-	public Key<Choice> getParentChoice() {
-		return parentChoice;
-	}
-
-	public void setParentChoice(Key<Choice> parentChoice) {
-		if(!Objects.equal(this.parentChoice, parentChoice)) {
-			this.setDirty(true);
-			this.parentChoice = parentChoice;
-		}
-	}
-
 	public Key<Business> getBusiness() {
 		return business;
 	}

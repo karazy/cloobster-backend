@@ -20,6 +20,11 @@ public class Product extends GenericEntity<Product> {
 	 * Detailed description of this product.
 	 */
 	private String longDesc;
+	
+	
+	/**
+	 * Saved as currency minor amount (cent)
+	 */
 	private long price;
 	private Integer order;
 	

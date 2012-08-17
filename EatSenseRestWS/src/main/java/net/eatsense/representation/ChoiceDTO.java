@@ -13,6 +13,7 @@ import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.validation.ImportChecks;
@@ -25,8 +26,10 @@ public class ChoiceDTO {
 	String text;
 	
 	int minOccurence;
-	
 	int maxOccurence;
+	
+	private Long originalChoiceId;
+	
 	@Min(value=0)
 	double price;
 	
@@ -41,8 +44,6 @@ public class ChoiceDTO {
 	
 	Collection<ProductOption> selected;
 	
-	Long parent;
-	
 	private Integer order;
 	
 	private Long productId;
@@ -51,20 +52,19 @@ public class ChoiceDTO {
 	 * @param choice Entity
 	 */
 	public ChoiceDTO(Choice choice) {
-		super();
+		this();
+		
 		if(choice == null)
 			return;
 		
 		this.id = choice.getId();
+		this.originalChoiceId = choice.getId();
 
 		this.included = choice.getIncludedChoices();
 		this.maxOccurence = choice.getMaxOccurence();
 		this.minOccurence = choice.getMinOccurence();
 		this.overridePrice = choice.getOverridePrice();
 		this.order = choice.getOrder();
-		
-		if(choice.getParentChoice() != null)
-			this.parent = choice.getParentChoice().getId();
 		
 		this.price = (choice.getPrice() == null ? 0 : choice.getPrice().doubleValue() / 100.0);
 		this.text = choice.getText();
@@ -74,7 +74,14 @@ public class ChoiceDTO {
 		}
 		
 		if(choice.getProduct() != null)
-			this.productId = choice.getProduct().getId(); 
+			this.productId = choice.getProduct().getId();
+	}
+	
+	public ChoiceDTO(OrderChoice orderChoice) {
+		this(orderChoice.getChoice());
+		// Set the id of the orderChoice instead of the original choice, because
+		// this was an choice coming from a saved order.
+		this.id = orderChoice.getId();
 	}
 	
 	/**
@@ -89,13 +96,7 @@ public class ChoiceDTO {
 	public ChoiceDTO() {
 		super();
 	}
-	
-	public Long getParent() {
-		return parent;
-	}
-	public void setParent(Long parent) {
-		this.parent = parent;
-	}
+
 	String group;
 	
 	boolean groupParent = false;
@@ -193,6 +194,14 @@ public class ChoiceDTO {
 	 */
 	public void setOrder(Integer order) {
 		this.order = order;
+	}
+
+	public Long getOriginalChoiceId() {
+		return originalChoiceId;
+	}
+
+	public void setOriginalChoiceId(Long originalChoiceId) {
+		this.originalChoiceId = originalChoiceId;
 	}
 	
 	

@@ -1,0 +1,11 @@
+[Cloobster] E-Mail geändert für {0}
+Hallo {0},
+
+Sie haben angefordert, dass die bisherige E-Mailadresse Ihres Cloobster Accounts
+durch {1} ersetzt wird.
+
+Sollten Sie dies nicht selbst veranlasst haben, wenden Sie sich bitte an support@cloobster.com.
+
+Viele Grüße
+Ihr cloobster Team
+Sirko Polster

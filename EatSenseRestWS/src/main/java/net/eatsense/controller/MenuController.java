@@ -596,11 +596,6 @@ public class MenuController {
 		choice.setPrice(choiceData.getPriceMinor());
 		choice.setText(choiceData.getText());
 		
-		if(choiceData.getParent() != null)
-			choice.setParentChoice(choiceRepo.getKey(choice.getBusiness(), choiceData.getParent()));
-		else
-			choice.setParentChoice(null);
-		
 		if(choice.getProduct() == null && choiceData.getProductId() != null) {
 			// Only set the Product if this was the first Product to be set.
 			choice.setProduct(productRepo.getKey(choice.getBusiness(), choiceData.getProductId()));
@@ -635,20 +630,6 @@ public class MenuController {
 				}
 				else {
 					dirty = true;
-				}
-				
-				Collection<Choice> choices = choiceRepo.getByKeys(product.getChoices());
-				for (Choice choice : choices) {
-					if(choiceKey.equals(choice.getParentChoice())) {
-						// This is a child choice for this product.
-						Key<Choice> childChoiceKey = choice.getKey();
-						
-						if(product.getChoices().remove(childChoiceKey)) {
-							dirty = true;
-						}
-						
-						choiceKeysToDelete.add(childChoiceKey);
-					}
 				}
 				
 				if(dirty)
