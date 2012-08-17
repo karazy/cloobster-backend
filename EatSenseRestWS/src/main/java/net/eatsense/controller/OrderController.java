@@ -425,7 +425,7 @@ public class OrderController {
 				// That can only mean the choice was removed from the product by the business and a checkin was added.
 				throw new DataConflictException("Conflict while placing order, refresh resource.");
 			}
-				
+			
 			choices = new ArrayList<OrderChoice>();
 			Map<Key<Choice>, Choice> originalChoiceMap = choiceRepo.getByKeysAsMap(product.getChoices());
 			
