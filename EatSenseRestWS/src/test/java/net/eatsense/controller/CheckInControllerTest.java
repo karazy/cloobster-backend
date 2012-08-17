@@ -188,32 +188,37 @@ public class CheckInControllerTest {
 		checkIn.setStatus(CheckInStatus.INTENT);
 		ctr.createCheckIn( checkIn);
 	}
+//  Deactivated test.
+//	@Test
+//
+//	public void testCreateCheckInNicknameInUse() throws Exception {
+//		
+//		thrown.expect(CheckInFailureException.class);
+//		thrown.expectMessage("nickname");
+//		String spotId = "b4rc0de";
+//		String nickname = "FakeNik";
+//		
+//		when(business.getKey()).thenReturn( businessKey);
+//		when(spot.getBusiness()).thenReturn( businessKey);
+//		when(spot.getKey()).thenReturn(spotKey);
+//		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
+//		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+//		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
+//		CheckIn olderCheckIn = new CheckIn();
+//		olderCheckIn.setNickname(nickname);
+//		checkInList.add(olderCheckIn);
+//		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
+//				
+//		CheckInDTO checkIn = new CheckInDTO();
+//		checkIn.setSpotId(spotId);
+//		checkIn.setNickname(nickname);
+//		checkIn.setStatus(CheckInStatus.INTENT);
+//		checkIn = ctr.createCheckIn( checkIn);
+//	}
 	
-	@Test
-	public void testCreateCheckInNicknameInUse() throws Exception {
-		thrown.expect(CheckInFailureException.class);
-		thrown.expectMessage("nickname");
-		String spotId = "b4rc0de";
-		String nickname = "FakeNik";
-		
-		when(business.getKey()).thenReturn( businessKey);
-		when(spot.getBusiness()).thenReturn( businessKey);
-		when(spot.getKey()).thenReturn(spotKey);
-		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
-		when(businessRepo.getByKey(businessKey)).thenReturn(business);
-		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
-		CheckIn olderCheckIn = new CheckIn();
-		olderCheckIn.setNickname(nickname);
-		checkInList.add(olderCheckIn);
-		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
-				
-		CheckInDTO checkIn = new CheckInDTO();
-		checkIn.setSpotId(spotId);
-		checkIn.setNickname(nickname);
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn = ctr.createCheckIn( checkIn);
-	}
-	
+	/**
+	 * @throws Exception
+	 */
 	@Test
 	public void testCreateCheckInTooLongNickname() throws Exception {
 		thrown.expect(CheckInFailureException.class);
