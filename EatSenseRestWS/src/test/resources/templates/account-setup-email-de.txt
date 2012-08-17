@@ -6,7 +6,7 @@ Hallo {0},
 Um Ihren Account zu aktivieren, klicken Sie bitte auf den Aktivierungslink:
 {2}
 
-Wenn du Fragen hast wende dich bitte an support@cloobster.com.
+Falls Fragen bestehen wenden Sie sich bitte an support@cloobster.com.
 
 Viele Grüße
 Ihr cloobster Team
