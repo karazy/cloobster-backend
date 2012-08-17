@@ -45,7 +45,7 @@ public class RequestsResource {
 			@QueryParam("checkInId") long checkInId,
 			@QueryParam("spotId") long spotId,
 			@QueryParam("areaId") long areaId,
-			@QueryParam("types") Set<RequestType> types) {
+			@QueryParam("type") Set<RequestType> types) {
 		return requestCtrl.getRequests(business.getKey(), areaId, spotId,
 				checkInId, types);
 	}
