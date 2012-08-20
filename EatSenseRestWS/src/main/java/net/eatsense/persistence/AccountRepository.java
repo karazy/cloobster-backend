@@ -1,11 +1,14 @@
 package net.eatsense.persistence;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Date;
 import java.util.List;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
+import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.embedded.UploadToken;
 import net.eatsense.util.IdHelper;
 
@@ -97,5 +100,20 @@ public class AccountRepository extends GenericRepository<Account> {
 		token.setToken(IdHelper.generateId());
 		token.setCreation(new Date());
 		return token;
+	}
+	
+	public CustomerProfile getProfile(Account account) {
+		checkNotNull(account, "account was null");
+		checkNotNull(account.getCustomerProfile(), "customerprofile field was null");
+		return ofy().get(account.getCustomerProfile());
+	}
+	
+	public CustomerProfile getProfile(Key<CustomerProfile> profileKey) {
+		checkNotNull(profileKey, "profileKey was null");
+		return ofy().get(profileKey);
+	}
+	
+	public CustomerProfile newProfile() {
+		return new CustomerProfile();
 	}
 }

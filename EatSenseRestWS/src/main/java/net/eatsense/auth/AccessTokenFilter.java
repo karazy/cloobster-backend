@@ -15,6 +15,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.CheckInRepository;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -43,13 +44,16 @@ public class AccessTokenFilter implements ContainerRequestFilter {
     HttpServletRequest servletRequest;
 
 	private final AuthorizerFactory authorizerFactory;
+
+	private final CheckInRepository checkInRepo;
 	
 	@Inject
-	public AccessTokenFilter(AccessTokenRepository accessTokenRepo, AccountRepository accountRepo, AuthorizerFactory authorizerFactory) {
+	public AccessTokenFilter(AccessTokenRepository accessTokenRepo, AccountRepository accountRepo, AuthorizerFactory authorizerFactory, CheckInRepository checkInRepo) {
 		super();
 		this.authorizerFactory = authorizerFactory;
 		this.accountRepo = accountRepo;
 		this.accessTokenRepo = accessTokenRepo;
+		this.checkInRepo = checkInRepo;
 	}
 
 	@Override
@@ -57,28 +61,6 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 		String stringToken = request.getHeaderValue(TOKEN_HEADER);
 		//AbstractResourceMethod method = resourceContext.matchUriInfo(request.getRequestUri()).getMatchedMethod();
 		//TokenType requiredToken = null;
-		
-		Long businessId = null;
-		
-		for (Iterator<PathSegment> iterator = request.getPathSegments(true).iterator(); iterator.hasNext();) {
-			PathSegment pathSegment = iterator.next();
-			if(pathSegment.getPath().equals("businesses") ) {
-				try {
-					if(iterator.hasNext())
-						businessId = Long.valueOf(iterator.next().getPath());
-				} catch (NumberFormatException e) {
-				}
-			}
-		}
-		
-		if(businessId == null) {
-			if( request.getFormParameters().getFirst("businessId") != null)
-				try {
-					businessId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
-				} catch (NumberFormatException e) {
-					logger.error("businessId invalid");
-				}
-		}
 		
 //		if(method != null) {
 //			TokenRequired tr = method.getAnnotation(TokenRequired.class);
@@ -124,6 +106,13 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			if(accessToken.getType() == TokenType.AUTHENTICATION) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken));
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
+				if(account.getActiveCheckIn() != null) {
+					try {
+						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
+					} catch (com.googlecode.objectify.NotFoundException e) {
+						logger.info("activeCheckin for account not found.");
+					}
+				}
 				logger.info("Request authenticated success for user: "+account.getLogin());
 			}
 		}

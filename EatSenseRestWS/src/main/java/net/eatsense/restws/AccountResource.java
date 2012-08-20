@@ -23,7 +23,7 @@ import net.eatsense.controller.AccountController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyAccountDTO;
 
@@ -66,7 +66,7 @@ public class AccountResource {
 	@Path("{login}")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public AccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
+	public BusinessAccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
 		return this.getAccount();
 	}
 	
@@ -74,11 +74,11 @@ public class AccountResource {
 	@Path("login")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public AccountDTO getAccount() {
+	public BusinessAccountDTO getAccount() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		AccessToken token = (AccessToken)servletRequest.getAttribute(AccessToken.class.getName());
 		
-		AccountDTO accountDTO = new AccountDTO(account);
+		BusinessAccountDTO accountDTO = new BusinessAccountDTO(account);
 		accountDTO.setAccessToken(token != null ? token.getToken() : null);
 		return accountDTO;
 	}
@@ -87,14 +87,14 @@ public class AccountResource {
 	@Path("tokens")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public AccountDTO createToken() {
+	public BusinessAccountDTO createToken() {
 		
 		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
 		
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		AccountDTO accountDto = new AccountDTO(account);
+		BusinessAccountDTO accountDto = new BusinessAccountDTO(account);
 		AccessToken authToken = accountCtr.createAuthenticationToken(account);
 		logger.info("Token created, expires on {}", authToken.getExpires());
 		accountDto.setAccessToken(authToken.getToken());
@@ -106,7 +106,7 @@ public class AccountResource {
 	@Path("password-reset")
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	public String createPasswordReset(AccountDTO accountData,  @Context UriInfo uriInfo) {
+	public String createPasswordReset(BusinessAccountDTO accountData,  @Context UriInfo uriInfo) {
 		accountCtr.createAndSendPasswordResetToken(accountData.getEmail(), uriInfo);
 		return "OK";
 	}
@@ -123,10 +123,10 @@ public class AccountResource {
 	@GET
 	@Path("loginfb")
 	@Produces("application/json; charset=UTF-8")
-	public AccountDTO getAccountFacebook(@QueryParam("uid") String uid, @QueryParam("token") String accessToken) {
+	public BusinessAccountDTO getAccountFacebook(@QueryParam("uid") String uid, @QueryParam("token") String accessToken) {
 		Account account = accountCtr.authenticateFacebook(uid, accessToken);
 		logger.info("Authenticated request from user :" + account.getLogin());
-		return new AccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	@GET

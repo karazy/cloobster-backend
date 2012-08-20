@@ -6,11 +6,9 @@ import javax.validation.constraints.Size;
 import net.eatsense.domain.Account;
 import net.eatsense.validation.PasswordChecks;
 
-public class CompanyAccountDTO extends AccountDTO {
+public class CompanyAccountDTO extends BusinessAccountDTO {
 	/**
 	 * Only supplied during account creation of a new cockpit user.
-	 */
-	/**
 	 * Password pattern matches a password with at least one number or one unicode/symbolic and one alphabetical character.
 	 */
 	@Size(min = 6,groups={PasswordChecks.class})

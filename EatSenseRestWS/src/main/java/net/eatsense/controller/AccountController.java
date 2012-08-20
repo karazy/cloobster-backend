@@ -20,6 +20,7 @@ import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
+import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
@@ -28,16 +29,18 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
+import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
-import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
+import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
-import net.eatsense.validation.BusinessAdminChecks;
+import net.eatsense.validation.EmailChecks;
 import net.eatsense.validation.CockpitUserChecks;
 import net.eatsense.validation.LoginNameChecks;
 import net.eatsense.validation.PasswordChecks;
@@ -47,6 +50,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.tools.development.DynamicLatencyAdjuster.Default;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -72,12 +76,13 @@ public class AccountController {
 	private final ImageController imageController;
 	private final AccessTokenRepository accessTokenRepo;
 	private final EventBus eventBus;
+	private final CustomerProfileRepository customerProfileRepo;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus) {
+			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus, CustomerProfileRepository customerProfileRepo) {
 		super();
 		this.accessTokenRepo = accessTokenRepo;
 		this.validator = validator;
@@ -88,6 +93,7 @@ public class AccountController {
 		this.facebookService = facebookService;
 		this.imageController = imageController;
 		this.eventBus = eventBus;
+		this.customerProfileRepo = customerProfileRepo;
 	}
 	
 	
@@ -271,7 +277,7 @@ public class AccountController {
 	 * @param accountData
 	 * @return
 	 */
-	public Account registerNewAccount(RegistrationDTO accountData) {
+	public Account registerNewCompanyAccount(RegistrationDTO accountData) {
 		checkNotNull(accountData, "accountData was null");
 		
 		validator.validate(accountData);
@@ -491,7 +497,7 @@ public class AccountController {
 	 * @param accountData Containing login, password, business id (for which the account should have access), and an optional name.
 	 * @return a new Account entity
 	 */
-	public CompanyAccountDTO createUserAccount(Account ownerAccount, CompanyAccountDTO accountData) {
+	public CompanyAccountDTO createCockpitUserAccount(Account ownerAccount, CompanyAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -513,11 +519,11 @@ public class AccountController {
 	 * @param accountData Only "email" and "name" will be used.
 	 * @return The newly created or updated {@link Account}.
 	 */
-	public Account createOrAddAdminAccount(Account ownerAccount, AccountDTO accountData) {
+	public Account createOrAddAdminAccount(Account ownerAccount, BusinessAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
-		validator.validate(accountData, BusinessAdminChecks.class);
+		validator.validate(accountData, EmailChecks.class);
 		
 		Account account = accountRepo.getByProperty("email", accountData.getEmail());
 		
@@ -557,7 +563,7 @@ public class AccountController {
 		checkNotNull(accountData, "accountData was null");
 		
 		// Validate data for cockpit user update.
-		validator.validate(accountData, BusinessAdminChecks.class);
+		validator.validate(accountData, EmailChecks.class);
 		
 		account.setName(accountData.getName());
 		account.setPhone(accountData.getPhone());
@@ -699,10 +705,10 @@ public class AccountController {
 	 * @param role If specified, only return Accounts with this role.
 	 * @return List of Account transfer objects for the company filtered by role if specified. 
 	 */
-	public List<AccountDTO> getCompanyAccounts(Account authenticatedAccount, Key<Company> companyKey, String role) {
+	public List<BusinessAccountDTO> getCompanyAccounts(Account authenticatedAccount, Key<Company> companyKey, String role) {
 		checkNotNull(companyKey, "companyKey was null");
 		
-		ArrayList<AccountDTO> accountDtos = new ArrayList<AccountDTO>();
+		ArrayList<BusinessAccountDTO> accountDtos = new ArrayList<BusinessAccountDTO>();
 		List<Account> accounts;
 		
 		if(!Strings.isNullOrEmpty(role)) {
@@ -726,7 +732,7 @@ public class AccountController {
 		for (Account account : accounts) {
 			if(!account.getId().equals(authenticatedAccount.getId())) {
 				// Filter the account making the request.
-				accountDtos.add(new AccountDTO(account));
+				accountDtos.add(new BusinessAccountDTO(account));
 			}
 		}
 		
@@ -758,11 +764,11 @@ public class AccountController {
 	 * @param email
 	 * @return
 	 */
-	public List<AccountDTO> getAccountsByEmail(String email) {
-		ArrayList<AccountDTO> accountDTOs = new ArrayList<AccountDTO>();
+	public List<BusinessAccountDTO> getAccountsByEmail(String email) {
+		ArrayList<BusinessAccountDTO> accountDTOs = new ArrayList<BusinessAccountDTO>();
 		
 		for(Account account : accountRepo.getListByProperty("email", email)) {
-			AccountDTO accountDTO = new AccountDTO();
+			BusinessAccountDTO accountDTO = new BusinessAccountDTO();
 			if(account.getCompany() != null) {
 				accountDTO.setCompanyId(account.getCompany().getId());
 			}
@@ -780,7 +786,7 @@ public class AccountController {
 	 * @param accountData
 	 * @return
 	 */
-	public AccountDTO setupAdminAccount(Key<Account> accountKey, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO setupAdminAccount(Key<Account> accountKey, CompanyAccountDTO accountData) {
 		checkNotNull(accountKey, "accountKey was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -795,7 +801,7 @@ public class AccountController {
 		
 		accountRepo.saveOrUpdate(account);
 		
-		return new AccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	/**
@@ -871,5 +877,42 @@ public class AccountController {
 		List<Key<AccessToken>> authTokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.AUTHENTICATION);
 		authTokens.add(accessToken.getKey());
 		accessTokenRepo.delete(authTokens);
+	}
+	
+	
+	/**
+	 * create and save a new Account entity with the supplied data and the "user" role.
+	 * 
+	 * @param accountData
+	 * @return
+	 */
+	public Account registerNewCustomerAccount(CustomerAccountDTO accountData) {
+		checkNotNull(accountData, "accountData was null");
+		
+		validator.validate(accountData, Default.class, PasswordChecks.class);
+		checkEmailDoesNotExist(accountData.getEmail());
+		
+		if(!Strings.isNullOrEmpty(accountData.getLogin())) {
+			validator.validate(accountData, LoginNameChecks.class);
+			checkLoginDoesNotExist(accountData.getLogin());
+		}
+		
+		Account account = accountRepo.newEntity();
+		CustomerProfile profile = customerProfileRepo.newEntity();
+		profile.setNickname(accountData.getNickname());
+		
+		account.setActive(true);
+		account.setCreationDate(new Date());
+		account.setEmail(accountData.getEmail());
+		account.setEmailConfirmed(false);
+		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		account.setCustomerProfile(customerProfileRepo.saveOrUpdate(profile));
+		account.setName(accountData.getName());
+		account.setLogin(accountData.getLogin());
+		account.setRole(Role.USER);
+		
+		accountRepo.saveOrUpdate(account);
+		
+		return account;
 	}
 }

@@ -28,6 +28,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
+import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
@@ -108,6 +109,9 @@ public class AccountControllerTest {
 
 	@Mock
 	private EventBus eventBus;
+
+	@Mock
+	private CustomerProfileRepository profileRepo;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -115,7 +119,7 @@ public class AccountControllerTest {
 				new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				validator, facebookService, imageCtrl, accessTokenRepo, eventBus);
+				validator, facebookService, imageCtrl, accessTokenRepo, eventBus, profileRepo);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";
@@ -415,7 +419,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -437,7 +441,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -459,7 +463,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	
@@ -482,7 +486,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -504,7 +508,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -526,7 +530,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -548,7 +552,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -571,7 +575,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 
-		ctr.registerNewAccount(data);
+		ctr.registerNewCompanyAccount(data);
 	}
 	
 	@Test
@@ -597,7 +601,7 @@ public class AccountControllerTest {
 		
 		when(ar.hashPassword(data.getPassword())).thenReturn(BCrypt.hashpw(data.getPassword(), BCrypt.gensalt()));
 		
-		account = ctr.registerNewAccount(data);
+		account = ctr.registerNewCompanyAccount(data);
 		
 		verify(ar).saveOrUpdate(newAccount);
 		
@@ -1015,7 +1019,7 @@ public class AccountControllerTest {
 		Account newAccount = new Account();
 		when(ar.newEntity()).thenReturn(newAccount );
 		
-		ctr.createUserAccount(account, accountData );
+		ctr.createCockpitUserAccount(account, accountData );
 		
 		verify(ar).saveOrUpdate(newAccount);
 		assertThat(newAccount.isActive(),is(true));

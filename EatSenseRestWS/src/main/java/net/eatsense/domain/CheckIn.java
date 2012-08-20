@@ -86,6 +86,8 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	private boolean archived = false;
 	
 	private String channelId;
+	
+	private Key<Account> account;
 
 	public String getUserId() {
 		return userId;
@@ -183,6 +185,14 @@ public class CheckIn extends GenericEntity<CheckIn>{
 
 	public void setFeedback(Key<Feedback> feedback) {
 		this.feedback = feedback;
+	}
+
+	public Key<Account> getAccount() {
+		return account;
+	}
+
+	public void setAccount(Key<Account> account) {
+		this.account = account;
 	}
 	
 	

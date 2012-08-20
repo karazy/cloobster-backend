@@ -22,6 +22,7 @@ import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
+import net.eatsense.event.NewCustomerAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
@@ -95,6 +96,7 @@ public class MailController {
 		applyTextAndSubject(mail, text);
 		
 		Transport.send(mail);
+		
 		return mail;
 	}
 
@@ -240,6 +242,27 @@ public class MailController {
 		try {
 			// Send e-mail with password reset link.
 			sendMail(account.getEmail(), text);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendCustomerAccountEmailConfirmation(NewCustomerAccountEvent event) {
+		Account account = event.getAccount();
+		UriInfo uriInfo = event.getUriInfo();
+		
+		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		
+		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-customer/{token}").build(accessToken).toString();
+		
+		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmUrl);
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(account.getEmail(), confirmationText);
 		} catch (AddressException e) {
 			logger.error("Error with e-mail address",e);
 		} catch (MessagingException e) {

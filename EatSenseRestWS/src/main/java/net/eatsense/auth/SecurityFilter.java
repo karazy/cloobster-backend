@@ -101,7 +101,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
 				logger.info("authentication success for user: "+login);
 				return request;
-			}			
+			}
 		}
 		return request;
 	}
