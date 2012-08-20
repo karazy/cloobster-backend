@@ -25,7 +25,6 @@ import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.CompanyAccountDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +114,7 @@ public class AccountResource {
 	@Path("password-reset/{token}")
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	public String passwordReset(@PathParam("token")String token, CompanyAccountDTO accountData,  @Context UriInfo uriInfo) {
+	public String passwordReset(@PathParam("token")String token, BusinessAccountDTO accountData,  @Context UriInfo uriInfo) {
 		accountCtr.resetPassword(token, accountData);
 		return "OK";
 	}

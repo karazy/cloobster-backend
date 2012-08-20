@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -30,7 +29,7 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
-import net.eatsense.representation.CompanyAccountDTO;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
@@ -859,7 +858,7 @@ public class AccountControllerTest {
 		account.setBusinesses(businesses );
 		Account newAccount = new Account();
 		newAccount.setCompany(companyKey);
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setLogin("testuser");
 		accountData.setPassword("password");
 		List<Long> businessIds = new ArrayList<Long>();
@@ -887,7 +886,7 @@ public class AccountControllerTest {
 		newAccount.setRole(Role.COCKPITUSER);
 		newAccount.setCompany(companyKey);
 		
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setLogin("testuser");
 		accountData.setPassword("password");
 		
@@ -908,7 +907,7 @@ public class AccountControllerTest {
 		// We test the update of a cockpit account.
 		newAccount.setRole(Role.COCKPITUSER);
 		newAccount.setCompany(companyKey);
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setLogin("testuser");
 		accountData.setPassword("password1");
 		List<Long> businessIds = new ArrayList<Long>();
@@ -934,7 +933,7 @@ public class AccountControllerTest {
 	public void testAddAdminAccountWithDifferentCompany() throws Exception {
 		Account newAccount = new Account();
 		newAccount.setCompany(mock(Key.class));
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setEmail("test@cloobster.com");
 		when(ar.getByProperty("email", accountData.getEmail())).thenReturn(newAccount);
 		
@@ -952,7 +951,7 @@ public class AccountControllerTest {
 	public void testAddAdminAccountWithNoCompany() throws Exception {
 		Account newAccount = new Account();
 		newAccount.setActive(true);
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setEmail("test@cloobster.com");
 		when(ar.getByProperty("email", accountData.getEmail())).thenReturn(newAccount);
 		
@@ -968,7 +967,7 @@ public class AccountControllerTest {
 	public void testCreateAdminAccount() throws Exception {
 		Account newAccount = new Account();
 		when(ar.newEntity()).thenReturn(newAccount);
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setEmail("test@cloobster.com");
 		
 		ctr.createOrAddAdminAccount(account, accountData);
@@ -1012,7 +1011,7 @@ public class AccountControllerTest {
 	@Test
 	public void testCreateUserAccount() throws Exception {
 		
-		CompanyAccountDTO accountData = new CompanyAccountDTO();
+		BusinessAccountDTO accountData = new BusinessAccountDTO();
 		accountData.setLogin("testuser");
 		accountData.setPassword("password!1");
 		

@@ -2,14 +2,12 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.mockito.Mockito.reset;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
@@ -31,17 +29,17 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
+import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
-import net.eatsense.validation.EmailChecks;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.EmailChecks;
 import net.eatsense.validation.LoginNameChecks;
 import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
@@ -497,7 +495,7 @@ public class AccountController {
 	 * @param accountData Containing login, password, business id (for which the account should have access), and an optional name.
 	 * @return a new Account entity
 	 */
-	public CompanyAccountDTO createCockpitUserAccount(Account ownerAccount, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO createCockpitUserAccount(Account ownerAccount, BusinessAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -552,13 +550,29 @@ public class AccountController {
 	}
 	
 	/**
+	 * Update specific fields for a business user Account entity.
+	 * 
+	 * @param account
+	 * @param accountData
+	 * @return
+	 */
+	public Account updateBusinessAccount(Account account, BusinessAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		account.setPhone(accountData.getPhone());
+		
+		return updateAccount(account, accountData);
+	}
+	
+	/**
 	 * Update account profile data.
 	 * 
 	 * @param account
 	 * @param accountData
 	 * @return
 	 */
-	public Account updateAccount(Account account, CompanyAccountDTO accountData) {
+	public Account updateAccount(Account account, AccountDTO accountData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -566,7 +580,6 @@ public class AccountController {
 		validator.validate(accountData, EmailChecks.class);
 		
 		account.setName(accountData.getName());
-		account.setPhone(accountData.getPhone());
 		
 		if(!Objects.equal(account.getEmail(),accountData.getEmail()) || 
 				!Objects.equal(account.getNewEmail(), accountData.getEmail())) {
@@ -622,7 +635,7 @@ public class AccountController {
 	 * @param accountData Updated fields for login, password,name and/or business ids.
 	 * @return Updated transfer object.
 	 */
-	public CompanyAccountDTO updateCompanyAccount(Account account, Account ownerAccount, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO updateCompanyAccount(Account account, Account ownerAccount, BusinessAccountDTO accountData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
@@ -671,7 +684,7 @@ public class AccountController {
 			accountRepo.saveOrUpdate(account);
 		}
 		
-		return new CompanyAccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	/**
@@ -786,7 +799,7 @@ public class AccountController {
 	 * @param accountData
 	 * @return
 	 */
-	public BusinessAccountDTO setupAdminAccount(Key<Account> accountKey, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO setupAdminAccount(Key<Account> accountKey, BusinessAccountDTO accountData) {
 		checkNotNull(accountKey, "accountKey was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -852,7 +865,7 @@ public class AccountController {
 	 * @param token
 	 * @param accountData
 	 */
-	public void resetPassword(String token, CompanyAccountDTO accountData) {
+	public void resetPassword(String token, BusinessAccountDTO accountData) {
 		checkArgument(!Strings.isNullOrEmpty(token), "token was null or empty");
 		checkNotNull(accountData, "accountData was null");
 		

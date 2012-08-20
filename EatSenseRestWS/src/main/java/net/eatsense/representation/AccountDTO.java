@@ -8,6 +8,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.validation.CockpitUserChecks;
 import net.eatsense.validation.EmailChecks;
 import net.eatsense.validation.LoginNameChecks;
+import net.eatsense.validation.PasswordChecks;
 
 import org.apache.bval.constraints.Email;
 
@@ -19,6 +20,14 @@ public class AccountDTO {
 	@Size(min = 4, max = 30 ,groups={CockpitUserChecks.class, LoginNameChecks.class})
 	@Pattern(regexp = "^[a-z0-9_\\.-]+$",groups={CockpitUserChecks.class,LoginNameChecks.class})
 	private String login;
+	
+	/**
+	 * Only supplied during account creation of a new cockpit user.
+	 * Password pattern matches a password with at least one number or one unicode/symbolic and one alphabetical character.
+	 */
+	@Size(min = 6,groups={PasswordChecks.class})
+	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$",groups={PasswordChecks.class})
+	private String password;
 	
 	@NotNull(groups={EmailChecks.class})
 	@Email(groups={EmailChecks.class})
@@ -95,5 +104,13 @@ public class AccountDTO {
 	}
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}	
 }

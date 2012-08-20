@@ -28,7 +28,6 @@ import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.BusinessAccountDTO;
-import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.RegistrationDTO;
 
 import org.slf4j.Logger;
@@ -98,7 +97,7 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public BusinessAccountDTO updateAccountProfile(@PathParam("accountId") Long accountId, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO updateAccountProfile(@PathParam("accountId") Long accountId, BusinessAccountDTO accountData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only update the authenticated account.");
@@ -165,7 +164,7 @@ public class AccountsResource {
 	@Path("setup/{accessToken}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public BusinessAccountDTO setupAccount(@PathParam("accessToken") String accessToken, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO setupAccount(@PathParam("accessToken") String accessToken, BusinessAccountDTO accountData) {
 		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
 		AccessToken token = accessTokenRepository.get(accessToken);
 		

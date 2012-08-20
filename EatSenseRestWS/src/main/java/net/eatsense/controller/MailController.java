@@ -16,13 +16,13 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
-import net.eatsense.event.NewCustomerAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
@@ -133,6 +133,11 @@ public class MailController {
 	public void sendRegistrationConfirmationMail(NewAccountEvent event) {
 		Account account = event.getAccount();
 		UriInfo uriInfo = event.getUriInfo();
+		
+		if(account.getRole().equals(Role.USER)) {
+			sendCustomerAccountEmailConfirmation(account, uriInfo);
+		}
+
 		
 		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
 		
@@ -249,11 +254,7 @@ public class MailController {
 		}
 	}
 	
-	@Subscribe
-	public void sendCustomerAccountEmailConfirmation(NewCustomerAccountEvent event) {
-		Account account = event.getAccount();
-		UriInfo uriInfo = event.getUriInfo();
-		
+	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
 		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
 		
 		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-customer/{token}").build(accessToken).toString();

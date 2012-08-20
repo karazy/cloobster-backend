@@ -24,7 +24,6 @@ import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.representation.BusinessAccountDTO;
-import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.ImageDTO;
 
@@ -117,7 +116,7 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public BusinessAccountDTO createUserAccount(CompanyAccountDTO accountData, @Context UriInfo uriInfo) {
+	public BusinessAccountDTO createUserAccount(BusinessAccountDTO accountData, @Context UriInfo uriInfo) {
 		
 		if(Role.COCKPITUSER.equals(accountData.getRole())) {
 			return accountCtrl.createCockpitUserAccount(account, accountData);
@@ -149,7 +148,7 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public BusinessAccountDTO updateUserAccount(@PathParam("accountId") long accountId, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO updateUserAccount(@PathParam("accountId") long accountId, BusinessAccountDTO accountData) {
 		if(!authorized) {
 			throw new IllegalAccessException();
 		}
