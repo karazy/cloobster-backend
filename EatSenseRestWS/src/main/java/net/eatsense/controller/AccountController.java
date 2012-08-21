@@ -34,6 +34,7 @@ import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.CustomerAccountDTO;
+import net.eatsense.representation.CustomerProfileDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
@@ -838,11 +839,19 @@ public class AccountController {
 	}
 
 
+	/**
+	 * @param account
+	 * @return
+	 */
 	public AccessToken createConfirmAccountToken(Account account) {
 		return accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null);
 	}
 
 
+	/**
+	 * @param email
+	 * @param uriInfo
+	 */
 	public void createAndSendPasswordResetToken(String email, UriInfo uriInfo) {
 		if(Strings.isNullOrEmpty(email)) {
 			throw new ValidationException("No e-mail address provided.");
@@ -912,7 +921,6 @@ public class AccountController {
 		
 		Account account = accountRepo.newEntity();
 		CustomerProfile profile = customerProfileRepo.newEntity();
-		profile.setNickname(accountData.getNickname());
 		
 		account.setActive(true);
 		account.setCreationDate(new Date());

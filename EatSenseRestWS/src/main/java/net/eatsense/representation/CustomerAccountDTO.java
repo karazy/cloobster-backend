@@ -1,32 +1,30 @@
 package net.eatsense.representation;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.CheckIn;
 
 public class CustomerAccountDTO extends AccountDTO {
-	private String nickname;
-	private String password;
+	private String checkInId;
 	
 	public CustomerAccountDTO() {
 		super();
 	}
-
+	
 	public CustomerAccountDTO(Account account) {
 		super(account);
 	}
 
-	public String getNickname() {
-		return nickname;
+	public CustomerAccountDTO(Account account, CheckIn checkIn) {
+		super(account);
+		
+		checkInId = checkIn.getUserId(); 
 	}
 
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
+	public String getCheckInId() {
+		return checkInId;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
+	public void setCheckInId(String checkInId) {
+		this.checkInId = checkInId;
 	}
 }
