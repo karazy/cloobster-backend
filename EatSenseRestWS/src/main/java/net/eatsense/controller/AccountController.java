@@ -911,7 +911,7 @@ public class AccountController {
 	public Account registerNewCustomerAccount(CustomerAccountDTO accountData) {
 		checkNotNull(accountData, "accountData was null");
 		
-		validator.validate(accountData, Default.class, PasswordChecks.class);
+		validator.validate(accountData, javax.validation.groups.Default.class, PasswordChecks.class);
 		checkEmailDoesNotExist(accountData.getEmail());
 		
 		if(!Strings.isNullOrEmpty(accountData.getLogin())) {
