@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-	<application>cloobster-test</application>
-	<version>1-3-test</version>
+	<application>karazy-cloobster</application>
+<<<<<<< HEAD
+	<version>3</version>
+=======
+	<version>1-2-1</version>
+>>>>>>> master
 
 	<!-- By default, App Engine sends requests serially to a given web server. 
 		To allow App Engine to send multiple requests in parallel specify: <threadsafe>true</threadsafe> -->

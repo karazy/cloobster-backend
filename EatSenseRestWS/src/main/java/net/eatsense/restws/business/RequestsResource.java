@@ -1,6 +1,5 @@
 package net.eatsense.restws.business;
 
-import java.util.Collection;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
