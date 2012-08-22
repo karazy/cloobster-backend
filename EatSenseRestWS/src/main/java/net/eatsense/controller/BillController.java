@@ -234,7 +234,8 @@ public class BillController {
 		
 			billData = transform.billToDto(bill);
 			
-			Request request = new Request(checkIn,spot, bill);
+			Request request = new Request(checkIn, spot, bill);
+			request.setObjectText(bill.getPaymentMethod().getName());
 			request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
 			requestRepo.saveOrUpdate(request);
 			

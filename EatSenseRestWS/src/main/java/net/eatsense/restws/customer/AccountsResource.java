@@ -26,6 +26,9 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.CustomerProfileDTO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -36,6 +39,7 @@ import com.google.inject.Provider;
 @Produces("application/json; charset=utf-8")
 public class AccountsResource {
 	private final Provider<AccountController> accountCtrlProvider;
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Context
 	HttpServletRequest servletRequest;
@@ -98,6 +102,29 @@ public class AccountsResource {
 			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
 		}
 		return new CustomerAccountDTO(updateAccount);
+	}
+	
+	@POST
+	@Path("tokens")
+	@Produces("application/json; charset=UTF-8")
+	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public CustomerAccountDTO createToken() {
+		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
+			throw new IllegalAccessException("Must re-authenticate with user credentials.");
+		}
+		
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		CustomerAccountDTO accountDto = new CustomerAccountDTO(account);
+		AccessToken authToken;
+		
+		AccountController accountCtrl = accountCtrlProvider.get();
+		authToken = accountCtrl.createCustomerAuthToken(account);
+		
+		logger.info("Permanent customer Token created");
+		accountDto.setAccessToken(authToken.getToken());
+		
+		return accountDto;
 	}
 	
 	@PUT

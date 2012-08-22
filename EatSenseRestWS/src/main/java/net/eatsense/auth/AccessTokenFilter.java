@@ -31,6 +31,8 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
  *
  */
 public class AccessTokenFilter implements ContainerRequestFilter {
+	private static final String BUSINESS_PATH_PREFIX = "b";
+
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public final static String TOKEN_HEADER = "X-Auth";
@@ -83,6 +85,13 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 				throw new IllegalAccessException("Access token exired, please re-authenticate.");	
 			}
 			
+			if( accessToken.getType() == TokenType.AUTHENTICATION_CUSTOMER) {
+				if(request.getPathSegments().get(0).equals(BUSINESS_PATH_PREFIX)) {
+					throw new IllegalAccessException("Can not access business resource with this access token.");
+				}
+			}
+			
+			
 			Account account = accountRepo.getByKey(accessToken.getAccount());
 			
 			if(account == null) {
@@ -103,7 +112,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 //
 			servletRequest.setAttribute(AccessToken.class.getName(), accessToken);
 			
-			if(accessToken.getType() == TokenType.AUTHENTICATION) {
+			if(accessToken.getType() == TokenType.AUTHENTICATION || accessToken.getType() == TokenType.AUTHENTICATION_CUSTOMER) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken));
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
 				if(account.getActiveCheckIn() != null) {

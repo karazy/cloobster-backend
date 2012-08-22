@@ -13,6 +13,7 @@ import com.googlecode.objectify.annotation.Cached;
 public class AccessToken {
 	public enum TokenType {
 		AUTHENTICATION,
+		AUTHENTICATION_CUSTOMER,
 		EMAIL_CONFIRMATION,
 		PASSWORD_RESET,
 		/**

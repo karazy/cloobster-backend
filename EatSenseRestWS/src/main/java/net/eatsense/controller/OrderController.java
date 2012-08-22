@@ -503,12 +503,12 @@ public class OrderController {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}
 		
-		
 		List<Request> requests = new ArrayList<Request>();
 		for (Order order : orders) {
 			order.setStatus(OrderStatus.PLACED);
 			
 			Request request = new Request(checkIn, spot, order);
+			request.setObjectText(order.getProductName());
 			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 			
 			requests.add(request);
@@ -594,7 +594,7 @@ public class OrderController {
 			}
 		}
 		
-		//Validate the order entity.		
+		//Validate the order entity.
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		//Check that we have no violations.
 		if(violations.isEmpty()) {
@@ -618,6 +618,7 @@ public class OrderController {
 				}
 				
 				Request request = new Request(checkIn, spot, order);
+				request.setObjectText(order.getProductName());
 				request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 				requestRepo.saveOrUpdate(request);
 				
@@ -630,7 +631,6 @@ public class OrderController {
 				eventBus.post(updateEvent);
 			}
 		}
-		
 
 		return orderData;
 	}

@@ -13,8 +13,8 @@ public class RequestDTO {
 	private Long spotId;
 	private String spotName;
 	private Long areaId;
-	
 	private Date receivedTime;
+	private String info;
 	
 	public RequestDTO() {
 		super();
@@ -44,6 +44,8 @@ public class RequestDTO {
 		
 		this.setType(request.getStatus());
 		this.setReceivedTime(request.getReceivedTime());
+		
+		this.setInfo(request.getObjectText());
 	}
 	
 	public String getType() {
@@ -108,5 +110,13 @@ public class RequestDTO {
 
 	public void setReceivedTime(Date receivedTime) {
 		this.receivedTime = receivedTime;
+	}
+
+	public String getInfo() {
+		return info;
+	}
+
+	public void setInfo(String info) {
+		this.info = info;
 	}
 }

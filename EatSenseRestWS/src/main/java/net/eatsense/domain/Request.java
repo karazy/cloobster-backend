@@ -38,6 +38,8 @@ public class Request extends GenericEntity<Request> {
 	 * Represents the datastore id of the corresponding of this request ( {@link Request#type}=={@link RequestType#ORDER} means objectId is id of the order object)
 	 */
 	private Long objectId;
+	@Unindexed
+	private String objectText;
 	private Key<Spot> spot;
 	private Key<CheckIn> checkIn;
 	private Key<Area> area;
@@ -169,5 +171,13 @@ public class Request extends GenericEntity<Request> {
 
 	public void setArea(Key<Area> area) {
 		this.area = area;
+	}
+
+	public String getObjectText() {
+		return objectText;
+	}
+
+	public void setObjectText(String objectText) {
+		this.objectText = objectText;
 	}
 }

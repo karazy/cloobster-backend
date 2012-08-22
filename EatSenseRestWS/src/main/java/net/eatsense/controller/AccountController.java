@@ -829,15 +829,34 @@ public class AccountController {
 	}
 	
 	/**
-	 * Return a new access token for authentication, valid for several days.
+	 * Create and save a new access token for authentication, valid for several days.
 	 * 
 	 * @param account
 	 * @return {@link AccessToken} with {@link TokenType#AUTHENTICATION}
 	 */
 	public AccessToken createAuthenticationToken(Account account) {
-		return accessTokenRepo.createAuthToken(account.getKey());
+		return accessTokenRepo.createAuthToken(account.getKey(), false);
 	}
-
+	
+	/**
+	 * Create and save a new access token for authentication, valid until invalidated.
+	 * 
+	 * @param account
+	 * @return {@link AccessToken} with {@link TokenType#AUTHENTICATION}
+	 */
+	public AccessToken createAuthenticationToken(Account account, boolean isPermanent) {
+		return accessTokenRepo.createAuthToken(account.getKey(), isPermanent);
+	}
+	
+	/**
+	 * Create and save new access token for authentication from the app.
+	 * 
+	 * @param account
+	 * @return New {@link AccessToken} with {@link TokenType#AUTHENTICATION_CUSTOMER} and no expiration date.
+	 */
+	public AccessToken createCustomerAuthToken(Account account) {
+		return accessTokenRepo.create(TokenType.AUTHENTICATION_CUSTOMER, account.getKey(), null);
+	}
 
 	/**
 	 * @param account

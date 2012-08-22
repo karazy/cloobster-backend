@@ -85,9 +85,9 @@ public class AccountResource {
 	@POST
 	@Path("tokens")
 	@Produces("application/json; charset=UTF-8")
+	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessAccountDTO createToken() {
-		
 		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
@@ -95,6 +95,7 @@ public class AccountResource {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		BusinessAccountDTO accountDto = new BusinessAccountDTO(account);
 		AccessToken authToken = accountCtr.createAuthenticationToken(account);
+
 		logger.info("Token created, expires on {}", authToken.getExpires());
 		accountDto.setAccessToken(authToken.getToken());
 		
