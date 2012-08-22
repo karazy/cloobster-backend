@@ -920,6 +920,14 @@ public class AccountController {
 		accessTokenRepo.delete(authTokens);
 	}
 	
+	public Account removeActiveCheckIn(Account account) {
+		checkNotNull(account, "account was null");
+		
+		account.setActiveCheckIn(null);
+		accountRepo.saveOrUpdate(account);
+		return account;
+	}
+	
 	
 	/**
 	 * create and save a new Account entity with the supplied data and the "user" role.

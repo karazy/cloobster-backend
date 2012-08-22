@@ -99,6 +99,16 @@ public class SecurityFilter implements ContainerRequestFilter {
 			if(account != null) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, null));
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
+				
+				if(account.getActiveCheckIn() != null) {
+					try {
+						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
+					} catch (com.googlecode.objectify.NotFoundException e) {
+						logger.info("activeCheckin for account not found, removing reference");
+						accountCtrl.removeActiveCheckIn(account);
+					}
+				}
+				
 				logger.info("authentication success for user: "+login);
 				return request;
 			}

@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -28,6 +29,8 @@ import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -46,6 +49,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -71,6 +75,7 @@ public class CheckInController {
 	private EventBus eventBus;
 	private OrderChoiceRepository orderChoiceRepo;
 	private final AreaRepository areaRepo;
+	private final AccountRepository accountRepo;
 
 	/**
 	 * Constructor using injection for creation.
@@ -89,7 +94,7 @@ public class CheckInController {
 			Transformer transformer,
 			ObjectMapper objectMapper, Validator validator,
 			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo, AreaRepository areaRepository,
-			EventBus eventBus) {
+			EventBus eventBus, AccountRepository accountRepo) {
 		this.businessRepo = businessRepository;
 		this.eventBus = eventBus;
 		this.checkInRepo = checkInRepository;
@@ -101,6 +106,7 @@ public class CheckInController {
 		this.mapper = objectMapper;
 		this.validator = validator;
 		this.orderChoiceRepo = orderChoiceRepo;
+		this.accountRepo = accountRepo;
 	}
 
     /**
@@ -172,17 +178,28 @@ public class CheckInController {
 	 * @return
 	 */
 	public CheckInDTO createCheckIn(CheckInDTO checkInDto) {
+		return createCheckIn(checkInDto, Optional.<Account>absent());
+	}
+
+	/**
+	 * Create and save a new checkin in the store.
+	 * 
+	 * @param checkInDto
+	 * @param optAccount Connect this checkin to the account and set as active.
+	 * @return
+	 */
+	public CheckInDTO createCheckIn(CheckInDTO checkInDto, Optional<Account> optAccount) {
 		checkNotNull(checkInDto, "checkInDto was null");
 		checkNotNull(checkInDto.getSpotId(), "checkInDto spotId was null");
 		checkNotNull(checkInDto.getStatus(), "checkInDto status was null");
 		checkArgument(!checkInDto.getSpotId().isEmpty(), "checkInDto spotId was empty");
 		checkArgument(checkInDto.getStatus() == CheckInStatus.INTENT,
 				"checkInDto status expected to be INTENT but was %s", checkInDto.getStatus());
-			
+		
 		// Find spot by the given barcode
 		Spot spot = spotRepo.getByProperty("barcode", checkInDto.getSpotId());
 		if(spot == null )
-    		throw new IllegalArgumentException("Unable to create checkin, spot barcode unknown");
+    		throw new ValidationException("Unable to create checkin, spot barcode unknown");
     	
     	Business business = businessRepo.getByKey(spot.getBusiness());
 		
@@ -191,6 +208,8 @@ public class CheckInController {
     	String checkInId = IdHelper.generateId();
 		checkIn.setBusiness(business.getKey());
 		checkIn.setSpot(spot.getKey());
+		// Set the account key if it is present.
+		checkIn.setAccount(optAccount.isPresent() ? optAccount.get().getKey() : null);
 		checkIn.setUserId(checkInId);
 		checkIn.setStatus(CheckInStatus.CHECKEDIN);
 		checkIn.setCheckInTime(new Date());
@@ -214,7 +233,8 @@ public class CheckInController {
 							violation.getPropertyPath().toString() + " " + violation.getMessage());
 				}	
 			}
-		}			
+		}
+		
 		// Check for double nickname is deactivated for now.
 //		List<CheckIn> checkInsAtSpot = checkInRepo.getBySpot(checkIn.getSpot());
 //		// count checkins at spot
@@ -231,7 +251,12 @@ public class CheckInController {
 //			}
 //		}
 
-		checkInRepo.saveOrUpdate(checkIn);
+		Key<CheckIn> checkInKey = checkInRepo.saveOrUpdate(checkIn);
+		if(optAccount.isPresent()) {
+			Account account = optAccount.get();
+			account.setActiveCheckIn(checkInKey);
+			accountRepo.saveOrUpdate(account);
+		}
 		checkInDto.setUserId(checkInId);
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
@@ -340,13 +365,21 @@ public class CheckInController {
 			return null;
 		return checkInRepo.getByProperty("userId", checkInUid);
 	}
+	
+	/**
+	 * {@link #checkOut(CheckIn, Optional)}
+	 * @param checkIn
+	 */
+	public void checkOut(CheckIn checkIn) {
+		checkOut(checkIn, Optional.<Account>absent());
+	}
 
 	/**
 	 * Delete the checkIn from database only if there are no orders placed or payment requested.
 	 * 
 	 * @param checkInUid
 	 */
-	public void checkOut(CheckIn checkIn) {
+	public void checkOut(CheckIn checkIn, Optional<Account> optAccount) {
 		checkNotNull(checkIn, "checkIn was null");
 		checkNotNull(checkIn.getId(), "checkIn id was null");
 		checkArgument(checkIn.getId() != 0, "checkIn id was 0");
@@ -370,6 +403,12 @@ public class CheckInController {
 			orderRepo.delete(orderKeys);
 			checkInRepo.delete(checkIn);
 			
+			// Remove active checkIn from the account, if this was authenticated with an user account.
+			if(optAccount.isPresent()) {
+				optAccount.get().setActiveCheckIn(null);
+				accountRepo.saveOrUpdate(optAccount.get());
+			}	
+			
 			DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
 			event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
 			eventBus.post(event);
@@ -390,13 +429,24 @@ public class CheckInController {
 	}
 	
 	/**
+	 * {@link #deleteCheckIn(Business, long, Optional)}
+	 * 
+	 * @param business
+	 * @param checkInId
+	 * @return
+	 */
+	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
+		return deleteCheckIn(business, checkInId, Optional.<Account>absent());
+	}
+	
+	/**
 	 * Delete the checkin and all related entities.
 	 * @param business 
 	 * 
 	 * @param checkInId
 	 * @return 
 	 */
-	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
+	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId, Optional<Account> optAccount) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -429,6 +479,12 @@ public class CheckInController {
 		
 		// Finally delete the checkin.
 		checkInRepo.delete(checkIn);
+		
+		// Remove active checkIn from the account, if this was authenticated with an user account.
+		if(optAccount.isPresent()) {
+			optAccount.get().setActiveCheckIn(null);
+			accountRepo.saveOrUpdate(optAccount.get());
+		}
 		
 		// Send event
 		DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, business, false);

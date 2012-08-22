@@ -36,6 +36,8 @@ import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
@@ -100,16 +102,19 @@ public class CheckInControllerTest {
 	private OrderChoiceRepository orderChoiceRepo;
 	@Mock
 	private AreaRepository areaRepo;
+	
 	@Mock
 	private Area area;
 	@Mock
 	private Key<Area> areaKey;
+	@Mock
+	private AccountRepository accountRepo;
 
 	@Before
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo);
 	}
 
 	@After
@@ -173,7 +178,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCreateCheckInUnknownBarcode() {
-		thrown.expect(IllegalArgumentException.class);
+		thrown.expect(ValidationException.class);
 		String spotId = "b4rc0de";
 		
 		when(business.getKey()).thenReturn( businessKey);

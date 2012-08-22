@@ -119,7 +119,9 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 					try {
 						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
 					} catch (com.googlecode.objectify.NotFoundException e) {
-						logger.info("activeCheckin for account not found.");
+						logger.info("activeCheckin for account not found, removing reference");
+						account.setActiveCheckIn(null);
+						accountRepo.saveOrUpdate(account);
 					}
 				}
 				logger.info("Request authenticated success for user: "+account.getLogin());
