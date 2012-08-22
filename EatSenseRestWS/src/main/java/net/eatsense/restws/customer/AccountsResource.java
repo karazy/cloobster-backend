@@ -68,9 +68,18 @@ public class AccountsResource {
 	@POST
 	@Consumes("application/json; charset=utf-8")
 	public CustomerAccountDTO createAccount(CustomerAccountDTO accountData, @Context UriInfo uriInfo) {
-		Account account = accountCtrlProvider.get().registerNewCustomerAccount(accountData);
+		AccountController accountCtrl = accountCtrlProvider.get();
+		Account account = accountCtrl.registerNewCustomerAccount(accountData);
 		eventBus.post(new NewAccountEvent(account, uriInfo));
-		return new CustomerAccountDTO(account);
+		CustomerAccountDTO accountDto = new CustomerAccountDTO(account);
+		
+		AccessToken authToken = accountCtrl.createCustomerAuthToken(account);
+		
+		logger.info("Permanent customer Token created");
+		accountDto.setAccessToken(authToken.getToken());
+
+		
+		return accountDto;
 	}
 	
 	/**
