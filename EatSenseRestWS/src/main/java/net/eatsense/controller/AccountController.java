@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -857,6 +858,7 @@ public class AccountController {
 	 * @return {@link AccessToken} with {@link TokenType#AUTHENTICATION}
 	 */
 	public AccessToken createAuthenticationToken(Account account) {
+		
 		return accessTokenRepo.createAuthToken(account.getKey(), false);
 	}
 	
@@ -877,7 +879,12 @@ public class AccountController {
 	 * @return New {@link AccessToken} with {@link TokenType#AUTHENTICATION_CUSTOMER} and no expiration date.
 	 */
 	public AccessToken createCustomerAuthToken(Account account) {
-		return accessTokenRepo.create(TokenType.AUTHENTICATION_CUSTOMER, account.getKey(), null);
+		
+		Calendar cal = Calendar.getInstance();
+		//TODO: Extract expiration date for app tokens.
+    	cal.add(Calendar.YEAR, 1);
+		
+		return accessTokenRepo.create(TokenType.AUTHENTICATION_CUSTOMER, account.getKey(), cal.getTime());
 	}
 
 	/**
