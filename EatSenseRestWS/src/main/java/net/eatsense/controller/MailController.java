@@ -136,8 +136,9 @@ public class MailController {
 		
 		if(account.getRole().equals(Role.USER)) {
 			sendCustomerAccountEmailConfirmation(account, uriInfo);
+			return;
 		}
-
+		
 		
 		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
 		
@@ -257,7 +258,7 @@ public class MailController {
 	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
 		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
 		
-		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-customer/{token}").build(accessToken).toString();
+		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
 		
 		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmUrl);
 		
