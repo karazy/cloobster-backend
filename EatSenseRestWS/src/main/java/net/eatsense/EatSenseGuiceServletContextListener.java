@@ -95,7 +95,8 @@ public class EatSenseGuiceServletContextListener extends
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*b/companies(.)*",
+						serveRegex("(.)*c/accounts(.)*",
+								"(.)*b/companies(.)*",
 								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",
 								"(.)*admin/services(.)*",

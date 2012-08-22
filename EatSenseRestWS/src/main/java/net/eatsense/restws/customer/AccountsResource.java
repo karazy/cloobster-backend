@@ -19,6 +19,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
 import net.eatsense.controller.ProfileController;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
@@ -91,9 +92,10 @@ public class AccountsResource {
 	@Path("{accountId}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({Role.USER})
+	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CustomerAccountDTO updateAccount(@PathParam("accountId") Long accountId, CustomerAccountDTO accountData, @Context UriInfo uriInfo) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only update the authenticated account.");
 		}
@@ -105,12 +107,12 @@ public class AccountsResource {
 		}
 		String previousNewEmail = account.getNewEmail();
 		
-		Account updateAccount = accountCtrlProvider.get().updateAccount(account, accountData);
+		Account updateAccount = accountCtrlProvider.get().updateCustomerAccount(account, accountData);
 		
 		if(account.getNewEmail() != null && !Objects.equal(previousNewEmail, account.getNewEmail()) ) {
 			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
 		}
-		return new CustomerAccountDTO(updateAccount);
+		return new CustomerAccountDTO(updateAccount, checkIn);
 	}
 	
 	@POST
@@ -124,7 +126,9 @@ public class AccountsResource {
 		}
 		
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		CustomerAccountDTO accountDto = new CustomerAccountDTO(account);
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		
+		CustomerAccountDTO accountDto = new CustomerAccountDTO(account, checkIn);
 		AccessToken authToken;
 		
 		AccountController accountCtrl = accountCtrlProvider.get();
@@ -138,7 +142,7 @@ public class AccountsResource {
 	
 	@PUT
 	@Path("{accountId}/profile")
-	@RolesAllowed({Role.USER})
+	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CustomerProfileDTO updateProfile(@PathParam("accountId") Long accountId, CustomerProfileDTO profileData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		if(!account.getId().equals(accountId)) {

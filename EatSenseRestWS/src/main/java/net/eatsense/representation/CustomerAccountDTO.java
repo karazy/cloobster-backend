@@ -16,8 +16,9 @@ public class CustomerAccountDTO extends AccountDTO {
 
 	public CustomerAccountDTO(Account account, CheckIn checkIn) {
 		super(account);
-		
-		checkInId = checkIn.getUserId(); 
+		if(checkIn != null) {
+			checkInId = checkIn.getUserId();
+		}
 	}
 
 	public String getCheckInId() {

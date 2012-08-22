@@ -31,6 +31,7 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
@@ -117,6 +118,9 @@ public class AccountControllerTest {
 
 	@Mock
 	private CustomerProfileRepository profileRepo;
+
+	@Mock
+	private CheckInRepository checkInRepo;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -124,7 +128,7 @@ public class AccountControllerTest {
 				new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				validator, facebookService, imageCtrl, accessTokenRepo, eventBus, profileRepo);
+				validator, facebookService, imageCtrl, accessTokenRepo, eventBus, profileRepo, checkInRepo);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";

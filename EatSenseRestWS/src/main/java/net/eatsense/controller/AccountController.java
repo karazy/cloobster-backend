@@ -17,6 +17,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.NewsletterRecipient;
@@ -26,6 +27,7 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
@@ -76,12 +78,13 @@ public class AccountController {
 	private final AccessTokenRepository accessTokenRepo;
 	private final EventBus eventBus;
 	private final CustomerProfileRepository customerProfileRepo;
+	private final CheckInRepository checkInRepo;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus, CustomerProfileRepository customerProfileRepo) {
+			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus, CustomerProfileRepository customerProfileRepo, CheckInRepository checkInRepo) {
 		super();
 		this.accessTokenRepo = accessTokenRepo;
 		this.validator = validator;
@@ -91,6 +94,7 @@ public class AccountController {
 		this.companyRepo = companyRepo;
 		this.facebookService = facebookService;
 		this.imageController = imageController;
+		this.checkInRepo = checkInRepo;
 		this.eventBus = eventBus;
 		this.customerProfileRepo = customerProfileRepo;
 	}
@@ -562,6 +566,22 @@ public class AccountController {
 		checkNotNull(accountData, "accountData was null");
 		
 		account.setPhone(accountData.getPhone());
+		
+		return updateAccount(account, accountData);
+	}
+	
+	public Account updateCustomerAccount(Account account , CustomerAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		CheckIn checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
+		
+		if(checkIn == null) {
+			throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+		}
+		else {
+			account.setActiveCheckIn(checkIn.getKey());
+		}
 		
 		return updateAccount(account, accountData);
 	}

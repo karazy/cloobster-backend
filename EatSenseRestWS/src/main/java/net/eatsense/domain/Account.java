@@ -275,7 +275,10 @@ public class Account extends GenericEntity<Account> {
 	}
 
 	public void setActiveCheckIn(Key<CheckIn> activeCheckIn) {
-		this.activeCheckIn = activeCheckIn;
+		if(!Objects.equal(this.activeCheckIn, activeCheckIn)) {
+			this.setDirty(true);
+			this.activeCheckIn = activeCheckIn;
+		}
 	}
 
 	public Key<CustomerProfile> getCustomerProfile() {
