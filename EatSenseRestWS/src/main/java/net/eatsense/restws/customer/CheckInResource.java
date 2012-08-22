@@ -20,6 +20,7 @@ import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CheckInDTO;
@@ -46,6 +47,7 @@ public class CheckInResource {
 	private final Provider<BusinessController> businessCtrlProvider;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private final Provider<OrderController> orderCtrlProvider;
+	private Optional<Account> accountOpt;
 
 	public void setCheckIn(CheckIn checkIn) {
 		this.checkIn = checkIn;
@@ -57,6 +59,7 @@ public class CheckInResource {
 			Provider<ChannelController> channelCtrl,
 			Provider<OrderController> orderCtrlProvider) {
 		super();
+		this.accountOpt = Optional.absent();
 		this.orderCtrlProvider = orderCtrlProvider;
 		this.checkInCtrlprovider = checkInController;
 		this.businessCtrlProvider = businessCtrl;
@@ -85,7 +88,7 @@ public class CheckInResource {
 	@RolesAllowed(Role.GUEST)
 	public void deleteCheckIn() {
 		if(authenticated)
-			checkInCtrlprovider.get().checkOut(checkIn);
+			checkInCtrlprovider.get().checkOut(checkIn, accountOpt);
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}
@@ -159,5 +162,9 @@ public class CheckInResource {
 
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;
+	}
+
+	public void setAccount(Account account) {
+		this.accountOpt = Optional.fromNullable(account);
 	}
 }

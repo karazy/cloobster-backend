@@ -429,24 +429,13 @@ public class CheckInController {
 	}
 	
 	/**
-	 * {@link #deleteCheckIn(Business, long, Optional)}
-	 * 
-	 * @param business
-	 * @param checkInId
-	 * @return
-	 */
-	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
-		return deleteCheckIn(business, checkInId, Optional.<Account>absent());
-	}
-	
-	/**
 	 * Delete the checkin and all related entities.
 	 * @param business 
 	 * 
 	 * @param checkInId
 	 * @return 
 	 */
-	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId, Optional<Account> optAccount) {
+	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -481,9 +470,10 @@ public class CheckInController {
 		checkInRepo.delete(checkIn);
 		
 		// Remove active checkIn from the account, if this was authenticated with an user account.
-		if(optAccount.isPresent()) {
-			optAccount.get().setActiveCheckIn(null);
-			accountRepo.saveOrUpdate(optAccount.get());
+		if(checkIn.getAccount() != null) {
+			Account account = accountRepo.getByKey(checkIn.getAccount());
+			account.setActiveCheckIn(null);
+			accountRepo.saveOrUpdate(account);
 		}
 		
 		// Send event

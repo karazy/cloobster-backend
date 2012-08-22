@@ -17,6 +17,7 @@ import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
@@ -24,6 +25,7 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.CheckInDTO;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
@@ -51,7 +53,8 @@ public class CheckInsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO createCheckIn(CheckInDTO checkIn) {
-		return checkInCtrl.createCheckIn(checkIn);
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		return checkInCtrl.createCheckIn(checkIn, Optional.fromNullable(account));
 		
 	}
 
@@ -86,7 +89,7 @@ public class CheckInsResource {
 		
 		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
 		checkInResource.setCheckIn(checkInFromPath);
-
+		checkInResource.setAccount((Account)servletRequest.getAttribute("net.eatsense.domain.Account"));
 		checkInResource.setAuthenticated(authenticated);
 		
 		return checkInResource;

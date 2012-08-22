@@ -97,7 +97,8 @@ public class Authorizer implements SecurityContext {
      */
     public boolean isUserInRole(String role) {
     	// guest role is for checkedin customers
-    	if( role.equals(Role.GUEST) && checkIn != null && checkIn.getUserId() != null)
+    	if( role.equals(Role.GUEST) && ( ( checkIn != null && checkIn.getUserId() != null ) ||
+    										account.getActiveCheckIn() != null ) )
     		return true;
    	
     	if(accountController.isAccountInRole(account, role)) {
