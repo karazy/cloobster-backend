@@ -581,6 +581,8 @@ public class AccountController {
 		}
 		else {
 			account.setActiveCheckIn(checkIn.getKey());
+			checkIn.setAccount(account.getKey());
+			checkInRepo.saveOrUpdate(checkIn);
 		}
 		
 		return updateAccount(account, accountData);
@@ -979,8 +981,25 @@ public class AccountController {
 		account.setLogin(accountData.getLogin());
 		account.setRole(Role.USER);
 		
-		accountRepo.saveOrUpdate(account);
+		boolean isCheckInSet = !Strings.isNullOrEmpty(accountData.getCheckInId());
+		CheckIn checkIn = null;
+		if(isCheckInSet) {
+			checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
+			if(checkIn == null) {
+				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+			}
+			else {
+				account.setActiveCheckIn(checkIn.getKey());
+			}
+		}
 		
+		Key<Account> accountKey = accountRepo.saveOrUpdate(account);
+		
+		if(checkIn != null) {
+			checkIn.setAccount(accountKey);
+			checkInRepo.saveOrUpdate(checkIn);
+		}
+				
 		return account;
 	}
 }

@@ -77,6 +77,7 @@ public class EatSenseGuiceServletContextListener extends
 				                RolesAllowedResourceFilterFactory.class.getName());
 						bind(AccountsResource.class);
 						bind(BusinessesResource.class);
+						bind(net.eatsense.restws.customer.AccountsResource.class);
 						bind(net.eatsense.restws.customer.BusinessesResource.class);
 						bind(NicknameResource.class);
 						bind(NewsletterResource.class);
