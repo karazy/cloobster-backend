@@ -76,6 +76,7 @@ public class CheckInsResource {
 	 */
 	@GET
 	@Path("history")
+	@Produces("application/json; charset=UTF-8")
 	public List<VisitDTO> getVisits(@QueryParam("installId") String installId, @QueryParam("start") int start, @QueryParam("limit") int limit ) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		

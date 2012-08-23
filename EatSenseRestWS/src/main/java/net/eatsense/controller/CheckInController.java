@@ -551,7 +551,7 @@ public class CheckInController {
 	 * @return
 	 */
 	public List<VisitDTO> getVisits(Optional<Account> account , String installId, int start, int limit) {
-		Query<CheckIn> checkInQuery = checkInRepo.query().offset(start).limit(limit);
+		Query<CheckIn> checkInQuery = checkInRepo.query().filter("status", CheckInStatus.COMPLETE).offset(start).limit(limit);
 		if(account.isPresent()) {
 			checkInQuery = checkInQuery.filter("account", account.get());
 		}
@@ -565,11 +565,9 @@ public class CheckInController {
 		ArrayList<VisitDTO> visitDTOList = new ArrayList<VisitDTO>();
 		
 		for (CheckIn checkIn : checkInQuery) {
-			if(checkIn.getStatus() == CheckInStatus.COMPLETE) {
-				Business business = businessRepo.getByKey(checkIn.getBusiness());
-				Bill bill = billRepo.getByProperty("checkIn", checkIn);
-				visitDTOList.add( new VisitDTO(checkIn, business, bill));
-			}
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
+			Bill bill = billRepo.getByProperty("checkIn", checkIn);
+			visitDTOList.add( new VisitDTO(checkIn, business, bill));
 		}
 		
 		return visitDTOList;
@@ -578,12 +576,14 @@ public class CheckInController {
 	/**
 	 * @param businessKey
 	 * @param areaId
+	 * @param start
+	 * @param limit
 	 * @return
 	 */
-	public List<CheckInHistoryDTO> getHistory(Key<Business> businessKey, long areaId) {
+	public List<CheckInHistoryDTO> getHistory(Key<Business> businessKey, long areaId, int start, int limit) {
 		checkNotNull(businessKey, "businessKey was null");
 		
-		Query<CheckIn> checkInQuery = checkInRepo.query();
+		Query<CheckIn> checkInQuery = checkInRepo.query().offset(start).limit(limit);
 		if(areaId != 0) {
 			checkInQuery = checkInQuery.filter("area", areaRepo.getKey(businessKey, areaId));
 		}
@@ -595,7 +595,7 @@ public class CheckInController {
 		for (CheckIn checkIn : checkInQuery) {
 			Spot spot = spotRepo.getByKey(checkIn.getSpot());
 			Bill bill = billRepo.getByProperty("checkIn", checkIn);
-			
+			historyDTOList.add(new CheckInHistoryDTO(checkIn, bill, spot));			
 		}
 		
 		return historyDTOList;
