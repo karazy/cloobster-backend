@@ -78,6 +78,8 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	@NotNull
 	private Key<Spot> spot;
 	
+	private Key<Area> area;
+	
 	/**
 	 * Links to saved Feedback entity if given.
 	 */
@@ -193,6 +195,14 @@ public class CheckIn extends GenericEntity<CheckIn>{
 
 	public void setAccount(Key<Account> account) {
 		this.account = account;
+	}
+
+	public Key<Area> getArea() {
+		return area;
+	}
+
+	public void setArea(Key<Area> area) {
+		this.area = area;
 	}
 	
 	

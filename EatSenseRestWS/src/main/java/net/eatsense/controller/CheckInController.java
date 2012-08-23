@@ -208,6 +208,7 @@ public class CheckInController {
     	String checkInId = IdHelper.generateId();
 		checkIn.setBusiness(business.getKey());
 		checkIn.setSpot(spot.getKey());
+		checkIn.setArea(spot.getArea());
 		// Set the account key if it is present.
 		checkIn.setAccount(optAccount.isPresent() ? optAccount.get().getKey() : null);
 		checkIn.setUserId(checkInId);

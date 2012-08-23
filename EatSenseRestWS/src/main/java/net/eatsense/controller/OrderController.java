@@ -331,7 +331,7 @@ public class OrderController {
 	 * @param status 
 	 * @return
 	 */
-	public List<Order> getOrdersByCheckInOrStatus(Business business, CheckIn checkIn, String status) {
+	public Iterable<Order> getOrdersByCheckInOrStatus(Business business, CheckIn checkIn, String status) {
 		//Return empty list if we have no checkin
 		if(checkIn == null ||checkIn.getId() == null)
 			return new ArrayList<Order>();
@@ -347,7 +347,7 @@ public class OrderController {
 			query.filter("status in", EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED));
 		}
 		
-		return query.list();
+		return query;
 	}
 	
 	/**
