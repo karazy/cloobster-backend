@@ -3,6 +3,7 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -199,7 +200,8 @@ public class BillController {
 		checkArgument(checkIn.getBusiness().getId() == business.getId(),
 				"checkin is not at the same business to which the request was sent: id=%s", checkIn.getBusiness().getId());
 		
-		Query<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
+		Query<Order> ordersQuery = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
+		boolean foundOrderToBill = false;
 		
 		Spot spot = spotRepo.getByKey(checkIn.getSpot());
 		if(spot == null) {
@@ -207,21 +209,20 @@ public class BillController {
 		}
 		
 		Long billId = null;
-		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
+		for (Iterator<Order> iterator = ordersQuery.iterator(); iterator.hasNext() && !foundOrderToBill;) {
 			Order order = iterator.next();
 			if(order.getBill() != null) {
 				billId = order.getBill().getId();
-				iterator.remove();
 			}
 			else {
-				if (order.getStatus() == OrderStatus.CANCELED
+				if ( ! (order.getStatus() == OrderStatus.CANCELED
 						|| order.getStatus() == OrderStatus.CART
-						|| order.getStatus() == OrderStatus.COMPLETE)
-					iterator.remove();
+						|| order.getStatus() == OrderStatus.COMPLETE ))
+					foundOrderToBill = true;
 			}
 		}
-		if(!orders.iterator().hasNext()) {
-			logger.info("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
+		if(!foundOrderToBill) {
+			logger.warn("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
 			billData.setId(billId);
 		}
 		else {
