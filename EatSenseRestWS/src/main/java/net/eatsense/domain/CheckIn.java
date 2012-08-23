@@ -60,9 +60,9 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	private Date checkInTime;
 	
 	/**
-	 * The unique Id of the phone. Primarily used to block users
+	 * The unique Id of the cloobster installation on a phone. Primarily used to block users
 	 * who try to abuse the service by issuing orders they don't
-	 * pay or need.
+	 * pay or need, also for anonymous history creation.
 	 */
 	private String deviceId;
 	

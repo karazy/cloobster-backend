@@ -15,6 +15,7 @@ import javax.validation.Validator;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -32,6 +33,7 @@ import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -42,6 +44,7 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.VisitDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 import net.eatsense.util.IdHelper;
 
@@ -50,9 +53,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a
@@ -76,6 +81,7 @@ public class CheckInController {
 	private OrderChoiceRepository orderChoiceRepo;
 	private final AreaRepository areaRepo;
 	private final AccountRepository accountRepo;
+	private final BillRepository billRepo;
 
 	/**
 	 * Constructor using injection for creation.
@@ -94,7 +100,7 @@ public class CheckInController {
 			Transformer transformer,
 			ObjectMapper objectMapper, Validator validator,
 			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo, AreaRepository areaRepository,
-			EventBus eventBus, AccountRepository accountRepo) {
+			EventBus eventBus, AccountRepository accountRepo, BillRepository billRepo) {
 		this.businessRepo = businessRepository;
 		this.eventBus = eventBus;
 		this.checkInRepo = checkInRepository;
@@ -107,6 +113,7 @@ public class CheckInController {
 		this.validator = validator;
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.accountRepo = accountRepo;
+		this.billRepo = billRepo;
 	}
 
     /**
@@ -532,5 +539,36 @@ public class CheckInController {
 			eventBus.post(new MoveCheckInEvent(checkIn, business, oldSpotKey));
 		}
 		return checkInData;
+	}
+	
+	/**
+	 * Load information about past checkIns for this account or anonymous installation id.
+	 * 
+	 * @param account
+	 * @return
+	 */
+	public List<VisitDTO> getVisits(Optional<Account> account , String installId) {
+		Query<CheckIn> checkInQuery;
+		if(account.isPresent()) {
+			checkInQuery = checkInRepo.query().filter("account", account.get());
+		}
+		else {
+			if(Strings.isNullOrEmpty(installId)) {
+				throw new ValidationException("Unable to query without deviceId");
+			}
+			checkInQuery = checkInRepo.query().filter("deviceId", installId);
+		}
+		 
+		ArrayList<VisitDTO> visitDTOList = new ArrayList<VisitDTO>();
+		
+		for (CheckIn checkIn : checkInQuery) {
+			if(checkIn.getStatus() == CheckInStatus.COMPLETE) {
+				Business business = businessRepo.getByKey(checkIn.getBusiness());
+				Bill bill = billRepo.getByProperty("checkIn", checkIn);
+				visitDTOList.add( new VisitDTO(checkIn, business, bill));
+			}
+		}
+		
+		return visitDTOList;
 	}
 }

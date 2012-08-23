@@ -44,6 +44,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Query;
 
 /**
  * Handles creation of bills and price calculations.
@@ -198,7 +199,7 @@ public class BillController {
 		checkArgument(checkIn.getBusiness().getId() == business.getId(),
 				"checkin is not at the same business to which the request was sent: id=%s", checkIn.getBusiness().getId());
 		
-		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
+		Query<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
 		
 		Spot spot = spotRepo.getByKey(checkIn.getSpot());
 		if(spot == null) {
@@ -219,7 +220,7 @@ public class BillController {
 					iterator.remove();
 			}
 		}
-		if(orders.isEmpty()) {
+		if(!orders.iterator().hasNext()) {
 			logger.info("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
 			billData.setId(billId);
 		}

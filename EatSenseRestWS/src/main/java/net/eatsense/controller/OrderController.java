@@ -370,7 +370,7 @@ public class OrderController {
 	 * @param checkInId filter by checkin if not null
 	 * @return list of the orders found
 	 */
-	public List<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
+	public Iterable<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business)
 				.filter("status !=", OrderStatus.CART.toString());
 		
@@ -378,7 +378,7 @@ public class OrderController {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
 
-		return query.list();
+		return query;
 	}
 	
 	public Collection<OrderDTO> getOrdersBySpotAsDto(Business business, Long spotId, Long checkInId) {

@@ -72,21 +72,23 @@ public class Transformer {
 	}
 	
 
-	public List<OrderDTO> ordersToDto(Iterable<Order> iterable ) {
+	public List<OrderDTO> ordersToDto(Iterable<Order> orderIterable ) {
 		List<OrderDTO> dtos = new ArrayList<OrderDTO>();
-		if(iterable == null || !iterable.iterator().hasNext()) {
+		if(orderIterable == null || !orderIterable.iterator().hasNext()) {
 			logger.info("orders are null or empty");
 		}
 		else {
 			List<Key<OrderChoice>> choiceKeys = new ArrayList<Key<OrderChoice>>();
-			for (Order order : iterable) {
+			List<Order> orderList = new ArrayList<Order>();
+			for (Order order : orderIterable) {
 				// Add keys to lists for loading.
+				orderList.add(order);
 				choiceKeys.addAll(order.getChoices());
 			}
 			
 			Map<Key<OrderChoice>, OrderChoice> choicesMap = orderChoiceRepo.getByKeysAsMap(choiceKeys);
 			
-			for (Order order : iterable) {
+			for (Order order : orderList) {
 				OrderDTO orderDto = new OrderDTO(order);
 								
 				if( !order.getChoices().isEmpty() ) {
