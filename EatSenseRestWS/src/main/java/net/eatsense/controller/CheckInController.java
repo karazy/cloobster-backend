@@ -551,7 +551,7 @@ public class CheckInController {
 	 * @return
 	 */
 	public List<VisitDTO> getVisits(Optional<Account> account , String installId, int start, int limit) {
-		Query<CheckIn> checkInQuery = checkInRepo.query().filter("status", CheckInStatus.COMPLETE).offset(start).limit(limit);
+		Query<CheckIn> checkInQuery = checkInRepo.query().order("-id").filter("status", CheckInStatus.COMPLETE).offset(start).limit(limit);
 		if(account.isPresent()) {
 			checkInQuery = checkInQuery.filter("account", account.get());
 		}
@@ -583,7 +583,7 @@ public class CheckInController {
 	public List<CheckInHistoryDTO> getHistory(Key<Business> businessKey, long areaId, int start, int limit) {
 		checkNotNull(businessKey, "businessKey was null");
 		
-		Query<CheckIn> checkInQuery = checkInRepo.query().offset(start).limit(limit);
+		Query<CheckIn> checkInQuery = checkInRepo.query().order("-id").offset(start).limit(limit);
 		if(areaId != 0) {
 			checkInQuery = checkInQuery.filter("area", areaRepo.getKey(businessKey, areaId));
 		}
