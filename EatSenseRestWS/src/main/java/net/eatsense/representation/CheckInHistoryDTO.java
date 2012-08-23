@@ -5,63 +5,65 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Spot;
 
+/**
+ * @author Nils Weiher
+ *
+ */
 @XmlRootElement
-public class VisitDTO {
+public class CheckInHistoryDTO {
+	private Long checkInId;
 	private String nickname;
-	private String checkInId;
 	private Date checkInTime;
-	private long businessId;
-	private String businessName;
-	private long billId;
+	private Long billId;
+	private String paymentMethod;
 	private Date billTime;
 	private double billTotal;
-	private String paymentMethod;
+	private Long spotId;
+	private Long areaId;
+	private String spotName;
 	
-	/**
-	 * 
-	 */
-	public VisitDTO() {
+	public CheckInHistoryDTO() {
 	}
 	
 	/**
-	 * Create the transfer object from the given source entities.
-	 * 
 	 * @param checkIn
-	 * @param business
 	 * @param bill
+	 * @param spot
 	 */
-	public VisitDTO(CheckIn checkIn, Business business, Bill bill) {
+	public CheckInHistoryDTO(CheckIn checkIn, Bill bill, Spot spot) {
 		if(checkIn != null) {
+			checkInId = checkIn.getId();
 			nickname = checkIn.getNickname();
-			checkInId = checkIn.getUserId();
 			checkInTime = checkIn.getCheckInTime();
-		}
-		if(business != null) {
-			businessId = business.getId();
-			businessName = business.getName();
 		}
 		if(bill != null) {
 			billId = bill.getId();
+			paymentMethod = bill.getPaymentMethod().getName();
 			billTime = bill.getCreationTime();
 			billTotal = bill.getTotal() / 100.0;
-			paymentMethod = bill.getPaymentMethod().getName();
+		}
+		if(spot != null) {
+			spotId = spot.getId();
+			areaId = spot.getArea().getId();
+			spotName = spot.getName();
 		}
 	}
+
 	
+	public Long getCheckInId() {
+		return checkInId;
+	}
+	public void setCheckInId(Long checkInId) {
+		this.checkInId = checkInId;
+	}
 	public String getNickname() {
 		return nickname;
 	}
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
-	}
-	public String getCheckInId() {
-		return checkInId;
-	}
-	public void setCheckInId(String checkInId) {
-		this.checkInId = checkInId;
 	}
 	public Date getCheckInTime() {
 		return checkInTime;
@@ -69,23 +71,17 @@ public class VisitDTO {
 	public void setCheckInTime(Date checkInTime) {
 		this.checkInTime = checkInTime;
 	}
-	public Long getBusinessId() {
-		return businessId;
-	}
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
-	}
-	public String getBusinessName() {
-		return businessName;
-	}
-	public void setBusinessName(String businessName) {
-		this.businessName = businessName;
-	}
 	public Long getBillId() {
 		return billId;
 	}
 	public void setBillId(Long billId) {
 		this.billId = billId;
+	}
+	public String getPaymentMethod() {
+		return paymentMethod;
+	}
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 	public Date getBillTime() {
 		return billTime;
@@ -99,11 +95,22 @@ public class VisitDTO {
 	public void setBillTotal(double billTotal) {
 		this.billTotal = billTotal;
 	}
-	public String getPaymentMethod() {
-		return paymentMethod;
+	public Long getSpotId() {
+		return spotId;
 	}
-	public void setPaymentMethod(String paymentMethod) {
-		this.paymentMethod = paymentMethod;
+	public void setSpotId(Long spotId) {
+		this.spotId = spotId;
 	}
-	
+	public Long getAreaId() {
+		return areaId;
+	}
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
+	public String getSpotName() {
+		return spotName;
+	}
+	public void setSpotName(String spotName) {
+		this.spotName = spotName;
+	}
 }

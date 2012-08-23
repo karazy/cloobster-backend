@@ -41,6 +41,7 @@ import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
@@ -545,18 +546,20 @@ public class CheckInController {
 	 * Load information about past checkIns for this account or anonymous installation id.
 	 * 
 	 * @param account
+	 * @param limit 
+	 * @param start 
 	 * @return
 	 */
-	public List<VisitDTO> getVisits(Optional<Account> account , String installId) {
-		Query<CheckIn> checkInQuery;
+	public List<VisitDTO> getVisits(Optional<Account> account , String installId, int start, int limit) {
+		Query<CheckIn> checkInQuery = checkInRepo.query().offset(start).limit(limit);
 		if(account.isPresent()) {
-			checkInQuery = checkInRepo.query().filter("account", account.get());
+			checkInQuery = checkInQuery.filter("account", account.get());
 		}
 		else {
 			if(Strings.isNullOrEmpty(installId)) {
 				throw new ValidationException("Unable to query without deviceId");
 			}
-			checkInQuery = checkInRepo.query().filter("deviceId", installId);
+			checkInQuery = checkInQuery.filter("deviceId", installId);
 		}
 		 
 		ArrayList<VisitDTO> visitDTOList = new ArrayList<VisitDTO>();
@@ -570,5 +573,31 @@ public class CheckInController {
 		}
 		
 		return visitDTOList;
+	}
+	
+	/**
+	 * @param businessKey
+	 * @param areaId
+	 * @return
+	 */
+	public List<CheckInHistoryDTO> getHistory(Key<Business> businessKey, long areaId) {
+		checkNotNull(businessKey, "businessKey was null");
+		
+		Query<CheckIn> checkInQuery = checkInRepo.query();
+		if(areaId != 0) {
+			checkInQuery = checkInQuery.filter("area", areaRepo.getKey(businessKey, areaId));
+		}
+		
+		checkInQuery.filter("status", CheckInStatus.COMPLETE);
+	
+		ArrayList<CheckInHistoryDTO> historyDTOList = new ArrayList<CheckInHistoryDTO>();
+		
+		for (CheckIn checkIn : checkInQuery) {
+			Spot spot = spotRepo.getByKey(checkIn.getSpot());
+			Bill bill = billRepo.getByProperty("checkIn", checkIn);
+			
+		}
+		
+		return historyDTOList;
 	}
 }

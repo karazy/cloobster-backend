@@ -49,6 +49,7 @@ public class CheckInsResource {
 		return checkInController.getCheckInStatusesBySpot(business, spotId);	
 	}
 	
+	
 	@DELETE
 	@Path("{checkInId}")
 	@Produces("application/json; charset=UTF-8")

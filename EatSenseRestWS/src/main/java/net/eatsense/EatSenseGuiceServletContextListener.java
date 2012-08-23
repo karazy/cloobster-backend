@@ -19,7 +19,6 @@ import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.UploadsResource;
-import net.eatsense.restws.VisitsResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
 import net.eatsense.restws.business.CompaniesResource;
@@ -94,12 +93,10 @@ public class EatSenseGuiceServletContextListener extends
 						bind(UploadsResource.class);
 						bind(DownloadResource.class);
 						bind(CompaniesResource.class);
-						bind(VisitsResource.class);
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)visits(.)*",
-								"(.)*c/accounts(.)*",
+						serveRegex("(.)*c/accounts(.)*",
 								"(.)*b/companies(.)*",
 								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",

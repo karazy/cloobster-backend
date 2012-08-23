@@ -1,6 +1,7 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.VisitDTO;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -64,6 +66,20 @@ public class CheckInsResource {
 	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotBarcode, @QueryParam("checkInId") String checkInId) {
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		return checkInCtrl.getOtherUsersAtSpot(checkIn, spotBarcode);
+	}
+	
+	/**
+	 * Get previous visits for this account.
+	 * 
+	 * @param installId
+	 * @return Array of visit objects, containing check in , bill and business data.
+	 */
+	@GET
+	@Path("history")
+	public List<VisitDTO> getVisits(@QueryParam("installId") String installId, @QueryParam("start") int start, @QueryParam("limit") int limit ) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		
+		return checkInCtrl.getVisits(Optional.fromNullable(account), installId , start, limit);
 	}
 	
 	@GET
