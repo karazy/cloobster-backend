@@ -335,8 +335,7 @@ public class OrderController {
 		//Return empty list if we have no checkin
 		if(checkIn == null ||checkIn.getId() == null)
 			return new ArrayList<Order>();
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
-		query = query.filter("checkIn", checkIn.getKey()); 
+		Query<Order> query = orderRepo.query().ancestor(business).filter("checkIn", checkIn.getKey()); 
 		
 		if(status != null && !status.isEmpty()) {
 			// Filter by status if set.

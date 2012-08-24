@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -24,11 +26,13 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.CheckInEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
@@ -53,8 +57,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.labs.repackaged.com.google.common.collect.Collections2;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -396,32 +402,38 @@ public class CheckInController {
 		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
 		checkNotNull(checkIn.getStatus(), "checkIn status was null");
 		
-		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST) {
-			throw new CheckInFailureException("invalid status " + checkIn.getStatus());
+		
+		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST || checkIn.getStatus() == CheckInStatus.COMPLETE) {
+			throw new IllegalAccessException("invalid status " + checkIn.getStatus());
 		}
-		else {
-			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
-			List<Key<Order>> orderKeys = orderRepo.getKeysByProperty("checkIn", checkIn);
-			List<Key<OrderChoice>> orderChoiceKeys = new ArrayList<Key<OrderChoice>>();
-			
-			for (Key<Order> orderKey : orderKeys) {
-				orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
-			}
-			requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
-			orderChoiceRepo.delete(orderChoiceKeys);
-			orderRepo.delete(orderKeys);
-			checkInRepo.delete(checkIn);
-			
-			// Remove active checkIn from the account, if this was authenticated with an user account.
-			if(optAccount.isPresent()) {
-				optAccount.get().setActiveCheckIn(null);
-				accountRepo.saveOrUpdate(optAccount.get());
-			}	
-			
-			DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
-			event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
-			eventBus.post(event);
-		}			
+		// Check that there were no orders placed.
+		if (orderRepo.queryForCheckInAndStatus(checkIn, OrderStatus.COMPLETE,
+								OrderStatus.INPROCESS, OrderStatus.PLACED,
+								OrderStatus.RECEIVED).getKey() != null) {
+			throw new IllegalAccessException("Unable to delete checkIn while orders exist");
+		}
+		
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
+		List<Key<Order>> orderKeys = orderRepo.getKeysByProperty("checkIn", checkIn);
+		List<Key<OrderChoice>> orderChoiceKeys = new ArrayList<Key<OrderChoice>>();
+		
+		for (Key<Order> orderKey : orderKeys) {
+			orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
+		}
+		requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
+		orderChoiceRepo.delete(orderChoiceKeys);
+		orderRepo.delete(orderKeys);
+		checkInRepo.delete(checkIn);
+		
+		// Remove active checkIn from the account, if this was authenticated with an user account.
+		if(optAccount.isPresent()) {
+			optAccount.get().setActiveCheckIn(null);
+			accountRepo.saveOrUpdate(optAccount.get());
+		}	
+		
+		DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
+		event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
+		eventBus.post(event);
 	}
 
 	/**
@@ -595,7 +607,7 @@ public class CheckInController {
 		for (CheckIn checkIn : checkInQuery) {
 			Spot spot = spotRepo.getByKey(checkIn.getSpot());
 			Bill bill = billRepo.getByProperty("checkIn", checkIn);
-			historyDTOList.add(new CheckInHistoryDTO(checkIn, bill, spot));			
+			historyDTOList.add(new CheckInHistoryDTO(checkIn, bill, spot));
 		}
 		
 		return historyDTOList;

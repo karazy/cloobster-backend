@@ -32,10 +32,12 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
@@ -66,6 +68,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CheckInControllerTest {
@@ -485,7 +488,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCheckOutCheckInStatusOrderPlaced() throws Exception {
-		thrown.expect(CheckInFailureException.class);
+		thrown.expect(IllegalAccessException.class);
 		thrown.expectMessage("invalid status");
 		
 		CheckIn checkIn = mock(CheckIn.class);
@@ -500,7 +503,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCheckOutCheckInStatusPaymentRequest() throws Exception {
-		thrown.expect(CheckInFailureException.class);
+		thrown.expect(IllegalAccessException.class);
 		thrown.expectMessage("invalid status");
 		
 		CheckIn checkIn = mock(CheckIn.class);
@@ -548,6 +551,10 @@ public class CheckInControllerTest {
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		int activeCheckIns = 2;
 		when(checkInRepo.countActiveCheckInsAtSpot(spotKey)).thenReturn(activeCheckIns);
+		Query<Order> orderQuery = mock(Query.class);
+		when(orderRepo.queryForCheckInAndStatus(checkIn, OrderStatus.COMPLETE,
+								OrderStatus.INPROCESS, OrderStatus.PLACED,
+								OrderStatus.RECEIVED)).thenReturn(orderQuery );
 		
 		InOrder inOrder = inOrder(orderRepo);
 		
