@@ -591,7 +591,22 @@ public class CheckInController {
 	 * @return
 	 */
 	public Account connectVisits(Account account, String installId) {
-		return null;
+		Query<CheckIn> visitsQuery = checkInRepo.query().filter("status", CheckInStatus.COMPLETE).filter("deviceId", installId);
+		List<CheckIn> visits = new ArrayList<CheckIn>();
+		
+		for (CheckIn checkIn : visitsQuery) {
+			if(checkIn.getAccount() == null) {
+				checkIn.setAccount(account.getKey());
+				//TODO Think about removing deviceId from the checkIns?
+				// Do we want to associate visits with a user and a device, is that a privacy problem?
+				visits.add(checkIn);
+			}
+		}
+		
+		// Save all the check ins!
+		checkInRepo.saveOrUpdate(visits);
+		
+		return account;
 	}
 	
 	/**
