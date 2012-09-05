@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -25,6 +26,7 @@ import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.HistoryStatusDTO;
 import net.eatsense.representation.VisitDTO;
 
 import com.google.common.base.Optional;
@@ -82,6 +84,18 @@ public class CheckInsResource {
 		
 		return checkInCtrl.getVisits(Optional.fromNullable(account), installId , start, limit);
 	}
+	
+	@PUT
+	@Path("history/connect")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.USER)
+	public HistoryStatusDTO connectVisits(HistoryStatusDTO historyDTO, @QueryParam("installId") String installId) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		return checkInCtrl.connectVisits(account, historyDTO);
+	}
+	
+	
 	
 	@GET
 	@Path("channels")

@@ -47,6 +47,7 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.ErrorDTO;
+import net.eatsense.representation.HistoryStatusDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.VisitDTO;
@@ -590,23 +591,33 @@ public class CheckInController {
 	 * @param installId
 	 * @return
 	 */
-	public Account connectVisits(Account account, String installId) {
-		Query<CheckIn> visitsQuery = checkInRepo.query().filter("status", CheckInStatus.COMPLETE).filter("deviceId", installId);
-		List<CheckIn> visits = new ArrayList<CheckIn>();
+	public HistoryStatusDTO connectVisits(Account account, HistoryStatusDTO historyDTO) {
+		checkNotNull(account, "account was null");
 		
+		if(Strings.isNullOrEmpty(historyDTO.getInstallId())) {
+			throw new ValidationException("installId was null or empty");
+		}
+		
+		Query<CheckIn> visitsQuery = checkInRepo.query().filter("status", CheckInStatus.COMPLETE).filter("deviceId", historyDTO.getInstallId());
+		List<CheckIn> visits = new ArrayList<CheckIn>();
+		int visitCount = 0;
 		for (CheckIn checkIn : visitsQuery) {
+			// Only update check which are not yet linked.
 			if(checkIn.getAccount() == null) {
 				checkIn.setAccount(account.getKey());
 				//TODO Think about removing deviceId from the checkIns?
 				// Do we want to associate visits with a user and a device, is that a privacy problem?
 				visits.add(checkIn);
+				++visitCount;
 			}
 		}
 		
+		
 		// Save all the check ins!
 		checkInRepo.saveOrUpdate(visits);
-		
-		return account;
+		// Return number of connected checkIns.
+		historyDTO.setVisitCount(visitCount);
+		return historyDTO;
 	}
 	
 	/**
