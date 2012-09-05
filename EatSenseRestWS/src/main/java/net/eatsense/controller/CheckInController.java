@@ -586,6 +586,15 @@ public class CheckInController {
 	}
 	
 	/**
+	 * @param account
+	 * @param installId
+	 * @return
+	 */
+	public Account connectVisits(Account account, String installId) {
+		return null;
+	}
+	
+	/**
 	 * @param businessKey
 	 * @param areaId
 	 * @param start
