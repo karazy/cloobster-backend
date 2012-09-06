@@ -95,8 +95,6 @@ public class CheckInsResource {
 		return checkInCtrl.connectVisits(account, historyDTO);
 	}
 	
-	
-	
 	@GET
 	@Path("channels")
 	public String getConnectionStatus(@QueryParam ("c") String checkInUid) {
