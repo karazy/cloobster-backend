@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
@@ -327,15 +329,15 @@ public class OrderController {
 	 * Get orders saved for the given checkin and filter by status if set.
 	 * 
 	 * @param business
-	 * @param checkIn
+	 * @param checkInKey
 	 * @param status 
 	 * @return
 	 */
-	public Iterable<Order> getOrdersByCheckInOrStatus(Business business, CheckIn checkIn, String status) {
+	public Iterable<Order> getOrdersByCheckInOrStatus(Business business, Key<CheckIn> checkInKey, String status) {
 		//Return empty list if we have no checkin
-		if(checkIn == null ||checkIn.getId() == null)
+		if(checkInKey == null)
 			return new ArrayList<Order>();
-		Query<Order> query = orderRepo.query().ancestor(business).filter("checkIn", checkIn.getKey()); 
+		Query<Order> query = orderRepo.query().ancestor(business).filter("checkIn", checkInKey); 
 		
 		if(status != null && !status.isEmpty()) {
 			// Filter by status if set.
@@ -357,8 +359,30 @@ public class OrderController {
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDto(Business business, CheckIn checkIn, String status) {
-		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkIn, status));
+	public Collection<OrderDTO> getOrdersAsDto(Business business, Key<CheckIn> checkInKey, String status) {
+		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkInKey, status));
+	}
+	
+	/**
+	 * @param business
+	 * @param account
+	 * @param checkInKey
+	 * @param status
+	 * @return
+	 */
+	public Collection<OrderDTO> getOrdersAsDtoForVisit(Business business, Account account, Key<CheckIn> checkInKey, String status) {
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getByKey(checkInKey);
+		} catch (NotFoundException e) {
+			// No checkIn found return empty orders.
+			return Collections.emptyList();
+		}
+		if(checkIn.getAccount().getId() != account.getId().longValue()) {
+			// Not allowed to read checkins of different account.
+			return Collections.emptyList();
+		}
+		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkInKey, status));
 	}
 	
 	/**
