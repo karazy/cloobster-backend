@@ -124,16 +124,14 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.GUEST, Role.USER})
 	public Collection<OrderDTO> getOrders( @QueryParam("status") String status, @QueryParam("checkInId") Long checkInId) {
-		Key<CheckIn> checkInKey;
-		if(checkInId != null && checkInId.longValue() != 0) {
-			checkInKey = new Key<CheckIn>(CheckIn.class, checkInId);
+		if( account != null && checkInId != null && checkInId.longValue() != 0) {
+			return orderCtrl.getOrdersAsDtoForVisit(business, account, new Key<CheckIn>(CheckIn.class, checkInId), status);
 		}
 		else {
-			checkInKey = checkIn.getKey();
+			return orderCtrl.getOrdersAsDto(business, checkIn.getKey(), status);
 		}
-		 
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkInKey, status);
-		return orders;
+		
+		
 	}
 	
 	@Path("orders/{orderId}")
