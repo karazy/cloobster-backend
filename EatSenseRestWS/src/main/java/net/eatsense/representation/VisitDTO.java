@@ -11,7 +11,7 @@ import net.eatsense.domain.CheckIn;
 @XmlRootElement
 public class VisitDTO {
 	private String nickname;
-	private String checkInId;
+	private Long id;
 	private Date checkInTime;
 	private long businessId;
 	private String businessName;
@@ -36,7 +36,7 @@ public class VisitDTO {
 	public VisitDTO(CheckIn checkIn, Business business, Bill bill) {
 		if(checkIn != null) {
 			nickname = checkIn.getNickname();
-			checkInId = checkIn.getUserId();
+			id = checkIn.getId();
 			checkInTime = checkIn.getCheckInTime();
 		}
 		if(business != null) {
@@ -56,12 +56,6 @@ public class VisitDTO {
 	}
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
-	}
-	public String getCheckInId() {
-		return checkInId;
-	}
-	public void setCheckInId(String checkInId) {
-		this.checkInId = checkInId;
 	}
 	public Date getCheckInTime() {
 		return checkInTime;
@@ -104,6 +98,14 @@ public class VisitDTO {
 	}
 	public void setPaymentMethod(String paymentMethod) {
 		this.paymentMethod = paymentMethod;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 }
