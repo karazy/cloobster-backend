@@ -163,7 +163,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, "cart");
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn.getKey(), "cart");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -249,7 +249,7 @@ public class OrderControllerTest {
 		
 		orderCtrl.deleteOrder(business, placedOrder , checkIn);
 		
-		Iterable<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn, null);
+		Iterable<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn.getKey(), null);
 		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
 		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.iterator().hasNext(), is(false));
@@ -325,7 +325,7 @@ public class OrderControllerTest {
 			}
 		}
 		//#3 Check "getOrders" with status
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, "CART");
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn.getKey(), "CART");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(2));
 		for (OrderDTO dto : orders) {
@@ -383,7 +383,7 @@ public class OrderControllerTest {
 		
 		//#3 Check "getOrders"
 		
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, "cart");
+		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn.getKey(), "cart");
 		assertThat(orders, notNullValue());
 		assertThat(orders.size(), equalTo(1));
 		for (OrderDTO dto : orders) {
