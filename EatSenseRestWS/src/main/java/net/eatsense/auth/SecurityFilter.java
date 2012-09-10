@@ -129,5 +129,4 @@ public class SecurityFilter implements ContainerRequestFilter {
 			return authorizerFactory.createForCheckIn(checkIn);
 		}
 	}
-
 }

@@ -589,7 +589,7 @@ public class AccountController {
 			}
 		}		
 		
-		return updateAccount(account, accountData);
+		return updateAccount(account, accountData, false);
 	}
 	
 	/**
@@ -600,6 +600,19 @@ public class AccountController {
 	 * @return
 	 */
 	public Account updateAccount(Account account, AccountDTO accountData) {
+		return updateAccount(account, accountData, false);
+	}
+
+
+	/**
+	 * Update account profile data.
+	 * 
+	 * @param account
+	 * @param accountData
+	 * @param emailConfirmed If <code>true</code>, send e-mail confirmation before updating the e-mail field.
+	 * @return
+	 */
+	public Account updateAccount(Account account, AccountDTO accountData, boolean emailConfirmed) {
 		checkNotNull(account, "account was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -610,7 +623,7 @@ public class AccountController {
 		
 		if(!Objects.equal(account.getEmail(),accountData.getEmail()) || 
 				!Objects.equal(account.getNewEmail(), accountData.getEmail())) {
-			if(account.getNewEmail() != null) {
+			if(account.getNewEmail() != null || !account.isEmailConfirmed()) {
 				// User wants to set a new email while already in the process of
 				// confirming another address.
 				List<Key<AccessToken>> tokenKeys = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.EMAIL_CONFIRMATION);
@@ -624,7 +637,13 @@ public class AccountController {
 			}
 			else {
 				checkEmailDoesNotExist(accountData.getEmail());
-				account.setNewEmail(accountData.getEmail());
+				if(!emailConfirmed) {
+					account.setNewEmail(accountData.getEmail());
+				}
+				else {
+					account.setEmail(accountData.getEmail());
+				}
+				
 				account.setEmailConfirmed(false);
 			}
 		}
@@ -984,6 +1003,7 @@ public class AccountController {
 		account.setActive(true);
 		account.setCreationDate(new Date());
 		account.setEmail(accountData.getEmail());
+		account.setNewEmail(accountData.getNewEmail());
 		account.setEmailConfirmed(false);
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 		account.setCustomerProfile(customerProfileRepo.saveOrUpdate(profile));

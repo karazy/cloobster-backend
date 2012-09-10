@@ -102,7 +102,8 @@ public class AccountsResource {
 			throw new IllegalAccessException("Can only update the authenticated account.");
 		}
 		
-		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+		if(!Strings.isNullOrEmpty(accountData.getPassword()) || !accountData.getEmail().equals(account.getEmail())) {
+			// User tries to change e-mail or password.
 			if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
 				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
 			}
