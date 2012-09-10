@@ -575,16 +575,19 @@ public class AccountController {
 		checkNotNull(account, "account was null");
 		checkNotNull(accountData, "accountData was null");
 		
-		CheckIn checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
-		
-		if(checkIn == null) {
-			throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
-		}
-		else {
-			account.setActiveCheckIn(checkIn.getKey());
-			checkIn.setAccount(account.getKey());
-			checkInRepo.saveOrUpdate(checkIn);
-		}
+		// Change 
+		if(!Strings.isNullOrEmpty(accountData.getCheckInId()) && account.getActiveCheckIn() == null) {
+			CheckIn checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
+			
+			if(checkIn == null) {
+				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+			}
+			else {
+				account.setActiveCheckIn(checkIn.getKey());
+				checkIn.setAccount(account.getKey());
+				checkInRepo.saveOrUpdate(checkIn);
+			}
+		}		
 		
 		return updateAccount(account, accountData);
 	}
