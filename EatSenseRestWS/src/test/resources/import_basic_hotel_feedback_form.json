@@ -3,6 +3,10 @@
 	"description": "Einige Standardfragen",
 	"questions": [
 		{
+			"question": "Empfang",
+			"rating": 3
+		},
+		{
 			"question": "Ambiente",
 			"rating": 3
 		},
@@ -11,19 +15,15 @@
 			"rating": 3
 		},
 		{
+			"question": "Speisen / Getränke",
+			"rating": 3
+		},
+		{
+			"question": "Service",
+			"rating": 3
+		},
+		{
 			"question": "Sauberkeit",
-			"rating": 3
-		},
-		{
-			"question": "Empfang",
-			"rating": 3
-		},
-		{
-			"question": "Restaurant",
-			"rating": 3
-		},
-		{
-			"question": "Zimmerservice",
 			"rating": 3
 		},
 		{

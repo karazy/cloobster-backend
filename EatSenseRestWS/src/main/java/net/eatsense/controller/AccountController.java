@@ -2,14 +2,13 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.mockito.Mockito.reset;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
@@ -19,7 +18,9 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
+import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
@@ -27,18 +28,22 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.CompanyRepository;
+import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.CompanyAccountDTO;
 import net.eatsense.representation.CompanyDTO;
+import net.eatsense.representation.CustomerAccountDTO;
+import net.eatsense.representation.CustomerProfileDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
-import net.eatsense.validation.BusinessAdminChecks;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.EmailChecks;
 import net.eatsense.validation.LoginNameChecks;
 import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
@@ -47,6 +52,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.tools.development.DynamicLatencyAdjuster.Default;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -72,12 +78,14 @@ public class AccountController {
 	private final ImageController imageController;
 	private final AccessTokenRepository accessTokenRepo;
 	private final EventBus eventBus;
+	private final CustomerProfileRepository customerProfileRepo;
+	private final CheckInRepository checkInRepo;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus) {
+			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus, CustomerProfileRepository customerProfileRepo, CheckInRepository checkInRepo) {
 		super();
 		this.accessTokenRepo = accessTokenRepo;
 		this.validator = validator;
@@ -87,7 +95,9 @@ public class AccountController {
 		this.companyRepo = companyRepo;
 		this.facebookService = facebookService;
 		this.imageController = imageController;
+		this.checkInRepo = checkInRepo;
 		this.eventBus = eventBus;
+		this.customerProfileRepo = customerProfileRepo;
 	}
 	
 	
@@ -271,7 +281,7 @@ public class AccountController {
 	 * @param accountData
 	 * @return
 	 */
-	public Account registerNewAccount(RegistrationDTO accountData) {
+	public Account registerNewCompanyAccount(RegistrationDTO accountData) {
 		checkNotNull(accountData, "accountData was null");
 		
 		validator.validate(accountData);
@@ -491,7 +501,7 @@ public class AccountController {
 	 * @param accountData Containing login, password, business id (for which the account should have access), and an optional name.
 	 * @return a new Account entity
 	 */
-	public CompanyAccountDTO createUserAccount(Account ownerAccount, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO createCockpitUserAccount(Account ownerAccount, BusinessAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -513,11 +523,11 @@ public class AccountController {
 	 * @param accountData Only "email" and "name" will be used.
 	 * @return The newly created or updated {@link Account}.
 	 */
-	public Account createOrAddAdminAccount(Account ownerAccount, AccountDTO accountData) {
+	public Account createOrAddAdminAccount(Account ownerAccount, BusinessAccountDTO accountData) {
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
 		
-		validator.validate(accountData, BusinessAdminChecks.class);
+		validator.validate(accountData, EmailChecks.class);
 		
 		Account account = accountRepo.getByProperty("email", accountData.getEmail());
 		
@@ -546,25 +556,74 @@ public class AccountController {
 	}
 	
 	/**
+	 * Update specific fields for a business user Account entity.
+	 * 
+	 * @param account
+	 * @param accountData
+	 * @return
+	 */
+	public Account updateBusinessAccount(Account account, BusinessAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		account.setPhone(accountData.getPhone());
+		
+		return updateAccount(account, accountData);
+	}
+	
+	public Account updateCustomerAccount(Account account , CustomerAccountDTO accountData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(accountData, "accountData was null");
+		
+		// Change 
+		if(!Strings.isNullOrEmpty(accountData.getCheckInId()) && account.getActiveCheckIn() == null) {
+			CheckIn checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
+			
+			if(checkIn == null) {
+				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+			}
+			else {
+				account.setActiveCheckIn(checkIn.getKey());
+				checkIn.setAccount(account.getKey());
+				checkInRepo.saveOrUpdate(checkIn);
+			}
+		}		
+		
+		return updateAccount(account, accountData, false);
+	}
+	
+	/**
 	 * Update account profile data.
 	 * 
 	 * @param account
 	 * @param accountData
 	 * @return
 	 */
-	public Account updateAccount(Account account, CompanyAccountDTO accountData) {
+	public Account updateAccount(Account account, AccountDTO accountData) {
+		return updateAccount(account, accountData, false);
+	}
+
+
+	/**
+	 * Update account profile data.
+	 * 
+	 * @param account
+	 * @param accountData
+	 * @param emailConfirmed If <code>true</code>, send e-mail confirmation before updating the e-mail field.
+	 * @return
+	 */
+	public Account updateAccount(Account account, AccountDTO accountData, boolean emailConfirmed) {
 		checkNotNull(account, "account was null");
 		checkNotNull(accountData, "accountData was null");
 		
 		// Validate data for cockpit user update.
-		validator.validate(accountData, BusinessAdminChecks.class);
+		validator.validate(accountData, EmailChecks.class);
 		
 		account.setName(accountData.getName());
-		account.setPhone(accountData.getPhone());
 		
 		if(!Objects.equal(account.getEmail(),accountData.getEmail()) || 
 				!Objects.equal(account.getNewEmail(), accountData.getEmail())) {
-			if(account.getNewEmail() != null) {
+			if(account.getNewEmail() != null || !account.isEmailConfirmed()) {
 				// User wants to set a new email while already in the process of
 				// confirming another address.
 				List<Key<AccessToken>> tokenKeys = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.EMAIL_CONFIRMATION);
@@ -578,7 +637,13 @@ public class AccountController {
 			}
 			else {
 				checkEmailDoesNotExist(accountData.getEmail());
-				account.setNewEmail(accountData.getEmail());
+				if(!emailConfirmed) {
+					account.setNewEmail(accountData.getEmail());
+				}
+				else {
+					account.setEmail(accountData.getEmail());
+				}
+				
 				account.setEmailConfirmed(false);
 			}
 		}
@@ -616,7 +681,7 @@ public class AccountController {
 	 * @param accountData Updated fields for login, password,name and/or business ids.
 	 * @return Updated transfer object.
 	 */
-	public CompanyAccountDTO updateCompanyAccount(Account account, Account ownerAccount, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO updateCompanyAccount(Account account, Account ownerAccount, BusinessAccountDTO accountData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(ownerAccount, "ownerAccount was null");
 		checkNotNull(accountData, "accountData was null");
@@ -665,7 +730,7 @@ public class AccountController {
 			accountRepo.saveOrUpdate(account);
 		}
 		
-		return new CompanyAccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	/**
@@ -699,10 +764,10 @@ public class AccountController {
 	 * @param role If specified, only return Accounts with this role.
 	 * @return List of Account transfer objects for the company filtered by role if specified. 
 	 */
-	public List<AccountDTO> getCompanyAccounts(Account authenticatedAccount, Key<Company> companyKey, String role) {
+	public List<BusinessAccountDTO> getCompanyAccounts(Account authenticatedAccount, Key<Company> companyKey, String role) {
 		checkNotNull(companyKey, "companyKey was null");
 		
-		ArrayList<AccountDTO> accountDtos = new ArrayList<AccountDTO>();
+		ArrayList<BusinessAccountDTO> accountDtos = new ArrayList<BusinessAccountDTO>();
 		List<Account> accounts;
 		
 		if(!Strings.isNullOrEmpty(role)) {
@@ -726,7 +791,7 @@ public class AccountController {
 		for (Account account : accounts) {
 			if(!account.getId().equals(authenticatedAccount.getId())) {
 				// Filter the account making the request.
-				accountDtos.add(new AccountDTO(account));
+				accountDtos.add(new BusinessAccountDTO(account));
 			}
 		}
 		
@@ -758,11 +823,11 @@ public class AccountController {
 	 * @param email
 	 * @return
 	 */
-	public List<AccountDTO> getAccountsByEmail(String email) {
-		ArrayList<AccountDTO> accountDTOs = new ArrayList<AccountDTO>();
+	public List<BusinessAccountDTO> getAccountsByEmail(String email) {
+		ArrayList<BusinessAccountDTO> accountDTOs = new ArrayList<BusinessAccountDTO>();
 		
 		for(Account account : accountRepo.getListByProperty("email", email)) {
-			AccountDTO accountDTO = new AccountDTO();
+			BusinessAccountDTO accountDTO = new BusinessAccountDTO();
 			if(account.getCompany() != null) {
 				accountDTO.setCompanyId(account.getCompany().getId());
 			}
@@ -780,7 +845,7 @@ public class AccountController {
 	 * @param accountData
 	 * @return
 	 */
-	public AccountDTO setupAdminAccount(Key<Account> accountKey, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO setupAdminAccount(Key<Account> accountKey, BusinessAccountDTO accountData) {
 		checkNotNull(accountKey, "accountKey was null");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -795,7 +860,7 @@ public class AccountController {
 		
 		accountRepo.saveOrUpdate(account);
 		
-		return new AccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	/**
@@ -809,21 +874,54 @@ public class AccountController {
 	}
 	
 	/**
-	 * Return a new access token for authentication, valid for several days.
+	 * Create and save a new access token for authentication, valid for several days.
 	 * 
 	 * @param account
 	 * @return {@link AccessToken} with {@link TokenType#AUTHENTICATION}
 	 */
 	public AccessToken createAuthenticationToken(Account account) {
-		return accessTokenRepo.createAuthToken(account.getKey());
+		
+		return accessTokenRepo.createAuthToken(account.getKey(), false);
+	}
+	
+	/**
+	 * Create and save a new access token for authentication, valid until invalidated.
+	 * 
+	 * @param account
+	 * @return {@link AccessToken} with {@link TokenType#AUTHENTICATION}
+	 */
+	public AccessToken createAuthenticationToken(Account account, boolean isPermanent) {
+		return accessTokenRepo.createAuthToken(account.getKey(), isPermanent);
+	}
+	
+	/**
+	 * Create and save new access token for authentication from the app.
+	 * 
+	 * @param account
+	 * @return New {@link AccessToken} with {@link TokenType#AUTHENTICATION_CUSTOMER} and no expiration date.
+	 */
+	public AccessToken createCustomerAuthToken(Account account) {
+		
+		Calendar cal = Calendar.getInstance();
+		//TODO: Extract expiration date for app tokens.
+    	cal.add(Calendar.YEAR, 1);
+		
+		return accessTokenRepo.create(TokenType.AUTHENTICATION_CUSTOMER, account.getKey(), cal.getTime());
 	}
 
-
+	/**
+	 * @param account
+	 * @return
+	 */
 	public AccessToken createConfirmAccountToken(Account account) {
 		return accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null);
 	}
 
 
+	/**
+	 * @param email
+	 * @param uriInfo
+	 */
 	public void createAndSendPasswordResetToken(String email, UriInfo uriInfo) {
 		if(Strings.isNullOrEmpty(email)) {
 			throw new ValidationException("No e-mail address provided.");
@@ -846,7 +944,7 @@ public class AccountController {
 	 * @param token
 	 * @param accountData
 	 */
-	public void resetPassword(String token, CompanyAccountDTO accountData) {
+	public void resetPassword(String token, BusinessAccountDTO accountData) {
 		checkArgument(!Strings.isNullOrEmpty(token), "token was null or empty");
 		checkNotNull(accountData, "accountData was null");
 		
@@ -871,5 +969,67 @@ public class AccountController {
 		List<Key<AccessToken>> authTokens = accessTokenRepo.getKeysForAccountAndType(account.getKey(), TokenType.AUTHENTICATION);
 		authTokens.add(accessToken.getKey());
 		accessTokenRepo.delete(authTokens);
+	}
+	
+	public Account removeActiveCheckIn(Account account) {
+		checkNotNull(account, "account was null");
+		
+		account.setActiveCheckIn(null);
+		accountRepo.saveOrUpdate(account);
+		return account;
+	}
+	
+	
+	/**
+	 * create and save a new Account entity with the supplied data and the "user" role.
+	 * 
+	 * @param accountData
+	 * @return
+	 */
+	public Account registerNewCustomerAccount(CustomerAccountDTO accountData) {
+		checkNotNull(accountData, "accountData was null");
+		
+		validator.validate(accountData, javax.validation.groups.Default.class, PasswordChecks.class);
+		checkEmailDoesNotExist(accountData.getEmail());
+		
+		if(!Strings.isNullOrEmpty(accountData.getLogin())) {
+			validator.validate(accountData, LoginNameChecks.class);
+			checkLoginDoesNotExist(accountData.getLogin());
+		}
+		
+		Account account = accountRepo.newEntity();
+		CustomerProfile profile = customerProfileRepo.newEntity();
+		
+		account.setActive(true);
+		account.setCreationDate(new Date());
+		account.setEmail(accountData.getEmail());
+		account.setNewEmail(accountData.getNewEmail());
+		account.setEmailConfirmed(false);
+		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		account.setCustomerProfile(customerProfileRepo.saveOrUpdate(profile));
+		account.setName(accountData.getName());
+		account.setLogin(accountData.getLogin());
+		account.setRole(Role.USER);
+		
+		boolean isCheckInSet = !Strings.isNullOrEmpty(accountData.getCheckInId());
+		CheckIn checkIn = null;
+		if(isCheckInSet) {
+			checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
+			if(checkIn == null) {
+				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+			}
+			else {
+				account.setActiveCheckIn(checkIn.getKey());
+			}
+		}
+		
+		Key<Account> accountKey = accountRepo.saveOrUpdate(account);
+		
+		if(checkIn != null) {
+			checkIn.setAccount(accountKey);
+			checkInRepo.saveOrUpdate(checkIn);
+		}
+				
+		return account;
 	}
 }

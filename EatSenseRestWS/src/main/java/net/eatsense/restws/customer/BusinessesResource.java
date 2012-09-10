@@ -11,6 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.HttpMethods;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
@@ -58,12 +59,13 @@ public class BusinessesResource{
 				throw new IllegalAccessException("Can not modified trashed resource.");
 			}
 		}
-		
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		
 		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class);
 		
 		
+		businessResource.setAccount(account);
 		businessResource.setBusiness(business);
 		businessResource.setCheckIn(checkIn);
 		

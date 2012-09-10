@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
+@Cached
 public class Area extends GenericEntity<Area> {
 	
 	private String name;

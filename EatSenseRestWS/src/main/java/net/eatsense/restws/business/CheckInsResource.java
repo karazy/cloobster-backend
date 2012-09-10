@@ -17,6 +17,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
+import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
 import com.google.inject.Inject;
@@ -48,6 +49,22 @@ public class CheckInsResource {
 	public Collection<CheckInStatusDTO> getCheckIns(@QueryParam("spotId") Long spotId) {
 		return checkInController.getCheckInStatusesBySpot(business, spotId);	
 	}
+	
+	
+	/**
+	 * @param areaId
+	 * @param start Offset for pagination.
+	 * @param limit Limit per query for pagination.
+	 * @return List of past completed check ins with bill and spot data.
+	 */
+	@GET
+	@Path("history")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public Collection<CheckInHistoryDTO> getCheckInHistory(@QueryParam("areaId") long areaId, @QueryParam("start") int start, @QueryParam("limit") int limit) {
+		return checkInController.getHistory(business.getKey(), areaId, start, limit);
+	}
+	
 	
 	@DELETE
 	@Path("{checkInId}")

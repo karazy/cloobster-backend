@@ -1,21 +1,16 @@
 package net.eatsense.representation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.apache.bval.constraints.Email;
-
-import com.googlecode.objectify.Key;
-
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
-import net.eatsense.validation.BusinessAdminChecks;
 import net.eatsense.validation.CockpitUserChecks;
+import net.eatsense.validation.EmailChecks;
 import net.eatsense.validation.LoginNameChecks;
+import net.eatsense.validation.PasswordChecks;
+
+import org.apache.bval.constraints.Email;
 
 public class AccountDTO {
 	/**
@@ -26,33 +21,29 @@ public class AccountDTO {
 	@Pattern(regexp = "^[a-z0-9_\\.-]+$",groups={CockpitUserChecks.class,LoginNameChecks.class})
 	private String login;
 	
-	@NotNull(groups={BusinessAdminChecks.class})
-	@Email(groups={BusinessAdminChecks.class})
+	/**
+	 * Only supplied during account creation of a new cockpit user.
+	 * Password pattern matches a password with at least one number or one unicode/symbolic and one alphabetical character.
+	 */
+	@Size(min = 6,groups={PasswordChecks.class})
+	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$",groups={PasswordChecks.class})
+	private String password;
+	
+	@NotNull(groups={EmailChecks.class})
+	@Email(groups={EmailChecks.class})
 	private String email;
 	private String newEmail;
 	private boolean emailConfirmed;
 	private String role;
 	
-	private Long companyId;
 	private Long id;
 	private String name;
-	private String phone;
 	private String accessToken;
 	
-	private List<Long> businessIds;
-
-		
 	public AccountDTO() {
 		super();
-		
-		businessIds = new ArrayList<Long>();
 	}
 	
-	/**
-	 * Construct a new AccountDTO from the given Account entity.
-	 * 
-	 * @param account
-	 */
 	public AccountDTO(Account account) {
 		this();
 		if(account == null)
@@ -62,21 +53,10 @@ public class AccountDTO {
 		this.login = account.getLogin();
 		this.email = account.getEmail();
 		this.newEmail = account.getNewEmail();
-		this.setName(account.getName());
-		this.setPhone(account.getPhone());
-		
+		this.name = account.getName();
 		this.role = account.getRole();
 		this.emailConfirmed = account.isEmailConfirmed();
-		if(account.getCompany() != null)
-			this.companyId = account.getCompany().getId();
-		
-		if(account.getBusinesses()!=null) {
-			for (Key<Business> businessKey : account.getBusinesses()) {
-				businessIds.add(businessKey.getId());
-			}
-		}
 	}
-	
 	public String getLogin() {
 		return login;
 	}
@@ -89,73 +69,48 @@ public class AccountDTO {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	public String getNewEmail() {
+		return newEmail;
+	}
+	public void setNewEmail(String newEmail) {
+		this.newEmail = newEmail;
+	}
+	public boolean isEmailConfirmed() {
+		return emailConfirmed;
+	}
+	public void setEmailConfirmed(boolean emailConfirmed) {
+		this.emailConfirmed = emailConfirmed;
+	}
 	public String getRole() {
 		return role;
 	}
 	public void setRole(String role) {
 		this.role = role;
 	}
-
-	public Long getCompanyId() {
-		return companyId;
-	}
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
-
 	public Long getId() {
 		return id;
 	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public List<Long> getBusinessIds() {
-		return businessIds;
-	}
-
-	public void setBusinessIds(List<Long> businessIds) {
-		this.businessIds = businessIds;
-	}
-
 	public String getAccessToken() {
 		return accessToken;
 	}
-
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
 	}
 
-	public boolean isEmailConfirmed() {
-		return emailConfirmed;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setEmailConfirmed(boolean emailConfirmed) {
-		this.emailConfirmed = emailConfirmed;
-	}
-
-	public String getNewEmail() {
-		return newEmail;
-	}
-
-	public void setNewEmail(String newEmail) {
-		this.newEmail = newEmail;
-	}
+	public void setPassword(String password) {
+		this.password = password;
+	}	
 }

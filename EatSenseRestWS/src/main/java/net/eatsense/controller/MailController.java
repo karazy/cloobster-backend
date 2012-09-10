@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.auth.AccessTokenRepository;
+import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
@@ -95,6 +96,7 @@ public class MailController {
 		applyTextAndSubject(mail, text);
 		
 		Transport.send(mail);
+		
 		return mail;
 	}
 
@@ -131,6 +133,12 @@ public class MailController {
 	public void sendRegistrationConfirmationMail(NewAccountEvent event) {
 		Account account = event.getAccount();
 		UriInfo uriInfo = event.getUriInfo();
+		
+		if(account.getRole().equals(Role.USER)) {
+			sendCustomerAccountEmailConfirmation(account, uriInfo);
+			return;
+		}
+		
 		
 		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
 		
@@ -240,6 +248,23 @@ public class MailController {
 		try {
 			// Send e-mail with password reset link.
 			sendMail(account.getEmail(), text);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
+		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		
+		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
+		
+		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmUrl);
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(account.getEmail(), confirmationText);
 		} catch (AddressException e) {
 			logger.error("Error with e-mail address",e);
 		} catch (MessagingException e) {

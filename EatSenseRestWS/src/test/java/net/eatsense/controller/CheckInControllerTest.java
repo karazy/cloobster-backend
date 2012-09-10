@@ -32,11 +32,16 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -63,6 +68,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CheckInControllerTest {
@@ -100,16 +106,21 @@ public class CheckInControllerTest {
 	private OrderChoiceRepository orderChoiceRepo;
 	@Mock
 	private AreaRepository areaRepo;
+	
 	@Mock
 	private Area area;
 	@Mock
 	private Key<Area> areaKey;
+	@Mock
+	private AccountRepository accountRepo;
+	@Mock
+	private BillRepository billRepo;
 
 	@Before
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo, billRepo);
 	}
 
 	@After
@@ -173,7 +184,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCreateCheckInUnknownBarcode() {
-		thrown.expect(IllegalArgumentException.class);
+		thrown.expect(ValidationException.class);
 		String spotId = "b4rc0de";
 		
 		when(business.getKey()).thenReturn( businessKey);
@@ -477,7 +488,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCheckOutCheckInStatusOrderPlaced() throws Exception {
-		thrown.expect(CheckInFailureException.class);
+		thrown.expect(IllegalAccessException.class);
 		thrown.expectMessage("invalid status");
 		
 		CheckIn checkIn = mock(CheckIn.class);
@@ -492,7 +503,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCheckOutCheckInStatusPaymentRequest() throws Exception {
-		thrown.expect(CheckInFailureException.class);
+		thrown.expect(IllegalAccessException.class);
 		thrown.expectMessage("invalid status");
 		
 		CheckIn checkIn = mock(CheckIn.class);
@@ -540,6 +551,10 @@ public class CheckInControllerTest {
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		int activeCheckIns = 2;
 		when(checkInRepo.countActiveCheckInsAtSpot(spotKey)).thenReturn(activeCheckIns);
+		Query<Order> orderQuery = mock(Query.class);
+		when(orderRepo.queryForCheckInAndStatus(checkIn, OrderStatus.COMPLETE,
+								OrderStatus.INPROCESS, OrderStatus.PLACED,
+								OrderStatus.RECEIVED)).thenReturn(orderQuery );
 		
 		InOrder inOrder = inOrder(orderRepo);
 		

@@ -13,11 +13,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import org.apache.lucene.index.CheckIndex;
+
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.FeedbackController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -29,6 +32,7 @@ import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
 
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
@@ -37,6 +41,7 @@ public class BusinessResource {
 	private ResourceContext resourceContext;
 
 	private CheckIn checkIn;
+	private Account account;
 	
 	private Business business;
 	
@@ -55,6 +60,10 @@ public class BusinessResource {
 		this.orderCtrl = orderCtrl;
 		this.billCtrl = billCtrl;
 	}
+	
+	public void setAccount(Account account) {
+		this.account = account;
+	}	
 
 	public void setCheckIn(CheckIn checkIn) {
 		this.checkIn = checkIn;
@@ -113,10 +122,16 @@ public class BusinessResource {
 	@GET
 	@Path("orders")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.GUEST)
-	public Collection<OrderDTO> getOrders( @QueryParam("status") String status) {
-		Collection<OrderDTO> orders = orderCtrl.getOrdersAsDto(business, checkIn, status);
-		return orders;
+	@RolesAllowed({Role.GUEST, Role.USER})
+	public Collection<OrderDTO> getOrders( @QueryParam("status") String status, @QueryParam("checkInId") Long checkInId) {
+		if( account != null && checkInId != null && checkInId.longValue() != 0) {
+			return orderCtrl.getOrdersAsDtoForVisit(business, account, new Key<CheckIn>(CheckIn.class, checkInId), status);
+		}
+		else {
+			return orderCtrl.getOrdersAsDto(business, checkIn.getKey(), status);
+		}
+		
+		
 	}
 	
 	@Path("orders/{orderId}")
@@ -181,5 +196,6 @@ public class BusinessResource {
 		else {
 			throw new net.eatsense.exceptions.NotFoundException("unknown feedback id");
 		}
-	}	
+	}
+
 }

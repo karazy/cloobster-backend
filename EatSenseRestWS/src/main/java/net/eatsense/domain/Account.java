@@ -73,6 +73,11 @@ public class Account extends GenericEntity<Account> {
 	
 	private Date creationDate;
 	
+	private Key<CheckIn> activeCheckIn;
+	
+	@Unindexed
+	private Key<CustomerProfile> customerProfile;
+	
 	public String getFacebookUid() {
 		return facebookUid;
 	}
@@ -263,5 +268,24 @@ public class Account extends GenericEntity<Account> {
 
 	public void setNewEmail(String newEmail) {
 		this.newEmail = newEmail;
+	}
+
+	public Key<CheckIn> getActiveCheckIn() {
+		return activeCheckIn;
+	}
+
+	public void setActiveCheckIn(Key<CheckIn> activeCheckIn) {
+		if(!Objects.equal(this.activeCheckIn, activeCheckIn)) {
+			this.setDirty(true);
+			this.activeCheckIn = activeCheckIn;
+		}
+	}
+
+	public Key<CustomerProfile> getCustomerProfile() {
+		return customerProfile;
+	}
+
+	public void setCustomerProfile(Key<CustomerProfile> customerProfile) {
+		this.customerProfile = customerProfile;
 	}
 }

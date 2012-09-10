@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
@@ -24,6 +26,7 @@ import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
@@ -41,6 +44,7 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -63,27 +67,27 @@ import com.googlecode.objectify.Query;
  *
  */
 public class OrderController {
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final OrderRepository orderRepo;
+	private final ProductRepository productRepo;
+	private final OrderChoiceRepository orderChoiceRepo;
+	private final CheckInRepository checkInRepo;
+	private final ChoiceRepository choiceRepo;
+	private final Transformer transform;
+	private final RequestRepository requestRepo;
+	private final EventBus eventBus;
+	private final SpotRepository spotRepo;
 	
-	private OrderRepository orderRepo;
-	private ProductRepository productRepo;
-	private OrderChoiceRepository orderChoiceRepo;
 	private ValidationHelper validator;
-	private CheckInRepository checkInRepo;
-	private ChoiceRepository choiceRepo;
-	private Transformer transform;
-	private RequestRepository requestRepo;
-
-	private EventBus eventBus;
-	
 	@Inject
 	public OrderController(OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, BusinessRepository businessRepo,
 			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
 			RequestRepository rr, Transformer trans, ValidationHelper validator,
-			EventBus eventBus) {
+			EventBus eventBus, SpotRepository spotRepo) {
 		super();
+		this.spotRepo = spotRepo;
 		this.eventBus = eventBus;
 		this.validator = validator;
 		this.requestRepo = rr;
@@ -325,16 +329,15 @@ public class OrderController {
 	 * Get orders saved for the given checkin and filter by status if set.
 	 * 
 	 * @param business
-	 * @param checkIn
+	 * @param checkInKey
 	 * @param status 
 	 * @return
 	 */
-	public List<Order> getOrdersByCheckInOrStatus(Business business, CheckIn checkIn, String status) {
+	public Iterable<Order> getOrdersByCheckInOrStatus(Business business, Key<CheckIn> checkInKey, String status) {
 		//Return empty list if we have no checkin
-		if(checkIn == null ||checkIn.getId() == null)
+		if(checkInKey == null)
 			return new ArrayList<Order>();
-		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business);
-		query = query.filter("checkIn", checkIn.getKey()); 
+		Query<Order> query = orderRepo.query().ancestor(business).filter("checkIn", checkInKey); 
 		
 		if(status != null && !status.isEmpty()) {
 			// Filter by status if set.
@@ -345,7 +348,7 @@ public class OrderController {
 			query.filter("status in", EnumSet.of(OrderStatus.PLACED, OrderStatus.RECEIVED));
 		}
 		
-		return query.list();
+		return query;
 	}
 	
 	/**
@@ -356,8 +359,30 @@ public class OrderController {
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDto(Business business, CheckIn checkIn, String status) {
-		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkIn, status));
+	public Collection<OrderDTO> getOrdersAsDto(Business business, Key<CheckIn> checkInKey, String status) {
+		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkInKey, status));
+	}
+	
+	/**
+	 * @param business
+	 * @param account
+	 * @param checkInKey
+	 * @param status
+	 * @return
+	 */
+	public Collection<OrderDTO> getOrdersAsDtoForVisit(Business business, Account account, Key<CheckIn> checkInKey, String status) {
+		CheckIn checkIn;
+		try {
+			checkIn = checkInRepo.getByKey(checkInKey);
+		} catch (NotFoundException e) {
+			// No checkIn found return empty orders.
+			return Collections.emptyList();
+		}
+		if(checkIn.getAccount().getId() != account.getId().longValue()) {
+			// Not allowed to read checkins of different account.
+			return Collections.emptyList();
+		}
+		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkInKey, status));
 	}
 	
 	/**
@@ -368,7 +393,7 @@ public class OrderController {
 	 * @param checkInId filter by checkin if not null
 	 * @return list of the orders found
 	 */
-	public List<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
+	public Iterable<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business)
 				.filter("status !=", OrderStatus.CART.toString());
 		
@@ -376,7 +401,7 @@ public class OrderController {
 			query = query.filter("checkIn", CheckIn.getKey(checkInId));
 		}
 
-		return query.list();
+		return query;
 	}
 	
 	public Collection<OrderDTO> getOrdersBySpotAsDto(Business business, Long spotId, Long checkInId) {
@@ -480,6 +505,10 @@ public class OrderController {
 		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
 		checkArgument(checkIn.getStatus() == CheckInStatus.CHECKEDIN ||
 				checkIn.getStatus() == CheckInStatus.ORDER_PLACED, "" );
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot == null) {
+			throw new OrderFailureException("Unable to find Spot for this CheckIn.");
+		}
 		
 		List<Order> orders = orderRepo.query().ancestor(checkIn.getBusiness())
 				.filter("checkIn", checkIn.getKey())
@@ -501,13 +530,8 @@ public class OrderController {
 		for (Order order : orders) {
 			order.setStatus(OrderStatus.PLACED);
 			
-			Request request = new Request();
-			request.setCheckIn(checkIn.getKey());
-			request.setBusiness(checkIn.getBusiness());
-			request.setObjectId(order.getId());
-			request.setType(RequestType.ORDER);
-			request.setReceivedTime(new Date());
-			request.setSpot(checkIn.getSpot());
+			Request request = new Request(checkIn, spot, order);
+			request.setObjectText(order.getProductName());
 			request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 			
 			requests.add(request);
@@ -593,10 +617,14 @@ public class OrderController {
 			}
 		}
 		
-		//Validate the order entity.		
+		//Validate the order entity.
 		Set<ConstraintViolation<Order>> violations = validator.validate(order);
 		//Check that we have no violations.
 		if(violations.isEmpty()) {
+			Spot spot = spotRepo.getByKey(checkIn.getSpot());
+			if(spot == null) {
+				throw new OrderFailureException("Unable to find Spot for CheckIn.");
+			}
 			// save order
 			orderRepo.saveOrUpdate(order);
 			
@@ -612,26 +640,20 @@ public class OrderController {
 					updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED);
 				}
 				
-				Request request = new Request();
-				request.setCheckIn(checkIn.getKey());
-				request.setBusiness(business.getKey());
-				request.setObjectId(order.getId());
-				request.setType(RequestType.ORDER);
-				request.setReceivedTime(new Date());
-				request.setSpot(checkIn.getSpot());
+				Request request = new Request(checkIn, spot, order);
+				request.setObjectText(order.getProductName());
 				request.setStatus(CheckInStatus.ORDER_PLACED.toString());
 				requestRepo.saveOrUpdate(request);
 				
 				Key<Request> oldestRequest = requestRepo.ofy().query(Request.class).filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 				// If we have no older request in the database or the new request is the oldest...
-				if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+				if( oldestRequest == null || oldestRequest.getId() == request.getId().longValue() ) {
 					updateEvent.setNewSpotStatus(request.getStatus());
 				}
 
 				eventBus.post(updateEvent);
 			}
 		}
-		
 
 		return orderData;
 	}

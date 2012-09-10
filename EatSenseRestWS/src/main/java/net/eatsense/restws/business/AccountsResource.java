@@ -27,8 +27,7 @@ import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.representation.AccountDTO;
-import net.eatsense.representation.CompanyAccountDTO;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.RegistrationDTO;
 
 import org.slf4j.Logger;
@@ -66,7 +65,7 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public RegistrationDTO registerAccount(RegistrationDTO accountData) {
-		Account newAccount = accountCtr.registerNewAccount(accountData);
+		Account newAccount = accountCtr.registerNewCompanyAccount(accountData);
 		eventBus.post(new NewAccountEvent(newAccount, uriInfo));
 		return accountData;
 	}
@@ -79,13 +78,13 @@ public class AccountsResource {
 	@Path("{accountId}")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public AccountDTO getAccountProfile(@PathParam("accountId") Long accountId) {
+	public BusinessAccountDTO getAccountProfile(@PathParam("accountId") Long accountId) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only read own account.");
 		}
 		
-		return new AccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	/**
@@ -98,7 +97,7 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public AccountDTO updateAccountProfile(@PathParam("accountId") Long accountId, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO updateAccountProfile(@PathParam("accountId") Long accountId, BusinessAccountDTO accountData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only update the authenticated account.");
@@ -116,7 +115,7 @@ public class AccountsResource {
 		if(account.getNewEmail() != null && !Objects.equal(previousNewEmail, account.getNewEmail()) ) {
 			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
 		}
-		return new AccountDTO(updateAccount);
+		return new BusinessAccountDTO(updateAccount);
 	}
 	
 	/**
@@ -128,7 +127,7 @@ public class AccountsResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.COMPANYOWNER)
-	public List<AccountDTO> getAccounts(@QueryParam("email") String email) {
+	public List<BusinessAccountDTO> getAccounts(@QueryParam("email") String email) {
 		return accountCtr.getAccountsByEmail(email);
 	}
 	
@@ -136,21 +135,21 @@ public class AccountsResource {
 	@Path("email-confirmation/{accessToken}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public AccountDTO confirmNewEmail(@PathParam("accessToken") String accessToken) {
+	public BusinessAccountDTO confirmNewEmail(@PathParam("accessToken") String accessToken) {
 		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
 		AccessToken token = accessTokenRepository.get(accessToken);
 		
 		Account account = accountCtr.confirmAccountEmail(token.getAccount());
 		accessTokenRepository.delete(token);
 		
-		return new AccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	@PUT
 	@Path("confirmation/{accessToken}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public AccountDTO confirmEmail(@PathParam("accessToken") String accessToken) {
+	public BusinessAccountDTO confirmEmail(@PathParam("accessToken") String accessToken) {
 		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
 		AccessToken token = accessTokenRepository.get(accessToken);
 		
@@ -158,21 +157,21 @@ public class AccountsResource {
 		accessTokenRepository.delete(token);
 		
 		eventBus.post(new ConfirmedAccountEvent(account));
-		return new AccountDTO(account);
+		return new BusinessAccountDTO(account);
 	}
 	
 	@PUT
 	@Path("setup/{accessToken}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public AccountDTO setupAccount(@PathParam("accessToken") String accessToken, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO setupAccount(@PathParam("accessToken") String accessToken, BusinessAccountDTO accountData) {
 		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
 		AccessToken token = accessTokenRepository.get(accessToken);
 		
 		if(token.getType() != TokenType.ACCOUNTSETUP) {
 			throw new IllegalAccessException("Invalid token.");
 		}
-		AccountDTO accountDto = accountCtr.setupAdminAccount(token.getAccount(), accountData);
+		BusinessAccountDTO accountDto = accountCtr.setupAdminAccount(token.getAccount(), accountData);
 		accessTokenRepository.delete(token);
 		return accountDto;
 	}

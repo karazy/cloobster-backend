@@ -28,11 +28,18 @@ public class AccessTokenRepository extends DAOBase {
 	 * @param accountKey
 	 * @return
 	 */
-	public AccessToken createAuthToken(Key<Account> accountKey) {
-		Calendar cal = Calendar.getInstance();
-		//TODO: Extract the number of hours an authentication token is valid to the web.xml config.
-        cal.add(Calendar.HOUR_OF_DAY, 120);
-        AccessToken token = new AccessToken(IdHelper.generateId(), TokenType.AUTHENTICATION, cal.getTime(), accountKey);
+	public AccessToken createAuthToken(Key<Account> accountKey, boolean isPermanent) {
+		Date expirationDate = null;
+		
+		if(!isPermanent) {
+			Calendar cal = Calendar.getInstance();
+			//TODO: Extract the number of hours an authentication token is valid to the web.xml config.
+		
+        	cal.add(Calendar.HOUR_OF_DAY, 120);
+        	expirationDate = cal.getTime();
+		}
+		
+		AccessToken token = new AccessToken(IdHelper.generateId(), TokenType.AUTHENTICATION, expirationDate, accountKey);
         ofy().put(token);
         return token;
 	}

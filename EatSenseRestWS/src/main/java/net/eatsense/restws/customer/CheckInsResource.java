@@ -1,12 +1,14 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -17,13 +19,17 @@ import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.HistoryStatusDTO;
+import net.eatsense.representation.VisitDTO;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
@@ -51,7 +57,8 @@ public class CheckInsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO createCheckIn(CheckInDTO checkIn) {
-		return checkInCtrl.createCheckIn(checkIn);
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		return checkInCtrl.createCheckIn(checkIn, Optional.fromNullable(account));
 		
 	}
 
@@ -61,6 +68,31 @@ public class CheckInsResource {
 	public Collection<User> getUsersAtSpot(@QueryParam("spotId") String spotBarcode, @QueryParam("checkInId") String checkInId) {
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		return checkInCtrl.getOtherUsersAtSpot(checkIn, spotBarcode);
+	}
+	
+	/**
+	 * Get previous visits for this account.
+	 * 
+	 * @param installId
+	 * @return Array of visit objects, containing check in , bill and business data.
+	 */
+	@GET
+	@Path("history")
+	@Produces("application/json; charset=UTF-8")
+	public List<VisitDTO> getVisits(@QueryParam("installId") String installId, @QueryParam("start") int start, @QueryParam("limit") int limit ) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		
+		return checkInCtrl.getVisits(Optional.fromNullable(account), installId , start, limit);
+	}
+	
+	@PUT
+	@Path("history/connect")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.USER)
+	public HistoryStatusDTO connectVisits(HistoryStatusDTO historyDTO, @QueryParam("installId") String installId) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		return checkInCtrl.connectVisits(account, historyDTO);
 	}
 	
 	@GET
@@ -86,7 +118,7 @@ public class CheckInsResource {
 		
 		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
 		checkInResource.setCheckIn(checkInFromPath);
-
+		checkInResource.setAccount((Account)servletRequest.getAttribute("net.eatsense.domain.Account"));
 		checkInResource.setAuthenticated(authenticated);
 		
 		return checkInResource;

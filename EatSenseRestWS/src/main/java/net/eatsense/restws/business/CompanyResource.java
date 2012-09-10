@@ -23,8 +23,7 @@ import net.eatsense.domain.Company;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
-import net.eatsense.representation.AccountDTO;
-import net.eatsense.representation.CompanyAccountDTO;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.ImageDTO;
 
@@ -102,7 +101,7 @@ public class CompanyResource {
 	@Path("accounts")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public List<AccountDTO> getAccounts(@QueryParam("role")String role) {
+	public List<BusinessAccountDTO> getAccounts(@QueryParam("role")String role) {
 		return accountCtrl.getCompanyAccounts(account, company.getKey(), role);
 	}
 	
@@ -117,10 +116,10 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public AccountDTO createUserAccount(CompanyAccountDTO accountData, @Context UriInfo uriInfo) {
+	public BusinessAccountDTO createUserAccount(BusinessAccountDTO accountData, @Context UriInfo uriInfo) {
 		
 		if(Role.COCKPITUSER.equals(accountData.getRole())) {
-			return accountCtrl.createUserAccount(account, accountData);
+			return accountCtrl.createCockpitUserAccount(account, accountData);
 		}
 		else if(Role.BUSINESSADMIN.equals(accountData.getRole())) {
 			if(!account.getRole().equals(Role.COMPANYOWNER)) {
@@ -130,7 +129,7 @@ public class CompanyResource {
 			
 			eventBus.post(new NewCompanyAccountEvent(newAccount, uriInfo, account));
 			
-			return new AccountDTO(newAccount);
+			return new BusinessAccountDTO(newAccount);
 		}
 		else {
 			throw new ValidationException("Invalid role specified: "+ accountData.getRole());
@@ -149,7 +148,7 @@ public class CompanyResource {
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COMPANYOWNER, Role.BUSINESSADMIN})
-	public AccountDTO updateUserAccount(@PathParam("accountId") long accountId, CompanyAccountDTO accountData) {
+	public BusinessAccountDTO updateUserAccount(@PathParam("accountId") long accountId, BusinessAccountDTO accountData) {
 		if(!authorized) {
 			throw new IllegalAccessException();
 		}

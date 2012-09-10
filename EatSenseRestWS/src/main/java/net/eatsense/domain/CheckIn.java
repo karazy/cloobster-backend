@@ -60,9 +60,9 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	private Date checkInTime;
 	
 	/**
-	 * The unique Id of the phone. Primarily used to block users
+	 * The unique Id of the cloobster installation on a phone. Primarily used to block users
 	 * who try to abuse the service by issuing orders they don't
-	 * pay or need.
+	 * pay or need, also for anonymous history creation.
 	 */
 	private String deviceId;
 	
@@ -78,6 +78,8 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	@NotNull
 	private Key<Spot> spot;
 	
+	private Key<Area> area;
+	
 	/**
 	 * Links to saved Feedback entity if given.
 	 */
@@ -86,6 +88,8 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	private boolean archived = false;
 	
 	private String channelId;
+	
+	private Key<Account> account;
 
 	public String getUserId() {
 		return userId;
@@ -183,6 +187,22 @@ public class CheckIn extends GenericEntity<CheckIn>{
 
 	public void setFeedback(Key<Feedback> feedback) {
 		this.feedback = feedback;
+	}
+
+	public Key<Account> getAccount() {
+		return account;
+	}
+
+	public void setAccount(Key<Account> account) {
+		this.account = account;
+	}
+
+	public Key<Area> getArea() {
+		return area;
+	}
+
+	public void setArea(Key<Area> area) {
+		this.area = area;
 	}
 	
 	

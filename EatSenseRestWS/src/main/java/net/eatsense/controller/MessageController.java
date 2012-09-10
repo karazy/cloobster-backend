@@ -22,7 +22,7 @@ import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
@@ -119,7 +119,7 @@ public class MessageController {
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		
-		CustomerRequestDTO requestData =  new CustomerRequestDTO(event.getRequest());
+		RequestDTO requestData =  new RequestDTO(event.getRequest());
 		
 		messages.add(new MessageDTO("request", "delete", requestData));
 		
@@ -152,7 +152,7 @@ public class MessageController {
 		spotData.setStatus(event.getRequest().getStatus());
 				
 		messages.add(new MessageDTO("spot", "update", spotData));
-		messages.add(new MessageDTO("request", "new", new CustomerRequestDTO(event.getRequest()) ));
+		messages.add(new MessageDTO("request", "new", new RequestDTO(event.getRequest()) ));
 		
 		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
