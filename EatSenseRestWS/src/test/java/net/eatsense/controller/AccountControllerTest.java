@@ -292,6 +292,7 @@ public class AccountControllerTest {
 	public void testIsAccountInRoleUserAsCompanyowner() throws Exception {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("companyowner");
+		when(account.isActive()).thenReturn(true);
 				
 		assertThat(ctr.isAccountInRole(account, "user"), is(true));
 	}
@@ -316,6 +317,7 @@ public class AccountControllerTest {
 	public void testIsAccountInRoleCompanyownerAsCompanyowner() throws Exception {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("companyowner");
+		when(account.isActive()).thenReturn(true);
 		
 		assertThat(ctr.isAccountInRole(account, "companyowner"), is(true));
 	}
@@ -324,6 +326,7 @@ public class AccountControllerTest {
 	public void testIsAccountInRoleCockpituserAsCockpituser() throws Exception {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("cockpituser");
+		when(account.isActive()).thenReturn(true);
 		
 		assertThat(ctr.isAccountInRole(account, "cockpituser"), is(true));
 	}
@@ -356,6 +359,7 @@ public class AccountControllerTest {
 	public void testIsAccountInRoleBusinessadminAsBusinessadmin() throws Exception {
 		account = mock(Account.class);
 		when(account.getRole()).thenReturn("businessadmin");
+		when(account.isActive()).thenReturn(true);
 		
 		assertThat(ctr.isAccountInRole(account, "businessadmin"), is(true));
 	}
