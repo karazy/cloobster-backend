@@ -8,6 +8,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import com.google.inject.Inject;
+
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ProfileController;
 import net.eatsense.domain.Account;
@@ -22,6 +24,7 @@ public class ProfilesResource {
 	private final ProfileController profileCtrl;
 	private final Account account;
 	
+	@Inject
 	public ProfilesResource(HttpServletRequest servletRequest,
 			ProfileController profileCtrl) {
 		super();
