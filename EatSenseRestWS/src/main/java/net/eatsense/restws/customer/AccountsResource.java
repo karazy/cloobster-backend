@@ -143,18 +143,6 @@ public class AccountsResource {
 		return accountDto;
 	}
 	
-	@PUT
-	@Path("{accountId}/profile")
-	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public CustomerProfileDTO updateProfile(@PathParam("accountId") Long accountId, CustomerProfileDTO profileData) {
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		if(!account.getId().equals(accountId)) {
-			throw new IllegalAccessException("Can only update the authenticated account's profile.");
-		}
-		
-		return new CustomerProfileDTO( profileCtrlProvider.get().updateCustomerProfile(account.getCustomerProfile(), profileData));
-	}
-	
 	@GET
 	@Path("{accountId}")
 	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})

@@ -23,6 +23,7 @@ import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
 import net.eatsense.restws.business.CompaniesResource;
 import net.eatsense.restws.customer.CheckInsResource;
+import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
@@ -94,9 +95,11 @@ public class EatSenseGuiceServletContextListener extends
 						bind(DownloadResource.class);
 						bind(CompaniesResource.class);
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
+						bind(ProfilesResource.class);
 						
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*c/accounts(.)*",
+						serveRegex("(.)*c/profiles(.)*",
+								"(.)*c/accounts(.)*",
 								"(.)*b/companies(.)*",
 								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",

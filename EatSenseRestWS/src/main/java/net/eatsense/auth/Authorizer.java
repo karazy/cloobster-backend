@@ -57,19 +57,19 @@ public final class Authorizer implements SecurityContext {
     	this.token = token;
     	 
     	this.account = account;
-		
+    	
 		for (Iterator<PathSegment> iterator = uriInfo.getPathSegments(true).iterator(); iterator.hasNext();) {
 			PathSegment pathSegment = iterator.next();
-			if(pathSegment.getPath().equals("businesses") ) {
-				
-					if(iterator.hasNext()) {
-						try {
-							businessId = Long.valueOf(iterator.next().getPath());
-							break;
-						} catch (NumberFormatException e) {
-							logger.info("Invalid businessId specified.");
-						}
-					}
+			if(pathSegment.getPath().equals("b") && iterator.hasNext()) {
+				pathSegment = iterator.next();
+			}
+			if(pathSegment.getPath().equals("businesses") && iterator.hasNext()) {
+				try {
+					businessId = Long.valueOf(iterator.next().getPath());
+					break;
+				} catch (NumberFormatException e) {
+					logger.warn("Could not parse businessId from path");
+				}
 			}
 		}
     	
@@ -96,23 +96,26 @@ public final class Authorizer implements SecurityContext {
      * @param role Role to be checked
      */
     public boolean isUserInRole(String role) {
-    	// guest role is for checkedin customers
+    	// Check for "guest" role, requires an active checkin (either anonymous or authenticated)
     	if( role.equals(Role.GUEST) && ( ( checkIn != null && checkIn.getUserId() != null ) ||
     										account.getActiveCheckIn() != null ) )
     		return true;
     	
+    	// Check for "user" role, requires an active account.
     	if( role.equals(Role.USER) && (accountController.isAccountInRole(account, role))) {
     		return true;
     	}
     	
+		// Check for all other roles( "cockpituser", "businessadmin" and
+		// "companyowner").
+		// We include the check for businessId here because access to a business
+		// requires further permission.
     	if(accountController.isAccountInRole(account, role)) {
     		if( businessId == null || businessId == 0)
     			return true;
     		else 
     			return accountController.isAccountManagingBusiness(account, businessId);
     	}
-    	
-    	logger.warn("Account({}) not in role: {}", account.getId(), role);
     	
         return false;
     }
