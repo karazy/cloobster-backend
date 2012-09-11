@@ -3,6 +3,7 @@ package net.eatsense.restws.customer;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -96,11 +97,13 @@ public class AccountsResource {
 	public CustomerAccountDTO updateAccount(@PathParam("accountId") Long accountId, CustomerAccountDTO accountData, @Context UriInfo uriInfo) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		
 		if(!account.getId().equals(accountId)) {
 			throw new IllegalAccessException("Can only update the authenticated account.");
 		}
 		
-		if(!Strings.isNullOrEmpty(accountData.getPassword())) {
+		if(!Strings.isNullOrEmpty(accountData.getPassword()) || !accountData.getEmail().equals(account.getEmail())) {
+			// User tries to change e-mail or password.
 			if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
 				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
 			}
@@ -150,6 +153,19 @@ public class AccountsResource {
 		}
 		
 		return new CustomerProfileDTO( profileCtrlProvider.get().updateCustomerProfile(account.getCustomerProfile(), profileData));
+	}
+	
+	@GET
+	@Path("{accountId}")
+	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public CustomerAccountDTO getAccount(@PathParam("accountId") Long accountId) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		
+		if(!account.getId().equals(accountId)) {
+			throw new IllegalAccessException("Tried to load wrong account!");
+		}
+		
+		return new CustomerAccountDTO(account, null);
 	}
 	
 	@PUT

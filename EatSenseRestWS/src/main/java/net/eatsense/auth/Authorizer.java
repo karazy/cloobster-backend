@@ -17,7 +17,7 @@ import net.eatsense.domain.CheckIn;
 /**
  * <p>SecurityContext used to perform authorization checks.</p>
  */
-public class Authorizer implements SecurityContext {
+public final class Authorizer implements SecurityContext {
 	public static final String TOKEN_AUTH = "TOKEN";
 	private final String authScheme;
 	private final CheckIn checkIn;
@@ -44,7 +44,7 @@ public class Authorizer implements SecurityContext {
         };
     }
     
-    protected Authorizer(AccountController accountController, UriInfo uriInfo, final Account account, final AccessToken token) {
+    protected Authorizer(final AccountController accountController,final UriInfo uriInfo, final Account account, final AccessToken token) {
     	this.accountController = accountController;
     	this.uriInfo = uriInfo;
 		this.checkIn = null;
