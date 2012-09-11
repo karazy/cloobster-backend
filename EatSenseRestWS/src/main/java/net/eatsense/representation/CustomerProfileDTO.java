@@ -15,6 +15,7 @@ public class CustomerProfileDTO {
 		if(profile == null)
 			return;
 		
+		id = profile.getId();
 		nickname = profile.getNickname();
 	}
 
