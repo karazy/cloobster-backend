@@ -100,13 +100,19 @@ public final class Authorizer implements SecurityContext {
     	if( role.equals(Role.GUEST) && ( ( checkIn != null && checkIn.getUserId() != null ) ||
     										account.getActiveCheckIn() != null ) )
     		return true;
-   	
+    	
+    	if( role.equals(Role.USER) && (accountController.isAccountInRole(account, role))) {
+    		return true;
+    	}
+    	
     	if(accountController.isAccountInRole(account, role)) {
     		if( businessId == null || businessId == 0)
     			return true;
     		else 
     			return accountController.isAccountManagingBusiness(account, businessId);
     	}
+    	
+    	logger.warn("Account({}) not in role: {}", account.getId(), role);
     	
         return false;
     }

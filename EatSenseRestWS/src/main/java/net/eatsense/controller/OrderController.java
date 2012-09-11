@@ -380,6 +380,7 @@ public class OrderController {
 		}
 		if(checkIn.getAccount().getId() != account.getId().longValue()) {
 			// Not allowed to read checkins of different account.
+			logger.info("Tried to access checkIn of different account.");
 			return Collections.emptyList();
 		}
 		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkInKey, status));

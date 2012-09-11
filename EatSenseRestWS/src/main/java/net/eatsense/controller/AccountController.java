@@ -118,7 +118,7 @@ public class AccountController {
 					return true;
 			}
 		}
-		
+		logger.warn("Account has no right for business with id {}.", businessId);
 		return false;
 	}
 	
