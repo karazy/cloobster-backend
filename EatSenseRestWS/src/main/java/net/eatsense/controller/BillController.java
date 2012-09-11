@@ -150,6 +150,10 @@ public class BillController {
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);
 		checkInRepo.saveOrUpdate(checkIn);
+		
+		if(checkIn.getAccount() != null) {
+			//TODO 
+		}
 		// Get all pending requests sorted by oldest first.
 		List<Request> requests = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 
