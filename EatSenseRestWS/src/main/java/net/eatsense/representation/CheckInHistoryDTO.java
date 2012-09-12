@@ -51,7 +51,6 @@ public class CheckInHistoryDTO {
 			spotName = spot.getName();
 		}
 	}
-
 	
 	public Long getCheckInId() {
 		return checkInId;
