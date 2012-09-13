@@ -260,7 +260,7 @@ public class MailController {
 		
 		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
 		
-		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", account.getName(), confirmUrl);
+		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", confirmUrl);
 		
 		try {
 			// Send e-mail with password reset link.

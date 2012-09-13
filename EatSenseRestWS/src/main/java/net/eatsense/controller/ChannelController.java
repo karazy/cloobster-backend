@@ -290,7 +290,7 @@ public class ChannelController {
 	 */
 	public String checkOnlineStatus(long businessId, String clientId) {
 		boolean connected = false;
-		logger.debug("recieved online check from clientId:" + clientId);
+		logger.info("recieved online check from clientId:" + clientId);
 
 		Business business;
 		try {
@@ -299,8 +299,9 @@ public class ChannelController {
 			logger.warn("Unknown businessId");
 			business = null;
 		}
+		clientId = buildCockpitClientId(businessId, clientId);
 		
-		connected = !(business == null || !business.getChannels().contains( Channel.fromClientId(clientId)));
+		connected = (business != null && business.getChannels().contains( Channel.fromClientId(clientId)));
 
 		if(connected) {
 			sendMessage(clientId, new MessageDTO("channel","connected", null));
@@ -317,7 +318,7 @@ public class ChannelController {
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 
-		connected = !(checkIn == null || checkIn.getChannelId() == null);
+		connected = (checkIn != null && checkIn.getChannelId() != null);
 		
 		if(connected) {
 			sendMessage(checkIn.getChannelId(), new MessageDTO("channel","connected", null));
