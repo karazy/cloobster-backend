@@ -3,11 +3,11 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -16,7 +16,6 @@ import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -25,9 +24,9 @@ import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -64,13 +63,15 @@ public class BillController {
 	private final Transformer transform;
 	private final EventBus eventBus;
 	private final SpotRepository spotRepo;
+	private final AccountRepository accountRepo;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo) {
+			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo) {
 		super();
+		this.accountRepo = accountRepo;
 		this.spotRepo = spotRepo;
 		this.eventBus = eventBus;
 		this.transform = transformer;
@@ -150,6 +151,19 @@ public class BillController {
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);
 		checkInRepo.saveOrUpdate(checkIn);
+		
+		if(checkIn.getAccount() != null) {
+			Account account = null;
+			try {
+				account = accountRepo.getByKey(checkIn.getAccount());
+			} catch (NotFoundException e) {
+				logger.warn("Could not find associated Account for CheckIn({}).",checkIn.getId());
+			}
+			if( account != null && (account.getActiveCheckIn().getId() == checkIn.getId().longValue())) {
+				account.setActiveCheckIn(null);
+				accountRepo.saveOrUpdate(account);
+			}
+		}
 		// Get all pending requests sorted by oldest first.
 		List<Request> requests = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 

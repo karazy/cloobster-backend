@@ -118,7 +118,7 @@ public class AccountController {
 					return true;
 			}
 		}
-		
+		logger.warn("Account({}) has no right to access Business({})",account.getId(), businessId);
 		return false;
 	}
 	
@@ -136,8 +136,11 @@ public class AccountController {
 		
 		if(account == null)
 			return false;
+		// Inactive accounts have no role.
+		if(!account.isActive())
+			return false;
 		
-		// grant the user role, if an account was authenticated
+		// grant the user role, if an account was authenticated and is active.
     	if(role.equals(Role.USER) && account.getId() != null) {
     		return true;
     	}

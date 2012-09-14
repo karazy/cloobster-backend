@@ -124,7 +124,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 						accountRepo.saveOrUpdate(account);
 					}
 				}
-				logger.info("Request authenticated success for user: "+account.getLogin());
+				logger.info("Request authenticated for Account({}), login: {}", account.getId(), account.getLogin());
 			}
 		}
 //		else if(requiredToken != null) {

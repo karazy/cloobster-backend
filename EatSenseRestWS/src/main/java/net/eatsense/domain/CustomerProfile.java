@@ -18,7 +18,7 @@ public class CustomerProfile extends GenericEntity<CustomerProfile> {
 
 	@Override
 	public Key<CustomerProfile> getKey() {
-		return new Key<CustomerProfile>(CustomerProfile.class, getId());
+		return getKey( getId());
 	}
 	
 	public String getNickname() {
@@ -31,5 +31,13 @@ public class CustomerProfile extends GenericEntity<CustomerProfile> {
 			this.nickname = nickname;
 		}
 	}
-
+	
+	
+	/**
+	 * @param id
+	 * @return
+	 */
+	public static Key<CustomerProfile> getKey(long id) {
+		return new Key<CustomerProfile>(CustomerProfile.class, id);
+	}
 }
