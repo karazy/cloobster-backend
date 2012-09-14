@@ -5,6 +5,11 @@
         <property name="checkInTime" direction="asc"/>
 	</datastore-index>
 	<datastore-index kind="CheckIn" ancestor="false" source="manual">
+        <property name="account" direction="asc"/>
+        <property name="status" direction="asc"/>
+        <property name="__key__" direction="desc"/>
+    </datastore-index>
+	<datastore-index kind="CheckIn" ancestor="false" source="manual">
         <property name="status" direction="asc"/>
         <property name="__key__" direction="desc"/>
     </datastore-index>
