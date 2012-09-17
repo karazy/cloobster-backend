@@ -873,7 +873,11 @@ public class AccountController {
 	 * @return {@link AccessToken} with {@link TokenType#ACCOUNTSETUP}
 	 */
 	public AccessToken createSetupAccountToken(Account account) {
-		return accessTokenRepo.create(TokenType.ACCOUNTSETUP, account.getKey(), null);
+		Calendar cal = Calendar.getInstance();
+		//TODO: Extract expiration date for account setup token.
+    	cal.add(Calendar.DAY_OF_MONTH, 7);
+		
+		return accessTokenRepo.create(TokenType.ACCOUNTSETUP, account.getKey(), cal.getTime());
 	}
 	
 	/**
@@ -916,10 +920,25 @@ public class AccountController {
 	 * @param account
 	 * @return
 	 */
-	public AccessToken createConfirmAccountToken(Account account) {
-		return accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null);
-	}
+	public AccessToken createEmailConfirmationToken(Account account) {
+		Calendar cal = Calendar.getInstance();
+		//TODO: Extract expiration date for confirm account token.
+    	cal.add(Calendar.YEAR, 1);
 
+		return accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), cal.getTime());
+	}
+	
+	/**
+	 * @param account
+	 * @return
+	 */
+	public AccessToken createPasswordResetToken(Account account) {
+		Calendar cal = Calendar.getInstance();
+		//TODO: Extract expiration date for confirm account token.
+    	cal.add(Calendar.DATE, 1);
+
+		return accessTokenRepo.create(TokenType.PASSWORD_RESET, account.getKey(), cal.getTime());
+	}
 
 	/**
 	 * @param email
