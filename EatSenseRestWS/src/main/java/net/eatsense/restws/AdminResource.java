@@ -105,17 +105,22 @@ public class AdminResource {
 					TextLine text = new TextLine(f1,"First appengine generated PDF!");
 				    text.setPosition(90, 30);
 				    text.drawOn(page);
+				    
+				    // Open image from web resources file.
 				    File f = new File("images/logo_cloobster_big.png");
-				   	InputStream in = new FileInputStream(f);
-				   	Spot spot = new Spot();
-				   	spot.setBarcode("tst001");
-				   	URL url = new URL(spot.getQrImageUrl());
-
-				    Image image = new Image(pdf, in, ImageType.PNG);				
+				   	InputStream in = new FileInputStream(f);				
+				    Image image = new Image(pdf, in, ImageType.PNG);
+				    image.scaleBy(0.5);
 				    image.drawOn(page);
+				    
+				    Spot spot = new Spot();
+				   	spot.setBarcode("tst001");
+				   	
 				    // Create url from url fetch stream.
+				    URL url = new URL(spot.getQrImageUrl());
 				    Image image2 = new Image(pdf, url.openStream(), ImageType.PNG);
-				    image2.setPosition(0, 500);
+				    image2.scaleBy(1.5);
+				    image2.setPosition(0, 300);
 				    image2.drawOn(page);
 				    
 				    pdf.flush();
