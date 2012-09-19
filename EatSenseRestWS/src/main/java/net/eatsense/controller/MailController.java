@@ -199,7 +199,7 @@ public class MailController {
 		String newEmail = event.getPreviousEmail().isPresent() ? account.getEmail() : account.getNewEmail();
 		
 		String text = templateCtrl.getAndReplace("account-confirm-email-update", name, setupUrl);
-		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", name, previousEmail);
+		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", name, newEmail);
 		
 
 		try {
