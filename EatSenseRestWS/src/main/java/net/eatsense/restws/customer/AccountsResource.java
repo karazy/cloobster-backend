@@ -115,7 +115,7 @@ public class AccountsResource {
 		Account updateAccount = accountCtrlProvider.get().updateCustomerAccount(account, accountData);
 		
 		if(!Objects.equal(previousEmail, account.getEmail()) ) {
-			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
+			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo, previousEmail));
 		}
 		return new CustomerAccountDTO(updateAccount, checkIn);
 	}
