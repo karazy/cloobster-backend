@@ -81,7 +81,10 @@ public class CheckInResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
 	public CheckInDTO getCheckIn() {
-		return checkInCtrlprovider.get().getCheckInDto(checkIn);
+		if(authenticated)
+			return checkInCtrlprovider.get().getCheckInDto(checkIn);
+		else
+			throw new IllegalAccessException("Unauthenticated checkin, or checkInId not valid.");
 	}
 	
 	@DELETE
