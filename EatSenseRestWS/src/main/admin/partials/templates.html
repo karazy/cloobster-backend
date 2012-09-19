@@ -3,13 +3,14 @@
 		<h1>Manage Templates <small>Import business complete with spots, menus and products.</small></h1>
 		<div class="row-fluid">
 			<div class="span12">
+				<p>
+					<button type="button" ng-click="initTemplates()" class="btn btn-primary btn-large">Init Templates</button>
+				</p>
 				<p ng-hide="templates.length == 0">
 					Select Template ...<br/>
 					<select ng-model="template" ng-options="(t.id) for t in templates"></select>
 				</p>
-				<p ng-show="templates.length == 0">
-					<button type="button" ng-click="initTemplates()" class="btn btn-primary btn-large">Init Templates</button>
-				</p>
+
 				<div ng-show="templates.length > 0">
 					<h2>Edit Template "{{template.id}}"</h2>
 					<form ng-submit="saveTemplate()" name="editTemplateForm">

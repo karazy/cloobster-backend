@@ -593,7 +593,7 @@ public class AccountController {
 			}
 		}		
 		
-		return updateAccount(account, accountData, false);
+		return updateAccount(account, accountData, true);
 	}
 	
 	/**
@@ -643,9 +643,11 @@ public class AccountController {
 				checkEmailDoesNotExist(accountData.getEmail());
 				if(!emailConfirmed) {
 					account.setNewEmail(accountData.getEmail());
+					
 				}
 				else {
 					account.setEmail(accountData.getEmail());
+					logger.info("Writing new e-mail address {}", account.getEmail());
 				}
 				
 				account.setEmailConfirmed(false);
