@@ -110,11 +110,11 @@ public class AccountsResource {
 				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
 			}
 		}
-		String previousNewEmail = account.getNewEmail();
+		String previousEmail = account.getEmail();
 		
 		Account updateAccount = accountCtrlProvider.get().updateCustomerAccount(account, accountData);
 		
-		if(account.getNewEmail() != null && !Objects.equal(previousNewEmail, account.getNewEmail()) ) {
+		if(!Objects.equal(previousEmail, account.getEmail()) ) {
 			eventBus.post(new UpdateAccountEmailEvent(account, uriInfo));
 		}
 		return new CustomerAccountDTO(updateAccount, checkIn);
