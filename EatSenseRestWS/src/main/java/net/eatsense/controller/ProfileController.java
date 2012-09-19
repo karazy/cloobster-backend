@@ -1,8 +1,11 @@
 package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CustomerProfile;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.representation.CustomerProfileDTO;
 
 import com.google.common.base.Optional;
@@ -13,10 +16,12 @@ import com.googlecode.objectify.NotFoundException;
 public class ProfileController {
 		
 	private final CustomerProfileRepository profileRepo;
+	private final AccountRepository accountRepo;
 	
 	@Inject
-	public ProfileController(CustomerProfileRepository profileRepo) {
+	public ProfileController(CustomerProfileRepository profileRepo, AccountRepository accountRepo) {
 		super();
+		this.accountRepo = accountRepo;
 		this.profileRepo = profileRepo;
 	}
 	
@@ -39,17 +44,19 @@ public class ProfileController {
 	 * @param profileData
 	 * @return
 	 */
-	public CustomerProfile createCustomerProfile(Optional<CustomerProfileDTO> profileData) {
+	public CustomerProfile createCustomerProfile(Account account, Optional<CustomerProfileDTO> profileData) {
 		CustomerProfile profile = profileRepo.newEntity();
 		
 		if(profileData.isPresent()) {
 			profile.setNickname(profileData.get().getNickname());
 		}
 		
-		profileRepo.saveOrUpdate(profile);
+		account.setCustomerProfile(profileRepo.saveOrUpdate(profile));
+		accountRepo.saveOrUpdate(account);
 		
 		return profile;
 	}
+	
 	
 	/**
 	 * Load the profile from the store and calls

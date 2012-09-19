@@ -40,17 +40,17 @@ public class MailController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Session session = Session.getDefaultInstance( new Properties(), null);
 	private final TemplateController templateCtrl;
-	private final AccessTokenRepository accessTokenRepo;
 	private final CompanyRepository companyRepo;
+	private final AccountController accountCtrl;
 	
 	public static final String FROM_ADDRESS = "info@karazy.net";
 	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
 	
 	@Inject
-	public MailController( TemplateController templateCtrl, AccessTokenRepository accessTokenRepository, CompanyRepository companyRepo) {
+	public MailController( TemplateController templateCtrl, CompanyRepository companyRepo, AccountController accountCtrl) {
 		super();
 		this.companyRepo = companyRepo;
-		this.accessTokenRepo = accessTokenRepository;
+		this.accountCtrl = accountCtrl;
 		this.templateCtrl = templateCtrl;
 	}
 	
@@ -140,7 +140,7 @@ public class MailController {
 		}
 		
 		
-		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
 		try {
 			String unsubcribeUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
@@ -157,7 +157,7 @@ public class MailController {
 		Account newAccount = event.getAccount();
 		Account ownerAccount = event.getOwnerAccount();
 		UriInfo uriInfo = event.getUriInfo();
-		String accessToken = accessTokenRepo.create(TokenType.ACCOUNTSETUP, newAccount.getKey(), null).getToken();
+		String accessToken = accountCtrl.createSetupAccountToken(newAccount).getToken();
 		
 		//TODO: Extract url strings as a config parameter.
 		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/setup/{token}").build(accessToken).toString();
@@ -188,7 +188,8 @@ public class MailController {
 	public void sendUpdateAccountEmailMessage(UpdateAccountEmailEvent event) {
 		Account account = event.getAccount();
 		UriInfo uriInfo = event.getUriInfo();
-		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
+		
 		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-email/{token}").build(accessToken).toString();
 		
 		String text = templateCtrl.getAndReplace("account-confirm-email-update", account.getName(), setupUrl);
@@ -240,7 +241,7 @@ public class MailController {
 		Account account = event.getAccount();
 		UriInfo uriInfo = event.getUriInfo();
 		//TODO: Add expiration time, and externalize to config file.
-		String accessToken = accessTokenRepo.create(TokenType.PASSWORD_RESET, account.getKey(), null).getToken();
+		String accessToken = accountCtrl.createPasswordResetToken(account).getToken();
 		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
 
 		String text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getName(), setupUrl);
@@ -256,11 +257,11 @@ public class MailController {
 	}
 	
 	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
-		String accessToken = accessTokenRepo.create(TokenType.EMAIL_CONFIRMATION, account.getKey(), null).getToken();
+		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
 		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
 		
-		String confirmationText = templateCtrl.getAndReplace("account-confirm-email", confirmUrl);
+		String confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);
 		
 		try {
 			// Send e-mail with password reset link.

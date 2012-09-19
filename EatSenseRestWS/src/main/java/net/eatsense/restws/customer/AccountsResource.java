@@ -21,6 +21,7 @@ import net.eatsense.controller.AccountController;
 import net.eatsense.controller.ProfileController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.CustomerProfile;
 import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -130,11 +132,16 @@ public class AccountsResource {
 		
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		AccountController accountCtrl = accountCtrlProvider.get();
+		
+		if(account.getCustomerProfile() == null) {
+			accountCtrl.addCustomerProfile(account);
+		}
 		
 		CustomerAccountDTO accountDto = new CustomerAccountDTO(account, checkIn);
 		AccessToken authToken;
 		
-		AccountController accountCtrl = accountCtrlProvider.get();
+		
 		authToken = accountCtrl.createCustomerAuthToken(account);
 		
 		logger.info("Permanent customer Token created");

@@ -251,32 +251,6 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>						
-					<plugin>
-						<groupId>com.google.code.maven-replacer-plugin</groupId>
-						<artifactId>maven-replacer-plugin</artifactId>
-						<version>1.4.0</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>replace</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<file>target/${project.build.finalName}/app/lib/karazy-config.js</file>
-							<replacements>
-								<replacement>
-									<token>(serviceUrl :) .*</token>
-									<value>$1 '',</value>
-								</replacement>
-								<replacement>
-									<token>(disableCaching :) .*</token>
-									<value>$1 true,</value>
-								</replacement>
-							</replacements>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -366,33 +340,6 @@
 							</execution>
 						</executions>
 					</plugin>						
-					<plugin>
-						<groupId>com.google.code.maven-replacer-plugin</groupId>
-						<artifactId>maven-replacer-plugin</artifactId>
-						<version>1.4.0</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>replace</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<file>target/${project.build.finalName}/app/lib/karazy-config.js</file>
-							<replacements>
-								<replacement>
-									<token>(serviceUrl :) .*</token>
-									<value>$1 '',</value>
-								</replacement>
-								<replacement>
-									<token>(disableCaching :) .*</token>
-									<value>$1 true,</value>
-								</replacement>
-							</replacements>
-						</configuration>
-					</plugin>
-					
 				</plugins>
 			</build>
 		</profile>

@@ -116,7 +116,8 @@ public class AdminResource {
 				"newsletter-email-registered", "account-confirmed",
 				"account-forgotpassword-email", "account-setup-email",
 				"account-notice-password-update",
-				"account-confirm-email-update", "account-notice-email-update");
+				"account-confirm-email-update", "account-notice-email-update",
+				"customer-account-confirm-email");
 	}
 	
 	@POST

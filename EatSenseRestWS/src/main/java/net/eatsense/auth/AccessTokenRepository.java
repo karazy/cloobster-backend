@@ -12,6 +12,7 @@ import com.google.inject.Singleton;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.Query;
 import com.googlecode.objectify.util.DAOBase;
 
 /**
@@ -102,5 +103,14 @@ public class AccessTokenRepository extends DAOBase {
 	 */
 	public void delete(AccessToken token) {
 		ofy().delete(token);
+	}
+	
+	/**
+	 * Start datatsore query.
+	 * 
+	 * @return Query object
+	 */
+	public Query<AccessToken> query() {
+		return ofy().query(AccessToken.class);
 	}
 }

@@ -1,46 +1,43 @@
 package net.eatsense.restws;
 
-import java.util.Calendar;
+import java.util.Date;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+
+import net.eatsense.auth.AccessToken;
+import net.eatsense.auth.AccessTokenRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.persistence.CheckInRepository;
+import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
 @Path("/cron")
 public class CronResource {
 	
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private CheckInRepository checkInRepo;
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final AccessTokenRepository accessTokenRepo;
 
 	@Inject
-	public CronResource(CheckInRepository cr) {
-		this.checkInRepo = cr;
-
+	public CronResource(AccessTokenRepository accessTokenRepo) {
+		this.accessTokenRepo = accessTokenRepo;
 	}
 	
 	/**
-	 * Removes checkin intents older than 10 minutes
+	 * Delete all expired access tokens from the datastore.
+	 * 
+	 * @return "OK" if done.
 	 */
 	@GET
-	@Path("cleanintents")
-	@Produces("text/plain")
-	public String cleanIntents() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.MINUTE, -10);			
-		logger.info("JOB: Cleaning old checkin intents ...");
+	@Path("cleantokens")
+	public String deleteExpiredTokens() {
+		QueryResultIterable<Key<AccessToken>> expiredTokens = this.accessTokenRepo.query().filter("expires <=", new Date()).fetchKeys();
 		
-		Iterable<Key<CheckIn>> checkins = checkInRepo.getOfy().query(CheckIn.class).filter("status", CheckInStatus.INTENT).filter("checkInTime <", calendar.getTime())
-				.fetchKeys();
+		accessTokenRepo.delete(expiredTokens);
 		
-		checkInRepo.getOfy().delete(checkins);
-		return "Deleted old intents";
+		return "OK";
 	}
 }
