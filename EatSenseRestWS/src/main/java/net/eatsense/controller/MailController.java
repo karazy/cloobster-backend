@@ -195,12 +195,13 @@ public class MailController {
 		
 		String name = Objects.firstNonNull(account.getName(), "Cloobster-Benutzer");
 		
-		String text = templateCtrl.getAndReplace("account-confirm-email-update", name, setupUrl);
-		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", name, account.getNewEmail());
-		
 		String previousEmail = event.getPreviousEmail().or(account.getEmail());
 		String newEmail = event.getPreviousEmail().isPresent() ? account.getEmail() : account.getNewEmail();
 		
+		String text = templateCtrl.getAndReplace("account-confirm-email-update", name, setupUrl);
+		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", name, previousEmail);
+		
+
 		try {
 			// Send e-mail asking for confirmation to new address.
 			sendMail(newEmail, text);
