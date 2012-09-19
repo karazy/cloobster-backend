@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.appengine.tools.development.DynamicLatencyAdjuster.Default;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -1053,5 +1054,29 @@ public class AccountController {
 		}
 				
 		return account;
+	}
+	
+	/**
+	 * @param account to link the profile with.
+	 * @return profile entity
+	 */
+	public CustomerProfile addCustomerProfile(Account account) {
+		checkNotNull(account, "account was null");
+		
+		if(account.getCustomerProfile() != null) {
+			logger.warn("Returning already existing profile for Account({})", account.getId());
+			try {
+				return customerProfileRepo.getByKey(account.getCustomerProfile());
+			} catch (NotFoundException e) {
+				logger.warn("Could not load profile for Account({}). Creating new profile.", account.getId());
+			}
+		}
+		
+		CustomerProfile profile = customerProfileRepo.newEntity();
+		
+		account.setCustomerProfile(customerProfileRepo.saveOrUpdate(profile));
+		accountRepo.saveOrUpdate(account);
+		
+		return profile;
 	}
 }
