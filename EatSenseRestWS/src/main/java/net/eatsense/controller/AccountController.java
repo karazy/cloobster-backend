@@ -593,7 +593,7 @@ public class AccountController {
 			}
 		}		
 		
-		return updateAccount(account, accountData, false);
+		return updateAccount(account, accountData, true);
 	}
 	
 	/**
