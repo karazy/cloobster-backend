@@ -159,7 +159,7 @@ public class BillController {
 			} catch (NotFoundException e) {
 				logger.warn("Could not find associated Account for CheckIn({}).",checkIn.getId());
 			}
-			if( account != null && (account.getActiveCheckIn().getId() == checkIn.getId().longValue())) {
+			if( account != null && account.getActiveCheckIn() != null && (account.getActiveCheckIn().getId() == checkIn.getId().longValue())) {
 				account.setActiveCheckIn(null);
 				accountRepo.saveOrUpdate(account);
 			}
