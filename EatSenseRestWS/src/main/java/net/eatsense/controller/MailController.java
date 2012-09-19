@@ -32,6 +32,7 @@ import net.eatsense.persistence.CompanyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
@@ -192,14 +193,19 @@ public class MailController {
 		
 		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-email/{token}").build(accessToken).toString();
 		
-		String text = templateCtrl.getAndReplace("account-confirm-email-update", account.getName(), setupUrl);
-		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", account.getName(), account.getNewEmail());
+		String name = Objects.firstNonNull(account.getName(), "Cloobster-Benutzer");
+		
+		String text = templateCtrl.getAndReplace("account-confirm-email-update", name, setupUrl);
+		String textNotice = templateCtrl.getAndReplace("account-notice-email-update", name, account.getNewEmail());
+		
+		String previousEmail = event.getPreviousEmail().or(account.getEmail());
+		String newEmail = event.getPreviousEmail().isPresent() ? account.getEmail() : account.getNewEmail();
 		
 		try {
 			// Send e-mail asking for confirmation to new address.
-			sendMail(account.getNewEmail(), text);
+			sendMail(newEmail, text);
 			// Send notice of e-mail update to old address.
-			sendMail(account.getEmail(), textNotice);
+			sendMail(previousEmail, textNotice);
 		} catch (AddressException e) {
 			logger.error("Error with e-mail address",e);
 		} catch (MessagingException e) {
