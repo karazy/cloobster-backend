@@ -43,7 +43,9 @@ public class CheckInHistoryDTO {
 			billId = bill.getId();
 			paymentMethod = bill.getPaymentMethod().getName();
 			billTime = bill.getCreationTime();
-			billTotal = bill.getTotal() / 100.0;
+			
+			if(bill.getTotal() != null && bill.getTotal().longValue() != 0)
+				billTotal = bill.getTotal() / 100.0;
 		}
 		if(spot != null) {
 			spotId = spot.getId();
