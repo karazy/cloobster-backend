@@ -47,7 +47,9 @@ public class TemplateController {
 		ArrayList<Template> templateList = new ArrayList<Template>();
 		
 		for (String templateId : templates) {
-			templateList.add(new Template(templateId));
+			if(templateRepo.getById(templateId) == null) {
+				templateList.add(new Template(templateId));
+			}
 		}
 		
 		templateRepo.saveOrUpdate(templateList);
