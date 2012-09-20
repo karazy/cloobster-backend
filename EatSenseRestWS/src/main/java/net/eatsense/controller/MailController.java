@@ -217,7 +217,8 @@ public class MailController {
 	@Subscribe
 	public void sendAccountPasswordUpdateNotification(UpdateAccountPasswordEvent event) {
 		Account account = event.getAccount();
-		String textNotice = templateCtrl.getAndReplace("account-notice-password-update", account.getName());
+		String name = Objects.firstNonNull(account.getName(), "Cloobster-Benutzer");
+		String textNotice = templateCtrl.getAndReplace("account-notice-password-update", name);
 		
 		try {
 			// Send notice of password update to user.
