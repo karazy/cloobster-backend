@@ -34,6 +34,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.validation.ValidationHelper;
 
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
@@ -64,12 +65,13 @@ public class BillController {
 	private final EventBus eventBus;
 	private final SpotRepository spotRepo;
 	private final AccountRepository accountRepo;
+	private final ValidationHelper validator;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo) {
+			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo, ValidationHelper validator) {
 		super();
 		this.accountRepo = accountRepo;
 		this.spotRepo = spotRepo;
@@ -81,6 +83,7 @@ public class BillController {
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.checkInRepo = checkInRepo;
 		this.billRepo = billRepo;
+		this.validator = validator;
 	}
 	
 	/**
@@ -185,6 +188,23 @@ public class BillController {
 		eventBus.post(updateEvent);
 		
 		return billData;
+	}
+	
+	/**
+	 * Create a new bill for a checkInId supplied with billData.
+	 * 
+	 * @param business
+	 * @param billData must have checkInId and paymentMethod set.
+	 * @return transfer object for the newly created Bill
+	 */
+	public BillDTO createBillForCheckIn(final Business business, BillDTO billData) {
+		checkNotNull(billData, "billData was null");
+		
+		validator.validate(billData);
+		
+		CheckIn checkIn = checkInRepo.getById(billData.getCheckInId());
+		
+		return createBill(business,checkIn, billData);		
 	}
 	
 	/**

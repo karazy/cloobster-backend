@@ -54,12 +54,7 @@ public class BillsResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BillDTO createBill(BillDTO billData) {
-		if(billData.getCheckInId() == null) {
-			throw new net.eatsense.exceptions.ValidationException("checkInId was null", "validationError");
-			
-		}
-		//TODO finish method
-		return null;//billController.createBill(business, checkIn, billData);
+		return billController.createBillForCheckIn(business, billData);
 	}
 	
 	
