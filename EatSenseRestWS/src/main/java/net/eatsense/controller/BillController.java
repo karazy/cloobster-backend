@@ -204,7 +204,19 @@ public class BillController {
 		
 		CheckIn checkIn = checkInRepo.getById(billData.getCheckInId());
 		
-		return createBill(business,checkIn, billData);		
+		return createBill(business,checkIn, billData, true);
+	}
+	
+	/**
+	 * Calls {@link #createBill(Business, CheckIn, BillDTO, boolean)}.
+	 * 
+	 * @param business
+	 * @param checkIn
+	 * @param billData
+	 * @return
+	 */
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+		return createBill(business, checkIn, billData, false);
 	}
 	
 	/**
@@ -215,7 +227,7 @@ public class BillController {
 	 * @param billData
 	 * @return bill DTO saved
 	 */
-	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData, boolean fromBusiness) {
 		// Check preconditions.
 		checkNotNull(business, "business is null");
 		checkNotNull(business.getId(), "id for business is null");
@@ -256,8 +268,7 @@ public class BillController {
 			}
 		}
 		if(!foundOrderToBill) {
-			logger.warn("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
-			billData.setId(billId);
+			throw new BillFailureException("no orders to bill where found.");
 		}
 		else {
 			Bill bill = new Bill();
@@ -280,7 +291,7 @@ public class BillController {
 				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 				checkInRepo.saveOrUpdate(checkIn);				
 			}
-			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn);
+			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn, fromBusiness);
 			
 			Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
