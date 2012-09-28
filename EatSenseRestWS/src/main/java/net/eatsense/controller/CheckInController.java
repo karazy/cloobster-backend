@@ -48,6 +48,7 @@ import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.HistoryStatusDTO;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.VisitDTO;
@@ -173,6 +174,24 @@ public class CheckInController {
     	spotDto.setCurrency(business.getCurrency());
     	spotDto.setPayments(business.getPaymentMethods());
     	spotDto.setTheme(business.getTheme());
+    	ImageDTO logo = null, header = null;
+    	
+    	if(business.getImages() != null) {
+    		for (ImageDTO i : business.getImages()) {
+    			if(i.getId().equals("logo")) {
+    				logo = i;
+    				spotDto.setLogoUrl(i.getUrl());
+    			};
+    			if(i.getId().equals("picture1")) {
+    				header = i;
+    				spotDto.setHeaderUrl(i.getUrl());
+    			};
+    		};
+        	
+        	
+        	
+    	}
+    	
 		return spotDto;
 	}
 	
