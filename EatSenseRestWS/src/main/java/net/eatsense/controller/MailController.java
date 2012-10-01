@@ -12,6 +12,7 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken.TokenType;
@@ -38,6 +39,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 public class MailController {
+	private static final String ACCOUNTS_CUSTOMER_CONFIRM = "/accounts/customer/confirm/{token}";
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Session session = Session.getDefaultInstance( new Properties(), null);
 	private final TemplateController templateCtrl;
@@ -191,7 +193,15 @@ public class MailController {
 		UriInfo uriInfo = event.getUriInfo();
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
-		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-email/{token}").build(accessToken).toString();
+		
+		UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path("/frontend");
+		if(account.getRole().equals(Role.USER)) {
+			uriBuilder = uriBuilder.fragment("/accounts/customer/confirm-email/{token}");
+		}
+		else 
+			uriBuilder = uriBuilder.fragment("/accounts/confirm-email/{token}");
+		
+		String setupUrl = uriBuilder.build(accessToken).toString();
 		
 		String name = Objects.firstNonNull(account.getName(), "Cloobster-Benutzer");
 		
@@ -267,7 +277,7 @@ public class MailController {
 	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
-		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
+		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment(ACCOUNTS_CUSTOMER_CONFIRM).build(accessToken).toString();
 		
 		String confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);
 		
