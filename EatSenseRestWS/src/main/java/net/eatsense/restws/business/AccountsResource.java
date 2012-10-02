@@ -52,7 +52,7 @@ public class AccountsResource {
 	private final EventBus eventBus;
 	@Context
 	private UriInfo uriInfo;
-	
+
 	@Inject
 	public AccountsResource(AccountController accountCtr, Provider<AccessTokenRepository> accessTokenRepoProvider, EventBus eventBus) {
 		super();
