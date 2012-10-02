@@ -34,9 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
+import com.googlecode.objectify.NotFoundException;
 
 public class MailController {
 	private static final String ACCOUNTS_CUSTOMER_CONFIRM = "/accounts/customer/confirm/{token}";
@@ -178,12 +180,19 @@ public class MailController {
 	@Subscribe
 	public void sendAccountConfirmedMessage(ConfirmedAccountEvent event) {
 		Account account = event.getAccount();
-		Company company = companyRepo.getByKey(account.getCompany());
+		Optional<Company> company = Optional.absent();
+		if(account.getCompany() != null) {
+			try {
+				company = Optional.of(companyRepo.getByKey(account.getCompany()));
+			} catch (NotFoundException e1) {
+				logger.error("Associated {} not found for Account({}).", account.getCompany(),account.getId());
+			}
+		}
 		
 		try {
 			sendAccountConfirmedMessage(account, company);
 		} catch (MessagingException e) {
-			logger.error("error sending confirmation notice", e);
+			logger.error("error sending confirmation notice mail", e);
 		}
 	}
 	
@@ -240,10 +249,15 @@ public class MailController {
 		}
 	}
 	
-	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {
+	public Message sendAccountConfirmedMessage(Account account, Optional<Company> company) throws MessagingException {
+		String accountName = Strings.isNullOrEmpty(account.getName()) ? "(Kein Name)" : account.getName();
+		String accountLogin = Objects.firstNonNull(account.getLogin(), "(Kein Login)");
+		String accountInfo = account.getRole().equals(Role.USER) ? "Benutzerkonto" : "Firmenkonto";
+		String companyName = company.isPresent() ? company.get().getName() : "(Kein Firmenaccount)";
+		
 		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
-				account.getName(), account.getLogin(), account.getEmail(),
-				Strings.nullToEmpty(account.getPhone()), company.getName());
+				accountName, accountLogin, account.getEmail(),
+				Strings.nullToEmpty(account.getPhone()), companyName, accountInfo);
 		
 		return sendMail("info@cloobster.com", confirmationText);
 	}
