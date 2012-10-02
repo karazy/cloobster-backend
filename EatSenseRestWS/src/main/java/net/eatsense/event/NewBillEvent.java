@@ -9,10 +9,13 @@ import net.eatsense.domain.CheckIn;
 public class NewBillEvent extends BillEvent {
 
 	private Optional<String> newSpotStatus;
+	private final boolean fromBusiness;
+	
 
-	public NewBillEvent(Business business, Bill bill, CheckIn checkIn) {
+	public NewBillEvent(Business business, Bill bill, CheckIn checkIn, boolean fromBusiness) {
 		super(business, bill, checkIn);
 		this.newSpotStatus = Optional.absent();
+		this.fromBusiness = fromBusiness;
 	}
 	
 	public Optional<String> getNewSpotStatus() {
@@ -23,4 +26,7 @@ public class NewBillEvent extends BillEvent {
 		this.newSpotStatus = Optional.fromNullable(newSpotStatus);
 	}
 
+	public boolean isFromBusiness() {
+		return fromBusiness;
+	}
 }

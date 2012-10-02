@@ -16,7 +16,7 @@ public class ImageDTO {
 	String blobKey;
 	
 	/**
-	 * At the moment we only use 'logo', 'scrapbook1,scrapbook2, etc.
+	 * At the moment we only use 'logo', 'scrapbook1','scrapbook2', etc.
 	 */
 	String id;
 	

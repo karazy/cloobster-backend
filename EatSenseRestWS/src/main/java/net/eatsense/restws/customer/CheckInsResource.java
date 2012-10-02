@@ -104,10 +104,12 @@ public class CheckInsResource {
 	
 	@Path("{checkInUid}")
 	public CheckInResource getCheckInResource(@PathParam("checkInUid") String checkInUid) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		// Check that the authenticated checkin owns the entity
-		boolean authenticated = checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId());
+		boolean authenticated = (checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId()))
+								|| (account!= null && checkInFromPath.getAccount().getId() == account.getId().longValue());
 		
 		if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
 			// Check for read-only mode.
@@ -118,7 +120,8 @@ public class CheckInsResource {
 		
 		CheckInResource checkInResource = resourceContext.getResource(CheckInResource.class);
 		checkInResource.setCheckIn(checkInFromPath);
-		checkInResource.setAccount((Account)servletRequest.getAttribute("net.eatsense.domain.Account"));
+		
+		checkInResource.setAccount(account);
 		checkInResource.setAuthenticated(authenticated);
 		
 		return checkInResource;

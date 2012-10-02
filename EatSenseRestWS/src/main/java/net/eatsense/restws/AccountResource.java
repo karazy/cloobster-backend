@@ -14,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken;
@@ -36,6 +37,9 @@ import com.google.inject.Provider;
 public class AccountResource {
 	private AccountController accountCtr;
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Context
+	private SecurityContext securityContext;
 	
 	@Context
 	HttpServletRequest servletRequest;
@@ -88,7 +92,7 @@ public class AccountResource {
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessAccountDTO createToken() {
-		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
+		if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
 		
