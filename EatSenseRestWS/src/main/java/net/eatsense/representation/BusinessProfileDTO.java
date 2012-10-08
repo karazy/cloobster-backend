@@ -30,8 +30,6 @@ public class BusinessProfileDTO extends BusinessDTO {
 	 */
 	private LinkedHashMap<String,ImageDTO> images;
 	
-	@Valid
-	private List<PaymentMethod> paymentMethods;
 	private String phone;
 
 	private String slogan;
@@ -55,7 +53,6 @@ public class BusinessProfileDTO extends BusinessDTO {
 				images.put(image.getId(), image);
 			}
 		}
-		this.paymentMethods = business.getPaymentMethods();
 		this.phone = business.getPhone();
 		this.postcode = business.getPostcode();
 		this.slogan = business.getSlogan();
@@ -83,14 +80,6 @@ public class BusinessProfileDTO extends BusinessDTO {
 
 	public void setImages(LinkedHashMap<String, ImageDTO> images) {
 		this.images = images;
-	}
-
-	public List<PaymentMethod> getPaymentMethods() {
-		return paymentMethods;
-	}
-
-	public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
-		this.paymentMethods = paymentMethods;
 	}
 
 	public String getPhone() {

@@ -31,6 +31,9 @@ public class ServiceExceptionMapper implements
 			builder = Response.status(Status.CONFLICT);
 		else if(arg0 instanceof ReadOnlyException)
 			builder = Response.status(405).header("Allow", "GET, HEAD, OPTIONS");
+		else if(arg0 instanceof BillFailureException)
+			// Send Unprocessable Entity HTTP error, for business logic failures.
+			builder = Response.status(422);
 		else
 			builder = Response.status(Status.INTERNAL_SERVER_ERROR);
 		

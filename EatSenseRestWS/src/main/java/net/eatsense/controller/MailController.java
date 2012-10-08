@@ -12,6 +12,7 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.AccessToken.TokenType;
@@ -33,11 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
+import com.googlecode.objectify.NotFoundException;
 
 public class MailController {
+	private static final String ACCOUNTS_CUSTOMER_CONFIRM = "/accounts/customer/confirm/{token}";
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Session session = Session.getDefaultInstance( new Properties(), null);
 	private final TemplateController templateCtrl;
@@ -176,12 +180,19 @@ public class MailController {
 	@Subscribe
 	public void sendAccountConfirmedMessage(ConfirmedAccountEvent event) {
 		Account account = event.getAccount();
-		Company company = companyRepo.getByKey(account.getCompany());
+		Optional<Company> company = Optional.absent();
+		if(account.getCompany() != null) {
+			try {
+				company = Optional.of(companyRepo.getByKey(account.getCompany()));
+			} catch (NotFoundException e1) {
+				logger.error("Associated {} not found for Account({}).", account.getCompany(),account.getId());
+			}
+		}
 		
 		try {
 			sendAccountConfirmedMessage(account, company);
 		} catch (MessagingException e) {
-			logger.error("error sending confirmation notice", e);
+			logger.error("error sending confirmation notice mail", e);
 		}
 	}
 	
@@ -191,7 +202,15 @@ public class MailController {
 		UriInfo uriInfo = event.getUriInfo();
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
-		String setupUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm-email/{token}").build(accessToken).toString();
+		
+		UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path("/frontend");
+		if(account.getRole().equals(Role.USER)) {
+			uriBuilder = uriBuilder.fragment("/accounts/customer/confirm-email/{token}");
+		}
+		else 
+			uriBuilder = uriBuilder.fragment("/accounts/confirm-email/{token}");
+		
+		String setupUrl = uriBuilder.build(accessToken).toString();
 		
 		String name = Objects.firstNonNull(account.getName(), "Cloobster-Benutzer");
 		
@@ -230,10 +249,15 @@ public class MailController {
 		}
 	}
 	
-	public Message sendAccountConfirmedMessage(Account account,Company company) throws MessagingException {
+	public Message sendAccountConfirmedMessage(Account account, Optional<Company> company) throws MessagingException {
+		String accountName = Strings.isNullOrEmpty(account.getName()) ? "(Kein Name)" : account.getName();
+		String accountLogin = Objects.firstNonNull(account.getLogin(), "(Kein Login)");
+		String accountInfo = account.getRole().equals(Role.USER) ? "Benutzerkonto" : "Firmenkonto";
+		String companyName = company.isPresent() ? company.get().getName() : "(Kein Firmenaccount)";
+		
 		String confirmationText = templateCtrl.getAndReplace("account-confirmed",
-				account.getName(), account.getLogin(), account.getEmail(),
-				Strings.nullToEmpty(account.getPhone()), company.getName());
+				accountName, accountLogin, account.getEmail(),
+				Strings.nullToEmpty(account.getPhone()), companyName, accountInfo);
 		
 		return sendMail("info@cloobster.com", confirmationText);
 	}
@@ -267,7 +291,7 @@ public class MailController {
 	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
-		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment("/accounts/confirm/{token}").build(accessToken).toString();
+		String confirmUrl = uriInfo.getBaseUriBuilder().path("/frontend").fragment(ACCOUNTS_CUSTOMER_CONFIRM).build(accessToken).toString();
 		
 		String confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);
 		

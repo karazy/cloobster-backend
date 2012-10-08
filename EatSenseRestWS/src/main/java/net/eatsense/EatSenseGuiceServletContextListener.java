@@ -71,7 +71,9 @@ public class EatSenseGuiceServletContextListener extends
 								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName());
 						
 						// add cross origin headers filter, deactivated for now.
-						// parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CrossOriginResourceSharingFilter.class.getName());
+						// add cache control response filter.
+						parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CacheResponseFilter.class.getName());
+						
 						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
 						
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,

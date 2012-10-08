@@ -126,7 +126,7 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CustomerAccountDTO createToken() {
-		if(servletRequest.getAuthType() == Authorizer.TOKEN_AUTH) {
+		if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
 		

@@ -161,7 +161,12 @@ public class MessageController {
 	public void sendNewBillMessages(NewBillEvent event) {
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		// Add a message with the new bill to the message package.
-		messages.add(new MessageDTO("bill","new", transform.billToDto(event.getBill())));
+		MessageDTO billMessage = new MessageDTO("bill","new", transform.billToDto(event.getBill()));
+		if(event.isFromBusiness() && event.getCheckIn().getChannelId() != null) {
+			// Send message to checkIn if the new bill was created from the cockpit.
+			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), billMessage);
+		}
+		messages.add(billMessage);
 		// Add a message with updated checkin status to the package.
 		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(event.getCheckIn())));
 		

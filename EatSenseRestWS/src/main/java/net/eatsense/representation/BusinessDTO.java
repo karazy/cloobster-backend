@@ -1,5 +1,8 @@
 package net.eatsense.representation;
 
+import java.util.List;
+
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -7,6 +10,7 @@ import org.apache.bval.constraints.NotEmpty;
 import com.google.common.base.Strings;
 
 import net.eatsense.domain.Business;
+import net.eatsense.domain.embedded.PaymentMethod;
 
 public class BusinessDTO {
 	@NotNull
@@ -25,6 +29,9 @@ public class BusinessDTO {
 	
 	private String theme;
 	
+	@Valid
+	private List<PaymentMethod> paymentMethods;
+	
 	public BusinessDTO() {
 		super();
 	}
@@ -38,6 +45,7 @@ public class BusinessDTO {
 		this.trash = business.isTrash();
 		this.id = business.getId();
 		this.theme = Strings.isNullOrEmpty(business.getTheme())?"default":business.getTheme();
+		this.paymentMethods = business.getPaymentMethods();
 	}
 	
 	public String getName() {
@@ -81,5 +89,13 @@ public class BusinessDTO {
 
 	public void setTheme(String theme) {
 		this.theme = theme;
+	}
+	
+	public List<PaymentMethod> getPaymentMethods() {
+		return paymentMethods;
+	}
+
+	public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
+		this.paymentMethods = paymentMethods;
 	}
 }

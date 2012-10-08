@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.validation.CreationChecks;
@@ -18,6 +19,10 @@ import org.apache.bval.constraints.NotEmpty;
  * A spot is a place with a barcode where a user is able to check in.
  * 
  * @author Nils Weiher
+ *
+ */
+/**
+ * @author fred
  *
  */
 public class SpotDTO {
@@ -52,6 +57,17 @@ public class SpotDTO {
 	private String currency;
 	
 	private boolean active;
+	
+	
+	/**
+	 * Url to logo.
+	 */
+	private String logoUrl;
+	
+	/**
+	 * Url to image of header displayed in App.
+	 */
+	private String headerUrl;
 	
 	@NotNull(groups= {CreationChecks.class})
 	private Long areaId;
@@ -193,5 +209,27 @@ public class SpotDTO {
 	public void setAreaId(Long areaId) {
 		this.areaId = areaId;
 	}
+
+
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+
+
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+
+
+	public String getHeaderUrl() {
+		return headerUrl;
+	}
+
+
+	public void setHeaderUrl(String headerUrl) {
+		this.headerUrl = headerUrl;
+	}
+	
+	
 	
 }

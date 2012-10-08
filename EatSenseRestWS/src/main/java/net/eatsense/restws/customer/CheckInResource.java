@@ -79,7 +79,6 @@ public class CheckInResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.GUEST)
 	public CheckInDTO getCheckIn() {
 		if(authenticated)
 			return checkInCtrlprovider.get().getCheckInDto(checkIn);

@@ -34,6 +34,7 @@ import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.validation.ValidationHelper;
 
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
@@ -64,12 +65,13 @@ public class BillController {
 	private final EventBus eventBus;
 	private final SpotRepository spotRepo;
 	private final AccountRepository accountRepo;
+	private final ValidationHelper validator;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo) {
+			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo, ValidationHelper validator) {
 		super();
 		this.accountRepo = accountRepo;
 		this.spotRepo = spotRepo;
@@ -81,6 +83,7 @@ public class BillController {
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.checkInRepo = checkInRepo;
 		this.billRepo = billRepo;
+		this.validator = validator;
 	}
 	
 	/**
@@ -188,6 +191,35 @@ public class BillController {
 	}
 	
 	/**
+	 * Create a new bill for a checkInId supplied with billData.
+	 * 
+	 * @param business
+	 * @param billData must have checkInId and paymentMethod set.
+	 * @return transfer object for the newly created Bill
+	 */
+	public BillDTO createBillForCheckIn(final Business business, BillDTO billData) {
+		checkNotNull(billData, "billData was null");
+		
+		validator.validate(billData);
+		
+		CheckIn checkIn = checkInRepo.getById(billData.getCheckInId());
+		
+		return createBill(business,checkIn, billData, true);
+	}
+	
+	/**
+	 * Calls {@link #createBill(Business, CheckIn, BillDTO, boolean)}.
+	 * 
+	 * @param business
+	 * @param checkIn
+	 * @param billData
+	 * @return
+	 */
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+		return createBill(business, checkIn, billData, false);
+	}
+	
+	/**
 	 * Create a new bill and save it in the datastore with the given paymentmethod.
 	 * 
 	 * @param business
@@ -195,7 +227,7 @@ public class BillController {
 	 * @param billData
 	 * @return bill DTO saved
 	 */
-	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData, boolean fromBusiness) {
 		// Check preconditions.
 		checkNotNull(business, "business is null");
 		checkNotNull(business.getId(), "id for business is null");
@@ -236,8 +268,7 @@ public class BillController {
 			}
 		}
 		if(!foundOrderToBill) {
-			logger.warn("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
-			billData.setId(billId);
+			throw new BillFailureException("no orders to bill where found.");
 		}
 		else {
 			Bill bill = new Bill();
@@ -260,7 +291,7 @@ public class BillController {
 				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 				checkInRepo.saveOrUpdate(checkIn);				
 			}
-			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn);
+			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn, fromBusiness);
 			
 			Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
