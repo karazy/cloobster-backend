@@ -1,6 +1,7 @@
 package net.eatsense.restws;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 
+import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
 import net.eatsense.domain.Account;
@@ -23,6 +25,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
+import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
@@ -30,6 +33,7 @@ import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 
@@ -52,12 +56,14 @@ public class AdminResource {
 	private final boolean devEnvironment;
 	private final TemplateController templateCtrl;
 	private final AccountRepository accountRepo;
+	private final ChannelController channelCtrl;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
-			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo) {
+			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl) {
 		super();
+		this.channelCtrl = channelCtrl;
 		this.accountRepo = accountRepo;
 		this.templateCtrl = templateCtrl;
 		this.logger =  LoggerFactory.getLogger(this.getClass());
@@ -201,6 +207,19 @@ public class AdminResource {
 	@Produces("application/json; charset=UTF-8")
 	public FeedbackFormDTO importNewBusinessFeedback(@PathParam("id") Long businessId, FeedbackFormDTO feedbackFormData ) {
 		return importCtrl.importFeedbackForm(businessId, feedbackFormData);
+	}
+	
+	@POST
+	@Path("channels/messages")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public MessageDTO sendCockpitUpdateMessage(MessageDTO message) {
+		
+		for(Business business :  businessRepo.query()) {
+			channelCtrl.sendMessage(business, message);
+		}
+		
+		return message;
 	}
 	
 	/**
