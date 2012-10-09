@@ -13,7 +13,7 @@
 		<property name="net.karazy.channels.app.timeout" value="240"/>
 		<property name="net.karazy.uploads.token.timeout" value="120"/>
 		<property name="net.karazy.app.download.url" value="http://www.cloobster.com/download"/>
-		<property name="net.karazy.url.outside" value="https://www.cloobster.com"/>
+		<property name="net.karazy.url.outside" value="http://q.cloobster.com"/>
 	</system-properties>
 
 	<inbound-services>
