@@ -18,7 +18,7 @@ public enum OrderStatus {
 		allowed.put(CANCELED, null);
 		allowed.put(CART, EnumSet.of(CART, PLACED));
 		allowed.put(PLACED, EnumSet.of(PLACED, RECEIVED,CANCELED));
-		allowed.put(RECEIVED, EnumSet.of(CANCELED));		
+		allowed.put(RECEIVED, EnumSet.of(CANCELED, RECEIVED));		
 	}
 	
 	public boolean isTransitionAllowed( OrderStatus newStatus) {
