@@ -127,6 +127,16 @@ CloobsterAdmin.Functions = function($scope, $http) {
 				$scope.createDummieAccountsText = status + " error.";
 			});	
 	};
+
+	$scope.sendCockpitUpdateMessage = function() {
+		$scope.sendCockpitUpdateMessageText = "Creating ...";
+		$scope.sendCockpitUpdateMessageDisabled = true;
+		$http.post('/admin/services/channels/messages', {'type':'application', 'action': 'update'}).success(function() {
+				$scope.sendCockpitUpdateMessageText = "Message sent.";
+			}).error(function (data, status) {
+				$scope.sendCockpitUpdateMessageText = status + " error.";
+			});	
+	};
 }
 
 CloobsterAdmin.Functions.$inject = ['$scope', '$http'];
