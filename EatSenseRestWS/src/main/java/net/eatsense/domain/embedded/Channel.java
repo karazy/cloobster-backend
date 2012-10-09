@@ -1,5 +1,6 @@
 package net.eatsense.domain.embedded;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import com.google.common.base.Objects;
@@ -59,5 +60,4 @@ public class Channel {
 				add("creationDate", creationDate).
 				toString();
 	}
-	
 }
