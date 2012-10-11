@@ -28,6 +28,7 @@ import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.CustomerProfileDTO;
+import net.eatsense.service.FacebookService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,27 +125,36 @@ public class AccountsResource {
 	@Path("tokens")
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CustomerAccountDTO createToken() {
-		if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
+		Account account = null;
+		if(Authorizer.TOKEN_AUTH.equals(securityContext.getAuthenticationScheme())) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
-		
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		AccountController accountCtrl = accountCtrlProvider.get();
+		account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		if(account == null) {
+			String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
+			String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
+			if(Strings.isNullOrEmpty(fbUserId) || Strings.isNullOrEmpty(fbAccessToken)) {
+				logger.error("Assumed Facebook authentication, but {} and {} headers not found or empty.",
+						FacebookService.FB_USERID_HEADER, FacebookService.FB_ACCESSTOKEN_HEADER);
+				throw new IllegalAccessException();
+			}
+			// Authenticate via Facebook servers.
+			account = accountCtrl.authenticateFacebook(fbUserId, fbAccessToken);
+		}
+		
+		
 		
 		if(account.getCustomerProfile() == null) {
 			accountCtrl.addCustomerProfile(account);
 		}
 		
 		CustomerAccountDTO accountDto = new CustomerAccountDTO(account, checkIn);
-		AccessToken authToken;
+		AccessToken authToken = accountCtrl.createCustomerAuthToken(account);
 		
-		
-		authToken = accountCtrl.createCustomerAuthToken(account);
-		
-		logger.info("Permanent customer Token created");
+		logger.info("Customer accessToken created for Account({})", account.getId());
 		accountDto.setAccessToken(authToken.getToken());
 		
 		return accountDto;

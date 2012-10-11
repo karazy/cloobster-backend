@@ -49,6 +49,7 @@ import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1014,7 +1015,7 @@ public class AccountController {
 	public Account registerNewCustomerAccount(CustomerAccountDTO accountData) {
 		checkNotNull(accountData, "accountData was null");
 		
-		validator.validate(accountData, javax.validation.groups.Default.class, PasswordChecks.class);
+		validator.validate(accountData, javax.validation.groups.Default.class);
 		checkEmailDoesNotExist(accountData.getEmail());
 		
 		if(!Strings.isNullOrEmpty(accountData.getLogin())) {
@@ -1022,19 +1023,49 @@ public class AccountController {
 			checkLoginDoesNotExist(accountData.getLogin());
 		}
 		
-		Account account = accountRepo.newEntity();
+		Account newAccount = accountRepo.newEntity();
+		
+		if(!Strings.isNullOrEmpty(accountData.getFbUserId())) {
+			Account account = accountRepo.getByProperty("facebookUid", accountData.getFbUserId());
+			if(account != null) {
+				logger.error("Account({}) already using facebookUid:", account.getId(), accountData.getFbUserId());
+				throw new ValidationException("Facebook account already in use for existing Acccount", "error.account.facebook.exists");
+			}
+			
+			// Return the user object from the facebook api, to which the access token belongs.
+			JSONObject jsonMe;
+			try {
+				jsonMe = facebookService.getMe(accountData.getFbAccessToken());
+			} catch (IllegalArgumentException e) {
+				throw new IllegalAccessException("invalid fbAccessToken");
+			} 
+			String facebookUid = jsonMe.optString("id");
+			if( accountData.getFbUserId().equals( facebookUid)) {
+				// Valid fbAccessToken belonging to the fbUserId
+				logger.info("Connecting new Account with fbUserId: {}", facebookUid);
+				newAccount.setFacebookUid(facebookUid);
+			}
+			else {
+				logger.error("fbAccessToken not owned by fbUserId:{}.Owner fbUserId:{}",accountData.getFbUserId(), facebookUid);
+				throw new IllegalAccessException("fbAccessToken not owned by fbUserId, token owner: " + jsonMe.optString("name"));
+			}
+		}
+		if(!Strings.isNullOrEmpty(accountData.getPassword()) || newAccount.getFacebookUid() == null) {
+			validator.validate(accountData, PasswordChecks.class);
+		}
+			
 		CustomerProfile profile = customerProfileRepo.newEntity();
 		
-		account.setActive(true);
-		account.setCreationDate(new Date());
-		account.setEmail(accountData.getEmail());
-		account.setNewEmail(accountData.getNewEmail());
-		account.setEmailConfirmed(false);
-		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
-		account.setCustomerProfile(customerProfileRepo.saveOrUpdate(profile));
-		account.setName(accountData.getName());
-		account.setLogin(accountData.getLogin());
-		account.setRole(Role.USER);
+		newAccount.setActive(true);
+		newAccount.setCreationDate(new Date());
+		newAccount.setEmail(accountData.getEmail());
+		newAccount.setNewEmail(accountData.getNewEmail());
+		newAccount.setEmailConfirmed(false);
+		newAccount.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
+		newAccount.setCustomerProfile(customerProfileRepo.saveOrUpdate(profile));
+		newAccount.setName(accountData.getName());
+		newAccount.setLogin(accountData.getLogin());
+		newAccount.setRole(Role.USER);
 		
 		boolean isCheckInSet = !Strings.isNullOrEmpty(accountData.getCheckInId());
 		CheckIn checkIn = null;
@@ -1044,18 +1075,18 @@ public class AccountController {
 				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
 			}
 			else {
-				account.setActiveCheckIn(checkIn.getKey());
+				newAccount.setActiveCheckIn(checkIn.getKey());
 			}
 		}
 		
-		Key<Account> accountKey = accountRepo.saveOrUpdate(account);
+		Key<Account> accountKey = accountRepo.saveOrUpdate(newAccount);
 		
 		if(checkIn != null) {
 			checkIn.setAccount(accountKey);
 			checkInRepo.saveOrUpdate(checkIn);
 		}
 				
-		return account;
+		return newAccount;
 	}
 	
 	/**
