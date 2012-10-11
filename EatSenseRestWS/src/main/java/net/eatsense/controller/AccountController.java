@@ -671,7 +671,11 @@ public class AccountController {
 			// MailController listens for this type of event.
 			eventBus.post(new UpdateAccountPasswordEvent(account));
 		}
-
+		
+		if(!Strings.isNullOrEmpty(accountData.getFbUserId())) {
+			validateAndConnectFacebook(accountData, account);
+		}
+		
 		if(account.isDirty()) {
 			accountRepo.saveOrUpdate(account);
 		}
@@ -1026,29 +1030,7 @@ public class AccountController {
 		Account newAccount = accountRepo.newEntity();
 		
 		if(!Strings.isNullOrEmpty(accountData.getFbUserId())) {
-			Account account = accountRepo.getByProperty("facebookUid", accountData.getFbUserId());
-			if(account != null) {
-				logger.error("Account({}) already using facebookUid:", account.getId(), accountData.getFbUserId());
-				throw new ValidationException("Facebook account already in use for existing Acccount", "error.account.facebook.exists");
-			}
-			
-			// Return the user object from the facebook api, to which the access token belongs.
-			JSONObject jsonMe;
-			try {
-				jsonMe = facebookService.getMe(accountData.getFbAccessToken());
-			} catch (IllegalArgumentException e) {
-				throw new IllegalAccessException("invalid fbAccessToken");
-			} 
-			String facebookUid = jsonMe.optString("id");
-			if( accountData.getFbUserId().equals( facebookUid)) {
-				// Valid fbAccessToken belonging to the fbUserId
-				logger.info("Connecting new Account with fbUserId: {}", facebookUid);
-				newAccount.setFacebookUid(facebookUid);
-			}
-			else {
-				logger.error("fbAccessToken not owned by fbUserId:{}.Owner fbUserId:{}",accountData.getFbUserId(), facebookUid);
-				throw new IllegalAccessException("fbAccessToken not owned by fbUserId, token owner: " + jsonMe.optString("name"));
-			}
+			validateAndConnectFacebook(accountData, newAccount);
 		}
 		if(!Strings.isNullOrEmpty(accountData.getPassword()) || newAccount.getFacebookUid() == null) {
 			validator.validate(accountData, PasswordChecks.class);
@@ -1087,6 +1069,46 @@ public class AccountController {
 		}
 				
 		return newAccount;
+	}
+
+
+	/**
+	 * @param accountData
+	 * @param account
+	 */
+	private void validateAndConnectFacebook(AccountDTO accountData,
+			Account account) {
+		checkNotNull(accountData, "accountData was null");
+		checkNotNull(account, "account was null");
+		
+		if(account.getFacebookUid() != null) {
+			logger.error("Unable to set fbUserId. Account({}) already has fbUserId: {}",account.getId(),account.getFacebookUid());
+			throw new ValidationException("Account already connected with fbUserId: "+account.getFacebookUid());
+		}
+		Account existingAccount = accountRepo.getByProperty("facebookUid", accountData.getFbUserId());
+		if(existingAccount != null) {
+			logger.error("Account({}) already using facebookUid:", existingAccount.getId(), accountData.getFbUserId());
+			throw new ValidationException("Facebook account already in use for existing Acccount", "error.account.facebook.exists");
+		}
+		
+		// Return the user object from the facebook api, to which the access token belongs.
+		JSONObject jsonMe;
+		try {
+			jsonMe = facebookService.getMe(accountData.getFbAccessToken());
+		} catch (IllegalArgumentException e) {
+			logger.error("Invalid fbAccessToken supplied");
+			throw new ValidationException("invalid fbAccessToken");
+		} 
+		String facebookUid = jsonMe.optString("id");
+		if( accountData.getFbUserId().equals( facebookUid)) {
+			// Valid fbAccessToken belonging to the fbUserId
+			logger.info("Connecting Account with fbUserId: {}", facebookUid);
+			account.setFacebookUid(facebookUid);
+		}
+		else {
+			logger.error("fbAccessToken not owned by fbUserId:{}.Owner fbUserId:{}",accountData.getFbUserId(), facebookUid);
+			throw new ValidationException("fbAccessToken not owned by fbUserId, token owner: " + jsonMe.optString("name"));
+		}
 	}
 	
 	/**
