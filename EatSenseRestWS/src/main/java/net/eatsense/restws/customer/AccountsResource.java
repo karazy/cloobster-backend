@@ -160,7 +160,7 @@ public class AccountsResource {
 			throw new IllegalAccessException("Tried to load wrong account!");
 		}
 		
-		return new CustomerAccountDTO(account, null);
+		return new CustomerAccountDTO(account);
 	}
 	
 	@PUT
