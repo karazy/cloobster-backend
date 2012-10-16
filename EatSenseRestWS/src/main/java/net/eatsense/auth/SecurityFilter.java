@@ -12,11 +12,14 @@ import javax.ws.rs.core.UriInfo;
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.service.FacebookService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.sun.jersey.spi.container.ContainerRequest;
@@ -74,6 +77,9 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String login = request.getHeaderValue("login");
 		String password = request.getHeaderValue("password");
 		String passwordHash = request.getHeaderValue("passwordHash");
+		String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
+		String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
+		Account account = null;
 
 		if(checkInId != null && !checkInId.isEmpty()) {
 			 Authorizer auth = authenticateCheckIn(checkInId);
@@ -85,8 +91,6 @@ public class SecurityFilter implements ContainerRequestFilter {
 				
 		if(login != null && !login.isEmpty()) {
 			logger.info("recieved login request from user: " +login);
-			Account account = null;
-
 			if(passwordHash != null && !passwordHash.isEmpty()) {
 				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticateHashed(login, passwordHash);
@@ -97,22 +101,30 @@ public class SecurityFilter implements ContainerRequestFilter {
 			}
 
 			if(account != null) {
-				request.setSecurityContext(authorizerFactory.createForAccount(account, null));
-				servletRequest.setAttribute("net.eatsense.domain.Account", account);
-				
-				if(account.getActiveCheckIn() != null) {
-					try {
-						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
-					} catch (com.googlecode.objectify.NotFoundException e) {
-						logger.info("activeCheckin for account not found, removing reference");
-						accountCtrl.removeActiveCheckIn(account);
-					}
-				}
-				
-				logger.info("authentication success for user: "+login);
-				return request;
+				request.setSecurityContext(authorizerFactory.createForAccount(account, null,null));
+				logger.info("Basic authentication success for user: {}", login);
 			}
 		}
+		else if(!Strings.isNullOrEmpty(fbUserId) && !Strings.isNullOrEmpty(fbAccessToken)) {
+			logger.info("Received Facebook authentication request for fb id: {}", fbUserId);
+			// Authenticate via Facebook servers.
+			account = accountCtrl.authenticateFacebook(fbUserId, fbAccessToken);
+			request.setSecurityContext(authorizerFactory.createForAccount(account, null, Authorizer.FB_AUTH));
+			
+			logger.info("Facebook authentication success for user: {}", account.getEmail());
+		}
+		
+		servletRequest.setAttribute("net.eatsense.domain.Account", account);
+		
+		if( account != null && account.getActiveCheckIn() != null) {
+			try {
+				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
+			} catch (com.googlecode.objectify.NotFoundException e) {
+				logger.info("activeCheckin for account not found, removing reference");
+				accountCtrl.removeActiveCheckIn(account);
+			}
+		}
+		
 		return request;
 	}
 

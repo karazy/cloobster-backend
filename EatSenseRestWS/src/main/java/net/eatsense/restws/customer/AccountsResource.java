@@ -107,8 +107,8 @@ public class AccountsResource {
 		
 		if(!Strings.isNullOrEmpty(accountData.getPassword()) || !accountData.getEmail().equals(account.getEmail())) {
 			// User tries to change e-mail or password.
-			if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
-				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
+			if(Authorizer.TOKEN_AUTH.equals(securityContext.getAuthenticationScheme())) {
+				throw new IllegalAccessException("Must authenticate with user credentials/facebook to change password or email.");
 			}
 		}
 		String previousEmail = account.getEmail();
@@ -125,6 +125,7 @@ public class AccountsResource {
 	@Path("tokens")
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CustomerAccountDTO createToken() {
 		Account account = null;
 		if(Authorizer.TOKEN_AUTH.equals(securityContext.getAuthenticationScheme())) {
@@ -133,20 +134,7 @@ public class AccountsResource {
 		AccountController accountCtrl = accountCtrlProvider.get();
 		account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
-		if(account == null) {
-			String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
-			String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
-			if(Strings.isNullOrEmpty(fbUserId) || Strings.isNullOrEmpty(fbAccessToken)) {
-				logger.error("Assumed Facebook authentication, but {} and {} headers not found or empty.",
-						FacebookService.FB_USERID_HEADER, FacebookService.FB_ACCESSTOKEN_HEADER);
-				throw new IllegalAccessException();
-			}
-			// Authenticate via Facebook servers.
-			account = accountCtrl.authenticateFacebook(fbUserId, fbAccessToken);
-		}
-		
-		
-		
+
 		if(account.getCustomerProfile() == null) {
 			accountCtrl.addCustomerProfile(account);
 		}
