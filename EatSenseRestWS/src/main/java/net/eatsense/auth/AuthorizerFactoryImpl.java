@@ -28,8 +28,8 @@ public class AuthorizerFactoryImpl implements AuthorizerFactory {
 	}
 
 	@Override
-	public Authorizer createForAccount(final Account account, final AccessToken token) {
-		return new Authorizer(accountControllerProvider.get(), uriInfoProvider.get(), account, token);
+	public Authorizer createForAccount(final Account account, final AccessToken token, final String authScheme) {
+		return new Authorizer(accountControllerProvider.get(), uriInfoProvider.get(), account, token, authScheme);
 	}
 
 }
