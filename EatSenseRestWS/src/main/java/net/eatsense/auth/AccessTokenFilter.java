@@ -92,12 +92,13 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			}
 			
 			
-			Account account = accountRepo.getByKey(accessToken.getAccount());
-			
-			if(account == null) {
+			Account account;
+			try {
+				account = accountRepo.getByKey(accessToken.getAccount());
+			} catch (com.googlecode.objectify.NotFoundException e1) {
 				accessTokenRepo.delete(accessToken);
-				logger.info("Deleted invalid access token, account no longer exists {}", accessToken.getAccount());
-				throw new IllegalAccessException("Access token invalid, account no longer exists.");	
+				logger.warn("Deleted invalid access token, account no longer exists {}", accessToken.getAccount());
+				throw new IllegalAccessException("Access token invalid, account no longer exists.");
 			}
 			
 //			if(requiredToken != null) {
