@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -56,9 +57,9 @@ public class UploadsResource {
 	@POST
 	@Path("images/new/{token}")
 	@Produces("application/json")
-	public Collection<ImageUploadDTO> handleUpload( @PathParam("token") String token) {
+	public Collection<ImageUploadDTO> handleUpload( @PathParam("token") String token, @FormParam("imageId") String imageId) {
 		logger.info("uploads received for token: {}", token);
-		return uploadCtrl.parseUploadRequest(token, servletRequest);
+		return uploadCtrl.parseUploadRequest(token, servletRequest, imageId);
 	}
 	
 	@DELETE

@@ -69,9 +69,10 @@ public class UploadController {
 	 * 
 	 * @param token - Challenge token created by {@link #getUploadUrl}, supplied as part of the URL in the callback.
 	 * @param request - Request data.
+	 * @param imageId - String identifier for the uploaded image. Used to check restrictions.
 	 * @return List of image data.
 	 */
-	public Collection<ImageUploadDTO> parseUploadRequest(String token, HttpServletRequest request) {
+	public Collection<ImageUploadDTO> parseUploadRequest(String token, HttpServletRequest request, String imageId) {
 		Account account = accountRepo.getByProperty("uploadToken.token", token);
 		if(account == null)
 			throw new NotFoundException("upload token not found");
@@ -83,6 +84,7 @@ public class UploadController {
 		}
 		
 		Map<String, List<BlobKey>> uploads = blobStoreService.getUploads(request);
+		
 		List<ImageUploadDTO> images = new ArrayList<ImageUploadDTO>();
 		if(account.getImageUploads() == null) {
 			account.setImageUploads(new ArrayList<ImageUploadDTO>());
