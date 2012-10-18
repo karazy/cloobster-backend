@@ -13,13 +13,13 @@ public class CustomerAccountDTO extends AccountDTO {
 	
 	public CustomerAccountDTO(Account account) {
 		super(account);
-	}
-
-	public CustomerAccountDTO(Account account, CheckIn checkIn) {
-		super(account);
 		if(account != null && account.getCustomerProfile() != null) {
 			setProfileId(account.getCustomerProfile().getId());
 		}
+	}
+
+	public CustomerAccountDTO(Account account, CheckIn checkIn) {
+		this(account);
 		if(checkIn != null) {
 			checkInId = checkIn.getUserId();
 		}

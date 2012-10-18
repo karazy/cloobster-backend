@@ -3,6 +3,7 @@
 	<name>EatSenseRestWS</name>
 	<comment></comment>
 	<projects>
+		<project>cloobster_app</project>
 		<project>cloobster_cockpit</project>
 		<project>cloobster_frontend</project>
 	</projects>
