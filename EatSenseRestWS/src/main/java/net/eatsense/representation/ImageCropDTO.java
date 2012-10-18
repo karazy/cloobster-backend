@@ -1,6 +1,7 @@
 package net.eatsense.representation;
 
 public class ImageCropDTO {
+	private String blobKey;
 	private double leftX;
 	private double topY;
 	private double rightX;
@@ -29,5 +30,11 @@ public class ImageCropDTO {
 	}
 	public void setBottomY(double bottomY) {
 		this.bottomY = bottomY;
+	}
+	public String getBlobKey() {
+		return blobKey;
+	}
+	public void setBlobKey(String blobKey) {
+		this.blobKey = blobKey;
 	}
 }

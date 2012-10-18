@@ -45,7 +45,10 @@ import com.google.inject.Inject;
 
 public class UploadController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+	/**
+	 * The limit for uploaded file size, appengine limit is 32mb, but we limit it to 3mb.
+	 */
+	public final static long MAX_UPLOADSIZE = 3145728;
 	private BlobstoreService blobStoreService;
 	private final AccountRepository accountRepo;
 	private final ImagesService imagesService;
@@ -116,19 +119,39 @@ public class UploadController {
 		for (String key : uploads.keySet()) {
 			for(BlobKey blobKey : uploads.get(key)) {
 				ImageUploadDTO image = new ImageUploadDTO();
-				image.setName(key);
-				image.setBlobKey(blobKey.getKeyString());
-				image.setUrl(imagesService.getServingUrl(blobKey));
-				images.add(image);
+				BlobInfo blobInfo = blobInfoFactory.loadBlobInfo(blobKey);				
+				if(!isValidContentType(blobInfo.getContentType())) {
+					blobStoreService.delete(blobKey);
+					throw new ValidationException("Upload has invalid mime type");
+				}
+				else if(blobInfo.getSize() > MAX_UPLOADSIZE) {
+					blobStoreService.delete(blobKey);
+					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE);					
+				}
+				else {
+					// Add to uploaded images for this account.
+					// Generate public URL.
+					image.setName(key);
+					image.setBlobKey(blobKey.getKeyString());
+					image.setUrl(imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey)));
+					images.add(image);
+				}
 			}
 		}
-		//TODO add checks for mime type and file size limit
+		
 		account.getImageUploads().addAll(images);
 		accountRepo.saveOrUpdate(account);
 				
 		return images;
 	}
 	
+	private boolean isValidContentType(String contentType) {
+		if(contentType.equals("image/png") || contentType.equals("image/jpeg") || contentType.equals("image/gif")) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Delete an unused uploaded image.
 	 * 

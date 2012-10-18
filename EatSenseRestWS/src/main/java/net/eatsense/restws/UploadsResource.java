@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -68,6 +69,8 @@ public class UploadsResource {
 	@PUT
 	@Path("images/{blobKey}")
 	@RolesAllowed(Role.USER)
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json")
 	public ImageUploadDTO cropImage(@PathParam("blobKey") String blobKey, ImageCropDTO cropData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		
