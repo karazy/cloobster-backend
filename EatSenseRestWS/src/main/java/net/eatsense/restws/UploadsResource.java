@@ -1,5 +1,6 @@
 package net.eatsense.restws;
 
+import java.awt.image.CropImageFilter;
 import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
@@ -8,6 +9,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -23,6 +25,7 @@ import com.google.inject.Inject;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.UploadController;
 import net.eatsense.domain.Account;
+import net.eatsense.representation.ImageCropDTO;
 import net.eatsense.representation.ImageUploadDTO;
 
 @Path("uploads")
@@ -60,6 +63,15 @@ public class UploadsResource {
 	public Collection<ImageUploadDTO> handleUpload( @PathParam("token") String token, @FormParam("imageId") String imageId) {
 		logger.info("uploads received for token: {}", token);
 		return uploadCtrl.parseUploadRequest(token, servletRequest, imageId);
+	}
+	
+	@PUT
+	@Path("images/{blobKey}")
+	@RolesAllowed(Role.USER)
+	public ImageUploadDTO cropImage(@PathParam("blobKey") String blobKey, ImageCropDTO cropData) {
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		
+		return uploadCtrl.cropUpload(account, blobKey, cropData);
 	}
 	
 	@DELETE

@@ -3,6 +3,9 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -19,12 +22,24 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.embedded.UploadToken;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ServiceException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.representation.ImageCropDTO;
 import net.eatsense.representation.ImageUploadDTO;
 
+import com.google.appengine.api.blobstore.BlobInfo;
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.files.AppEngineFile;
+import com.google.appengine.api.files.FileService;
+import com.google.appengine.api.files.FileWriteChannel;
+import com.google.appengine.api.files.FinalizationException;
+import com.google.appengine.api.files.LockException;
+import com.google.appengine.api.images.Image;
 import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ServingUrlOptions;
+import com.google.appengine.api.images.ImagesService.OutputEncoding;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
@@ -35,12 +50,21 @@ public class UploadController {
 	private final AccountRepository accountRepo;
 	private final ImagesService imagesService;
 
+	private FileService fileService;
+
+	private ImageController imageController;
+
+	private BlobInfoFactory blobInfoFactory;
+
 	@Inject
-	public UploadController(BlobstoreService blobStoreService, AccountRepository accountRepo, ImagesService imagesService) {
+	public UploadController(BlobstoreService blobStoreService, AccountRepository accountRepo, ImagesService imagesService, FileService fileService, ImageController imageCtrl, BlobInfoFactory blobInfoFactory) {
 		super();
 		this.blobStoreService = blobStoreService;
 		this.accountRepo = accountRepo;
 		this.imagesService = imagesService;
+		this.fileService = fileService;
+		this.imageController = imageCtrl;
+		this.blobInfoFactory = blobInfoFactory;
 	}
 	
 	/**
@@ -98,6 +122,7 @@ public class UploadController {
 				images.add(image);
 			}
 		}
+		//TODO add checks for mime type and file size limit
 		account.getImageUploads().addAll(images);
 		accountRepo.saveOrUpdate(account);
 				
@@ -129,6 +154,105 @@ public class UploadController {
 				}
 			}	
 		}
+	}
+	
+	public ImageUploadDTO cropUpload(Account account, String blobKeyString, ImageCropDTO cropData) {
+		checkNotNull(account, "account was null");
+		checkArgument(!Strings.isNullOrEmpty(blobKeyString), "blobKeyString was null or empty");
+		
+		ImageUploadDTO imageDto = null;
+		
+		for (ImageUploadDTO upload :account.getImageUploads()) {
+			if(upload.getBlobKey().equals(blobKeyString)) {
+				imageDto = upload;
+			}
+		}
+		if(imageDto == null) {
+			logger.error("Could not find blob under uploads for this account, aborting crop operation.");
+			throw new ValidationException("Unknown blobkey specified");
+		}
+		
+		//Retrieve info about this blob. For mime type check.
+		BlobKey blobKey = new BlobKey(blobKeyString);
+		BlobInfo blobInfo = blobInfoFactory.loadBlobInfo(blobKey);
+		OutputEncoding outputEnc;
+		String outputType;
+		if(blobInfo.getContentType().equals("image/png")) {
+			outputEnc = OutputEncoding.PNG;
+			outputType = blobInfo.getContentType(); 
+		} else if (blobInfo.getContentType().equals("image/jpeg")) {
+			outputEnc = OutputEncoding.JPEG;
+			outputType = blobInfo.getContentType();
+		}
+		else if (blobInfo.getContentType().equals("image/gif")) {
+			outputEnc = OutputEncoding.PNG;
+			outputType = "image/png";
+		}
+		else {
+			throw new ValidationException("Uploaded file has incorrect mime type.");
+		}
+		
+		Image image = imageController.cropImage(blobKeyString, outputEnc, cropData.getLeftX(), cropData.getTopY(), cropData.getRightX(), cropData.getBottomY());
+		
+		String newBlobKey = saveNewBlob(imageDto.getName(), outputType, image.getImageData());
+		
+		// Delete old blob.
+		blobStoreService.delete(blobKey);
+		
+		imageDto.setBlobKey(newBlobKey);
+		imageDto.setUrl(imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(new BlobKey(newBlobKey))));
+		
+		accountRepo.saveOrUpdate(account);
+				
+		return imageDto;		
+	}
+	
+	public String saveNewBlob(String name, String mimeType, byte[] bytes) {
+		AppEngineFile file; 
+		
+		try {
+			file = fileService.createNewBlobFile(mimeType, name);
+		} catch (IOException e) {
+			logger.error("Error while communicating with blobstore, could not create new file");
+			throw new ServiceException("Could not save to blobstore", e);
+		}
+		// Start writing the new file.
+		FileWriteChannel writeChannel;
+		try {
+			writeChannel = fileService.openWriteChannel(file, true);
+		} catch (FileNotFoundException e) {
+			logger.error("Could not find created file for writing",e);
+			throw new ServiceException(e);
+		} catch (FinalizationException e) {
+			logger.error("Could not write to newly created file, already finalized!",e);
+			throw new ServiceException(e);
+		} catch (LockException e) {
+			logger.error("Could not write to newly created file, already locked!",e);
+			throw new ServiceException(e);
+		} catch (IOException e) {
+			throw new ServiceException("Error while writing to blobstore file.", e);
+		}
+		
+		int byteCount;
+		try {
+			byteCount = writeChannel.write(ByteBuffer.wrap(bytes));
+		} catch (IOException e) {
+			logger.error("Exception while writing to blob",e);
+			throw new ServiceException("Error while writing to blobstore file.", e);
+		}
+		
+		try {
+			writeChannel.closeFinally();
+		} catch (Exception e) {
+			logger.error("Unable to finalize file",e);
+			throw new ServiceException("Error while finallizing file.", e);
+		}
+		
+		String blobKey = fileService.getBlobKey(file).getKeyString();
+		
+		logger.info("Written {} bytes to blob: {}", byteCount, blobKey);
+		
+		return blobKey;
 	}
 	
 	
