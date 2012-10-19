@@ -92,12 +92,13 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			}
 			
 			
-			Account account = accountRepo.getByKey(accessToken.getAccount());
-			
-			if(account == null) {
+			Account account;
+			try {
+				account = accountRepo.getByKey(accessToken.getAccount());
+			} catch (com.googlecode.objectify.NotFoundException e1) {
 				accessTokenRepo.delete(accessToken);
-				logger.info("Deleted invalid access token, account no longer exists {}", accessToken.getAccount());
-				throw new IllegalAccessException("Access token invalid, account no longer exists.");	
+				logger.warn("Deleted invalid access token, account no longer exists {}", accessToken.getAccount());
+				throw new IllegalAccessException("Access token invalid, account no longer exists.");
 			}
 			
 //			if(requiredToken != null) {
@@ -113,7 +114,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			servletRequest.setAttribute(AccessToken.class.getName(), accessToken);
 			
 			if(accessToken.getType() == TokenType.AUTHENTICATION || accessToken.getType() == TokenType.AUTHENTICATION_CUSTOMER) {
-				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken));
+				request.setSecurityContext(authorizerFactory.createForAccount(account, accessToken, null));
 				servletRequest.setAttribute("net.eatsense.domain.Account", account);
 				if(account.getActiveCheckIn() != null) {
 					try {

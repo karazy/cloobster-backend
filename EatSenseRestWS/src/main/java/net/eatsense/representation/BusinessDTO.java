@@ -28,6 +28,8 @@ public class BusinessDTO {
 	private boolean trash;
 	
 	private String theme;
+	private String url;
+	private String fbUrl;
 	
 	@Valid
 	private List<PaymentMethod> paymentMethods;
@@ -46,6 +48,8 @@ public class BusinessDTO {
 		this.id = business.getId();
 		this.theme = Strings.isNullOrEmpty(business.getTheme())?"default":business.getTheme();
 		this.paymentMethods = business.getPaymentMethods();
+		this.url = business.getUrl();
+		this.fbUrl = business.getFbUrl();
 	}
 	
 	public String getName() {
@@ -97,5 +101,21 @@ public class BusinessDTO {
 
 	public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
 		this.paymentMethods = paymentMethods;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getFbUrl() {
+		return fbUrl;
+	}
+
+	public void setFbUrl(String fbUrl) {
+		this.fbUrl = fbUrl;
 	}
 }

@@ -89,6 +89,16 @@ public class Business extends GenericEntity<Business> {
 	
 	private String currency;
 	
+	/**
+	 * Link to a website for this location (e.g. for facebook posts)
+	 */
+	private String url;
+	
+	/**
+	 * Link to a facebook page for this business.
+	 */
+	private String fbUrl;
+	
 	public Business() {
 	}
 	
@@ -251,6 +261,28 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.theme, theme)) {
 			this.setDirty(true);
 			this.theme = theme;
+		}
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		if(!Objects.equal(this.url, url)) {
+			this.setDirty(true);
+			this.url = url;
+		}
+	}
+
+	public String getFbUrl() {
+		return fbUrl;
+	}
+
+	public void setFbUrl(String fbUrl) {
+		if(!Objects.equal(this.fbUrl, fbUrl)) {
+			this.setDirty(true);
+			this.fbUrl = fbUrl;
 		}
 	}
 }
