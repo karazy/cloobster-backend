@@ -122,11 +122,11 @@ public class UploadController {
 				BlobInfo blobInfo = blobInfoFactory.loadBlobInfo(blobKey);				
 				if(!isValidContentType(blobInfo.getContentType())) {
 					blobStoreService.delete(blobKey);
-					throw new ValidationException("Upload has invalid mime type");
+					throw new ValidationException("Upload has invalid mime type", "fileupload.error.type");
 				}
 				else if(blobInfo.getSize() > MAX_UPLOADSIZE) {
 					blobStoreService.delete(blobKey);
-					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE);					
+					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE, "fileupload.error.size");					
 				}
 				else {
 					// Add to uploaded images for this account.
@@ -190,6 +190,7 @@ public class UploadController {
 				imageDto = upload;
 			}
 		}
+		
 		if(imageDto == null) {
 			logger.error("Could not find blob under uploads for this account, aborting crop operation.");
 			throw new ValidationException("Unknown blobkey specified");
