@@ -48,7 +48,7 @@ public class MailController {
 	private final TemplateController templateCtrl;
 	private final CompanyRepository companyRepo;
 	private final AccountController accountCtrl;
-	private UriBuilder baseUriBuilder;
+	private String baseUri;
 	
 	public static final String FROM_ADDRESS = "info@karazy.net";
 	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
@@ -60,9 +60,8 @@ public class MailController {
 		this.accountCtrl = accountCtrl;
 		this.templateCtrl = templateCtrl;
 		// Get uri for email links from system property or use default if not set.
-		String baseUri = Objects.firstNonNull(Strings.emptyToNull(System.getProperty("net.karazy.url.outside")),
+		this.baseUri = Objects.firstNonNull(Strings.emptyToNull(System.getProperty("net.karazy.url.outside")),
 				"https://www.cloobster.com");
-		this.baseUriBuilder = UriBuilder.fromUri(  baseUri);
 	}
 	
 	/**
@@ -122,7 +121,8 @@ public class MailController {
 	public void sendWelcomeMessage(NewNewsletterRecipientEvent event) {
 		NewsletterRecipient recipient = event.getRecipient();
 		
-		String unsubscribeUrl = baseUriBuilder.path("unsubscribe/{id}").queryParam("email", recipient .getEmail()).build(recipient.getId()).toString();
+		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
+		String unsubscribeUrl = baseUriBuilder .path("unsubscribe/{id}").queryParam("email", recipient .getEmail()).build(recipient.getId()).toString();
 		
 		try {
 			sendWelcomeMessage(unsubscribeUrl, recipient);
@@ -144,6 +144,7 @@ public class MailController {
 	public void sendRegistrationConfirmationMail(NewAccountEvent event) {
 		Account account = event.getAccount();
 		UriInfo uriInfo = event.getUriInfo();
+		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		
 		if(account.getRole().equals(Role.USER)) {
 			sendCustomerAccountEmailConfirmation(account, uriInfo);
@@ -167,7 +168,7 @@ public class MailController {
 	public void sendAccountSetupMail(NewCompanyAccountEvent event) {
 		Account newAccount = event.getAccount();
 		Account ownerAccount = event.getOwnerAccount();
-		
+		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String accessToken = accountCtrl.createSetupAccountToken(newAccount).getToken();
 		
 		String setupUrl = baseUriBuilder.path("/frontend").fragment("/accounts/setup/{token}").build(accessToken).toString();
@@ -204,9 +205,8 @@ public class MailController {
 	@Subscribe
 	public void sendUpdateAccountEmailMessage(UpdateAccountEmailEvent event) {
 		Account account = event.getAccount();
-
+		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
-		
 		
 		UriBuilder uriBuilder = baseUriBuilder.path("/frontend");
 		if(account.getRole().equals(Role.USER)) {
@@ -278,7 +278,7 @@ public class MailController {
 		Account account = event.getAccount();
 		//TODO: Add expiration time, and externalize to config file.
 		String accessToken = accountCtrl.createPasswordResetToken(account).getToken();
-		
+		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String setupUrl = baseUriBuilder.path("/frontend").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
 
 		String text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getName(), setupUrl);
@@ -295,7 +295,7 @@ public class MailController {
 	
 	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
-		
+		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String confirmUrl = baseUriBuilder.path("/frontend").fragment(ACCOUNTS_CUSTOMER_CONFIRM).build(accessToken).toString();
 		
 		String confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);

@@ -25,6 +25,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.representation.BillDTO;
+import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
@@ -71,6 +72,12 @@ public class BusinessResource {
 
 	public void setBusiness(Business business) {
 		this.business = business;
+	}
+	
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	public BusinessProfileDTO getBusiness() {
+		return new BusinessProfileDTO(business);
 	}
 	
 	@GET

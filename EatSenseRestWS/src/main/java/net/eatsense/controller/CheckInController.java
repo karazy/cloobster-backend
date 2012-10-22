@@ -182,7 +182,7 @@ public class CheckInController {
     				logo = i;
     				spotDto.setLogoUrl(i.getUrl());
     			};
-    			if(i.getId().equals("picture1")) {
+    			if(i.getId().equals("appheader")) {
     				header = i;
     				spotDto.setHeaderUrl(i.getUrl());
     			};
