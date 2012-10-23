@@ -1,3 +1,124 @@
+var karazy;
+
+//create karazy namespace
+karazy = karazy || {};
+
+karazy.Login = (function() {
+
+	/**
+	* Show/hide loginbox depending on state.
+	*/
+	function toggleLoginBox() {
+		var existingToken = window.localStorage.getItem("accessToken");
+		
+		$(".login_failed").hide();
+		
+		//0. check if accessToken exists
+		if(existingToken) {
+			logMeIn(existingToken, true);
+		}
+		
+		
+		$('.login_box').slideToggle("slow", function() {
+			 $(":input[name='login_user']").focus();
+		});
+		return false;
+	}
+
+	/**
+	* Gather data from input fields and attempt a login try.
+	* If successful redirect to frontend.
+	*/
+	function doLogin() {
+		var username,
+			password,
+			save,
+			valid = true;
+			
+
+		username = $(":input[name='login_user']").val();
+		password = $(":input[name='login_pw']").val();
+		save = $(":input[name='login_save']").is(":checked");
+		
+		$(".login_failed").hide();
+		
+		//1. check if empty
+		if($.trim(username).length == 0) {
+			valid = false;
+			$(".login_user_error").show();
+		} else {
+			$(".login_user_error").hide();
+		}
+
+		if($.trim(password).length == 0) {
+			valid = false;
+			$(".login_pw_error").show();
+		} else {
+			$(".login_pw_error").hide();
+		}
+
+		if(!valid) {
+			return;
+		}
+
+		//2. do ajax request
+		$.ajax({
+			url: "/accounts/tokens",
+			type: "POST",
+			dataType: "json",
+			beforeSend: function(xhr) {
+    			xhr.setRequestHeader("login", username);
+    			xhr.setRequestHeader("password", password);
+  			},
+			success: function(data, status) {
+				logMeIn(data.accessToken, save);
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				$(".login_failed").show();
+			}
+		});		
+	}
+	
+	function logMeIn(accessToken, save) {
+		//3. store access token
+		window.localStorage.setItem("accessToken", accessToken);
+
+		if(save == "save" || save == true) {
+			window.localStorage.removeItem("accessTokenTransient");				
+		} else {
+			window.localStorage.setItem("accessTokenTransient", true);
+		}
+		//4. redirect to frontend on success
+		window.location = "frontend/#/businesses";
+	}
+
+	$(document).ready(function() {
+		$("#loginaction").click(function(e) {			
+			karazy.Login.login();
+		});
+
+		$(".login_but").click(function(e) {
+			karazy.Login.show();
+		});
+		
+		$(":input[name='login_user'], :input[name='login_pw'], :input[name='login_save']").keypress(function(e) {
+		    if(e.which == 13) {
+		        doLogin();
+		    }
+		});
+	});
+	//public methods
+	return {
+		show: function() {
+			toggleLoginBox();
+		},
+
+		login: function() {
+			doLogin();
+		}
+	};
+
+}());
 
 /**
 * Validates a form with jQuery.
@@ -51,3 +172,6 @@ $(document).ready(function() {
 		return validateForm();
 	});
 });
+
+
+
