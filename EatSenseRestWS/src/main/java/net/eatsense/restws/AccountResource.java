@@ -24,6 +24,7 @@ import net.eatsense.controller.AccountController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.BusinessDTO;
 
@@ -110,7 +111,7 @@ public class AccountResource {
 	@Path("password-reset")
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	public String createPasswordReset(BusinessAccountDTO accountData,  @Context UriInfo uriInfo) {
+	public String createPasswordReset(AccountDTO accountData,  @Context UriInfo uriInfo) {
 		accountCtr.createAndSendPasswordResetToken(accountData.getEmail(), uriInfo);
 		return "OK";
 	}
