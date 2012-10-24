@@ -93,6 +93,87 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 }
 CloobsterAdmin.Import.$inject = ['$scope', '$http', '$anchorScroll'];
 
+/**
+* 	@name CloobsterAdmin.Configuration
+*	@requires $http
+*
+* 	Manages data import.
+* 	@constructor
+*/
+CloobsterAdmin.Configuration = function($scope, $http, $anchorScroll, $timeout) {
+	
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setError(message) {
+		showAlert("alert-error", "Error!", message, "Try again", resetForm);
+	}
+
+	function setProgress( progress ) {
+		$scope.importProgressStyle = { width: progress };
+	}
+
+	function importError(data, status) {
+		var message = (data.message) ?
+			data.message
+			: "An unknown error occured, check the server and your connection.";
+		setError(message);
+	}
+
+	function importSuccess(data) {
+		setProgress("100%");
+		showAlert("alert-success", "Done!", "Import done.");
+		$scope.defaultFeedbackForm = angular.toJson(data, true);
+
+		$timeout(function() {
+			resetForm();
+		});
+	}
+
+	function resetForm() {
+		$scope.importProgress = false;
+		setProgress("0%");
+	}
+
+	$scope.saveDefaultFeedback = function() {
+		var dto;
+		$scope.importProgress = true;
+		try {
+			dto = angular.fromJson($scope.defaultFeedbackForm);
+		}
+		catch(err) {
+			setProgress("30%");
+			setError("JSON parsing error: " + err.message);
+			return;
+		}
+		$http.put("/admin/services/configuration/defaultfeedbackform", dto).success(importSuccess)
+		.error(importError);
+	}
+
+	dismissAlert();
+	setProgress("0%");
+	resetForm();
+
+	$scope.defaultFeedbackForm = "Loading ...";
+	$http.get("/admin/services/configuration/defaultfeedbackform").success(function(data) {
+		$scope.defaultFeedbackForm = angular.toJson(data, true);
+	});
+
+
+	$anchorScroll();
+}
+CloobsterAdmin.Configuration.$inject = ['$scope', '$http', '$anchorScroll', '$timeout'];
+
 CloobsterAdmin.Functions = function($scope, $http) {
 	$scope.deleteFunctionsDisabled = (Karazy.environment === "prod")? true : false;
 	$scope.confirmDeleteAllDisabled = false;
