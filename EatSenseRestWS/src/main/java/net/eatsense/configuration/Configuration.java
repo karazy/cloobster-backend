@@ -1,11 +1,12 @@
 package net.eatsense.configuration;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import net.eatsense.domain.FeedbackForm;
 
-import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 
@@ -26,7 +27,7 @@ public class Configuration {
 		this.repository = repository;
 	}
 
-	protected Configuration() {		
+	protected Configuration() {
 		super();
 		// Set default id.
 		this.id = "default";
@@ -51,9 +52,8 @@ public class Configuration {
 	}
 	
 	public void save() throws IllegalStateException {
-		if(repository == null) {
-			throw new IllegalStateException("No repository found.");
-		}
+		checkState(repository != null, "no respository set");
+		
 		repository.save(this);
 	}
 }

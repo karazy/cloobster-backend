@@ -24,12 +24,8 @@ public class ConfigurationProvider implements Provider<Configuration> {
 			config = repository.get("default");
 		} catch (NotFoundException e) {
 			logger.warn("No config found returning empty default");
-			config = new Configuration();
-			config.setId("default");
+			config = repository.createDefault();
 		}
-		
-		config.setRepository(repository);
-					
 		return config;
 	}
 }

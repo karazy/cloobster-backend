@@ -245,12 +245,12 @@ public class ImportController {
 						}
 					}
 					else {
-						logger.info("Error while saving product with name: " +productData.getName());
+						logger.error("Error while saving product with name: " +productData.getName());
 					}
 				}
 			}
 			else {
-				logger.info("Error while saving menu with title: " +menu.getTitle());
+				logger.error("Error while saving menu with title: " +menu.getTitle());
 			}
 
 		}

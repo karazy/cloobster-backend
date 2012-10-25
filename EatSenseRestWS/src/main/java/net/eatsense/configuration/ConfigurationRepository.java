@@ -23,7 +23,15 @@ public class ConfigurationRepository extends DAOBase {
 	 * @return
 	 */
 	public Configuration get(String id) throws NotFoundException {
-		return ofy().get(Configuration.class, id);
+		Configuration configuration = ofy().get(Configuration.class, id);
+		configuration.setRepository(this);
+		return configuration;
+	}
+	
+	public Configuration createDefault() {
+		Configuration configuration = new Configuration();
+		configuration.setRepository(this);
+		return configuration;
 	}
 
 	public Key<Configuration> save(Configuration configuration) {
