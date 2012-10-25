@@ -584,7 +584,6 @@ public class BusinessControllerTest {
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		BusinessProfileDTO testProfileData = getTestProfileData();
 		
-		
 		// Run the method.
 		businessCtrl.createBusinessForAccount(account, testProfileData);
 		
@@ -597,8 +596,7 @@ public class BusinessControllerTest {
 		
 		// Default FeedbackForm creation verifications.
 		verify(defaultFeedbackForm).setId(null);
-		assertThat(business.getFeedbackForm(), is(newFormKey));
-		
+		assertThat(business.getFeedbackForm(), is(newFormKey));		
 	}
 	
 	@Test
