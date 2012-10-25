@@ -29,6 +29,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.exceptions.ValidationException;
@@ -560,6 +561,15 @@ public class BusinessControllerTest {
 		businessCtrl = createController();
 		Configuration config = mock(Configuration.class);
 		when(configProvider.get()).thenReturn(config );
+		@SuppressWarnings("unchecked")
+		Key<FeedbackForm> defaultFeedbackFormKey = mock(Key.class);
+		when(config.getDefaultFeedbackForm()).thenReturn(defaultFeedbackFormKey);
+		
+		FeedbackForm defaultFeedbackForm = mock(FeedbackForm.class);
+		when(feedbackRepo.getByKey(defaultFeedbackFormKey)).thenReturn(defaultFeedbackForm );
+		@SuppressWarnings("unchecked")
+		Key<FeedbackForm> newFormKey = mock(Key.class);
+		when(feedbackRepo.saveOrUpdate(defaultFeedbackForm)).thenReturn(newFormKey );
 		
 		// Mock arguments and stub method calls.
 		@SuppressWarnings("unchecked")
@@ -570,9 +580,10 @@ public class BusinessControllerTest {
 		Account account = mock(Account.class);
 		// Create the list here to check the contents after the test.
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
-		when(account.getBusinesses()).thenReturn(businessesList );
+		when(account.getBusinesses()).thenReturn(businessesList);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		BusinessProfileDTO testProfileData = getTestProfileData();
+		
 		
 		// Run the method.
 		businessCtrl.createBusinessForAccount(account, testProfileData);
@@ -583,6 +594,11 @@ public class BusinessControllerTest {
 		assertThat(business.getPaymentMethods().get(0).getName(), is("Bar"));
 		// The key for the new business should be added to the account.
 		assertThat(businessesList, hasItem(businessKey));
+		
+		// Default FeedbackForm creation verifications.
+		verify(defaultFeedbackForm).setId(null);
+		assertThat(business.getFeedbackForm(), is(newFormKey));
+		
 	}
 	
 	@Test
