@@ -44,7 +44,7 @@
 		<!-- Cloobster Projects -->
 		<cloobster.app>../../cloobster_app/app</cloobster.app>
 		<cloobster.cockpit>../../cloobster_cockpit</cloobster.cockpit>
-		<cloobster.frontend>../../cloobster_frontend</cloobster.frontend>
+		<cloobster.frontend>../../cloobster_frontend/</cloobster.frontend>
 		
 	</properties>
 
@@ -120,7 +120,7 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
 											<directory>../../cloobster_frontend/src</directory>
@@ -135,10 +135,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend-test</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/test</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src/test</directory>
+											<directory>../../cloobster_frontend/test</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -166,10 +166,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.frontend}/src</directory>
+											<directory>${cloobster.frontend}/src/frontend</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -181,7 +181,7 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend-test</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/test</outputDirectory>
 									<resources>
 										<resource>
 											<directory>${cloobster.frontend}/test</directory>
@@ -267,13 +267,13 @@
 						<version>2.4.2</version>
 						<executions>
 							<execution>
-								<id>copy-cloobster-frontend-dev</id>
+								<id>copy-cloobster-frontend-prod</id>
 								<phase>compile</phase>
 								<goals>
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
 											<directory>${cloobster.frontend}/build</directory>
