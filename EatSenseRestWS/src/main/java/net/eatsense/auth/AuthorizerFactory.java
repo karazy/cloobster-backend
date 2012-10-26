@@ -20,5 +20,5 @@ public interface AuthorizerFactory {
 	 * @param token
 	 * @return Authorizer instance for this Account and optional AccessToken
 	 */
-	public Authorizer createForAccount(final Account account, final AccessToken token);
+	public Authorizer createForAccount(final Account account, final AccessToken token, final String authScheme);
 }

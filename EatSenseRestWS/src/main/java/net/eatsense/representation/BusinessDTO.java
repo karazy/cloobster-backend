@@ -29,6 +29,7 @@ public class BusinessDTO {
 	
 	private String theme;
 	private String url;
+	private String fbUrl;
 	
 	@Valid
 	private List<PaymentMethod> paymentMethods;
@@ -48,6 +49,7 @@ public class BusinessDTO {
 		this.theme = Strings.isNullOrEmpty(business.getTheme())?"default":business.getTheme();
 		this.paymentMethods = business.getPaymentMethods();
 		this.url = business.getUrl();
+		this.fbUrl = business.getFbUrl();
 	}
 	
 	public String getName() {
@@ -107,5 +109,13 @@ public class BusinessDTO {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getFbUrl() {
+		return fbUrl;
+	}
+
+	public void setFbUrl(String fbUrl) {
+		this.fbUrl = fbUrl;
 	}
 }

@@ -10,6 +10,8 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
@@ -19,6 +21,7 @@ import net.eatsense.domain.CheckIn;
  */
 public final class Authorizer implements SecurityContext {
 	public static final String TOKEN_AUTH = "TOKEN";
+	public static final String FB_AUTH = "FACEBOOK";
 	private final String authScheme;
 	private final CheckIn checkIn;
 	private final Account account;
@@ -44,7 +47,7 @@ public final class Authorizer implements SecurityContext {
         };
     }
     
-    protected Authorizer(final AccountController accountController,final UriInfo uriInfo, final Account account, final AccessToken token) {
+    protected Authorizer(final AccountController accountController,final UriInfo uriInfo, final Account account, final AccessToken token, final String authScheme) {
     	this.accountController = accountController;
     	this.uriInfo = uriInfo;
 		this.checkIn = null;
@@ -52,7 +55,7 @@ public final class Authorizer implements SecurityContext {
     		this.authScheme = TOKEN_AUTH;
     	}
     	else {
-    		this.authScheme = BASIC_AUTH;
+    		this.authScheme = Strings.isNullOrEmpty(authScheme) ? BASIC_AUTH : authScheme;
     	}
     	this.token = token;
     	 

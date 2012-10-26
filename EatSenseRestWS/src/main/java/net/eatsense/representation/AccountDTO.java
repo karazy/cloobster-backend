@@ -40,6 +40,9 @@ public class AccountDTO {
 	private String name;
 	private String accessToken;
 	
+	private String fbUserId;
+	private String fbAccessToken;
+	
 	public AccountDTO() {
 		super();
 	}
@@ -56,6 +59,7 @@ public class AccountDTO {
 		this.name = account.getName();
 		this.role = account.getRole();
 		this.emailConfirmed = account.isEmailConfirmed();
+		this.fbUserId = account.getFacebookUid();
 	}
 	public String getLogin() {
 		return login;
@@ -112,5 +116,21 @@ public class AccountDTO {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getFbUserId() {
+		return fbUserId;
+	}
+
+	public void setFbUserId(String fbUserId) {
+		this.fbUserId = fbUserId;
+	}
+
+	public String getFbAccessToken() {
+		return fbAccessToken;
+	}
+
+	public void setFbAccessToken(String fbAccessToken) {
+		this.fbAccessToken = fbAccessToken;
 	}	
 }
