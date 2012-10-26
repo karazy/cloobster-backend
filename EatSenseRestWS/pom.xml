@@ -169,7 +169,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.frontend}/src/frontend</directory>
+											<directory>${cloobster.frontend}/src/</directory>
 										</resource>
 									</resources>
 								</configuration>
