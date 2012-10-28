@@ -579,6 +579,7 @@ public class AccountControllerTest {
 		data.setLogin("testuser1");
 		data.setName("Test Person");
 		data.setPassword("testtest!");
+		data.setPhone("0123-456789");
 		CompanyDTO company = new CompanyDTO();
 		company.setName("Test Company");
 		company.setAddress("Street 1");
@@ -603,6 +604,7 @@ public class AccountControllerTest {
 		data.setLogin("testuser1");
 		data.setName("Test Person");
 		data.setPassword("testt1");
+		data.setPhone("01234-012345");
 		CompanyDTO company = new CompanyDTO();
 		company.setName("Test Company");
 		company.setAddress("Street 1");
@@ -751,16 +753,6 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void testUpdateCompanyInvalidPostcode() throws Exception {
-		CompanyDTO companyData = getCompanyTestData();
-		companyData.setPostcode("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("postcode");
-		
-		ctr.updateCompany(company, companyData);
-	}
-	
-	@Test
 	public void testUpdateCompanyPhone() throws Exception {
 		CompanyDTO companyData = getCompanyTestData();
 		companyData.setPhone("020-test2");
@@ -789,32 +781,12 @@ public class AccountControllerTest {
 	}
 	
 	@Test
-	public void testUpdateCompanyInvalidCountry() throws Exception {
-		CompanyDTO companyData = getCompanyTestData();
-		companyData.setCountry("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("country");
-		
-		ctr.updateCompany(company, companyData);
-	}
-	
-	@Test
 	public void testUpdateCompanyCountry() throws Exception {
 		CompanyDTO companyData = getCompanyTestData();
 		companyData.setCountry("US");
 		ctr.updateCompany(company, companyData);
 		verify(companyRepo).saveOrUpdate(company);
 		assertThat(company.getCountry(), is(companyData.getCountry()));
-	}
-	
-	@Test
-	public void testUpdateCompanyInvalidCity() throws Exception {
-		CompanyDTO companyData = getCompanyTestData();
-		companyData.setCity("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("city");
-		
-		ctr.updateCompany(company, companyData);
 	}
 	
 	@Test
@@ -834,16 +806,6 @@ public class AccountControllerTest {
 		verify(companyRepo).saveOrUpdate(company);
 		
 		assertThat(company.getAddress(), is(companyData.getAddress()));
-	}
-	
-	@Test
-	public void testUpdateCompanyInvalidAddress() throws Exception {
-		CompanyDTO companyData = getCompanyTestData();
-		companyData.setAddress("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("address");
-		
-		ctr.updateCompany(company, companyData);
 	}
 	
 	@Test

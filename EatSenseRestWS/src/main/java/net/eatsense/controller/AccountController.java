@@ -953,7 +953,7 @@ public class AccountController {
 		}
 		
 		Account account = accountRepo.getByProperty("email", email);
-		
+		//TODO Remove return values.
 		if(account == null) {
 			throw new ValidationException("Unknown e-mail address.");
 		}
