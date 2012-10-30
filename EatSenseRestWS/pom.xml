@@ -148,6 +148,7 @@
 				</plugins>
 			</build>
 		</profile>
+		
 		<profile>
 			<id>website</id>
 			<plugins>
@@ -373,7 +374,7 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>						
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
