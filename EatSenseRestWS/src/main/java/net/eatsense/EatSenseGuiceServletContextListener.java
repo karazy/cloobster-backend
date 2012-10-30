@@ -32,6 +32,8 @@ import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.files.FileService;
+import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.urlfetch.URLFetchService;
@@ -141,6 +143,11 @@ public class EatSenseGuiceServletContextListener extends
 					@Provides
 					public ImagesService providesImagesService() {
 						return ImagesServiceFactory.getImagesService();
+					}
+					
+					@Provides
+					public FileService providesFileService() {
+						return FileServiceFactory.getFileService();
 					}
 					
 				}, new ValidationModule());

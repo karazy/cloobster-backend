@@ -288,8 +288,7 @@ public class ChannelControllerTest {
 		
 		ctr.unsubscribeCheckIn(clientId);
 		
-		verify(checkIn).setChannelId(null);
-		verify(cr).saveOrUpdate(checkIn);
+		verify(cr, never()).saveOrUpdate(checkIn);
 	}
 	
 	@Test(expected=NullPointerException.class)

@@ -12,17 +12,9 @@ public class CompanyDTO {
 	@NotNull
 	@NotEmpty
 	String name;
-	@NotNull
-	@NotEmpty
 	String address;
-	@NotNull
-	@NotEmpty
 	String city;
-	@NotNull
-	@NotEmpty
 	String country;
-	@NotNull
-	@NotEmpty
 	String postcode;
 	
 	String url;

@@ -26,6 +26,7 @@ import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.CustomerProfileDTO;
 import net.eatsense.service.FacebookService;
@@ -172,6 +173,20 @@ public class AccountsResource {
 		accessTokenRepository.delete(token);
 		
 		eventBus.post(new ConfirmedAccountEvent(account));
+		return new CustomerAccountDTO(account);
+	}
+	
+	@PUT
+	@Path("email-confirmation/{accessToken}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public CustomerAccountDTO confirmNewEmail(@PathParam("accessToken") String accessToken) {
+		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
+		AccessToken token = accessTokenRepository.get(accessToken);
+		
+		Account account = accountCtrlProvider.get().confirmAccountEmail(token.getAccount());
+		accessTokenRepository.delete(token);
+		
 		return new CustomerAccountDTO(account);
 	}
 }
