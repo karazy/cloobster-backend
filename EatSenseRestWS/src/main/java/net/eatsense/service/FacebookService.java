@@ -1,8 +1,6 @@
 package net.eatsense.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,6 +19,9 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 public class FacebookService {
+	public static final String FB_USERID_HEADER = "X-FBUserId";
+	public static final String FB_ACCESSTOKEN_HEADER = "X-FBAccessToken";
+	
 	private URLFetchService urlFetchService;
 
 	@Inject

@@ -42,7 +42,7 @@ import com.google.inject.Inject;
 import com.googlecode.objectify.NotFoundException;
 
 public class MailController {
-	private static final String ACCOUNTS_CUSTOMER_CONFIRM = "/accounts/customer/confirm/{token}";
+	private static final String ACCOUNTS_CUSTOMER_CONFIRM = "/confirm/{token}";
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Session session = Session.getDefaultInstance( new Properties(), null);
 	private final TemplateController templateCtrl;
@@ -205,15 +205,14 @@ public class MailController {
 	@Subscribe
 	public void sendUpdateAccountEmailMessage(UpdateAccountEmailEvent event) {
 		Account account = event.getAccount();
-		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
+		UriBuilder uriBuilder = UriBuilder.fromUri(baseUri);
 		
-		UriBuilder uriBuilder = baseUriBuilder.path("/frontend");
 		if(account.getRole().equals(Role.USER)) {
-			uriBuilder = uriBuilder.fragment("/accounts/customer/confirm-email/{token}");
+			uriBuilder = uriBuilder.path("/home").fragment("/confirm-email/{token}");
 		}
 		else 
-			uriBuilder = uriBuilder.fragment("/accounts/confirm-email/{token}");
+			uriBuilder = uriBuilder.path("/frontend").fragment("/accounts/confirm-email/{token}");
 		
 		String setupUrl = uriBuilder.build(accessToken).toString();
 		
@@ -279,9 +278,16 @@ public class MailController {
 		//TODO: Add expiration time, and externalize to config file.
 		String accessToken = accountCtrl.createPasswordResetToken(account).getToken();
 		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
-		String setupUrl = baseUriBuilder.path("/frontend").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
-
-		String text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getName(), setupUrl);
+		String setupUrl;
+		String text;
+		if(account.getRole().equals(Role.USER)) {
+			setupUrl = baseUriBuilder.path("/home").fragment("/reset-password/{token}").build(accessToken).toString();
+			text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getEmail(), setupUrl);
+		}
+		else {
+			setupUrl = baseUriBuilder.path("/frontend").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
+			text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getEmail(), setupUrl);
+		}
 		
 		try {
 			// Send e-mail with password reset link.
@@ -296,7 +302,7 @@ public class MailController {
 	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
-		String confirmUrl = baseUriBuilder.path("/frontend").fragment(ACCOUNTS_CUSTOMER_CONFIRM).build(accessToken).toString();
+		String confirmUrl = baseUriBuilder.path("/home").fragment(ACCOUNTS_CUSTOMER_CONFIRM).build(accessToken).toString();
 		
 		String confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);
 		
