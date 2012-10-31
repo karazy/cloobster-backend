@@ -406,6 +406,7 @@ public class BusinessController {
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
 		business.setUrl(businessData.getUrl());
+		business.setFbUrl(businessData.getFbUrl());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme

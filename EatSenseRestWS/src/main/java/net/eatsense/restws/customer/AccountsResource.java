@@ -26,8 +26,10 @@ import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.CustomerProfileDTO;
+import net.eatsense.service.FacebookService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,8 +108,8 @@ public class AccountsResource {
 		
 		if(!Strings.isNullOrEmpty(accountData.getPassword()) || !accountData.getEmail().equals(account.getEmail())) {
 			// User tries to change e-mail or password.
-			if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
-				throw new IllegalAccessException("Must authenticate with user credentials to change password.");
+			if(Authorizer.TOKEN_AUTH.equals(securityContext.getAuthenticationScheme())) {
+				throw new IllegalAccessException("Must authenticate with user credentials/facebook to change password or email.");
 			}
 		}
 		String previousEmail = account.getEmail();
@@ -126,25 +128,22 @@ public class AccountsResource {
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public CustomerAccountDTO createToken() {
-		if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
+		Account account = null;
+		if(Authorizer.TOKEN_AUTH.equals(securityContext.getAuthenticationScheme())) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
 		}
-		
-		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
-		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		AccountController accountCtrl = accountCtrlProvider.get();
-		
+		account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+
 		if(account.getCustomerProfile() == null) {
 			accountCtrl.addCustomerProfile(account);
 		}
 		
 		CustomerAccountDTO accountDto = new CustomerAccountDTO(account, checkIn);
-		AccessToken authToken;
+		AccessToken authToken = accountCtrl.createCustomerAuthToken(account);
 		
-		
-		authToken = accountCtrl.createCustomerAuthToken(account);
-		
-		logger.info("Permanent customer Token created");
+		logger.info("Customer accessToken created for Account({})", account.getId());
 		accountDto.setAccessToken(authToken.getToken());
 		
 		return accountDto;
@@ -174,6 +173,20 @@ public class AccountsResource {
 		accessTokenRepository.delete(token);
 		
 		eventBus.post(new ConfirmedAccountEvent(account));
+		return new CustomerAccountDTO(account);
+	}
+	
+	@PUT
+	@Path("email-confirmation/{accessToken}")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public CustomerAccountDTO confirmNewEmail(@PathParam("accessToken") String accessToken) {
+		AccessTokenRepository accessTokenRepository = accessTokenRepoProvider.get();
+		AccessToken token = accessTokenRepository.get(accessToken);
+		
+		Account account = accountCtrlProvider.get().confirmAccountEmail(token.getAccount());
+		accessTokenRepository.delete(token);
+		
 		return new CustomerAccountDTO(account);
 	}
 }
