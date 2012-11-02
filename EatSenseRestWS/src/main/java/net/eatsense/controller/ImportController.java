@@ -15,6 +15,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
+import net.eatsense.configuration.Configuration;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
@@ -57,7 +58,9 @@ import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 
 /**
@@ -90,6 +93,7 @@ public class ImportController {
 	private BillRepository billRepo;
 	private FeedbackFormRepository feedbackFormRepo;
 	private AreaRepository areaRepo;
+	private Provider<Configuration> configProvider;
 	
 
 	@Inject
@@ -98,7 +102,7 @@ public class ImportController {
 			CheckInRepository chkr, OrderRepository or,
 			OrderChoiceRepository ocr, BillRepository br,
 			RequestRepository reqr, AccountRepository acr,
-			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo) {
+			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo, Provider<Configuration> configProvider) {
 		this.areaRepo = areaRepo;
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
@@ -112,6 +116,7 @@ public class ImportController {
 		this.requestRepo = reqr;
 		this.accountRepo = acr;
 		this.feedbackFormRepo = feedbackFormRepo;
+		this.configProvider = configProvider;
 	}
 
     public void setValidator(Validator validator) {
@@ -150,6 +155,39 @@ public class ImportController {
     	    	
     	return new FeedbackFormDTO(feedbackForm);
     }
+    
+    /**
+     * Update or create the default {@link FeedbackForm} entity based on the given data. 
+     * 
+     * @param feedbackFormData - Data for the new {@link FeedbackForm} entity.
+     * @return {@link FeedbackFormDTO} - Data object representing the new FeedbackForm.
+     */
+	public FeedbackFormDTO importDefaultFeedbackForm(
+			FeedbackFormDTO feedbackFormData) {
+		FeedbackForm feedbackForm = new FeedbackForm();
+		Configuration config = configProvider.get();
+		if(config.getDefaultFeedbackForm() != null) {
+			feedbackForm.setId(config.getDefaultFeedbackForm().getId());
+		}
+    	feedbackForm.setDescription(feedbackFormData.getDescription());
+    	
+    	Long index = 1l;
+    	for (FeedbackQuestion question : feedbackFormData.getQuestions()) {
+			question.setId(index);
+			index++;
+		}
+    	feedbackForm.setQuestions(feedbackFormData.getQuestions());
+    	feedbackForm.setTitle(feedbackFormData.getTitle());
+    	
+    	Key<FeedbackForm> formKey = feedbackFormRepo.saveOrUpdate(feedbackForm);
+    	
+    	if(!Objects.equal(formKey, config.getDefaultFeedbackForm())) {
+    		config.setDefaultFeedbackForm(formKey);
+    		config.save();
+    	}
+    	    	
+		return new FeedbackFormDTO(feedbackForm);
+	}
 
 	public Long addBusiness(BusinessImportDTO businessData) {
 		if (!isValidBusinessData(businessData)) {
@@ -207,12 +245,12 @@ public class ImportController {
 						}
 					}
 					else {
-						logger.info("Error while saving product with name: " +productData.getName());
+						logger.error("Error while saving product with name: " +productData.getName());
 					}
 				}
 			}
 			else {
-				logger.info("Error while saving menu with title: " +menu.getTitle());
+				logger.error("Error while saving menu with title: " +menu.getTitle());
 			}
 
 		}
@@ -384,4 +422,5 @@ public class ImportController {
 		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
+
 }

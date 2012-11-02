@@ -9,6 +9,7 @@
 <title>cloobster - We are mobile</title>
 <!-- css -->
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" type="text/css" href="css/styles.css">
 <link href="css/lightbox.css" rel="stylesheet" />
 
@@ -41,7 +42,8 @@
                         <a  class="login_but" target="blank">Login</a>
                         <a href="#contact" class="login_but signup_but">Kontakt</a>
                         </span>
-                         <div class="login_box">                                    
+                         <div class="login_box">
+                         	<p>Geschäftskundenzugang</p>                               
                             <input type="text" name="login_user" placeholder="benutzername/email"></input>
                             <span class="login_error login_user_error">Bitte Benutzernamen eingeben.</span><br/>
                             <input type="password" name="login_pw" placeholder="passwort"></input>
@@ -49,11 +51,14 @@
                             <input type="checkbox" name="login_save" value="save" id="login_save_checkbox"></input>
                             <label for="login_save_checkbox">Zugang speichern</label><br/>                    
                             <button type="button" id="loginaction">Login</button><br/>
-                            <div class="login_error login_failed">Falscher Benutzername und/oder Passwort.</div>
+                            <div class="login_error login_failed">
+                            	Falscher Benutzername und/oder Passwort.<br/>
+                            	Sie sind App Benutzer? Dann können Sie Einstellungen in der App vornehmen.
+                            </div>
                         </div>
                     </div>
 
-                <strong class="mobile_btns"><a href="https://play.google.com/store/apps/details?id=net.karazy.cloobster" target="blank"><img src="images/g_play_btn.png" width="180" alt=""></a><a href="https://itunes.apple.com/de/app/cloobster/id532351667?mt=8" target="blank"><img src="images/app_store_btn.png" width="180" alt=""></a></strong>
+                <strong class="mobile_btns"><a href="https://play.google.com/store/apps/details?id=net.karazy.cloobster" target="blank"><img src="images/g_play_btn.png" width="180" alt=""></a><a href="https://itunes.apple.com/de/app/cloobster/id532351667?mt=8" target="blank"><img src="images/app_store_btn_new.png" width="180" alt=""></a></strong>
               </div>
             </div>
         </div>
@@ -396,34 +401,26 @@ style="display:none;" onload="if(submitted)
                                         <div class="texttab1">
                                             <input type="text" name="entry.0.single" value="" class="ss-q-short required" id="entry_0" placeholder="Name*">                                            
                                         </div>
-                                        <div class="form-error" id="entry_0_error">
-                                                Das ist ein Pflichtfeld.
-                                        </div>
+                                        <div class="form-error" id="entry_0_error">Das ist ein Pflichtfeld.</div>
                                     </div>                        
                                  <div class="form-elements">
                                         <div class="texttab1">
                                             <input type="text" name="entry.1.single" value="" class="ss-q-short required email" id="entry_1" placeholder="Email*">
                                         </div>
-                                        <div class="form-error" id="entry_1_error">
-                                                Das ist ein Pflichtfeld und muss eine korrekte E-Mailadresse enthalten.
-                                        </div>
+                                        <div class="form-error" id="entry_1_error">Das ist ein Pflichtfeld und muss eine korrekte E-Mailadresse enthalten.</div>
                                  </div>
                                  <div class="form-elements">
                                         <div class="texttab1">
                                             <input type="text" name="entry.3.single" value="" class="ss-q-short required" id="entry_3" placeholder="Telefon*">
                                         </div>
-                                        <div class="form-error" id="entry_3_error">
-                                                Das ist ein Pflichtfeld.
-                                        </div>
+                                        <div class="form-error" id="entry_3_error">Das ist ein Pflichtfeld.</div>
                                  </div>                                 
                             </div>
                             <div class="form-elementsright">
                                 <div class="textarea1">
                                     <textarea name="entry.2.single" rows="8" cols="75" class="ss-q-long required" id="entry_2" placeholder="Ihre Anfrage"></textarea>                            
                                 </div>
-                                <div class="form-error" id="entry_2_error">
-                                                Das ist ein Pflichtfeld.
-                                        </div>
+                                <div class="form-error" id="entry_2_error">Das ist ein Pflichtfeld.</div>
                                 <input type="submit" name="submit" class="send-button" value="Kontaktieren">
                             </div>
                             <input type="hidden" name="pageNumber" value="0">
@@ -437,7 +434,8 @@ style="display:none;" onload="if(submitted)
                    <!--
                    <a href="skype:mycloobster?chat"><img src="http://mystatus.skype.com/balloon/mycloobster" style="border: none;" width="150" height="60" alt="My status" /></a>
                    -->	
-                </div>               
+                </div> 
+                             
                 </div>
                 
                 <p><br><br><br><br><br><br>

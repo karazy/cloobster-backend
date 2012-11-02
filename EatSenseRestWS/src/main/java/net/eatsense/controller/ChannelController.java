@@ -357,8 +357,11 @@ public class ChannelController {
 		
 		if(checkIn.getChannelId() != null && checkIn.getChannelId().equals(clientId)) {
 			checkIn.setChannelId(null);
-			logger.info("Unsubscribing channel {} from checkin {} ", clientId, checkIn.getNickname());
-			checkInRepo.saveOrUpdate(checkIn);
+			logger.info("Channel disconnected for CheckIn.id={}, nickname={}", checkIn.getId(), checkIn.getNickname());
+			
+			// Disabled updating of checking because of problematic caching
+			// and datastore deletes leading to inconsitencies after checkin deletion.
+			//checkInRepo.saveOrUpdate(checkIn);
 		}
 	}
 

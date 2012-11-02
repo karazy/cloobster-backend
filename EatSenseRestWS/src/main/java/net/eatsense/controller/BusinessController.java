@@ -12,11 +12,13 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
 
+import net.eatsense.configuration.Configuration;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
@@ -34,6 +36,8 @@ import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.FeedbackFormRepository;
+import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -53,6 +57,7 @@ import com.google.appengine.api.blobstore.BlobKey;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
@@ -75,11 +80,13 @@ public class BusinessController {
 	private final Validator validator;
 	private final AreaRepository areaRepo;
 	private final MenuRepository menuRepo;
+	private final Provider<Configuration> configProvider;
+	private FeedbackFormRepository feedbackRepo;
 	
 	@Inject
 	public BusinessController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, BusinessRepository br, EventBus eventBus,
-			AccountRepository accountRepo, ImageController imageController,AreaRepository areaRepository, Validator validator, MenuRepository menuRepository) {
+			AccountRepository accountRepo, ImageController imageController,AreaRepository areaRepository, Validator validator, MenuRepository menuRepository,FeedbackFormRepository feedbackRepository, Provider<Configuration> configProvider) {
 		this.areaRepo = areaRepository;
 		this.menuRepo = menuRepository;
 		this.validator = validator;
@@ -90,6 +97,8 @@ public class BusinessController {
 		this.businessRepo = br;
 		this.accountRepo = accountRepo;
 		this.imageController = imageController;
+		this.configProvider = configProvider;
+		this.feedbackRepo = feedbackRepository;
 	}
 	
 	/**
@@ -331,6 +340,29 @@ public class BusinessController {
 			account.setBusinesses(new ArrayList<Key<Business>>());	
 		}
 		Business business = businessRepo.newEntity();
+		Configuration config = configProvider.get();
+		
+		if(config.getDefaultFeedbackForm() != null) {
+			// Copy default feedback form if it exists.
+			FeedbackForm feedbackForm = null;
+			
+			try {
+				feedbackForm = feedbackRepo.getByKey(config.getDefaultFeedbackForm());				
+			} catch (com.googlecode.objectify.NotFoundException e) {
+				logger.warn("Default FeedbackForm not found.");				
+			}
+			
+			if(feedbackForm != null) {
+				// Remove id so we create a copy of the original entity.
+				feedbackForm.setId(null);
+				business.setFeedbackForm(feedbackRepo.saveOrUpdate(feedbackForm));
+			}
+		}
+		else {
+			logger.warn("defaultFeedbackForm not set in default configuration.");
+		}
+		
+		
 		
 		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
 		business.getPaymentMethods().add(new PaymentMethod("Bar"));
@@ -374,6 +406,7 @@ public class BusinessController {
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
 		business.setUrl(businessData.getUrl());
+		business.setFbUrl(businessData.getFbUrl());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme

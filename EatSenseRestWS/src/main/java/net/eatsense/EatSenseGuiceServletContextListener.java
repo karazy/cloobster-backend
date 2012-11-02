@@ -7,6 +7,8 @@ import net.eatsense.auth.AccessTokenFilter;
 import net.eatsense.auth.AuthorizerFactory;
 import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
+import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.ConfigurationProvider;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.exceptions.ServiceExceptionMapper;
@@ -101,6 +103,9 @@ public class EatSenseGuiceServletContextListener extends
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						bind(ProfilesResource.class);
 						
+						// Create Configuration binding to automatically load configuration if needed.
+						bind(Configuration.class).toProvider(ConfigurationProvider.class);
+												
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*c/profiles(.)*",
 								"(.)*c/accounts(.)*",
@@ -129,7 +134,7 @@ public class EatSenseGuiceServletContextListener extends
 //						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
 					@Provides
-					public ChannelService providesChannelService() {
+					public ChannelService providesChannelService() {						
 						return ChannelServiceFactory.getChannelService();
 					}
 					@Provides

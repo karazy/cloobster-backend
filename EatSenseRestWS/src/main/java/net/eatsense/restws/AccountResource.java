@@ -69,7 +69,7 @@ public class AccountResource {
 	@GET
 	@Path("{login}")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessAccountDTO getAccount(@PathParam("login") String login, @HeaderParam("password") String password) {
 		return this.getAccount();
 	}
@@ -77,7 +77,7 @@ public class AccountResource {
 	@GET
 	@Path("login")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessAccountDTO getAccount() {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		AccessToken token = (AccessToken)servletRequest.getAttribute(AccessToken.class.getName());
@@ -91,7 +91,7 @@ public class AccountResource {
 	@Path("tokens")
 	@Produces("application/json; charset=UTF-8")
 	@Consumes("application/json; charset=UTF-8")
-	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BusinessAccountDTO createToken() {
 		if(securityContext.getAuthenticationScheme().equals(Authorizer.TOKEN_AUTH)) {
 			throw new IllegalAccessException("Must re-authenticate with user credentials.");
@@ -137,7 +137,7 @@ public class AccountResource {
 	@GET
 	@Path("{login}/businesses")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({Role.USER, Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<BusinessDTO> getBusinessesForAccount(@PathParam("login") String login) {
 		//TODO Refactor call to getBusinessesForAccount
 		return accountCtr.getBusinessDtos(login);
