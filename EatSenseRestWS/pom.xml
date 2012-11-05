@@ -16,10 +16,10 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.7.0</gae.version>
+		<gae.version>1.7.2</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
-		<maven-gae-plugin.version>0.9.4</maven-gae-plugin.version>
+		<maven-gae-plugin.version>0.9.5</maven-gae-plugin.version>
 
 		<!-- Don't let your Mac use a crazy non-standard encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
