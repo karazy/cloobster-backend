@@ -204,5 +204,4 @@ public class BusinessResource {
 			throw new net.eatsense.exceptions.NotFoundException("unknown feedback id");
 		}
 	}
-
 }
