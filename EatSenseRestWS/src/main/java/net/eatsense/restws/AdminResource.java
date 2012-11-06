@@ -17,17 +17,21 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 
+import net.eatsense.configuration.Configuration;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.FeedbackFormRepository;
+import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
@@ -57,11 +61,14 @@ public class AdminResource {
 	private final TemplateController templateCtrl;
 	private final AccountRepository accountRepo;
 	private final ChannelController channelCtrl;
+	private Configuration configuration;
+	private FeedbackFormRepository feedbackFormRepo;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
-			NicknameAdjectiveRepository adjRepo, NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl) {
+			NicknameAdjectiveRepository adjRepo,
+			NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl, FeedbackFormRepository feedbackFormRepo, Configuration configuration) {
 		super();
 		this.channelCtrl = channelCtrl;
 		this.accountRepo = accountRepo;
@@ -72,6 +79,8 @@ public class AdminResource {
 		this.adjectiveRepo = adjRepo;
 		this.nounRepo = nounRepo;
 		this.businessRepo = businessRepo;
+		this.configuration = configuration;
+		this.feedbackFormRepo = feedbackFormRepo;		
 		String environment = servletContext.getInitParameter("net.karazy.environment");
 		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
@@ -199,6 +208,34 @@ public class AdminResource {
 			return "Error:\n" + importCtrl.getReturnMessage();
 		else
 		    return id.toString();
+	}
+	
+	@GET
+	@Path("configuration/defaultfeedbackform")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO getDefaultFeedbackForm() {
+		Key<FeedbackForm> defaultFeedbackFormKey = configuration.getDefaultFeedbackForm();
+		
+		if(defaultFeedbackFormKey == null) {
+			return new FeedbackFormDTO();			
+		}
+		
+		FeedbackForm defaultFeedbackForm;
+		try {
+			defaultFeedbackForm = feedbackFormRepo.getByKey(defaultFeedbackFormKey);
+		} catch (NotFoundException e) {
+			return new FeedbackFormDTO();
+		}
+			
+		return new FeedbackFormDTO(defaultFeedbackForm);
+	}
+	
+	@PUT
+	@Path("configuration/defaultfeedbackform")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	public FeedbackFormDTO importDefaultBusinessFeedback(FeedbackFormDTO feedbackFormData ) {
+		return importCtrl.importDefaultFeedbackForm(feedbackFormData);
 	}
 	
 	@POST

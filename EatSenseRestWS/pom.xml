@@ -16,10 +16,10 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.7.0</gae.version>
+		<gae.version>1.7.2</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
-		<maven-gae-plugin.version>0.9.4</maven-gae-plugin.version>
+		<maven-gae-plugin.version>0.9.5</maven-gae-plugin.version>
 
 		<!-- Don't let your Mac use a crazy non-standard encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,7 +44,7 @@
 		<!-- Cloobster Projects -->
 		<cloobster.app>../../cloobster_app/app</cloobster.app>
 		<cloobster.cockpit>../../cloobster_cockpit</cloobster.cockpit>
-		<cloobster.frontend>../../cloobster_frontend</cloobster.frontend>
+		<cloobster.frontend>../../cloobster_frontend/</cloobster.frontend>
 		
 	</properties>
 
@@ -120,7 +120,7 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
 											<directory>../../cloobster_frontend/src</directory>
@@ -135,10 +135,38 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend-test</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/test</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src/test</directory>
+											<directory>../../cloobster_frontend/test</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>		
+		<profile>
+			<id>website</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
+							<execution>
+								<id>copy-cloobster-website</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/website</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -148,6 +176,47 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>api-dev</id>
+			<build>
+				<filters>
+                    <filter>${basedir}/src/main/filters/dev.properties</filter>
+                </filters>
+            </build>
+        </profile>
+        <profile>
+        	<id>app-dev</id>
+        	<build>
+        		<plugins>
+	        		<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
+			        		<execution>
+								<id>copy-app-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.app}/src</directory>
+												<excludes>
+												<exclude>**/*.phone.*</exclude>
+												<exclude>**/*.iphone.*</exclude>
+											</excludes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+        		</plugins>
+        	</build>
+        </profile>
+        
 		<profile>
 			<id>dev</id>
 			<build>
@@ -166,10 +235,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.frontend}/src</directory>
+											<directory>${cloobster.frontend}/src/</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -181,7 +250,7 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend-test</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/test</outputDirectory>
 									<resources>
 										<resource>
 											<directory>${cloobster.frontend}/test</directory>
@@ -230,9 +299,25 @@
 										</resource>
 									</resources>
 								</configuration>	
-							</execution>
+							</execution>							
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>app-prod</id>
+			<build>
+				<filters>
+            		<filter>${basedir}/src/main/filters/prod.properties</filter>
+            	</filters>	
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
 							<execution>
-								<id>copy-app-dev</id>
+								<id>copy-app-prod</id>
 								<phase>compile</phase>
 								<goals>
 									<goal>copy-resources</goal>
@@ -241,11 +326,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.app}/src</directory>
-												<excludes>
-												<exclude>**/*.phone.*</exclude>
-												<exclude>**/*.iphone.*</exclude>
-											</excludes>
+											<directory>${cloobster.app}/prod/desktop</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -254,7 +335,7 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>
+		</profile>	
 		<profile>
 			<id>prod</id>
 			<build>
@@ -267,13 +348,13 @@
 						<version>2.4.2</version>
 						<executions>
 							<execution>
-								<id>copy-cloobster-frontend-dev</id>
+								<id>copy-cloobster-frontend-prod</id>
 								<phase>compile</phase>
 								<goals>
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
 											<directory>${cloobster.frontend}/build</directory>
@@ -323,23 +404,8 @@
 									</resources>
 								</configuration>
 							</execution>
-							<execution>
-								<id>copy-app-prod</id>
-								<phase>compile</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
-									<resources>
-										<resource>
-											<directory>${cloobster.app}/prod/desktop</directory>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
 						</executions>
-					</plugin>						
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
