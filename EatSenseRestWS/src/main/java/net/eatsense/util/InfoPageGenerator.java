@@ -1,0 +1,84 @@
+package net.eatsense.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+
+import net.eatsense.domain.Business;
+import net.eatsense.domain.InfoPage;
+import net.eatsense.persistence.InfoPageRepository;
+import net.eatsense.representation.ImageDTO;
+import net.eatsense.representation.InfoPageDTO;
+
+public class InfoPageGenerator {
+	public static String[] countryList=new String[]{"Abkhazia","Afghanistan","Akrotiri and Dhekelia","Åland Islands","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla",
+		"Antigua and Barbuda","Argentina ","Armenia ","Aruba","Ascension Island",
+		"Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados",
+		"Belarus","Belgium","Belize","Benin ","Bermuda","Bhutan","Bolivia"," Bosnia","Botswana","Brazil",
+		"Brunei"," Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde",
+		"Cayman Islands","Central African Republic","Chad","Chile","China","ChristmasIsland",
+		"Cocos","Colombia","Comoros","Congo","Cook Islands","Costa Rica","Côte d'Ivoire",
+		"Croatia","Cuba","Cyprus","Czech","Denmark","Djibouti","Dominica","Ecuador","Egypt",
+		"El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands",
+		"Faroe Islands","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany",
+		"Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea",
+		"Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia",
+		"Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey",
+		"Jordan","Kazakhstan","Kenya","Kiribati","Korea","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia",
+		"Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macao",
+		"Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands",
+		"Mauritania","Mauritius","Mayotte","Mexico","Micronesia","Moldova","Monaco","Mongolia",
+		"Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Nagorno-Karabakh","Namibia","Nauru",
+		"Nepal","Netherlands","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island",
+		"Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru",
+		"Philippines","Pitcairn","Poland","Portugal","Pridnestrovie","Puerto Rico","Qatar",
+		"Romania","Russia","Rwanda","Saint-Barthélemy","Saint Helena","Saint Kitts and Nevis",
+		"Saint Lucia","Saint Martin","Saint-Pierre and	Miquelon",
+		"Saint Vincent and the Grenadines","Samoa","San Marino","São Tomé and Príncipe",
+		"Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia",
+		"Slovenia","Solomon	Islands","Somalia","Somaliland","South Africa","South Ossetia",
+		"Spain","SriLanka","Sudan","Suriname","Svalbard","Swaziland","Sweden",
+		"Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor",
+		"Togo","Tokelau","Tonga","Trinidad and Tobago","Tristan da Cunha",
+		"Tunisia","Turkey","Turkmenistan","Turks and Caicos","Tuvalu","Uganda",
+		"Ukraine","United Arab Emirates","United Kingdom","United States",
+		"Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam",
+		"Virgin Islands","Wallis and Futuna","Western Sahara","Yemen",
+		"Zambia","Zimbabwe"};
+	
+	public final static String HTML = "<h2>Lorem</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed nulla in tellus mollis eleifend a quis risus. Sed nibh magna, blandit vel molestie at, adipiscing fringilla justo. Pellentesque molestie euismod ante vitae vestibulum. In lobortis suscipit quam ut interdum. Nunc vitae ligula purus, euismod faucibus nibh. Nam et arcu ut ligula viverra consectetur. Pellentesque cursus dui dapibus purus vestibulum lacinia. Aliquam gravida mollis est sit amet malesuada. Etiam id tortor at leo dignissim placerat. Nulla vel massa arcu, vitae volutpat libero. Sed id magna quam. Pellentesque sit amet nisi non libero pretium euismod quis vitae arcu. Integer porta, enim sed mollis iaculis, felis velit accumsan lacus, sed laoreet orci tellus eu tellus. Nunc pretium fringilla ornare.</p>"+
+		"<h2>Ipsum</h2><p>Curabitur blandit auctor augue, ac eleifend turpis accumsan eu. Phasellus lacus quam, vestibulum et condimentum in, vestibulum mollis orci. Nam tellus est, lobortis at pharetra et, tincidunt quis metus. Cras vestibulum turpis nec nisl mollis ultrices. Pellentesque vitae libero eros, tincidunt suscipit tellus. Sed rutrum consequat pharetra. Aenean nunc erat, egestas ut ullamcorper in, placerat et libero. Curabitur a felis sed lorem porttitor semper. Morbi neque magna, sagittis in elementum id, gravida vitae libero. Proin id ipsum lacinia lorem vulputate gravida sed sit amet augue.</p>"+
+		"<h2>Dolor</h2><p>Nunc blandit dolor ac sapien varius cursus. Nunc sit amet vehicula est. Mauris ac ligula mollis lorem mollis porttitor. Praesent in lacus elit. In hac habitasse platea dictumst. Nullam nec purus lorem, vitae consectetur velit. Cras fringilla, nisl eu mollis semper, tellus nisi tempus ipsum, non iaculis dui sapien ac leo.</p>";
+	public final static String SHORT_TEXT ="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed nulla in tellus mollis eleifend a quis risus. Sed nibh magna, blandit vel molestie at, adipiscing fringilla justo.";
+	
+	public static final String IMAGEURL = "http://robohash.org/";
+	private final InfoPageRepository repo;
+
+	@Inject
+	public InfoPageGenerator(InfoPageRepository repo) {
+		super();
+		this.repo = repo;
+	}
+	
+	public List<InfoPageDTO> generate(Key<Business> businessKey, int count) {
+		
+		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
+		List<InfoPage> infoPages = new ArrayList<InfoPage>();
+		for (int i = 0; i < count; i++) {
+			InfoPage infoPage = new InfoPage();
+			infoPage.setBusiness(businessKey);
+			infoPage.setHtml(HTML);
+			infoPage.setShortText(SHORT_TEXT);
+			infoPage.setImage(new ImageDTO());
+			infoPage.setTitle(countryList[i % countryList.length]);
+			infoPage.getImage().setUrl(IMAGEURL + infoPage.getTitle());
+			infoPages.add(infoPage);
+			infoPageDtos.add(new InfoPageDTO(infoPage));
+		}
+		repo.saveOrUpdate(infoPages);
+		
+		return infoPageDtos ;
+	}
+}
