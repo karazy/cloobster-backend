@@ -5,6 +5,7 @@ import javax.persistence.Embedded;
 import net.eatsense.representation.ImageDTO;
 
 import com.google.appengine.api.images.ImagesServicePb.ImageData;
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -27,7 +28,10 @@ public class InfoPage extends GenericEntity<InfoPage> {
 
 
 	public void setTitle(String title) {
-		this.title = title;
+		if(!Objects.equal(this.title, title)) {
+			this.setDirty(true);
+			this.title = title;
+		}
 	}
 
 
@@ -37,7 +41,10 @@ public class InfoPage extends GenericEntity<InfoPage> {
 
 
 	public void setShortText(String shortText) {
-		this.shortText = shortText;
+		if(!Objects.equal(this.shortText, shortText)) {
+			this.setDirty(true);
+			this.shortText = shortText;
+		}
 	}
 
 
@@ -47,7 +54,10 @@ public class InfoPage extends GenericEntity<InfoPage> {
 
 
 	public void setHtml(String html) {
-		this.html = html;
+		if(!Objects.equal(this.html, html)) {
+			this.setDirty(true);
+			this.html = html;
+		}
 	}
 
 
@@ -77,6 +87,9 @@ public class InfoPage extends GenericEntity<InfoPage> {
 
 
 	public void setBusiness(Key<Business> business) {
-		this.business = business;
+		if(!Objects.equal(this.business, business)) {
+			this.setDirty(true);
+			this.business = business;
+		}
 	}
 }
