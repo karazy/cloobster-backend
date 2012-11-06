@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Query;
@@ -24,6 +25,7 @@ import net.eatsense.representation.InfoPageDTO;
 public class InfoPageController {
 	private final InfoPageRepository infoPageRepo;
 
+	@Inject
 	public InfoPageController(InfoPageRepository infoPageRepo) {
 		super();
 		this.infoPageRepo = infoPageRepo;

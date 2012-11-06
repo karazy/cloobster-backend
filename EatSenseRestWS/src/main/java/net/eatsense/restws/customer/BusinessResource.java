@@ -1,6 +1,7 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -18,6 +19,7 @@ import org.apache.lucene.index.CheckIndex;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.FeedbackController;
+import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Account;
@@ -28,6 +30,7 @@ import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
@@ -51,11 +54,14 @@ public class BusinessResource {
 	private BillController billCtrl;
 
 	private FeedbackController feedbackCtrl;
+
+	private InfoPageController infoPageCtrl;
 	
 	@Inject
 	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl, FeedbackController feedbackCtrl) {
+			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl) {
 		super();
+		this.infoPageCtrl = infoPageCtrl;
 		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
@@ -203,5 +209,12 @@ public class BusinessResource {
 		else {
 			throw new net.eatsense.exceptions.NotFoundException("unknown feedback id");
 		}
+	}
+	
+	@GET
+	@Path("infopages")
+	@Produces("application/json; charset=UTF-8")
+	public List<InfoPageDTO> getInfoPages() {
+		return infoPageCtrl.getAll(business.getKey());
 	}
 }
