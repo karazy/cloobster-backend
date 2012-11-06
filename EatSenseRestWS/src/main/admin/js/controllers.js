@@ -341,3 +341,64 @@ CloobsterAdmin.Fixes = function($scope, $http) {
 	
 };
 CloobsterAdmin.Fixes.$inject = ['$scope', '$http'];
+
+/**
+* 	@name CloobsterAdmin.Import
+*	@requires $http
+*
+* 	Manages data import.
+* 	@constructor
+*/
+CloobsterAdmin.InfoPages = function($scope, $http, $anchorScroll) {
+	
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setError(message) {
+		showAlert("alert-error", "Error!", message, "Try again", resetForm);
+	}
+
+	function setProgress( progress ) {
+		$scope.importProgressStyle = { width: progress };
+	}
+
+	function importError(data, status) {
+		var message = (data.message) ?
+			data.message
+			: "An unknown error occured, check the server and your connection.";
+		setError(message);
+	}
+
+	function importSuccess() {
+		setProgress("100%");
+		showAlert("alert-success", "Done!", "All pages generated.", "Okay");
+	}
+
+	function resetForm() {
+		$scope.infoPageCount = 30;
+		$scope.generateProgress = false;
+		setProgress("0%");
+	}
+
+	$scope.generate = function() {
+		$scope.generateProgress = true;
+		$http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount).success(importSuccess)
+		.error(importError);
+	}
+
+	dismissAlert();
+	resetForm();
+
+	$anchorScroll();
+}
+CloobsterAdmin.InfoPages.$inject = ['$scope', '$http', '$anchorScroll'];

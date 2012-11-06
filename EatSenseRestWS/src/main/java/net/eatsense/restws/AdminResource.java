@@ -37,14 +37,17 @@ import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
+import net.eatsense.util.InfoPageGenerator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
@@ -63,12 +66,13 @@ public class AdminResource {
 	private final ChannelController channelCtrl;
 	private Configuration configuration;
 	private FeedbackFormRepository feedbackFormRepo;
+	private Provider<InfoPageGenerator> infoPageGen;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
 			NicknameAdjectiveRepository adjRepo,
-			NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl, FeedbackFormRepository feedbackFormRepo, Configuration configuration) {
+			NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl, FeedbackFormRepository feedbackFormRepo, Configuration configuration, Provider<InfoPageGenerator> infoPageGenerator) {
 		super();
 		this.channelCtrl = channelCtrl;
 		this.accountRepo = accountRepo;
@@ -78,9 +82,10 @@ public class AdminResource {
 		this.importCtrl = importCtr;
 		this.adjectiveRepo = adjRepo;
 		this.nounRepo = nounRepo;
-		this.businessRepo = businessRepo;
 		this.configuration = configuration;
-		this.feedbackFormRepo = feedbackFormRepo;		
+		this.businessRepo = businessRepo;
+		this.feedbackFormRepo = feedbackFormRepo;
+		this.infoPageGen = infoPageGenerator;
 		String environment = servletContext.getInitParameter("net.karazy.environment");
 		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
@@ -257,6 +262,13 @@ public class AdminResource {
 		}
 		
 		return message;
+	}
+	
+	@POST
+	@Path("businesses/{businessId}/infopages/{count}")
+	@Produces("application/json; charset=UTF-8")
+	public List<InfoPageDTO> generateInfoPages(@PathParam("businessId")Long businessId, @PathParam("count") int count) {
+		return infoPageGen.get().generate(Business.getKey(businessId), count);
 	}
 	
 	/**

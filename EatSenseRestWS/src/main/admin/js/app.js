@@ -13,6 +13,7 @@ CloobsterAdmin.module = angular.module('CloobsterAdmin', ['ngResource']).
   config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
   	$locationProvider.hashPrefix = '!';
   	$routeProvider.when('/main', {templateUrl: 'partials/main.html'});
+    $routeProvider.when('/dummydata', {templateUrl: 'partials/dummydata.html'});
     $routeProvider.when('/templates', {templateUrl: 'partials/templates.html', controller: CloobsterAdmin.Templates});
     $routeProvider.when('/trash', {templateUrl: 'partials/trash.html', controller: CloobsterAdmin.TrashCan});
     $routeProvider.otherwise({redirectTo: '/main'});
