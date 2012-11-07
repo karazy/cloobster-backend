@@ -108,7 +108,7 @@ public class CheckInsResource {
 		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		// Check that the authenticated checkin owns the entity
-		boolean authenticated = (checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId()))
+		boolean authenticated = (checkIn == null ? false : checkInFromPath.getId().equals(checkIn.getId()))
 								|| (account!= null && checkInFromPath.getAccount().getId() == account.getId().longValue());
 		
 		if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
@@ -126,5 +126,4 @@ public class CheckInsResource {
 		
 		return checkInResource;
 	}
-
 }

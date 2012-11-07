@@ -13,16 +13,13 @@ import net.eatsense.domain.TranslationEntity;
  * @param <T> The domain object the repository handles.
  * @param <U>
  */
-public abstract class LocalisedRepository<T extends GenericEntity<T>, U extends TranslationEntity<T>> extends GenericRepository<T> {
+public  class LocalisedRepository<T extends GenericEntity<T>, U extends TranslationEntity<T>> extends GenericRepository<T> {
 
-	public LocalisedRepository(Class<T> clazz, Class<U> clazzT) {
+	public LocalisedRepository(Class<T> clazz) {
 		super(clazz);
-		try {
-			ObjectifyService.register(clazzT);
-		} catch (IllegalArgumentException e) {
-			// We already registered the entity, okay to skip this.
-		}
 	}
 	
-	public abstract T applyLocalisation(T entity, U translationEntity);
+	public T applyLocalisation(T entity, U translationEntity) {
+		return entity;
+	}
 }
