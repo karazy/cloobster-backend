@@ -85,7 +85,7 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 		return Key.create(originalKey, translationClass, locale.getLanguage());
 	}
 	
-	private List<T> loadAndApplyTranslations(Query<T> entityQuery, Locale locale) {
+	public List<T> loadAndApplyTranslations(Query<T> entityQuery, Locale locale) {
 				
 		List<Key<T>> entityKeys = entityQuery.listKeys();
 		List<Key<?>> allKeys = new ArrayList<Key<?>>();
@@ -133,6 +133,7 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 			logger.error("Error instantiating translation entity", e);
 			throw new ServiceException("Internal error while creating translation model", e);
 		}
+		
 		translationEntity.setLang(locale.getLanguage());
 		translationEntity.setParent(entity.getKey());
 		

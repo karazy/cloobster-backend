@@ -72,7 +72,7 @@ public class EatSenseGuiceServletContextListener extends
 						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
-								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName());
+								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName()+ "," + SuffixFilter.class.getName());
 						
 						// add cross origin headers filter, deactivated for now.
 						// add cache control response filter.
