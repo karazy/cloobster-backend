@@ -598,7 +598,14 @@
   			<version>1.9.0</version> 
   			<scope>test</scope>
   		</dependency>
-		</dependencies>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+			<classifier>api</classifier>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<!-- Generate compiled stuff in the folder used for development mode -->

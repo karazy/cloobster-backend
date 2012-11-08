@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -66,5 +67,16 @@ public class InfoPageController {
 		}
 		
 		return new InfoPageDTO(infoPage);
+	}
+
+	public List<InfoPageDTO> getAll(Key<Business> businessKey, Locale locale) {
+		List<InfoPage> infoPages = infoPageRepo.getByParent(businessKey, locale);
+		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
+		for (InfoPage infoPage : infoPages) {
+			
+			infoPageDtos.add(new InfoPageDTO(infoPage));
+		}
+		
+		return infoPageDtos;
 	}
 }

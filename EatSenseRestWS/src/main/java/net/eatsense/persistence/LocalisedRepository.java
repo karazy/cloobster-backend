@@ -6,21 +6,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import net.eatsense.annotations.Translate;
 import net.eatsense.domain.GenericEntity;
-import net.eatsense.domain.TranslationEntity;
+import net.eatsense.domain.TranslatedEntity;
 import net.eatsense.domain.embedded.TranslatedField;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ServiceException;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.Query;
 
 /**
  * Base class for repositories, which want to deal with translated entities.
@@ -30,32 +35,26 @@ import com.googlecode.objectify.Key;
  * @param <T> The domain object the repository handles.
  * @param <U>
  */
-public  class LocalisedRepository<T extends GenericEntity<T>> extends GenericRepository<T> {
-	
-	private final static Multimap<String, String> translatedFields = ArrayListMultimap.create();
-	
-	public LocalisedRepository(Class<T> clazz) {		
-		super(clazz);
-		String entityName = clazz.getSimpleName();
-		
-		if(!translatedFields.containsKey(entityName)) {
-			Field[] fields = clazz.getDeclaredFields();
+public  class LocalisedRepository<T extends GenericEntity<T>, U extends TranslatedEntity<T>> extends GenericRepository<T> {
 
-			for (int i = 0; i < fields.length; i++) {
-				Field field = fields[i];
-				if(field.isAnnotationPresent(Translate.class)) {
-					
-					translatedFields.put(entityName, field.getName());
-				}
-			}
-		}		
+	private Class<U> translationClass;
+
+	public LocalisedRepository(Class<T> clazz, Class<U> tClazz) {		
+		super(clazz);
+		this.translationClass = tClazz;
+		try {
+			ObjectifyService.register(tClazz);
+		} catch (IllegalArgumentException e) {
+			// We already registered the entity, okay to skip this.
+		}
 	}
 	
 	public T get(Key<T> entityKey, Locale locale) {
 		checkNotNull(entityKey, "entityKey was null");
-		checkArgument(locale.getLanguage().isEmpty(), "locale must have valid language code");
+		checkNotNull(locale, "locale was null");
+		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
 		
-		Key<TranslationEntity> translationKey = Key.create(entityKey, TranslationEntity.class, locale.getLanguage());
+		Key<U> translationKey = Key.create(entityKey, translationClass, locale.getLanguage());
 		@SuppressWarnings("unchecked")
 		Map<Key<Object>, Object> resultMap = ofy().get(entityKey, translationKey);
 		
@@ -66,44 +65,78 @@ public  class LocalisedRepository<T extends GenericEntity<T>> extends GenericRep
 			throw new NotFoundException("No entity found for key: " + entityKey.toString());
 		}
 		
-		TranslationEntity transEntity = (TranslationEntity) resultMap.get(translationKey);
+		U transEntity = (U) resultMap.get(translationKey);
 		
 		if(transEntity != null) {
-			try {
-				BeanUtils.populate(entity, transEntity.getFieldsMap());
-			} catch (Exception e) {
-				logger.error("Could not apply translation", e);
-				throw new ServiceException("Unable to apply translation to fields",e);
-			}
+			transEntity.applyTranslation(entity);
 		}
 		
 		return entity;
 	}
 	
-	public Collection<String> getTranslatedFieldNames() {
-		return translatedFields.get(clazz.getSimpleName());
+	public <V> List<T> getByParent(Key<V> parentKey, Locale locale) {
+		checkNotNull(locale, "locale was null");
+		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
+
+		return loadAndApplyTranslations(ofy().query(clazz).ancestor(parentKey), locale);
+	}
+	
+	public Key<U> createTranslationKey(Key<T> originalKey, Locale locale) {
+		return Key.create(originalKey, translationClass, locale.getLanguage());
+	}
+	
+	private List<T> loadAndApplyTranslations(Query<T> entityQuery, Locale locale) {
+				
+		List<Key<T>> entityKeys = entityQuery.listKeys();
+		List<Key<?>> allKeys = new ArrayList<Key<?>>();
+		List<Key<U>> translationKeys = new ArrayList<Key<U>>();
+		List<T> entities = new ArrayList<T>();
+		
+		for (Key<T> entityKey : entityKeys) {
+			allKeys.add(entityKey);
+			Key<U> translationKey = createTranslationKey(entityKey, locale);
+			translationKeys.add(translationKey);
+			allKeys.add(translationKey);
+		}
+		
+		Map<Key<Object>, Object> allEntities = ofy().get(allKeys);
+		Iterator<Key<U>> translationKeysIter = translationKeys.iterator();
+		
+		for (Iterator<Key<T>> iterator = entityKeys.iterator(); iterator.hasNext();) {
+			Key<T> entityKey = iterator.next();
+			Key<U> transKey = translationKeysIter.next();
+			
+			@SuppressWarnings("unchecked")
+			T entity = (T) allEntities.get(entityKey);
+			
+			@SuppressWarnings("unchecked")
+			U transEntity = (U) allEntities.get(transKey);
+			
+			if(transEntity != null) {
+				transEntity.applyTranslation(entity);
+			}
+			
+			entities.add(entity);
+		}
+				
+		return entities;
 	}
 	
 	public void saveOrUpdateTranslation(T entity, Locale locale) {
 		checkNotNull(entity, "entity was null");
 		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
 		
-		TranslationEntity translationEntity = new TranslationEntity(locale.getLanguage(), entity.getKey());
-		ArrayList<TranslatedField> translation = new ArrayList<TranslatedField>(); 
-		for (String fieldName : translatedFields.get(clazz.getSimpleName())) {
-			String fieldValue;
-			try {
-				fieldValue = BeanUtils.getSimpleProperty(entity, fieldName);
-			} catch (Exception e) {
-				logger.error("Could not read field from entity", e);
-				throw new ServiceException("Unable to save translation",e);
-			}
-			
-			translation.add(new TranslatedField(fieldName, fieldValue));
+		U translationEntity;
+		try {
+			translationEntity = translationClass.newInstance();
+		} catch (Exception e) {
+			logger.error("Error instantiating translation entity", e);
+			throw new ServiceException("Internal error while creating translation model", e);
 		}
+		translationEntity.setLang(locale.getLanguage());
+		translationEntity.setParent(entity.getKey());
 		
-		translationEntity.setFields(translation);
-		
+		translationEntity.setFieldsFromEntity(entity);
 		
 		ofy().put(translationEntity);
 	}

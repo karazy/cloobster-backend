@@ -391,9 +391,21 @@ CloobsterAdmin.InfoPages = function($scope, $http, $anchorScroll) {
 	}
 
 	$scope.generate = function() {
+		var promise;
 		$scope.generateProgress = true;
-		$http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount).success(importSuccess)
-		.error(importError);
+
+		if($scope.useLang) {
+			if(!$scope.lang) {
+				// Error no language entered.
+				setError("Enter a language key.");
+				return;
+			}
+			promise = $http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount + '.' + $scope.lang);
+		}
+		else {
+			promise = $http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount);
+		}
+		promise.success(importSuccess).error(importError);
 	}
 
 	dismissAlert();

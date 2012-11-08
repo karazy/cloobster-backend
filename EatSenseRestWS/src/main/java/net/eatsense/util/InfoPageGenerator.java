@@ -2,6 +2,10 @@ package net.eatsense.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -13,6 +17,8 @@ import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 
 public class InfoPageGenerator {
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	public static String[] countryList=new String[]{"Abkhazia","Afghanistan","Akrotiri and Dhekelia","Åland Islands","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla",
 		"Antigua and Barbuda","Argentina ","Armenia ","Aruba","Ascension Island",
 		"Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados",
@@ -62,7 +68,7 @@ public class InfoPageGenerator {
 		this.repo = repo;
 	}
 	
-	public List<InfoPageDTO> generate(Key<Business> businessKey, int count) {
+	public List<InfoPageDTO> generate(Key<Business> businessKey, int count, Locale locale) {
 		
 		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
 		List<InfoPage> infoPages = new ArrayList<InfoPage>();
@@ -78,6 +84,14 @@ public class InfoPageGenerator {
 			infoPageDtos.add(new InfoPageDTO(infoPage));
 		}
 		repo.saveOrUpdate(infoPages);
+		
+		if(locale != null) {
+			logger.info("Saving translation for locale: {}", locale);
+			for (InfoPage infoPage : infoPages) {
+				infoPage.setShortText("Lang: "+ locale + SHORT_TEXT);
+				repo.saveOrUpdateTranslation(infoPage, locale);
+			}
+		}
 		
 		return infoPageDtos ;
 	}

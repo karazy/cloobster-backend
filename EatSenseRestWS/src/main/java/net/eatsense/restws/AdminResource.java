@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -268,8 +269,16 @@ public class AdminResource {
 	@Path("businesses/{businessId}/infopages/{count}")
 	@Produces("application/json; charset=UTF-8")
 	public List<InfoPageDTO> generateInfoPages(@PathParam("businessId")Long businessId, @PathParam("count") int count) {
-		return infoPageGen.get().generate(Business.getKey(businessId), count);
+		return infoPageGen.get().generate(Business.getKey(businessId), count ,null);
 	}
+	
+	@POST
+	@Path("businesses/{businessId}/infopages/{count}.{lang}")
+	@Produces("application/json; charset=UTF-8")
+	public List<InfoPageDTO> generateInfoPages(@PathParam("businessId")Long businessId, @PathParam("count") int count, @PathParam("lang") Locale locale) {
+		return infoPageGen.get().generate(Business.getKey(businessId), count , locale);
+	}
+	
 	
 	/**
 	 * Deletes all data. Use at your own risk.

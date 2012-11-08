@@ -2,6 +2,7 @@ package net.eatsense.restws.customer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -216,5 +217,12 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	public List<InfoPageDTO> getInfoPages() {
 		return infoPageCtrl.getAll(business.getKey());
+	}
+	
+	@GET
+	@Path("infopages.{lang}")
+	@Produces("application/json; charset=UTF-8")
+	public List<InfoPageDTO> getInfoPages(@PathParam("lang")Locale locale ) {
+		return infoPageCtrl.getAll(business.getKey(), locale);
 	}
 }
