@@ -391,7 +391,8 @@ CloobsterAdmin.InfoPages = function($scope, $http, $anchorScroll) {
 	}
 
 	$scope.generate = function() {
-		var promise;
+		var promise,
+			config = {};
 		$scope.generateProgress = true;
 
 		if($scope.useLang) {
@@ -400,12 +401,15 @@ CloobsterAdmin.InfoPages = function($scope, $http, $anchorScroll) {
 				setError("Enter a language key.");
 				return;
 			}
-			promise = $http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount + '.' + $scope.lang);
+
+			// Set language header.
+			config['headers'] = {
+				'Content-Language': $scope.lang
+			}
 		}
-		else {
-			promise = $http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount);
-		}
-		promise.success(importSuccess).error(importError);
+		$http.post('/admin/services/businesses/'+$scope.business.id+'/infopages/'+$scope.infoPageCount, {}, config)
+			.success(importSuccess)
+			.error(importError);
 	}
 
 	dismissAlert();

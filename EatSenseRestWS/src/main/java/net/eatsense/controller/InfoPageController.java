@@ -3,7 +3,6 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -14,6 +13,7 @@ import com.googlecode.objectify.Query;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
+import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.InfoPageDTO;
 
@@ -25,20 +25,30 @@ import net.eatsense.representation.InfoPageDTO;
  */
 public class InfoPageController {
 	private final InfoPageRepository infoPageRepo;
+	private final LocalizationProvider localizationProvider;
 
 	@Inject
-	public InfoPageController(InfoPageRepository infoPageRepo) {
+	public InfoPageController(InfoPageRepository infoPageRepo, LocalizationProvider localizationProvider) {
 		super();
 		this.infoPageRepo = infoPageRepo;
+		this.localizationProvider = localizationProvider;
 	}
 	
 	public List<InfoPageDTO> getAll(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
+		List<InfoPage> infoPages;
 		
-		Query<InfoPage> infoPageQuery = infoPageRepo.query().ancestor(businessKey);
+		Locale locale = localizationProvider.getAcceptableLanguage();
+		if(locale.getLanguage().equals("*")) {
+			infoPages = infoPageRepo.getByParent(businessKey);
+		}
+		else {
+			infoPages = infoPageRepo.getByParent(businessKey, locale);
+		}
+		
 		ArrayList<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
 		
-		for (InfoPage infoPage : infoPageQuery) {
+		for (InfoPage infoPage : infoPages) {
 			infoPageDtos.add(new InfoPageDTO(infoPage));
 		}
 		
@@ -54,29 +64,33 @@ public class InfoPageController {
 		}
 	}
 	
+	public InfoPageDTO create(Key<Business> businessKey, InfoPageDTO infoPageData) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(infoPageData, "infoPageData was null");
+		
+		InfoPage infoPage = infoPageRepo.newEntity();
+		infoPage.setBusiness(businessKey);
+		
+		return update(infoPage, infoPageData);
+	}
+	
 	public InfoPageDTO update(InfoPage infoPage, InfoPageDTO infoPageData) {
 		checkNotNull(infoPage, "infoPage was null");
 		checkNotNull(infoPageData, "infoPageData was null");
+		
+		Locale locale = localizationProvider.getContentLanguage();
 		
 		infoPage.setHtml(infoPageData.getHtml());
 		infoPage.setShortText(infoPage.getShortText());
 		infoPage.setTitle(infoPage.getShortText());
 		
-		if(infoPage.isDirty()) {
+		if(infoPage.isDirty()) {			
 			infoPageRepo.saveOrUpdate(infoPage);
+		}
+		else if (locale != null) {
+			infoPageRepo.saveOrUpdate(infoPage, locale);
 		}
 		
 		return new InfoPageDTO(infoPage);
-	}
-
-	public List<InfoPageDTO> getAll(Key<Business> businessKey, Locale locale) {
-		List<InfoPage> infoPages = infoPageRepo.getByParent(businessKey, locale);
-		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
-		for (InfoPage infoPage : infoPages) {
-			
-			infoPageDtos.add(new InfoPageDTO(infoPage));
-		}
-		
-		return infoPageDtos;
 	}
 }

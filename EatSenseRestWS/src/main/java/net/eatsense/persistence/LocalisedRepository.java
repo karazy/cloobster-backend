@@ -77,6 +77,8 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 	public <V> List<T> getByParent(Key<V> parentKey, Locale locale) {
 		checkNotNull(locale, "locale was null");
 		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
+		
+		logger.info("kind={}, parent={}, lang={}", new Object[]{clazz ,parentKey,locale.getLanguage()});
 
 		return loadAndApplyTranslations(ofy().query(clazz).ancestor(parentKey), locale);
 	}
@@ -122,10 +124,29 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 		return entities;
 	}
 	
-	public void saveOrUpdateTranslation(T entity, Locale locale) {
+	/**
+	 * Save an entity and a translation of the entity in the specified language.
+	 * The saved data is the same for the translation and the original entity.
+	 * 
+	 * @param entity the entity to write
+	 * @param locale 
+	 * @return
+	 */
+	public Key<T> saveOrUpdate(T entity, Locale locale) {
 		checkNotNull(entity, "entity was null");
+		checkNotNull(locale, "locale was null");
 		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
 		
+		logger.info("{}({}), locale={}", new Object[]{Key.getKind(clazz), entity.getId(), locale});
+		
+		Key<T> entityKey = ofy().put(entity);
+		
+		saveOrUpdateTranslation(entity, locale);
+		
+		return entityKey;
+	}
+	
+	private U createAndFill(T entity, Locale locale) {
 		U translationEntity;
 		try {
 			translationEntity = translationClass.newInstance();
@@ -136,9 +157,27 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 		
 		translationEntity.setLang(locale.getLanguage());
 		translationEntity.setParent(entity.getKey());
-		
 		translationEntity.setFieldsFromEntity(entity);
 		
+		return translationEntity;
+	}
+	
+	/**
+	 * Save an entity translation for a specified language.
+	 * 
+	 * @param entity the entity that contains the translation
+	 * @param locale language of the entity to save
+	 */
+	public U saveOrUpdateTranslation(T entity, Locale locale) {
+		checkNotNull(entity, "entity was null");
+		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
+		
+		logger.info("{}({}), locale={}", new Object[]{Key.getKind(clazz), entity.getId(), locale});
+		
+		U translationEntity = createAndFill(entity, locale);
+		
 		ofy().put(translationEntity);
+		
+		return translationEntity;
 	}
 }

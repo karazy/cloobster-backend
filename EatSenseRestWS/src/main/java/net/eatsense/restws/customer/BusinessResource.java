@@ -27,6 +27,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
+import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
@@ -62,7 +63,6 @@ public class BusinessResource {
 	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
 			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl) {
 		super();
-		this.infoPageCtrl = infoPageCtrl;
 		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
@@ -211,18 +211,12 @@ public class BusinessResource {
 			throw new net.eatsense.exceptions.NotFoundException("unknown feedback id");
 		}
 	}
-	
-	@GET
+
 	@Path("infopages")
-	@Produces("application/json; charset=UTF-8")
-	public List<InfoPageDTO> getInfoPages() {
-		return infoPageCtrl.getAll(business.getKey());
-	}
-	
-	@GET
-	@Path("infopages.{lang}")
-	@Produces("application/json; charset=UTF-8")
-	public List<InfoPageDTO> getInfoPages(@PathParam("lang")Locale locale ) {
-		return infoPageCtrl.getAll(business.getKey(), locale);
+	public InfoPagesResource getInfoPagesResource() {
+		InfoPagesResource infoPageResource = resourceContext.getResource(InfoPagesResource.class);
+		infoPageResource.setBusiness(business);
+		
+		return infoPageResource;
 	}
 }

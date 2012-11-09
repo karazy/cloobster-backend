@@ -12,11 +12,14 @@ import com.googlecode.objectify.Key;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
+import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 
 public class InfoPageGenerator {
+	private final LocalizationProvider localizationProvider;
+	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public static String[] countryList=new String[]{"Abkhazia","Afghanistan","Akrotiri and Dhekelia","Åland Islands","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla",
@@ -63,12 +66,13 @@ public class InfoPageGenerator {
 	private final InfoPageRepository repo;
 
 	@Inject
-	public InfoPageGenerator(InfoPageRepository repo) {
+	public InfoPageGenerator(InfoPageRepository repo, LocalizationProvider localizationProvider) {
 		super();
 		this.repo = repo;
+		this.localizationProvider = localizationProvider;
 	}
 	
-	public List<InfoPageDTO> generate(Key<Business> businessKey, int count, Locale locale) {
+	public List<InfoPageDTO> generate(Key<Business> businessKey, int count) {
 		
 		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
 		List<InfoPage> infoPages = new ArrayList<InfoPage>();
@@ -85,8 +89,9 @@ public class InfoPageGenerator {
 		}
 		repo.saveOrUpdate(infoPages);
 		
+		Locale locale = localizationProvider.getContentLanguage();		
 		if(locale != null) {
-			logger.info("Saving translation for locale: {}", locale);
+			logger.info("Generating translation, lang={}", locale.getLanguage());
 			for (InfoPage infoPage : infoPages) {
 				infoPage.setShortText("Lang: "+ locale + SHORT_TEXT);
 				repo.saveOrUpdateTranslation(infoPage, locale);
