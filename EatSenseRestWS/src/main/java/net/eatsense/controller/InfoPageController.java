@@ -85,8 +85,8 @@ public class InfoPageController {
 		Locale locale = localizationProvider.getContentLanguage();
 		
 		infoPage.setHtml(infoPageData.getHtml());
-		infoPage.setShortText(infoPage.getShortText());
-		infoPage.setTitle(infoPage.getShortText());
+		infoPage.setShortText(infoPageData.getShortText());
+		infoPage.setTitle(infoPageData.getTitle());
 		
 		if(infoPage.isDirty()) {			
 			infoPageRepo.saveOrUpdate(infoPage);
