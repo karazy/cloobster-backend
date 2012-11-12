@@ -1,7 +1,9 @@
 package net.eatsense.restws.business;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 
 import com.google.inject.Inject;
@@ -24,6 +26,12 @@ public class InfoPagesResource {
 	@GET
 	public List<InfoPageDTO> getInfoPages() {
 		return infoPageCtrl.getAll(business.getKey());
+	}
+	
+	@POST
+	@Consumes("application/json; charset=UTF-8")
+	public InfoPageDTO createInfoPage(InfoPageDTO infoPageData) {
+		return infoPageCtrl.create(business.getKey(), infoPageData);
 	}
 
 	public void setBusiness(Business business) {

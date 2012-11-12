@@ -3,6 +3,7 @@ package net.eatsense.representation;
 import net.eatsense.domain.InfoPage;
 
 public class InfoPageDTO {
+	private Long id;
 	private String title;
 	private String shortText;
 	private String html;
@@ -13,6 +14,7 @@ public class InfoPageDTO {
 	
 	public InfoPageDTO(InfoPage infoPage) {
 		if(infoPage != null) {
+			id = infoPage.getId();
 			title = infoPage.getTitle();
 			shortText = infoPage.getShortText();
 			html = infoPage.getHtml();
@@ -43,5 +45,13 @@ public class InfoPageDTO {
 	}
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}	
 }
