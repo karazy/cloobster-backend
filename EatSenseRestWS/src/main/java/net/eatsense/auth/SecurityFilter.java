@@ -131,7 +131,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 	private Authorizer authenticateCheckIn(String checkInId) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
-			logger.info("Invalid checkin uid given {}", checkInId);
+			logger.warn("Invalid checkin uid given {}", checkInId);
 			return null;
 		}
 		else {
