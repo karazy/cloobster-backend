@@ -81,9 +81,13 @@ public class InfoPageGenerator {
 			infoPage.setBusiness(businessKey);
 			infoPage.setHtml(HTML);
 			infoPage.setShortText(SHORT_TEXT);
-			infoPage.setImage(new ImageDTO());
 			infoPage.setTitle(countryList[i % countryList.length]);
-			infoPage.getImage().setUrl(IMAGEURL + infoPage.getTitle());
+			
+			ImageDTO imageDTO = new ImageDTO();
+			infoPage.setImages(new ArrayList<ImageDTO>());
+			imageDTO.setUrl(IMAGEURL + infoPage.getTitle());
+			infoPage.getImages().add(imageDTO);
+			
 			infoPages.add(infoPage);
 			infoPageDtos.add(new InfoPageDTO(infoPage));
 		}

@@ -18,7 +18,9 @@ public class InfoPageDTO {
 			title = infoPage.getTitle();
 			shortText = infoPage.getShortText();
 			html = infoPage.getHtml();
-			imageUrl = infoPage.getImage() != null ? infoPage.getImage().getUrl() : null;
+			imageUrl = (infoPage.getImages() != null && !infoPage.getImages().isEmpty())
+					? infoPage.getImages().get(0).getUrl()
+					: null;
 		}
 	}
 	
