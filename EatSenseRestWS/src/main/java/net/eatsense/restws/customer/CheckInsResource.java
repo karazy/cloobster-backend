@@ -24,6 +24,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.HistoryStatusDTO;
@@ -106,6 +107,11 @@ public class CheckInsResource {
 	public CheckInResource getCheckInResource(@PathParam("checkInUid") String checkInUid) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkInFromPath = checkInCtrl.getCheckIn(checkInUid);
+		
+		if(checkInFromPath == null) {
+			throw new NotFoundException();
+		}
+		
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		// Check that the authenticated checkin owns the entity
 		boolean authenticated = (checkIn== null ? false : checkInFromPath.getId().equals(checkIn.getId()))
