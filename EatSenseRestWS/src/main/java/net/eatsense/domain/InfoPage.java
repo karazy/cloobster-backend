@@ -1,5 +1,7 @@
 package net.eatsense.domain;
 
+import java.util.List;
+
 import javax.persistence.Embedded;
 
 import net.eatsense.annotations.Translate;
@@ -23,7 +25,7 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	
 	@Embedded
 	@Unindexed
-	private ImageDTO image;
+	private List<ImageDTO> images;
 	
 	public String getTitle() {
 		return title;
@@ -63,17 +65,6 @@ public class InfoPage extends GenericEntity<InfoPage> {
 		}
 	}
 
-
-	public ImageDTO getImage() {
-		return image;
-	}
-
-
-	public void setImage(ImageDTO image) {
-		this.image = image;
-	}
-
-
 	@Parent
 	private Key<Business> business;
 	
@@ -94,5 +85,15 @@ public class InfoPage extends GenericEntity<InfoPage> {
 			this.setDirty(true);
 			this.business = business;
 		}
+	}
+
+
+	public List<ImageDTO> getImages() {
+		return images;
+	}
+
+
+	public void setImages(List<ImageDTO> images) {
+		this.images = images;
 	}
 }

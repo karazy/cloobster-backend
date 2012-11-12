@@ -11,10 +11,12 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Query;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 
 /**
@@ -26,11 +28,13 @@ import net.eatsense.representation.InfoPageDTO;
 public class InfoPageController {
 	private final InfoPageRepository infoPageRepo;
 	private final LocalizationProvider localizationProvider;
+	private final ImageController imageCtrl;
 
 	@Inject
-	public InfoPageController(InfoPageRepository infoPageRepo, LocalizationProvider localizationProvider) {
+	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider) {
 		super();
 		this.infoPageRepo = infoPageRepo;
+		this.imageCtrl = imageCtrl;
 		this.localizationProvider = localizationProvider;
 	}
 	
@@ -92,5 +96,9 @@ public class InfoPageController {
 		}
 		
 		return new InfoPageDTO(infoPage);
+	}
+	
+	public ImageDTO updateImage(Account account, InfoPage infoPage, ImageDTO imageData) {
+		return imageCtrl.updateImages(account, infoPage.getImages(), imageData).getUpdatedImage();
 	}
 }

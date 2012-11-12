@@ -613,6 +613,22 @@ public class BusinessController {
 	}
 	
 	/**
+	 * @param business
+	 * @param areaData
+	 * @return
+	 */
+	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(areaData, "areaData was null");
+		
+		Area area = areaRepo.newEntity();
+		area.setBusiness(businessKey);
+		updateArea(area, areaData);
+		
+		return area;
+	}
+
+	/**
 	 * 
 	 * @param businessKey
 	 * @return List of areas as transfer objects.
@@ -628,22 +644,6 @@ public class BusinessController {
 		}
 		
 		return areaDtos;
-	}
-	
-	/**
-	 * @param business
-	 * @param areaData
-	 * @return
-	 */
-	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
-		checkNotNull(businessKey, "businessKey was null");
-		checkNotNull(areaData, "areaData was null");
-		
-		Area area = areaRepo.newEntity();
-		area.setBusiness(businessKey);
-		updateArea(area, areaData);
-		
-		return area;
 	}
 
 	/**
