@@ -189,6 +189,15 @@ public class BusinessResource {
 		return areasResource;
 	}
 	
+	@Path("infopages")
+	public InfoPagesResource getInfoPagesResource() {
+		InfoPagesResource infoPagesResource = resourceContext.getResource(InfoPagesResource.class);
+		
+		infoPagesResource.setBusiness(business);
+		
+		return infoPagesResource;
+	}
+	
 	@Path("spotsdata")
 	@GET
 	@Produces("application/json; charset=UTF-8")
