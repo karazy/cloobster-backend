@@ -8,7 +8,16 @@ public class InfoPageDTO {
 	private String shortText;
 	private String html;
 	private String imageUrl;
+	private ImageDTO image;
 	
+	public ImageDTO getImage() {
+		return image;
+	}
+
+	public void setImage(ImageDTO image) {
+		this.image = image;
+	}
+
 	public InfoPageDTO() {
 	}
 	
@@ -18,8 +27,10 @@ public class InfoPageDTO {
 			title = infoPage.getTitle();
 			shortText = infoPage.getShortText();
 			html = infoPage.getHtml();
-			imageUrl = (infoPage.getImages() != null && !infoPage.getImages().isEmpty())
-					? infoPage.getImages().get(0).getUrl()
+			image = (infoPage.getImages() != null && !infoPage.getImages().isEmpty())
+					? infoPage.getImages().get(0)
+					: null;
+			imageUrl = (image != null) ? image.getUrl()
 					: null;
 		}
 	}

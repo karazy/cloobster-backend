@@ -165,6 +165,7 @@ public class InfoPageController {
 		UpdateImagesResult result = imageCtrl.updateImages(account, infoPage.getImages(), imageData);
 		
 		if(result.isDirty()) {
+			infoPage.setImages(result.getImages());
 			infoPageRepo.saveOrUpdate(infoPage);
 		}
 		
