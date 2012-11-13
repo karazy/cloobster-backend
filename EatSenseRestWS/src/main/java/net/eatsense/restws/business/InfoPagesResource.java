@@ -3,6 +3,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -52,12 +53,21 @@ public class InfoPagesResource {
 		return infoPageCtrl.update(infoPageCtrl.get(business.getKey(), id), infoPageData);
 	}
 	
+	@DELETE
+	@Path("{id}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void deleteInfoPage(@PathParam("id") Long id) {
+		infoPageCtrl.delete(business.getKey(), id);
+	}
+	
+	
 	@POST
 	@Path("{id}/image")
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ImageDTO saveImage(@PathParam("id") Long id, ImageDTO imageData) {
 		return infoPageCtrl.updateImage(account, infoPageCtrl.get(business.getKey(), id), imageData);
-	}	
+	}
 
 	public void setBusiness(Business business) {
 		this.business = business;
