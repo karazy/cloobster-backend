@@ -11,6 +11,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Query;
 
+import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
@@ -99,6 +100,20 @@ public class InfoPageController {
 	}
 	
 	public ImageDTO updateImage(Account account, InfoPage infoPage, ImageDTO imageData) {
-		return imageCtrl.updateImages(account, infoPage.getImages(), imageData).getUpdatedImage();
+		checkNotNull(account, "account was null");
+		checkNotNull(infoPage, "infoPage was null");
+		checkNotNull(imageData, "imageData was null");
+		
+		// For the moment we only have one image per info page.
+		// Always override this image.
+		imageData.setId("image");
+		
+		UpdateImagesResult result = imageCtrl.updateImages(account, infoPage.getImages(), imageData);
+		
+		if(result.isDirty()) {
+			infoPageRepo.saveOrUpdate(infoPage);
+		}
+		
+		return result.getUpdatedImage();
 	}
 }

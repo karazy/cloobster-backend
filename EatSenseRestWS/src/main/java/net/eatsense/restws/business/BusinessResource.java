@@ -194,6 +194,7 @@ public class BusinessResource {
 		InfoPagesResource infoPagesResource = resourceContext.getResource(InfoPagesResource.class);
 		
 		infoPagesResource.setBusiness(business);
+		infoPagesResource.setAccount(account);
 		
 		return infoPagesResource;
 	}

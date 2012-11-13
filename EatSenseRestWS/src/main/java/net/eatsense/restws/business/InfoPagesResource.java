@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.InfoPageController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
@@ -23,6 +24,7 @@ import net.eatsense.representation.InfoPageDTO;
 public class InfoPagesResource {
 	private final InfoPageController infoPageCtrl;
 	private Business business;
+	private Account account;
 	
 	@Inject
 	public InfoPagesResource(InfoPageController infoPageCtrl) {
@@ -53,11 +55,15 @@ public class InfoPagesResource {
 	@POST
 	@Path("{id}/image")
 	@Consumes("application/json; charset=UTF-8")
-	public ImageDTO saveImage(ImageDTO imageData) {
-		return null;
+	public ImageDTO saveImage(@PathParam("id") Long id, ImageDTO imageData) {
+		return infoPageCtrl.updateImage(account, infoPageCtrl.get(business.getKey(), id), imageData);
 	}	
 
 	public void setBusiness(Business business) {
 		this.business = business;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 }

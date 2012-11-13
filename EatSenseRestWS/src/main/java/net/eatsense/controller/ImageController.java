@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Account;
 import net.eatsense.exceptions.ServiceException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.ImageUploadDTO;
@@ -22,6 +23,7 @@ import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.images.Image;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.ServingUrlOptions;
 import com.google.appengine.api.images.Transform;
 import com.google.appengine.api.images.ImagesService.OutputEncoding;
 import com.google.common.base.Strings;
@@ -127,10 +129,10 @@ public class ImageController {
 			}
 			else {
 				// Create new serving url from the new blob key.
-				image.setUrl(imagesService.getServingUrl( new BlobKey( image.getBlobKey() ) ) );
+				image.setUrl(imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey( new BlobKey( image.getBlobKey()) )));
 			}
 			if(account.getImageUploads() == null || account.getImageUploads().isEmpty()) {
-				throw new ServiceException("No uploaded images for account "+ account.getLogin());
+				throw new ValidationException("No uploaded images for Account"+ account.getId());
 			}
 			else {
 				boolean found = false;
@@ -146,7 +148,7 @@ public class ImageController {
 					}
 				}
 				if(!found) {
-					throw new ServiceException("Updated image was not uploaded by account "+ account.getLogin());
+					throw new ValidationException("No image with that blobKey was uploaded by account "+ account.getId());
 				}
 			}
 		}
