@@ -42,21 +42,38 @@ public class InfoPageController {
 	}
 	
 	/**
+	 * Get all InfoPage entities in the language specified via the current request.
+	 * 
+	 * @param businessKey
+	 * @return
+	 */
+	public List<InfoPageDTO> getAll(Key<Business> businessKey) {
+		Locale locale = localizationProvider.getAcceptableLanguage();
+		if(locale.getLanguage().equals("*")) {
+			return getAll(businessKey, Optional.<Locale>absent());
+		}
+		else {
+			return getAll(businessKey, Optional.of(locale));
+		}
+		
+	}
+	
+	/**
 	 * Retrieve all InfoPage entities for a specific parent Business.
 	 * 
 	 * @param businessKey Key of the business.
+	 * @param optLocale Optional Locale, if present load the specified translation
 	 * @return List of all InfoPage entities for this business.
 	 */
-	public List<InfoPageDTO> getAll(Key<Business> businessKey) {
+	public List<InfoPageDTO> getAll(Key<Business> businessKey, Optional<Locale> optLocale) {
 		checkNotNull(businessKey, "businessKey was null");
 		List<InfoPage> infoPages;
 		
-		Locale locale = localizationProvider.getAcceptableLanguage();
-		if(locale.getLanguage().equals("*")) {
-			infoPages = infoPageRepo.getByParent(businessKey);
+		if(optLocale.isPresent()) {
+			infoPages = infoPageRepo.getByParent(businessKey, optLocale.get());
 		}
 		else {
-			infoPages = infoPageRepo.getByParent(businessKey, locale);
+			infoPages = infoPageRepo.getByParent(businessKey);
 		}
 		
 		ArrayList<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();

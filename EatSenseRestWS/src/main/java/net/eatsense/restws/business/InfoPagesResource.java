@@ -1,5 +1,6 @@
 package net.eatsense.restws.business;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -10,7 +11,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
@@ -33,8 +36,8 @@ public class InfoPagesResource {
 	}
 	
 	@GET
-	public List<InfoPageDTO> getInfoPages() {
-		return infoPageCtrl.getAll(business.getKey());
+	public List<InfoPageDTO> getInfoPages(@QueryParam("lang")Locale locale) {
+		return infoPageCtrl.getAll(business.getKey(), Optional.fromNullable(locale));
 	}
 	
 	@POST
