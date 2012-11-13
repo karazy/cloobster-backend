@@ -99,6 +99,12 @@ public class InfoPageController {
 		return new InfoPageDTO(infoPage);
 	}
 	
+	/**
+	 * @param account that uploaded the image
+	 * @param infoPage 
+	 * @param imageData
+	 * @return
+	 */
 	public ImageDTO updateImage(Account account, InfoPage infoPage, ImageDTO imageData) {
 		checkNotNull(account, "account was null");
 		checkNotNull(infoPage, "infoPage was null");
@@ -115,5 +121,15 @@ public class InfoPageController {
 		}
 		
 		return result.getUpdatedImage();
+	}
+	
+	/**
+	 * Delete InfoPage and all translations.
+	 * 
+	 * @param businessKey Parent key
+	 * @param id for the InfoPage entity to delete
+	 */
+	public void delete(Key<Business> businessKey, Long id) {
+		infoPageRepo.deleteWithTranslation(infoPageRepo.getKey(businessKey, id));
 	}
 }

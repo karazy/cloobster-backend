@@ -15,6 +15,7 @@ import net.eatsense.annotations.Translate;
 import net.eatsense.domain.GenericEntity;
 import net.eatsense.domain.TranslatedEntity;
 import net.eatsense.domain.embedded.TranslatedField;
+import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ServiceException;
 
@@ -179,5 +180,14 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 		ofy().put(translationEntity);
 		
 		return translationEntity;
+	}
+	
+	public void deleteWithTranslation(Key<T> entityKey) {
+		checkNotNull(entityKey, "entityKey was null");
+		
+		logger.info("key={}",entityKey);
+						
+		ofy().delete(ofy().query(translationClass).ancestor(entityKey).fetchKeys());
+		ofy().delete(entityKey);
 	}
 }
