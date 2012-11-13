@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -94,7 +95,7 @@ public class InfoPageController {
 		
 		InfoPage infoPage = infoPageRepo.newEntity();
 		infoPage.setBusiness(businessKey);
-		
+			
 		return update(infoPage, infoPageData);
 	}
 	
@@ -116,11 +117,14 @@ public class InfoPageController {
 		infoPage.setShortText(infoPageData.getShortText());
 		infoPage.setTitle(infoPageData.getTitle());
 		
-		if(infoPage.isDirty()) {			
-			infoPageRepo.saveOrUpdate(infoPage);
+		if(locale != null) {
+			if(infoPage.getId() == null) {
+				infoPageRepo.saveOrUpdate(infoPage);
+			}
+			infoPageRepo.saveOrUpdateTranslation(infoPage, locale);
 		}
-		else if (locale != null) {
-			infoPageRepo.saveOrUpdate(infoPage, locale);
+		else if(infoPage.isDirty()){
+			infoPageRepo.saveOrUpdate(infoPage);
 		}
 		
 		return new InfoPageDTO(infoPage);

@@ -22,6 +22,7 @@ import net.eatsense.exceptions.ServiceException;
 import org.apache.commons.beanutils.BeanUtils;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.googlecode.objectify.Key;
@@ -133,16 +134,18 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 	 * @param locale 
 	 * @return
 	 */
-	public Key<T> saveOrUpdate(T entity, Locale locale) {
+	public Key<T> saveOrUpdate(T entity, Optional<Locale> locale) {
 		checkNotNull(entity, "entity was null");
 		checkNotNull(locale, "locale was null");
-		checkArgument(!locale.getLanguage().isEmpty(), "locale must have valid language code");
+		checkArgument( locale.isPresent() && !locale.get().getLanguage().isEmpty(), "locale must have valid language code");
 		
 		logger.info("{}({}), locale={}", new Object[]{Key.getKind(clazz), entity.getId(), locale});
 		
 		Key<T> entityKey = ofy().put(entity);
 		
-		saveOrUpdateTranslation(entity, locale);
+		if(locale.isPresent()) {
+			saveOrUpdateTranslation(entity, locale.get());
+		}
 		
 		return entityKey;
 	}

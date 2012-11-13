@@ -11,7 +11,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.google.appengine.api.images.ImagesServicePb.ImageData;
 import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
@@ -59,7 +58,6 @@ public class InfoPagesResource {
 	public void deleteInfoPage(@PathParam("id") Long id) {
 		infoPageCtrl.delete(business.getKey(), id);
 	}
-	
 	
 	@POST
 	@Path("{id}/image")
