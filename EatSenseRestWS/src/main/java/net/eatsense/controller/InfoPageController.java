@@ -22,6 +22,7 @@ import net.eatsense.representation.InfoPageDTO;
 
 /**
  * Handles creation and loading of info pages ("Gäste ABC")
+ * with translated content.
  * 
  * @author Nils Weiher
  *
@@ -39,6 +40,12 @@ public class InfoPageController {
 		this.localizationProvider = localizationProvider;
 	}
 	
+	/**
+	 * Retrieve all InfoPage entities for a specific parent Business.
+	 * 
+	 * @param businessKey Key of the business.
+	 * @return List of all InfoPage entities for this business.
+	 */
 	public List<InfoPageDTO> getAll(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
 		List<InfoPage> infoPages;
@@ -60,6 +67,11 @@ public class InfoPageController {
 		return infoPageDtos;
 	}
 	
+	/**
+	 * @param businessKey
+	 * @param id
+	 * @return InfoPage entity from the datastore.
+	 */
 	public InfoPage get(Key<Business> businessKey, Long id) {
 		try {
 			return infoPageRepo.getById(businessKey, id);
@@ -69,6 +81,13 @@ public class InfoPageController {
 		}
 	}
 	
+	/**
+	 * Create and save new InfoPage entity with data.
+	 * 
+	 * @param businessKey
+	 * @param infoPageData
+	 * @return
+	 */
 	public InfoPageDTO create(Key<Business> businessKey, InfoPageDTO infoPageData) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(infoPageData, "infoPageData was null");
@@ -79,6 +98,14 @@ public class InfoPageController {
 		return update(infoPage, infoPageData);
 	}
 	
+	/**
+	 * Update InfoPage entity with new data.
+	 * Also writes translation based on the locale of the data.
+	 * 
+	 * @param infoPage
+	 * @param infoPageData
+	 * @return
+	 */
 	public InfoPageDTO update(InfoPage infoPage, InfoPageDTO infoPageData) {
 		checkNotNull(infoPage, "infoPage was null");
 		checkNotNull(infoPageData, "infoPageData was null");
