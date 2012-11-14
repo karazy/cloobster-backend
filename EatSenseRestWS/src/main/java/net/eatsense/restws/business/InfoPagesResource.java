@@ -23,6 +23,12 @@ import net.eatsense.domain.Business;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 
+/**
+ * Resource class for handling infopages from the business side.
+ * 
+ * @author Nils Weiher
+ *
+ */
 @Produces("application/json; charset=UTF-8")
 public class InfoPagesResource {
 	private final InfoPageController infoPageCtrl;
@@ -35,11 +41,23 @@ public class InfoPagesResource {
 		this.infoPageCtrl = infoPageCtrl;
 	}
 	
+	/**
+	 * Retrieve language specific InfoPages for this business.
+	 * 
+	 * @param locale Supply ISO 639-1 code to get a specific translation
+	 * @return List of InfoPage transfer objects saved with the specified locale.
+	 */
 	@GET
 	public List<InfoPageDTO> getInfoPages(@QueryParam("lang")Locale locale) {
 		return infoPageCtrl.getAll(business.getKey(), Optional.fromNullable(locale));
 	}
 	
+	/**
+	 * Create a new InfoPage entity
+	 * 
+	 * @param infoPageData content for the new InfoPage entity
+	 * @return The created InfoPage
+	 */
 	@POST
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
@@ -47,6 +65,13 @@ public class InfoPagesResource {
 		return infoPageCtrl.create(business.getKey(), infoPageData);
 	}
 	
+	/**
+	 * Update an existing InfoPage entity
+	 * 
+	 * @param id of the entity to update
+	 * @param infoPageData updated content for the specified entity 
+	 * @return the updated InfoPage representation
+	 */
 	@PUT
 	@Path("{id}")
 	@Consumes("application/json; charset=UTF-8")
@@ -55,6 +80,11 @@ public class InfoPagesResource {
 		return infoPageCtrl.update(infoPageCtrl.get(business.getKey(), id), infoPageData);
 	}
 	
+	/**
+	 * Permanently delete an existing InfoPage entity 
+	 * 
+	 * @param id of the entity to delete
+	 */
 	@DELETE
 	@Path("{id}")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
@@ -62,6 +92,13 @@ public class InfoPagesResource {
 		infoPageCtrl.delete(business.getKey(), id);
 	}
 	
+	/**
+	 * Update or create the embedded image of the InfoPage entity
+	 * 
+	 * @param id of the InfoPage entity that should be updated
+	 * @param imageData the data to update the embedded image entity
+	 * @return the updated embedded image property
+	 */
 	@POST
 	@Path("{id}/image")
 	@Consumes("application/json; charset=UTF-8")
