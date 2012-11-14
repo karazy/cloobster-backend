@@ -29,6 +29,8 @@ import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -154,7 +156,10 @@ public class EatSenseGuiceServletContextListener extends
 					public FileService providesFileService() {
 						return FileServiceFactory.getFileService();
 					}
-					
+					@Provides
+					public PolicyFactory providesHTMLPolicyFactory() {
+						return Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);
+					}
 				}, new ValidationModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);

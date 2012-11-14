@@ -44,11 +44,11 @@ public class InfoPagesResource {
 	/**
 	 * Retrieve language specific InfoPages for this business.
 	 * 
-	 * @param locale Supply ISO 639-1 code to get a specific translation
+	 * @param locale (optional) ISO 639-1 code to get a specific translation
 	 * @return List of InfoPage transfer objects saved with the specified locale.
 	 */
 	@GET
-	public List<InfoPageDTO> getInfoPages(@QueryParam("lang")Locale locale) {
+	public List<InfoPageDTO> getInfoPages(@QueryParam("lang") Locale locale) {
 		return infoPageCtrl.getAll(business.getKey(), Optional.fromNullable(locale));
 	}
 	

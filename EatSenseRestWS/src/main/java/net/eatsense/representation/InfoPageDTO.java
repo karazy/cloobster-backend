@@ -1,9 +1,16 @@
 package net.eatsense.representation;
 
+import org.apache.bval.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
+
 import net.eatsense.domain.InfoPage;
 
 public class InfoPageDTO {
 	private Long id;
+	
+	@NotNull
+	@NotEmpty
 	private String title;
 	private String shortText;
 	private String html;

@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
-import com.googlecode.objectify.Query;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
@@ -20,6 +17,12 @@ import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.validation.ValidationHelper;
+
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 /**
  * Handles creation and loading of info pages ("Gäste ABC")
@@ -32,10 +35,14 @@ public class InfoPageController {
 	private final InfoPageRepository infoPageRepo;
 	private final LocalizationProvider localizationProvider;
 	private final ImageController imageCtrl;
+	private final ValidationHelper validator;
+	private final PolicyFactory sanitizer;
 
 	@Inject
-	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider) {
+	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider, ValidationHelper validator, PolicyFactory sanitizer) {
 		super();
+		this.sanitizer = sanitizer;
+		this.validator = validator;
 		this.infoPageRepo = infoPageRepo;
 		this.imageCtrl = imageCtrl;
 		this.localizationProvider = localizationProvider;
@@ -128,9 +135,12 @@ public class InfoPageController {
 		checkNotNull(infoPage, "infoPage was null");
 		checkNotNull(infoPageData, "infoPageData was null");
 		
+		validator.validate(infoPageData);
+		
 		Locale locale = localizationProvider.getContentLanguage();
 		
-		infoPage.setHtml(infoPageData.getHtml());
+		infoPage.setHtml(sanitizer.sanitize(infoPageData.getHtml()));
+		
 		infoPage.setShortText(infoPageData.getShortText());
 		infoPage.setTitle(infoPageData.getTitle());
 		

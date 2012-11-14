@@ -23,6 +23,7 @@ import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.templates.TemplateRepository;
+import net.eatsense.validation.ValidationHelper;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +32,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import com.google.appengine.api.images.ImagesServicePb.ImageData;
 import com.googlecode.objectify.Key;
@@ -49,11 +52,16 @@ public class InfoPageControllerTest {
 	private InfoPageController ctrl;
 	@Mock
 	private Key<Business> businessKey;
+	@Mock
+	private ValidationHelper validator;
+	
+	private PolicyFactory sanitizer;
 
 	@Before
 	public void setUp() throws Exception {
-		ctrl = new InfoPageController(infoPageRepo, imageCtrl, localeProvider);
 		
+		sanitizer = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);
+		ctrl = new InfoPageController(infoPageRepo, imageCtrl, localeProvider, validator, sanitizer);
 	}
 	
 	@Test
