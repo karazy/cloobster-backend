@@ -31,6 +31,8 @@ public class BusinessDTO {
 	private String url;
 	private String fbUrl;
 	
+	private List<String> lang;
+	
 	@Valid
 	private List<PaymentMethod> paymentMethods;
 	
@@ -117,5 +119,13 @@ public class BusinessDTO {
 
 	public void setFbUrl(String fbUrl) {
 		this.fbUrl = fbUrl;
+	}
+
+	public List<String> getLang() {
+		return lang;
+	}
+
+	public void setLang(List<String> lang) {
+		this.lang = lang;
 	}
 }

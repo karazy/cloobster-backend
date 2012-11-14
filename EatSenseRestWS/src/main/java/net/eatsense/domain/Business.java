@@ -37,6 +37,7 @@ public class Business extends GenericEntity<Business> {
 	@NotEmpty
 	private String name;
 	
+	@Unindexed
 	private String theme = "default";
 
 	/**
@@ -49,6 +50,7 @@ public class Business extends GenericEntity<Business> {
 	/**
 	 * For marketing on front pages and links. (optional)
 	 */
+	@Unindexed
 	private String slogan;
 	
 	@Embedded
@@ -86,18 +88,27 @@ public class Business extends GenericEntity<Business> {
 
 	@Transient
 	private Key<Business> key;
-	
+
+	@Unindexed
 	private String currency;
 	
 	/**
 	 * Link to a website for this location (e.g. for facebook posts)
 	 */
+	@Unindexed
 	private String url;
 	
 	/**
 	 * Link to a facebook page for this business.
 	 */
+	@Unindexed
 	private String fbUrl;
+	
+	/**
+	 * Contains iso code language indentifier used for translated content by this business.
+	 */
+	@Unindexed
+	private List<String> lang;
 	
 	public Business() {
 	}
@@ -283,6 +294,17 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.fbUrl, fbUrl)) {
 			this.setDirty(true);
 			this.fbUrl = fbUrl;
+		}
+	}
+
+	public List<String> getLang() {
+		return lang;
+	}
+
+	public void setLang(List<String> lang) {
+		if(!Objects.equal(this.lang, lang)) {
+			this.setDirty(true);
+			this.lang = lang;
 		}
 	}
 }
