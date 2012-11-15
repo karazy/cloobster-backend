@@ -23,6 +23,7 @@ import java.util.List;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -31,10 +32,16 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -61,6 +68,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CheckInControllerTest {
@@ -96,12 +104,23 @@ public class CheckInControllerTest {
 	
 	@Mock
 	private OrderChoiceRepository orderChoiceRepo;
+	@Mock
+	private AreaRepository areaRepo;
+	
+	@Mock
+	private Area area;
+	@Mock
+	private Key<Area> areaKey;
+	@Mock
+	private AccountRepository accountRepo;
+	@Mock
+	private BillRepository billRepo;
 
 	@Before
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, eventBus);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo, billRepo);
 	}
 
 	@After
@@ -165,7 +184,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCreateCheckInUnknownBarcode() {
-		thrown.expect(IllegalArgumentException.class);
+		thrown.expect(ValidationException.class);
 		String spotId = "b4rc0de";
 		
 		when(business.getKey()).thenReturn( businessKey);
@@ -180,32 +199,37 @@ public class CheckInControllerTest {
 		checkIn.setStatus(CheckInStatus.INTENT);
 		ctr.createCheckIn( checkIn);
 	}
+//  Deactivated test.
+//	@Test
+//
+//	public void testCreateCheckInNicknameInUse() throws Exception {
+//		
+//		thrown.expect(CheckInFailureException.class);
+//		thrown.expectMessage("nickname");
+//		String spotId = "b4rc0de";
+//		String nickname = "FakeNik";
+//		
+//		when(business.getKey()).thenReturn( businessKey);
+//		when(spot.getBusiness()).thenReturn( businessKey);
+//		when(spot.getKey()).thenReturn(spotKey);
+//		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
+//		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+//		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
+//		CheckIn olderCheckIn = new CheckIn();
+//		olderCheckIn.setNickname(nickname);
+//		checkInList.add(olderCheckIn);
+//		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
+//				
+//		CheckInDTO checkIn = new CheckInDTO();
+//		checkIn.setSpotId(spotId);
+//		checkIn.setNickname(nickname);
+//		checkIn.setStatus(CheckInStatus.INTENT);
+//		checkIn = ctr.createCheckIn( checkIn);
+//	}
 	
-	@Test
-	public void testCreateCheckInNicknameInUse() throws Exception {
-		thrown.expect(CheckInFailureException.class);
-		thrown.expectMessage("nickname");
-		String spotId = "b4rc0de";
-		String nickname = "FakeNik";
-		
-		when(business.getKey()).thenReturn( businessKey);
-		when(spot.getBusiness()).thenReturn( businessKey);
-		when(spot.getKey()).thenReturn(spotKey);
-		when(spotRepo.getByProperty("barcode", spotId)).thenReturn(spot);
-		when(businessRepo.getByKey(businessKey)).thenReturn(business);
-		ArrayList<CheckIn> checkInList = new ArrayList<CheckIn>();
-		CheckIn olderCheckIn = new CheckIn();
-		olderCheckIn.setNickname(nickname);
-		checkInList.add(olderCheckIn);
-		when(checkInRepo.getBySpot(spotKey)).thenReturn(checkInList);
-				
-		CheckInDTO checkIn = new CheckInDTO();
-		checkIn.setSpotId(spotId);
-		checkIn.setNickname(nickname);
-		checkIn.setStatus(CheckInStatus.INTENT);
-		checkIn = ctr.createCheckIn( checkIn);
-	}
-	
+	/**
+	 * @throws Exception
+	 */
 	@Test
 	public void testCreateCheckInTooLongNickname() throws Exception {
 		thrown.expect(CheckInFailureException.class);
@@ -263,7 +287,9 @@ public class CheckInControllerTest {
 	@Test
 	public void testGetSpotInformationUnknown() throws Exception {
 		String barcode = "bla";
-		assertThat(ctr.getSpotInformation(barcode), nullValue());
+		
+		thrown.expect(net.eatsense.exceptions.NotFoundException.class);
+		ctr.getSpotInformation(barcode);
 		verify(spotRepo).getByProperty("barcode", barcode);
 	}
 	
@@ -280,11 +306,28 @@ public class CheckInControllerTest {
 	}
 	
 	@Test
-	public void testGetSpotInformation() throws Exception {
+	public void testGetSpotInactive() throws Exception {
 		String barcode = "abarcode";
 
 		when(spotRepo.getByProperty("barcode", barcode )).thenReturn(spot);
 		when(spot.getBusiness()).thenReturn( businessKey);
+		when(businessRepo.getByKey(businessKey)).thenReturn(business);
+		thrown.expect(net.eatsense.exceptions.NotFoundException.class);
+		
+		ctr.getSpotInformation(barcode);
+	}
+	
+	@Test
+	public void testGetSpotInformation() throws Exception {
+		String barcode = "abarcode";
+
+		when(spotRepo.getByProperty("barcode", barcode )).thenReturn(spot);
+		when(spot.isActive()).thenReturn(true);
+		when(spot.getBusiness()).thenReturn( businessKey);
+		
+		when(spot.getArea()).thenReturn(areaKey );
+		when(areaRepo.getByKey(areaKey)).thenReturn(area);
+		when(area.isActive()).thenReturn(true);
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		
 		assertThat(ctr.getSpotInformation(barcode), notNullValue());
@@ -445,7 +488,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCheckOutCheckInStatusOrderPlaced() throws Exception {
-		thrown.expect(CheckInFailureException.class);
+		thrown.expect(IllegalAccessException.class);
 		thrown.expectMessage("invalid status");
 		
 		CheckIn checkIn = mock(CheckIn.class);
@@ -460,7 +503,7 @@ public class CheckInControllerTest {
 	
 	@Test
 	public void testCheckOutCheckInStatusPaymentRequest() throws Exception {
-		thrown.expect(CheckInFailureException.class);
+		thrown.expect(IllegalAccessException.class);
 		thrown.expectMessage("invalid status");
 		
 		CheckIn checkIn = mock(CheckIn.class);
@@ -508,6 +551,10 @@ public class CheckInControllerTest {
 		when(businessRepo.getByKey(businessKey)).thenReturn(business);
 		int activeCheckIns = 2;
 		when(checkInRepo.countActiveCheckInsAtSpot(spotKey)).thenReturn(activeCheckIns);
+		Query<Order> orderQuery = mock(Query.class);
+		when(orderRepo.queryForCheckInAndStatus(checkIn, OrderStatus.COMPLETE,
+								OrderStatus.INPROCESS, OrderStatus.PLACED,
+								OrderStatus.RECEIVED)).thenReturn(orderQuery );
 		
 		InOrder inOrder = inOrder(orderRepo);
 		

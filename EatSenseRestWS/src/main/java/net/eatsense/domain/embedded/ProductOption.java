@@ -2,8 +2,14 @@ package net.eatsense.domain.embedded;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.validation.ImportChecks;
+
 import org.apache.bval.constraints.NotEmpty;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.google.common.base.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductOption {
@@ -11,7 +17,7 @@ public class ProductOption {
 	@NotEmpty
 	String name;
 	
-	float price;
+	long price;
 	
 	Boolean selected;
 	
@@ -23,7 +29,6 @@ public class ProductOption {
 		this.selected = selected;
 	}
 
-
 	public String getName() {
 		return name;
 	}
@@ -31,48 +36,47 @@ public class ProductOption {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public float getPrice() {
+	@JsonIgnore
+	public long getPriceMinor() {
 		return price;
 	}
-
-	public void setPrice(float price) {
-		this.price = price;
+	
+	@JsonProperty("price")
+	public double getPrice() {
+		return price/100d;
 	}
 	
-	public ProductOption(String name, float price) {
+	@JsonProperty("price")
+	public void setPrice(double price) {
+		this.price = Math.round(price * 100);
+	}
+	
+	public ProductOption(String name, double price) {
 		super();
 		this.name = name;
-		this.price = price;
+		this.setPrice(price);
 	}
 
 	public ProductOption() {
 		super();
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + Float.floatToIntBits(price);
-		result = prime * result + ((selected == null) ? 0 : selected.hashCode());
-		return result;
+		return Objects.hashCode(name, price, selected);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof ProductOption))
+		if (getClass() != obj.getClass())
 			return false;
 		ProductOption other = (ProductOption) obj;
 		if (name == null) {
@@ -80,7 +84,8 @@ public class ProductOption {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (Float.floatToIntBits(price) != Float.floatToIntBits(other.price))
+		if (Double.doubleToLongBits(price) != Double
+				.doubleToLongBits(other.price))
 			return false;
 		if (selected == null) {
 			if (other.selected != null)
@@ -89,6 +94,4 @@ public class ProductOption {
 			return false;
 		return true;
 	}
-	
-	
 }

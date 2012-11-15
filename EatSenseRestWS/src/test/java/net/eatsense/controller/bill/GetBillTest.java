@@ -33,6 +33,7 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
+import org.joda.money.CurrencyUnit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,7 +63,7 @@ public class GetBillTest {
 
 	private BillDTO billData;
 
-	private Float billTotal;
+	private Long billTotal;
 
 	@Before
 	public void setUp() throws Exception {
@@ -95,7 +96,7 @@ public class GetBillTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		orderDto.setProductId(frites.getId());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -103,7 +104,7 @@ public class GetBillTest {
 		OrderDTO placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		Order placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		billTotal = billCtrl.calculateTotalPrice(placedOrder);
+		billTotal = billCtrl.calculateTotalPrice(placedOrder, CurrencyUnit.EUR).getAmountMinorLong();
 		
 		placedOrderDto.setStatus(OrderStatus.PLACED);
 		placedOrderDto = orderCtrl.updateOrder(business, placedOrder, placedOrderDto, checkIn);
@@ -129,7 +130,8 @@ public class GetBillTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -137,7 +139,7 @@ public class GetBillTest {
 		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		billTotal += billCtrl.calculateTotalPrice(placedOrder);
+		billTotal += billCtrl.calculateTotalPrice(placedOrder, CurrencyUnit.EUR).getAmountMinorInt();
 		
 		// Set order to placed and confirm in restaurant.
 		placedOrderDto.setStatus(OrderStatus.PLACED);
@@ -209,12 +211,14 @@ public class GetBillTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testGetBillNullBusinessId() {
-		business.setId(null);
+		business = new Business();
+		
 		billCtrl.getBill(business, billData.getId());
 	}
 	
 	@Test
 	public void testGetBillUnknownBusinessId() {
+		business = new Business();
 		business.setId(12345l);
 		assertThat(billCtrl.getBill(business, billData.getId()), nullValue());
 	}

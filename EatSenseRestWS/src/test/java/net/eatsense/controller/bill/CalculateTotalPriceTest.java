@@ -25,6 +25,8 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.util.DummyDataDumper;
 
 import org.apache.bval.guice.ValidationModule;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,7 +97,9 @@ public class CalculateTotalPriceTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO fritesDto = transform.productToDto(frites);
+		orderDto.setChoices(fritesDto.getChoices());
+		orderDto.setProductId(frites.getId());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -123,7 +127,8 @@ public class CalculateTotalPriceTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(1);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -140,42 +145,42 @@ public class CalculateTotalPriceTest {
 	
 	@Test(expected = NullPointerException.class)
 	public void testCalculateTotalNullOrder() {
-		billCtrl.calculateTotalPrice(null);
+		billCtrl.calculateTotalPrice(null,null);
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void testCalculateTotalNullOrderId() {
 		placedOrderFries.setId(null);
-		billCtrl.calculateTotalPrice(placedOrderFries);
+		billCtrl.calculateTotalPrice(placedOrderFries, null);
 	}
 
 	
 	@Test(expected = NullPointerException.class)
 	public void testCalculateTotalNullOrderProduct() {
 		placedOrderFries.setProduct(null);
-		billCtrl.calculateTotalPrice(placedOrderFries);
+		billCtrl.calculateTotalPrice(placedOrderFries, null);
 	}
 	
 	@Test
 	public void testCalculateTotalAmount() {
 		placedOrderFries.setAmount(3);
-		assertThat(billCtrl.calculateTotalPrice(placedOrderFries), is( 1.5f * placedOrderFries.getAmount()));
+		assertThat(billCtrl.calculateTotalPrice(placedOrderFries,CurrencyUnit.EUR), is( Money.of(CurrencyUnit.EUR, 1.5).multipliedBy(placedOrderFries.getAmount())));
 	}
 	
 	@Test
 	public void testCalculateTotalZeroAmount() {
 		placedOrderFries.setAmount(0);
-		assertThat(billCtrl.calculateTotalPrice(placedOrderFries), is( 0f ));
+		assertThat(billCtrl.calculateTotalPrice(placedOrderFries,CurrencyUnit.EUR), is( Money.of(CurrencyUnit.EUR,0) ));
 	}
 		
 	@Test
 	public void testCalculateTotalSingleProduct() {
-		assertThat(billCtrl.calculateTotalPrice(placedOrderFries), is( 1.5f));
+		assertThat(billCtrl.calculateTotalPrice(placedOrderFries,CurrencyUnit.EUR), is( Money.of(CurrencyUnit.EUR,1.5) ));
 	}
 	
 	@Test
 	public void testCalculateTotalProductWithChoices() {
-		assertThat(billCtrl.calculateTotalPrice(placedOrderBurger), is( 10f));
+		assertThat(billCtrl.calculateTotalPrice(placedOrderBurger,CurrencyUnit.EUR), is( Money.of(CurrencyUnit.EUR,10) ));
 	}
 	
 }

@@ -1,20 +1,16 @@
 package net.eatsense.restws;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
-import net.eatsense.domain.Spot;
-import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
 
 /**
  * Resource to retrieve spot information by a unique barcode.
@@ -25,6 +21,9 @@ import com.sun.jersey.api.NotFoundException;
 @Path("/spots")
 public class SpotResource {
 	private CheckInController checkInCtr;
+	
+	@Context
+	HttpServletRequest servletRequest;
 
 	@Inject
 	public SpotResource(CheckInController checkInCtr) {
@@ -36,36 +35,13 @@ public class SpotResource {
 	 * Get the information of the spot identified by the given barcode.
 	 * 
 	 * @param barcode
-	 * @return Spot as JsonObject 
+	 * @return Spot as JSON 
 	 */
 	@GET
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
 	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
-		SpotDTO spot = checkInCtr.getSpotInformation(barcode);
-		if(spot == null)
-			throw new NotFoundException("barcode not found");
-		else
-			return spot;
-	}
-	
-	
-	//TESTING PURPOSE
-	@GET
-	@Produces("application/json; charset=UTF-8")
-	public Collection<SpotDTO> getAllSpots() {
-		
-		SpotRepository sr = new SpotRepository();
-		Collection<Spot> spots = sr.getAll();
-		Collection<SpotDTO> dtos = new ArrayList<SpotDTO>();
-		for (Spot s : spots) {
-			
-			dtos.add(checkInCtr.toSpotDto(s));
-			
-		}
-		
-	
-		return dtos;
-		
+		boolean checkInResume = servletRequest.getAttribute("net.eatsense.domain.CheckIn") != null;
+		return checkInCtr.getSpotInformation(barcode, checkInResume );
 	}
 }

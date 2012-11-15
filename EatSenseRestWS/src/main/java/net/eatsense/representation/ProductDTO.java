@@ -2,10 +2,13 @@ package net.eatsense.representation;
 
 import java.util.Collection;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Product;
+import net.eatsense.validation.ImportChecks;
+
+import org.apache.bval.Validate;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -14,8 +17,8 @@ public class ProductDTO {
 //	@NotEmpty
 	private Long id;
 	
-	@JsonIgnore
 	private Long menuId;
+	
 	@NotNull
 	@NotEmpty
 	private String name;
@@ -25,15 +28,40 @@ public class ProductDTO {
 	 */
 	private String longDesc;
 	
-	@NotNull
 	@Min(0)
-	private Float price;
+	private double price;
 	
-	@Valid
+	@Validate(groups=ImportChecks.class)
 	private Collection<ChoiceDTO> choices;
 	
 	private Integer order;
 	
+	private boolean active;	
+	
+	public ProductDTO() {
+		super();
+	}
+	
+	/**
+	 * @param product Entity to copy property values from.
+	 */
+	public ProductDTO(Product product) {
+		super();
+		if(product == null)
+			return;
+		this.id = product.getId();
+		
+		this.menuId = product.getMenu() != null ? product.getMenu().getId():null;
+		this.name = product.getName();
+		this.shortDesc = product.getShortDesc();
+		this.longDesc = product.getLongDesc();
+		this.price = product.getPrice() / 100d;
+		this.order = product.getOrder();
+		this.active = product.isActive();
+	}
+
+
+
 	public String getName() {
 		return name;
 	}
@@ -64,12 +92,19 @@ public class ProductDTO {
 	}
 
 
-	public Float getPrice() {
+	public double getPrice() {
 		return price;
 	}
+	
+	/**
+	 * @return price*100 rounded to the closest integer
+	 */
+	@JsonIgnore
+	public long getPriceMinor() {
+		return Math.round(price * 100);
+	}
 
-
-	public void setPrice(Float price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
 
@@ -112,5 +147,13 @@ public class ProductDTO {
 
 	public void setOrder(Integer order) {
 		this.order = order;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

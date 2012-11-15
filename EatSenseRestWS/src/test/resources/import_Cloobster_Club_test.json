@@ -1,6 +1,10 @@
 {
     "name": "Cloobster Club",
     "description": "Test case",
+    "city": "Test",
+    "postcode": "12345",
+    "address": "Test",
+    "currency": "EUR",
     "payments": [
         {
             "name": "EC",
@@ -15,22 +19,26 @@
             "order": 3
         }
     ],
-    "spots": [
-        {
-            "name": "Tisch 1",
-            "barcode": "tst001",
-            "groupTag": null
-        },
-        {
-            "name": "Tisch 2",
-            "barcode": "tst002",
-            "groupTag": null
-        }
+    "areas": [
+    	{
+    		"name": "Restaurant",
+    		"description": "Der Restaurantbereich.",
+			"spots": [
+		        {
+		            "name": "Tisch 1",
+		            "barcode": "tst001"
+		        },
+		        {
+		            "name": "Tisch 2",
+		            "barcode": "tst002"
+		        }
+		    ]
+		}
     ],
     "menus": [
         {
             "description": "100% saftiges, lockeres Bio-Rinderhackfleisch",
-            "title": "Die Rindfleischburger",
+            "title": "Rindfleischburger",
             "order": 1,
             "products": [
                 {
@@ -145,27 +153,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 },
@@ -281,35 +269,15 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
-                    ]
-                }
+                     ]
+                } 
             ]
         },
         {
             "description": "100% zartes Hühnchenbrustfilet aus der Region, saftig und mild im Geschmack",
-            "title": "Die Geflügelburger",
+            "title": "Geflügelburger",
             "order": 2,
             "products": [
                 {
@@ -424,27 +392,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 },
@@ -560,27 +508,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 }
@@ -588,7 +516,7 @@
         },
         {
             "description": null,
-            "title": "Die Vegetarischen Burger",
+            "title": "Vegetarische Burger",
             "order": 3,
             "products": [
                 {
@@ -703,27 +631,7 @@
                             "overridePrice": "OVERRIDE_FIXED_SUM",
                             "text": "Menü mit Pommes & Getränk",
                             "included": 0,
-                            "selected": null,
-                            "groupParent": true,
-                            "group": "BR01"
-                        },
-                        {
-                            "options": [
-                                {
-                                    "name": "Beilagensalat statt Pommes",
-                                    "id": null,
-                                    "price": 0.5
-                                }
-                            ],
-                            "price": 0.5,
-                            "maxOccurence": 1,
-                            "minOccurence": 0,
-                            "overridePrice": "NONE",
-                            "text": "Menü mit Pommes & Getränk",
-                            "included": 0,
-                            "selected": null,
-                            "groupParent": false,
-                            "group": "BR01"
+                            "selected": null
                         }
                     ]
                 }
@@ -731,7 +639,7 @@
         },
         {
             "description": null,
-            "title": "Unsere Salate",
+            "title": "Salate",
             "order": 6,
             "products": [
                 {

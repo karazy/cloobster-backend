@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<enunciate label="cloobsterapi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.25.xsd">
+    <services>
+    	<rest defaultRestSubcontext="/"/>
+  	</services>
+    <modules>
+        <c disabled="true"></c>
+        <csharp disabled="true"></csharp>
+        <java-client disabled="true"></java-client>
+        <docs title="Cloobster API" groupRestResources="byPath" disableRestMountpoint="false" includeDefaultDownloads="false" includeExampleXml="false" >
+        </docs>
+    </modules>
+    <api-classes>
+        <include pattern="net.eatsense.restws.*" />
+        <include pattern="net.eatsense.restws.business.*" />
+        <include pattern="net.eatsense.restws.customer.*" />
+    </api-classes>
+</enunciate>

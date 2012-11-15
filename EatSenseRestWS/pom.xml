@@ -16,9 +16,10 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.6.6</gae.version>
-		<!-- <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home> -->
+		<gae.version>1.7.3</gae.version>
+		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
+		<maven-gae-plugin.version>0.9.5</maven-gae-plugin.version>
 
 		<!-- Don't let your Mac use a crazy non-standard encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,7 +36,7 @@
 		<objectify.version>3.1</objectify.version>
 
 		<!-- apache bean validation -->
-		<bval.version>0.3-incubating</bval.version>
+		<bval.version>0.4</bval.version>
 
 		<!-- ant run plugin -->
 		<antrun.version>1.7</antrun.version>
@@ -43,24 +44,70 @@
 		<!-- Cloobster Projects -->
 		<cloobster.app>../../cloobster_app/app</cloobster.app>
 		<cloobster.cockpit>../../cloobster_cockpit</cloobster.cockpit>
-		<cloobster.frontend>../../cloobster_frontend</cloobster.frontend>
+		<cloobster.frontend>../../cloobster_frontend/</cloobster.frontend>
 		
 	</properties>
 
 	<profiles>
 		<profile>
-			<id>clean</id>
+			<id>doc</id>
 			<build>
+				<plugins>
+					<plugin>
+			        	<groupId>org.codehaus.enunciate</groupId>
+			        	<artifactId>maven-enunciate-plugin</artifactId>
+			        	<!-- check for the latest version -->
+			        	<version>1.25</version>
+						<configuration>
+							<configFile>enunciate.xml</configFile>
+						</configuration>
+			        	<executions>
+			          		<execution>
+				            	<goals>
+			              			<goal>docs</goal>
+			            		</goals>
+			            		<configuration>
+			              			<!-- the directory where to put the docs -->
+			              			<docsDir>${project.build.directory}/docs</docsDir>
+			            		</configuration>
+			          		</execution>
+			        	</executions>
+			      </plugin>
+				</plugins>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.codehaus.enunciate</groupId>
+												<artifactId>maven-enunciate-plugin</artifactId>
+												<!-- check for the latest version -->
+												<versionRange>[1.25,)</versionRange>
+					        					<goals>
+					              					<goal>docs</goal>
+					            				</goals>
+					            			</pluginExecutionFilter>
+					            			<action>			            
+												<execute />
+											</action>
+					           			</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
 			</build>
 		</profile>
-			
-	
 		<profile>
-			<id>dev</id>
+			<id>frontend-dev</id>
 			<build>
-				<filters>
-                    <filter>${basedir}/src/main/filters/dev.properties</filter>
-                </filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -73,45 +120,79 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/frontend</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.frontend}/src</directory>
+											<directory>../../cloobster_frontend/src</directory>
 										</resource>
 									</resources>
 								</configuration>
 							</execution>
 							<execution>
-								<id>copy-admin-dev</id>
+								<id>copy-cloobster-frontend-dev-tests</id>
 								<phase>compile</phase>
 								<goals>
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/test</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/admin</directory>
+											<directory>../../cloobster_frontend/test</directory>
 										</resource>
 									</resources>
 								</configuration>
 							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>		
+		<profile>
+			<id>website</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
 							<execution>
-								<id>copy-cockpit-dev</id>
+								<id>copy-cloobster-website</id>
 								<phase>compile</phase>
 								<goals>
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.cockpit}/src</directory>
+											<directory>src/main/website</directory>
 										</resource>
 									</resources>
-								</configuration>	
+								</configuration>
 							</execution>
-							<execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>api-dev</id>
+			<build>
+				<filters>
+                    <filter>${basedir}/src/main/filters/dev.properties</filter>
+                </filters>
+            </build>
+        </profile>
+        <profile>
+        	<id>app-dev</id>
+        	<build>
+        		<plugins>
+	        		<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
+			        		<execution>
 								<id>copy-app-dev</id>
 								<phase>compile</phase>
 								<goals>
@@ -132,9 +213,129 @@
 							</execution>
 						</executions>
 					</plugin>
+        		</plugins>
+        	</build>
+        </profile>
+        
+		<profile>
+			<id>dev</id>
+			<build>
+				<filters>
+                    <filter>${basedir}/src/main/filters/dev.properties</filter>
+                </filters>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
+							<execution>
+								<id>copy-cloobster-frontend-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.frontend}/src/</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>copy-cloobster-frontend-dev-tests</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/test</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.frontend}/test</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>copy-admin-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/admin</directory>
+											<includes>
+												<include>js/app.js</include>
+											</includes>
+											<!-- Filter app.js with properties. -->
+											<filtering>true</filtering>
+										</resource>
+										<resource>
+											<directory>src/main/admin</directory>
+											<excludes>
+												<exclude>js/app.js</exclude>
+											</excludes>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>copy-cockpit-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.cockpit}/src</directory>
+										</resource>
+									</resources>
+								</configuration>	
+							</execution>							
+						</executions>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>app-prod</id>
+			<build>
+				<filters>
+            		<filter>${basedir}/src/main/filters/prod.properties</filter>
+            	</filters>	
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
+							<execution>
+								<id>copy-app-prod</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.app}/prod/desktop</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
 		<profile>
 			<id>prod</id>
 			<build>
@@ -147,6 +348,21 @@
 						<version>2.4.2</version>
 						<executions>
 							<execution>
+								<id>copy-cloobster-frontend-prod</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.frontend}/build</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
 								<id>copy-admin-prod</id>
 								<phase>compile</phase>
 								<goals>
@@ -157,6 +373,18 @@
 									<resources>
 										<resource>
 											<directory>src/main/admin</directory>
+											<includes>
+												<include>js/app.js</include>
+											</includes>
+											<!-- Filter app.js with properties. -->
+											<filtering>true</filtering>
+										</resource>
+										<resource>
+											<directory>src/main/admin</directory>
+											<excludes>
+												<exclude>js/app.js</exclude>
+											</excludes>
+											<filtering>false</filtering>
 										</resource>
 									</resources>
 								</configuration>
@@ -171,22 +399,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.cockpit}/prod</directory>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
-							<execution>
-								<id>copy-app-prod</id>
-								<phase>compile</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
-									<resources>
-										<resource>
-											<directory>${cloobster.app}/prod/desktop</directory>
+											<directory>${cloobster.cockpit}/build/production</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -215,7 +428,7 @@
 		<dependency>
     		<groupId>com.google.guava</groupId>
     		<artifactId>guava</artifactId>
-    		<version>10.0.1</version>
+    		<version>12.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -227,17 +440,12 @@
 			<artifactId>jbcrypt</artifactId>
 			<version>0.3m</version>
 		</dependency>
-		<dependency>
-	        <groupId>com.jayway.restassured</groupId>
-	        <artifactId>rest-assured</artifactId>
-      		<version>1.5</version>
-      		<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.10.0</version>
-		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>com.jayway.restassured</groupId> -->
+		<!-- <artifactId>rest-assured</artifactId> -->
+		<!-- <version>1.5</version> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
 		<!-- Apache Bean Validation dependencies -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -364,7 +572,11 @@
 <!-- 			<version>${antrun.version}</version> -->
 <!-- 			<scope>provided</scope> -->
 <!-- 		</dependency> -->
-
+		<dependency>
+			<groupId>org.joda</groupId>
+			<artifactId>joda-money</artifactId>
+			<version>0.6</version>
+		</dependency>
 
 		<!-- Unit tests -->
 
@@ -376,7 +588,7 @@
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<artifactId>junit-dep</artifactId>
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
@@ -466,7 +678,7 @@
 										<exclude>WEB-INF/web.xml</exclude>
 									</excludes>
 								</resource>
-								<!-- Add filtering of appengine-web.xml for system properties -->
+								<!-- Add filtering of web.xml for system properties -->
 
 							</resources>
 						</configuration>
@@ -496,35 +708,29 @@
 					</execution>
 				</executions>
 			</plugin>
-
-<!-- 			<plugin>
-				<groupId>com.google.code.maven-replacer-plugin</groupId>
-				<artifactId>maven-replacer-plugin</artifactId>
-				<version>1.4.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>replace</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<file>target/${project.build.finalName}/app/lib/karazy-config.js</file>
-					<replacements>
-						<replacement>
-							<token>(serviceUrl :) .*</token>
-							<value>$1 '',</value>
-						</replacement>
-						<replacement>
-							<token>(disableCaching :) .*</token>
-							<value>$1 true,</value>
-						</replacement>
-					</replacements>
-				</configuration>
-			</plugin> -->
-
-
+			
+			<plugin>
+                <groupId>net.kindleit</groupId>
+                <artifactId>maven-gae-plugin</artifactId>
+                <version>${maven-gae-plugin.version}</version>
+                <dependencies>
+                  <dependency>
+                    <groupId>net.kindleit</groupId>
+                    <artifactId>gae-runtime</artifactId>
+                    <version>${gae.version}</version>
+                    <type>pom</type>
+                  </dependency>
+                </dependencies>
+                <executions>
+	          		<execution>
+	            	<id />
+	            		<phase>validate</phase>
+	            	<goals>
+	              		<goal>unpack</goal>
+	            		</goals>
+	          		</execution>
+	        	</executions>
+            </plugin>
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -539,7 +745,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 		<!-- Required by m2e for import into eclipse. No effect on command line 
 			builds -->
 		<pluginManagement>
@@ -590,6 +795,20 @@
 										<execute />
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+                  					<pluginExecutionFilter>
+                    					<groupId>net.kindleit</groupId>
+					                    <artifactId>maven-gae-plugin</artifactId>
+					                    <versionRange>[0.7.3,)</versionRange>
+					                    <goals>
+					                      <goal>unpack</goal>
+					                    </goals>
+					                </pluginExecutionFilter>
+					             	<action>
+					                	<execute />
+					                </action>
+				                </pluginExecution>
+				                
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -603,11 +822,6 @@
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest-core</artifactId>
-				<version>1.2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest-library</artifactId>
 				<version>1.2.1</version>
 			</dependency>
 		</dependencies>

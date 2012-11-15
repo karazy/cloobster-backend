@@ -15,7 +15,7 @@ import com.googlecode.objectify.Key;
  * @author Nils Weiher
  *
  */
-public class User extends GenericEntity {
+public class User extends GenericEntity<User> {
 	
 	
 	/**

@@ -1,6 +1,10 @@
 ﻿{
     "name": "Heidi und Paul",
     "description": "Fresh Food - die Alternative für alle, die nicht nur Fast Food, sondern auch Ihre Gesundheit lieben",
+    "city": "Eschborn",
+    "address": "Unterortstraße 29",
+    "postcode": "65760",
+    "currency": "EUR",
     "payments": [
         {
             "name": "EC",

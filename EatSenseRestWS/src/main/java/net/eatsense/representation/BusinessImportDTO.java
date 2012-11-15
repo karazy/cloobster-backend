@@ -5,17 +5,19 @@ import java.util.Collection;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
 
 /**
- * POJO for data transfer, which represents a location where you can check in and order food/drinks what ever.
+ * POJO for data import, which represents a location where you can check in and order food/drinks what ever.
  * 
  * @author Nils Weiher
  *
  */
+@XmlRootElement
 public class BusinessImportDTO {
 
 	/**
@@ -25,6 +27,45 @@ public class BusinessImportDTO {
 	@NotEmpty
 	@Size(min=1)
 	private String name;
+	
+	@NotNull
+	@NotEmpty
+	private String city;
+	@NotEmpty
+	@NotNull
+	private String address;
+
+	@NotEmpty
+	@NotNull
+	private String currency;
+	
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPostcode() {
+		return postcode;
+	}
+
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
+	}
+
+	@NotEmpty
+	@NotNull
+	private String postcode;
 
 	/**
 	 * Description of location.
@@ -40,12 +81,12 @@ public class BusinessImportDTO {
 	private Collection<MenuDTO> menus;
 	
 	/**
-	 * All different spots (e.g. tables, seats, areas) where a customer is able to checkin. 
+	 * All different service areas, containing the spots.
 	 */
 	@NotNull
 	@NotEmpty
 	@Valid
-	private Collection<SpotDTO> spots;
+	private Collection<AreaImportDTO> areas;
 	
 	/**
 	 * All payment methods the business accepts.
@@ -54,7 +95,6 @@ public class BusinessImportDTO {
 	@NotEmpty
 	@Valid
 	private Collection<PaymentMethod> payments;
-	
 
 	public BusinessImportDTO() {
 	}
@@ -83,20 +123,27 @@ public class BusinessImportDTO {
 		this.menus = menus;
 	}
 
-
-	public Collection<SpotDTO> getSpots() {
-		return spots;
-	}
-
-	public void setSpots(Collection<SpotDTO> spots) {
-		this.spots = spots;
-	}
-
 	public Collection<PaymentMethod> getPayments() {
 		return payments;
 	}
 
 	public void setPayments(Collection<PaymentMethod> payments) {
 		this.payments = payments;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	public Collection<AreaImportDTO> getAreas() {
+		return areas;
+	}
+
+	public void setAreas(Collection<AreaImportDTO> areas) {
+		this.areas = areas;
 	}
 }

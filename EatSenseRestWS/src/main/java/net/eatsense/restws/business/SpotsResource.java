@@ -7,6 +7,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
@@ -34,7 +35,7 @@ public class SpotsResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"cockpituser"})
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public Collection<SpotStatusDTO> getSpotCockpitInformation() throws Exception {
 		return businessController.getSpotStatusData(business);
 	}

@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +15,9 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -21,11 +26,18 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.event.CheckInEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.exceptions.CheckInFailureException;
+import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -33,9 +45,13 @@ import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
+import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.ErrorDTO;
+import net.eatsense.representation.HistoryStatusDTO;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.representation.VisitDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 import net.eatsense.util.IdHelper;
 
@@ -43,9 +59,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.labs.repackaged.com.google.common.collect.Collections2;
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 /**
  * Controller for checkIn logic and process. When an attempt to checkIn at a
@@ -67,6 +88,9 @@ public class CheckInController {
 	private OrderRepository orderRepo;
 	private EventBus eventBus;
 	private OrderChoiceRepository orderChoiceRepo;
+	private final AreaRepository areaRepo;
+	private final AccountRepository accountRepo;
+	private final BillRepository billRepo;
 
 	/**
 	 * Constructor using injection for creation.
@@ -84,8 +108,8 @@ public class CheckInController {
 			CheckInRepository checkInRepository, SpotRepository spotRepository,
 			Transformer transformer,
 			ObjectMapper objectMapper, Validator validator,
-			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo,
-			EventBus eventBus) {
+			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo, AreaRepository areaRepository,
+			EventBus eventBus, AccountRepository accountRepo, BillRepository billRepo) {
 		this.businessRepo = businessRepository;
 		this.eventBus = eventBus;
 		this.checkInRepo = checkInRepository;
@@ -93,35 +117,81 @@ public class CheckInController {
 		this.requestRepo = requestRepository;
 		this.orderRepo = orderRepo;
 		this.transform = transformer;
+		this.areaRepo = areaRepository;
 		this.mapper = objectMapper;
 		this.validator = validator;
 		this.orderChoiceRepo = orderChoiceRepo;
+		this.accountRepo = accountRepo;
+		this.billRepo = billRepo;
 	}
 
     /**
      * Get spot data for a given barcode.
      * 
      * @param barcode
+     * @param checkInResume If not null spot can be loaded
      * @return <code>null</code> if not found or SpotDTO containing all relevant data for the client
      */
-    public SpotDTO getSpotInformation(String barcode) {
+    public SpotDTO getSpotInformation(String barcode, boolean checkInResume) {
     	if(barcode == null || barcode.isEmpty() )
     		return null;
     	
-    	return toSpotDto(spotRepo.getByProperty("barcode", barcode)) ;
+    	Spot spot = spotRepo.getByProperty("barcode", barcode);
+    	
+    	if(spot == null || (!spot.isActive() && !checkInResume)) {
+    		throw new NotFoundException();
+    	}
+    	
+    	if(spot.getArea() == null) {
+    		throw new NotFoundException(); 
+    	}
+    	else {
+    		Area area = areaRepo.getByKey(spot.getArea());
+    		if(!area.isActive() && !checkInResume) {
+    			throw new NotFoundException();
+    		}
+    	}
+    	
+
+		return toSpotDto(spot) ;
+    }
+    
+    /**
+     * Calls {@link CheckInController#getSpotInformation(String, boolean)} with checkInResume=false.
+     * @param barcode
+     * @return
+     */
+    public SpotDTO getSpotInformation(String barcode) {
+    	return getSpotInformation(barcode, false);
     }
 
     public SpotDTO toSpotDto(Spot spot) {
     	if(spot == null)
     		return null;
 		Business business = businessRepo.getByKey(spot.getBusiness());
-    	SpotDTO spotDto = new SpotDTO();    	
-    	spotDto.setBarcode(spot.getBarcode());
-    	spotDto.setName(spot.getName());
+    	SpotDTO spotDto = new SpotDTO(spot);
     	spotDto.setBusiness(business.getName());
-    	spotDto.setBusinessId(business.getId());
+    	spotDto.setCurrency(business.getCurrency());
     	spotDto.setPayments(business.getPaymentMethods());
-    	spotDto.setGroupTag(spot.getGroupTag());
+    	spotDto.setTheme(business.getTheme());
+    	ImageDTO logo = null, header = null;
+    	
+    	if(business.getImages() != null) {
+    		for (ImageDTO i : business.getImages()) {
+    			if(i.getId().equals("logo")) {
+    				logo = i;
+    				spotDto.setLogoUrl(i.getUrl());
+    			};
+    			if(i.getId().equals("appheader")) {
+    				header = i;
+    				spotDto.setHeaderUrl(i.getUrl());
+    			};
+    		};
+        	
+        	
+        	
+    	}
+    	
 		return spotDto;
 	}
 	
@@ -142,17 +212,28 @@ public class CheckInController {
 	 * @return
 	 */
 	public CheckInDTO createCheckIn(CheckInDTO checkInDto) {
+		return createCheckIn(checkInDto, Optional.<Account>absent());
+	}
+
+	/**
+	 * Create and save a new checkin in the store.
+	 * 
+	 * @param checkInDto
+	 * @param optAccount Connect this checkin to the account and set as active.
+	 * @return
+	 */
+	public CheckInDTO createCheckIn(CheckInDTO checkInDto, Optional<Account> optAccount) {
 		checkNotNull(checkInDto, "checkInDto was null");
 		checkNotNull(checkInDto.getSpotId(), "checkInDto spotId was null");
 		checkNotNull(checkInDto.getStatus(), "checkInDto status was null");
 		checkArgument(!checkInDto.getSpotId().isEmpty(), "checkInDto spotId was empty");
 		checkArgument(checkInDto.getStatus() == CheckInStatus.INTENT,
 				"checkInDto status expected to be INTENT but was %s", checkInDto.getStatus());
-			
+		
 		// Find spot by the given barcode
 		Spot spot = spotRepo.getByProperty("barcode", checkInDto.getSpotId());
 		if(spot == null )
-    		throw new IllegalArgumentException("Unable to create checkin, spot barcode unknown");
+    		throw new ValidationException("Unable to create checkin, spot barcode unknown");
     	
     	Business business = businessRepo.getByKey(spot.getBusiness());
 		
@@ -161,6 +242,9 @@ public class CheckInController {
     	String checkInId = IdHelper.generateId();
 		checkIn.setBusiness(business.getKey());
 		checkIn.setSpot(spot.getKey());
+		checkIn.setArea(spot.getArea());
+		// Set the account key if it is present.
+		checkIn.setAccount(optAccount.isPresent() ? optAccount.get().getKey() : null);
 		checkIn.setUserId(checkInId);
 		checkIn.setStatus(CheckInStatus.CHECKEDIN);
 		checkIn.setCheckInTime(new Date());
@@ -184,30 +268,39 @@ public class CheckInController {
 							violation.getPropertyPath().toString() + " " + violation.getMessage());
 				}	
 			}
-		}			
- 		
-		List<CheckIn> checkInsAtSpot = checkInRepo.getBySpot(checkIn.getSpot());
-		// count checkins at spot
-		int checkInCount = 1;
-		if(checkInsAtSpot != null) {
-			Iterator<CheckIn> it = checkInsAtSpot.iterator();
-			while(it.hasNext()) {
-				checkInCount++;
-				CheckIn next = it.next();
-				
-				if(next.getNickname().equals(checkIn.getNickname() ) ) {
-					throw new CheckInFailureException("nickname already exists", "checkInErrorNicknameExists");
-				}
-			}
 		}
+		
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(spot.getKey());
 
-		checkInRepo.saveOrUpdate(checkIn);
+		// Check for double nickname is deactivated for now.
+//		List<CheckIn> checkInsAtSpot = checkInRepo.getBySpot(checkIn.getSpot());
+//		// count checkins at spot
+//		if(checkInsAtSpot != null) {
+//			Iterator<CheckIn> it = checkInsAtSpot.iterator();
+//			while(it.hasNext()) {
+//				checkInCount++;
+//				CheckIn next = it.next();
+//				
+//				if(next.getNickname().equals(checkIn.getNickname() ) ) {
+//					throw new CheckInFailureException("nickname already exists", "checkInErrorNicknameExists");
+//				}
+//			}
+//		}
+		
+		logger.info("New CheckIn with userId={}", checkIn.getUserId());
+
+		Key<CheckIn> checkInKey = checkInRepo.saveOrUpdate(checkIn);
+		if(optAccount.isPresent()) {
+			Account account = optAccount.get();
+			account.setActiveCheckIn(checkInKey);
+			accountRepo.saveOrUpdate(account);
+		}
 		checkInDto.setUserId(checkInId);
 		checkInDto.setStatus(CheckInStatus.CHECKEDIN);
 		
 		// send the event
 		CheckInEvent newCheckInEvent = new NewCheckInEvent(checkIn, business);
-		newCheckInEvent.setCheckInCount(checkInCount);
+		newCheckInEvent.setCheckInCount(checkInCount + 1);
 		eventBus.post(newCheckInEvent);
 		return checkInDto;
 	}
@@ -310,13 +403,21 @@ public class CheckInController {
 			return null;
 		return checkInRepo.getByProperty("userId", checkInUid);
 	}
+	
+	/**
+	 * {@link #checkOut(CheckIn, Optional)}
+	 * @param checkIn
+	 */
+	public void checkOut(CheckIn checkIn) {
+		checkOut(checkIn, Optional.<Account>absent());
+	}
 
 	/**
 	 * Delete the checkIn from database only if there are no orders placed or payment requested.
 	 * 
 	 * @param checkInUid
 	 */
-	public void checkOut(CheckIn checkIn) {
+	public void checkOut(CheckIn checkIn, Optional<Account> optAccount) {
 		checkNotNull(checkIn, "checkIn was null");
 		checkNotNull(checkIn.getId(), "checkIn id was null");
 		checkArgument(checkIn.getId() != 0, "checkIn id was 0");
@@ -324,26 +425,38 @@ public class CheckInController {
 		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
 		checkNotNull(checkIn.getStatus(), "checkIn status was null");
 		
-		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST) {
-			throw new CheckInFailureException("invalid status " + checkIn.getStatus());
+		
+		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST || checkIn.getStatus() == CheckInStatus.COMPLETE) {
+			throw new IllegalAccessException("invalid status " + checkIn.getStatus());
 		}
-		else {
-			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
-			List<Key<Order>> orderKeys = orderRepo.getKeysByProperty("checkIn", checkIn);
-			List<Key<OrderChoice>> orderChoiceKeys = new ArrayList<Key<OrderChoice>>();
-			
-			for (Key<Order> orderKey : orderKeys) {
-				orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
-			}
-			requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
-			orderChoiceRepo.delete(orderChoiceKeys);
-			orderRepo.delete(orderKeys);
-			checkInRepo.delete(checkIn);
-			
-			DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
-			event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
-			eventBus.post(event);
-		}			
+		// Check that there were no orders placed.
+		if (orderRepo.queryForCheckInAndStatus(checkIn, OrderStatus.COMPLETE,
+								OrderStatus.INPROCESS, OrderStatus.PLACED,
+								OrderStatus.RECEIVED).getKey() != null) {
+			throw new IllegalAccessException("Unable to delete checkIn while orders exist");
+		}
+		
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
+		List<Key<Order>> orderKeys = orderRepo.getKeysByProperty("checkIn", checkIn);
+		List<Key<OrderChoice>> orderChoiceKeys = new ArrayList<Key<OrderChoice>>();
+		
+		for (Key<Order> orderKey : orderKeys) {
+			orderChoiceKeys.addAll(orderChoiceRepo.getKeysByParent(orderKey));
+		}
+		requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
+		orderChoiceRepo.delete(orderChoiceKeys);
+		orderRepo.delete(orderKeys);
+		checkInRepo.delete(checkIn);
+		
+		// Remove active checkIn from the account, if this was authenticated with an user account.
+		if(optAccount.isPresent()) {
+			optAccount.get().setActiveCheckIn(null);
+			accountRepo.saveOrUpdate(optAccount.get());
+		}	
+		
+		DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
+		event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
+		eventBus.post(event);
 	}
 
 	/**
@@ -400,6 +513,13 @@ public class CheckInController {
 		// Finally delete the checkin.
 		checkInRepo.delete(checkIn);
 		
+		// Remove active checkIn from the account, if this was authenticated with an user account.
+		if(checkIn.getAccount() != null) {
+			Account account = accountRepo.getByKey(checkIn.getAccount());
+			account.setActiveCheckIn(null);
+			accountRepo.saveOrUpdate(account);
+		}
+		
 		// Send event
 		DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, business, false);
 		
@@ -455,5 +575,98 @@ public class CheckInController {
 			eventBus.post(new MoveCheckInEvent(checkIn, business, oldSpotKey));
 		}
 		return checkInData;
+	}
+	
+	/**
+	 * Load information about past checkIns for this account or anonymous installation id.
+	 * 
+	 * @param account
+	 * @param limit 
+	 * @param start 
+	 * @return
+	 */
+	public List<VisitDTO> getVisits(Optional<Account> account , String installId, int start, int limit) {
+		Query<CheckIn> checkInQuery = checkInRepo.query().order("-id").filter("status", CheckInStatus.COMPLETE).offset(start).limit(limit);
+		if(account.isPresent()) {
+			checkInQuery = checkInQuery.filter("account", account.get());
+		}
+		else {
+			if(Strings.isNullOrEmpty(installId)) {
+				throw new ValidationException("Unable to query without deviceId");
+			}
+			checkInQuery = checkInQuery.filter("deviceId", installId);
+		}
+		 
+		ArrayList<VisitDTO> visitDTOList = new ArrayList<VisitDTO>();
+		
+		for (CheckIn checkIn : checkInQuery) {
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
+			Bill bill = billRepo.getByProperty("checkIn", checkIn);
+			visitDTOList.add( new VisitDTO(checkIn, business, bill));
+		}
+		
+		return visitDTOList;
+	}
+	
+	/**
+	 * @param account
+	 * @param installId
+	 * @return
+	 */
+	public HistoryStatusDTO connectVisits(Account account, HistoryStatusDTO historyDTO) {
+		checkNotNull(account, "account was null");
+		
+		if(Strings.isNullOrEmpty(historyDTO.getInstallId())) {
+			throw new ValidationException("installId was null or empty");
+		}
+		
+		Query<CheckIn> visitsQuery = checkInRepo.query().filter("status", CheckInStatus.COMPLETE).filter("deviceId", historyDTO.getInstallId());
+		List<CheckIn> visits = new ArrayList<CheckIn>();
+		int visitCount = 0;
+		for (CheckIn checkIn : visitsQuery) {
+			// Only update check which are not yet linked.
+			if(checkIn.getAccount() == null) {
+				checkIn.setAccount(account.getKey());
+				//TODO Think about removing deviceId from the checkIns?
+				// Do we want to associate visits with a user and a device, is that a privacy problem?
+				visits.add(checkIn);
+				++visitCount;
+			}
+		}
+		
+		
+		// Save all the check ins!
+		checkInRepo.saveOrUpdate(visits);
+		// Return number of connected checkIns.
+		historyDTO.setVisitCount(visitCount);
+		return historyDTO;
+	}
+	
+	/**
+	 * @param businessKey
+	 * @param areaId
+	 * @param start
+	 * @param limit
+	 * @return
+	 */
+	public List<CheckInHistoryDTO> getHistory(Key<Business> businessKey, long areaId, int start, int limit) {
+		checkNotNull(businessKey, "businessKey was null");
+		
+		Query<CheckIn> checkInQuery = checkInRepo.query().order("-id").offset(start).limit(limit);
+		if(areaId != 0) {
+			checkInQuery = checkInQuery.filter("area", areaRepo.getKey(businessKey, areaId));
+		}
+		
+		checkInQuery.filter("status", CheckInStatus.COMPLETE);
+	
+		ArrayList<CheckInHistoryDTO> historyDTOList = new ArrayList<CheckInHistoryDTO>();
+		
+		for (CheckIn checkIn : checkInQuery) {
+			Spot spot = spotRepo.getByKey(checkIn.getSpot());
+			Bill bill = billRepo.getByProperty("checkIn", checkIn);
+			historyDTOList.add(new CheckInHistoryDTO(checkIn, bill, spot));
+		}
+		
+		return historyDTOList;
 	}
 }

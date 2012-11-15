@@ -1,13 +1,48 @@
 package net.eatsense.representation;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.apache.bval.constraints.Email;
+import org.apache.bval.constraints.NotEmpty;
+
 public class RegistrationDTO {
+	@NotNull
+	@NotEmpty
+	@Size(min = 3)
 	String name;
+	
+	/**
+	 * Login name must be between 4 and 30 characters with only lowercase letters, numbers, undercore, hyphen and dot.
+	 */
+	@NotNull
+	@Size(min = 4, max = 30)
+	@Pattern(regexp = "^[a-z0-9_\\.-]+$")
 	String login;
+	
+	@NotNull
+	@Email
 	String email;
+	
 	String facebookUID;
 	String facebookToken;
+	
+	/**
+	 * Password pattern matches a password with at least one number or one unicode/symbolic and one alphabetical character.
+	 */
+	@NotNull
+	@Size(min = 6)
+	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$")
 	String password;
+	
+	@NotNull
+	@NotEmpty
 	String phone;
+	
+	@Valid
+	CompanyDTO company;
 	
 	public String getPhone() {
 		return phone;
@@ -15,7 +50,6 @@ public class RegistrationDTO {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	CompanyDTO company;
 	
 	public String getFacebookToken() {
 		return facebookToken;

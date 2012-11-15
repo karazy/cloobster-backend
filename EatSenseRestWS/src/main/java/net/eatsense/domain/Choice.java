@@ -11,7 +11,9 @@ import net.eatsense.domain.embedded.ProductOption;
 
 import org.apache.bval.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
@@ -21,7 +23,8 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Nils Weiher
  *
  */
-public class Choice extends GenericEntity {
+@Cached
+public class Choice extends GenericEntity<Choice> {
 	
 	/**
 	 * Description of the choice to show on the product page.
@@ -34,7 +37,7 @@ public class Choice extends GenericEntity {
 	/**
 	 * Only used if overridePrice is different to NONE.
 	 */
-	Float price;
+	Long price;
 
 	/**
 	 * Determines how to calculate the price of the options.
@@ -70,16 +73,11 @@ public class Choice extends GenericEntity {
 	 */
 	int includedChoices;
 	
-	Key<Choice> parentChoice;
-
-	public Key<Choice> getParentChoice() {
-		return parentChoice;
-	}
-
-	public void setParentChoice(Key<Choice> parentChoice) {
-		this.parentChoice = parentChoice;
-	}
-
+	/**
+	 * Order of choice for UI.
+	 */
+	private Integer order;
+	
 	public Key<Business> getBusiness() {
 		return business;
 	}
@@ -109,7 +107,7 @@ public class Choice extends GenericEntity {
 		return overridePrice;
 	}
 
-	public Float getPrice() {
+	public Long getPrice() {
 		return price;
 	}
 	
@@ -121,42 +119,77 @@ public class Choice extends GenericEntity {
 		return text;
 	}
 	
+	public Integer getOrder() {
+		return order;
+	}
+	
 	public void setBusiness(Key<Business> business) {
 		this.business = business;
 	}
 	
 	public void setIncludedChoices(int includedChoices) {
-		this.includedChoices = includedChoices;
+		if(!Objects.equal(this.includedChoices, includedChoices)) {
+			this.setDirty(true);
+			this.includedChoices = includedChoices;
+		}
 	}
 	
 	public void setMaxOccurence(int maxOccurence) {
-		this.maxOccurence = maxOccurence;
+		if(!Objects.equal(this.maxOccurence, maxOccurence)) {
+			this.setDirty(true);
+			this.maxOccurence = maxOccurence;
+		}
 	}
 
 	public void setMinOccurence(int minOccurence) {
-		this.minOccurence = minOccurence;
+		if(!Objects.equal(this.minOccurence, minOccurence)) {
+			this.setDirty(true);
+			this.minOccurence = minOccurence;
+		}
 	}
 
-	public void setOptions(List<ProductOption> availableChoices) {
-		this.options = availableChoices;
+	public void setOptions(List<ProductOption> options) {
+		if(!Objects.equal(this.options, options)) {
+			this.setDirty(true);
+			this.options = options;
+		}
 	}
 		
 	public void setOverridePrice(ChoiceOverridePrice overridePrice) {
-		this.overridePrice = overridePrice;
+		if(!Objects.equal(this.overridePrice, overridePrice)) {
+			this.setDirty(true);
+			this.overridePrice = overridePrice;
+		}
 	}
 	
-	public void setPrice(Float price) {
-		this.price = price;
+	public void setPrice(Long price) {
+		if(!Objects.equal(this.price, price)) {
+			this.setDirty(true);
+			this.price = price;
+		}
 	}
 	
 	public void setProduct(Key<Product> product) {
-		this.product = product;
+		if(!Objects.equal(this.product, product)) {
+			this.setDirty(true);
+			this.product = product;
+		}
 	}
 	
 	public void setText(String text) {
-		this.text = text;
+		if(!Objects.equal(this.text, text)) {
+			this.setDirty(true);
+			this.text = text;
+		}
 	}
-	
+
+	public void setOrder(Integer order) {
+		if(!Objects.equal(this.order, order)) {
+			this.setDirty(true);
+			this.order = order;
+		}		
+	}
+
 	public static Key<Choice> getKey(Key<Business> parent, long id) {
 		return new Key<Choice>(parent,Choice.class, id);
 	}

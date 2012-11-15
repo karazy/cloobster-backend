@@ -1,12 +1,17 @@
 package net.eatsense.persistence;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.GenericEntity;
-import net.eatsense.domain.Spot;
+import net.eatsense.domain.TrashEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,21 +27,26 @@ import com.googlecode.objectify.util.DAOBase;
  * Generic repository. Acts as intermediate layer between datastore and domain
  * objects. Similar to a DAO.
  * 
- * @author freifschneider, Nils Weiher
+ * @author Frederik Reifschneider, Nils Weiher
  * 
  * @param <T>
  */
-public class GenericRepository<T extends GenericEntity> extends DAOBase{
-
+public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected Class<T> clazz;
-
-	static public <T> void register(Class<T> clazz) {
-		ObjectifyService.register(clazz);
+	
+	static {
+		ObjectifyService.register(TrashEntry.class);
 	}
 
 	public GenericRepository(Class<T> clazz) {
 		this.clazz = clazz;
+		//OPTIMIZE This part is still not the best way to handle the entity registration.
+		try {
+			ObjectifyService.register(clazz);
+		} catch (IllegalArgumentException e) {
+			// We already registered the entity, okay to skip this.
+		}
 	}
 	
 	/**
@@ -63,8 +73,9 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	 */
 	public Key<T> saveOrUpdate(T obj) {
 		logger.info("{}", obj);
-		
-		return ofy().put(obj);
+		Key<T> key = ofy().put(obj);
+		obj.setDirty(false);
+		return key;
 	}
 	
 	/**
@@ -109,7 +120,91 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 		logger.info("{}", keyIterable);
 		ofy().delete(keyIterable);
 	}
+	
+	/**
+	 * Shortcut for getting an entity and saving as trash.
+	 * 
+	 * @param entityKey
+	 * @param loginResponsible
+	 * @return The entry saved for trash.
+	 */
+	public TrashEntry trashEntity(Key<T> entityKey, String loginResponsible) {
+		return trashEntity(ofy().get(entityKey), loginResponsible);
+	}
+	
+	/**
+	 * Save the Entity as trash, creates a TrashEntry for this entity, for later deletion.
+	 * 
+	 * @param entity
+	 * @param loginResponsible
+	 * @return The TrashEntry for this entity.
+	 */
+	public TrashEntry trashEntity(T entity, String loginResponsible) {
+		Key<T> key = entity.getKey();
+		logger.info("{}", key);
+		TrashEntry trashEntry = new TrashEntry(key, Key.getKind(clazz), new Date(), loginResponsible);
+		entity.setTrash(true);
+		ofy().put(entity);
+		ofy().put(trashEntry);
+		return trashEntry;
+	}
+		
+	/**
+	 * @param trashEntryKey
+	 * @return
+	 */
+	public T restoreTrashedEntity(Key<TrashEntry> trashEntryKey) {
+		checkNotNull(trashEntryKey, "trashEntryKey was null");
+		TrashEntry trashEntry = ofy().get(trashEntryKey);
+		checkArgument(trashEntry.getEntityKey().getKind().equals(Key.getKind(clazz)), "Trashed entity not of correct type");
+		
+		T entity = ofy().get((Key<T>)trashEntry.getEntityKey());
+		entity.setTrash(false);
+		
+		ofy().put(entity);
+		
+		ofy().delete(trashEntryKey);
+		
+		return entity;
+	}
 
+	
+	/**
+	 * @return All TrashEntry items in the store.
+	 */
+	public List<TrashEntry> getAllTrash() {
+		return ofy().query(TrashEntry.class).list();
+	}
+	
+	/**
+	 * @param trashEntries
+	 */
+	private List<TrashEntry> deleteTrash(Iterable<TrashEntry> trashEntries) {
+		List<Key<?>> keysToDelete = new ArrayList<Key<?>>();
+		List<TrashEntry> trashList = new ArrayList<TrashEntry>();
+		
+		for (TrashEntry trashEntry : trashEntries) {
+			keysToDelete.add(trashEntry.getEntityKey());
+			trashEntry.setDeletionDate(new Date());
+			
+			trashList.add(trashEntry);
+		}
+		ofy().put(trashList);
+		
+		ofy().delete(keysToDelete);
+		
+		return trashList;
+	}
+	
+	/**
+	 * Permanently delete entities in the trash.
+	 * 
+	 * @return List of TrashEntries for the deleted Entities.
+	 */
+	public List<TrashEntry> deleteAllTrash() {
+		return deleteTrash(ofy().query(TrashEntry.class));
+	}
+	
 	/**
 	 * Finds an object by id. ONLY WORKING WITH OBJECTS WITH NO PARENT ANNOTATION
 	 * @param id
@@ -305,6 +400,49 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	}
 	
 	/**
+	 * Convenience method to get all objects matching a single property and Parent
+	 * @param <V> Type of the parent entity.
+	 * 
+	 * @param parent
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public <V extends GenericEntity<V>> List<T> getListByParentAndProperty(Key<V> parent, String propName, Object propValue)
+	{
+		logger.info("{}, property: {}", clazz, propName);
+		Query<T> q = ofy().query(clazz).ancestor(parent);
+
+		q.filter(propName, propValue);
+
+		return q.list();
+
+	}
+	
+	/**
+	 * Convenience method to get all objects matching a single property and Parent
+	 * @param <V> Type of the parent entity.
+	 * 
+	 * @param parent
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<Key<T>> of matching entity keys.
+	 */
+	public <V extends GenericEntity<V>> List<Key<T>> getKeysByParentAndProperty(Key<V> parent, String propName, Object propValue)
+	{
+		logger.info("{}, property: {}", clazz, propName);
+		Query<T> q = ofy().query(clazz).ancestor(parent);
+
+		q.filter(propName, propValue);
+
+		return q.listKeys();
+	}
+	
+	/**
 	 * Convenience method to get all object keys matching a single property
 	 * 
 	 * 
@@ -327,11 +465,12 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	
 	/**
 	 * Convenience method to get all object keys matching a single property
+	 * @param <V>
 	 * 
 	 * @param parentKey
 	 * @return List<Key<T>> of matching entity keys
 	 */
-	public List<Key<T>> getKeysByParent(Key<? extends GenericEntity> parentKey)
+	public <V> List<Key<T>> getKeysByParent(Key<? extends GenericEntity<V>> parentKey)
 	{
 		logger.info("{}, parent: {}", clazz, parentKey);
 		Query<T> q = ofy().query(clazz);
@@ -382,7 +521,7 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	 * @return
 	 */
 	public Query<T> query() {
-		logger.info("{}", clazz);
+		logger.info("entity: {}", clazz);
 		return ofy().query(clazz);
 	}
 		
@@ -396,12 +535,13 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 
 	/**
 	 * Create a typesafe wrapper for the datastore key object.
+	 * @param <V>
 	 * 
 	 * @param parent parent {@link Key}
 	 * @param id numerical identifier
 	 * @return {@link Key}
 	 */
-	public Key<T> getKey(Key<? extends GenericEntity> parent, long id) {
+	public <V> Key<T> getKey(Key<? extends GenericEntity<V>> parent, long id) {
 		return new Key<T>(parent , clazz, id);
 	}
 	
@@ -413,5 +553,15 @@ public class GenericRepository<T extends GenericEntity> extends DAOBase{
 	 */
 	public Key<T> getKey(long id) {
 		return new Key<T>( clazz, id);
+	}
+	
+	/**
+	 * Create a typesafe wrapper for the datastore key object.
+	 * 
+	 * @param id numerical identifier
+	 * @return {@link Key} of type T
+	 */
+	public Key<T> getKey(T obj) {
+		return obj.getKey();
 	}
 }

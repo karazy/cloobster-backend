@@ -1,0 +1,11 @@
+[Cloobster] E-Mail geändert für {0}
+Hallo {0},
+
+Sie haben eine Änderung Ihrer E-Mail angefordert. Sollten Sie diese nicht selbst veranlasst haben, wenden Sie sich bitte an support@cloobster.com.
+
+Um die neue E-Mail zu aktivieren, klicken Sie bitte auf den Aktivierungslink. 
+{1}
+
+
+Ihr cloobster Team
+Sirko Polster

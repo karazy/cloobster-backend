@@ -3,6 +3,7 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,8 +13,11 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
+import net.eatsense.configuration.Configuration;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.FeedbackForm;
@@ -25,7 +29,9 @@ import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -38,17 +44,23 @@ import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.AreaImportDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.SpotDTO;
+import net.eatsense.validation.ImportChecks;
 
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 
 /**
@@ -80,10 +92,18 @@ public class ImportController {
 	private OrderChoiceRepository orderChoiceRepo;
 	private BillRepository billRepo;
 	private FeedbackFormRepository feedbackFormRepo;
+	private AreaRepository areaRepo;
+	private Provider<Configuration> configProvider;
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, CheckInRepository chkr, OrderRepository or, OrderChoiceRepository ocr, BillRepository br, RequestRepository reqr, AccountRepository acr, FeedbackFormRepository feedbackFormRepo) {
+	public ImportController(BusinessRepository businessRepo, SpotRepository sr,
+			MenuRepository mr, ProductRepository pr, ChoiceRepository cr,
+			CheckInRepository chkr, OrderRepository or,
+			OrderChoiceRepository ocr, BillRepository br,
+			RequestRepository reqr, AccountRepository acr,
+			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo, Provider<Configuration> configProvider) {
+		this.areaRepo = areaRepo;
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
 		this.menuRepo = mr;
@@ -96,8 +116,9 @@ public class ImportController {
 		this.requestRepo = reqr;
 		this.accountRepo = acr;
 		this.feedbackFormRepo = feedbackFormRepo;
+		this.configProvider = configProvider;
 	}
-	
+
     public void setValidator(Validator validator) {
         this.validator = validator;
     }
@@ -134,26 +155,67 @@ public class ImportController {
     	    	
     	return new FeedbackFormDTO(feedbackForm);
     }
+    
+    /**
+     * Update or create the default {@link FeedbackForm} entity based on the given data. 
+     * 
+     * @param feedbackFormData - Data for the new {@link FeedbackForm} entity.
+     * @return {@link FeedbackFormDTO} - Data object representing the new FeedbackForm.
+     */
+	public FeedbackFormDTO importDefaultFeedbackForm(
+			FeedbackFormDTO feedbackFormData) {
+		FeedbackForm feedbackForm = new FeedbackForm();
+		Configuration config = configProvider.get();
+		if(config.getDefaultFeedbackForm() != null) {
+			feedbackForm.setId(config.getDefaultFeedbackForm().getId());
+		}
+    	feedbackForm.setDescription(feedbackFormData.getDescription());
+    	
+    	Long index = 1l;
+    	for (FeedbackQuestion question : feedbackFormData.getQuestions()) {
+			question.setId(index);
+			index++;
+		}
+    	feedbackForm.setQuestions(feedbackFormData.getQuestions());
+    	feedbackForm.setTitle(feedbackFormData.getTitle());
+    	
+    	Key<FeedbackForm> formKey = feedbackFormRepo.saveOrUpdate(feedbackForm);
+    	
+    	if(!Objects.equal(formKey, config.getDefaultFeedbackForm())) {
+    		config.setDefaultFeedbackForm(formKey);
+    		config.save();
+    	}
+    	    	
+		return new FeedbackFormDTO(feedbackForm);
+	}
 
 	public Long addBusiness(BusinessImportDTO businessData) {
 		if (!isValidBusinessData(businessData)) {
-			logger.info("Invalid business data, import aborted.");
-			logger.info(returnMessage);
-			return null;
+			logger.error("Invalid business data, import aborted.");
+			logger.error(returnMessage);
+			throw new ValidationException(returnMessage);
 		}
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
-		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getPayments() );
+		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
 		}
 		
-		for(SpotDTO spot : businessData.getSpots()) {
-			if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), spot.getGroupTag()) == null )
-				logger.info("Error while saving spot with name: " + spot.getName());
+		// Create service area and spots.
+		for(AreaImportDTO area : businessData.getAreas()) {
+			Key<Area> kA = createAndSaveArea(kR, area.getName(), area.getDescription());
+			
+			for(SpotDTO spot : area.getSpots()) {
+				if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), kA) == null )
+					logger.info("Error while saving spot with name: " + spot.getName());
+			}
 		}
+		
+		
+		CurrencyUnit currencyUnit = CurrencyUnit.of(businessData.getCurrency());
 		
 		for(MenuDTO menu : businessData.getMenus()) {
 			Key<Menu> kM = createAndSaveMenu(kR, menu.getTitle(), menu.getDescription(), menu.getOrder());
@@ -161,7 +223,8 @@ public class ImportController {
 			if(kM != null) {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
-					Product newProduct = createProduct(kM,kR, productData.getName(), productData.getPrice(), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
+					
+					Product newProduct = createProduct(kM,kR, productData.getName(), Money.ofMinor(currencyUnit, productData.getPriceMinor() ), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
@@ -170,33 +233,10 @@ public class ImportController {
 							Map<String, ChoiceDTO> parentMap = new HashMap<String, ChoiceDTO>();
 							
 							for(ChoiceDTO choiceData : productData.getChoices()) {
-								if(choiceData.getGroup() != null && !choiceData.getGroup().isEmpty()) {
-									if(!groupMap.containsKey(choiceData.getGroup())) {
-										groupMap.put(choiceData.getGroup(), new ArrayList<ChoiceDTO>());
-									}
-									if(choiceData.isGroupParent()) {
-										parentMap.put(choiceData.getGroup(), choiceData);
-									}
-									else
-										groupMap.get(choiceData.getGroup()).add(choiceData);
-								}
-								else {
-									// no group name set, just save the choice
-									Key<Choice> choiceKey = createAndSaveChoice(kP,kR, choiceData.getText(), choiceData.getPrice(), choiceData.getOverridePrice(),
-											choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions(), null);
-									choices.add(choiceKey);
-								}
-							}
-							
-							for (ChoiceDTO parentChoice : parentMap.values()) {
-								Key<Choice> parentKey = createAndSaveChoice(kP,kR, parentChoice.getText(), parentChoice.getPrice(), parentChoice.getOverridePrice(),
-										parentChoice.getMinOccurence(), parentChoice.getMaxOccurence(), parentChoice.getIncluded(), parentChoice.getOptions(), null);
-								choices.add(parentKey);
-								for (ChoiceDTO childChoice : groupMap.get(parentChoice.getGroup())) {
-									Key<Choice> childKey = createAndSaveChoice(kP,kR, childChoice.getText(), childChoice.getPrice(), childChoice.getOverridePrice(),
-											childChoice.getMinOccurence(), childChoice.getMaxOccurence(), childChoice.getIncluded(), childChoice.getOptions(), parentKey);
-									choices.add(childKey);
-								} 
+								// no group name set, just save the choice
+								Key<Choice> choiceKey = createAndSaveChoice(kP,kR, choiceData.getText(), Money.ofMinor(currencyUnit, choiceData.getPriceMinor()), choiceData.getOverridePrice(),
+											choiceData.getMinOccurence(), choiceData.getMaxOccurence(), choiceData.getIncluded(), choiceData.getOptions());
+								choices.add(choiceKey);
 							}
 						
 							newProduct.setChoices(choices);
@@ -205,12 +245,12 @@ public class ImportController {
 						}
 					}
 					else {
-						logger.info("Error while saving product with name: " +productData.getName());
+						logger.error("Error while saving product with name: " +productData.getName());
 					}
 				}
 			}
 			else {
-				logger.info("Error while saving menu with title: " +menu.getTitle());
+				logger.error("Error while saving menu with title: " +menu.getTitle());
 			}
 
 		}
@@ -219,12 +259,15 @@ public class ImportController {
 		return kR.getId();
 	}
 	
-	private Key<Business> createAndSaveBusiness(String name, String desc, Collection<PaymentMethod> paymentMethods) {
+	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
 		logger.info("Creating new business with data: " + name + ", " + desc );
 		
 		Business business = new Business();
 		business.setName(name);
 		business.setDescription(desc);
+		business.setAddress(address);
+		business.setCity(city);
+		business.setPostcode(postcode);
 		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
 		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
@@ -232,7 +275,20 @@ public class ImportController {
 		return businessKey;
 	}
 	
-	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, String groupTag) {
+	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description) {
+		checkNotNull(businessKey, "businessKey was null");
+		Area area = new Area();
+		area.setBusiness(businessKey);
+		area.setDescription(description);
+		area.setName(name);
+		area.setActive(true);
+		
+		Key<Area> kA = areaRepo.saveOrUpdate(area);
+		logger.info("Created new area with id: " + kA.getId());
+		return kA;
+	}
+	
+	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, Key<Area> areaKey) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new spot for business ("+ businessKey.getId() + ") with name: " + name );
@@ -241,7 +297,7 @@ public class ImportController {
 		s.setBusiness(businessKey);
 		s.setName(name);
 		s.setBarcode(barcode);
-		s.setGroupTag(groupTag);
+		s.setArea(areaKey);
 		
 		Key<Spot> kS = spotRepo.saveOrUpdate(s);
 		logger.info("Created new spot with id: " + kS.getId());
@@ -254,6 +310,7 @@ public class ImportController {
 		logger.info("Creating new menu for business ("+ businessKey.getId() + ") with title: " + title );
 		
 		Menu menu = new Menu();
+		menu.setActive(true);
 		menu.setTitle(title);
 		menu.setBusiness(businessKey);
 		menu.setDescription(description);
@@ -264,16 +321,17 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Float price, String shortDesc, String longDesc, Integer order)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
 		
 		Product product = new Product();
+		product.setActive(true);
 		product.setMenu(menuKey);
 		product.setBusiness(business);
 		product.setName(name);
-		product.setPrice(price);
+		product.setPrice(price.getAmountMinorInt());
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
 		product.setOrder(order);
@@ -282,11 +340,10 @@ public class ImportController {
 	}
 	
 	private Key<Choice> createAndSaveChoice(Key<Product> productKey,
-			Key<Business> businessKey, String text, float price,
+			Key<Business> businessKey, String text, Money price,
 			ChoiceOverridePrice overridePrice, int minOccurence,
 			int maxOccurence, int includedChoices,
-			Collection<ProductOption> availableOptions,
-			Key<Choice> parentChoice) {
+			Collection<ProductOption> availableOptions) {
 		if(productKey == null)
 			throw new NullPointerException("productKey was not set");
 		logger.info("Creating new choice for product ("+ productKey.getId() + ") with text: " +text);
@@ -295,12 +352,11 @@ public class ImportController {
 		choice.setProduct(productKey);
 		choice.setBusiness(businessKey);
 		choice.setText(text);
-		choice.setPrice(price);
+		choice.setPrice(price.getAmountMinorLong());
 		choice.setOverridePrice(overridePrice);
 		choice.setMinOccurence(minOccurence);
 		choice.setMaxOccurence(maxOccurence);
 		choice.setIncludedChoices(includedChoices);
-		choice.setParentChoice(parentChoice);
 	
 		if(availableOptions != null)
 			choice.setOptions(new ArrayList<ProductOption>(availableOptions));
@@ -314,7 +370,7 @@ public class ImportController {
 		StringBuilder messageBuilder = new StringBuilder();
 		boolean isValid = true;
 		if( business != null ) {
-			Set<ConstraintViolation<BusinessImportDTO>> violation = validator.validate(business);
+			Set<ConstraintViolation<BusinessImportDTO>> violation = validator.validate(business,Default.class, ImportChecks.class);
 			
 			if(violation.isEmpty()) {
 				isValid = true;
@@ -348,7 +404,7 @@ public class ImportController {
 		choiceRepo.ofy().delete(choiceRepo.getAllKeys());
 		checkinRepo.ofy().delete(checkinRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
-		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 		accountRepo.ofy().delete(accountRepo.getAllKeys());
@@ -363,7 +419,8 @@ public class ImportController {
 		checkinRepo.ofy().delete(checkinRepo.ofy().query(CheckIn.class).fetchKeys());
 		requestRepo.ofy().delete(requestRepo.getAllKeys());
 		orderRepo.ofy().delete(orderRepo.getAllKeys());
-		orderChoiceRepo.ofy().delete(orderRepo.getAllKeys());
+		orderChoiceRepo.ofy().delete(orderChoiceRepo.getAllKeys());
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
+
 }

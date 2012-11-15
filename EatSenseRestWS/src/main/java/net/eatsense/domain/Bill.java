@@ -14,7 +14,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
-public class Bill extends GenericEntity {
+public class Bill extends GenericEntity<Bill> {
 	@Parent
 	@NotNull
 	private Key<Business> business;
@@ -33,7 +33,7 @@ public class Bill extends GenericEntity {
 	
 	@NotNull
 	@Min(0)
-	private Float total;
+	private Long total;
 	
 	private boolean cleared;
 
@@ -69,11 +69,11 @@ public class Bill extends GenericEntity {
 		this.paymentMethod = paymentMethod;
 	}
 
-	public Float getTotal() {
+	public Long getTotal() {
 		return total;
 	}
 
-	public void setTotal(Float total) {
+	public void setTotal(Long total) {
 		this.total = total;
 	}
 	
@@ -89,5 +89,4 @@ public class Bill extends GenericEntity {
 	public void setCleared(boolean cleared) {
 		this.cleared = cleared;
 	}
-
 }

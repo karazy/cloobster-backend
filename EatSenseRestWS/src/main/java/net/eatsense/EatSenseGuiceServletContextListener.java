@@ -1,30 +1,45 @@
 package net.eatsense;
 
 
-import java.util.Enumeration;
 import java.util.HashMap;
 
+import net.eatsense.auth.AccessTokenFilter;
+import net.eatsense.auth.AuthorizerFactory;
+import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
+import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.ConfigurationProvider;
+import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.AdminResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
+import net.eatsense.restws.DownloadResource;
 import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
+import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.BusinessesResource;
+import net.eatsense.restws.business.CompaniesResource;
 import net.eatsense.restws.customer.CheckInsResource;
+import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.files.FileService;
+import com.google.appengine.api.files.FileServiceFactory;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -50,23 +65,26 @@ public class EatSenseGuiceServletContextListener extends
 	@Override
 	protected Injector getInjector() {
 		Injector injector = Guice.createInjector(
-				new JerseyServletModule() { 
-					@Override 					
+				new JerseyServletModule() {
+					@Override 		
 					protected void configureServlets() {
-						Logger logger = LoggerFactory.getLogger(this.getClass());
 						HashMap<String, String> parameters = new HashMap<String, String>();
 						
-						Enumeration env = getServletContext().getInitParameterNames();
-						while( env.hasMoreElements() ) {
-							logger.info("initparameter: ", env.nextElement());
-						}
-						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
-						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, SecurityFilter.class.getName());
+						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
+								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName());
+						
+						// add cross origin headers filter, deactivated for now.
+						// add cache control response filter.
+						parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CacheResponseFilter.class.getName());
+						
+						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
+						
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
 						bind(AccountsResource.class);
 						bind(BusinessesResource.class);
+						bind(net.eatsense.restws.customer.AccountsResource.class);
 						bind(net.eatsense.restws.customer.BusinessesResource.class);
 						bind(NicknameResource.class);
 						bind(NewsletterResource.class);
@@ -79,10 +97,22 @@ public class EatSenseGuiceServletContextListener extends
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
 						bind(NicknameGenerator.class);
+						bind(UploadsResource.class);
+						bind(DownloadResource.class);
+						bind(CompaniesResource.class);
+						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
+						bind(ProfilesResource.class);
 						
+						// Create Configuration binding to automatically load configuration if needed.
+						bind(Configuration.class).toProvider(ConfigurationProvider.class);
+												
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*admin/services(.)*",
+						serveRegex("(.)*c/profiles(.)*",
+								"(.)*c/accounts(.)*",
+								"(.)*b/companies(.)*",
+								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",
+								"(.)*admin/services(.)*",
 								"(.)*newsletter(.)*",
 								"(.)*b/businesses(.)*",
 								"(.)*c/businesses(.)*",
@@ -90,10 +120,10 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*accounts(.)*",
 								"(.)*spots(.)*",
 								"(.)*nickname(.)*",
+								"(.)*download(.)*",
 								"(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*",
-								"(.)*cron(.)*"
-							).with(GuiceContainer.class, parameters);
+								"(.)*_ah/channel/disconnected(.)*",								
+								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
@@ -104,14 +134,33 @@ public class EatSenseGuiceServletContextListener extends
 //						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
 					@Provides
-					public ChannelService providesChannelService() {
+					public ChannelService providesChannelService() {						
 						return ChannelServiceFactory.getChannelService();
 					}
+					@Provides
+					public URLFetchService providesURLFetchService() {
+						return URLFetchServiceFactory.getURLFetchService();
+					}
+					@Provides
+					public BlobstoreService providesBlobStoreService() {
+						return BlobstoreServiceFactory.getBlobstoreService();
+					}
+					@Provides
+					public ImagesService providesImagesService() {
+						return ImagesServiceFactory.getImagesService();
+					}
+					
+					@Provides
+					public FileService providesFileService() {
+						return FileServiceFactory.getFileService();
+					}
+					
 				}, new ValidationModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
 		eventBus.register(injector.getInstance(MessageController.class));
+		eventBus.register(injector.getInstance(MailController.class));
 		
 		return injector;
 	}

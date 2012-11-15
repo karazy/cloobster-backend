@@ -109,7 +109,10 @@ public class UpdateBillTest {
 		OrderDTO orderDto = new OrderDTO();
 		orderDto.setAmount(1);
 		orderDto.setComment("I like fries!");
-		orderDto.setProduct(transform.productToDto(frites));
+		ProductDTO fritesDto = transform.productToDto(frites);
+		
+		orderDto.setProductId(frites.getId());
+		orderDto.setChoices(fritesDto.getChoices());
 		orderDto.setStatus(OrderStatus.CART);
 		
 		//#1 Place a simple order without choices...
@@ -141,7 +144,8 @@ public class UpdateBillTest {
 		
 		orderDto.setId(null);
 		orderDto.setAmount(2);
-		orderDto.setProduct(burgerDto);
+		orderDto.setProductId(burger.getId());
+		orderDto.setChoices(burgerDto.getChoices());
 		orderDto.setComment("I like my burger " + selected.getName());
 		
 		orderId = orderCtrl.placeOrderInCart(business, checkIn, orderDto);
@@ -149,7 +153,7 @@ public class UpdateBillTest {
 		placedOrderDto = orderCtrl.getOrderAsDTO(business, orderId);
 		placedOrder = orderCtrl.getOrder(business, orderId);
 		
-		for (ChoiceDTO orderChoice : placedOrderDto.getProduct().getChoices()) {
+		for (ChoiceDTO orderChoice : placedOrderDto.getChoices()) {
 			for (ProductOption option : orderChoice.getOptions()) {
 				if(option.getName() == selected.getName() )
 					assertThat(option.getSelected(), equalTo(true));
@@ -251,11 +255,11 @@ public class UpdateBillTest {
 			assertThat(bill.getId(), is(billData.getId()));
 			assertThat(bill.getCreationTime(), notNullValue());
 			assertThat(bill.getPaymentMethod().getName(), is(billData.getPaymentMethod().getName()));
-			assertThat(bill.getTotal(), is(21.5f));
+			assertThat(bill.getTotal(), is(2150l));
 			assertThat(bill.isCleared(), is(true));
 		}
 		// Check orders again to see if they are linked ...
-		List<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn, null);
+		Iterable<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn.getKey(), null);
 		
 		for (Order order : orders) {
 			assertThat(order.getBill().getId(), is(billData.getId()));

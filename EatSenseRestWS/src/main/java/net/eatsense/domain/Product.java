@@ -1,21 +1,31 @@
 package net.eatsense.domain;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Transient;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindexed;
 
-public class Product extends GenericEntity {
+@Cached
+public class Product extends GenericEntity<Product> {
 	private String name;
 	private String shortDesc;
 	/**
 	 * Detailed description of this product.
 	 */
 	private String longDesc;
-	private Float price;
+	
+	
+	/**
+	 * Saved as currency minor amount (cent)
+	 */
+	private long price;
 	private Integer order;
 	
 	/**
@@ -26,8 +36,9 @@ public class Product extends GenericEntity {
 	@Parent
 	private Key<Business> business;
 	
-	@Unindexed
 	private List<Key<Choice>> choices;
+	
+	private boolean active = false;
 	
 	public String getName() {
 		return name;
@@ -35,7 +46,10 @@ public class Product extends GenericEntity {
 
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 
@@ -45,7 +59,10 @@ public class Product extends GenericEntity {
 
 
 	public void setShortDesc(String shortDesc) {
-		this.shortDesc = shortDesc;
+		if(!Objects.equal(this.shortDesc, shortDesc)) {
+			this.setDirty(true);
+			this.shortDesc = shortDesc;
+		}
 	}
 
 
@@ -55,17 +72,23 @@ public class Product extends GenericEntity {
 
 
 	public void setLongDesc(String longDesc) {
-		this.longDesc = longDesc;
+		if(!Objects.equal(this.longDesc, longDesc)) {
+			this.setDirty(true);
+			this.longDesc = longDesc;
+		}
 	}
 
 
-	public Float getPrice() {
+	public long getPrice() {
 		return price;
 	}
 
 
-	public void setPrice(Float price) {
-		this.price = price;
+	public void setPrice(long price) {
+		if(!Objects.equal(this.price, price)) {
+			this.setDirty(true);
+			this.price = price;
+		}
 	}
 
 
@@ -75,7 +98,10 @@ public class Product extends GenericEntity {
 
 
 	public void setMenu(Key<Menu> menu) {
-		this.menu = menu;
+		if(!Objects.equal(this.menu, menu)) {
+			this.setDirty(true);
+			this.menu = menu;
+		}
 	}
 
 
@@ -91,7 +117,10 @@ public class Product extends GenericEntity {
 
 
 	public void setChoices(List<Key<Choice>> choices) {
-		this.choices = choices;
+		if(!Objects.equal(this.choices, choices)) {
+			this.setDirty(true);
+			this.choices = choices;
+		}
 	}
 
 
@@ -115,7 +144,45 @@ public class Product extends GenericEntity {
 
 
 	public void setOrder(Integer order) {
-		this.order = order;
+		if(!Objects.equal(this.order, order)) {
+			this.setDirty(true);
+			this.order = order;
+		}
 	}
 	
+	/**
+	 * Add a Key for a Choice entity to the list of choices.
+	 * 
+	 * @param choice
+	 * @return true
+	 */
+	public boolean addChoice(Key<Choice> choice) {
+		checkNotNull(choice, "choice key was null");
+		
+		if(choices == null)
+			choices = new ArrayList<Key<Choice>>();
+		boolean result = false;
+		
+		if(!choices.contains(choice)) {
+			result = choices.add(choice);
+			if(result) {
+				this.setDirty(true);
+			}
+		}
+		
+		return result;
+	}
+
+
+	public boolean isActive() {
+		return active;
+	}
+
+
+	public void setActive(boolean active) {
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
+	}
 }

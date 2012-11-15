@@ -9,6 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -48,6 +49,7 @@ public class OrderResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.GUEST)
 	public OrderDTO getOrder() {
 		return orderCtrl.toDto(order);
 	}
@@ -55,6 +57,7 @@ public class OrderResource {
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.GUEST)
 	public OrderDTO updateOrder( OrderDTO orderData) {
 		// Only update the order if this was an authorized request, i.e. this order belongs to the given checkin.
 		if(authorized)
@@ -64,7 +67,8 @@ public class OrderResource {
 	}
 	
 	@DELETE
-	public void deleteOrder() {
+	@RolesAllowed(Role.GUEST)
+	public void deleteOrderFromCart() {
 		if(authorized)
 			orderCtrl.deleteOrder(business, order, checkIn);
 		else

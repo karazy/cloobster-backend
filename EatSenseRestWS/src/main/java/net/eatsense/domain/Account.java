@@ -1,28 +1,39 @@
 package net.eatsense.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
+import net.eatsense.domain.embedded.UploadToken;
+import net.eatsense.representation.ImageUploadDTO;
 
 import org.apache.bval.constraints.Email;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
+import com.googlecode.objectify.annotation.Unindexed;
+import com.googlecode.objectify.annotation.NotSaved;
 
 @Cached
-public class Account extends GenericEntity {
+public class Account extends GenericEntity<Account> {
 	@NotNull
 	@NotEmpty
 	String login;
 	String hashedPassword;
 	
-	@NotNull
+	@NotNull 
 	@Email
 	String email;
+	
+	@Unindexed
+	private String newEmail;
 	
 	@NotNull
 	@NotEmpty
@@ -31,7 +42,14 @@ public class Account extends GenericEntity {
 	Date lastFailedLogin;
 	int failedLoginAttempts;
 	
+	/**
+	 * (DEPRECATED) We keep this because we got a typo in this field.
+	 */
+	@NotSaved
 	List<Key<Business>> businessess;
+	
+	//TODO: Refactor to a Set.
+	List<Key<Business>> businesses;
 	
 	@NotNull
 	@NotEmpty
@@ -42,19 +60,33 @@ public class Account extends GenericEntity {
 	@NotNull
 	Key<Company> company;
 	
+	@Embedded
+	private UploadToken uploadToken;
+	
+	@Embedded
+	@Unindexed
+	private List<ImageUploadDTO> imageUploads;
+	
 	private String facebookUid;
-	private String emailConfirmationHash;
 	private boolean emailConfirmed = false;
 	private boolean active = false;
 	
 	private Date creationDate;
+	
+	private Key<CheckIn> activeCheckIn;
+	
+	@Unindexed
+	private Key<CustomerProfile> customerProfile;
 	
 	public String getFacebookUid() {
 		return facebookUid;
 	}
 
 	public void setFacebookUid(String facebookUid) {
-		this.facebookUid = facebookUid;
+		if(!Objects.equal(this.facebookUid, facebookUid)) {
+			this.setDirty(true);
+			this.facebookUid = facebookUid;
+		}
 	}
 
 	public boolean isEmailConfirmed() {
@@ -62,7 +94,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setEmailConfirmed(boolean emailConfirmed) {
-		this.emailConfirmed = emailConfirmed;
+		if(!Objects.equal(this.emailConfirmed, emailConfirmed)) {
+			this.setDirty(true);
+			this.emailConfirmed = emailConfirmed;
+		}
 	}
 
 	public boolean isActive() {
@@ -70,7 +105,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setActive(boolean active) {
-		this.active = active;
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
 	}
 
 	public Key<Company> getCompany() {
@@ -78,7 +116,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setCompany(Key<Company> company) {
-		this.company = company;
+		if(!Objects.equal(this.company, company)) {
+			this.setDirty(true);
+			this.company = company;
+		}
 	}
 
 	public String getName() {
@@ -86,15 +127,29 @@ public class Account extends GenericEntity {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 	public List<Key<Business>> getBusinesses() {
-		return businessess;
+		//Temporary: Remove after all entities are converted.
+		if(businessess != null && !businessess.isEmpty()) {
+			if(businesses == null) {
+				businesses = new ArrayList<Key<Business>>();
+			}
+			businesses.addAll(businessess);
+			businessess = null;
+		}
+		return businesses;
 	}
 
 	public void setBusinesses(List<Key<Business>> businesses) {
-		this.businessess = businesses;
+		if(!Objects.equal(this.businesses, businesses)) {
+			this.setDirty(true);
+			this.businesses = businesses;
+		}
 	}
 
 	public Date getLastFailedLogin() {
@@ -102,7 +157,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setLastFailedLogin(Date lastFailedLogin) {
-		this.lastFailedLogin = lastFailedLogin;
+		if(!Objects.equal(this.lastFailedLogin, lastFailedLogin)) {
+			this.setDirty(true);
+			this.lastFailedLogin = lastFailedLogin;
+		}
 	}
 
 	public int getFailedLoginAttempts() {
@@ -110,7 +168,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setFailedLoginAttempts(int failedLoginAttempts) {
-		this.failedLoginAttempts = failedLoginAttempts;
+		if(!Objects.equal(this.failedLoginAttempts, failedLoginAttempts)) {
+			this.setDirty(true);
+			this.failedLoginAttempts = failedLoginAttempts;
+		}
 	}
 
 	public String getLogin() {
@@ -118,7 +179,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setLogin(String login) {
-		this.login = login;
+		if(!Objects.equal(this.login, login)) {
+			this.setDirty(true);
+			this.login = login;
+		}
 	}
 
 	public String getHashedPassword() {
@@ -126,7 +190,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setHashedPassword(String hashedPassword) {
-		this.hashedPassword = hashedPassword;
+		if(!Objects.equal(this.hashedPassword, hashedPassword)) {
+			this.setDirty(true);
+			this.hashedPassword = hashedPassword;
+		}
 	}
 
 	public String getEmail() {
@@ -134,7 +201,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setEmail(String email) {
-		this.email = email;
+		if(!Objects.equal(this.email, email)) {
+			this.setDirty(true);
+			this.email = email;
+		}
 	}
 
 	public String getRole() {
@@ -142,7 +212,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setRole(String role) {
-		this.role = role;
+		if(!Objects.equal(this.role, role)) {
+			this.setDirty(true);
+			this.role = role;
+		}
 	}
 		
 	@JsonIgnore
@@ -156,7 +229,10 @@ public class Account extends GenericEntity {
 	}
 
 	public void setPhone(String phone) {
-		this.phone = phone;
+		if(!Objects.equal(this.phone, phone)) {
+			this.setDirty(true);
+			this.phone = phone;
+		}
 	}
 
 	public Date getCreationDate() {
@@ -167,11 +243,49 @@ public class Account extends GenericEntity {
 		this.creationDate = creationDate;
 	}
 
-	public String getEmailConfirmationHash() {
-		return emailConfirmationHash;
+	public UploadToken getUploadToken() {
+		return uploadToken;
 	}
 
-	public void setEmailConfirmationHash(String emailConfirmationHash) {
-		this.emailConfirmationHash = emailConfirmationHash;
+	public void setUploadToken(UploadToken uploadToken) {
+		if(!Objects.equal(this.uploadToken, uploadToken)) {
+			this.setDirty(true);
+			this.uploadToken = uploadToken;
+		}
+	}
+
+	public List<ImageUploadDTO> getImageUploads() {
+		return imageUploads;
+	}
+
+	public void setImageUploads(List<ImageUploadDTO> imageUploads) {
+		this.imageUploads = imageUploads;
+	}
+
+	public String getNewEmail() {
+		return newEmail;
+	}
+
+	public void setNewEmail(String newEmail) {
+		this.newEmail = newEmail;
+	}
+
+	public Key<CheckIn> getActiveCheckIn() {
+		return activeCheckIn;
+	}
+
+	public void setActiveCheckIn(Key<CheckIn> activeCheckIn) {
+		if(!Objects.equal(this.activeCheckIn, activeCheckIn)) {
+			this.setDirty(true);
+			this.activeCheckIn = activeCheckIn;
+		}
+	}
+
+	public Key<CustomerProfile> getCustomerProfile() {
+		return customerProfile;
+	}
+
+	public void setCustomerProfile(Key<CustomerProfile> customerProfile) {
+		this.customerProfile = customerProfile;
 	}
 }

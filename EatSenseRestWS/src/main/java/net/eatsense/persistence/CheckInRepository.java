@@ -10,10 +10,6 @@ import net.eatsense.domain.Spot;
 public class CheckInRepository extends GenericRepository<CheckIn> {
 	final static Class<CheckIn> entityClass = CheckIn.class;
 	
-	static {
-		GenericRepository.register(entityClass);
-	}
-
 	public CheckInRepository() {
 		super(CheckIn.class);
 	}

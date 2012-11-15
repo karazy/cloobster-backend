@@ -2,7 +2,9 @@ package net.eatsense.domain;
 
 import java.util.Date;
 
-public class NewsletterRecipient extends GenericEntity {
+import com.googlecode.objectify.Key;
+
+public class NewsletterRecipient extends GenericEntity<NewsletterRecipient> {
 	@org.apache.bval.constraints.Email
 	String email;
 	Date entryDate;
@@ -25,6 +27,15 @@ public class NewsletterRecipient extends GenericEntity {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	@Override
+	public Key<NewsletterRecipient> getKey() {
+		return getKey(getId());
+	}
+	
+	public static Key<NewsletterRecipient> getKey(long id) {
+		return new Key<NewsletterRecipient>(NewsletterRecipient.class, id);
 	}
  
 }

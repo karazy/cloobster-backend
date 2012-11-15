@@ -3,21 +3,29 @@
       <div class="well">
         <h2>Admin Functions</h2>
         <h6 class="nav-header">Datastore Functions</h6>
-        <p ng-hide="showDeleteAll">
-        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button>
-        </p>
-        <p ng-show="showDeleteAll">
-        	<button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button>
-        </p>
-        <p ng-hide="showDeleteLive">
-        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button>
-        </p>
-        <p ng-show="showDeleteLive">
-        	<button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button>
-        </p>
+        <div ng-hide="deleteFunctionsDisabled">
+	        <p ng-hide="showDeleteAll">
+	        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteAll=true;confirmDeleteAllText='Confirm Delete'">Delete All Content</button>
+	        </p>
+	        <p ng-show="showDeleteAll">
+	        	<button type="button" class="btn btn-small" ng-click="showDeleteAll=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteAllData()" ng-bind="confirmDeleteAllText" ng-disabled="confirmDeleteAllDisabled"></button>
+	        </p>
+	        <p ng-hide="showDeleteLive">
+	        	<button type="button" class="btn btn-small btn-danger" ng-click="showDeleteLive=true;confirmDeleteLiveText='Confirm Delete'">Delete Live Content</button>
+	        </p>
+	        <p ng-show="showDeleteLive">
+	        	<button type="button" class="btn btn-small" ng-click="showDeleteLive=false">Cancel</button><button type="button" class="btn btn-small btn-danger" ng-click="deleteLiveData()" ng-bind="confirmDeleteLiveText" ng-disabled="confirmDeleteLiveDisabled"></button>
+	        </p>
+        </div>
+        <p ng-show="deleteFunctionsDisabled">Delete functions disabled in production environment.</p>
         <h6 class="nav-header">Account Functions</h6>
         <p>
         	<button type="button" class="btn btn-small" ng-click="createDummieAccounts()" ng-bind="createDummieAccountsText" ng-disabled="createDummieAccountsDisabled" ng-init="createDummieAccountsText='Create Dummie Accounts'"></button>
+        </p>
+        <h6 class="nav-header">Cockpit Functions</h6>
+        <p>
+        	<button type="button" class="btn btn-small" ng-click="sendCockpitUpdateMessage()" ng-bind="sendCockpitUpdateMessageText" ng-disabled="sendCockpitUpdateMessageDisabled" ng-init="sendCockpitUpdateMessageText='Send Cockpit Update'"></button>
+
         </p>
       </div><!--/.well -->
     </div><!--/span-->
@@ -90,6 +98,32 @@
 				</div>
 			</div>
 		</div>
+		<div class="row-fluid" id="importdefaultfeedbackform" >
+			<div class="span12 well" ng-controller="CloobsterAdmin.Configuration">
+				<h1>Set default feedback form <small>Import feedback form as default for new businesses.</small></h1>
+				<div class="row-fluid" >
+					<div class="span12">
+						<div import-alert alert="importAlert"></div>
+						<div class="progress" ng-show="importProgress">
+			        		<div class="bar" ng-style="importProgressStyle"></div>
+			    		</div>			    		
+						<form ng-submit="saveDefaultFeedback()" name="importDefaultFeedbackForm" ng-hide="importProgress" >
+							<fieldset>
+								<div class="control-group">
+				  					<label class="control-label" for="defaultfeedbackformjson">JSON data:</label>
+				  						<div class="controls">
+				    						<textarea name="business-json" id="defaultfeedbackformjson" placeholder="Paste JSON import file here ..." ng-model="defaultFeedbackForm" required/>
+				    					</div>
+								</div>
+								</fieldset>
+								<button type="submit" ng-disabled="importDefaultFeedbackForm.$invalid" class="btn btn-primary btn-large">Import feedback form</button>
+						</form>
+						<div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="row-fluid" id="importfeedbackform" >
 			<div class="span12 well" ng-controller="CloobsterAdmin.SelectBusiness">
 				<h1>Import feedback form <small>Import feedback form for a selected businesses.</small></h1>
@@ -113,11 +147,21 @@
 							<button type="submit" ng-disabled="importFeedbackForm.$invalid" class="btn btn-primary btn-large">Import feedback form</button>
 					</form>
 					<div>
-						<div class="progress" ng-show="importProgress">
-			        		<div class="bar" ng-style="importProgressStyle"></div>
-			    		</div>
-			    		<div import-alert alert="importAlert"></div>
+			    		<div import-alert alert="templateAlert"></div>
 					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row-fluid" id="fixes">
+			<div class="span12 well" ng-controller="CloobsterAdmin.Fixes">
+				<h1>Hotfixes <small>This section executes fixes for known bugs. E.g. problems with datastore structure which need to be adressed.</small></h1>
+				<div class="row-fluid" >
+					<div class="span12">
+						<div>
+							<button type="button" class="btn btn-primary btn-large" ng-click="fixBusinessesTypo()">Fix Businesses(s) Typo</button>
+							<p>Fixes bug in net.eatsense.domain.Account. Instead of businesses it was businessess. After fixing this all assigned businesses weren't visible anymore.</p>
+						</div>
 					</div>
 				</div>
 			</div>

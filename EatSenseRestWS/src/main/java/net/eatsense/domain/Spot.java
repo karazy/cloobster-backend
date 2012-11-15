@@ -1,8 +1,15 @@
 package net.eatsense.domain;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.persistence.Transient;
 
+import net.eatsense.exceptions.ServiceException;
+
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 
 
@@ -13,7 +20,8 @@ import com.googlecode.objectify.annotation.Parent;
  * @author Frederik Reifschneider
  *
  */
-public class Spot extends GenericEntity{
+@Cached
+public class Spot extends GenericEntity<Spot>{
 	
 	/**
 	 * The business this spot belongs to.
@@ -33,18 +41,36 @@ public class Spot extends GenericEntity{
 	private String name;
 	
 	/**
-	 * A tag which can be used to group spots for easier organisation.
-	 * E. g. Outside, Upper floor
+	 * Determines if the customer is able to checkin on that spot.
+	 * (Default is true, for downwards combatibility).
 	 */
-	private String groupTag;
+	private boolean active = true;
+	
+	private Key<Area> area;
 
+	public Key<Area> getArea() {
+		return area;
+	}
+
+	public void setArea(Key<Area> area) {
+		
+		if(!Objects.equal(this.area, area)) {
+			this.setDirty(true);
+			this.area = area;
+		}
+	}
+
+	private String qrImageUrl;
 
 	public String getBarcode() {
 		return barcode;
 	}
 
-	public void setBarcode(String code) {
-		this.barcode = code;
+	public void setBarcode(String barcode) {
+		if(!Objects.equal(this.barcode, barcode)) {
+			this.setDirty(true);
+			this.barcode = barcode;
+		}
 	}	
 
 	public String getName() {
@@ -52,7 +78,10 @@ public class Spot extends GenericEntity{
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 	public Key<Business> getBusiness() {
@@ -60,17 +89,12 @@ public class Spot extends GenericEntity{
 	}
 
 	public void setBusiness(Key<Business> business) {
-		this.business = business;
+		if(!Objects.equal(this.business, business)) {
+			this.setDirty(true);
+			this.business = business;
+		}
 	}
 
-	public String getGroupTag() {
-		return groupTag;
-	}
-
-	public void setGroupTag(String groupTag) {
-		this.groupTag = groupTag;
-	}
-	
 	@Transient
 	public Key<Spot> getKey() {
 	   return getKey(getBusiness(), getId());
@@ -79,5 +103,32 @@ public class Spot extends GenericEntity{
 	@Transient
 	public static Key<Spot> getKey(Key<Business> business, Long spotId) {
 		return new Key<Spot>(business ,Spot.class,spotId);
+	}
+	
+	public String getQrImageUrl() {
+		if(barcode != null) {
+			if(qrImageUrl == null) {
+				try {
+					String barcodeWithUrl = System.getProperty("net.karazy.app.download.url") + "#" + barcode;
+					qrImageUrl = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=" + URLEncoder.encode(barcodeWithUrl,"UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					throw new ServiceException(e);
+				}
+			}
+			return qrImageUrl;
+		}
+		else
+			return null;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		if(!Objects.equal(this.active, active)) {
+			this.setDirty(true);
+			this.active = active;
+		}
 	}
 }

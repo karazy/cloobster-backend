@@ -1,15 +1,22 @@
 package net.eatsense.representation;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 
+import net.eatsense.domain.Choice;
+import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.validation.ImportChecks;
 
 public class ChoiceDTO {
 	Long id;
@@ -19,10 +26,12 @@ public class ChoiceDTO {
 	String text;
 	
 	int minOccurence;
-	
 	int maxOccurence;
-	@Min(0)
-	float price;
+	
+	private Long originalChoiceId;
+	
+	@Min(value=0)
+	double price;
 	
 	int included;
 	
@@ -31,18 +40,63 @@ public class ChoiceDTO {
 	@NotNull
 	@NotEmpty
 	@Valid
-	Collection<ProductOption> options; 
+	List<ProductOption> options; 
 	
 	Collection<ProductOption> selected;
 	
-	Long parent;
+	private Integer order;
 	
-	public Long getParent() {
-		return parent;
+	private Long productId;
+	
+	/**
+	 * @param choice Entity
+	 */
+	public ChoiceDTO(Choice choice) {
+		this();
+		
+		if(choice == null)
+			return;
+		
+		this.id = choice.getId();
+		this.originalChoiceId = choice.getId();
+
+		this.included = choice.getIncludedChoices();
+		this.maxOccurence = choice.getMaxOccurence();
+		this.minOccurence = choice.getMinOccurence();
+		this.overridePrice = choice.getOverridePrice();
+		this.order = choice.getOrder();
+		
+		this.price = (choice.getPrice() == null ? 0 : choice.getPrice().doubleValue() / 100.0);
+		this.text = choice.getText();
+		
+		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
+			this.options = choice.getOptions();						
+		}
+		
+		if(choice.getProduct() != null)
+			this.productId = choice.getProduct().getId();
 	}
-	public void setParent(Long parent) {
-		this.parent = parent;
+	
+	public ChoiceDTO(OrderChoice orderChoice) {
+		this(orderChoice.getChoice());
+		// Set the id of the orderChoice instead of the original choice, because
+		// this was an choice coming from a saved order.
+		this.id = orderChoice.getId();
 	}
+	
+	/**
+	 * @param choice Entity
+	 * @param productId Override for productId in the Choice entity.
+	 */
+	public ChoiceDTO(Choice choice, long productId) {
+		this(choice);
+		this.productId = productId;
+	}
+	
+	public ChoiceDTO() {
+		super();
+	}
+
 	String group;
 	
 	boolean groupParent = false;
@@ -83,10 +137,16 @@ public class ChoiceDTO {
 	public void setMaxOccurence(int maxOccurence) {
 		this.maxOccurence = maxOccurence;
 	}
-	public float getPrice() {
+	
+	@JsonIgnore
+	public long getPriceMinor() {
+		return Math.round(price * 100);
+	}
+		
+	public double getPrice() {
 		return price;
 	}
-	public void setPrice(float price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 	public int getIncluded() {
@@ -101,10 +161,10 @@ public class ChoiceDTO {
 	public void setOverridePrice(ChoiceOverridePrice overridePrice) {
 		this.overridePrice = overridePrice;
 	}
-	public Collection<ProductOption> getOptions() {
+	public List<ProductOption> getOptions() {
 		return options;
 	}
-	public void setOptions(Collection<ProductOption> options) {
+	public void setOptions(List<ProductOption> options) {
 		this.options = options;
 	}
 	public Collection<ProductOption> getSelected() {
@@ -113,5 +173,37 @@ public class ChoiceDTO {
 	public void setSelected(Collection<ProductOption> selected) {
 		this.selected = selected;
 	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+
+	/**
+	 * @return the order
+	 */
+	public Integer getOrder() {
+		return order;
+	}
+
+	/**
+	 * @param order the order to set
+	 */
+	public void setOrder(Integer order) {
+		this.order = order;
+	}
+
+	public Long getOriginalChoiceId() {
+		return originalChoiceId;
+	}
+
+	public void setOriginalChoiceId(Long originalChoiceId) {
+		this.originalChoiceId = originalChoiceId;
+	}
+	
+	
 	
 }

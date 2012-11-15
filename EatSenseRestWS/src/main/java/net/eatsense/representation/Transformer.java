@@ -58,8 +58,10 @@ public class Transformer {
 			return null;
 		
 		BillDTO billData = new BillDTO();
-		
-		billData.setTotal(bill.getTotal());
+		// convert from sotred minor values to decimal
+		if(billData.getTotal() != null) {
+			billData.setTotal( (bill.getTotal() == 0) ? 0 : bill.getTotal() / 100d );
+		}
 		billData.setCheckInId(bill.getCheckIn().getId());
 		billData.setCleared(bill.isCleared());
 		billData.setId(bill.getId());
@@ -70,39 +72,32 @@ public class Transformer {
 	}
 	
 
-	public List<OrderDTO> ordersToDto(List<Order> orders ) {
+	public List<OrderDTO> ordersToDto(Iterable<Order> orderIterable ) {
 		List<OrderDTO> dtos = new ArrayList<OrderDTO>();
-		if(orders == null || orders.isEmpty()) {
+		if(orderIterable == null || !orderIterable.iterator().hasNext()) {
 			logger.info("orders are null or empty");
 		}
 		else {
-			List<Key<Product>> productKeys = new ArrayList<Key<Product>>(orders.size());
 			List<Key<OrderChoice>> choiceKeys = new ArrayList<Key<OrderChoice>>();
-			for (Order order : orders) {
+			List<Order> orderList = new ArrayList<Order>();
+			for (Order order : orderIterable) {
 				// Add keys to lists for loading.
-				productKeys.add(order.getProduct());
+				orderList.add(order);
 				choiceKeys.addAll(order.getChoices());
 			}
-			Map<Key<Product>, Product> productMap = productRepo.getByKeysAsMap(productKeys);
+			
 			Map<Key<OrderChoice>, OrderChoice> choicesMap = orderChoiceRepo.getByKeysAsMap(choiceKeys);
 			
-			for (Order order : orders) {
-				OrderDTO orderDto = new OrderDTO();
-				orderDto.setId(order.getId());
-				orderDto.setAmount(order.getAmount());
-				orderDto.setOrderTime(order.getOrderTime());
-				orderDto.setStatus(order.getStatus());
-				orderDto.setComment(order.getComment());
-				orderDto.setCheckInId(order.getCheckIn().getId());
-				orderDto.setProduct(productToDtoOmitChoices(productMap.get(order.getProduct())));
-				
+			for (Order order : orderList) {
+				OrderDTO orderDto = new OrderDTO(order);
+								
 				if( !order.getChoices().isEmpty() ) {
 					ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
 					
 					for (Key<OrderChoice> choiceKey : order.getChoices()) {
-						choiceDtos.add(choiceToDto( choicesMap.get(choiceKey).getChoice()));
+						choiceDtos.add(new ChoiceDTO( choicesMap.get(choiceKey)));
 					}
-					orderDto.getProduct().setChoices(choiceDtos);
+					orderDto.setChoices(choiceDtos);
 				}
 					
 				dtos.add( orderDto );
@@ -111,45 +106,34 @@ public class Transformer {
 		return dtos;	
 	}
 	
+	/**
+	 * @param order Entity
+	 * @return Data transfer object for Order entity.
+	 */
 	public OrderDTO orderToDto(Order order) {
 		if(order == null || order.getId() == null) {
 			logger.error("order is null or order id is null");
 			return null;
 		}
 			
-		OrderDTO dto = new OrderDTO();
-		Product product = productRepo.getByKey(order.getProduct());
-		if(product == null) {
-			logger.error("product not found: " +order.getProduct());
-			return null;
-		}
+		OrderDTO dto = new OrderDTO(order);
 			
-		dto.setProduct( productToDtoOmitChoices( product ) );
-		
 		Collection<OrderChoice> orderChoices = orderChoiceRepo.getByKeys(order.getChoices());
+		
 		if(orderChoices != null && !orderChoices.isEmpty()) {
 			ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
 			
 			for (OrderChoice orderChoice : orderChoices) {
-				choiceDtos.add(choiceToDto(orderChoice.getChoice()));
+				choiceDtos.add(new ChoiceDTO(orderChoice));
 			}
-			dto.getProduct().setChoices(choiceDtos);
 			
+			dto.setChoices(choiceDtos);
 		}
-		else {
-			dto.getProduct().setChoices(getChoicesForProduct(product));
-		}
-		dto.setId(order.getId());
-		dto.setAmount(order.getAmount());
-		dto.setOrderTime(order.getOrderTime());
-		dto.setStatus(order.getStatus());
-		dto.setComment(order.getComment());
-		dto.setCheckInId(order.getCheckIn().getId());
 				
 		return dto;
 	}
 
-	public List<ProductDTO> productsToDto(List<Product> products) {
+	public List<ProductDTO> productsToDtoWithChoices(List<Product> products) {
 		List<ProductDTO> productDTOs = new ArrayList<ProductDTO>();
 		if(products != null) {
 			List<Key<Choice>> choiceKeys = new ArrayList<Key<Choice>>();
@@ -193,53 +177,14 @@ public class Transformer {
 	public ProductDTO productToDtoOmitChoices(Product product) {
 		if(product == null)
 			return null;
-		ProductDTO dto = new ProductDTO();
-		
-		dto.setMenuId(product.getMenu().getId());
-		dto.setId(product.getId());		 
-		dto.setName( product.getName() );
-		dto.setLongDesc( product.getLongDesc() );
-		dto.setShortDesc( product.getShortDesc() );
-		dto.setPrice( product.getPrice() );
-		dto.setOrder(product.getOrder());
-		 
-		return dto;
+		return new ProductDTO(product);
 	}
 	
 	public ChoiceDTO choiceToDto(Choice choice) {
 		if(choice == null)
 			return null;
 		
-		ChoiceDTO dto = new ChoiceDTO();
-		
-		dto.setId(choice.getId());
-
-		dto.setIncluded(choice.getIncludedChoices());
-		dto.setMaxOccurence(choice.getMaxOccurence());
-		dto.setMinOccurence(choice.getMinOccurence());
-		dto.setOverridePrice(choice.getOverridePrice());
-		if(choice.getParentChoice() != null)
-			dto.setParent(choice.getParentChoice().getId());
-		
-		dto.setPrice(choice.getPrice() == null ? 0 : choice.getPrice());
-		dto.setText(choice.getText());
-		
-		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
-			dto.setOptions(choice.getOptions());						
-		}
-		//	else if (choice.getAvailableProducts() != null && !choice.getAvailableProducts().isEmpty()) {
-		//		ArrayList<ProductOption> options = new ArrayList<ProductOption>();
-		//		Map<Key<Product>,Product> products =  productRepo.getOfy().get(choice.getAvailableProducts());
-		//		
-		//		for (Product choiceProduct : products.values() ) {
-		//			options.add(new ProductOption(choiceProduct.getName(), choiceProduct.getPrice(), choiceProduct.getId()));
-		//		}
-		//		
-		//		dto.setOptions(options);
-		//	}
-	
-		
-		return dto;
+		return new ChoiceDTO(choice);
 	}
 	
 	public Collection<ChoiceDTO> getChoicesForProduct(Product p)

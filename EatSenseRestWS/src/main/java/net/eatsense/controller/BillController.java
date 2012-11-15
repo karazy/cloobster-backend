@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -14,7 +15,7 @@ import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
-import net.eatsense.domain.Request.RequestType;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -22,15 +23,21 @@ import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
+import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
+import net.eatsense.validation.ValidationHelper;
 
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +45,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Query;
 
 /**
  * Handles creation of bills and price calculations.
@@ -47,21 +55,26 @@ import com.googlecode.objectify.NotFoundException;
  */
 public class BillController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private OrderRepository orderRepo;
-	private ProductRepository productRepo;
-	private OrderChoiceRepository orderChoiceRepo;
-	private BillRepository billRepo;
-	private CheckInRepository checkInRepo;
-	private RequestRepository requestRepo;
-	private Transformer transform;
-	private EventBus eventBus;
+	private final OrderRepository orderRepo;
+	private final ProductRepository productRepo;
+	private final OrderChoiceRepository orderChoiceRepo;
+	private final BillRepository billRepo;
+	private final CheckInRepository checkInRepo;
+	private final RequestRepository requestRepo;
+	private final Transformer transform;
+	private final EventBus eventBus;
+	private final SpotRepository spotRepo;
+	private final AccountRepository accountRepo;
+	private final ValidationHelper validator;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, Transformer transformer, EventBus eventBus) {
+			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo, ValidationHelper validator) {
 		super();
+		this.accountRepo = accountRepo;
+		this.spotRepo = spotRepo;
 		this.eventBus = eventBus;
 		this.transform = transformer;
 		this.requestRepo = rr;
@@ -70,6 +83,7 @@ public class BillController {
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.checkInRepo = checkInRepo;
 		this.billRepo = billRepo;
+		this.validator = validator;
 	}
 	
 	/**
@@ -108,7 +122,9 @@ public class BillController {
 		
 		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
 		List<Order> orders = orderRepo.query().ancestor(business).filter("checkIn", bill.getCheckIn()).list();
-		Float billTotal= 0f;
+		// Currency used for this business.
+		CurrencyUnit currencyUnit = CurrencyUnit.of(business.getCurrency());
+		Money billTotal = Money.of(currencyUnit, 0);
 		
 		if(orders.isEmpty())
 			throw new BillFailureException("Bill cannot be updated, no orders found.");
@@ -122,12 +138,12 @@ public class BillController {
 					iterator.remove();
 			}
 			else {
-				billTotal += calculateTotalPrice(order);
+				billTotal = billTotal.plus(calculateTotalPrice(order, currencyUnit));
 				order.setStatus(OrderStatus.COMPLETE);
 				order.setBill(bill.getKey());
 			}
 		}
-		bill.setTotal(billTotal);
+		bill.setTotal(billTotal.getAmountMinorLong());
 		bill.setCleared(billData.isCleared());
 		orderRepo.saveOrUpdate(orders);
 		billRepo.saveOrUpdate(bill);
@@ -138,6 +154,19 @@ public class BillController {
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);
 		checkInRepo.saveOrUpdate(checkIn);
+		
+		if(checkIn.getAccount() != null) {
+			Account account = null;
+			try {
+				account = accountRepo.getByKey(checkIn.getAccount());
+			} catch (NotFoundException e) {
+				logger.warn("Could not find associated Account for CheckIn({}).",checkIn.getId());
+			}
+			if( account != null && account.getActiveCheckIn() != null && (account.getActiveCheckIn().getId() == checkIn.getId().longValue())) {
+				account.setActiveCheckIn(null);
+				accountRepo.saveOrUpdate(account);
+			}
+		}
 		// Get all pending requests sorted by oldest first.
 		List<Request> requests = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").list();
 
@@ -162,6 +191,35 @@ public class BillController {
 	}
 	
 	/**
+	 * Create a new bill for a checkInId supplied with billData.
+	 * 
+	 * @param business
+	 * @param billData must have checkInId and paymentMethod set.
+	 * @return transfer object for the newly created Bill
+	 */
+	public BillDTO createBillForCheckIn(final Business business, BillDTO billData) {
+		checkNotNull(billData, "billData was null");
+		
+		validator.validate(billData);
+		
+		CheckIn checkIn = checkInRepo.getById(billData.getCheckInId());
+		
+		return createBill(business,checkIn, billData, true);
+	}
+	
+	/**
+	 * Calls {@link #createBill(Business, CheckIn, BillDTO, boolean)}.
+	 * 
+	 * @param business
+	 * @param checkIn
+	 * @param billData
+	 * @return
+	 */
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+		return createBill(business, checkIn, billData, false);
+	}
+	
+	/**
 	 * Create a new bill and save it in the datastore with the given paymentmethod.
 	 * 
 	 * @param business
@@ -169,7 +227,7 @@ public class BillController {
 	 * @param billData
 	 * @return bill DTO saved
 	 */
-	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData, boolean fromBusiness) {
 		// Check preconditions.
 		checkNotNull(business, "business is null");
 		checkNotNull(business.getId(), "id for business is null");
@@ -188,25 +246,29 @@ public class BillController {
 		checkArgument(checkIn.getBusiness().getId() == business.getId(),
 				"checkin is not at the same business to which the request was sent: id=%s", checkIn.getBusiness().getId());
 		
-		List<Order> orders = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey()).list();
+		Query<Order> ordersQuery = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
+		boolean foundOrderToBill = false;
+		
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot == null) {
+			throw new OrderFailureException("Unable to find Spot for CheckIn.");
+		}
 		
 		Long billId = null;
-		for (Iterator<Order> iterator = orders.iterator(); iterator.hasNext();) {
+		for (Iterator<Order> iterator = ordersQuery.iterator(); iterator.hasNext() && !foundOrderToBill;) {
 			Order order = iterator.next();
 			if(order.getBill() != null) {
 				billId = order.getBill().getId();
-				iterator.remove();
 			}
 			else {
-				if (order.getStatus() == OrderStatus.CANCELED
+				if ( ! (order.getStatus() == OrderStatus.CANCELED
 						|| order.getStatus() == OrderStatus.CART
-						|| order.getStatus() == OrderStatus.COMPLETE)
-					iterator.remove();
+						|| order.getStatus() == OrderStatus.COMPLETE ))
+					foundOrderToBill = true;
 			}
 		}
-		if(orders.isEmpty()) {
-			logger.info("Retrieved request to create bill, but no orders to bill where found. Returning last known bill id");
-			billData.setId(billId);
+		if(!foundOrderToBill) {
+			throw new BillFailureException("no orders to bill where found.");
 		}
 		else {
 			Bill bill = new Bill();
@@ -219,14 +281,9 @@ public class BillController {
 		
 			billData = transform.billToDto(bill);
 			
-			Request request = new Request();
-			request.setBusiness(business.getKey());
-			request.setCheckIn(checkIn.getKey());
-			request.setSpot(checkIn.getSpot());
-			request.setType(RequestType.BILL);
-			request.setReceivedTime(new Date());
+			Request request = new Request(checkIn, spot, bill);
+			request.setObjectText(bill.getPaymentMethod().getName());
 			request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
-			request.setObjectId(bill.getId());
 			requestRepo.saveOrUpdate(request);
 			
 			if(checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
@@ -234,12 +291,12 @@ public class BillController {
 				checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
 				checkInRepo.saveOrUpdate(checkIn);				
 			}
-			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn);
+			NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn, fromBusiness);
 			
 			Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 			
 			// If we have no older request in the database ...
-			if( oldestRequest == null || oldestRequest.getId() == request.getId() ) {
+			if( oldestRequest == null || oldestRequest.getId() == request.getId().longValue() ) {
 				newEvent.setNewSpotStatus(request.getStatus());
 			}
 			
@@ -254,18 +311,17 @@ public class BillController {
 	 * @param order
 	 * @return total price of the order
 	 */
-	public Float calculateTotalPrice(Order order) {
+	public Money calculateTotalPrice(Order order, CurrencyUnit currencyUnit) {
 		checkNotNull(order, "order is null");
 		checkNotNull(order.getId(), "id for order is null");
 		checkNotNull(order.getProduct(), "product for oder is null");
 		
-		Float total = 0f;
+		Money total = Money.of(currencyUnit, 0);
 		
 		List<OrderChoice> choices = orderChoiceRepo.getByParent(order.getKey());
 		if(choices != null && !choices.isEmpty() ) {
 			for (OrderChoice orderChoice : choices) {
-				Float choicePrice = calculateTotalPrice(orderChoice );
-				total += choicePrice;
+				total = total.plus(calculateTotalPrice(orderChoice, currencyUnit));
 			}
 		}
 		
@@ -276,9 +332,9 @@ public class BillController {
 			throw new IllegalArgumentException("Product " + order.getProduct() + " not found for order with id: " + order.getId() ,e);
 		}
 		
-		total += product.getPrice();
+		total = total.plusMinor(product.getPrice());
 		
-		return total * order.getAmount();
+		return total.multipliedBy( order.getAmount() );
 	}
 
 	/**
@@ -287,28 +343,28 @@ public class BillController {
 	 * @param orderChoice
 	 * @return
 	 */
-	private Float calculateTotalPrice(OrderChoice orderChoice) {
+	private Money calculateTotalPrice(OrderChoice orderChoice, CurrencyUnit currencyUnit) {
 		checkNotNull(orderChoice, "orderchoice is null");
 		checkNotNull(orderChoice.getChoice(), "choice is null for orderChoice with id %s",orderChoice.getId());
 		checkNotNull(orderChoice.getChoice().getOptions(), "options are null for choice with id %s",orderChoice.getChoice().getId());
 		checkArgument(!orderChoice.getChoice().getOptions().isEmpty(), "options are empty for choice with id %s", orderChoice.getChoice().getId());
 		
 		int selected = 0;
-		Float total = 0f;
+		Money total = Money.of(currencyUnit, 0);
 		for (ProductOption option : orderChoice.getChoice().getOptions()) {
 			if(option.getSelected() != null && option.getSelected()) {
 				selected++;
 				if(selected > orderChoice.getChoice().getIncludedChoices()) {
 					if(orderChoice.getChoice().getOverridePrice() == ChoiceOverridePrice.OVERRIDE_SINGLE_PRICE)
-						total += orderChoice.getChoice().getPrice();
+						total = total.plusMinor(orderChoice.getChoice().getPrice());
 					else
-						total += option.getPrice();
+						total = total.plusMinor(option.getPriceMinor());
 				}
 			}
 		}
 		
 		if(selected > 0 && orderChoice.getChoice().getOverridePrice() == ChoiceOverridePrice.OVERRIDE_FIXED_SUM)
-			return orderChoice.getChoice().getPrice();
+			return Money.ofMinor(currencyUnit, orderChoice.getChoice().getPrice());
 		
 		return total;
 	}

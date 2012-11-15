@@ -15,12 +15,14 @@ import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
+import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.RequestDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
@@ -33,6 +35,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
+/**
+ * Listens to specific events from controllers and notifies clients with messages.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class MessageController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private ChannelController channelCtrl;
@@ -50,6 +58,11 @@ public class MessageController {
 		this.checkInRepo = checkInRepo;
 		this.transform = transform;
 		this.channelCtrl = channelCtrl;
+	}
+	
+	@Subscribe
+	public void sendTrashBusinessMessage(TrashBusinessEvent event) {
+		channelCtrl.sendMessage(event.getBusiness(), new MessageDTO("business", "delete", new BusinessDTO(event.getBusiness())));
 	}
 	
 	@Subscribe
@@ -106,13 +119,9 @@ public class MessageController {
 		
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
-		requestData.setCheckInId(event.getRequest().getCheckIn().getId());
-		requestData.setId(event.getRequest().getId());
-		requestData.setType(event.getRequest().getStatus());
-		requestData.setSpotId(event.getRequest().getSpot().getId());
-		messages.add(new MessageDTO("request", "delete", requestData));
+		RequestDTO requestData =  new RequestDTO(event.getRequest());
 		
+		messages.add(new MessageDTO("request", "delete", requestData));
 		
 		SpotStatusDTO spotData = new SpotStatusDTO();
 		spotData.setId(event.getRequest().getSpot().getId());
@@ -143,14 +152,7 @@ public class MessageController {
 		spotData.setStatus(event.getRequest().getStatus());
 				
 		messages.add(new MessageDTO("spot", "update", spotData));
-		
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
-		requestData.setCheckInId(event.getCheckIn().getId());
-		requestData.setId(event.getRequest().getId());
-		requestData.setType(event.getRequest().getStatus());
-		requestData.setSpotId(event.getCheckIn().getSpot().getId());
-		
-		messages.add(new MessageDTO("request", "new", requestData ));
+		messages.add(new MessageDTO("request", "new", new RequestDTO(event.getRequest()) ));
 		
 		channelCtrl.sendMessages(event.getBusiness(), messages);
 	}
@@ -159,7 +161,12 @@ public class MessageController {
 	public void sendNewBillMessages(NewBillEvent event) {
 		ArrayList<MessageDTO> messages = new ArrayList<MessageDTO>();
 		// Add a message with the new bill to the message package.
-		messages.add(new MessageDTO("bill","new", transform.billToDto(event.getBill())));
+		MessageDTO billMessage = new MessageDTO("bill","new", transform.billToDto(event.getBill()));
+		if(event.isFromBusiness() && event.getCheckIn().getChannelId() != null) {
+			// Send message to checkIn if the new bill was created from the cockpit.
+			channelCtrl.sendMessage(event.getCheckIn().getChannelId(), billMessage);
+		}
+		messages.add(billMessage);
 		// Add a message with updated checkin status to the package.
 		messages.add(new MessageDTO("checkin","update",transform.toStatusDto(event.getCheckIn())));
 		

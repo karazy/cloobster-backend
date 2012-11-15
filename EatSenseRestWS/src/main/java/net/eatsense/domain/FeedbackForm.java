@@ -12,7 +12,7 @@ import com.googlecode.objectify.Key;
 
 import net.eatsense.domain.embedded.FeedbackQuestion;
 
-public class FeedbackForm extends GenericEntity {
+public class FeedbackForm extends GenericEntity<FeedbackForm> {
 	@Embedded
 	List<FeedbackQuestion> questions;
 	

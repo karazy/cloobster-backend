@@ -32,7 +32,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -139,6 +138,19 @@ public class FeedbackControllerTest {
 	}
 	
 	@Test
+	public void testAddFeedbackInvalidFormId() {
+		Feedback feedback = new Feedback();
+		when(feedbackRepo.newEntity()).thenReturn(feedback );
+
+		FeedbackDTO testFeedbackData = getTestFeedbackData();
+		testFeedbackData.setFormId(0);
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("formId");
+				
+		ctrl.addFeedback(business, checkIn, testFeedbackData);
+	}
+	
+	@Test
 	public void testAddFeedbackInvalidAnswer2() {
 		Feedback feedback = new Feedback();
 		when(feedbackRepo.newEntity()).thenReturn(feedback );
@@ -147,7 +159,8 @@ public class FeedbackControllerTest {
 		testFeedbackData.getAnswers().get(0).setRating(-1);
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("rating");
-				
+		
+		
 		ctrl.addFeedback(business, checkIn, testFeedbackData);
 	}
 	
@@ -169,8 +182,8 @@ public class FeedbackControllerTest {
 		List<FeedbackQuestion> answers = new ArrayList<FeedbackQuestion>();
 		answers.add(new FeedbackQuestion("Frage1", 1, 1l));
 		answers.add(new FeedbackQuestion("Frage2", 2, 2l));
-		answers.add(new FeedbackQuestion("Frage3", 0, 2l));
-		answers.add(new FeedbackQuestion("Frage4", 5, 2l));
+		answers.add(new FeedbackQuestion("Frage3", 0, 3l));
+		answers.add(new FeedbackQuestion("Frage4", 5, 4l));
 		data.setAnswers(answers );
 		data.setComment("comment");
 		data.setEmail("email");

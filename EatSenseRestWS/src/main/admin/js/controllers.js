@@ -18,8 +18,7 @@ CloobsterAdmin.Navigation = function($scope, $location) {
 
 		location = $location.path();
 		return (location.indexOf(path) === 0) ? "active" : "";
-	}
-
+	};
 };
 CloobsterAdmin.Navigation.$inject = ['$scope', '$location'];
 
@@ -38,10 +37,7 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 		$scope.importAlert.message = message;
 		$scope.importAlert.title = title;
 		$scope.importAlert.buttonText = buttonText;
-		$scope.importAlert.continueFn =  function() {
-			dismissAlert();
-			continueFn();
-		};
+		$scope.importAlert.continueFn =  continueFn;
 	}
 
 	function dismissAlert() {
@@ -97,7 +93,89 @@ CloobsterAdmin.Import = function($scope, $http, $anchorScroll) {
 }
 CloobsterAdmin.Import.$inject = ['$scope', '$http', '$anchorScroll'];
 
+/**
+* 	@name CloobsterAdmin.Configuration
+*	@requires $http
+*
+* 	Manages data import.
+* 	@constructor
+*/
+CloobsterAdmin.Configuration = function($scope, $http, $anchorScroll, $timeout) {
+	
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setError(message) {
+		showAlert("alert-error", "Error!", message, "Try again", resetForm);
+	}
+
+	function setProgress( progress ) {
+		$scope.importProgressStyle = { width: progress };
+	}
+
+	function importError(data, status) {
+		var message = (data.message) ?
+			data.message
+			: "An unknown error occured, check the server and your connection.";
+		setError(message);
+	}
+
+	function importSuccess(data) {
+		setProgress("100%");
+		showAlert("alert-success", "Done!", "Import done.");
+		$scope.defaultFeedbackForm = angular.toJson(data, true);
+
+		$timeout(function() {
+			resetForm();
+		});
+	}
+
+	function resetForm() {
+		$scope.importProgress = false;
+		setProgress("0%");
+	}
+
+	$scope.saveDefaultFeedback = function() {
+		var dto;
+		$scope.importProgress = true;
+		try {
+			dto = angular.fromJson($scope.defaultFeedbackForm);
+		}
+		catch(err) {
+			setProgress("30%");
+			setError("JSON parsing error: " + err.message);
+			return;
+		}
+		$http.put("/admin/services/configuration/defaultfeedbackform", dto).success(importSuccess)
+		.error(importError);
+	}
+
+	dismissAlert();
+	setProgress("0%");
+	resetForm();
+
+	$scope.defaultFeedbackForm = "Loading ...";
+	$http.get("/admin/services/configuration/defaultfeedbackform").success(function(data) {
+		$scope.defaultFeedbackForm = angular.toJson(data, true);
+	});
+
+
+	$anchorScroll();
+}
+CloobsterAdmin.Configuration.$inject = ['$scope', '$http', '$anchorScroll', '$timeout'];
+
 CloobsterAdmin.Functions = function($scope, $http) {
+	$scope.deleteFunctionsDisabled = (Karazy.environment === "prod")? true : false;
 	$scope.confirmDeleteAllDisabled = false;
 	$scope.confirmDeleteLiveDisabled = false;
 
@@ -130,6 +208,16 @@ CloobsterAdmin.Functions = function($scope, $http) {
 				$scope.createDummieAccountsText = status + " error.";
 			});	
 	};
+
+	$scope.sendCockpitUpdateMessage = function() {
+		$scope.sendCockpitUpdateMessageText = "Creating ...";
+		$scope.sendCockpitUpdateMessageDisabled = true;
+		$http.post('/admin/services/channels/messages', {'type':'application', 'action': 'update'}).success(function() {
+				$scope.sendCockpitUpdateMessageText = "Message sent.";
+			}).error(function (data, status) {
+				$scope.sendCockpitUpdateMessageText = status + " error.";
+			});	
+	};
 }
 
 CloobsterAdmin.Functions.$inject = ['$scope', '$http'];
@@ -154,3 +242,102 @@ CloobsterAdmin.SelectBusiness = function($scope, $http) {
 	});
 }
 CloobsterAdmin.SelectBusiness.$inject = ['$scope', '$http'];
+
+CloobsterAdmin.Templates = function($scope, Template) {
+
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setTemplate() {
+		if($scope.templates.length > 0) {
+			$scope.template = $scope.templates[0];
+		}
+	}
+
+	$scope.templates = Template.query(setTemplate);
+
+	$scope.initTemplates = function() {
+		$scope.templates = Template.init({}, setTemplate);
+	};
+
+	$scope.saveTemplate = function() {
+		if($scope.editTemplateForm.$valid) {
+			$scope.template.$save({}, angular.noop, function(data, status) {
+				// Error callback.
+				showAlert("alert-error", "Error code"+ status, "Error", "Close");
+			});
+		}
+	};
+
+	dismissAlert();
+}
+CloobsterAdmin.Templates.$inject = ['$scope', 'Template'];
+
+
+CloobsterAdmin.TrashCan = function($scope, TrashEntry) {
+	$scope.restoring = [];
+	$scope.trashEntries = TrashEntry.query( function() {
+		angular.forEach($scope.trashEntries, function(value, index) {
+			$scope.restoring[index] = false;
+		});
+	});
+	
+	
+
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setError(message) {
+		showAlert("alert-error", "Error!", message, "Close");
+	}
+
+
+	$scope.restore = function(index) {
+		var entry = $scope.trashEntries[index];
+		$scope.restoring[index] = true;
+		entry.$restore(function() {
+			$scope.restoring[index] = false;
+			$scope.trashEntries.splice(index,1);
+		}, function(response) {
+			$scope.restoring[index] = true;
+			setError("Could not restore entity, http code:" + response.status+ ", message: " + response.message);
+		});
+	};
+
+	dismissAlert();
+};
+CloobsterAdmin.TrashCan.$inject = ['$scope','TrashEntry'];
+
+CloobsterAdmin.Fixes = function($scope, $http) {
+	
+	$scope.fixBusinessesTypo = function() {
+		$http.put('/admin/services/accounts/fixbusinesses')
+		.success(function(data, status) {
+			alert('Successfully applied fix!');
+		}).error(function(data, status) {
+			alert('fix failed! ' + status);
+		});
+	};
+	
+};
+CloobsterAdmin.Fixes.$inject = ['$scope', '$http'];

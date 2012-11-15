@@ -3,24 +3,25 @@
  */
 package net.eatsense.auth;
 
-import java.security.Principal;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.service.FacebookService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
@@ -31,7 +32,7 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
 public class SecurityFilter implements ContainerRequestFilter {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private AccountController accountCtrl;
+	AccountController accountCtrl;
 	
 	/**
      * <p>The URI information for this request.</p>
@@ -42,10 +43,15 @@ public class SecurityFilter implements ContainerRequestFilter {
     @Context
     HttpServletRequest servletRequest;
     
-	private CheckInRepository checkInRepo;
+    private @Context SecurityContext securityContext;
+    
+	private final CheckInRepository checkInRepo;
+	
+	private final AuthorizerFactory authorizerFactory;
 	
 	@Inject
-	public SecurityFilter(CheckInRepository checkInRepo, AccountController accountController) {
+	public SecurityFilter(Injector injector, CheckInRepository checkInRepo, AccountController accountController, AuthorizerFactory authorizerFactory) {
+		this.authorizerFactory = authorizerFactory;
 		this.checkInRepo = checkInRepo;
 		this.accountCtrl = accountController;
 	}
@@ -55,6 +61,15 @@ public class SecurityFilter implements ContainerRequestFilter {
 	 */
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
+		// If we receive an OPTIONS request, do nothing.
+		if(request.getMethod().equals("OPTIONS"))
+			return request;
+		
+		if(securityContext.getAuthenticationScheme() == Authorizer.TOKEN_AUTH) {
+			// Request was already authenticated with an access token, do nothing.
+			return request;
+		}
+			
 		String checkInId = request.getHeaderValue("checkInId");
 		if(checkInId == null)
 			checkInId = request.getQueryParameters(true).getFirst("checkInId");
@@ -62,152 +77,68 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String login = request.getHeaderValue("login");
 		String password = request.getHeaderValue("password");
 		String passwordHash = request.getHeaderValue("passwordHash");
-		
-		Long businessId = null;
-		
-		for (Iterator<PathSegment> iterator = request.getPathSegments(true).iterator(); iterator.hasNext();) {
-			PathSegment pathSegment = iterator.next();
-			if(pathSegment.getPath().equals("businesses") ) {
-				try {
-					if(iterator.hasNext())
-						businessId = Long.valueOf(iterator.next().getPath());
-				} catch (NumberFormatException e) {
-				}
-			}
-		}
-		
-		if(businessId == null) {
-			if( request.getFormParameters().getFirst("businessId") != null)
-				try {
-					businessId = Long.valueOf(request.getFormParameters().getFirst("businessId"));
-				} catch (NumberFormatException e) {
-					logger.error("businessId invalid");
-				}
-				
-		}
-		
+		String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
+		String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
+		Account account = null;
+
 		if(checkInId != null && !checkInId.isEmpty()) {
 			 Authorizer auth = authenticateCheckIn(checkInId);
 			 if(auth != null) {
-				 
 				 request.setSecurityContext(auth);
 				 return request;
 			 }
 		}
-		
-		
+				
 		if(login != null && !login.isEmpty()) {
 			logger.info("recieved login request from user: " +login);
-			Account account = null;
-
 			if(passwordHash != null && !passwordHash.isEmpty()) {
 				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticateHashed(login, passwordHash);
-				
-				if(account != null) {
-					request.setSecurityContext(new Authorizer(account, businessId));
-					servletRequest.setAttribute("net.eatsense.domain.Account", account);
-					logger.info("authentication success for user: "+login);
-					return request;
-				}	
 			}
 			
 			if(password != null && !password.isEmpty()) {
-				// Authenticate with hash comparison ...
 				account = accountCtrl.authenticate(login, password);
-				
-				if(account != null) {
-					request.setSecurityContext(new Authorizer(account, businessId));
-					servletRequest.setAttribute("net.eatsense.domain.Account", account);
-					logger.info("authentication success for user: "+login);
-					return request;
-				}	
 			}
-			
-			
+
+			if(account != null) {
+				request.setSecurityContext(authorizerFactory.createForAccount(account, null,null));
+				logger.info("Basic authentication success for user: {}", login);
+			}
 		}
+		else if(!Strings.isNullOrEmpty(fbUserId) && !Strings.isNullOrEmpty(fbAccessToken)) {
+			logger.info("Received Facebook authentication request for fb id: {}", fbUserId);
+			// Authenticate via Facebook servers.
+			account = accountCtrl.authenticateFacebook(fbUserId, fbAccessToken);
+			request.setSecurityContext(authorizerFactory.createForAccount(account, null, Authorizer.FB_AUTH));
+			
+			logger.info("Facebook authentication success for user: {}", account.getEmail());
+		}
+		
+		servletRequest.setAttribute("net.eatsense.domain.Account", account);
+		
+		if( account != null && account.getActiveCheckIn() != null) {
+			try {
+				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
+			} catch (com.googlecode.objectify.NotFoundException e) {
+				logger.info("activeCheckin for account not found, removing reference");
+				accountCtrl.removeActiveCheckIn(account);
+			}
+		}
+		
 		return request;
 	}
 
 	private Authorizer authenticateCheckIn(String checkInId) {
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 		if(checkIn == null) {
-			logger.info("Invalid checkin uid given {}", checkInId);
+			logger.warn("Invalid checkin uid given {}", checkInId);
 			return null;
 		}
 		else {
 			logger.info("Valid user request recieved from " + checkIn.getNickname());
 			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
 			// return a security context build around the checkIn
-			return new Authorizer(checkIn);
+			return authorizerFactory.createForCheckIn(checkIn);
 		}
 	}
-	
-	/**
-     * <p>SecurityContext used to perform authorization checks.</p>
-     */
-    public class Authorizer implements SecurityContext {
-    	
-    	private final CheckIn checkIn;
-		private final Account account;
-		private final Long businessId;
-
-        public Authorizer(final CheckIn checkIn) {
-        	this.account = null;
-        	this.businessId = null;
-        	this.checkIn = checkIn;
-            this.principal = new Principal() {
-                public String getName() {
-                		return checkIn.getUserId();
-                }
-            };
-        }
-        
-        public Authorizer(final Account account, Long businessId) {
-        	this.checkIn = null;
-        	this.account = account;
-        	this.businessId = businessId;
-            this.principal = new Principal() {
-                public String getName() {
-                		return account.getLogin();
-                }
-            };
-        }
-
-        private Principal principal;
-
-        public Principal getUserPrincipal() {
-        	
-            return this.principal;
-        }
-
-        /**
-         * <p>Determine whether the authenticated user possesses the requested
-         * role.</p>
-         * @param role Role to be checked
-         */
-        public boolean isUserInRole(String role) {
-        	// guest role is for checkedin customers
-        	if( role.equals("guest") && checkIn != null && checkIn.getUserId() != null)
-        		return true;
-        	
-        	if(accountCtrl.isAccountInRole(account, role)) {
-        		if( businessId != null)
-        			return  accountCtrl.isAccountManagingBusiness(account, businessId);
-        		else
-        			return true;
-        	}
-        	
-            return false;
-        }
-
-        public boolean isSecure() {
-            return "https".equals(uriInfo.getRequestUri().getScheme());
-        }
-
-        public String getAuthenticationScheme() {
-            return SecurityContext.FORM_AUTH;
-        }
-    }
-
 }

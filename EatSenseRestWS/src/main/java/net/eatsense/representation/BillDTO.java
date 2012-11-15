@@ -2,18 +2,26 @@ package net.eatsense.representation;
 
 import java.util.Date;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import net.eatsense.domain.embedded.PaymentMethod;
 
 public class BillDTO {
 	private Long id;
+	@NotNull
+	@Valid
 	private PaymentMethod paymentMethod;
 	private Date time;
-	private Float total;
+	private Double total;
 	@JsonIgnore
 	private String billnumber;
 	private boolean cleared;
+	@NotNull
+	@Min(0)
 	private Long checkInId;
 	
 	public Long getId() {
@@ -34,10 +42,10 @@ public class BillDTO {
 	public void setTime(Date time) {
 		this.time = time;
 	}
-	public Float getTotal() {
+	public Double getTotal() {
 		return total;
 	}
-	public void setTotal(Float total) {
+	public void setTotal(Double total) {
 		this.total = total;
 	}
 	

@@ -1,0 +1,34 @@
+{
+	"title": "Feedback an Uns",
+	"description": "Einige Standardfragen",
+	"questions": [
+		{
+			"question": "Empfang",
+			"rating": 3
+		},
+		{
+			"question": "Ambiente",
+			"rating": 3
+		},
+		{
+			"question": "Ausstattung",
+			"rating": 3
+		},
+		{
+			"question": "Speisen / Getränke",
+			"rating": 3
+		},
+		{
+			"question": "Service",
+			"rating": 3
+		},
+		{
+			"question": "Sauberkeit",
+			"rating": 3
+		},
+		{
+			"question": "Preis / Leistung",
+			"rating": 3
+		}
+	]
+}

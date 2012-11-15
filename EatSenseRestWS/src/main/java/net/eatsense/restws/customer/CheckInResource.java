@@ -15,14 +15,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ public class CheckInResource {
 	private final Provider<BusinessController> businessCtrlProvider;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private final Provider<OrderController> orderCtrlProvider;
+	private Optional<Account> accountOpt;
 
 	public void setCheckIn(CheckIn checkIn) {
 		this.checkIn = checkIn;
@@ -56,6 +59,7 @@ public class CheckInResource {
 			Provider<ChannelController> channelCtrl,
 			Provider<OrderController> orderCtrlProvider) {
 		super();
+		this.accountOpt = Optional.absent();
 		this.orderCtrlProvider = orderCtrlProvider;
 		this.checkInCtrlprovider = checkInController;
 		this.businessCtrlProvider = businessCtrl;
@@ -65,7 +69,7 @@ public class CheckInResource {
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public CheckInDTO updateCheckIn( CheckInDTO checkInData) {
 		if(authenticated)
 			return checkInCtrlprovider.get().updateCheckIn(checkIn, checkInData);
@@ -76,14 +80,17 @@ public class CheckInResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public CheckInDTO getCheckIn() {
-		return checkInCtrlprovider.get().getCheckInDto(checkIn);
+		if(authenticated)
+			return checkInCtrlprovider.get().getCheckInDto(checkIn);
+		else
+			throw new IllegalAccessException("Unauthenticated checkin, or checkInId not valid.");
 	}
 	
 	@DELETE
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public void deleteCheckIn() {
 		if(authenticated)
-			checkInCtrlprovider.get().checkOut(checkIn);
+			checkInCtrlprovider.get().checkOut(checkIn, accountOpt);
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}
@@ -91,20 +98,20 @@ public class CheckInResource {
 	@GET
 	@Path("requests")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
-	public Collection<CustomerRequestDTO> getRequests() {
+	@RolesAllowed(Role.GUEST)
+	public Collection<RequestDTO> getRequests() {
 		if(authenticated)
 			return businessCtrlProvider.get().getCustomerRequestsForCheckIn(checkIn);
 		else
-			throw new WebApplicationException(Status.FORBIDDEN);
+			throw new IllegalAccessException();
 	}
 	
 	@POST
 	@Path("requests")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed({"guest"})
-	public CustomerRequestDTO postRequest(CustomerRequestDTO requestData) {
+	@RolesAllowed(Role.GUEST)
+	public RequestDTO postRequest(RequestDTO requestData) {
 		if(authenticated)
 			return businessCtrlProvider.get().saveCustomerRequest( checkIn, requestData);
 		else
@@ -112,16 +119,12 @@ public class CheckInResource {
 	}
 	
 	@DELETE
-	@RolesAllowed({"guest"})
 	@Produces("application/json; charset=UTF-8")
 	@Path("requests/{requestId}")
-	public CustomerRequestDTO deleteRequest(@PathParam("requestId") long requestId) {
+	@RolesAllowed(Role.GUEST)
+	public RequestDTO deleteRequest(@PathParam("requestId") long requestId) {
 		if(authenticated)
-			try {
-				return businessCtrlProvider.get().deleteCustomerRequestForCheckIn(checkIn, requestId);
-			} catch (IllegalAccessException e) {
-				throw new WebApplicationException(e, Status.FORBIDDEN);
-			}
+			return businessCtrlProvider.get().deleteCustomerRequestForCheckIn(checkIn, requestId);
 		else
 			throw new WebApplicationException(Status.FORBIDDEN);
 	}
@@ -129,7 +132,7 @@ public class CheckInResource {
 	@POST
 	@Path("tokens")
 	@Produces("text/plain; charset=UTF-8")
-	@RolesAllowed({"guest"})
+	@RolesAllowed(Role.GUEST)
 	public String requestToken() {
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.app.timeout")));
 		return channelCtrlProvider.get().createCustomerChannel(checkIn, timeout);
@@ -137,7 +140,7 @@ public class CheckInResource {
 	
 	@PUT
 	@Path("cart")
-	@RolesAllowed({"guest"}) 
+	@RolesAllowed(Role.GUEST)
 	public void updateAllCartOrders() {
 		if(authenticated)
 			orderCtrlProvider.get().updateCartOrdersToPlaced(checkIn);
@@ -147,7 +150,7 @@ public class CheckInResource {
 	
 	@DELETE
 	@Path("cart")
-	@RolesAllowed({"guest"}) 
+	@RolesAllowed(Role.GUEST)
 	public void deleteAllCartOrders() {
 		if(authenticated)
 			orderCtrlProvider.get().deleteCartOrders(checkIn);
@@ -161,5 +164,9 @@ public class CheckInResource {
 
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;
+	}
+
+	public void setAccount(Account account) {
+		this.accountOpt = Optional.fromNullable(account);
 	}
 }

@@ -4,7 +4,11 @@ import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Business;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.validation.CreationChecks;
+import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -17,14 +21,22 @@ import org.apache.bval.constraints.NotEmpty;
  * @author Nils Weiher
  *
  */
+/**
+ * @author fred
+ *
+ */
 public class SpotDTO {
 	
 	/**
 	 * Barcode identifying this spot.
 	 */
-	@NotNull
-	@NotEmpty
+	@NotNull(groups={ImportChecks.class})
+	@NotEmpty(groups={ImportChecks.class})
 	private String barcode;
+	
+	private String qrImageUrl;
+	
+	private Long id;
 	
 	/**
 	 * A human readable identifier for the spot where the barcode is located.
@@ -36,10 +48,55 @@ public class SpotDTO {
 	
 	private String business;
 	
+	private String theme;
+	
 	private Long businessId;
 	
 	private Collection<PaymentMethod> payments;
 	
+	private String currency;
+	
+	private boolean active;
+	
+	
+	/**
+	 * Url to logo.
+	 */
+	private String logoUrl;
+	
+	/**
+	 * Url to image of header displayed in App.
+	 */
+	private String headerUrl;
+	
+	@NotNull(groups= {CreationChecks.class})
+	private Long areaId;
+	
+	public SpotDTO(Spot spot) {
+		super();
+		if(spot == null)
+			return;
+		
+		if(spot.getBusiness() != null) {
+			this.businessId = spot.getBusiness().getId();
+		}
+		this.id = spot.getId();
+		this.active = spot.isActive();
+		this.barcode = spot.getBarcode();
+		this.qrImageUrl = spot.getQrImageUrl();
+		this.name = spot.getName();
+		this.groupTag = spot.getBarcode();
+		if(spot.getArea()!=null) {
+			this.areaId = spot.getArea().getId();
+		}
+	}
+	
+	
+	public SpotDTO() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	public String getBusiness() {
 		return business;
 	}
@@ -94,5 +151,85 @@ public class SpotDTO {
 	public void setPayments(Collection<PaymentMethod> payments) {
 		this.payments = payments;
 	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+	public String getQrImageUrl() {
+		return qrImageUrl;
+	}
+
+
+	public void setQrImageUrl(String qrImageUrl) {
+		this.qrImageUrl = qrImageUrl;
+	}
+
+
+	public boolean isActive() {
+		return active;
+	}
+
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+
+	public String getTheme() {
+		return theme;
+	}
+
+
+	public void setTheme(String theme) {
+		this.theme = theme;
+	}
+
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
+
+
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+
+
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+
+
+	public String getHeaderUrl() {
+		return headerUrl;
+	}
+
+
+	public void setHeaderUrl(String headerUrl) {
+		this.headerUrl = headerUrl;
+	}
+	
+	
 	
 }

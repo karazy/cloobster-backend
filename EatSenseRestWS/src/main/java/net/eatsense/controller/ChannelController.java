@@ -56,17 +56,6 @@ public class ChannelController {
 	}
 	
 	/**
-	 * Create a new message channel for push notification.
-	 * 
-	 * @param businessId id of a business
-	 * @param clientId
-	 * @return
-	 */
-	public String createCockpitChannel(long businessId, String clientId) throws ChannelFailureException {
-		return createCockpitChannel(businessId, clientId, Optional.<Integer>absent());
-	}
-	
-	/**
 	 * Create a new message channel for push notification, with a default timeout of 2h,
 	 * and register the client id in the business.
 	 * 
@@ -102,28 +91,6 @@ public class ChannelController {
 		token = (timeout.isPresent())?channelService.createChannel(clientId, timeout.get()):channelService.createChannel(clientId);
 
 		return token;
-	}
-	
-	/**
-	 * Create a new message channel for push notification, with the given timeout.
-	 * 
-	 * @param businessId
-	 * @param clientId
-	 * @param timeout
-	 * @return the token to send to the client
-	 * @throws ChannelFailureException if channel creation failed
-	 * @throws IllegalArgumentException if unknown businessId has been passed
-	 */
-	public String createCockpitChannel(long businessId, String clientId , Optional<Integer> timeout) throws ChannelFailureException, IllegalArgumentException {
-		checkArgument(businessId != 0, "businessId was 0");
-		Business business;
-		try {
-			business = businessRepo.getById(businessId);
-		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("unknown businessId", e);
-		}
-		
-		return createCockpitChannel(business, clientId, timeout);
 	}
 	
 	/**
@@ -323,7 +290,7 @@ public class ChannelController {
 	 */
 	public String checkOnlineStatus(long businessId, String clientId) {
 		boolean connected = false;
-		logger.debug("recieved online check from clientId:" + clientId);
+		logger.info("recieved online check from clientId:" + clientId);
 
 		Business business;
 		try {
@@ -332,8 +299,9 @@ public class ChannelController {
 			logger.warn("Unknown businessId");
 			business = null;
 		}
+		clientId = buildCockpitClientId(businessId, clientId);
 		
-		connected = !(business == null || !business.getChannels().contains( Channel.fromClientId(clientId)));
+		connected = (business != null && business.getChannels().contains( Channel.fromClientId(clientId)));
 
 		if(connected) {
 			sendMessage(clientId, new MessageDTO("channel","connected", null));
@@ -350,7 +318,7 @@ public class ChannelController {
 		
 		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInUid);
 
-		connected = !(checkIn == null || checkIn.getChannelId() == null);
+		connected = (checkIn != null && checkIn.getChannelId() != null);
 		
 		if(connected) {
 			sendMessage(checkIn.getChannelId(), new MessageDTO("channel","connected", null));
@@ -389,8 +357,11 @@ public class ChannelController {
 		
 		if(checkIn.getChannelId() != null && checkIn.getChannelId().equals(clientId)) {
 			checkIn.setChannelId(null);
-			logger.info("Unsubscribing channel {} from checkin {} ", clientId, checkIn.getNickname());
-			checkInRepo.saveOrUpdate(checkIn);
+			logger.info("Channel disconnected for CheckIn.id={}, nickname={}", checkIn.getId(), checkIn.getNickname());
+			
+			// Disabled updating of checking because of problematic caching
+			// and datastore deletes leading to inconsitencies after checkin deletion.
+			//checkInRepo.saveOrUpdate(checkIn);
 		}
 	}
 
@@ -484,7 +455,7 @@ public class ChannelController {
 		} catch (NumberFormatException e) {
 			timeout = 120;
 		}
-		calendar.add(Calendar.MINUTE, -timeout);			
+		calendar.add(Calendar.MINUTE, -timeout);
 		
 		Channel newChannel = Channel.fromClientId(clientId);
 		
