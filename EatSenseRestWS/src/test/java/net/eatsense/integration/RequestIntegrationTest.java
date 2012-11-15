@@ -7,7 +7,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.CustomerRequestDTO;
+import net.eatsense.representation.RequestDTO;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +63,7 @@ public class RequestIntegrationTest extends RestIntegrationTest {
 		checkInId = checkInData.getUserId();
 		
 		// #2 Post a waiter request
-		CustomerRequestDTO requestData = new CustomerRequestDTO();
+		RequestDTO requestData = new RequestDTO();
 		
 		requestData.setType("CALL_WAITER");
 		response = given().contentType("application/json")
@@ -72,7 +72,7 @@ public class RequestIntegrationTest extends RestIntegrationTest {
 				.body("type", equalTo("CALL_WAITER"))
 				.body("id", notNullValue())
 				.when().post("c/checkins/{id}/requests", checkInId);
-		requestData = response.as(CustomerRequestDTO.class);
+		requestData = response.as(RequestDTO.class);
 		
 		// #3.1 get a waiter request
 		response = given().contentType("application/json")
@@ -81,7 +81,7 @@ public class RequestIntegrationTest extends RestIntegrationTest {
 				.expect().statusCode(200)
 				.when().get("/b/businesses/{id}/requests", businessId);
 
-		requestData = response.jsonPath().getObject("find {r-> r.checkInId == "+requestData.getCheckInId()+" }", CustomerRequestDTO.class);
+		requestData = response.jsonPath().getObject("find {r-> r.checkInId == "+requestData.getCheckInId()+" }", RequestDTO.class);
 		assertThat(requestData.getType(), equalTo("CALL_WAITER"));
 		assertThat(requestData.getId(), notNullValue());
 		

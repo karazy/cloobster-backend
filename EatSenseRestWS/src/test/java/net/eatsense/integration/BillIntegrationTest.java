@@ -76,7 +76,7 @@ public class BillIntegrationTest  extends RestIntegrationTest{
 	
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
-		orderData.setProduct(productData);
+		orderData.setProductId(productData.getId());
 		orderData.setStatus(OrderStatus.CART);
 		// Place Order in Cart
 		response = given().contentType("application/json")
@@ -163,7 +163,7 @@ public class BillIntegrationTest  extends RestIntegrationTest{
 		
 		returnedBillData = response.as(BillDTO.class);
 		
-		assertThat(returnedBillData.getTotal(), is(newOrderData.getProduct().getPrice()));
+		assertThat(returnedBillData.getTotal(), is(newOrderData.getProductPrice()));
 		
 		// Check status for spot
 		response = given().contentType("application/json")

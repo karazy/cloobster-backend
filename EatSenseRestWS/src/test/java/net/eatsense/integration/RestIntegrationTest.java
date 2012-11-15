@@ -10,7 +10,7 @@ public class RestIntegrationTest {
 
 	public RestIntegrationTest() {
 		super();
-		RestAssured.baseURI = "http://eatsense-test.appspot.com";
+		RestAssured.baseURI = "http://localhost/";
 		RestAssured.port = 80;
 	}
 	

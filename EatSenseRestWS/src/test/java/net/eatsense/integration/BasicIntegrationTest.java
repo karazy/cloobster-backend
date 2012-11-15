@@ -29,13 +29,14 @@ import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
 public class BasicIntegrationTest extends RestIntegrationTest {
+	private static final String BUSINESS_LOGIN_PASSWORD = "cl00bster!";
+	private static final String BUSINESS_LOGIN = "admin";
+	private static final String TEST_SPOT_NAME = "Tisch 1";
+	private static final String TEST_BUSINESS_NAME = "Cloobster Club";
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	String barcode;
-	String server;
 	private String checkInId;
 	private long businessId;
-	ObjectMapper jsonMapper;
-
 	
 	public BasicIntegrationTest() {
 		super();
@@ -44,19 +45,18 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 
 	@Before
 	public void setUp() throws Exception {
-		barcode = "hup001";
-		this.jsonMapper = new ObjectMapper();
+		barcode = "tst001";
 	}
 	
 	/**
 	 * 1.1 Testing a basic checkin.
 	 */
 	@Test
-	public void basicCheckInTest() {
+	public void testCheckInBasic() {
 		// #1 Get spot information
 		Response response = expect().statusCode(200)
-				.body("name", equalTo("Tisch 1"))
-				.body("business", equalTo("Heidi und Paul")).when()
+				.body("name", equalTo(TEST_SPOT_NAME))
+				.body("business", equalTo(TEST_BUSINESS_NAME)).when()
 				.get("/spots/{barcode}", barcode);
 
 		businessId = response.getBody().jsonPath().getLong("businessId");
@@ -77,9 +77,11 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		checkInId = checkInData.getUserId();
 
 		// #3 Check if we can retrieve the same data by user id
-		expect().statusCode(200).body("userId", is(checkInId)).when()
-				.get("/c/checkins/{userId}", checkInId);
+		given().header("checkInId",checkInId).
+		expect().statusCode(200).body("userId", is(checkInId)).
+		when().get("/c/checkins/{userId}", checkInId);
 		
+		// #4 Delete the checkin		
 		response = given().header("checkInId",checkInId).expect().statusCode(204).when().delete("c/checkins/{id}", checkInId);
 	}
 
@@ -90,8 +92,8 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 	public void testBasicOrderStatus() {
 		// #1 Get spot information
 		Response response = expect().statusCode(200)
-				.body("name", equalTo("Tisch 1"))
-				.body("business", equalTo("Heidi und Paul")).when()
+				.body("name", equalTo(TEST_SPOT_NAME))
+				.body("business", equalTo(TEST_BUSINESS_NAME)).when()
 				.get("/spots/{barcode}", barcode);
 
 		businessId = response.getBody().jsonPath().getLong("businessId");
@@ -115,7 +117,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 
 		// Check the checkincount at "Tisch 1"
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 1'}.checkInCount", is(1))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -131,7 +133,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
-		orderData.setProduct(productData);
+		orderData.setProductId(productData.getId());
 		orderData.setStatus(OrderStatus.CART);
 		// Place Order in Cart
 		response = given().contentType("application/json")
@@ -151,7 +153,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		OrderDTO orderData2 = new OrderDTO();
 		orderData2.setAmount(1);
-		orderData2.setProduct(productData2);
+		orderData2.setProductId(productData2.getId());
 		orderData2.setStatus(OrderStatus.CART);
 		
 		// Place Order in Cart
@@ -181,7 +183,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		// Retrieve spot status and check that status is ORDER_PLACED for "Tisch 1"
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 1'}.status", is("ORDER_PLACED"))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -189,13 +191,13 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		// 2.3 Confirm one order
 		orderData.setStatus(OrderStatus.RECEIVED);
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.body(orderData)
 				.expect().statusCode(200).when().put("/b/businesses/{id}/orders/{order}", businessId, orderData.getId());
 	
 		// Check status for spot
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 1'}.status", is("ORDER_PLACED"))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -203,13 +205,13 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		// 2.4 Cancel the other order
 		orderData.setStatus(OrderStatus.CANCELED);
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.body(orderData)
 				.expect().statusCode(200).when().put("/b/businesses/{id}/orders/{order}", businessId, orderData2.getId());
 		
 		// Check status for spot
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.rootPath("find {p -> p.name == 'Tisch 1'}")
 				.body("status", not( is("ORDER_PLACED") ))
@@ -228,7 +230,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		// Check status for spot
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.rootPath("find {p -> p.name == 'Tisch 1'}")
 				.body("status", is("PAYMENT_REQUEST") )
@@ -240,11 +242,11 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 	 */
 	@Test
 	public void testCheckInCount() {
-		barcode = "hup002";
+		barcode = "tst002";
 		// #1 Get spot information
 		Response response = expect().statusCode(200)
 				.body("name", equalTo("Tisch 2"))
-				.body("business", equalTo("Heidi und Paul")).when()
+				.body("business", equalTo(TEST_BUSINESS_NAME)).when()
 				.get("/spots/{barcode}", barcode);
 
 		businessId = response.getBody().jsonPath().getLong("businessId");
@@ -267,7 +269,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		}
 
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.rootPath("find {p -> p.name == 'Tisch 2'}")
 				.body("checkInCount", is(3))
@@ -284,7 +286,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 	
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
-		orderData.setProduct(productData);
+		orderData.setProductId(productData.getId());
 		orderData.setStatus(OrderStatus.CART);
 		// Place Order in Cart
 		response = given().contentType("application/json")
@@ -306,7 +308,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 	
 		// Check status for spot
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 2'}.status", is("ORDER_PLACED"))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -324,7 +326,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		// Check status for spot
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.rootPath("find {p -> p.name == 'Tisch 2'}")
 				.body("status", is("PAYMENT_REQUEST") )
@@ -340,7 +342,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		// #1 Get spot information
 		Response response = expect().statusCode(200)
 				.body("name", equalTo("Tisch 3"))
-				.body("business", equalTo("Heidi und Paul")).when()
+				.body("business", equalTo(TEST_BUSINESS_NAME)).when()
 				.get("/spots/{barcode}", barcode);
 
 		businessId = response.getBody().jsonPath().getLong("businessId");
@@ -363,7 +365,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		}
 
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.rootPath("find {p -> p.name == 'Tisch 3'}")
 				.body("checkInCount", is(3))
@@ -384,12 +386,12 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 			String checkInId = checkIns[0].getUserId();
 			orders1[i] = new OrderDTO();
 			orders1[i].setAmount(1);
-			orders1[i].setProduct(productData);
+			orders1[i].setProductId(productData.getId());
 			orders1[i].setStatus(OrderStatus.CART);
 			
 			if(i > 1) {
 				checkInId = checkIns[1].getUserId();
-				orders1[i].setProduct(productData2);
+				orders1[i].setProductId(productData2.getId());
 			}
 				
 				
@@ -415,7 +417,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 
 		// Check status for spot
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 3'}.status", is("ORDER_PLACED"))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -423,7 +425,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		// Check order count
 		
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.queryParam("spotId", spotId)
 				.expect().statusCode(200)
 				.body("$.size()", is(6))
@@ -437,8 +439,8 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 	public void testDeleteCheckin() {
 		// #1 Get spot information
 		Response response = expect().statusCode(200)
-				.body("name", equalTo("Tisch 1"))
-				.body("business", equalTo("Heidi und Paul")).when()
+				.body("name", equalTo(TEST_SPOT_NAME))
+				.body("business", equalTo(TEST_BUSINESS_NAME)).when()
 				.get("/spots/{barcode}", barcode);
 
 		businessId = response.getBody().jsonPath().getLong("businessId");
@@ -462,7 +464,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 
 		// Check the checkincount at "Tisch 1"
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 1'}.checkInCount", is(1))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -478,7 +480,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
-		orderData.setProduct(productData);
+		orderData.setProductId(productData.getId());
 		orderData.setStatus(OrderStatus.CART);
 		// Place Order in Cart
 		response = given().contentType("application/json")
@@ -498,7 +500,8 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		OrderDTO orderData2 = new OrderDTO();
 		orderData2.setAmount(1);
-		orderData2.setProduct(productData2);
+		orderData2.setProductId(productData2.getId());
+		orderData2.setChoices(productData2.getChoices());
 		orderData2.setStatus(OrderStatus.CART);
 		
 		// Place Order in Cart
@@ -528,7 +531,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		// Retrieve spot status and check that status is ORDER_PLACED for "Tisch 1"
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(200)
 				.body("find {p -> p.name == 'Tisch 1'}.status", is("ORDER_PLACED"))
 				.when().get("/b/businesses/{id}/spots", businessId);
@@ -536,7 +539,7 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		
 		// Get checkin status information
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.queryParam("spotId", spotStatus.getId())
 				.expect().statusCode(200)
 				.body("$.size()", is(1))
@@ -544,12 +547,12 @@ public class BasicIntegrationTest extends RestIntegrationTest {
 		CheckInStatusDTO checkInStatus = response.jsonPath().getObject("find { c -> c.nickname = 'TestNils'}", CheckInStatusDTO.class);
 		// Delete checkin.
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.expect().statusCode(204)
 				.when().delete("/b/businesses/{id}/checkins/{cId}", businessId, checkInStatus.getId());
 		// Get checkin status information
 		response = given().contentType("application/json")
-				.headers("login","admin","password","test")
+				.headers("login",BUSINESS_LOGIN,"password",BUSINESS_LOGIN_PASSWORD)
 				.queryParam("spotId", spotStatus.getId())
 				.expect().statusCode(200)
 				.body("$.size()", is(0))

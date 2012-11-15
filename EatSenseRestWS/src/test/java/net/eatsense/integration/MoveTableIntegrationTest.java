@@ -74,7 +74,7 @@ public class MoveTableIntegrationTest  extends RestIntegrationTest {
 		ProductDTO productData = menus.getObject("find {m -> m.title == 'Getränke'}.products.find {p -> p.name == 'Coca-Cola'}", ProductDTO.class);
 		OrderDTO orderData = new OrderDTO();
 		orderData.setAmount(1);
-		orderData.setProduct(productData);
+		orderData.setProductId(productData.getId());
 		orderData.setStatus(OrderStatus.CART);
 		// #2.2 Place Order in Cart
 		response = given().contentType("application/json")
