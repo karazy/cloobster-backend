@@ -463,6 +463,28 @@ public class BusinessController {
 		return result.getUpdatedImage();
 	}
 	
+
+	/**
+	 * Remove an image embedded in this Business entity.
+	 * 
+	 * @param business The Business containing the image.
+	 * @param imageId Unique identifier for the image.
+	 * @return <code>true</code> if an image was removed, <code>false</code> otherwise.
+	 */
+	public boolean removeBusinessImage(Business business, String imageId) {
+		checkNotNull(business, "business was null");
+		checkNotNull(Strings.emptyToNull(imageId), "imageId was null or empty");
+		
+		UpdateImagesResult result = imageController.removeImage(imageId, business.getImages());
+		
+		if(result.isDirty()) {
+			business.setImages(result.getImages());
+			businessRepo.saveOrUpdate(business);
+		}
+		
+		return result.isDirty();
+	}
+	
 	/**
 	 * @param business
 	 * @param account
@@ -705,4 +727,5 @@ public class BusinessController {
 		area.setActive(false);
 		areaRepo.trashEntity(area, account.getLogin());
 	}
+
 }

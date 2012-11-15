@@ -155,4 +155,36 @@ public class ImageController {
 		
 		return new UpdateImagesResult(images, dirty, image);
 	}
+	
+	/**
+	 * Remove an image from the list and from the blobstore.
+	 * 
+	 * @param id Unique identifier for the image
+	 * @param images Collection of images
+	 * @return
+	 */
+	public UpdateImagesResult removeImage(String id, List<ImageDTO> images) {
+		if( images == null || images.isEmpty()) {
+			new UpdateImagesResult(images, false, null);
+		}
+		
+		boolean dirty = false;
+		ImageDTO removedImage = null;
+		
+		// Look if we have an image saved under this id.
+		for (Iterator<ImageDTO> iterator = images.iterator(); iterator.hasNext();) {
+			ImageDTO imageDTO = iterator.next();
+			
+			if(imageDTO.getId().equals(id)) {
+				dirty = true;
+				iterator.remove();
+				BlobKey blobKey = new BlobKey(imageDTO.getBlobKey());
+				blobstoreService.delete(blobKey);
+				imagesService.deleteServingUrl(blobKey);
+				removedImage = imageDTO;
+			}
+		}
+		
+		return new UpdateImagesResult(images, dirty, removedImage);
+	}
 }
