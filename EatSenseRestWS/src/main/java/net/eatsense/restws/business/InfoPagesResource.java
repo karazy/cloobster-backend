@@ -15,6 +15,7 @@ import javax.ws.rs.QueryParam;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.InfoPageController;
@@ -105,6 +106,15 @@ public class InfoPagesResource {
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ImageDTO saveImage(@PathParam("id") Long id, ImageDTO imageData) {
 		return infoPageCtrl.updateImage(account, infoPageCtrl.get(business.getKey(), id), imageData);
+	}
+	
+	@DELETE
+	@Path("{id}/image")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void removeImage(@PathParam("id") Long id) {
+		if(!infoPageCtrl.removeImage(infoPageCtrl.get(business.getKey(), id))) {
+			throw new NotFoundException();
+		}
 	}
 
 	public void setBusiness(Business business) {

@@ -685,6 +685,41 @@ public class BusinessControllerTest {
 	}
 	
 	@Test
+	public void testRemoveBusinessImageNoChanges() throws Exception {
+		rr = mock(BusinessRepository.class);
+		accountRepo = mock(AccountRepository.class);
+		business = mock(Business.class);
+				
+		businessCtrl = createController();
+		List<ImageDTO> images = mock(List.class);
+		
+		String imageId = "test";
+		when(imageController.removeImage(imageId, business.getImages())).thenReturn(new UpdateImagesResult(images, false, null));
+		businessCtrl.removeBusinessImage(business, imageId);
+		
+		verify(rr, never()).saveOrUpdate(business);
+	}
+	
+	@Test
+	public void testRemoveBusinessImage() throws Exception {
+		rr = mock(BusinessRepository.class);
+		accountRepo = mock(AccountRepository.class);
+		business = mock(Business.class);
+				
+		businessCtrl = createController();
+		List<ImageDTO> images = mock(List.class);
+		
+		String imageId = "test";
+		when(imageController.removeImage(imageId, business.getImages())).thenReturn(new UpdateImagesResult(images, true, null));
+		boolean result = businessCtrl.removeBusinessImage(business, imageId);
+		
+		assertThat(result, is(true));
+		
+		verify(business).setImages(images);
+		verify(rr).saveOrUpdate(business);
+	}
+	
+	@Test
 	public void testUpdateAreaMenus() throws Exception {
 		mr = mock(MenuRepository.class);
 		businessCtrl = createController();

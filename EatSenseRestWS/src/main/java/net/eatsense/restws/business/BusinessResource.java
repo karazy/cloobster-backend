@@ -116,6 +116,16 @@ public class BusinessResource {
 		return businessCtrl.updateBusinessImage(account, business, imageData);
 	}
 	
+	@DELETE
+	@Path("images/{id}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void removeImage(@PathParam("id") String imageId) {
+		if(!businessCtrl.removeBusinessImage(business, imageId)) {
+			throw new NotFoundException(String.format("No image found with id '%s'", imageId));
+		}
+	}
+
+	
 	@Path("menus")
 	public MenusResource getMenusResource() {
 		MenusResource menusResource = resourceContext.getResource(MenusResource.class);

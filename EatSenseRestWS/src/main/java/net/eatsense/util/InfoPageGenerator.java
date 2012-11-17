@@ -85,6 +85,7 @@ public class InfoPageGenerator {
 			
 			ImageDTO imageDTO = new ImageDTO();
 			infoPage.setImages(new ArrayList<ImageDTO>());
+			imageDTO.setId("image");
 			imageDTO.setUrl(IMAGEURL + infoPage.getTitle());
 			infoPage.getImages().add(imageDTO);
 			

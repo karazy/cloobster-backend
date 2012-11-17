@@ -182,6 +182,19 @@ public class InfoPageController {
 		return result.getUpdatedImage();
 	}
 	
+	public boolean removeImage(InfoPage infoPage) {
+		checkNotNull(infoPage, "infoPage was null");
+		
+		UpdateImagesResult result = imageCtrl.removeImage("image", infoPage.getImages());
+		
+		if(result.isDirty()) {
+			infoPage.setImages(result.getImages());
+			infoPageRepo.saveOrUpdate(infoPage);
+		}
+		
+		return result.isDirty();
+	}
+	
 	/**
 	 * Delete InfoPage and all translations.
 	 * 
