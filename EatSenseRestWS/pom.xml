@@ -323,10 +323,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/app/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.app}/prod/desktop</directory>
+											<directory>${cloobster.app}/prod/desktop/build/EatSense/production</directory>
 										</resource>
 									</resources>
 								</configuration>
