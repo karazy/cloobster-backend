@@ -36,7 +36,7 @@ public class AccessTokenRepository extends DAOBase {
 			Calendar cal = Calendar.getInstance();
 			//TODO: Extract the number of hours an authentication token is valid to the web.xml config.
 		
-        	cal.add(Calendar.HOUR_OF_DAY, 120);
+        	cal.add(Calendar.DATE, 30);
         	expirationDate = cal.getTime();
 		}
 		
