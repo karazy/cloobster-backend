@@ -107,7 +107,7 @@ h1, h2, h3, h4, h5, h6 {
 .banner1_text {
 	width: 280px;
 	float: left;
-	padding: 124px 0 0 29px;
+	padding: 0px 0 0 29px;
 }
 .banner1_text h1 {
 	font-size: 35px;
@@ -1020,7 +1020,6 @@ h1, h2, h3, h4, h5, h6 {
 	color: red;
 	font-weight: bold;
 	display: none;
-	clear: both;
 }
 
 .login_box {
