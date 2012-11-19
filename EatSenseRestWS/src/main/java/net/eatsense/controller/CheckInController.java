@@ -270,10 +270,11 @@ public class CheckInController {
 			}
 		}
 		
+		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(spot.getKey());
+
 		// Check for double nickname is deactivated for now.
 //		List<CheckIn> checkInsAtSpot = checkInRepo.getBySpot(checkIn.getSpot());
 //		// count checkins at spot
-//		int checkInCount = 1;
 //		if(checkInsAtSpot != null) {
 //			Iterator<CheckIn> it = checkInsAtSpot.iterator();
 //			while(it.hasNext()) {
@@ -285,6 +286,8 @@ public class CheckInController {
 //				}
 //			}
 //		}
+		
+		logger.info("New CheckIn with userId={}", checkIn.getUserId());
 
 		Key<CheckIn> checkInKey = checkInRepo.saveOrUpdate(checkIn);
 		if(optAccount.isPresent()) {
@@ -297,7 +300,7 @@ public class CheckInController {
 		
 		// send the event
 		CheckInEvent newCheckInEvent = new NewCheckInEvent(checkIn, business);
-//		newCheckInEvent.setCheckInCount(checkInCount);
+		newCheckInEvent.setCheckInCount(checkInCount + 1);
 		eventBus.post(newCheckInEvent);
 		return checkInDto;
 	}

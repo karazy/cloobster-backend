@@ -17,6 +17,7 @@ import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.CheckInRepository;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
@@ -76,6 +77,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			try {
 				accessToken = accessTokenRepo.get(stringToken);
 			} catch (NotFoundException e) {
+				logger.warn("Access token no longer valid.");
 				throw new IllegalAccessException("Access token invalid, please re-authenticate.");
 			}
 			
@@ -87,6 +89,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			
 			if( accessToken.getType() == TokenType.AUTHENTICATION_CUSTOMER) {
 				if(request.getPathSegments().get(0).equals(BUSINESS_PATH_PREFIX)) {
+					logger.warn("Request for business resource with customer access token.");
 					throw new IllegalAccessException("Can not access business resource with this access token.");
 				}
 			}
@@ -125,7 +128,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 						accountRepo.saveOrUpdate(account);
 					}
 				}
-				logger.info("Request authenticated for Account({}), login: {}", account.getId(), account.getLogin());
+				logger.info("Request authenticated for Account({}), login/email={}", account.getId(), Objects.firstNonNull(account.getLogin(), account.getEmail()));
 			}
 		}
 //		else if(requiredToken != null) {
