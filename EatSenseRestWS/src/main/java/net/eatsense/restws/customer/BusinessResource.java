@@ -1,6 +1,8 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -18,16 +20,19 @@ import org.apache.lucene.index.CheckIndex;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.FeedbackController;
+import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
+import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
@@ -51,10 +56,12 @@ public class BusinessResource {
 	private BillController billCtrl;
 
 	private FeedbackController feedbackCtrl;
+
+	private InfoPageController infoPageCtrl;
 	
 	@Inject
 	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl, FeedbackController feedbackCtrl) {
+			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl) {
 		super();
 		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
@@ -205,4 +212,11 @@ public class BusinessResource {
 		}
 	}
 
+	@Path("infopages")
+	public InfoPagesResource getInfoPagesResource() {
+		InfoPagesResource infoPageResource = resourceContext.getResource(InfoPagesResource.class);
+		infoPageResource.setBusiness(business);
+		
+		return infoPageResource;
+	}
 }

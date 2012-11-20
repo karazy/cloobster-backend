@@ -11,6 +11,7 @@ import java.util.Map;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.GenericEntity;
+import net.eatsense.domain.TranslatedEntity;
 import net.eatsense.domain.TrashEntry;
 
 import org.slf4j.Logger;

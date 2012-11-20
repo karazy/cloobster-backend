@@ -323,10 +323,10 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/app</outputDirectory>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/app/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.app}/prod/desktop</directory>
+											<directory>${cloobster.app}/prod/desktop/build/EatSense/production</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -335,7 +335,38 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>	
+		</profile>
+				<profile>
+			<id>cockpit-prod</id>
+			<build>
+				<filters>
+            		<filter>${basedir}/src/main/filters/prod.properties</filter>
+            	</filters>	
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.2</version>
+						<executions>
+							<execution>
+								<id>copy-cockpit-prod</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/cockpit</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.cockpit}/build/production</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>prod</id>
 			<build>
@@ -422,9 +453,19 @@
 			<url>http://sli4j.googlecode.com/svn/repo</url>
 			<layout>default</layout>
 		</repository>
+		<repository>
+      		<id>owasp-java-html-sanitizer</id>
+      		<url>http://owasp-java-html-sanitizer.googlecode.com/svn/maven</url>
+   		</repository>
 	</repositories>
 
 	<dependencies>
+	 	<dependency>
+      		<groupId>owasp-java-html-sanitizer</groupId>
+      		<artifactId>owasp-java-html-sanitizer</artifactId>
+      		<version>r129</version>
+      		<scope>compile</scope>
+    	</dependency>
 		<dependency>
     		<groupId>com.google.guava</groupId>
     		<artifactId>guava</artifactId>
@@ -598,7 +639,14 @@
   			<version>1.9.0</version> 
   			<scope>test</scope>
   		</dependency>
-		</dependencies>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+			<classifier>api</classifier>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<!-- Generate compiled stuff in the folder used for development mode -->

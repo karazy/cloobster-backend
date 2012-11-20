@@ -50,6 +50,7 @@ public class AccountsResource {
 	
 	private final Provider<AccessTokenRepository> accessTokenRepoProvider;
 	private final EventBus eventBus;
+	
 	@Context
 	private UriInfo uriInfo;
 
