@@ -33,6 +33,9 @@ public class BusinessProfileDTO extends BusinessDTO {
 	private String phone;
 
 	private String slogan;
+	
+	private String email;
+	private int stars;
 
 	public BusinessProfileDTO() {
 		super();
@@ -53,6 +56,8 @@ public class BusinessProfileDTO extends BusinessDTO {
 				images.put(image.getId(), image);
 			}
 		}
+		this.email = business.getEmail();
+		this.setStars(business.getStars());
 		this.phone = business.getPhone();
 		this.postcode = business.getPostcode();
 		this.slogan = business.getSlogan();
@@ -104,5 +109,21 @@ public class BusinessProfileDTO extends BusinessDTO {
 
 	public void setSlogan(String slogan) {
 		this.slogan = slogan;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public int getStars() {
+		return stars;
+	}
+
+	public void setStars(int stars) {
+		this.stars = stars;
 	}	
 }

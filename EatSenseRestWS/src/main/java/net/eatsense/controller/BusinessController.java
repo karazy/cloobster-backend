@@ -401,13 +401,14 @@ public class BusinessController {
 		business.setDescription(businessData.getDescription());
 		business.setName(businessData.getName());
 		business.setPhone(businessData.getPhone());
-		business.setPhone(businessData.getPhone());
 		business.setPostcode(businessData.getPostcode());
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
 		business.setUrl(businessData.getUrl());
 		business.setFbUrl(businessData.getFbUrl());
 		business.setLang(businessData.getLang());
+		business.setEmail(businessData.getEmail());
+		business.setStars(businessData.getStars());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme
