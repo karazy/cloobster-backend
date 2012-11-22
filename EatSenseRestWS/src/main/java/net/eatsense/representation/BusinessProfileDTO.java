@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.apache.bval.constraints.NotEmpty;
@@ -35,6 +36,8 @@ public class BusinessProfileDTO extends BusinessDTO {
 	private String slogan;
 	
 	private String email;
+	
+	@Min(0)
 	private int stars;
 
 	public BusinessProfileDTO() {
