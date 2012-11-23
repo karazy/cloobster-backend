@@ -401,13 +401,14 @@ public class BusinessController {
 		business.setDescription(businessData.getDescription());
 		business.setName(businessData.getName());
 		business.setPhone(businessData.getPhone());
-		business.setPhone(businessData.getPhone());
 		business.setPostcode(businessData.getPostcode());
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
 		business.setUrl(businessData.getUrl());
 		business.setFbUrl(businessData.getFbUrl());
 		business.setLang(businessData.getLang());
+		business.setEmail(businessData.getEmail());
+		business.setStars(businessData.getStars());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme
@@ -496,11 +497,11 @@ public class BusinessController {
 		
 		businessRepo.trashEntity(business, account.getLogin());
 		
-		List<Spot> spots = spotRepo.getByParent(business.getKey());
-		for (Spot spot : spots) {
+		List<Area> area = areaRepo.getByParent(business.getKey());
+		for (Area spot : area) {
 			spot.setActive(false);
 		}
-		spotRepo.saveOrUpdate(spots);
+		areaRepo.saveOrUpdate(area);
 		
 		eventBus.post(new TrashBusinessEvent(business));
 	}

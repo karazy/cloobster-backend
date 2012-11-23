@@ -72,6 +72,7 @@ public class Business extends GenericEntity<Business> {
 	@NotNull
 	@NotEmpty
 	private String postcode;
+
 	
 	/**
 	 * Phone number to contact the location. (optional)
@@ -109,6 +110,16 @@ public class Business extends GenericEntity<Business> {
 	 */
 	@Unindexed
 	private List<String> lang;
+	
+	/**
+	 * Public E-mail address for this business.
+	 */
+	private String email;
+	
+	/**
+	 * Number of stars (for hotels and restaurants)
+	 */
+	private int stars;
 	
 	public Business() {
 	}
@@ -305,6 +316,28 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.lang, lang)) {
 			this.setDirty(true);
 			this.lang = lang;
+		}
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		if(!Objects.equal(this.email, email)) {
+			this.setDirty(true);
+			this.email = email;
+		}
+	}
+
+	public int getStars() {
+		return stars;
+	}
+
+	public void setStars(int stars) {
+		if(!Objects.equal(this.stars, stars)) {
+			this.setDirty(true);
+			this.stars = stars;
 		}
 	}
 }

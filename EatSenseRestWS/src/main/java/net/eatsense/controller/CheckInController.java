@@ -142,18 +142,21 @@ public class CheckInController {
     		throw new NotFoundException();
     	}
     	
+    	
     	if(spot.getArea() == null) {
     		throw new NotFoundException(); 
     	}
-    	else {
-    		Area area = areaRepo.getByKey(spot.getArea());
-    		if(!area.isActive() && !checkInResume) {
-    			throw new NotFoundException();
-    		}
-    	}
     	
+    	try {
+			Area area = areaRepo.getByKey(spot.getArea());
+			if(!area.isActive() && !checkInResume) {
+				throw new NotFoundException();
+			}
 
-		return toSpotDto(spot) ;
+			return new SpotDTO(spot, businessRepo.getByKey(spot.getBusiness()), area) ;
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new NotFoundException("Business or area no longer exists.");
+		}
     }
     
     /**
@@ -164,36 +167,6 @@ public class CheckInController {
     public SpotDTO getSpotInformation(String barcode) {
     	return getSpotInformation(barcode, false);
     }
-
-    public SpotDTO toSpotDto(Spot spot) {
-    	if(spot == null)
-    		return null;
-		Business business = businessRepo.getByKey(spot.getBusiness());
-    	SpotDTO spotDto = new SpotDTO(spot);
-    	spotDto.setBusiness(business.getName());
-    	spotDto.setCurrency(business.getCurrency());
-    	spotDto.setPayments(business.getPaymentMethods());
-    	spotDto.setTheme(business.getTheme());
-    	ImageDTO logo = null, header = null;
-    	
-    	if(business.getImages() != null) {
-    		for (ImageDTO i : business.getImages()) {
-    			if(i.getId().equals("logo")) {
-    				logo = i;
-    				spotDto.setLogoUrl(i.getUrl());
-    			};
-    			if(i.getId().equals("appheader")) {
-    				header = i;
-    				spotDto.setHeaderUrl(i.getUrl());
-    			};
-    		};
-        	
-        	
-        	
-    	}
-    	
-		return spotDto;
-	}
 	
 	/**
 	 * Return transfer object containing relevant data for the checkin.
