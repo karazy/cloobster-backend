@@ -497,11 +497,11 @@ public class BusinessController {
 		
 		businessRepo.trashEntity(business, account.getLogin());
 		
-		List<Spot> spots = spotRepo.getByParent(business.getKey());
-		for (Spot spot : spots) {
+		List<Area> area = areaRepo.getByParent(business.getKey());
+		for (Area spot : area) {
 			spot.setActive(false);
 		}
-		spotRepo.saveOrUpdate(spots);
+		areaRepo.saveOrUpdate(area);
 		
 		eventBus.post(new TrashBusinessEvent(business));
 	}
