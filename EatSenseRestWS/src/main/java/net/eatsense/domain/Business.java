@@ -37,6 +37,7 @@ public class Business extends GenericEntity<Business> {
 	@NotEmpty
 	private String name;
 	
+	@Unindexed
 	private String theme = "default";
 
 	/**
@@ -49,6 +50,7 @@ public class Business extends GenericEntity<Business> {
 	/**
 	 * For marketing on front pages and links. (optional)
 	 */
+	@Unindexed
 	private String slogan;
 	
 	@Embedded
@@ -70,6 +72,7 @@ public class Business extends GenericEntity<Business> {
 	@NotNull
 	@NotEmpty
 	private String postcode;
+
 	
 	/**
 	 * Phone number to contact the location. (optional)
@@ -86,18 +89,37 @@ public class Business extends GenericEntity<Business> {
 
 	@Transient
 	private Key<Business> key;
-	
+
+	@Unindexed
 	private String currency;
 	
 	/**
 	 * Link to a website for this location (e.g. for facebook posts)
 	 */
+	@Unindexed
 	private String url;
 	
 	/**
 	 * Link to a facebook page for this business.
 	 */
+	@Unindexed
 	private String fbUrl;
+	
+	/**
+	 * Contains iso code language indentifier used for translated content by this business.
+	 */
+	@Unindexed
+	private List<String> lang;
+	
+	/**
+	 * Public E-mail address for this business.
+	 */
+	private String email;
+	
+	/**
+	 * Number of stars (for hotels and restaurants)
+	 */
+	private int stars;
 	
 	public Business() {
 	}
@@ -283,6 +305,39 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.fbUrl, fbUrl)) {
 			this.setDirty(true);
 			this.fbUrl = fbUrl;
+		}
+	}
+
+	public List<String> getLang() {
+		return lang;
+	}
+
+	public void setLang(List<String> lang) {
+		if(!Objects.equal(this.lang, lang)) {
+			this.setDirty(true);
+			this.lang = lang;
+		}
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		if(!Objects.equal(this.email, email)) {
+			this.setDirty(true);
+			this.email = email;
+		}
+	}
+
+	public int getStars() {
+		return stars;
+	}
+
+	public void setStars(int stars) {
+		if(!Objects.equal(this.stars, stars)) {
+			this.setDirty(true);
+			this.stars = stars;
 		}
 	}
 }

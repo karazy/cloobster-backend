@@ -401,12 +401,14 @@ public class BusinessController {
 		business.setDescription(businessData.getDescription());
 		business.setName(businessData.getName());
 		business.setPhone(businessData.getPhone());
-		business.setPhone(businessData.getPhone());
 		business.setPostcode(businessData.getPostcode());
 		business.setSlogan(businessData.getSlogan());
 		business.setCurrency(businessData.getCurrency());
 		business.setUrl(businessData.getUrl());
 		business.setFbUrl(businessData.getFbUrl());
+		business.setLang(businessData.getLang());
+		business.setEmail(businessData.getEmail());
+		business.setStars(businessData.getStars());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme
@@ -462,6 +464,28 @@ public class BusinessController {
 		return result.getUpdatedImage();
 	}
 	
+
+	/**
+	 * Remove an image embedded in this Business entity.
+	 * 
+	 * @param business The Business containing the image.
+	 * @param imageId Unique identifier for the image.
+	 * @return <code>true</code> if an image was removed, <code>false</code> otherwise.
+	 */
+	public boolean removeBusinessImage(Business business, String imageId) {
+		checkNotNull(business, "business was null");
+		checkNotNull(Strings.emptyToNull(imageId), "imageId was null or empty");
+		
+		UpdateImagesResult result = imageController.removeImage(imageId, business.getImages());
+		
+		if(result.isDirty()) {
+			business.setImages(result.getImages());
+			businessRepo.saveOrUpdate(business);
+		}
+		
+		return result.isDirty();
+	}
+	
 	/**
 	 * @param business
 	 * @param account
@@ -473,11 +497,11 @@ public class BusinessController {
 		
 		businessRepo.trashEntity(business, account.getLogin());
 		
-		List<Spot> spots = spotRepo.getByParent(business.getKey());
-		for (Spot spot : spots) {
+		List<Area> area = areaRepo.getByParent(business.getKey());
+		for (Area spot : area) {
 			spot.setActive(false);
 		}
-		spotRepo.saveOrUpdate(spots);
+		areaRepo.saveOrUpdate(area);
 		
 		eventBus.post(new TrashBusinessEvent(business));
 	}
@@ -613,6 +637,22 @@ public class BusinessController {
 	}
 	
 	/**
+	 * @param business
+	 * @param areaData
+	 * @return
+	 */
+	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(areaData, "areaData was null");
+		
+		Area area = areaRepo.newEntity();
+		area.setBusiness(businessKey);
+		updateArea(area, areaData);
+		
+		return area;
+	}
+
+	/**
 	 * 
 	 * @param businessKey
 	 * @return List of areas as transfer objects.
@@ -628,22 +668,6 @@ public class BusinessController {
 		}
 		
 		return areaDtos;
-	}
-	
-	/**
-	 * @param business
-	 * @param areaData
-	 * @return
-	 */
-	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
-		checkNotNull(businessKey, "businessKey was null");
-		checkNotNull(areaData, "areaData was null");
-		
-		Area area = areaRepo.newEntity();
-		area.setBusiness(businessKey);
-		updateArea(area, areaData);
-		
-		return area;
 	}
 
 	/**
@@ -704,4 +728,5 @@ public class BusinessController {
 		area.setActive(false);
 		areaRepo.trashEntity(area, account.getLogin());
 	}
+
 }
