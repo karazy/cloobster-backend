@@ -326,7 +326,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/app/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${cloobster.app}/prod/desktop/build/EatSense/production</directory>
+											<directory>${cloobster.app}/prod/desktop/build/EatSense/package</directory>
 										</resource>
 									</resources>
 								</configuration>
