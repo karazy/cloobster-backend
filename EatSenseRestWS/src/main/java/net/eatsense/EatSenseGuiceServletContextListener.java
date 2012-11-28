@@ -29,6 +29,8 @@ import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -72,7 +74,7 @@ public class EatSenseGuiceServletContextListener extends
 						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
-								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName());
+								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName()+ "," + SuffixFilter.class.getName());
 						
 						// add cross origin headers filter, deactivated for now.
 						// add cache control response filter.
@@ -154,7 +156,10 @@ public class EatSenseGuiceServletContextListener extends
 					public FileService providesFileService() {
 						return FileServiceFactory.getFileService();
 					}
-					
+					@Provides
+					public PolicyFactory providesHTMLPolicyFactory() {
+						return Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);
+					}
 				}, new ValidationModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);

@@ -31,6 +31,8 @@ public class BusinessDTO {
 	private String url;
 	private String fbUrl;
 	
+	private List<String> lang;
+	
 	@Valid
 	private List<PaymentMethod> paymentMethods;
 	
@@ -46,6 +48,7 @@ public class BusinessDTO {
 		this.currency = business.getCurrency();
 		this.trash = business.isTrash();
 		this.id = business.getId();
+		this.lang = business.getLang();
 		this.theme = Strings.isNullOrEmpty(business.getTheme())?"default":business.getTheme();
 		this.paymentMethods = business.getPaymentMethods();
 		this.url = business.getUrl();
@@ -117,5 +120,13 @@ public class BusinessDTO {
 
 	public void setFbUrl(String fbUrl) {
 		this.fbUrl = fbUrl;
+	}
+
+	public List<String> getLang() {
+		return lang;
+	}
+
+	public void setLang(List<String> lang) {
+		this.lang = lang;
 	}
 }

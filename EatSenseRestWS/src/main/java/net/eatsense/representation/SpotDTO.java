@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
@@ -58,6 +59,9 @@ public class SpotDTO {
 	
 	private boolean active;
 	
+	private String areaName;
+	private String areaDescription;
+	
 	
 	/**
 	 * Url to logo.
@@ -91,6 +95,32 @@ public class SpotDTO {
 		}
 	}
 	
+	public SpotDTO(Spot spot, Business business, Area area) {
+		this(spot);
+		if(business != null) {
+			this.business = business.getName();			
+			this.setBusiness(business.getName());
+	    	this.setCurrency(business.getCurrency());
+	    	this.setPayments(business.getPaymentMethods());
+	    	this.setTheme(business.getTheme());
+	    	
+	       	if(business.getImages() != null) {
+	    		for (ImageDTO i : business.getImages()) {
+	    			if(i.getId().equals("logo")) {
+	    				this.setLogoUrl(i.getUrl());
+	    			}
+	    			if(i.getId().equals("appheader")) {
+	    				this.setHeaderUrl(i.getUrl());
+	    			}
+	    		}
+	       	}
+		}
+		
+		if(area != null) {
+			this.areaDescription = area.getDescription();
+			this.areaName = area.getName();
+		}
+	}
 	
 	public SpotDTO() {
 		super();
@@ -228,6 +258,22 @@ public class SpotDTO {
 
 	public void setHeaderUrl(String headerUrl) {
 		this.headerUrl = headerUrl;
+	}
+
+	public String getAreaName() {
+		return areaName;
+	}
+
+	public void setAreaName(String areaName) {
+		this.areaName = areaName;
+	}
+
+	public String getAreaDescription() {
+		return areaDescription;
+	}
+
+	public void setAreaDescription(String areaDescription) {
+		this.areaDescription = areaDescription;
 	}
 	
 	
