@@ -22,6 +22,7 @@ import com.googlecode.objectify.annotation.Parent;
  */
 @Cached
 public class Spot extends GenericEntity<Spot>{
+	public static final String BARCODE_FORMAT = "%d-%d";
 	
 	/**
 	 * The business this spot belongs to.
@@ -47,6 +48,7 @@ public class Spot extends GenericEntity<Spot>{
 	private boolean active = true;
 	
 	private Key<Area> area;
+	
 
 	public Key<Area> getArea() {
 		return area;
@@ -131,4 +133,22 @@ public class Spot extends GenericEntity<Spot>{
 			this.active = active;
 		}
 	}
+	
+	/**
+	 * @param businessId representing the parent business
+	 * @param id representing the spot
+	 * @return
+	 */
+	public static String generateBarcode(long businessId, long id) {		
+		return String.format(BARCODE_FORMAT, businessId, id);
+	}
+	
+	/**
+	 * @return
+	 */
+	public String generateBarcode() {
+		this.barcode = generateBarcode(business.getId(), getId()); 
+		return barcode;
+	}
 }
+

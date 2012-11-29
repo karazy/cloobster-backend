@@ -69,6 +69,7 @@ import com.googlecode.objectify.Query;
  * @author Nils Weiher
  */
 public class BusinessController {
+	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final CheckInRepository checkInRepo;
 	private final SpotRepository spotRepo;
@@ -545,9 +546,11 @@ public class BusinessController {
 		
 		Spot spot = spotRepo.newEntity();
 		spot.setBusiness(businessKey);
+		spot.generateBarcode();
+		
 		updateSpot(spot, spotData);
 		// Generate the barcode like this: {businessId}-{spotId}
-		spot.setBarcode(String.format("%d-%d", businessKey.getId(), spot.getId()));
+		
 		spotRepo.saveOrUpdate(spot);
 		
 		return new SpotDTO(spot);
