@@ -1,8 +1,13 @@
 package net.eatsense.controller;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.apache.bval.constraints.NotEmpty;
 
 public class SpotsData {
+	@NotNull
+	@NotEmpty
 	String name;
 	
 	@Min(0)
@@ -11,7 +16,7 @@ public class SpotsData {
 	@Min(1)
 	int count;
 	
-	@Min(0)
+	@Min(1)
 	long areaId;
 
 	public String getName() {

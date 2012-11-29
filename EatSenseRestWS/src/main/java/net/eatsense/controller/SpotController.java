@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.validation.Validator;
 
+import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
 import net.eatsense.domain.Area;
@@ -22,6 +23,7 @@ public class SpotController {
 	private final AreaRepository areaRepo;
 	private final ValidationHelper validator;
 
+	@Inject
 	public SpotController(SpotRepository spotRepo, ValidationHelper validationHelper, AreaRepository areaRepo) {
 		super();
 		this.areaRepo = areaRepo;
@@ -60,4 +62,6 @@ public class SpotController {
 		 
 		return spots;
 	}
+	
+	
 }
