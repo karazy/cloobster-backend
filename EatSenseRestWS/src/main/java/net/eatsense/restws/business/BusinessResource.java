@@ -231,7 +231,7 @@ public class BusinessResource {
 		return businessCtrl.createSpot(business.getKey(), spotData);
 	}
 	
-	@Path("spotsdata")
+	@Path("spotsdata/{spotId}")
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
