@@ -53,13 +53,18 @@ public class SpotController {
 			spot.setArea(areaRepo.getKey(businessKey, spotsData.getAreaId()));
 			spot.setBusiness(businessKey);
 			spot.setName(String.format("%s %02d", spotsData.getName(), spotsData.startNumber + i));
-			spot.generateBarcode();
 			
 			spots.add(spot);
 		}
 		
 		spotRepo.saveOrUpdate(spots);
-		 
+		
+		for (Spot spot : spots) {
+			spot.generateBarcode();
+		}
+		
+		spotRepo.saveOrUpdate(spots);
+			 
 		return spots;
 	}
 	

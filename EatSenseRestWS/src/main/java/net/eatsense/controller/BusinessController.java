@@ -546,10 +546,11 @@ public class BusinessController {
 		
 		Spot spot = spotRepo.newEntity();
 		spot.setBusiness(businessKey);
-		spot.generateBarcode();
 		
 		updateSpot(spot, spotData);
 		// Generate the barcode like this: {businessId}-{spotId}
+		
+		spot.generateBarcode();
 		
 		spotRepo.saveOrUpdate(spot);
 		
