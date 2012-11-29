@@ -19,6 +19,8 @@ import javax.ws.rs.core.Context;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
+import net.eatsense.controller.SpotController;
+import net.eatsense.controller.SpotsData;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
@@ -30,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
@@ -50,6 +53,7 @@ public class BusinessResource {
 	private BusinessController businessCtrl;
 	private Account account;
 	private final Provider<ChannelController> channelCtrlProvider;
+	private SpotController spotController;
 	
 	public void setBusiness(Business business) {
 		this.business = business;
@@ -60,10 +64,11 @@ public class BusinessResource {
 	}
 	
 	@Inject
-	public BusinessResource(BusinessController businessCtrl, Provider<ChannelController> channelCtrlProvider) {
+	public BusinessResource(BusinessController businessCtrl, SpotController spotCtrl, Provider<ChannelController> channelCtrlProvider) {
 		super();
 		this.channelCtrlProvider = channelCtrlProvider;
 		this.businessCtrl = businessCtrl;
+		this.spotController = spotCtrl;
 	}
 
 	@GET
@@ -226,13 +231,22 @@ public class BusinessResource {
 		return businessCtrl.createSpot(business.getKey(), spotData);
 	}
 	
-	@Path("spotsdata/{spotId}")
+	@Path("spotsdata")
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO updateSpot(@PathParam("spotId") long spotId, SpotDTO spotData) {
 		return new SpotDTO(businessCtrl.updateSpot(businessCtrl.getSpot(business.getKey(), spotId), spotData));
+	}
+	
+	@Path("spotsdata")
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public List<SpotDTO> createSpots(SpotsData spotsData) {
+		return Lists.transform(spotController.createSpots(business.getKey(), spotsData), SpotDTO.toDTO );
 	}
 	
 	@Path("spotsdata/{spotId}")
@@ -249,4 +263,6 @@ public class BusinessResource {
 	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
 		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
 	}
+	
+	
 }
