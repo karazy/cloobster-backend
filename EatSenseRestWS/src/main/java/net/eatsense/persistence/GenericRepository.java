@@ -263,6 +263,20 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	}
 	
 	/**
+	 * Gets a list of entities by a list of Ids.
+	 * 
+	 * @param id
+	 * 		List of ids of entities to load
+	 * @return
+	 * 		List of entities
+	 */
+	public Collection<T> getByIds(List<Long> ids) throws NotFoundException {
+		logger.info("{}", ids);
+		
+		return ofy().get(clazz, ids).values();
+	}
+	
+	/**
 	 * Gets a map of entities by a list of keys.
 	 * 
 	 * @param id

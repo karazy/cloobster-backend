@@ -3,6 +3,8 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Validator;
@@ -70,5 +72,33 @@ public class SpotController {
 		return spots;
 	}
 	
-	
+	/**
+	 * @param businessKey
+	 * @param spotsData
+	 * @return
+	 */
+	public Collection<Spot> updateSpots(Key<Business> businessKey, List<Long> spotIds, boolean active) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(spotIds, "spotIds were null");
+		
+		if(spotIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		ArrayList<Key<Spot>> spotKeys = new ArrayList<Key<Spot>>();
+		
+		for (Long spotId : spotIds) {
+			spotKeys.add(spotRepo.getKey(businessKey, spotId));
+		}
+				
+		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
+		
+		for (Spot spot : spots) {
+			spot.setActive(active);
+		}
+		
+		spotRepo.saveOrUpdate(spots);
+		
+		return spots;
+	}
 }
