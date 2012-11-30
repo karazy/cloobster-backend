@@ -19,6 +19,7 @@ import net.eatsense.validation.ValidationHelper;
 
 public class SpotController {
 	
+	public static final String NAME_FORMAT = "%s %03d";
 	private final SpotRepository spotRepo;
 	private final AreaRepository areaRepo;
 	private final ValidationHelper validator;
@@ -52,7 +53,7 @@ public class SpotController {
 			spot.setActive(true);
 			spot.setArea(areaRepo.getKey(businessKey, spotsData.getAreaId()));
 			spot.setBusiness(businessKey);
-			spot.setName(String.format("%s %02d", spotsData.getName(), spotsData.startNumber + i));
+			spot.setName(String.format(NAME_FORMAT, spotsData.getName(), spotsData.startNumber + i));
 			
 			spots.add(spot);
 		}
