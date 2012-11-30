@@ -16,6 +16,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
 import org.junit.Before;
@@ -57,22 +58,22 @@ public class SpotControllerTest {
 		Spot spot = mock(Spot.class);
 		when(spotRepo.newEntity()).thenReturn(spot);
 		Key<Area> areaKey = mock(Key.class);
-		when(areaRepo.getKey(businessKey, spotsData.areaId)).thenReturn(areaKey );
+		when(areaRepo.getKey(businessKey, spotsData.getAreaId())).thenReturn(areaKey );
 		
 		ctrl.createSpots(businessKey, spotsData);
 		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
 		InOrder inOrder = Mockito.inOrder(spot, spotRepo);
-		verify(spot, times(spotsData.count)).setActive(true);
-		verify(spot, times(spotsData.count)).setArea(areaKey);
-		verify(spot, times(spotsData.count)).setBusiness(businessKey);
-		verify(spot, atLeast(1)).setName(String.format(SpotController.NAME_FORMAT, spotsData.name, spotsData.startNumber));
-		verify(spot, atLeast(1)).setName(String.format(SpotController.NAME_FORMAT, spotsData.name, spotsData.startNumber + spotsData.count-1));
+		verify(spot, times(spotsData.getCount())).setActive(true);
+		verify(spot, times(spotsData.getCount())).setArea(areaKey);
+		verify(spot, times(spotsData.getCount())).setBusiness(businessKey);
+		verify(spot, atLeast(1)).setName(String.format(SpotController.NAME_FORMAT, spotsData.getName(), spotsData.getStartNumber()));
+		verify(spot, atLeast(1)).setName(String.format(SpotController.NAME_FORMAT, spotsData.getName(), spotsData.getStartNumber() + spotsData.getCount()-1));
 		
 		inOrder.verify(spotRepo).saveOrUpdate(spotListCaptor.capture());
-		inOrder.verify(spot, times(spotsData.count)).generateBarcode();
+		inOrder.verify(spot, times(spotsData.getCount())).generateBarcode();
 		inOrder.verify(spotRepo).saveOrUpdate(spotListCaptor.capture());
 		
-		assertThat(spotListCaptor.getValue().size(), is(spotsData.count));
+		assertThat(spotListCaptor.getValue().size(), is(spotsData.getCount()));
 	}
 
 	private SpotsData getTestSpotsData() {
@@ -81,7 +82,7 @@ public class SpotControllerTest {
 		data.setAreaId(1);
 		data.setCount(20);
 		data.setName("Prefix");
-		data.setStartNumber(3);
+		data.setStartNumber(100);
 
 		return data;
 	}

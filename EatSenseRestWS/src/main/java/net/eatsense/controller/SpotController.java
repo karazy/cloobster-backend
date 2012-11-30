@@ -15,6 +15,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
 public class SpotController {
@@ -44,16 +45,16 @@ public class SpotController {
 		
 		List<Spot> spots = new ArrayList<Spot>();
 		
-		if( spotsData.startNumber == 0) {
-			spotsData.startNumber = 1;
+		if( spotsData.getStartNumber() == 0) {
+			spotsData.setStartNumber(1);
 		}
 		
-		for (int i = 0; i < spotsData.count; i++) {
+		for (int i = 0; i < spotsData.getCount(); i++) {
 			Spot spot = spotRepo.newEntity();			
 			spot.setActive(true);
 			spot.setArea(areaRepo.getKey(businessKey, spotsData.getAreaId()));
 			spot.setBusiness(businessKey);
-			spot.setName(String.format(NAME_FORMAT, spotsData.getName(), spotsData.startNumber + i));
+			spot.setName(String.format(NAME_FORMAT, spotsData.getName(), spotsData.getStartNumber() + i));
 			
 			spots.add(spot);
 		}

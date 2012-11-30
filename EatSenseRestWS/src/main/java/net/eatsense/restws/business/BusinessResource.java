@@ -20,13 +20,13 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.SpotController;
-import net.eatsense.controller.SpotsData;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
+import net.eatsense.representation.SpotsData;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
