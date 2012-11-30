@@ -77,7 +77,7 @@ public class SpotController {
 	 * @param spotsData
 	 * @return
 	 */
-	public Collection<Spot> updateSpots(Key<Business> businessKey, List<Long> spotIds, boolean active) {
+	public List<Spot> updateSpots(Key<Business> businessKey, List<Long> spotIds, boolean active) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(spotIds, "spotIds were null");
 		
@@ -99,6 +99,6 @@ public class SpotController {
 		
 		spotRepo.saveOrUpdate(spots);
 		
-		return spots;
+		return new ArrayList<Spot>(spots);
 	}
 }

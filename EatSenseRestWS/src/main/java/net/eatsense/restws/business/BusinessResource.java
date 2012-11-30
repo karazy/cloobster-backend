@@ -245,8 +245,13 @@ public class BusinessResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public List<SpotDTO> createSpots(SpotsData spotsData) {
-		return Lists.transform(spotController.createSpots(business.getKey(), spotsData), SpotDTO.toDTO );
+	public List<SpotDTO> modifySpots(SpotsData spotsData) {
+		if(spotsData.getIds().isEmpty()) {
+			return Lists.transform(spotController.createSpots(business.getKey(), spotsData), SpotDTO.toDTO );
+		}
+		else {
+			return Lists.transform(spotController.updateSpots(business.getKey(), spotsData.getIds(), spotsData.isActive()), SpotDTO.toDTO );
+		}
 	}
 	
 	@Path("spotsdata/{spotId}")
@@ -263,6 +268,4 @@ public class BusinessResource {
 	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
 		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
 	}
-	
-	
 }
