@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,5 +86,16 @@ public class SpotControllerTest {
 		data.setStartNumber(100);
 
 		return data;
+	}
+	
+	@Test
+	public void testUpdateSpots() throws Exception {
+		
+		List<Long> spotIds = Lists.newArrayList(10l, 11l, 12l);
+		ctrl.updateSpots(businessKey, spotIds , true);
+		List<Spot> spots;
+		verify(spotRepo).getKey(businessKey, spotIds.get(0));
+		verify(spotRepo).getKey(businessKey, spotIds.get(0));
+		
 	}
 }
