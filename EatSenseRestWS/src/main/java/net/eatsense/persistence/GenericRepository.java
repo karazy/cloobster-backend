@@ -73,8 +73,8 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * 		Generated/existing key
 	 */
 	public Key<T> saveOrUpdate(T obj) {
-		logger.info("{}", obj);
 		Key<T> key = ofy().put(obj);
+		logger.info("key={}", key);
 		obj.setDirty(false);
 		return key;
 	}
@@ -87,7 +87,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * 		Map of generated/existing keys and entities
 	 */
 	public Map<Key<T>, T> saveOrUpdate(Iterable<T> obj) {
-		logger.info("{}", obj);
+		logger.info("kind={}", Key.getKind(clazz));
 		
 		return ofy().put(obj);
 	}
