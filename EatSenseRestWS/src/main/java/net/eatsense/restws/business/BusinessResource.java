@@ -1,5 +1,6 @@
 package net.eatsense.restws.business;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
@@ -248,6 +249,10 @@ public class BusinessResource {
 	public List<SpotDTO> modifySpots(SpotsData spotsData) {
 		if(spotsData.getIds().isEmpty()) {
 			return Lists.transform(spotController.createSpots(business.getKey(), spotsData), SpotDTO.toDTO );
+		}
+		else if(spotsData.isRemove()){
+			spotController.deleteSpots(business.getKey(), spotsData.getIds());
+			return Collections.emptyList();
 		}
 		else {
 			return Lists.transform(spotController.updateSpots(business.getKey(), spotsData.getIds(), spotsData.isActive()), SpotDTO.toDTO );
