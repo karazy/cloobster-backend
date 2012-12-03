@@ -117,12 +117,11 @@ public class SpotControllerTest {
 		when(spotRepo.getKey(businessKey, spotIds.get(2))).thenReturn(spotKey);
 		when(spotRepo.getByKeys(anyList())).thenReturn(spots);
 		
-		
-		
-		ctrl.updateSpots(businessKey, spotIds , true);
+		List<Spot> resultList = ctrl.updateSpots(businessKey, spotIds , true);
 		
 		verify(spot, times(spotIds.size())).setActive(true);
-		
 		verify(spotRepo).saveOrUpdate(spots);
+		
+		assertThat(resultList, hasItems(spot));
 	}
 }

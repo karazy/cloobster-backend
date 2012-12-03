@@ -74,6 +74,21 @@ public class SpotController {
 	
 	/**
 	 * @param businessKey
+	 * @param spotIds
+	 * @return 
+	 */
+	private List<Key<Spot>> createKeys(Key<Business> businessKey, List<Long> spotIds) {
+		ArrayList<Key<Spot>> spotKeys = new ArrayList<Key<Spot>>();
+		
+		for (Long spotId : spotIds) {
+			spotKeys.add(spotRepo.getKey(businessKey, spotId));
+		}
+		
+		return spotKeys;
+	}
+	
+	/**
+	 * @param businessKey
 	 * @param spotsData
 	 * @return
 	 */
@@ -85,14 +100,9 @@ public class SpotController {
 			return Collections.emptyList();
 		}
 		
-		ArrayList<Key<Spot>> spotKeys = new ArrayList<Key<Spot>>();
+		Collection<Spot> spots = spotRepo.getByKeys(createKeys(businessKey, spotIds));
 		
-		for (Long spotId : spotIds) {
-			spotKeys.add(spotRepo.getKey(businessKey, spotId));
-		}
-		
-		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
-		
+		// De-/Activate all spots
 		for (Spot spot : spots) {
 			spot.setActive(active);
 		}
@@ -100,5 +110,20 @@ public class SpotController {
 		spotRepo.saveOrUpdate(spots);
 		
 		return new ArrayList<Spot>(spots);
+	}
+	
+	/**
+	 * @param businessKey
+	 * @param spotIds
+	 */
+	public void deleteSpots(Key<Business> businessKey, List<Long> spotIds) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(spotIds, "spotIds were null");
+		
+		if(spotIds.isEmpty()) {
+			return;
+		}
+		
+		spotRepo.delete(createKeys(businessKey, spotIds));
 	}
 }
