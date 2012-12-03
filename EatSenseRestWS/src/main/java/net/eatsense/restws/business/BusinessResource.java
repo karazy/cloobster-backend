@@ -251,7 +251,7 @@ public class BusinessResource {
 			return Lists.transform(spotController.createSpots(business.getKey(), spotsData), SpotDTO.toDTO );
 		}
 		else if(spotsData.isRemove()) {
-			return Lists.transform(spotController.deleteSpots(business.getKey(), spotsData.getIds()), SpotDTO.toDTO );
+			return Lists.transform(spotController.deleteSpots(business.getKey(), spotsData.getIds(), account), SpotDTO.toDTO );
 		}
 		else {
 			return Lists.transform(spotController.updateSpots(business.getKey(), spotsData.getIds(), spotsData.isActive()), SpotDTO.toDTO );

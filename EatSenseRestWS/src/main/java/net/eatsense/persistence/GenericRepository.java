@@ -149,6 +149,38 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		ofy().put(trashEntry);
 		return trashEntry;
 	}
+	
+	/**
+	 * Save the Entities as trash, creates a TrashEntry for this entity, for later deletion.
+	 * 
+	 * @param entities
+	 * @param loginResponsible
+	 * @return TrashEntries for the entities
+	 */
+	public List<TrashEntry> trashEntities(Iterable<T> entities, String loginResponsible) {
+		List<TrashEntry> trashEntries = new ArrayList<TrashEntry>();
+		List<Object> entitiesToSave = new ArrayList<Object>();
+		if(entities == null || !entities.iterator().hasNext()) {
+			return trashEntries;
+		}
+
+		for (T entity : entities) {
+			TrashEntry trashEntry = new TrashEntry(entity.getKey(), Key.getKind(clazz), new Date(), loginResponsible);
+			entity.setTrash(true);
+			
+			trashEntries.add(trashEntry);
+			
+			// Add to our save list
+			entitiesToSave.add(trashEntry);
+			entitiesToSave.add(entity);
+		}
+		
+		logger.info("kind={}, number={}", Key.getKind(clazz), trashEntries.size());
+		
+		ofy().put(entitiesToSave);
+		
+		return trashEntries;
+	}
 		
 	/**
 	 * @param trashEntryKey

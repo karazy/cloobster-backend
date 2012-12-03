@@ -12,6 +12,7 @@ import javax.validation.Validator;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
@@ -119,7 +120,7 @@ public class SpotController {
 	 * @param spotIds
 	 * @return
 	 */
-	public List<Spot> deleteSpots(Key<Business> businessKey, List<Long> spotIds) {
+	public List<Spot> deleteSpots(Key<Business> businessKey, List<Long> spotIds, Account account) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(spotIds, "spotIds were null");
 		
@@ -131,8 +132,12 @@ public class SpotController {
 				
 		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
 		
-		spotRepo.delete(spotKeys);
+		for (Spot spot : spots) {
+			spot.setActive(false);
+		}
 		
+		spotRepo.trashEntities(spots, account.getEmail());
+				
 		return new ArrayList<Spot>(spots);
 	}
 	

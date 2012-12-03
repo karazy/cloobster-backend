@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
@@ -140,12 +142,13 @@ public class SpotControllerTest {
 		when(spotRepo.getKey(businessKey, spotIds.get(2))).thenReturn(spotKey);
 		when(spotRepo.getByKeys(anyList())).thenReturn(spots);
 		
-		List<Spot> resultList = ctrl.deleteSpots(businessKey, spotIds);
+		Account account = mock(Account.class);
+		List<Spot> resultList = ctrl.deleteSpots(businessKey, spotIds, account );
 		
-		verify(spotRepo).delete(spotKeyListCaptor.capture());
-		List<Key<Spot>> deleteList = spotKeyListCaptor.getValue();
+		verify(spotRepo).trashEntities(spotListCaptor.capture(), anyString());
+		List<Spot> deleteList = spotListCaptor.getValue();
 		assertThat(deleteList.size(), is(3));
-		assertThat(deleteList, hasItems(spotKey));
+		assertThat(deleteList, hasItems(spot));
 		assertThat(resultList, hasItems(spot));
 	}
 }
