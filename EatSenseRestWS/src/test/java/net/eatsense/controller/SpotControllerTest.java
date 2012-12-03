@@ -1,14 +1,19 @@
 package net.eatsense.controller;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.eatsense.domain.Area;
@@ -46,10 +51,29 @@ public class SpotControllerTest {
 	
 	@Captor
     private ArgumentCaptor<List<Spot>> spotListCaptor;
+	
+	@Captor
+    private ArgumentCaptor<List<Key<Spot>>> spotKeyListCaptor;
+	@Mock
+	private Key<Spot> spotKey;
 
 	@Before
 	public void setUp() throws Exception {
 		ctrl = new SpotController(spotRepo, validationHelper, areaRepo);
+	}
+
+	/** 
+	 * @return Test Data for Spot creation
+	 */
+	private SpotsData getTestSpotsData() {
+
+		SpotsData data = new SpotsData();
+		data.setAreaId(1);
+		data.setCount(20);
+		data.setName("Prefix");
+		data.setStartNumber(100);
+
+		return data;
 	}
 
 	@Test
@@ -77,25 +101,28 @@ public class SpotControllerTest {
 		assertThat(spotListCaptor.getValue().size(), is(spotsData.getCount()));
 	}
 
-	private SpotsData getTestSpotsData() {
-
-		SpotsData data = new SpotsData();
-		data.setAreaId(1);
-		data.setCount(20);
-		data.setName("Prefix");
-		data.setStartNumber(100);
-
-		return data;
-	}
-	
 	@Test
 	public void testUpdateSpots() throws Exception {
-		
 		List<Long> spotIds = Lists.newArrayList(10l, 11l, 12l);
-		ctrl.updateSpots(businessKey, spotIds , true);
-		List<Spot> spots;
-		verify(spotRepo).getKey(businessKey, spotIds.get(0));
-		verify(spotRepo).getKey(businessKey, spotIds.get(0));
 		
+		List<Spot> spots = new ArrayList<Spot>();
+		
+		Spot spot = mock(Spot.class);
+		spots.add(spot);
+		spots.add(spot);
+		spots.add(spot);
+		
+		when(spotRepo.getKey(businessKey, spotIds.get(0))).thenReturn(spotKey);
+		when(spotRepo.getKey(businessKey, spotIds.get(1))).thenReturn(spotKey);
+		when(spotRepo.getKey(businessKey, spotIds.get(2))).thenReturn(spotKey);
+		when(spotRepo.getByKeys(anyList())).thenReturn(spots);
+		
+		
+		
+		ctrl.updateSpots(businessKey, spotIds , true);
+		
+		verify(spot, times(spotIds.size())).setActive(true);
+		
+		verify(spotRepo).saveOrUpdate(spots);
 	}
 }
