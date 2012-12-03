@@ -90,7 +90,7 @@ public class SpotController {
 		for (Long spotId : spotIds) {
 			spotKeys.add(spotRepo.getKey(businessKey, spotId));
 		}
-				
+		
 		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
 		
 		for (Spot spot : spots) {
