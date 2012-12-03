@@ -124,4 +124,28 @@ public class SpotControllerTest {
 		
 		assertThat(resultList, hasItems(spot));
 	}
+	
+	@Test
+	public void testDeleteSpots() throws Exception {
+		List<Long> spotIds = Lists.newArrayList(10l, 11l, 12l);
+		List<Spot> spots = new ArrayList<Spot>();
+		
+		Spot spot = mock(Spot.class);
+		spots.add(spot);
+		spots.add(spot);
+		spots.add(spot);
+		
+		when(spotRepo.getKey(businessKey, spotIds.get(0))).thenReturn(spotKey);
+		when(spotRepo.getKey(businessKey, spotIds.get(1))).thenReturn(spotKey);
+		when(spotRepo.getKey(businessKey, spotIds.get(2))).thenReturn(spotKey);
+		when(spotRepo.getByKeys(anyList())).thenReturn(spots);
+		
+		List<Spot> resultList = ctrl.deleteSpots(businessKey, spotIds);
+		
+		verify(spotRepo).delete(spotKeyListCaptor.capture());
+		List<Key<Spot>> deleteList = spotKeyListCaptor.getValue();
+		assertThat(deleteList.size(), is(3));
+		assertThat(deleteList, hasItems(spotKey));
+		assertThat(resultList, hasItems(spot));
+	}
 }
