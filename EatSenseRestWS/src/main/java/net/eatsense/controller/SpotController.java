@@ -74,7 +74,7 @@ public class SpotController {
 	
 	/**
 	 * @param businessKey
-	 * @param spotsData
+	 * @param active
 	 * @return
 	 */
 	public List<Spot> updateSpots(Key<Business> businessKey, List<Long> spotIds, boolean active) {
@@ -101,4 +101,33 @@ public class SpotController {
 		
 		return new ArrayList<Spot>(spots);
 	}
+	
+	/**
+	 * Delete given spots.
+	 * 
+	 * @param businessKey
+	 * @param spotIds
+	 * @return
+	 */
+	public List<Spot> deleteSpots(Key<Business> businessKey, List<Long> spotIds) {
+		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(spotIds, "spotIds were null");
+		
+		if(spotIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		ArrayList<Key<Spot>> spotKeys = new ArrayList<Key<Spot>>();
+		
+		for (Long spotId : spotIds) {
+			spotKeys.add(spotRepo.getKey(businessKey, spotId));
+		}
+				
+		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
+		
+		spotRepo.delete(spotKeys);
+		
+		return new ArrayList<Spot>(spots);
+	}
+	
 }

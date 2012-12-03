@@ -246,8 +246,11 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public List<SpotDTO> modifySpots(SpotsData spotsData) {
-		if(spotsData.getIds().isEmpty()) {
+		if(spotsData.getIds() == null || spotsData.getIds().isEmpty()) {
 			return Lists.transform(spotController.createSpots(business.getKey(), spotsData), SpotDTO.toDTO );
+		}
+		else if(spotsData.isRemove()) {
+			return Lists.transform(spotController.deleteSpots(business.getKey(), spotsData.getIds()), SpotDTO.toDTO );
 		}
 		else {
 			return Lists.transform(spotController.updateSpots(business.getKey(), spotsData.getIds(), spotsData.isActive()), SpotDTO.toDTO );
