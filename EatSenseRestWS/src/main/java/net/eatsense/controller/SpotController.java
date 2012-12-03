@@ -113,17 +113,27 @@ public class SpotController {
 	}
 	
 	/**
+	 * Delete given spots.
+	 * 
 	 * @param businessKey
 	 * @param spotIds
+	 * @return
 	 */
-	public void deleteSpots(Key<Business> businessKey, List<Long> spotIds) {
+	public List<Spot> deleteSpots(Key<Business> businessKey, List<Long> spotIds) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(spotIds, "spotIds were null");
 		
 		if(spotIds.isEmpty()) {
-			return;
+			return Collections.emptyList();
 		}
 		
-		spotRepo.delete(createKeys(businessKey, spotIds));
+		List<Key<Spot>> spotKeys = createKeys(businessKey, spotIds);
+				
+		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
+		
+		spotRepo.delete(spotKeys);
+		
+		return new ArrayList<Spot>(spots);
 	}
+	
 }
