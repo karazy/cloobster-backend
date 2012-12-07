@@ -215,6 +215,16 @@ public class BusinessResource {
 		return infoPagesResource;
 	}
 	
+	@Path("documents")
+	public DocumentsResource getDocumentResource() {
+		DocumentsResource docResource = resourceContext.getResource(DocumentsResource.class);
+		
+		docResource.setBusiness(business);
+		docResource.setAccount(account);
+		
+		return docResource;
+	}
+	
 	@Path("spotsdata")
 	@GET
 	@Produces("application/json; charset=UTF-8")
