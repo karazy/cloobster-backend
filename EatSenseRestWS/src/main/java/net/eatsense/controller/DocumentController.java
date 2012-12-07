@@ -41,7 +41,6 @@ public class DocumentController {
 		newDoc.setBusiness(businessKey);
 		
 		//TODO FR Where to set createDate, status etc.? Directly on DTO or in update method or on doc entity?
-		
 		doc.setCreateDate(new Date());
 		doc.setStatus(DocumentStatus.PENDING);
 		
@@ -66,6 +65,7 @@ public class DocumentController {
 		doc.setName(docData.getName());
 		doc.setStatus(docData.getStatus());
 		doc.setCreateDate(docData.getCreateDate());
+		doc.setRepresentation(docData.getRepresentation());
 		
 		docRepo.saveOrUpdate(doc);
 		

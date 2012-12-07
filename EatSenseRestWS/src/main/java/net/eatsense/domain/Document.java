@@ -30,6 +30,8 @@ public class Document extends GenericEntity<Document>{
 	
 	private URL url;
 	
+	private String representation;
+	
 	private String[] ids;
 
 	@Transient
@@ -91,6 +93,15 @@ public class Document extends GenericEntity<Document>{
 
 	public void setUrl(URL url) {
 		this.url = url;
+	}
+	
+
+	public String getRepresentation() {
+		return representation;
+	}
+
+	public void setRepresentation(String representation) {
+		this.representation = representation;
 	}
 
 	public String[] getIds() {

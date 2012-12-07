@@ -19,6 +19,7 @@ public class DocumentDTO {
 	@NotNull
 	private String entity;
 	private DocumentStatus status;
+	private String representation;
 	private Date createDate;
 	private String url;
 	private List<Long> ids;
@@ -33,7 +34,11 @@ public class DocumentDTO {
 			type = doc.getType();
 			entity = doc.getEntity();
 			status = doc.getStatus();
-			url = doc.getUrl().toString();
+			createDate = doc.getCreateDate();
+			if(doc.getUrl() != null) {
+				url = doc.getUrl().toString();
+			}
+			representation = doc.getRepresentation();
 			//don't set ids since the are only relevant upon creation of a new document
 		}
 	}
@@ -101,5 +106,15 @@ public class DocumentDTO {
 	public void setIds(List<Long> ids) {
 		this.ids = ids;
 	}
+
+	public String getRepresentation() {
+		return representation;
+	}
+
+	public void setRepresentation(String representation) {
+		this.representation = representation;
+	}
+	
+	
 	
 }
