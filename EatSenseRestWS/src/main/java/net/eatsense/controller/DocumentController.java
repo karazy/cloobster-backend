@@ -87,5 +87,15 @@ public class DocumentController {
 		return docDTOs;
 		
 	}
+	
+	/**
+	 * Delete Document
+	 * 
+	 * @param businessKey Parent key
+	 * @param id for the Document entity to delete
+	 */
+	public void delete(Key<Business> businessKey, Long id) {
+		//docRepo.dele(docRepo.getKey(businessKey, id));
+	}
 
 }
