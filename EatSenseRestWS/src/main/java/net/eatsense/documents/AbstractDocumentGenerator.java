@@ -7,6 +7,6 @@ public abstract class AbstractDocumentGenerator<T extends GenericEntity<T>> {
 	
 	public abstract String getMimeType();
 	
-	public abstract byte[] generate(T entity, Document document);
+	public abstract byte[] generate(Iterable<T> entity, Document document);
 
 }

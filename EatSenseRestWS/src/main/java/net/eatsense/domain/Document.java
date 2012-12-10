@@ -2,6 +2,7 @@ package net.eatsense.domain;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -29,11 +30,9 @@ public class Document extends GenericEntity<Document>{
 	@NotNull
 	private Date createDate;
 	
-	private URL url;
-	
 	private String representation;
 	
-	private String[] ids;
+	private List<Long> entityIds;
 	
 	private BlobKey blobKey;
 
@@ -90,29 +89,12 @@ public class Document extends GenericEntity<Document>{
 		this.createDate = createDate;
 	}
 
-	public URL getUrl() {
-		return url;
-	}
-
-	public void setUrl(URL url) {
-		this.url = url;
-	}
-	
-
 	public String getRepresentation() {
 		return representation;
 	}
 
 	public void setRepresentation(String representation) {
 		this.representation = representation;
-	}
-
-	public String[] getIds() {
-		return ids;
-	}
-
-	public void setIds(String[] ids) {
-		this.ids = ids;
 	}
 
 	public BlobKey getBlobKey() {
@@ -122,5 +104,12 @@ public class Document extends GenericEntity<Document>{
 	public void setBlobKey(BlobKey blobKey) {
 		this.blobKey = blobKey;
 	}
-	
+
+	public List<Long> getEntityIds() {
+		return entityIds;
+	}
+
+	public void setEntityIds(List<Long> entityIds) {
+		this.entityIds = entityIds;
+	}	
 }

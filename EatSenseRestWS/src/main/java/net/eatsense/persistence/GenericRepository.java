@@ -304,7 +304,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 */
 	public Collection<T> getByIds(List<Long> ids) throws NotFoundException {
 		logger.info("{}", ids);
-		
+
 		return ofy().get(clazz, ids).values();
 	}
 	
@@ -610,5 +610,24 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 */
 	public Key<T> getKey(T obj) {
 		return obj.getKey();
+	}
+	
+	public <V> List<Key<T>> getKeys(Key<V> parent, long[] ids) {
+		ArrayList<Key<T>> keys = new ArrayList<Key<T>>();
+		for (int i = 0; i < ids.length; i++) {
+			keys.add(Key.create(parent, clazz, ids[i]));
+		}				
+		
+		return keys;
+	}
+	
+	public <V> List<Key<T>> getKeys(Key<V> parent, Iterable<Long> ids) {
+		ArrayList<Key<T>> keys = new ArrayList<Key<T>>();
+		
+		for (Long id : ids) {
+			keys.add(Key.create(parent, clazz, id));
+		}				
+		
+		return keys;
 	}
 }
