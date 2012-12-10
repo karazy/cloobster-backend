@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -52,6 +53,19 @@ public class DocumentsResource {
 	@GET
 	public List<DocumentDTO> getAll() {
 		return docCtrl.getAll(business.getKey());
+	}
+	
+	/**
+	 * Delete a single document.
+	 * Deletes the entity as well as the actual file.
+	 * @param id
+	 * 	Document's id
+	 */
+	@DELETE
+	@Path("{id}")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void deleteDocument(@PathParam("id") Long id) {
+		docCtrl.delete(business.getKey(), id);
 	}
 	
 	
