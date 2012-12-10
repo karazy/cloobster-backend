@@ -189,8 +189,8 @@ public class DocumentController {
 			mimeType = generator.getMimeType();
 		}
 		else {
-			logger.error("Unknown entity name or represantation: entity={}, representation={}", document.getEntity(), document.getRepresentation());
-			throw new ValidationException("Unkown entity name or represantion in Document");
+			logger.error("Unknown entity name or representation: entity={}, representation={}", document.getEntity(), document.getRepresentation());
+			throw new ValidationException("Unkown entity name or representation in Document");
 		}
 		
 		if(bytes != null) {
