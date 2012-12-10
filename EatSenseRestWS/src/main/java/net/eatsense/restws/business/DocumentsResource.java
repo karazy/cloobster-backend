@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -100,8 +101,8 @@ public class DocumentsResource {
 			logger.error("IO error trying to serve blob={]", blobKey);
 			throw new ServiceException("Internal error while trying to serve download.");
 		}
-		
-		return Response.ok().build();
+		String mediaType = "application/pdf";		
+		return Response.ok().type(mediaType).build();
 	}
 	
 	@POST

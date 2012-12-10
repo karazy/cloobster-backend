@@ -11,7 +11,9 @@ import net.eatsense.domain.embedded.DocumentStatus;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 public class Document extends GenericEntity<Document>{
 	
@@ -32,6 +34,7 @@ public class Document extends GenericEntity<Document>{
 	
 	private String representation;
 	
+	@Unindexed
 	private List<Long> entityIds;
 	
 	private BlobKey blobKey;

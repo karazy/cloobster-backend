@@ -102,9 +102,7 @@ public class DocumentController {
 		doc.setEntity(docData.getEntity());
 		doc.setEntityIds(docData.getIds());
 		doc.setName(docData.getName());
-		doc.setStatus(docData.getStatus());
 		doc.setRepresentation(docData.getRepresentation());
-		
 		
 		docRepo.saveOrUpdate(doc);
 		
@@ -178,6 +176,11 @@ public class DocumentController {
 	public Document processAndSave(Document document) {
 		checkNotNull(document, "document was null");
 		
+		if(document.getStatus() == DocumentStatus.COMPLETE) {
+			logger.info("Document was already processed");
+			return document;
+		}
+		
 		byte[] bytes = null;
 		String mimeType = null;
 		
@@ -190,6 +193,8 @@ public class DocumentController {
 		}
 		else {
 			logger.error("Unknown entity name or representation: entity={}, representation={}", document.getEntity(), document.getRepresentation());
+			document.setStatus(DocumentStatus.ERROR);
+			docRepo.saveOrUpdate(document);
 			throw new ValidationException("Unkown entity name or representation in Document");
 		}
 		
