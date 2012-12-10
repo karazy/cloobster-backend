@@ -7,8 +7,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
@@ -19,6 +24,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.DocumentStatus;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.DocumentRepository;
@@ -39,6 +45,8 @@ public class DocumentController {
 	private final Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider;
 	private final Provider<SpotRepository> spotRepoProvider;
 	private final FileServiceHelper fileService;
+	
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Inject
 	public DocumentController(DocumentRepository documentRepository, ValidationHelper validator, BlobstoreService blobStore, Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider, Provider<SpotRepository> spotRepoProvider, FileServiceHelper fileService) {
@@ -173,12 +181,16 @@ public class DocumentController {
 		byte[] bytes = null;
 		String mimeType = null;
 		
-		if(document.getEntity().equals("Spot") && document.getRepresentation().equals("pure")) {
+		if(document.getEntity().equals(Spot.class.getName()) && document.getRepresentation().equals("pure")) {
 			SpotPurePDFGenerator generator = spotPurePDFGeneratorProvider.get();
 			SpotRepository spotRepo = spotRepoProvider.get();
 			
 			bytes = generator.generate(spotRepo.getByKeys(spotRepo.getKeys(document.getBusiness(), document.getEntityIds())), document);
 			mimeType = generator.getMimeType();
+		}
+		else {
+			logger.error("Unknown entity name or represantation: entity={}, representation={}", document.getEntity(), document.getRepresentation());
+			throw new ValidationException("Unkown entity name or represantion in Document");
 		}
 		
 		if(bytes != null) {

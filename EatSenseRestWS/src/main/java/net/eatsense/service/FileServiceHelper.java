@@ -11,9 +11,11 @@ import net.eatsense.exceptions.ServiceException;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.files.AppEngineFile;
+import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.files.FinalizationException;
 import com.google.appengine.api.files.LockException;
+import com.google.inject.Inject;
 
 /**
  * Contains methods for Accessing the Appengine File API.
@@ -23,7 +25,12 @@ import com.google.appengine.api.files.LockException;
  */
 public class FileServiceHelper {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private com.google.appengine.api.files.FileService fileService;
+	private final com.google.appengine.api.files.FileService fileService;
+	
+	@Inject
+	public FileServiceHelper(FileService fileService) {
+		this.fileService = fileService;
+	}
 	
 	/**
 	 * Create a new Blob in the BlobStore and write the supplied bytes to it.

@@ -14,18 +14,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.capabilities.CapabilitiesPb.CapabilityConfig.Status;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.DocumentController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Document;
+import net.eatsense.domain.embedded.DocumentStatus;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ServiceException;
 import net.eatsense.representation.DocumentDTO;
@@ -55,8 +62,13 @@ public class DocumentsResource {
 	@POST
 	@Consumes("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public DocumentDTO createDocument(DocumentDTO data) {
-		return docCtrl.createDocument(business.getKey(), data);
+	public DocumentDTO createDocument(DocumentDTO data, @Context UriInfo uriInfo) {
+		DocumentDTO docData = docCtrl.createDocument(business.getKey(), data);
+		
+		String generateUrl = "/" + UriBuilder.fromPath(uriInfo.getPath()).path(docData.getId() + "/generate").build().toString();
+		QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl(generateUrl));
+		
+		return docData;
 	}
 	
 	/**
@@ -94,11 +106,15 @@ public class DocumentsResource {
 	
 	@POST
 	@Path("{id}/generate")
-	@RolesAllowed("admin")
 	public Response generateDocument(@PathParam("id") Long id) {
-		docCtrl.processAndSave(docCtrl.get(business.getKey(), id));
+		Document document = docCtrl.processAndSave(docCtrl.get(business.getKey(), id));
 		
-		return Response.ok().build();
+		if(document.getStatus() != DocumentStatus.COMPLETE) {
+			return Response.serverError().build();
+		}
+		else {
+			return Response.ok().build();
+		}
 	}
 	
 	/**
@@ -113,8 +129,6 @@ public class DocumentsResource {
 	public void deleteDocument(@PathParam("id") Long id) {
 		docCtrl.delete(business.getKey(), id);
 	}
-	
-	
 
 	public Business getBusiness() {
 		return business;
@@ -131,7 +145,4 @@ public class DocumentsResource {
 	public void setAccount(Account account) {
 		this.account = account;
 	}
-
-	
-	
 }
