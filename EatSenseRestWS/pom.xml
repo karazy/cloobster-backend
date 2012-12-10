@@ -466,6 +466,12 @@
       		<version>r129</version>
       		<scope>compile</scope>
     	</dependency>
+		<!-- From local repository -->
+		<dependency>
+			<groupId>com.innovatics</groupId>
+			<artifactId>pdfjet</artifactId>
+			<version>3.11</version>
+		</dependency>
 		<dependency>
     		<groupId>com.google.guava</groupId>
     		<artifactId>guava</artifactId>

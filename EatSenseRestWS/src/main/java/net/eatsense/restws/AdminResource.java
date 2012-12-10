@@ -1,5 +1,12 @@
 package net.eatsense.restws;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -17,6 +24,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.StreamingOutput;
 
 import net.eatsense.configuration.Configuration;
 import net.eatsense.controller.ChannelController;
@@ -27,6 +36,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.TrashEntry;
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.AccountRepository;
@@ -51,6 +61,14 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.pdfjet.A4;
+import com.pdfjet.CoreFont;
+import com.pdfjet.Font;
+import com.pdfjet.Image;
+import com.pdfjet.ImageType;
+import com.pdfjet.PDF;
+import com.pdfjet.Page;
+import com.pdfjet.TextLine;
 
 @Path("admin/services")
 public class AdminResource {
@@ -91,6 +109,48 @@ public class AdminResource {
 		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
 		devEnvironment = "dev".equals(environment);
+	}
+	
+	@GET
+	@Path("pdftest1")
+	@Produces("application/pdf")
+	public StreamingOutput createPDFTest1() {
+		return new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException,
+					WebApplicationException {
+				try {
+					PDF pdf = new PDF(output);
+					Page page = new Page(pdf, A4.PORTRAIT);
+					Font f1 = new Font(pdf, CoreFont.HELVETICA);
+					TextLine text = new TextLine(f1,"First appengine generated PDF!");
+				    text.setPosition(90, 30);
+				    text.drawOn(page);
+				    
+				    // Open image from web resources file.
+				    File f = new File("images/logo_cloobster_big.png");
+				   	InputStream in = new FileInputStream(f);				
+				    Image image = new Image(pdf, in, ImageType.PNG);
+				    image.scaleBy(0.5);
+				    image.drawOn(page);
+				    
+				    Spot spot = new Spot();
+				   	spot.setBarcode("tst001");
+				   	
+				    // Create url from url fetch stream.
+				    URL url = new URL(spot.getQrImageUrl());
+				    Image image2 = new Image(pdf, url.openStream(), ImageType.PNG);
+				    image2.scaleBy(1.5);
+				    image2.setPosition(0, 300);
+				    image2.drawOn(page);
+				    
+				    pdf.flush();
+				} catch (Exception e) {
+					throw new WebApplicationException(e);
+				}
+				
+			}
+		};
 	}
 	
 	@GET

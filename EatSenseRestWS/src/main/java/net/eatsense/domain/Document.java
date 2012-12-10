@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.embedded.DocumentStatus;
 
+import com.google.appengine.api.blobstore.BlobKey;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
@@ -33,6 +34,8 @@ public class Document extends GenericEntity<Document>{
 	private String representation;
 	
 	private String[] ids;
+	
+	private BlobKey blobKey;
 
 	@Transient
 	public Key<Document> getKey() {
@@ -110,6 +113,14 @@ public class Document extends GenericEntity<Document>{
 
 	public void setIds(String[] ids) {
 		this.ids = ids;
+	}
+
+	public BlobKey getBlobKey() {
+		return blobKey;
+	}
+
+	public void setBlobKey(BlobKey blobKey) {
+		this.blobKey = blobKey;
 	}
 	
 }

@@ -35,7 +35,6 @@ public class DocumentController {
 		this.validator = validator;
 	}
 	
-	
 	/**
 	 * Create and save a new document.
 	 * 
@@ -69,6 +68,8 @@ public class DocumentController {
 	 * @return
 	 */
 	public DocumentDTO update(Document doc, DocumentDTO docData) {
+		checkNotNull(doc, "doc was null");
+		
 		
 		validator.validate(docData);
 		
@@ -77,7 +78,6 @@ public class DocumentController {
 		doc.setEntity(docData.getEntity());
 		doc.setName(docData.getName());
 		doc.setStatus(docData.getStatus());
-		doc.setCreateDate(docData.getCreateDate());
 		doc.setRepresentation(docData.getRepresentation());
 		
 		docRepo.saveOrUpdate(doc);
@@ -105,7 +105,6 @@ public class DocumentController {
 		}
 		
 		return docDTOs;
-		
 	}
 	
 	/**
@@ -122,5 +121,4 @@ public class DocumentController {
 
 		docRepo.delete(docKey);
 	}
-
 }
