@@ -29,6 +29,8 @@ import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
+import org.owasp.html.AttributePolicy;
+import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
@@ -156,9 +158,11 @@ public class EatSenseGuiceServletContextListener extends
 					public FileService providesFileService() {
 						return FileServiceFactory.getFileService();
 					}
+					
 					@Provides
 					public PolicyFactory providesHTMLPolicyFactory() {
-						return Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);
+						return new HtmlPolicyBuilder().allowCommonBlockElements().allowCommonInlineFormattingElements()
+				         .allowAttributes("style").matching(AttributePolicy.IDENTITY_ATTRIBUTE_POLICY).globally().toFactory();
 					}
 				}, new ValidationModule());
 		// Register event listeners

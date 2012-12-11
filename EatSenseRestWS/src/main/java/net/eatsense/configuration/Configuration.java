@@ -2,6 +2,7 @@ package net.eatsense.configuration;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import javax.persistence.Embedded;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
@@ -32,6 +33,9 @@ public class Configuration {
 		// Set default id.
 		this.id = "default";
 	}
+	
+	@Embedded
+	private SpotPurePDFConfiguration spotPurePdfConfiguration;
 
 	private Key<FeedbackForm> defaultFeedbackForm;
 
@@ -55,5 +59,32 @@ public class Configuration {
 		checkState(repository != null, "no respository set");
 		
 		repository.save(this);
+	}
+
+	public SpotPurePDFConfiguration getSpotPurePdfConfiguration() {
+		if(spotPurePdfConfiguration == null) {
+			spotPurePdfConfiguration = getDefaultSpotPurePdfConfiguration();
+		}
+		return spotPurePdfConfiguration;
+	}
+	
+	/**
+	 * All Units for the coordinate system, are 72 dpi (points per inch).
+	 * A5, the current size is 420.0 wide and 595.0 high.
+	 * 
+	 * @return
+	 */
+	private SpotPurePDFConfiguration getDefaultSpotPurePdfConfiguration() {
+		SpotPurePDFConfiguration config = new SpotPurePDFConfiguration();
+		config.setBarcodePositionX(150);
+		config.setBarcodePositionY(250);
+		config.setTextPositionX(300);
+		config.setTextPositionY(450);
+		
+		return config;
+	}
+
+	public void setSpotPurePdfConfiguration(SpotPurePDFConfiguration spotPurePdfConfiguration) {
+		this.spotPurePdfConfiguration = spotPurePdfConfiguration;
 	}
 }

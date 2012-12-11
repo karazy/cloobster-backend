@@ -13,6 +13,8 @@ import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 
+import com.google.common.base.Function;
+
 
 
 /**
@@ -62,6 +64,7 @@ public class SpotDTO {
 	private String areaName;
 	private String areaDescription;
 	
+	private boolean checked;
 	
 	/**
 	 * Url to logo.
@@ -276,6 +279,19 @@ public class SpotDTO {
 		this.areaDescription = areaDescription;
 	}
 	
-	
-	
+	public boolean isChecked() {
+		return checked;
+	}
+
+	public void setChecked(boolean checked) {
+		this.checked = checked;
+	}
+
+	public final static Function<Spot, SpotDTO> toDTO = 
+			new Function<Spot, SpotDTO>() {
+				@Override
+				public SpotDTO apply(Spot input) {
+					return new SpotDTO(input);
+				}
+		    };
 }
