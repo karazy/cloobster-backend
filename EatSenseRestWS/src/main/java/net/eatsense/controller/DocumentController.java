@@ -7,23 +7,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.appengine.api.blobstore.BlobKey;
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
-
 import net.eatsense.documents.SpotPurePDFGenerator;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
-import net.eatsense.domain.Menu;
-import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.DocumentStatus;
 import net.eatsense.exceptions.ValidationException;
@@ -33,6 +19,15 @@ import net.eatsense.representation.DocumentDTO;
 import net.eatsense.service.FileServiceHelper;
 import net.eatsense.validation.ValidationHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
+
 /**
  * 
  * @author Frederik Reifschneider
@@ -41,7 +36,6 @@ public class DocumentController {
 	
 	private final DocumentRepository docRepo;
 	private final ValidationHelper validator;
-	private final BlobstoreService blobStore;
 	private final Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider;
 	private final Provider<SpotRepository> spotRepoProvider;
 	private final FileServiceHelper fileService;
@@ -49,9 +43,11 @@ public class DocumentController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Inject
-	public DocumentController(DocumentRepository documentRepository, ValidationHelper validator, BlobstoreService blobStore, Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider, Provider<SpotRepository> spotRepoProvider, FileServiceHelper fileService) {
+	public DocumentController(DocumentRepository documentRepository,
+			ValidationHelper validator, Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider,
+			Provider<SpotRepository> spotRepoProvider,
+			FileServiceHelper fileService) {
 		super();
-		this.blobStore = blobStore;
 		this.docRepo = documentRepository;
 		this.validator = validator;
 		this.spotPurePDFGeneratorProvider = spotPurePDFGeneratorProvider;
@@ -146,7 +142,7 @@ public class DocumentController {
 		
 		if(document.getBlobKey() != null) {
 			// Remove the document from the blobstore if there exists a blob.
-			blobStore.delete(document.getBlobKey());
+			fileService.delete(document.getBlobKey());
 		}
 
 		docRepo.delete(docKey);

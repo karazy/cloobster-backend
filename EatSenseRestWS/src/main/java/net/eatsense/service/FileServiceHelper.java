@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import net.eatsense.exceptions.ServiceException;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileWriteChannel;
@@ -26,10 +27,21 @@ import com.google.inject.Inject;
 public class FileServiceHelper {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final com.google.appengine.api.files.FileService fileService;
+	private final BlobstoreService blobService;
 	
 	@Inject
-	public FileServiceHelper(FileService fileService) {
+	public FileServiceHelper(FileService fileService, BlobstoreService blobService) {
 		this.fileService = fileService;
+		this.blobService = blobService;
+	}
+	
+	/**
+	 * Remove a File from the BlobStore
+	 * 
+	 * @param blobKey
+	 */
+	public void delete(BlobKey blobKey) {
+		blobService.delete(blobKey);
 	}
 	
 	/**
