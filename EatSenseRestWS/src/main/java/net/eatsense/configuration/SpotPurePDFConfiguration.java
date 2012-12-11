@@ -1,9 +1,15 @@
 package net.eatsense.configuration;
 
+import javax.validation.constraints.Min;
+
 public class SpotPurePDFConfiguration {
+	@Min(0)
 	private double textPositionX;
+	@Min(0)
 	private double textPositionY;
+	@Min(0)
 	private double barcodePositionX;
+	@Min(0)
 	private double barcodePositionY;
 	
 	public double getTextPositionX() {

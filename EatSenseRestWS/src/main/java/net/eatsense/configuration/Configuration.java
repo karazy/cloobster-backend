@@ -62,7 +62,20 @@ public class Configuration {
 	}
 
 	public SpotPurePDFConfiguration getSpotPurePdfConfiguration() {
+		if(spotPurePdfConfiguration == null) {
+			spotPurePdfConfiguration = getDefaultSpotPurePdfConfiguration();
+		}
 		return spotPurePdfConfiguration;
+	}
+	
+	private SpotPurePDFConfiguration getDefaultSpotPurePdfConfiguration() {
+		SpotPurePDFConfiguration config = new SpotPurePDFConfiguration();
+		config.setBarcodePositionX(150);
+		config.setBarcodePositionY(250);
+		config.setTextPositionX(300);
+		config.setTextPositionY(450);
+		
+		return config;
 	}
 
 	public void setSpotPurePdfConfiguration(SpotPurePDFConfiguration spotPurePdfConfiguration) {

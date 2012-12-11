@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
 
 import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
@@ -53,6 +54,7 @@ import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 import net.eatsense.util.InfoPageGenerator;
+import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,7 @@ import com.pdfjet.Page;
 import com.pdfjet.TextLine;
 
 @Path("admin/services")
+@Consumes("application/json; charset=UTF-8")
 public class AdminResource {
 	private final NicknameAdjectiveRepository adjectiveRepo;
 	private final NicknameNounRepository nounRepo;
@@ -86,17 +89,24 @@ public class AdminResource {
 	private Configuration configuration;
 	private FeedbackFormRepository feedbackFormRepo;
 	private Provider<InfoPageGenerator> infoPageGen;
+	private final ValidationHelper validator;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
 			NicknameAdjectiveRepository adjRepo,
-			NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl, FeedbackFormRepository feedbackFormRepo, Configuration configuration, Provider<InfoPageGenerator> infoPageGenerator) {
+			NicknameNounRepository nounRepo, TemplateController templateCtrl,
+			AccountRepository accountRepo, ChannelController channelCtrl,
+			FeedbackFormRepository feedbackFormRepo,
+			Configuration configuration,
+			Provider<InfoPageGenerator> infoPageGenerator,
+			ValidationHelper validator) {
 		super();
 		this.channelCtrl = channelCtrl;
 		this.accountRepo = accountRepo;
 		this.templateCtrl = templateCtrl;
-		this.logger =  LoggerFactory.getLogger(this.getClass());
+		this.validator = validator;
+		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
 		this.adjectiveRepo = adjRepo;
@@ -105,12 +115,13 @@ public class AdminResource {
 		this.businessRepo = businessRepo;
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.infoPageGen = infoPageGenerator;
-		String environment = servletContext.getInitParameter("net.karazy.environment");
+		String environment = servletContext
+				.getInitParameter("net.karazy.environment");
 		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
 		devEnvironment = "dev".equals(environment);
 	}
-	
+
 	@GET
 	@Path("pdftest1")
 	@Produces("application/pdf")
@@ -298,10 +309,26 @@ public class AdminResource {
 	
 	@PUT
 	@Path("configuration/defaultfeedbackform")
-	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public FeedbackFormDTO importDefaultBusinessFeedback(FeedbackFormDTO feedbackFormData ) {
 		return importCtrl.importDefaultFeedbackForm(feedbackFormData);
+	}
+	
+	@GET
+	@Path("configuration/spotpurepdf")
+	public SpotPurePDFConfiguration getSpotPurePDFConfiguration() {
+		return configuration.getSpotPurePdfConfiguration();
+	}
+	
+	@PUT
+	@Path("configuration/spotpurepdf")
+	public SpotPurePDFConfiguration updateSpotPurePDFConfiguration(SpotPurePDFConfiguration spotConfig) {
+		validator.validate(spotConfig);
+		
+		configuration.setSpotPurePdfConfiguration(spotConfig);
+		configuration.save();
+		
+		return configuration.getSpotPurePdfConfiguration();
 	}
 	
 	@POST

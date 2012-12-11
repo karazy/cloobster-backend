@@ -41,21 +41,9 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 		this.qrImageService = qrImageService;
 		byteOutput = new ByteArrayOutputStream();
 		
-		this.pdfConfig = config.getSpotPurePdfConfiguration() == null ? getDefaultConfig() : config.getSpotPurePdfConfiguration();
+		this.pdfConfig = config.getSpotPurePdfConfiguration();
 	}
 
-	/**
-	 * @return
-	 */
-	private SpotPurePDFConfiguration getDefaultConfig() {
-		SpotPurePDFConfiguration config = new SpotPurePDFConfiguration();
-		config.setBarcodePositionX(150);
-		config.setBarcodePositionY(250);
-		config.setTextPositionX(300);
-		config.setTextPositionY(450);
-		
-		return config;
-	}
 	
 	@Override
 	public String getMimeType() {
@@ -120,6 +108,7 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 	    
 		Image barcodeImage = new Image(pdf, qrImageStream , ImageType.PNG);
 	    barcodeImage.setPosition(pdfConfig.getBarcodePositionX(), pdfConfig.getBarcodePositionY());
+	    barcodeImage.scaleBy(0.5);
 	    barcodeImage.drawOn(page);
 	    
 		TextLine text = new TextLine(font, spot.getName());
