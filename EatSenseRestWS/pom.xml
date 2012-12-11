@@ -166,7 +166,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/website</directory>
+											<directory>${website.path}</directory>
 										</resource>
 									</resources>
 								</configuration>
