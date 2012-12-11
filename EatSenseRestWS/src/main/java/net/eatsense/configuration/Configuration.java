@@ -68,6 +68,12 @@ public class Configuration {
 		return spotPurePdfConfiguration;
 	}
 	
+	/**
+	 * All Units for the coordinate system, are 72 dpi (points per inch).
+	 * A5, the current size is 420.0 wide and 595.0 high.
+	 * 
+	 * @return
+	 */
 	private SpotPurePDFConfiguration getDefaultSpotPurePdfConfiguration() {
 		SpotPurePDFConfiguration config = new SpotPurePDFConfiguration();
 		config.setBarcodePositionX(150);
