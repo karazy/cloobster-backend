@@ -51,7 +51,6 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
 @Path("admin/services")
-@Consumes("application/json; charset=UTF-8")
 public class AdminResource {
 	private final NicknameAdjectiveRepository adjectiveRepo;
 	private final NicknameNounRepository nounRepo;
@@ -112,7 +111,6 @@ public class AdminResource {
 	@Produces("application/json; charset=UTF-8")
 	public void restoreTrash(@PathParam("id") Long trashEntryId, @QueryParam("restore") boolean restore) {
 		if(restore == true) {
-			// For the moment only business.
 			try {
 				businessRepo.restoreTrashedEntity(new Key<TrashEntry>(TrashEntry.class, trashEntryId));
 			} catch (NotFoundException e) {
