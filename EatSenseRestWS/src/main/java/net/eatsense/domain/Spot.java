@@ -107,12 +107,15 @@ public class Spot extends GenericEntity<Spot>{
 		return new Key<Spot>(business ,Spot.class,spotId);
 	}
 	
+	public String getBarcodeWithDownloadURL() {
+		return System.getProperty("net.karazy.app.download.url") + "#" + barcode;
+	}
+	
 	public String getQrImageUrl() {
 		if(barcode != null) {
 			if(qrImageUrl == null) {
 				try {
-					String barcodeWithUrl = System.getProperty("net.karazy.app.download.url") + "#" + barcode;
-					qrImageUrl = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=" + URLEncoder.encode(barcodeWithUrl,"UTF-8");
+					qrImageUrl = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=" + URLEncoder.encode(getBarcodeWithDownloadURL(),"UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					throw new ServiceException(e);
 				}

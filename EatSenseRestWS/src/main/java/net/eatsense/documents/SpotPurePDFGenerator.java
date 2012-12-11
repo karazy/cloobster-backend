@@ -5,6 +5,7 @@ package net.eatsense.documents;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.slf4j.Logger;
@@ -26,15 +27,18 @@ import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ServiceException;
+import net.eatsense.service.QRCodeGeneratorService;
 
 public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final ByteArrayOutputStream byteOutput;
 	private final SpotPurePDFConfiguration pdfConfig;
 	private Font font;
+	private final QRCodeGeneratorService qrImageService;
 	
 	@Inject
-	public SpotPurePDFGenerator(Configuration config) {
+	public SpotPurePDFGenerator(Configuration config, QRCodeGeneratorService qrImageService) {
+		this.qrImageService = qrImageService;
 		byteOutput = new ByteArrayOutputStream();
 		
 		this.pdfConfig = config.getSpotPurePdfConfiguration() == null ? getDefaultConfig() : config.getSpotPurePdfConfiguration();
@@ -111,9 +115,10 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 	private Page generatePage(PDF pdf, Spot spot) throws Exception {
 		Page page = new Page(pdf, A5.PORTRAIT);
 		
-	    // Create url from url fetch stream.
-	    URL url = new URL(spot.getQrImageUrl());
-	    Image barcodeImage = new Image(pdf, url.openStream(), ImageType.PNG);
+	    // Create QR code with 
+	    InputStream qrImageStream = qrImageService.loadQRImageAsStream(spot.getBarcodeWithDownloadURL(), 300, 300);
+	    
+		Image barcodeImage = new Image(pdf, qrImageStream , ImageType.PNG);
 	    barcodeImage.setPosition(pdfConfig.getBarcodePositionX(), pdfConfig.getBarcodePositionY());
 	    barcodeImage.drawOn(page);
 	    
