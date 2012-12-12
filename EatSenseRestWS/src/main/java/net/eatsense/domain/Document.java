@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import net.eatsense.domain.embedded.DocumentStatus;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
@@ -49,7 +50,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setBusiness(Key<Business> business) {
-		this.business = business;
+		if(!Objects.equal(this.business, business)) {
+			this.setDirty(true);
+			this.business = business;
+		}
 	}
 
 	public String getName() {
@@ -57,7 +61,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if(!Objects.equal(this.name, name)) {
+			this.setDirty(true);
+			this.name = name;
+		}
 	}
 
 	public String getType() {
@@ -65,7 +72,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setType(String type) {
-		this.type = type;
+		if(!Objects.equal(this.type, type)) {
+			this.setDirty(true);
+			this.type = type;
+		}
 	}
 
 	public String getEntity() {
@@ -73,7 +83,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setEntity(String entity) {
-		this.entity = entity;
+		if(!Objects.equal(this.entity, entity)) {
+			this.setDirty(true);
+			this.entity = entity;
+		}
 	}
 
 	public DocumentStatus getStatus() {
@@ -81,7 +94,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setStatus(DocumentStatus status) {
-		this.status = status;
+		if(!Objects.equal(this.status, status)) {
+			this.setDirty(true);
+			this.status = status;
+		}
 	}
 
 	public Date getCreateDate() {
@@ -89,7 +105,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
+		if(!Objects.equal(this.createDate, createDate)) {
+			this.setDirty(true);
+			this.createDate = createDate;
+		}
 	}
 
 	public String getRepresentation() {
@@ -97,7 +116,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setRepresentation(String representation) {
-		this.representation = representation;
+		if(!Objects.equal(this.representation, representation)) {
+			this.setDirty(true);
+			this.representation = representation;
+		}
 	}
 
 	public BlobKey getBlobKey() {
@@ -105,7 +127,10 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setBlobKey(BlobKey blobKey) {
-		this.blobKey = blobKey;
+		if(!Objects.equal(this.blobKey, blobKey)) {
+			this.setDirty(true);
+			this.blobKey = blobKey;
+		}
 	}
 
 	public List<Long> getEntityIds() {
@@ -113,6 +138,9 @@ public class Document extends GenericEntity<Document>{
 	}
 
 	public void setEntityIds(List<Long> entityIds) {
-		this.entityIds = entityIds;
+		if(!Objects.equal(this.entityIds, entityIds)) {
+			this.setDirty(true);
+			this.entityIds = entityIds;
+		}
 	}	
 }

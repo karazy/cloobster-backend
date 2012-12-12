@@ -89,18 +89,19 @@ public class DocumentController {
 	 */
 	public DocumentDTO update(Document doc, DocumentDTO docData) {
 		checkNotNull(doc, "doc was null");
-		
+		checkNotNull(docData, "docData was null");
 		
 		validator.validate(docData);
 		
-		doc.setId(docData.getId());
 		doc.setType(docData.getType());
 		doc.setEntity(docData.getEntity());
 		doc.setEntityIds(docData.getIds());
 		doc.setName(docData.getName());
 		doc.setRepresentation(docData.getRepresentation());
 		
-		docRepo.saveOrUpdate(doc);
+		if(doc.isDirty()) {
+			docRepo.saveOrUpdate(doc);
+		}
 		
 		return new DocumentDTO(doc);
 	}
@@ -138,7 +139,12 @@ public class DocumentController {
 		checkArgument(id != 0, "id was 0");
 		
 		Key<Document> docKey = docRepo.getKey(businessKey, id);
-		Document document = docRepo.getByKey(docKey);
+		Document document;
+		try {
+			document = docRepo.getByKey(docKey);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException(String.format("No Document with id=%d found.", id));
+		}
 		
 		if(document.getBlobKey() != null) {
 			// Remove the document from the blobstore if there exists a blob.
