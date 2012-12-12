@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -102,7 +103,7 @@ public class DocumentControllerTest {
 		ctrl.createDocument(businessKey, getTestDocData());
 		
 		assertThat(document.getBusiness(), is(businessKey));
-		assertThat(document.getCreateDate(), lessThan(new Date()));
+		assertThat(document.getCreateDate(), lessThanOrEqualTo(new Date()));
 		assertThat(document.getStatus(), is(DocumentStatus.PENDING));
 		
 		verify(docRepo).saveOrUpdate(document);

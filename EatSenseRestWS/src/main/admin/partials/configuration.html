@@ -20,6 +20,21 @@
 						<form class="form-horizontal" ng-submit="saveSpotPurePDFConfig()" name="spotPurePDFConfigForm" >
 							<fieldset>
 								<div class="control-group">
+									<label class="control-label" for="pageWidth">Page Width, Height</label>
+									<div class="controls controls-row">
+										<input class="span2" id="pageWidth" type="text" name="pageWidth" ng-model="spotPurePDFConfig.pageWidth" required>
+										<input class="span2" id="pageHeight" type="text" name="pageHeight" ng-model="spotPurePDFConfig.pageHeight" required>
+									</div>
+								</div>
+
+								<div class="control-group">
+									<label class="control-label" for="qrImageDPI">QR Code Image DPI (300 default)</label>
+									<div class="controls controls-row">
+										<input class="span2" id="qrImageDPI" type="text" name="qrImageDPI" ng-model="spotPurePDFConfig.qrImageDPI" required>
+									</div>
+								</div>
+
+								<div class="control-group">
 									<label class="control-label" for="barcodePositionX">Barcode Position X, Y: </label>
 									<div class="controls controls-row">
 										<input class="span2" id="barcodePositionX" type="text" name="barcodePositionX" ng-model="spotPurePDFConfig.barcodePositionX" required>
