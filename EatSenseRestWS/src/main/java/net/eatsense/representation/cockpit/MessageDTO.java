@@ -6,6 +6,7 @@ public class MessageDTO {
 	String type;
 	String action;
 	Object content;
+	private boolean silent;
 	
 	/**
 	 * 
@@ -24,7 +25,20 @@ public class MessageDTO {
 		this.type = type;
 		this.action = action;
 		this.content = content;
+		this.silent = false;
 	}
+	
+	/**
+	 * @param type
+	 * @param action
+	 * @param content
+	 * @param silent
+	 */
+	public MessageDTO(String type, String action, Object content, boolean silent) {
+		this(type, action, content);
+		this.silent = silent;
+	}
+	
 	public String getType() {
 		return type;
 	}
@@ -51,5 +65,13 @@ public class MessageDTO {
 				.add("action", action)
 				.add("content", content)
 				.toString();
+	}
+
+	public boolean isSilent() {
+		return silent;
+	}
+
+	public void setSilent(boolean silent) {
+		this.silent = silent;
 	}
 }

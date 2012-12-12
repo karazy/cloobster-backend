@@ -2,12 +2,12 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
@@ -441,6 +440,7 @@ public class OrderController {
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new ValidationException("Order cannot be placed, productId unknown",e);
 		}
+		
 		Long orderId = null;
 		List<OrderChoice> choices = null;
 		if(orderData.getChoices() != null
