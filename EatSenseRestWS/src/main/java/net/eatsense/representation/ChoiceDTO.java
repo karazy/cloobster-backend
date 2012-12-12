@@ -69,8 +69,14 @@ public class ChoiceDTO {
 		this.price = (choice.getPrice() == null ? 0 : choice.getPrice().doubleValue() / 100.0);
 		this.text = choice.getText();
 		
-		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
-			this.options = choice.getOptions();						
+		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {
+			int i = 0;
+			for (ProductOption option : choice.getOptions()) {
+				// Try to set an artificial id for productoptions.
+				option.setId(String.format("%d-%d", choice.getId(), i));
+				i++;
+			}
+			this.options = choice.getOptions();
 		}
 		
 		if(choice.getProduct() != null)

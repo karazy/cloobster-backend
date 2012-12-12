@@ -2,24 +2,26 @@ package net.eatsense.domain.embedded;
 
 import javax.validation.constraints.NotNull;
 
-import net.eatsense.validation.ImportChecks;
-
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.google.common.base.Objects;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductOption {
+	@Unindexed
+	private String id;
+	
 	@NotNull
 	@NotEmpty
-	String name;
+	private String name;
 	
-	long price;
+	private long price;
 	
-	Boolean selected;
+	private Boolean selected;
 	
 	public Boolean getSelected() {
 		return selected;
@@ -93,5 +95,13 @@ public class ProductOption {
 		} else if (!selected.equals(other.selected))
 			return false;
 		return true;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }
