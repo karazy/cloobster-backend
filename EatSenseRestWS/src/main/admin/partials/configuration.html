@@ -48,6 +48,12 @@
 										<input class="span2" id="textPositionY" type="text" name="textPositionY" ng-model="spotPurePDFConfig.textPositionY" required>
 									</div>
 								</div>
+								<div class="control-group">
+									<label class="control-label" for="fontSize">Font size (in points, e.g. 12, 10, etc.)</label>
+									<div class="controls controls-row">
+										<input class="span2" id="fontSize" type="text" name="fontSize" ng-model="spotPurePDFConfig.fontSize" required>
+									</div>
+								</div>
 							</fieldset>
 							<div class="form-actions">
   							<button type="submit" ng-disabled="spotPurePDFConfigForm.$invalid || saveSpotPurePDFConfigProgress" class="btn btn-primary">

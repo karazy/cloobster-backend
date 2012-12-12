@@ -84,6 +84,7 @@ public class Configuration {
 		config.setBarcodePositionY(250);
 		config.setTextPositionX(300);
 		config.setTextPositionY(450);
+		config.setFontSize(10);
 		
 		return config;
 	}

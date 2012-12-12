@@ -69,8 +69,7 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 			logger.error("Unable to create PDF or Font", e);
 			throw new ServiceException("Internal error while initializing PDF generation.", e);
 		}
-		
-
+		font.setSize(pdfConfig.getFontSize());
 		pdf.setTitle(document.getName());
 		pdf.setAuthor("Karazy GmbH");
 		
@@ -119,7 +118,7 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 		TextLine text = new TextLine(font, spot.getName());
 	    text.setPosition(pdfConfig.getTextPositionX(), pdfConfig.getTextPositionY());
 	    text.drawOn(page);
-	    	
+	    
 		return page;
 	}
 }

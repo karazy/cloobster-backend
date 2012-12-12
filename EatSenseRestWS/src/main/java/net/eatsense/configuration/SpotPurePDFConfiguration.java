@@ -20,6 +20,9 @@ public class SpotPurePDFConfiguration {
 	@Min(72)
 	private int qrImageDPI;
 	
+	@Min(2)
+	private double fontSize;
+	
 	public double getTextPositionX() {
 		return textPositionX;
 	}
@@ -72,6 +75,13 @@ public class SpotPurePDFConfiguration {
 				.add("barcodePositionY", barcodePositionY)
 				.add("pageWidth", pageWidth)
 				.add("pageHeight", pageHeight)
-				.add("qrImageDPI", qrImageDPI).toString();
+				.add("qrImageDPI", qrImageDPI)
+				.add("fontSize", fontSize).toString();
+	}
+	public double getFontSize() {
+		return fontSize;
+	}
+	public void setFontSize(double fontSize) {
+		this.fontSize = fontSize;
 	}
 }
