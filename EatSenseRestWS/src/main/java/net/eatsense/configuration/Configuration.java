@@ -76,10 +76,15 @@ public class Configuration {
 	 */
 	private SpotPurePDFConfiguration getDefaultSpotPurePdfConfiguration() {
 		SpotPurePDFConfiguration config = new SpotPurePDFConfiguration();
+		// A6 paper size
+		config.setPageWidth(297);
+		config.setPageHeight(421);
+		
 		config.setBarcodePositionX(150);
 		config.setBarcodePositionY(250);
 		config.setTextPositionX(300);
 		config.setTextPositionY(450);
+		config.setFontSize(10);
 		
 		return config;
 	}

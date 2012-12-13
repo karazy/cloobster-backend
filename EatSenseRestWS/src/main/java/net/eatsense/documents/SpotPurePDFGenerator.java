@@ -7,6 +7,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,10 +69,11 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 			logger.error("Unable to create PDF or Font", e);
 			throw new ServiceException("Internal error while initializing PDF generation.", e);
 		}
-		
-
+		font.setSize(pdfConfig.getFontSize());
 		pdf.setTitle(document.getName());
 		pdf.setAuthor("Karazy GmbH");
+		
+		logger.info("Using Config: {}", pdfConfig);
 		
 		try {
 			for (Spot spot : entities) {
@@ -101,20 +103,22 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 	 * @throws Exception
 	 */
 	private Page generatePage(PDF pdf, Spot spot) throws Exception {
-		Page page = new Page(pdf, A5.PORTRAIT);
+		double[] pageDimensions = {pdfConfig.getPageWidth(), pdfConfig.getPageHeight()};
+		Page page = new Page(pdf, pageDimensions);
 		
 	    // Create QR code with 
-	    InputStream qrImageStream = qrImageService.loadQRImageAsStream(spot.getBarcodeWithDownloadURL(), 300, 300);
+	    InputStream qrImageStream = qrImageService.loadQRImageAsStream(spot.getBarcodeWithDownloadURL(), pdfConfig.getQrImageDPI(), pdfConfig.getQrImageDPI());
 	    
 		Image barcodeImage = new Image(pdf, qrImageStream , ImageType.PNG);
 	    barcodeImage.setPosition(pdfConfig.getBarcodePositionX(), pdfConfig.getBarcodePositionY());
-	    barcodeImage.scaleBy(0.5);
+	    double imageScale = 72.0 / pdfConfig.getQrImageDPI();
+		barcodeImage.scaleBy(imageScale );
 	    barcodeImage.drawOn(page);
 	    
 		TextLine text = new TextLine(font, spot.getName());
 	    text.setPosition(pdfConfig.getTextPositionX(), pdfConfig.getTextPositionY());
 	    text.drawOn(page);
-	    	
+	    
 		return page;
 	}
 }
