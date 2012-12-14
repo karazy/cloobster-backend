@@ -73,8 +73,8 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * 		Generated/existing key
 	 */
 	public Key<T> saveOrUpdate(T obj) {
-		logger.info("{}", obj);
 		Key<T> key = ofy().put(obj);
+		logger.info("key={}", key);
 		obj.setDirty(false);
 		return key;
 	}
@@ -87,7 +87,7 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * 		Map of generated/existing keys and entities
 	 */
 	public Map<Key<T>, T> saveOrUpdate(Iterable<T> obj) {
-		logger.info("{}", obj);
+		logger.info("kind={}", Key.getKind(clazz));
 		
 		return ofy().put(obj);
 	}
@@ -148,6 +148,38 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		ofy().put(entity);
 		ofy().put(trashEntry);
 		return trashEntry;
+	}
+	
+	/**
+	 * Save the Entities as trash, creates a TrashEntry for this entity, for later deletion.
+	 * 
+	 * @param entities
+	 * @param loginResponsible
+	 * @return TrashEntries for the entities
+	 */
+	public List<TrashEntry> trashEntities(Iterable<T> entities, String loginResponsible) {
+		List<TrashEntry> trashEntries = new ArrayList<TrashEntry>();
+		List<Object> entitiesToSave = new ArrayList<Object>();
+		if(entities == null || !entities.iterator().hasNext()) {
+			return trashEntries;
+		}
+
+		for (T entity : entities) {
+			TrashEntry trashEntry = new TrashEntry(entity.getKey(), Key.getKind(clazz), new Date(), loginResponsible);
+			entity.setTrash(true);
+			
+			trashEntries.add(trashEntry);
+			
+			// Add to our save list
+			entitiesToSave.add(trashEntry);
+			entitiesToSave.add(entity);
+		}
+		
+		logger.info("kind={}, number={}", Key.getKind(clazz), trashEntries.size());
+		
+		ofy().put(entitiesToSave);
+		
+		return trashEntries;
 	}
 		
 	/**
@@ -260,6 +292,20 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	public Collection<T> getByKeys(List<Key<T>> keys) throws NotFoundException {
 		logger.info("{}", keys); 
 		return ofy().get(keys).values();
+	}
+	
+	/**
+	 * Gets a list of entities by a list of Ids.
+	 * 
+	 * @param id
+	 * 		List of ids of entities to load
+	 * @return
+	 * 		List of entities
+	 */
+	public Collection<T> getByIds(List<Long> ids) throws NotFoundException {
+		logger.info("{}", ids);
+
+		return ofy().get(clazz, ids).values();
 	}
 	
 	/**
@@ -564,5 +610,24 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 */
 	public Key<T> getKey(T obj) {
 		return obj.getKey();
+	}
+	
+	public <V> List<Key<T>> getKeys(Key<V> parent, long[] ids) {
+		ArrayList<Key<T>> keys = new ArrayList<Key<T>>();
+		for (int i = 0; i < ids.length; i++) {
+			keys.add(Key.create(parent, clazz, ids[i]));
+		}				
+		
+		return keys;
+	}
+	
+	public <V> List<Key<T>> getKeys(Key<V> parent, Iterable<Long> ids) {
+		ArrayList<Key<T>> keys = new ArrayList<Key<T>>();
+		
+		for (Long id : ids) {
+			keys.add(Key.create(parent, clazz, id));
+		}				
+		
+		return keys;
 	}
 }

@@ -26,6 +26,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.representation.ImageCropDTO;
 import net.eatsense.representation.ImageUploadDTO;
+import net.eatsense.service.FileServiceHelper;
 
 import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobInfoFactory;
@@ -53,14 +54,14 @@ public class UploadController {
 	private final AccountRepository accountRepo;
 	private final ImagesService imagesService;
 
-	private FileService fileService;
+	private FileServiceHelper fileService;
 
 	private ImageController imageController;
 
 	private BlobInfoFactory blobInfoFactory;
 
 	@Inject
-	public UploadController(BlobstoreService blobStoreService, AccountRepository accountRepo, ImagesService imagesService, FileService fileService, ImageController imageCtrl, BlobInfoFactory blobInfoFactory) {
+	public UploadController(BlobstoreService blobStoreService, AccountRepository accountRepo, ImagesService imagesService, FileServiceHelper fileService, ImageController imageCtrl, BlobInfoFactory blobInfoFactory) {
 		super();
 		this.blobStoreService = blobStoreService;
 		this.accountRepo = accountRepo;
@@ -218,67 +219,18 @@ public class UploadController {
 		
 		Image image = imageController.cropImage(blobKeyString, outputEnc, cropData.getLeftX(), cropData.getTopY(), cropData.getRightX(), cropData.getBottomY());
 		
-		String newBlobKey = saveNewBlob(imageDto.getName(), outputType, image.getImageData());
+		BlobKey newBlobKey = fileService.saveNewBlob(imageDto.getName(), outputType, image.getImageData());
 		
 		// Delete old blob.
 		blobStoreService.delete(blobKey);
 		
-		imageDto.setBlobKey(newBlobKey);
-		imageDto.setUrl(imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(new BlobKey(newBlobKey))));
+		imageDto.setBlobKey(newBlobKey.getKeyString());
+		imageDto.setUrl(imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(newBlobKey)));
 		
 		accountRepo.saveOrUpdate(account);
 				
 		return imageDto;		
 	}
-	
-	public String saveNewBlob(String name, String mimeType, byte[] bytes) {
-		AppEngineFile file; 
-		
-		try {
-			file = fileService.createNewBlobFile(mimeType, name);
-		} catch (IOException e) {
-			logger.error("Error while communicating with blobstore, could not create new file");
-			throw new ServiceException("Could not save to blobstore", e);
-		}
-		// Start writing the new file.
-		FileWriteChannel writeChannel;
-		try {
-			writeChannel = fileService.openWriteChannel(file, true);
-		} catch (FileNotFoundException e) {
-			logger.error("Could not find created file for writing",e);
-			throw new ServiceException(e);
-		} catch (FinalizationException e) {
-			logger.error("Could not write to newly created file, already finalized!",e);
-			throw new ServiceException(e);
-		} catch (LockException e) {
-			logger.error("Could not write to newly created file, already locked!",e);
-			throw new ServiceException(e);
-		} catch (IOException e) {
-			throw new ServiceException("Error while writing to blobstore file.", e);
-		}
-		
-		int byteCount;
-		try {
-			byteCount = writeChannel.write(ByteBuffer.wrap(bytes));
-		} catch (IOException e) {
-			logger.error("Exception while writing to blob",e);
-			throw new ServiceException("Error while writing to blobstore file.", e);
-		}
-		
-		try {
-			writeChannel.closeFinally();
-		} catch (Exception e) {
-			logger.error("Unable to finalize file",e);
-			throw new ServiceException("Error while finallizing file.", e);
-		}
-		
-		String blobKey = fileService.getBlobKey(file).getKeyString();
-		
-		logger.info("Written {} bytes to blob: {}", byteCount, blobKey);
-		
-		return blobKey;
-	}
-	
 	
 	/**
 	 * Check if the supplied token has expired.

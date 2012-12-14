@@ -1,10 +1,8 @@
 package net.eatsense.restws;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -19,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 
 import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
@@ -28,11 +27,9 @@ import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
-import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
-import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
 import net.eatsense.representation.BusinessDTO;
@@ -43,6 +40,7 @@ import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 import net.eatsense.util.InfoPageGenerator;
+import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,17 +66,24 @@ public class AdminResource {
 	private Configuration configuration;
 	private FeedbackFormRepository feedbackFormRepo;
 	private Provider<InfoPageGenerator> infoPageGen;
+	private final ValidationHelper validator;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
 			ImportController importCtr, BusinessRepository businessRepo,
 			NicknameAdjectiveRepository adjRepo,
-			NicknameNounRepository nounRepo, TemplateController templateCtrl, AccountRepository accountRepo, ChannelController channelCtrl, FeedbackFormRepository feedbackFormRepo, Configuration configuration, Provider<InfoPageGenerator> infoPageGenerator) {
+			NicknameNounRepository nounRepo, TemplateController templateCtrl,
+			AccountRepository accountRepo, ChannelController channelCtrl,
+			FeedbackFormRepository feedbackFormRepo,
+			Configuration configuration,
+			Provider<InfoPageGenerator> infoPageGenerator,
+			ValidationHelper validator) {
 		super();
 		this.channelCtrl = channelCtrl;
 		this.accountRepo = accountRepo;
 		this.templateCtrl = templateCtrl;
-		this.logger =  LoggerFactory.getLogger(this.getClass());
+		this.validator = validator;
+		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
 		this.adjectiveRepo = adjRepo;
@@ -87,12 +92,13 @@ public class AdminResource {
 		this.businessRepo = businessRepo;
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.infoPageGen = infoPageGenerator;
-		String environment = servletContext.getInitParameter("net.karazy.environment");
+		String environment = servletContext
+				.getInitParameter("net.karazy.environment");
 		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
 		devEnvironment = "dev".equals(environment);
 	}
-	
+
 	@GET
 	@Path("trash")
 	@Produces("application/json; charset=UTF-8")
@@ -105,7 +111,6 @@ public class AdminResource {
 	@Produces("application/json; charset=UTF-8")
 	public void restoreTrash(@PathParam("id") Long trashEntryId, @QueryParam("restore") boolean restore) {
 		if(restore == true) {
-			// For the moment only business.
 			try {
 				businessRepo.restoreTrashedEntity(new Key<TrashEntry>(TrashEntry.class, trashEntryId));
 			} catch (NotFoundException e) {
@@ -238,10 +243,26 @@ public class AdminResource {
 	
 	@PUT
 	@Path("configuration/defaultfeedbackform")
-	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	public FeedbackFormDTO importDefaultBusinessFeedback(FeedbackFormDTO feedbackFormData ) {
 		return importCtrl.importDefaultFeedbackForm(feedbackFormData);
+	}
+	
+	@GET
+	@Path("configuration/spotpurepdf")
+	public SpotPurePDFConfiguration getSpotPurePDFConfiguration() {
+		return configuration.getSpotPurePdfConfiguration();
+	}
+	
+	@PUT
+	@Path("configuration/spotpurepdf")
+	public SpotPurePDFConfiguration updateSpotPurePDFConfiguration(SpotPurePDFConfiguration spotConfig) {
+		validator.validate(spotConfig);
+		
+		configuration.setSpotPurePdfConfiguration(spotConfig);
+		configuration.save();
+		
+		return configuration.getSpotPurePdfConfiguration();
 	}
 	
 	@POST

@@ -48,18 +48,26 @@ public class ChoiceDTO {
 	
 	private Long productId;
 	
+	public ChoiceDTO(Choice choice) {
+		this(choice, null);
+	}
 	/**
 	 * @param choice Entity
 	 */
-	public ChoiceDTO(Choice choice) {
+	public ChoiceDTO(Choice choice, Long choiceIdOverride) {
 		this();
 		
 		if(choice == null)
 			return;
 		
-		this.id = choice.getId();
+		if(choiceIdOverride != null) {
+			this.id = choiceIdOverride;
+		}
+		else {
+			this.id = choice.getId();
+		}
+		
 		this.originalChoiceId = choice.getId();
-
 		this.included = choice.getIncludedChoices();
 		this.maxOccurence = choice.getMaxOccurence();
 		this.minOccurence = choice.getMinOccurence();
@@ -69,8 +77,16 @@ public class ChoiceDTO {
 		this.price = (choice.getPrice() == null ? 0 : choice.getPrice().doubleValue() / 100.0);
 		this.text = choice.getText();
 		
-		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {		
-			this.options = choice.getOptions();						
+		if( choice.getOptions() != null && !choice.getOptions().isEmpty() ) {
+			int i = 0;
+			for (ProductOption option : choice.getOptions()) {
+				// Try to set an artificial id for productoptions.
+				if(option.getId() == null) {
+					option.setId(String.format("%d-%d", this.id, i));
+				}
+				i++;
+			}
+			this.options = choice.getOptions();
 		}
 		
 		if(choice.getProduct() != null)
@@ -78,10 +94,10 @@ public class ChoiceDTO {
 	}
 	
 	public ChoiceDTO(OrderChoice orderChoice) {
-		this(orderChoice.getChoice());
+		this(orderChoice.getChoice(), orderChoice.getId());
+						
 		// Set the id of the orderChoice instead of the original choice, because
 		// this was an choice coming from a saved order.
-		this.id = orderChoice.getId();
 	}
 	
 	/**

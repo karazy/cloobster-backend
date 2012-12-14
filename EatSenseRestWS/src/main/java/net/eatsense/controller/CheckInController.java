@@ -153,7 +153,11 @@ public class CheckInController {
 				throw new NotFoundException();
 			}
 
-			return new SpotDTO(spot, businessRepo.getByKey(spot.getBusiness()), area) ;
+			Business business = businessRepo.getByKey(spot.getBusiness());
+			if(business.isTrash()) {
+				throw new NotFoundException("Business is locked");
+			}
+			return new SpotDTO(spot, business, area) ;
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new NotFoundException("Business or area no longer exists.");
 		}

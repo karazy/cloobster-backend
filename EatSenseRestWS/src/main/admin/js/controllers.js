@@ -101,6 +101,10 @@ CloobsterAdmin.Import.$inject = ['$scope', '$http', '$anchorScroll'];
 * 	@constructor
 */
 CloobsterAdmin.Configuration = function($scope, $http, $anchorScroll, $timeout) {
+	// Get current config from server
+	$scope.spotPurePDFConfig = $http.get('/admin/services/configuration/spotpurepdf')
+										.error(importError);
+	$scope.saveSpotPurePDFConfigProgress = false;
 	
 	function showAlert( type, title, message, buttonText, continueFn) {
 		$scope.importAlert.type = type;
@@ -142,8 +146,14 @@ CloobsterAdmin.Configuration = function($scope, $http, $anchorScroll, $timeout) 
 
 	function resetForm() {
 		$scope.importProgress = false;
+		$scope.saveSpotPurePDFConfigProgress = false;
 		setProgress("0%");
 	}
+
+	$scope.saveSpotPurePDFConfig= function() {
+		$scope.saveSpotPurePDFConfigProgress = true;
+		$http.put("/admin/services/configuration/spotpurepdf", $scope.spotPurePDFConfig).error(importError);
+	};
 
 	$scope.saveDefaultFeedback = function() {
 		var dto;
@@ -170,9 +180,70 @@ CloobsterAdmin.Configuration = function($scope, $http, $anchorScroll, $timeout) 
 	});
 
 
+
 	$anchorScroll();
 }
 CloobsterAdmin.Configuration.$inject = ['$scope', '$http', '$anchorScroll', '$timeout'];
+
+/**
+* 	@name CloobsterAdmin.PDFConfiguration
+*	@requires $http
+*
+* 	Manages PDF output configuration.
+* 	@constructor
+*/
+CloobsterAdmin.PDFConfiguration = function($scope, $http, $timeout) {
+	// Get current config from server
+	$http.get('/admin/services/configuration/spotpurepdf')
+		.success(function(data) {
+			$scope.spotPurePDFConfig = data;
+		})
+		.error(handleError);
+
+	function resetForm() {
+		$scope.saveSpotPurePDFConfigProgress = false;
+	}
+
+	function showAlert( type, title, message, buttonText, continueFn) {
+		$scope.importAlert.type = type;
+		$scope.importAlert.show = true;
+		$scope.importAlert.message = message;
+		$scope.importAlert.title = title;
+		$scope.importAlert.buttonText = buttonText;
+		$scope.importAlert.continueFn =  continueFn;
+	}
+
+	function dismissAlert() {
+		$scope.importAlert = { show: false, type: "alert-error", message: "", title: "", buttonText:"Action", continueFn: dismissAlert};
+	}
+
+	function setError(message) {
+		showAlert("alert-error", "Error!", message, "Try again", resetForm);
+	}
+
+	function handleError(data, status) {
+		var message = (data.message) ?
+			data.message
+			: "An unknown error occured, check the server and your connection.";
+		setError(message);
+	}
+
+	function handleSuccess(data) {
+		resetForm();
+	}
+
+	$scope.saveSpotPurePDFConfig= function() {
+		$scope.saveSpotPurePDFConfigProgress = true;
+		$http.put("/admin/services/configuration/spotpurepdf", $scope.spotPurePDFConfig)
+			.success(resetForm)
+			.error(handleError);
+	};
+
+	dismissAlert();
+	resetForm();
+}
+CloobsterAdmin.Configuration.$inject = ['$scope', '$http', '$timeout'];
+
 
 CloobsterAdmin.Functions = function($scope, $http) {
 	$scope.deleteFunctionsDisabled = (Karazy.environment === "prod")? true : false;

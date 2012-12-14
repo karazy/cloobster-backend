@@ -291,8 +291,10 @@ public class AccountController {
 		
 		validator.validate(accountData);
 		
+		accountData.setEmail(accountData.getEmail().toLowerCase());
+		
 		checkLoginDoesNotExist(accountData.getLogin());
-		checkEmailDoesNotExist(accountData.getEmail());		
+		checkEmailDoesNotExist(accountData.getEmail());
 		
 		Company company = companyRepo.newEntity();
 		
@@ -491,8 +493,8 @@ public class AccountController {
 	 * @throws ValidationException If the "email" is already in-use.
 	 */
 	public boolean checkEmailDoesNotExist(String email) throws ValidationException {
-		checkNotNull(email, "login was null");
-		
+		checkNotNull(email, "email was null");
+		email = email.toLowerCase();
 		if(accountRepo.getKeyByProperty("email", email) != null)
 			throw new ValidationException("E-mail adress already in use.", "error.account.email.exists");
 		else
@@ -533,7 +535,7 @@ public class AccountController {
 		checkNotNull(accountData, "accountData was null");
 		
 		validator.validate(accountData, EmailChecks.class);
-		
+		accountData.setEmail(accountData.getEmail().toLowerCase());
 		Account account = accountRepo.getByProperty("email", accountData.getEmail());
 		
 		if(account== null) {
@@ -956,7 +958,7 @@ public class AccountController {
 		if(Strings.isNullOrEmpty(email)) {
 			throw new ValidationException("No e-mail address provided.");
 		}
-		
+		email = email.toLowerCase();
 		Account account = accountRepo.getByProperty("email", email);
 		//TODO Remove return values.
 		if(account == null) {
@@ -1020,6 +1022,9 @@ public class AccountController {
 		checkNotNull(accountData, "accountData was null");
 		
 		validator.validate(accountData, javax.validation.groups.Default.class);
+		
+		accountData.setEmail(accountData.getEmail().toLowerCase());
+		
 		checkEmailDoesNotExist(accountData.getEmail());
 		
 		if(!Strings.isNullOrEmpty(accountData.getLogin())) {
