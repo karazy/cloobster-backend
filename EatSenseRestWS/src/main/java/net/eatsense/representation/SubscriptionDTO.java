@@ -1,0 +1,107 @@
+package net.eatsense.representation;
+
+import java.util.Date;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import net.eatsense.domain.Subscription;
+import net.eatsense.domain.embedded.SubscriptionStatus;
+
+import org.apache.bval.constraints.NotEmpty;
+
+public class SubscriptionDTO {
+	@NotEmpty
+	@NotNull
+	private String name;
+	
+	@Min(0)
+	private int maxSpotCount;
+	
+	private boolean quotaExceeded;
+	
+	private boolean basic;
+	
+	private double fee;
+	
+	private SubscriptionStatus status;
+	
+	private Date startDate;
+	private Date endDate;
+	
+	private Long businessId;
+	
+	public SubscriptionDTO() {
+		super();
+	}
+	
+	public SubscriptionDTO(Subscription subscription) {
+		this();
+		this.basic = subscription.isBasic();
+		this.businessId = subscription.getBusiness() != null ? subscription.getBusiness().getId() : null;
+		this.endDate = subscription.getEndData();
+		this.fee = subscription.getFee() / 100d;
+		this.maxSpotCount = subscription.getMaxSpotCount();
+		this.name = subscription.getName();
+		this.quotaExceeded = subscription.isQuotaExceeded();
+		this.startDate = subscription.getStartDate();
+		this.status = subscription.getStatus();
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getMaxSpotCount() {
+		return maxSpotCount;
+	}
+	public void setMaxSpotCount(int maxSpotCount) {
+		this.maxSpotCount = maxSpotCount;
+	}
+	public boolean isQuotaExceeded() {
+		return quotaExceeded;
+	}
+	public void setQuotaExceeded(boolean quotaExceeded) {
+		this.quotaExceeded = quotaExceeded;
+	}
+	public boolean isBasic() {
+		return basic;
+	}
+	public void setBasic(boolean basic) {
+		this.basic = basic;
+	}
+	public double getFee() {
+		return fee;
+	}
+	public void setFee(double fee) {
+		this.fee = fee;
+	}
+	public SubscriptionStatus getStatus() {
+		return status;
+	}
+	public void setStatus(SubscriptionStatus status) {
+		this.status = status;
+	}
+	public Date getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Long getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(Long businessId) {
+		this.businessId = businessId;
+	}
+}
