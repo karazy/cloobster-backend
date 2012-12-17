@@ -11,6 +11,8 @@ import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
+import net.eatsense.controller.SubscriptionController;
+import net.eatsense.domain.Subscription;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
@@ -170,6 +172,7 @@ public class EatSenseGuiceServletContextListener extends
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
+		eventBus.register(injector.getInstance(SubscriptionController.class));
 		eventBus.register(injector.getInstance(MessageController.class));
 		eventBus.register(injector.getInstance(MailController.class));
 		

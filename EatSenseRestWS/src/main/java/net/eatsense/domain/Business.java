@@ -93,6 +93,13 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private String currency;
 	
+	@Unindexed
+	private Key<Subscription> activeSubscription;
+	@Unindexed
+	private Key<Subscription> pendingSubscription;
+	
+
+
 	/**
 	 * Link to a website for this location (e.g. for facebook posts)
 	 */
@@ -339,5 +346,21 @@ public class Business extends GenericEntity<Business> {
 			this.setDirty(true);
 			this.stars = stars;
 		}
+	}
+	
+	public Key<Subscription> getActiveSubscription() {
+		return activeSubscription;
+	}
+
+	public void setActiveSubscription(Key<Subscription> activeSubscription) {
+		this.activeSubscription = activeSubscription;
+	}
+
+	public Key<Subscription> getPendingSubscription() {
+		return pendingSubscription;
+	}
+
+	public void setPendingSubscription(Key<Subscription> pendingSubscription) {
+		this.pendingSubscription = pendingSubscription;
 	}
 }

@@ -7,12 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
+import net.eatsense.event.NewBusinessEvent;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -121,5 +123,17 @@ public class SubscriptionController {
 	 */
 	public void deletePackage(long id) {
 		ofy.delete(Subscription.class, id);
+	}
+	
+	@Subscribe
+	public void handleNewBusinessEvent(NewBusinessEvent event) {
+		Key<Subscription> basicSubscriptionKey = ofy.query(Subscription.class).filter("template", true).filter("basic", true).getKey();
+		
+		if(basicSubscriptionKey == null) {
+			logger.warn("No Subscription flagged as basic found for setting at new business");
+		}
+		else {
+			event.getBusiness().setActiveSubscription(basicSubscriptionKey);
+		}
 	}
 }

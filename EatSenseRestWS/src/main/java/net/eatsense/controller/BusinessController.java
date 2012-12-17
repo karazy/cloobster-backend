@@ -25,6 +25,7 @@ import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.event.DeleteCustomerRequestEvent;
+import net.eatsense.event.NewBusinessEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.exceptions.IllegalAccessException;
@@ -368,6 +369,9 @@ public class BusinessController {
 		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
 		business.getPaymentMethods().add(new PaymentMethod("Bar"));
 		business.setCompany(account.getCompany());
+		
+		// Let other controllers know we created a new business.
+		eventBus.post(new NewBusinessEvent(business));
 		
 		account.getBusinesses().add(updateBusiness(business, businessData));
 		accountRepo.saveOrUpdate(account);
