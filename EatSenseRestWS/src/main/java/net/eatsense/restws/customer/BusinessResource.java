@@ -28,6 +28,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
+import net.eatsense.domain.Subscription;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.BusinessProfileDTO;
@@ -88,7 +89,8 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	public BusinessProfileDTO getBusiness() {
 		BusinessProfileDTO businessDto = new BusinessProfileDTO(business);
-		businessDto.setBasic(subCtrl.getActiveSubscription(business).isBasic());
+		Subscription activeSubscription = subCtrl.getActiveSubscription(business);
+		businessDto.setBasic(activeSubscription != null ? activeSubscription.isBasic() : false);
 		return businessDto;
 	}
 	
