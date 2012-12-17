@@ -20,12 +20,14 @@ public class SubscriptionController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Objectify ofy;
 	private final ValidationHelper validator;
+	private final OfyService ofyService;
 
 	@Inject
 	public SubscriptionController(OfyService ofy,  ValidationHelper validator) {
 		super();
 		
 		this.ofy = ofy.ofy();
+		this.ofyService = ofy;
 		this.validator = validator;
 	}
 	
@@ -70,9 +72,12 @@ public class SubscriptionController {
 		
 		validator.validate(subscriptionData);
 		
+		boolean wasBasic = subscription.isBasic();
+		
 		if(!subscription.isBasic()) {
 			subscription.setBasic(subscriptionData.isBasic());
 		}
+		
 		subscription.setEndData(subscriptionData.getEndDate());
 		subscription.setFee(subscriptionData.getFeeMinor());
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
@@ -80,24 +85,36 @@ public class SubscriptionController {
 		subscription.setStartDate(subscriptionData.getStartDate());
 		subscription.setStatus(subscriptionData.getStatus());
 		
-		if(subscription.isBasic() && subscription.isTemplate()) {
-			Subscription currentBasicSubscription = null;
-			
-			for(Subscription savedSubscription : ofy.query(Subscription.class).filter("template", true)) {
-				if(savedSubscription.isBasic()) {
-					currentBasicSubscription = savedSubscription;
+		if(subscription.isTemplate() && !wasBasic && subscription.isBasic()) {
+			//
+			Objectify ofyTrans = ofyService.ofyTrans();
+			try {
+				Subscription currentBasicSubscription = null;
+				
+				for(Subscription savedSubscription : ofyTrans.query(Subscription.class).filter("template", true)) {
+					if(savedSubscription.isBasic()) {
+						currentBasicSubscription = savedSubscription;
+					}
+				}
+				
+				if(currentBasicSubscription != null) {
+					logger.info("Starting transaction for setting subscription template \"{}\" as new basic subscription.", subscriptionData.getName());
+					
+					currentBasicSubscription.setBasic(false);
+					
+					ofyTrans.put(currentBasicSubscription, subscription);
+					ofyTrans.getTxn().commit();
 				}
 			}
-			
-			if(currentBasicSubscription != null) {
-				logger.info("Setting subscription template \"{}\" as new basic subscription.", subscriptionData.getName());
-				currentBasicSubscription.setBasic(false);
-				ofy.put(currentBasicSubscription);
+			finally {
+				if(ofyTrans.getTxn().isActive())
+					ofyTrans.getTxn().rollback();
 			}
 		}
-		
-		
-		ofy.put(subscription);
+		else {
+			// Save normally
+			ofy.put(subscription);
+		}
 		
 		return subscription;
 	}

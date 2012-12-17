@@ -15,6 +15,10 @@ public class OfyService {
 		return ObjectifyService.begin();
 	}
 	
+	public Objectify ofyTrans() {
+		return ObjectifyService.beginTransaction();
+	}
+	
 	public ObjectifyFactory factory() {
 		return ObjectifyService.factory();
 	}
