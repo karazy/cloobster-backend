@@ -36,6 +36,8 @@ public class BusinessDTO {
 	@Valid
 	private List<PaymentMethod> paymentMethods;
 	
+	private boolean basic;
+	
 	public BusinessDTO() {
 		super();
 	}
@@ -128,5 +130,13 @@ public class BusinessDTO {
 
 	public void setLang(List<String> lang) {
 		this.lang = lang;
+	}
+
+	public boolean isBasic() {
+		return basic;
+	}
+
+	public void setBasic(boolean basic) {
+		this.basic = basic;
 	}
 }

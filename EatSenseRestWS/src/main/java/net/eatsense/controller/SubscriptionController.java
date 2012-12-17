@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.NewBusinessEvent;
@@ -135,5 +136,13 @@ public class SubscriptionController {
 		else {
 			event.getBusiness().setActiveSubscription(basicSubscriptionKey);
 		}
+	}
+	
+	public Subscription getActiveSubscription(Business business) {
+		if(business.getActiveSubscription() == null) {
+			return null;
+		}
+		
+		return ofy.find(business.getActiveSubscription());
 	}
 }

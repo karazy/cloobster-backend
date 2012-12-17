@@ -23,6 +23,7 @@ import net.eatsense.controller.FeedbackController;
 import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -54,6 +55,7 @@ public class BusinessResource {
 	private MenuController menuCtrl;
 	private OrderController orderCtrl;
 	private BillController billCtrl;
+	private SubscriptionController subCtrl;
 
 	private FeedbackController feedbackCtrl;
 
@@ -61,8 +63,9 @@ public class BusinessResource {
 	
 	@Inject
 	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl) {
+			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl, SubscriptionController subCtrl) {
 		super();
+		this.subCtrl = subCtrl;
 		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
@@ -84,7 +87,9 @@ public class BusinessResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	public BusinessProfileDTO getBusiness() {
-		return new BusinessProfileDTO(business);
+		BusinessProfileDTO businessDto = new BusinessProfileDTO(business);
+		businessDto.setBasic(subCtrl.getActiveSubscription(business).isBasic());
+		return businessDto;
 	}
 	
 	@GET
