@@ -2,6 +2,7 @@ package net.eatsense.restws.administration;
 
 import javax.activation.MimeType;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -27,7 +28,7 @@ public class SubscriptionPackageResource {
 
 	@GET
 	@Produces("application/json")
-	public Iterable<SubscriptionDTO> getAllPackages(@QueryParam("template") boolean isTemplate) {
+	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate) {
 		return Iterables.transform(subCtrl.getAll(isTemplate), SubscriptionDTO.toDTO);
 	}
 	
@@ -39,17 +40,23 @@ public class SubscriptionPackageResource {
 	}
 	
 	@GET
-	@Path("{name}")
+	@Path("{id}")
 	@Produces("application/json")
-	public SubscriptionDTO getPackage(@PathParam("name") String name) {
-		return SubscriptionDTO.toDTO.apply(subCtrl.getPackage(name));
+	public SubscriptionDTO getPackage(@PathParam("id") Long id) {
+		return SubscriptionDTO.toDTO.apply(subCtrl.getPackage(id));
 	}
 	
 	@PUT
-	@Path("{name}")
+	@Path("{id}")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public SubscriptionDTO updatePackage(@PathParam("name") String name, SubscriptionDTO subscriptionData) {
-		return SubscriptionDTO.toDTO.apply(subCtrl.update(subCtrl.getPackage(name), subscriptionData));
+	public SubscriptionDTO updatePackage(@PathParam("id") Long id, SubscriptionDTO subscriptionData) {
+		return SubscriptionDTO.toDTO.apply(subCtrl.update(subCtrl.getPackage(id), subscriptionData));
 	}
+	
+	@DELETE
+	@Path("{id}")
+	public void deletePackage(@PathParam("id") Long id) {
+		subCtrl.deletePackage(id);
+	}	
 }

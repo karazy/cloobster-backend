@@ -6,9 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 import net.eatsense.domain.embedded.SubscriptionStatus;
-import net.eatsense.representation.SubscriptionDTO;
 
-import com.google.common.base.Function;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -16,11 +14,13 @@ import com.googlecode.objectify.annotation.Unindexed;
 public class Subscription {
 	@Parent
 	private Key<Business> business;
+
+	@Id
+	private Long id;
 	
 	/**
 	 * Name for this subscription package.
 	 */
-	@Id
 	private String name;
 	
 	@Unindexed
@@ -28,7 +28,6 @@ public class Subscription {
 	
 	private boolean quotaExceeded;
 	
-	@Unindexed
 	private boolean basic;
 	
 	@Unindexed
@@ -97,16 +96,16 @@ public class Subscription {
 	}
 	
 	@Transient
-	public static Key<Subscription> getKey(String name) {
-		return Key.create(Subscription.class, name);
+	public static Key<Subscription> getKey(long id) {
+		return Key.create(Subscription.class, id);
 	}
 	
 	public  Key<Subscription> getKey() {
 		if(business == null) {
-			return Key.create(Subscription.class, name);
+			return Key.create(Subscription.class, id);
 		}
 		else {
-			return Key.create(business, Subscription.class, name);
+			return Key.create(business, Subscription.class, id);
 		}
 	}
 	public boolean isTemplate() {
@@ -114,5 +113,11 @@ public class Subscription {
 	}
 	public void setTemplate(boolean template) {
 		this.template = template;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

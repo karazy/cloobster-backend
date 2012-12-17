@@ -14,6 +14,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import com.google.common.base.Function;
 
 public class SubscriptionDTO {
+	private Long id;
 	@NotEmpty
 	@NotNull
 	private String name;
@@ -41,6 +42,7 @@ public class SubscriptionDTO {
 	
 	public SubscriptionDTO(Subscription subscription) {
 		this();
+		this.setId(subscription.getId());
 		this.basic = subscription.isBasic();
 		this.businessId = subscription.getBusiness() != null ? subscription.getBusiness().getId() : null;
 		this.endDate = subscription.getEndData();
@@ -118,6 +120,14 @@ public class SubscriptionDTO {
 		this.businessId = businessId;
 	}
 	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	/**
 	 * Contains a guava transform function
 	 */

@@ -14,6 +14,7 @@ import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
 
 import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 
 public class SubscriptionController {
@@ -50,12 +51,12 @@ public class SubscriptionController {
 	 * @param name
 	 * @return Subscription entity saved with that name
 	 */
-	public Subscription getPackage(String name) throws NotFoundException{
+	public Subscription getPackage(long	id) throws NotFoundException{
 		try {
-			return ofy.get(Subscription.getKey(name));
+			return ofy.get(Subscription.getKey(id));
 		} catch (com.googlecode.objectify.NotFoundException e) {
-			logger.error("No Subscription package found with name={}", name);
-			throw new NotFoundException("No package found with name: " + name);
+			logger.error("No Subscription package found with id={}", id);
+			throw new NotFoundException("No package found with id: " + id);
 		}
 	}
 	
@@ -72,7 +73,7 @@ public class SubscriptionController {
 		
 		validator.validate(subscriptionData);
 		
-		boolean wasBasic = subscription.isBasic();
+		boolean subscriptionWasBasic = subscription.isBasic();
 		
 		if(!subscription.isBasic()) {
 			subscription.setBasic(subscriptionData.isBasic());
@@ -85,30 +86,24 @@ public class SubscriptionController {
 		subscription.setStartDate(subscriptionData.getStartDate());
 		subscription.setStatus(subscriptionData.getStatus());
 		
-		if(subscription.isTemplate() && !wasBasic && subscription.isBasic()) {
-			//
-			Objectify ofyTrans = ofyService.ofyTrans();
-			try {
-				Subscription currentBasicSubscription = null;
+		if(subscription.isTemplate() && !subscriptionWasBasic && subscription.isBasic()) {
+			logger.info(
+					"Querying for current basic subscription...");
+			Subscription currentBasicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
+
+			if (currentBasicSubscription != null) {
+				logger.info(
+						"Found basic subscription (id={}). Set Subscription({}) as new basic subscription.",currentBasicSubscription.getId(),
+						subscription.getId());
 				
-				for(Subscription savedSubscription : ofyTrans.query(Subscription.class).filter("template", true)) {
-					if(savedSubscription.isBasic()) {
-						currentBasicSubscription = savedSubscription;
-					}
-				}
-				
-				if(currentBasicSubscription != null) {
-					logger.info("Starting transaction for setting subscription template \"{}\" as new basic subscription.", subscriptionData.getName());
-					
-					currentBasicSubscription.setBasic(false);
-					
-					ofyTrans.put(currentBasicSubscription, subscription);
-					ofyTrans.getTxn().commit();
-				}
+				currentBasicSubscription.setBasic(false);
+		
+				ofy.put(currentBasicSubscription, subscription);
 			}
-			finally {
-				if(ofyTrans.getTxn().isActive())
-					ofyTrans.getTxn().rollback();
+			else {
+				// Save normally
+				logger.info("No basic subscription found. Saving as new basic.");
+				ofy.put(subscription);
 			}
 		}
 		else {
@@ -124,7 +119,7 @@ public class SubscriptionController {
 	 * 
 	 * @param name unique name for the package
 	 */
-	public void deletePackage(String name) {
-		ofy.delete(Subscription.class, name);
+	public void deletePackage(long id) {
+		ofy.delete(Subscription.class, id);
 	}
 }
