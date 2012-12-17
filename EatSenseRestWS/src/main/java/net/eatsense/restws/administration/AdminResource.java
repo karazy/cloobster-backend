@@ -38,7 +38,6 @@ import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
-import net.eatsense.restws.customer.BusinessResource;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 import net.eatsense.util.InfoPageGenerator;

@@ -39,6 +39,8 @@ public class Subscription {
 	private Date startDate;
 	private Date endData;
 	
+	private boolean template;
+	
 	public Key<Business> getBusiness() {
 		return business;
 	}
@@ -106,5 +108,11 @@ public class Subscription {
 		else {
 			return Key.create(business, Subscription.class, name);
 		}
+	}
+	public boolean isTemplate() {
+		return template;
+	}
+	public void setTemplate(boolean template) {
+		this.template = template;
 	}
 }

@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Subscription;
+import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
 
@@ -19,15 +21,17 @@ public class SubscriptionController {
 	private final ValidationHelper validator;
 
 	@Inject
-	public SubscriptionController(Objectify ofy,  ValidationHelper validator) {
+	public SubscriptionController(OfyService ofy,  ValidationHelper validator) {
 		super();
 		
-		this.ofy = ofy;
+		this.ofy = ofy.ofy();
 		this.validator = validator;
 	}
 	
 	public Subscription createAndSavePackage(SubscriptionDTO subscriptionData) {
 		Subscription subscription = new Subscription();
+		subscription.setTemplate(true);
+		subscriptionData.setStatus(SubscriptionStatus.PENDING);
 		
 		return update(subscription, subscriptionData);	
 	}
@@ -35,8 +39,8 @@ public class SubscriptionController {
 	/**
 	 * @return All saved Subscription packages
 	 */
-	public Iterable<Subscription> getAllPackages() {
-		return ofy.query(Subscription.class).filter("business", null).fetch();
+	public Iterable<Subscription> getAll(boolean template) {
+		return ofy.query(Subscription.class).filter("template", template).fetch();
 	}
 	
 	/**
@@ -68,10 +72,19 @@ public class SubscriptionController {
 		subscription.setBasic(subscriptionData.isBasic());
 		subscription.setEndData(subscriptionData.getEndDate());
 		subscription.setFee(subscriptionData.getFeeMinor());
-		subscription.setMaxSpotCount(subscription.getMaxSpotCount());
-		subscription.setName(subscription.getName());
+		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
+		subscription.setName(subscriptionData.getName());
 		subscription.setStartDate(subscriptionData.getStartDate());
 		subscription.setStatus(subscriptionData.getStatus());
+		
+		Subscription currentBasicSubscription = ofy.query(Subscription.class).filter("basic", true).get();
+		if(subscriptionData.isBasic()) {
+			if(currentBasicSubscription != null) {
+				logger.info("Setting subscription \"{}\" as new basic subscription.", subscriptionData.getName());
+				currentBasicSubscription.setBasic(false);
+				ofy.async().put(currentBasicSubscription);
+			}
+		}
 		
 		ofy.put(subscription);
 		
