@@ -9,6 +9,7 @@ import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 
 import org.apache.bval.constraints.NotEmpty;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class SubscriptionDTO {
 	@NotEmpty
@@ -24,6 +25,7 @@ public class SubscriptionDTO {
 	
 	private double fee;
 	
+	@NotNull
 	private SubscriptionStatus status;
 	
 	private Date startDate;
@@ -75,6 +77,15 @@ public class SubscriptionDTO {
 	public double getFee() {
 		return fee;
 	}
+	
+	/**
+	 * @return price*100 rounded to the closest integer
+	 */
+	@JsonIgnore
+	public long getFeeMinor() {
+		return Math.round(fee * 100);
+	}
+	
 	public void setFee(double fee) {
 		this.fee = fee;
 	}
