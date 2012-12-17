@@ -5,11 +5,14 @@ import java.util.Date;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.google.common.base.Function;
 
 public class SubscriptionDTO {
 	@NotEmpty
@@ -115,4 +118,14 @@ public class SubscriptionDTO {
 	public void setBusinessId(Long businessId) {
 		this.businessId = businessId;
 	}
+	
+	/**
+	 * Contains a guava transform function
+	 */
+	public final static Function<Subscription, SubscriptionDTO> toDTO = new Function<Subscription, SubscriptionDTO>() {
+		@Override
+		public SubscriptionDTO apply(Subscription input) {
+			return new SubscriptionDTO(input);
+		}
+	};
 }

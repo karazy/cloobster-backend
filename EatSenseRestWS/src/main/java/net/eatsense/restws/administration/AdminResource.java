@@ -1,4 +1,4 @@
-package net.eatsense.restws;
+package net.eatsense.restws.administration;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.SpotPurePDFConfiguration;
@@ -37,6 +38,7 @@ import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
+import net.eatsense.restws.customer.BusinessResource;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 import net.eatsense.util.InfoPageGenerator;
@@ -49,6 +51,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.sun.jersey.api.core.ResourceContext;
 
 @Path("admin/services")
 public class AdminResource {
@@ -67,6 +70,8 @@ public class AdminResource {
 	private FeedbackFormRepository feedbackFormRepo;
 	private Provider<InfoPageGenerator> infoPageGen;
 	private final ValidationHelper validator;
+	@Context
+	private ResourceContext resourceContext;
 
 	@Inject
 	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
@@ -315,5 +320,10 @@ public class AdminResource {
 			importCtrl.deleteLiveData();
 		else
 			throw new WebApplicationException(405);
+	}
+	
+	@Path("subscriptions")
+	public SubscriptionPackageResource getSubsriptionsResource() {
+		return resourceContext.getResource(SubscriptionPackageResource.class);
 	}
 }

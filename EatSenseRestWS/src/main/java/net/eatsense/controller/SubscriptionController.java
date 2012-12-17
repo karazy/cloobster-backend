@@ -1,16 +1,24 @@
 package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.eatsense.domain.Subscription;
+import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
 
+import com.google.inject.Inject;
 import com.googlecode.objectify.Objectify;
 
 public class SubscriptionController {
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Objectify ofy;
 	private final ValidationHelper validator;
 
+	@Inject
 	public SubscriptionController(Objectify ofy,  ValidationHelper validator) {
 		super();
 		
@@ -24,8 +32,24 @@ public class SubscriptionController {
 		return update(subscription, subscriptionData);	
 	}
 	
+	/**
+	 * @return All saved Subscription packages
+	 */
 	public Iterable<Subscription> getAllPackages() {
 		return ofy.query(Subscription.class).filter("business", null).fetch();
+	}
+	
+	/**
+	 * @param name
+	 * @return Subscription entity saved with that name
+	 */
+	public Subscription getPackage(String name) throws NotFoundException{
+		try {
+			return ofy.get(Subscription.getKey(name));
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("No Subscription package found with name={}", name);
+			throw new NotFoundException("No package found with name: " + name);
+		}
 	}
 	
 	/**

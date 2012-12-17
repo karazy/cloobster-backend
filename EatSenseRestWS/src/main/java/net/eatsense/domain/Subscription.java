@@ -3,9 +3,12 @@ package net.eatsense.domain;
 import java.util.Date;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import net.eatsense.domain.embedded.SubscriptionStatus;
+import net.eatsense.representation.SubscriptionDTO;
 
+import com.google.common.base.Function;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -89,5 +92,19 @@ public class Subscription {
 	}
 	public void setQuotaExceeded(boolean quotaExceeded) {
 		this.quotaExceeded = quotaExceeded;
+	}
+	
+	@Transient
+	public static Key<Subscription> getKey(String name) {
+		return Key.create(Subscription.class, name);
+	}
+	
+	public  Key<Subscription> getKey() {
+		if(business == null) {
+			return Key.create(Subscription.class, name);
+		}
+		else {
+			return Key.create(business, Subscription.class, name);
+		}
 	}
 }
