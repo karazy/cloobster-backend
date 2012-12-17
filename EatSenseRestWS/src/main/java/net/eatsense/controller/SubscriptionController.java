@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
@@ -69,7 +70,9 @@ public class SubscriptionController {
 		
 		validator.validate(subscriptionData);
 		
-		subscription.setBasic(subscriptionData.isBasic());
+		if(!subscription.isBasic()) {
+			subscription.setBasic(subscriptionData.isBasic());
+		}
 		subscription.setEndData(subscriptionData.getEndDate());
 		subscription.setFee(subscriptionData.getFeeMinor());
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
@@ -77,14 +80,22 @@ public class SubscriptionController {
 		subscription.setStartDate(subscriptionData.getStartDate());
 		subscription.setStatus(subscriptionData.getStatus());
 		
-		Subscription currentBasicSubscription = ofy.query(Subscription.class).filter("basic", true).get();
-		if(subscriptionData.isBasic()) {
+		if(subscription.isBasic() && subscription.isTemplate()) {
+			Subscription currentBasicSubscription = null;
+			
+			for(Subscription savedSubscription : ofy.query(Subscription.class).filter("template", true)) {
+				if(savedSubscription.isBasic()) {
+					currentBasicSubscription = savedSubscription;
+				}
+			}
+			
 			if(currentBasicSubscription != null) {
-				logger.info("Setting subscription \"{}\" as new basic subscription.", subscriptionData.getName());
+				logger.info("Setting subscription template \"{}\" as new basic subscription.", subscriptionData.getName());
 				currentBasicSubscription.setBasic(false);
-				ofy.async().put(currentBasicSubscription);
+				ofy.put(currentBasicSubscription);
 			}
 		}
+		
 		
 		ofy.put(subscription);
 		
