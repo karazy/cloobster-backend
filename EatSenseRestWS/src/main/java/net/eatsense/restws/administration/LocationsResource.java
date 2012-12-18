@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SubscriptionController;
-import net.eatsense.domain.Business;
 import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.SubscriptionDTO;
 
@@ -37,7 +36,7 @@ public class LocationsResource {
 	
 	@POST
 	@Path("{locationId}/subscriptions")
-	public SubscriptionDTO createNewSubscription(@PathParam("locationId") long locationId,SubscriptionDTO subscriptionData) {
-		return new SubscriptionDTO(subCtrl.createSubscriptionFromTemplate(subCtrl.getPackage(subscriptionData.getTemplateId()), subscriptionData.getStatus(), Business.getKey(locationId)));
+	public SubscriptionDTO createNewSubscription(@PathParam("locationId") long locationId, SubscriptionDTO subscriptionData) {
+		return new SubscriptionDTO(subCtrl.createSubscriptionFromTemplate(subCtrl.getPackage(subscriptionData.getTemplateId()), subscriptionData.getStatus(), locationId, true));
 	}
 }

@@ -134,30 +134,46 @@ public class SubscriptionController {
 		ofy.delete(Subscription.class, id);
 	}
 	
-	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status, Key<Business> businessKey) {
+	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status, Long businessId, boolean saveBusiness) {
+		return createSubscriptionFromTemplate(template, status, ofy.get(Business.class, businessId), saveBusiness);
+	}
+	
+	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status, Business business, boolean saveBusiness) {
 		checkNotNull(template, "subscription template was null");
 		checkNotNull(status, "status was null");
-		checkNotNull(businessKey, "businessKey was null");
+		checkNotNull(business, "business was null");
 		
-		Subscription subscription = new Subscription();
+		Subscription newSubscription = new Subscription();
 		
 		if(status == SubscriptionStatus.APPROVED) {
-			subscription.setStartDate(new Date());
+			Subscription activeSubscription;
 			
+			if(business.getActiveSubscription() != null) {
+				activeSubscription = ofy.get(business.getActiveSubscription());
+				activeSubscription.setEndData(new Date());
+				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
+				ofy.put(activeSubscription);
+			}
+			
+			newSubscription.setStartDate(new Date());
 		}
 		
-		subscription.setStatus(status);
-		subscription.setBasic(template.isBasic());
-		subscription.setBusiness(businessKey);
-		subscription.setFee(template.getFee());
-		subscription.setMaxSpotCount(template.getMaxSpotCount());
-		subscription.setName(template.getName());
-		subscription.setTemplate(false);
-		subscription.setTemplateKey(template.getKey());
+		newSubscription.setStatus(status);
+		newSubscription.setBasic(template.isBasic());
+		newSubscription.setBusiness(business.getKey());
+		newSubscription.setFee(template.getFee());
+		newSubscription.setMaxSpotCount(template.getMaxSpotCount());
+		newSubscription.setName(template.getName());
+		newSubscription.setTemplate(false);
+		newSubscription.setTemplateKey(template.getKey());
 		
-		ofy.put(subscription);
+		Key<Subscription> subscriptionKey = ofy.put(newSubscription);
 		
-		return subscription;
+		if(status == SubscriptionStatus.APPROVED) {
+			business.setActiveSubscription(subscriptionKey);
+		}
+		
+		return newSubscription;
 	}
 	
 	@Subscribe
@@ -168,8 +184,7 @@ public class SubscriptionController {
 			logger.warn("No Subscription flagged as basic found for setting at new business");
 		}
 		else {
-			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation().getKey());
-			event.getLocation().setActiveSubscription( newSubscription.getKey());
+			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation(), false);
 		}
 	}
 	
