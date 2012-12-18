@@ -37,6 +37,6 @@ public class LocationsResource {
 	@POST
 	@Path("{locationId}/subscriptions")
 	public SubscriptionDTO createNewSubscription(@PathParam("locationId") long locationId, SubscriptionDTO subscriptionData) {
-		return new SubscriptionDTO(subCtrl.createSubscriptionFromTemplate(subCtrl.getPackage(subscriptionData.getTemplateId()), subscriptionData.getStatus(), locationId, true));
+		return new SubscriptionDTO(subCtrl.createAndSetSubscription(subscriptionData.getTemplateId(), subscriptionData.getStatus(), locationId));
 	}
 }

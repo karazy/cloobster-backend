@@ -1,5 +1,6 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
@@ -134,57 +135,80 @@ public class SubscriptionController {
 		ofy.delete(Subscription.class, id);
 	}
 	
-	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status, Long businessId, boolean saveBusiness) {
-		return createSubscriptionFromTemplate(template, status, ofy.get(Business.class, businessId), saveBusiness);
+	public Subscription createAndSetSubscription(long templateId, SubscriptionStatus status,  Long businessId) {
+		checkArgument(templateId > 0, "templateId must be >0");
+		
+		Subscription newSubscription = createSubscriptionFromTemplate(getPackage(templateId), status, Business.getKey(businessId));
+		Business location = ofy.get(Business.getKey(businessId));
+		
+		setActiveSubscription(location, newSubscription, true);
+		
+		return newSubscription;
 	}
 	
-	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status, Business business, boolean saveBusiness) {
+	
+	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status,  Key<Business> businessKey) {
 		checkNotNull(template, "subscription template was null");
 		checkNotNull(status, "status was null");
-		checkNotNull(business, "business was null");
+		checkNotNull(businessKey, "businessId was null");
 		
 		Subscription newSubscription = new Subscription();
 		
 		if(status == SubscriptionStatus.APPROVED) {
-			Subscription activeSubscription;
-			
-			if(business.getActiveSubscription() != null) {
-				activeSubscription = ofy.get(business.getActiveSubscription());
-				activeSubscription.setEndData(new Date());
-				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
-				ofy.put(activeSubscription);
-			}
-			
 			newSubscription.setStartDate(new Date());
 		}
 		
 		newSubscription.setStatus(status);
 		newSubscription.setBasic(template.isBasic());
-		newSubscription.setBusiness(business.getKey());
+		newSubscription.setBusiness(businessKey);
 		newSubscription.setFee(template.getFee());
 		newSubscription.setMaxSpotCount(template.getMaxSpotCount());
 		newSubscription.setName(template.getName());
 		newSubscription.setTemplate(false);
 		newSubscription.setTemplateKey(template.getKey());
 		
-		Key<Subscription> subscriptionKey = ofy.put(newSubscription);
-		
-		if(status == SubscriptionStatus.APPROVED) {
-			business.setActiveSubscription(subscriptionKey);
-		}
+		ofy.put(newSubscription);
 		
 		return newSubscription;
 	}
 	
+	public Business setActiveSubscription(Business location, Subscription newSubscription, boolean saveBusiness) {
+		checkNotNull(location, "business was null");
+		checkNotNull(newSubscription, "newSubcription was null");
+		
+		if(location.getActiveSubscription() != null) {
+			Subscription activeSubscription = ofy.find(location.getActiveSubscription());
+			
+			if(activeSubscription != null) {
+				activeSubscription.setEndData(new Date());
+				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
+				ofy.put(activeSubscription);
+			}
+			else {
+				logger.warn("Corrupt Location data, unable to find previous activeSubscription.");
+			}
+		}
+				
+		location.setActiveSubscription(newSubscription.getKey());
+		
+		if(saveBusiness) {
+			ofy.put(location);
+		}
+		
+		return location;
+	}
+	
 	@Subscribe
-	public void handleNewBusinessEvent(NewLocationEvent event) {
+	public void handleNewLocationEvent(NewLocationEvent event) {
 		Subscription basicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
 		
 		if(basicSubscription == null) {
-			logger.warn("No Subscription flagged as basic found for setting at new business");
+			logger.warn("No Subscription flagged as basic found, unable to set active subscription for new Location.");
 		}
 		else {
-			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation(), false);
+			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation().getKey());
+			
+			setActiveSubscription(event.getLocation(), newSubscription, false);
 		}
 	}
 	
