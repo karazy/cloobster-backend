@@ -10,6 +10,7 @@ import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
@@ -150,8 +151,16 @@ public class SubscriptionController {
 		ofy.delete(Subscription.class, id);
 	}
 	
-	public Subscription createAndSetSubscription(long templateId, SubscriptionStatus status,  Long businessId) {
-		checkArgument(templateId > 0, "templateId must be >0");
+	public Subscription createAndSetSubscription(Long templateId, SubscriptionStatus status,  Long businessId) {
+		if(templateId == null || templateId.longValue() == 0) {
+			throw new ValidationException("templateId can't be null or 0");
+		}
+		if(status == null) {
+			throw new ValidationException("status can't be null");
+		}
+		if(businessId == null || businessId.longValue() == 0) {
+			throw new ValidationException("businessId can't be null or 0");
+		}
 		
 		Subscription newSubscription = createSubscriptionFromTemplate(getTemplate(templateId), status, Business.getKey(businessId));
 		Business location = ofy.get(Business.getKey(businessId));
