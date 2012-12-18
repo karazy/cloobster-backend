@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 
 import com.googlecode.objectify.Key;
 
@@ -39,7 +39,7 @@ public class BusinessAccountDTO  extends AccountDTO {
 			this.companyId = account.getCompany().getId();
 		
 		if(account.getBusinesses()!=null) {
-			for (Key<Location> businessKey : account.getBusinesses()) {
+			for (Key<Business> businessKey : account.getBusinesses()) {
 				businessIds.add(businessKey.getId());
 			}
 		}

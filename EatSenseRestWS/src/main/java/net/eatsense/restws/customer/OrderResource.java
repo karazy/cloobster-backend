@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response.Status;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.OrderController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.representation.OrderDTO;
@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 
 public class OrderResource {
 	private OrderController orderCtrl;
-	private Location business;
+	private Business business;
 	private CheckIn checkIn;
 	private Order order;
 	private boolean authorized = false;
@@ -30,10 +30,10 @@ public class OrderResource {
 		this.orderCtrl = orderCtrl;
 	}
 	
-	public Location getBusiness() {
+	public Business getBusiness() {
 		return business;
 	}
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 	public void setCheckIn(CheckIn checkIn) {

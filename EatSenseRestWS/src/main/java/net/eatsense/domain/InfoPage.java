@@ -61,7 +61,7 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	}
 
 	@Parent
-	private Key<Location> business;
+	private Key<Business> business;
 	
 
 	@Override
@@ -70,12 +70,12 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	}
 
 
-	public Key<Location> getBusiness() {
+	public Key<Business> getBusiness() {
 		return business;
 	}
 
 
-	public void setBusiness(Key<Location> business) {
+	public void setBusiness(Key<Business> business) {
 		if(!Objects.equal(this.business, business)) {
 			this.setDirty(true);
 			this.business = business;

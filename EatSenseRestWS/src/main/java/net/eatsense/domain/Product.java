@@ -34,7 +34,7 @@ public class Product extends GenericEntity<Product> {
 	private Key<Menu> menu;
 	
 	@Parent
-	private Key<Location> business;
+	private Key<Business> business;
 	
 	private List<Key<Choice>> choices;
 	
@@ -124,16 +124,16 @@ public class Product extends GenericEntity<Product> {
 	}
 
 
-	public Key<Location> getBusiness() {
+	public Key<Business> getBusiness() {
 		return business;
 	}
 
 
-	public void setBusiness(Key<Location> business) {
+	public void setBusiness(Key<Business> business) {
 		this.business = business;
 	}
 	
-	public static Key<Product> getKey(Key<Location> parentKey, long id) {
+	public static Key<Product> getKey(Key<Business> parentKey, long id) {
 		return new Key<Product>(parentKey, Product.class, id);
 	}
 

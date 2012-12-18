@@ -20,7 +20,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
@@ -111,7 +111,7 @@ public class AccountController {
 			return false;
 		
 		if(account.getBusinesses() != null) {
-			for (Key<Location> businessKey : account.getBusinesses()) {
+			for (Key<Business> businessKey : account.getBusinesses()) {
 				if(businessKey.getId() == businessId) 
 					return true;
 			}
@@ -242,7 +242,7 @@ public class AccountController {
 		Account account = accountRepo.getByProperty("login", login);
 		ArrayList<LocationDTO> businessDtos = new ArrayList<LocationDTO>();
 		if(account != null && account.getBusinesses() != null) {
-			for (Location business :businessRepo.getByKeys(account.getBusinesses())) {
+			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
 				LocationDTO businessData = new LocationDTO(business);
 				businessDtos.add(businessData);
 			}
@@ -699,11 +699,11 @@ public class AccountController {
 			throw new IllegalAccessException("Can only update company accounts");
 		}
 		
-		ArrayList<Key<Location>> businessKeys = new ArrayList<Key<Location>>();
+		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
 		
 		if(accountData.getBusinessIds() != null) {
 			for (Long businessId : accountData.getBusinessIds()) {
-				Key<Location> businessKey = businessRepo.getKey(businessId);
+				Key<Business> businessKey = businessRepo.getKey(businessId);
 				// Check that we only add business keys, that come from the owner account.
 				if(ownerAccount.getBusinesses().contains(businessKey) && !businessKeys.contains(businessKey)) {
 					businessKeys.add(businessKey);

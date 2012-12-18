@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.eatsense.documents.SpotPurePDFGenerator;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.DocumentStatus;
@@ -54,7 +54,7 @@ public class DocumentControllerTest {
 	@Mock
 	private SpotRepository spotRepo;
 	@Mock
-	private Key<Location> businessKey;
+	private Key<Business> businessKey;
 	
 	@Mock
 	private Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider;

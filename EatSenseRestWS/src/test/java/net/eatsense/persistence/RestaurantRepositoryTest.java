@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNull;
 import junit.framework.Assert;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
@@ -52,9 +52,9 @@ public class RestaurantRepositoryTest {
 	public void testSave() {
 		
 		exception.expect(NotFoundException.class);
-		Location found = rr.getById(1l);
+		Business found = rr.getById(1l);
 		
-		Location r = new Location();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		r.setId(1l);
@@ -68,14 +68,14 @@ public class RestaurantRepositoryTest {
 	@Test
 	public void testUpdate() {
 		exception.expect(NotFoundException.class);
-		Location found = rr.getById(1l);
+		Business found = rr.getById(1l);
 		Assert.assertNull(found);
 		
-		Location r = new Location();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 //		r.setId(1l);
-		Key<Location> key = rr.saveOrUpdate(r);
+		Key<Business> key = rr.saveOrUpdate(r);
 		
 		found = rr.getById(key.getId());
 		assertEquals("Heidi und Paul", found.getName());
@@ -90,13 +90,13 @@ public class RestaurantRepositoryTest {
 
 	@Test
 	public void testDelete() {
-		Location r = new Location();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
 		r.setId(1l);
 		rr.saveOrUpdate(r);
 		
-		Location found = rr.getById(1l);
+		Business found = rr.getById(1l);
 		assertNotNull(found);
 		
 		rr.delete(r);
@@ -107,10 +107,10 @@ public class RestaurantRepositoryTest {
 	
 	@Test
 	public void testFindRestaurantByBarcode() {
-		Location r = new Location();
+		Business r = new Business();
 		r.setName("Heidi und Paul");
 		r.setDescription("Geiles Bio Burger Restaurant.");
-		Key<Location> kR = rr.saveOrUpdate(r);
+		Key<Business> kR = rr.saveOrUpdate(r);
 		
 		Spot b = new Spot();
 		b.setBarcode("b4rc0de");
@@ -118,7 +118,7 @@ public class RestaurantRepositoryTest {
 		
 		Key<Spot> kB = br.saveOrUpdate(b); 
 		
-		Location found = rr.findByBarcode("b4rc0de");
+		Business found = rr.findByBarcode("b4rc0de");
 		assertNotNull(found);
 		assertEquals(kR.getId(), (long) found.getId());
 	}

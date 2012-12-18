@@ -2,7 +2,7 @@ package net.eatsense.persistence;
 
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.Before;
@@ -33,10 +33,10 @@ public class DummyDataCreator {
     	
     	@Test
     	public void createTestData() {
-    		Location r = new Location();
+    		Business r = new Business();
     		r.setName("Zum flotten Hasen");
     		r.setDescription("Geiles Bio Burger Restaurant.");
-    		Key<Location> kR = rr.saveOrUpdate(r);
+    		Key<Business> kR = rr.saveOrUpdate(r);
     		
     		Spot b = new Spot();
     		b.setBarcode("b4rc0de");

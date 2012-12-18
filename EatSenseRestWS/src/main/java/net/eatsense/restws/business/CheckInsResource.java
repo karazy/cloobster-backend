@@ -16,7 +16,7 @@ import javax.ws.rs.core.Context;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
@@ -29,10 +29,10 @@ public class CheckInsResource {
 	@Context
 	private ResourceContext resourceContext;
 	
-	private Location business;
+	private Business business;
 	private final Provider<OrderController> orderCtrlProvider;
 	
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 	

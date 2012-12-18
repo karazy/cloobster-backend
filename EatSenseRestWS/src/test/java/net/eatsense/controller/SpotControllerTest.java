@@ -19,7 +19,7 @@ import java.util.List;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -49,7 +49,7 @@ public class SpotControllerTest {
 	@Mock
 	private SpotRepository spotRepo;
 	@Mock
-	private Key<Location> businessKey;
+	private Key<Business> businessKey;
 	
 	@Captor
     private ArgumentCaptor<List<Spot>> spotListCaptor;

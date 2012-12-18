@@ -7,7 +7,7 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Product;
@@ -57,7 +57,7 @@ public class CalculateTotalPriceTest {
 		private BillController billCtrl;
 
 		private CheckIn checkIn;
-		private Location business;
+		private Business business;
 		private SpotDTO spotDto;
 
 		private Product frites;

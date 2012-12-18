@@ -17,7 +17,7 @@ import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.exceptions.ReadOnlyException;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.LocationDTO;
@@ -71,7 +71,7 @@ public class LocationsResource {
 	
 	@Path("{businessId}")
 	public LocationResource getBusinessResource(@PathParam("businessId") Long businessId) {
-		Location business;
+		Business business;
 		try {
 			business = businessRepo.getById(businessId);
 		} catch (com.googlecode.objectify.NotFoundException e) {

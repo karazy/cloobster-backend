@@ -19,7 +19,7 @@ import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.FeedbackForm;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
@@ -109,7 +109,7 @@ public class LocationController {
 	 * @param business
 	 * @return List of SpotCockpitDTO objects
 	 */
-	public List<SpotStatusDTO> getSpotStatusData(Location business){
+	public List<SpotStatusDTO> getSpotStatusData(Business business){
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
 		List<Spot> allSpots = spotRepo.getByParent(business);
@@ -197,7 +197,7 @@ public class LocationController {
 	 * @param spotId can be null
 	 * @return list of found request dtos or empty list if none found
 	 */
-	public List<RequestDTO> getCustomerRequestData(Location business, Long checkInId, Long spotId) {
+	public List<RequestDTO> getCustomerRequestData(Business business, Long checkInId, Long spotId) {
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
 		
@@ -230,7 +230,7 @@ public class LocationController {
 	 * @param requestId
 	 * @throws IllegalArgumentException if the request was not found
 	 */
-	public void deleteCustomerRequest(Location business, long requestId)  throws IllegalArgumentException{
+	public void deleteCustomerRequest(Business business, long requestId)  throws IllegalArgumentException{
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
 		checkArgument(requestId != 0, "requestId cannot be 0");
@@ -319,7 +319,7 @@ public class LocationController {
 	public List<LocationDTO> getBusinessDtosForAccount(Account account) {
 		ArrayList<LocationDTO> businessDtos = new ArrayList<LocationDTO>();
 		if(account != null && account.getBusinesses() != null ) {
-			for (Location business :locationRepo.getByKeys(account.getBusinesses())) {
+			for (Business business :locationRepo.getByKeys(account.getBusinesses())) {
 				businessDtos.add(new LocationDTO(business));
 			}
 		}
@@ -338,9 +338,9 @@ public class LocationController {
 		checkNotNull(businessData, "businessData was null");
 		
 		if(account.getBusinesses() == null) {
-			account.setBusinesses(new ArrayList<Key<Location>>());	
+			account.setBusinesses(new ArrayList<Key<Business>>());	
 		}
-		Location business = locationRepo.newEntity();
+		Business business = locationRepo.newEntity();
 		Configuration config = configProvider.get();
 		
 		if(config.getDefaultFeedbackForm() != null) {
@@ -385,7 +385,7 @@ public class LocationController {
 	 * @param businessData - The data transfer object to update the entity with.
 	 * @return Datastore key of the business.
 	 */
-	public Key<Location> updateBusiness(Location business,	LocationProfileDTO businessData) {
+	public Key<Business> updateBusiness(Business business,	LocationProfileDTO businessData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(businessData, "businessData was null");
 		
@@ -423,7 +423,7 @@ public class LocationController {
 			business.setPaymentMethods(businessData.getPaymentMethods());
 		}
 
-		Key<Location> key;
+		Key<Business> key;
 		
 		if(business.isDirty()) {
 			key = locationRepo.saveOrUpdate(business);
@@ -451,7 +451,7 @@ public class LocationController {
 	 *            image to save.
 	 * @return The saved image data.
 	 */
-	public ImageDTO updateBusinessImage(Account account, Location business, ImageDTO updatedImage) {
+	public ImageDTO updateBusinessImage(Account account, Business business, ImageDTO updatedImage) {
 		checkNotNull(account, "account was null");
 		checkNotNull(business, "business was null");
 		checkNotNull(updatedImage, "updatedImage was null ");
@@ -476,7 +476,7 @@ public class LocationController {
 	 * @param imageId Unique identifier for the image.
 	 * @return <code>true</code> if an image was removed, <code>false</code> otherwise.
 	 */
-	public boolean removeBusinessImage(Location business, String imageId) {
+	public boolean removeBusinessImage(Business business, String imageId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(Strings.emptyToNull(imageId), "imageId was null or empty");
 		
@@ -494,7 +494,7 @@ public class LocationController {
 	 * @param business
 	 * @param account
 	 */
-	public void trashBusiness(Location business, Account account) {
+	public void trashBusiness(Business business, Account account) {
 		checkNotNull(business, "business was null");
 		checkNotNull(account, "account was null");
 		checkArgument(!business.isTrash(), "business was already trashed");
@@ -516,7 +516,7 @@ public class LocationController {
 	 * @param areaId If different from 0, filter by area.
 	 * @return List of spots for the business and for the area if specified.
 	 */
-	public List<SpotDTO> getSpots(Key<Location> businessKey, long areaId) {
+	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
@@ -544,7 +544,7 @@ public class LocationController {
 	 * @param spotData
 	 * @return 
 	 */
-	public SpotDTO createSpot(Key<Location> businessKey, SpotDTO spotData) {
+	public SpotDTO createSpot(Key<Business> businessKey, SpotDTO spotData) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		Spot spot = spotRepo.newEntity();
@@ -617,7 +617,7 @@ public class LocationController {
 	 * @param spotId
 	 * @return Spot
 	 */
-	public Spot getSpot(Key<Location> businessKey, long spotId) {
+	public Spot getSpot(Key<Business> businessKey, long spotId) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		try {
@@ -632,7 +632,7 @@ public class LocationController {
 	 * @param id
 	 * @return
 	 */
-	public Area getArea(Key<Location> businessKey, long id) {
+	public Area getArea(Key<Business> businessKey, long id) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkArgument(id != 0, "id was zero");
 		
@@ -648,7 +648,7 @@ public class LocationController {
 	 * @param areaData
 	 * @return
 	 */
-	public Area createArea(Key<Location> businessKey, AreaDTO areaData) {
+	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(areaData, "areaData was null");
 		
@@ -664,7 +664,7 @@ public class LocationController {
 	 * @param businessKey
 	 * @return List of areas as transfer objects.
 	 */
-	public List<AreaDTO> getAreas(Key<Location> businessKey) {
+	public List<AreaDTO> getAreas(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
 		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
 		
@@ -740,7 +740,10 @@ public class LocationController {
 	 * @param companyId
 	 * @return Location entities for this company
 	 */
-	public List<Location> getLocations(long companyId) {
-		return locationRepo.getListByProperty("company", Company.getKey(companyId));
+	public List<Business> getLocations(long companyId) {
+		if(companyId == 0) 
+			return locationRepo.getAll();
+		else 
+			return locationRepo.getListByProperty("company", Company.getKey(companyId));
 	}
 }

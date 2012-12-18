@@ -21,7 +21,7 @@ import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SpotController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.LocationProfileDTO;
@@ -38,7 +38,7 @@ import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
 
 /**
- * Sub-resource representing {@link Location} entities.
+ * Sub-resource representing {@link Business} entities.
  * @author Nils Weiher
  *
  */
@@ -49,13 +49,13 @@ public class LocationResource {
 	@Context
 	HttpServletRequest servletRequest;
 	
-	private Location business;
+	private Business business;
 	private LocationController businessCtrl;
 	private Account account;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private SpotController spotController;
 	
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 	

@@ -9,7 +9,7 @@ import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.LocationController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class SpotsResource {
 	private ResourceContext resourceContext;
 	
 	private LocationController businessController;
-	private Location business;
+	private Business business;
 	
 	@Inject
 	public SpotsResource(LocationController businessController) {
@@ -40,7 +40,7 @@ public class SpotsResource {
 		return businessController.getSpotStatusData(business);
 	}
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 }

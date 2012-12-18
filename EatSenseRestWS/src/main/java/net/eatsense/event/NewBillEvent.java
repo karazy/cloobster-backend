@@ -3,7 +3,7 @@ package net.eatsense.event;
 import com.google.common.base.Optional;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 
 public class NewBillEvent extends BillEvent {
@@ -12,7 +12,7 @@ public class NewBillEvent extends BillEvent {
 	private final boolean fromBusiness;
 	
 
-	public NewBillEvent(Location business, Bill bill, CheckIn checkIn, boolean fromBusiness) {
+	public NewBillEvent(Business business, Bill bill, CheckIn checkIn, boolean fromBusiness) {
 		super(business, bill, checkIn);
 		this.newSpotStatus = Optional.absent();
 		this.fromBusiness = fromBusiness;

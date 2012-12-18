@@ -16,12 +16,12 @@ import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.MenuDTO;
 
 public class MenusResource {
 
-	private Location business;
+	private Business business;
 	private MenuController menuCtrl;
 	
 	@Inject
@@ -31,7 +31,7 @@ public class MenusResource {
 	}
 
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 	

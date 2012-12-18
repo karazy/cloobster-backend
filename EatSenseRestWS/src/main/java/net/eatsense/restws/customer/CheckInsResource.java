@@ -20,7 +20,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
@@ -119,7 +119,7 @@ public class CheckInsResource {
 		
 		if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
 			// Check for read-only mode.
-			Location business = businessRepo.getByKey(checkIn.getBusiness());
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
 			if(business.isTrash())
 				throw new IllegalAccessException("Business for this CheckIn has been deleted.");
 		}

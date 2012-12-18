@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.embedded.UploadToken;
@@ -38,7 +38,7 @@ public class AccountRepository extends GenericRepository<Account> {
 	 * @param active 
 	 * @return new Account entity
 	 */
-	public Account createAndSaveAccount( String name, String login, String password, String email, String role, List<Key<Location>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active) {
+	public Account createAndSaveAccount( String name, String login, String password, String email, String role, List<Key<Business>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active) {
 		Account account = new Account();
 		account.setActive(active);
 		account.setCreationDate(new Date());

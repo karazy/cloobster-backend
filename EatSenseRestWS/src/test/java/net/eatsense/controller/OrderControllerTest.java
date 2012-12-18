@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -68,7 +68,7 @@ public class OrderControllerTest {
 
 		private CheckIn checkIn;
 
-		private Location business;
+		private Business business;
 
 	@Before
 	public void setUp() throws Exception {
@@ -250,7 +250,7 @@ public class OrderControllerTest {
 		orderCtrl.deleteOrder(business, placedOrder , checkIn);
 		
 		Iterable<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn.getKey(), null);
-		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Location.getKey(checkInData.getBusinessId()), orderId));
+		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
 		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.iterator().hasNext(), is(false));
 		

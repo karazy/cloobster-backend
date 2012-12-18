@@ -70,7 +70,7 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	 * Business this checkIn belongs to.
 	 */
 	@NotNull
-	private Key<Location> business;
+	private Key<Business> business;
 	
 	/**
 	 * Spot in this business.
@@ -99,11 +99,11 @@ public class CheckIn extends GenericEntity<CheckIn>{
 		this.userId = userId;
 	}
 
-	public Key<Location> getBusiness() {
+	public Key<Business> getBusiness() {
 		return business;
 	}
 
-	public void setBusiness(Key<Location> business) {
+	public void setBusiness(Key<Business> business) {
 		this.business = business;
 	}
 

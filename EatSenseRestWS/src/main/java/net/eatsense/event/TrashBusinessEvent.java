@@ -1,16 +1,16 @@
 package net.eatsense.event;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 
 public class TrashBusinessEvent {
-	private final Location business;
+	private final Business business;
 
-	public TrashBusinessEvent(Location business) {
+	public TrashBusinessEvent(Business business) {
 		super();
 		this.business = business;
 	}
 
-	public Location getBusiness() {
+	public Business getBusiness() {
 		return business;
 	}
 }

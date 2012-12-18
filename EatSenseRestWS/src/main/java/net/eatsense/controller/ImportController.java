@@ -19,7 +19,7 @@ import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.FeedbackForm;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
@@ -122,7 +122,7 @@ public class ImportController {
     
     /**
      * Creates a new {@link FeedbackForm} entity based on the given data
-     * and adds it to a {@link Location} identified by the given id.
+     * and adds it to a {@link Business} identified by the given id.
      * 
      * @param businessId - Id of the business to which the form will be added.
      * @param feedbackFormData - Data for the new {@link FeedbackForm} entity.
@@ -133,7 +133,7 @@ public class ImportController {
     	checkNotNull(feedbackFormData, "feedbackFormData was null");
     	checkNotNull(feedbackFormData.getQuestions(), "questions list was null");
     	
-    	Location business = businessRepo.getById(businessId);
+    	Business business = businessRepo.getById(businessId);
     	
     	FeedbackForm feedbackForm = new FeedbackForm();
     	feedbackForm.setDescription(feedbackFormData.getDescription());
@@ -195,7 +195,7 @@ public class ImportController {
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
-		Key<Location> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
+		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
@@ -256,10 +256,10 @@ public class ImportController {
 		return kR.getId();
 	}
 	
-	private Key<Location> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
+	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
 		logger.info("Creating new business with data: " + name + ", " + desc );
 		
-		Location business = new Location();
+		Business business = new Business();
 		business.setName(name);
 		business.setDescription(desc);
 		business.setAddress(address);
@@ -267,12 +267,12 @@ public class ImportController {
 		business.setPostcode(postcode);
 		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
-		Key<Location> businessKey = businessRepo.saveOrUpdate(business);
+		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
 		logger.info("Created new business with id: " + businessKey.getId());
 		return businessKey;
 	}
 	
-	private Key<Area> createAndSaveArea(Key<Location> businessKey, String name, String description) {
+	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description) {
 		checkNotNull(businessKey, "businessKey was null");
 		Area area = new Area();
 		area.setBusiness(businessKey);
@@ -285,7 +285,7 @@ public class ImportController {
 		return kA;
 	}
 	
-	private Key<Spot> createAndSaveSpot(Key<Location> businessKey, String name, String barcode, Key<Area> areaKey) {
+	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, Key<Area> areaKey) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new spot for business ("+ businessKey.getId() + ") with name: " + name );
@@ -301,7 +301,7 @@ public class ImportController {
 		return kS;
 	}
 	
-	private Key<Menu> createAndSaveMenu (Key<Location> businessKey, String title, String description, Integer order) {
+	private Key<Menu> createAndSaveMenu (Key<Business> businessKey, String title, String description, Integer order) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new menu for business ("+ businessKey.getId() + ") with title: " + title );
@@ -318,7 +318,7 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Location> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
@@ -337,7 +337,7 @@ public class ImportController {
 	}
 	
 	private Key<Choice> createAndSaveChoice(Key<Product> productKey,
-			Key<Location> businessKey, String text, Money price,
+			Key<Business> businessKey, String text, Money price,
 			ChoiceOverridePrice overridePrice, int minOccurence,
 			int maxOccurence, int includedChoices,
 			Collection<ProductOption> availableOptions) {

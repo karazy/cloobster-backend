@@ -23,7 +23,7 @@ import net.eatsense.EatSenseDomainModule;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.NewsletterRecipient;
@@ -394,9 +394,9 @@ public class AccountControllerTest {
 	public void testIsAccountManagingBusiness() throws Exception {
 		account = mock(Account.class);
 		long businessId = 1;
-		ArrayList<Key<Location>> businessList = new ArrayList<Key<Location>>();
+		ArrayList<Key<Business>> businessList = new ArrayList<Key<Business>>();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock( Key.class);
+		Key<Business> businessKey = mock( Key.class);
 		when(businessKey.getId()).thenReturn(businessId);
 		businessList.add(businessKey);
 		when(account.getBusinesses()).thenReturn( businessList);
@@ -830,7 +830,7 @@ public class AccountControllerTest {
 	@Test
 	public void testUpdateUserAccountUnknownBusiness() throws Exception {
 		@SuppressWarnings("unchecked")
-		List<Key<Location>> businesses = mock(List.class);
+		List<Key<Business>> businesses = mock(List.class);
 		account.setBusinesses(businesses );
 		Account newAccount = new Account();
 		newAccount.setCompany(companyKey);
@@ -843,9 +843,9 @@ public class AccountControllerTest {
 		businessIds.add(businessId2 );
 		accountData.setBusinessIds(businessIds );
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey1 = mock(Key.class);
+		Key<Business> businessKey1 = mock(Key.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey2 = mock(Key.class);
+		Key<Business> businessKey2 = mock(Key.class);
 		when(rr.getKey(businessId1)).thenReturn(businessKey1 );
 		when(rr.getKey(businessId2)).thenReturn(businessKey2 );
 		when(businesses.contains(businessKey1)).thenReturn(true);
@@ -877,7 +877,7 @@ public class AccountControllerTest {
 	@Test
 	public void testUpdateCockpitUserAccount() throws Exception {
 		@SuppressWarnings("unchecked")
-		List<Key<Location>> businesses = mock(List.class);
+		List<Key<Business>> businesses = mock(List.class);
 		account.setBusinesses(businesses );
 		Account newAccount = new Account();
 		// We test the update of a cockpit account.
@@ -891,7 +891,7 @@ public class AccountControllerTest {
 		businessIds.add(businessId1 );
 		accountData.setBusinessIds(businessIds );
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey1 = mock(Key.class);
+		Key<Business> businessKey1 = mock(Key.class);
 		when(rr.getKey(businessId1)).thenReturn(businessKey1 );
 		when(businesses.contains(businessKey1)).thenReturn(true);
 		when(ar.hashPassword(accountData.getPassword())).thenReturn("hashedpassword");
@@ -973,7 +973,7 @@ public class AccountControllerTest {
 		// We test the update of a cockpit account.
 		newAccount.setRole(Role.BUSINESSADMIN);
 		newAccount.setCompany(companyKey);
-		List<Key<Location>> businesses = mock(List.class);
+		List<Key<Business>> businesses = mock(List.class);
 		newAccount.setBusinesses(businesses);
 		
 		ctr.deleteCompanyUserAccount(newAccount);

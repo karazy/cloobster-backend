@@ -25,7 +25,7 @@ import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Subscription;
@@ -51,7 +51,7 @@ public class LocationResource {
 	private CheckIn checkIn;
 	private Account account;
 	
-	private Location business;
+	private Business business;
 	
 	private MenuController menuCtrl;
 	private OrderController orderCtrl;
@@ -81,7 +81,7 @@ public class LocationResource {
 		this.checkIn = checkIn;
 	}
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 	

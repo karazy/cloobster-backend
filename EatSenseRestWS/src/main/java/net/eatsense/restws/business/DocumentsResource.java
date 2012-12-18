@@ -31,7 +31,7 @@ import com.google.inject.Inject;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.DocumentController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.embedded.DocumentStatus;
 import net.eatsense.exceptions.NotFoundException;
@@ -42,7 +42,7 @@ import net.eatsense.representation.DocumentDTO;
 public class DocumentsResource {
 	
 	private final DocumentController docCtrl;
-	private Location business;
+	private Business business;
 	private Account account;
 	private final BlobstoreService blobStoreService;
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -131,11 +131,11 @@ public class DocumentsResource {
 		docCtrl.delete(business.getKey(), id);
 	}
 
-	public Location getBusiness() {
+	public Business getBusiness() {
 		return business;
 	}
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 

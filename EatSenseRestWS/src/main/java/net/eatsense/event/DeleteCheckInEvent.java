@@ -1,20 +1,20 @@
 package net.eatsense.event;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 
 public class DeleteCheckInEvent extends CheckInEvent {
 
-	protected final Location business;
+	protected final Business business;
 	private boolean checkOut;
 
-	public DeleteCheckInEvent(CheckIn checkIn, Location business, boolean checkOut) {
+	public DeleteCheckInEvent(CheckIn checkIn, Business business, boolean checkOut) {
 		super(checkIn);
 		this.business= business;
 		this.checkOut = checkOut;
 	}
 	
-	public Location getBusiness() {
+	public Business getBusiness() {
 		return business;
 	}
 

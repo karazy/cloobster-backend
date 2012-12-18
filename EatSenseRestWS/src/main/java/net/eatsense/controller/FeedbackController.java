@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
@@ -46,7 +46,7 @@ public class FeedbackController {
 	 * @param business
 	 * @return The feedback form dto.
 	 */
-	public FeedbackFormDTO getFeedbackFormForBusiness(Location business) {
+	public FeedbackFormDTO getFeedbackFormForBusiness(Business business) {
 		checkNotNull(business, "business was null");
 		if(business.getFeedbackForm() == null) {
 			throw new net.eatsense.exceptions.NotFoundException("business has no feedback form");
@@ -69,7 +69,7 @@ public class FeedbackController {
 	 * @param feedbackData - Transfer object containing the data for the entity.
 	 * @return Transfer object representing the new Feedback entity.
 	 */
-	public Feedback addFeedback(Location business, CheckIn checkIn,
+	public Feedback addFeedback(Business business, CheckIn checkIn,
 			FeedbackDTO feedbackData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(feedbackData, "feedbackData was null");

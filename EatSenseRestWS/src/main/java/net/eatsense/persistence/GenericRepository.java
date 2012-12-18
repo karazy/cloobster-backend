@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.GenericEntity;
 import net.eatsense.domain.TranslatedEntity;
 import net.eatsense.domain.TrashEntry;

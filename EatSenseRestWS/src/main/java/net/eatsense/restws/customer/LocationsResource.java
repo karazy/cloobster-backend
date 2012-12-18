@@ -12,7 +12,7 @@ import javax.ws.rs.core.Context;
 
 import net.eatsense.HttpMethods;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.LocationRepository;
@@ -47,7 +47,7 @@ public class LocationsResource{
 
 	@Path("{businessId}")
 	public LocationResource getBusinessResource(@PathParam("businessId") Long businessId) {
-		Location business;
+		Business business;
 		try {
 			business = businessRepo.getById(businessId);
 		} catch (com.googlecode.objectify.NotFoundException e) {

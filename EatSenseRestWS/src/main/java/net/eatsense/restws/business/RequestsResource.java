@@ -14,7 +14,7 @@ import javax.ws.rs.core.Context;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.RequestController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.representation.RequestDTO;
 
@@ -29,7 +29,7 @@ public class RequestsResource {
 	private LocationController businessCtrl;
 	private final RequestController requestCtrl;
 
-	private Location business;
+	private Business business;
 
 	@Inject
 	public RequestsResource(LocationController checkInController, RequestController requestCtrl) {
@@ -60,7 +60,7 @@ public class RequestsResource {
 		}
 	}
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 }

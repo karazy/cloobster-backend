@@ -16,7 +16,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Request;
@@ -142,7 +142,7 @@ public class CheckInController {
 				throw new NotFoundException();
 			}
 
-			Location business = businessRepo.getByKey(spot.getBusiness());
+			Business business = businessRepo.getByKey(spot.getBusiness());
 			if(business.isTrash()) {
 				throw new NotFoundException("Business is locked");
 			}
@@ -201,7 +201,7 @@ public class CheckInController {
 		if(spot == null )
     		throw new ValidationException("Unable to create checkin, spot barcode unknown");
     	
-    	Location business = businessRepo.getByKey(spot.getBusiness());
+    	Business business = businessRepo.getByKey(spot.getBusiness());
 		
     	CheckIn checkIn = new CheckIn();
     	
@@ -432,7 +432,7 @@ public class CheckInController {
 	 * @param spotId
 	 * @return collection of checkin status DTOs
 	 */
-	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Location business, long spotId) {
+	public Collection<CheckInStatusDTO> getCheckInStatusesBySpot(Business business, long spotId) {
 		checkNotNull(business, "business was null");
 		checkArgument(spotId != 0, "spotId was 0");
 		return transform.toStatusDtos( checkInRepo.getBySpot(Spot.getKey(business.getKey(), spotId)));
@@ -445,7 +445,7 @@ public class CheckInController {
 	 * @param checkInId
 	 * @return 
 	 */
-	public CheckInStatusDTO deleteCheckIn(Location business, long checkInId) {
+	public CheckInStatusDTO deleteCheckIn(Business business, long checkInId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -503,7 +503,7 @@ public class CheckInController {
 	 * @param checkInData
 	 * @return updated checkin data
 	 */
-	public CheckInStatusDTO updateCheckInAsBusiness(Location business, long checkInId, CheckInStatusDTO checkInData) {
+	public CheckInStatusDTO updateCheckInAsBusiness(Business business, long checkInId, CheckInStatusDTO checkInData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -566,7 +566,7 @@ public class CheckInController {
 		ArrayList<VisitDTO> visitDTOList = new ArrayList<VisitDTO>();
 		
 		for (CheckIn checkIn : checkInQuery) {
-			Location business = businessRepo.getByKey(checkIn.getBusiness());
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
 			Bill bill = billRepo.getByProperty("checkIn", checkIn);
 			visitDTOList.add( new VisitDTO(checkIn, business, bill));
 		}
@@ -615,7 +615,7 @@ public class CheckInController {
 	 * @param limit
 	 * @return
 	 */
-	public List<CheckInHistoryDTO> getHistory(Key<Location> businessKey, long areaId, int start, int limit) {
+	public List<CheckInHistoryDTO> getHistory(Key<Business> businessKey, long areaId, int start, int limit) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		Query<CheckIn> checkInQuery = checkInRepo.query().order("-id").offset(start).limit(limit);

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
@@ -39,7 +39,7 @@ public class SpotController {
 	 * @param spotsData
 	 * @return List of auto generated Spots
 	 */
-	public List<Spot> createSpots(Key<Location> businessKey, SpotsData spotsData) {
+	public List<Spot> createSpots(Key<Business> businessKey, SpotsData spotsData) {
 		checkNotNull(spotsData);		
 		validator.validate(spotsData);
 		
@@ -75,7 +75,7 @@ public class SpotController {
 	 * @param spotIds
 	 * @return 
 	 */
-	private List<Key<Spot>> createKeys(Key<Location> businessKey, List<Long> spotIds) {
+	private List<Key<Spot>> createKeys(Key<Business> businessKey, List<Long> spotIds) {
 		ArrayList<Key<Spot>> spotKeys = new ArrayList<Key<Spot>>();
 		
 		for (Long spotId : spotIds) {
@@ -90,7 +90,7 @@ public class SpotController {
 	 * @param spotsData
 	 * @return
 	 */
-	public List<Spot> updateSpots(Key<Location> businessKey, List<Long> spotIds, boolean active) {
+	public List<Spot> updateSpots(Key<Business> businessKey, List<Long> spotIds, boolean active) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(spotIds, "spotIds were null");
 		
@@ -117,7 +117,7 @@ public class SpotController {
 	 * @param spotIds
 	 * @return
 	 */
-	public List<Spot> deleteSpots(Key<Location> businessKey, List<Long> spotIds, Account account) {
+	public List<Spot> deleteSpots(Key<Business> businessKey, List<Long> spotIds, Account account) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(spotIds, "spotIds were null");
 		

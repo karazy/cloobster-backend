@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
@@ -72,7 +72,7 @@ public class InfoPageGenerator {
 		this.localizationProvider = localizationProvider;
 	}
 	
-	public List<InfoPageDTO> generate(Key<Location> businessKey, int count) {
+	public List<InfoPageDTO> generate(Key<Business> businessKey, int count) {
 		
 		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
 		List<InfoPage> infoPages = new ArrayList<InfoPage>();

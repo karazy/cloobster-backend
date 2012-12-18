@@ -46,7 +46,7 @@ public class Choice extends GenericEntity<Choice> {
 
 	@Parent
 	@NotNull
-	Key<Location> business;
+	Key<Business> business;
 
 	Key<Product> product;
 
@@ -78,7 +78,7 @@ public class Choice extends GenericEntity<Choice> {
 	 */
 	private Integer order;
 	
-	public Key<Location> getBusiness() {
+	public Key<Business> getBusiness() {
 		return business;
 	}
 
@@ -123,7 +123,7 @@ public class Choice extends GenericEntity<Choice> {
 		return order;
 	}
 	
-	public void setBusiness(Key<Location> business) {
+	public void setBusiness(Key<Business> business) {
 		this.business = business;
 	}
 	
@@ -190,7 +190,7 @@ public class Choice extends GenericEntity<Choice> {
 		}		
 	}
 
-	public static Key<Choice> getKey(Key<Location> parent, long id) {
+	public static Key<Choice> getKey(Key<Business> parent, long id) {
 		return new Key<Choice>(parent,Choice.class, id);
 	}
 }

@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.LocationRepository;
@@ -55,7 +55,7 @@ public class ChannelControllerTest {
     @Mock
     private ChannelService channelService;
     @Mock
-	private Location business;
+	private Business business;
 	@Mock
 	private ObjectMapper jsonMapper;
 
@@ -180,7 +180,7 @@ public class ChannelControllerTest {
 	@Test
 	public void testSubscribeToBusiness() throws Exception {
 		long businessId = 1;
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		Set<Channel> channelList = new HashSet<Channel>();
 		when(business.getChannels()).thenReturn(channelList );
 		when(rr.getById(businessId)).thenReturn(business);
@@ -210,7 +210,7 @@ public class ChannelControllerTest {
 	@Test
 	public void testUnsubscribeFromBusinessValidButUnknownClientId() throws Exception {
 		long businessId = 1;
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		Set<Channel> channelList = new HashSet<Channel>();
 		channelList.add(Channel.fromClientId("clientid1"));
 		when(business.getChannels()).thenReturn(channelList );
@@ -224,7 +224,7 @@ public class ChannelControllerTest {
 	@Test
 	public void testUnsubscribeFromBusiness() throws Exception {
 		long businessId = 1;
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		Set<Channel> channelList = new HashSet<Channel>();
 		String clientId = ctr.buildCockpitClientId(businessId, "test");
 		Channel channel = Channel.fromClientId(clientId);
@@ -341,7 +341,7 @@ public class ChannelControllerTest {
 	
 	@Test
 	public void testSendMessagesEmptyContent() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessages(business, new ArrayList<MessageDTO>());
 		
 		verify(channelService, never()).sendMessage(any(ChannelMessage.class));
@@ -349,7 +349,7 @@ public class ChannelControllerTest {
 	
 	@Test
 	public void testSendMessagesNullContent() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessages(business, null);
 		
 		verify(channelService, never()).sendMessage(any(ChannelMessage.class));
@@ -363,7 +363,7 @@ public class ChannelControllerTest {
 	
 	@Test
 	public void testSendMessages() throws Exception {
-		business = mock(Location.class);
+		business = mock(Business.class);
 		
 		Set<Channel> channelList = new HashSet<Channel>();
 		when(business.getChannels()).thenReturn(channelList);
@@ -392,7 +392,7 @@ public class ChannelControllerTest {
 	
 	@Test(expected = NullPointerException.class)
 	public void testSendMessageNullContent() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessage(business, null);
 	}
 	
@@ -405,37 +405,37 @@ public class ChannelControllerTest {
 	
 	@Test
 	public void testSendMessageNullMessageContent() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessage(business, new MessageDTO("type","action", null));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendMessageEmptyAction() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessage(business, new MessageDTO("type","", null));
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void testSendMessageNullAction() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessage(business, new MessageDTO("type",null, null));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendMessageEmptyType() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessage(business, new MessageDTO("","testaction", null));
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void testSendMessageNullType() throws Exception {
-		Location business = mock(Location.class);
+		Business business = mock(Business.class);
 		ctr.sendMessage(business, new MessageDTO(null,"testaction", null));
 	}
 	
 	@Test
 	public void testSendMessage() throws Exception {
-		business = mock(Location.class);
+		business = mock(Business.class);
 		
 		Set<Channel> channelList = new HashSet<Channel>();
 		when(business.getChannels()).thenReturn(channelList);

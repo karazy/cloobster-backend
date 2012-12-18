@@ -24,7 +24,7 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -87,7 +87,7 @@ public class CheckInControllerTest {
 	@Mock
 	private ObjectMapper mapper;
 	@Mock
-	private Location business;
+	private Business business;
 	
 	@Mock
 	private RequestRepository requestRepo;
@@ -98,7 +98,7 @@ public class CheckInControllerTest {
 	@Mock
 	private Spot spot;
 	@Mock
-	Key<Location> businessKey;
+	Key<Business> businessKey;
 	@Mock
 	Key<Spot> spotKey;
 	
@@ -581,7 +581,7 @@ public class CheckInControllerTest {
 		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
 		when(checkIn.getBusiness()).thenReturn(businessKey);
 		@SuppressWarnings("unchecked")
-		Key<Location> anotherBusiness = mock(Key.class);
+		Key<Business> anotherBusiness = mock(Key.class);
 		when(business.getKey()).thenReturn(anotherBusiness);
 		
 		thrown.expect(IllegalArgumentException.class);
@@ -702,7 +702,7 @@ public class CheckInControllerTest {
 		CheckInStatusDTO checkInData = new CheckInStatusDTO();
 		CheckIn checkIn = mock (CheckIn.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> anotherBusiness = mock(Key.class);
+		Key<Business> anotherBusiness = mock(Key.class);
 		
 		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
 		when(checkIn.getBusiness()).thenReturn(businessKey);

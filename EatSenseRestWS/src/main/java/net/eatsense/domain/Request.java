@@ -49,7 +49,7 @@ public class Request extends GenericEntity<Request> {
 	private String checkInName;
 	
 	@Parent
-	private Key<Location> business;
+	private Key<Business> business;
 	
 	private Date receivedTime;
 	
@@ -102,10 +102,10 @@ public class Request extends GenericEntity<Request> {
 	public void setCheckIn(Key<CheckIn> checkIn) {
 		this.checkIn = checkIn;
 	}
-	public Key<Location> getBusiness() {
+	public Key<Business> getBusiness() {
 		return business;
 	}
-	public void setBusiness(Key<Location> business) {
+	public void setBusiness(Key<Business> business) {
 		this.business = business;
 	}
 	public RequestType getType() {
@@ -148,7 +148,7 @@ public class Request extends GenericEntity<Request> {
 	
 	@Transient
 	@JsonIgnore
-	public static Key<Request> getKey(Key<Location> parent, Long id) {
+	public static Key<Request> getKey(Key<Business> parent, Long id) {
 		
 		return new Key<Request>(parent, Request.class, id);
 	}

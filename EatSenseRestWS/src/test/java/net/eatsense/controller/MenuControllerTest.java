@@ -19,7 +19,7 @@ import java.util.List;
 import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
@@ -77,7 +77,7 @@ public class MenuControllerTest {
     private DummyDataDumper ddd;
     private SpotRepository spotRepo;
 	
-	private Location business;
+	private Business business;
 
 	@Mock
 	private AreaRepository areaRepo;
@@ -123,7 +123,7 @@ public class MenuControllerTest {
 		newSetUp();
 		
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock(Key.class);
+		Key<Business> businessKey = mock(Key.class);
 		long choiceId = 1l;
 		long productId = 1l;
 		Product product = mock(Product.class);
@@ -156,7 +156,7 @@ public class MenuControllerTest {
 		//TODO Remove after refactoring test class.
 		newSetUp();
 		
-		Key<Location> businessKey = mock(Key.class);
+		Key<Business> businessKey = mock(Key.class);
 		long choiceId = 1l;
 		long productId = 1l;
 		Product product = mock(Product.class);
@@ -180,7 +180,7 @@ public class MenuControllerTest {
 		//TODO Remove after refactoring test class.
 		newSetUp();
 		
-		Key<Location> businessKey = mock(Key.class);
+		Key<Business> businessKey = mock(Key.class);
 		long choiceId = 1l;
 		long productId = 1l;
 		Product product = mock(Product.class);
@@ -290,9 +290,9 @@ public class MenuControllerTest {
 	public void testUpdateChoicePrice() throws Exception {
 		//TODO Remove after refactoring test class.
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -337,9 +337,9 @@ public class MenuControllerTest {
 	public void testUpdateChoiceText() throws Exception {
 		//TODO Remove after refactoring test class.
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -384,9 +384,9 @@ public class MenuControllerTest {
 	public void testUpdateChoiceOverridePriceFlag() throws Exception {
 		//TODO Remove after refactoring test class.
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -430,9 +430,9 @@ public class MenuControllerTest {
 	public void testUpdateChoiceOptions() throws Exception {
 		//TODO Remove after refactoring test class.
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -478,9 +478,9 @@ public class MenuControllerTest {
 	public void testUpdateChoiceMinOccurence() throws Exception {
 		//TODO Remove after refactoring test class.
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -523,9 +523,9 @@ public class MenuControllerTest {
 	@Test
 	public void testUpdateChoiceMaxOccurence() throws Exception {
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -567,9 +567,9 @@ public class MenuControllerTest {
 	@Test
 	public void testUpdateChoiceIncluded() throws Exception {
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -612,9 +612,9 @@ public class MenuControllerTest {
 	@Test
 	public void testUpdateChoiceNoChanges() throws Exception {
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		when(business.getKey()).thenReturn(businessKey);
 		Choice choice = new Choice();
@@ -656,9 +656,9 @@ public class MenuControllerTest {
 	@Test
 	public void testCreateChoice() throws Exception {
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		ChoiceDTO data = getTestChoiceData();
 		
 		when(business.getKey()).thenReturn(businessKey);
@@ -750,7 +750,7 @@ public class MenuControllerTest {
 	public void testUpdateProductActiveStatus() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -779,7 +779,7 @@ public class MenuControllerTest {
 	public void testUpdateProductLongDesc() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -807,7 +807,7 @@ public class MenuControllerTest {
 	public void testUpdateProductShortDesc() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -835,7 +835,7 @@ public class MenuControllerTest {
 	public void testUpdateProductMenu() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
@@ -865,7 +865,7 @@ public class MenuControllerTest {
 	public void testUpdateProductPrice() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -893,7 +893,7 @@ public class MenuControllerTest {
 	public void testUpdateProductOrder() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -921,7 +921,7 @@ public class MenuControllerTest {
 	public void testUpdateProductChoices() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -959,7 +959,7 @@ public class MenuControllerTest {
 	public void testUpdateProductName() throws Exception {
 		newSetUp();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		@SuppressWarnings("unchecked")
 		Key<Menu> menuKey = mock (Key.class);
 			
@@ -986,9 +986,9 @@ public class MenuControllerTest {
 	@Test
 	public void testCreateProduct() throws Exception {
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		when(business.getKey()).thenReturn(businessKey );
 
 		ProductDTO testProductData = getTestProductData();
@@ -1017,9 +1017,9 @@ public class MenuControllerTest {
 	@Test
 	public void testCreateMenu() throws Exception {
 		newSetUp();
-		business = mock(Location.class);
+		business = mock(Business.class);
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock (Key.class);
+		Key<Business> businessKey = mock (Key.class);
 		when(business.getKey()).thenReturn(businessKey );
 		
 		MenuDTO testMenuData = getTestMenuData();

@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.eatsense.documents.SpotPurePDFGenerator;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.DocumentStatus;
@@ -65,7 +65,7 @@ public class DocumentController {
 	 * @return
 	 * 	Document object with generated id.
 	 */
-	public DocumentDTO createDocument(Key<Location> businessKey, DocumentDTO docData) {
+	public DocumentDTO createDocument(Key<Business> businessKey, DocumentDTO docData) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(docData, "docData was null");
 		
@@ -113,7 +113,7 @@ public class DocumentController {
 	 * @return
 	 * 	List of all documents.
 	 */
-	public List<DocumentDTO> getAll(Key<Location> businessKey) {
+	public List<DocumentDTO> getAll(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
 		List<Document> docs;
 		
@@ -134,7 +134,7 @@ public class DocumentController {
 	 * @param businessKey Parent key
 	 * @param id for the Document entity to delete
 	 */
-	public void delete(Key<Location> businessKey, Long id) {
+	public void delete(Key<Business> businessKey, Long id) {
 		checkNotNull(businessKey, "business was null");
 		checkArgument(id != 0, "id was 0");
 		
@@ -161,7 +161,7 @@ public class DocumentController {
 	 * @param id
 	 * @return Document entity saved with this id
 	 */
-	public Document get(Key<Location> businessKey, Long id) {
+	public Document get(Key<Business> businessKey, Long id) {
 		try {
 			return docRepo.getById(businessKey, id);
 		} catch (NotFoundException e) {

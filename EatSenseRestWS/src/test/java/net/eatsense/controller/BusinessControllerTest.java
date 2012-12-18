@@ -27,7 +27,7 @@ import net.eatsense.configuration.Configuration;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.embedded.CheckInStatus;
@@ -105,7 +105,7 @@ public class BusinessControllerTest {
 
 	private CheckIn checkIn;
 
-	private Location business;
+	private Business business;
 
 	private AccountRepository accountRepo;
 
@@ -445,10 +445,10 @@ public class BusinessControllerTest {
 		businessData.setPaymentMethods(paymentMethods );
 		
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey= mock(Key.class);
+		Key<Business> businessKey= mock(Key.class);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		
-		Key<Location> key = businessCtrl.updateBusiness(business, businessData );
+		Key<Business> key = businessCtrl.updateBusiness(business, businessData );
 		
 		verify(rr).saveOrUpdate(business);
 		assertThat(key, is(businessKey));
@@ -557,7 +557,7 @@ public class BusinessControllerTest {
 		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = new Location();
+		business = new Business();
 		businessCtrl = createController();
 		Configuration config = mock(Configuration.class);
 		when(configProvider.get()).thenReturn(config );
@@ -573,13 +573,13 @@ public class BusinessControllerTest {
 		
 		// Mock arguments and stub method calls.
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock(Key.class);
+		Key<Business> businessKey = mock(Key.class);
 		when(rr.getKey(business)).thenReturn(businessKey);
 		// Return the mocked class, when the controller retrieves the new instance.
 		when(rr.newEntity()).thenReturn(business);
 		Account account = mock(Account.class);
 		// Create the list here to check the contents after the test.
-		List<Key<Location>> businessesList = new ArrayList<Key<Location>>();
+		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		when(account.getBusinesses()).thenReturn(businessesList);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		LocationProfileDTO testProfileData = getTestProfileData();
@@ -604,9 +604,9 @@ public class BusinessControllerTest {
 		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = new Location();
+		business = new Business();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock(Key.class);
+		Key<Business> businessKey = mock(Key.class);
 		when(rr.getKey(business)).thenReturn(businessKey);
 		when(rr.newEntity()).thenReturn(business);
 		businessCtrl = createController();
@@ -615,7 +615,7 @@ public class BusinessControllerTest {
 		when(configProvider.get()).thenReturn(config );
 		
 		Account account = mock(Account.class);
-		List<Key<Location>> businessesList = new ArrayList<Key<Location>>();
+		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		// First we return null, to test the case of no businesses added.
 		when(account.getBusinesses()).thenReturn(null, businessesList );
 		
@@ -635,7 +635,7 @@ public class BusinessControllerTest {
 	public void testUpdateBusinessImage() throws Exception {
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = mock(Location.class);
+		business = mock(Business.class);
 				
 		businessCtrl = createController();
 		// Mocks for method arguments.
@@ -662,7 +662,7 @@ public class BusinessControllerTest {
 	public void testUpdateBusinessImageNoChanges() throws Exception {
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = mock(Location.class);
+		business = mock(Business.class);
 				
 		businessCtrl = createController();
 		// Mocks for method arguments.
@@ -688,7 +688,7 @@ public class BusinessControllerTest {
 	public void testRemoveBusinessImageNoChanges() throws Exception {
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = mock(Location.class);
+		business = mock(Business.class);
 				
 		businessCtrl = createController();
 		List<ImageDTO> images = mock(List.class);
@@ -704,7 +704,7 @@ public class BusinessControllerTest {
 	public void testRemoveBusinessImage() throws Exception {
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
-		business = mock(Location.class);
+		business = mock(Business.class);
 				
 		businessCtrl = createController();
 		List<ImageDTO> images = mock(List.class);
@@ -727,7 +727,7 @@ public class BusinessControllerTest {
 		AreaDTO areaData = getTestAreaData();
 		Area area = new Area();
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey = mock(Key.class);
+		Key<Business> businessKey = mock(Key.class);
 		area.setBusiness(businessKey );
 		// test update of description
 		area.setDescription("Another description.");
@@ -809,7 +809,7 @@ public class BusinessControllerTest {
 	public void testCreateArea() throws Exception {
 		
 		@SuppressWarnings("unchecked")
-		Key<Location> businessKey= mock(Key.class);
+		Key<Business> businessKey= mock(Key.class);
 		Area area = new Area();
 		when(areaRepo.newEntity()).thenReturn(area);
 		

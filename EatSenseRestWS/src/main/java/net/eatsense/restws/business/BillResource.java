@@ -8,7 +8,7 @@ import javax.ws.rs.Produces;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.BillDTO;
 
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class BillResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private BillController billController;
-	private Location business;
+	private Business business;
 
 	private Bill bill;
 
@@ -38,7 +38,7 @@ public class BillResource {
 		return billController.updateBill(business, bill, billData);
 	}
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
@@ -218,7 +218,7 @@ public class Transformer {
 		dto.setUserId(checkIn.getUserId());
 		
 		if(loadAll) {
-			Location business = businessRepo.getByKey(checkIn.getBusiness());
+			Business business = businessRepo.getByKey(checkIn.getBusiness());
 			dto.setBusinessName(business.getName());
 		}
 		

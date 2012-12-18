@@ -3,13 +3,13 @@ package net.eatsense.event;
 import com.google.common.base.Optional;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 
 public class UpdateBillEvent extends BillEvent {
 	private Optional<String> newSpotStatus;
 		
-	public UpdateBillEvent(Location business, Bill bill, CheckIn checkIn) {
+	public UpdateBillEvent(Business business, Bill bill, CheckIn checkIn) {
 		super(business, bill, checkIn);
 		newSpotStatus = Optional.absent();
 	}

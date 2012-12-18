@@ -8,7 +8,7 @@ import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.OrderController;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Order;
 import net.eatsense.representation.OrderDTO;
 
@@ -32,13 +32,13 @@ public class OrderResource {
 	private OrderController orderController;
 	
 	private Order order;
-	private Location business;
+	private Business business;
 
 	public void setOrder(Order order) {
 		this.order = order;
 	}
 
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 

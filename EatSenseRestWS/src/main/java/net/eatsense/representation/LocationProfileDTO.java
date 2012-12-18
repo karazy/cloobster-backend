@@ -6,7 +6,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Company;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 
 import org.apache.bval.constraints.NotEmpty;
 
@@ -27,7 +27,7 @@ public class LocationProfileDTO extends LocationDTO {
 	
 	/**
 	 * Maps to a json object images.{id}.
-	 * Containing {@link Location#images}
+	 * Containing {@link Business#images}
 	 */
 	private LinkedHashMap<String,ImageDTO> images;
 	
@@ -47,7 +47,7 @@ public class LocationProfileDTO extends LocationDTO {
 	/**
 	 * @param business - Business entity to copy the data from.
 	 */
-	public LocationProfileDTO(Location business) {
+	public LocationProfileDTO(Business business) {
 		super(business);
 		this.address = business.getAddress();
 		this.city = business.getCity();
@@ -130,10 +130,10 @@ public class LocationProfileDTO extends LocationDTO {
 		this.stars = stars;
 	}
 	
-	public final static Function<Location, LocationProfileDTO> toDTO = 
-			new Function<Location, LocationProfileDTO>() {
+	public final static Function<Business, LocationProfileDTO> toDTO = 
+			new Function<Business, LocationProfileDTO>() {
 				@Override
-				public LocationProfileDTO apply(Location input) {
+				public LocationProfileDTO apply(Business input) {
 					return new LocationProfileDTO(input);
 				}
 		    };

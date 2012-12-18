@@ -23,7 +23,7 @@ import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
@@ -188,9 +188,9 @@ public class AdminResource {
 			logger.info("Rewriting account with id: {}", account.getId());
 			if(account.getId().longValue() == 12) {
 				if(account.getBusinesses() == null) {
-					account.setBusinesses(new ArrayList<Key<Location>>());
+					account.setBusinesses(new ArrayList<Key<Business>>());
 				}
-				 Key<Location> orientalKey = new Key<Location>(Location.class, 10002);
+				 Key<Business> orientalKey = new Key<Business>(Business.class, 10002);
 				 logger.info("adding business {} to demo account", orientalKey);
 				 if(!account.getBusinesses().contains(orientalKey)) {
 					 account.getBusinesses().add(orientalKey);
@@ -206,7 +206,7 @@ public class AdminResource {
 	@Produces("application/json; charset=UTF-8")
 	public List<LocationDTO> getBusinesses() {
 		List<LocationDTO> businesses = new ArrayList<LocationDTO>();
-		for (Location business : businessRepo.getAll()) {
+		for (Business business : businessRepo.getAll()) {
 			businesses.add(new LocationDTO(business));
 		}
 		return businesses;
@@ -283,7 +283,7 @@ public class AdminResource {
 	@Produces("application/json; charset=UTF-8")
 	public MessageDTO sendCockpitUpdateMessage(MessageDTO message) {
 		
-		for(Location business :  businessRepo.query()) {
+		for(Business business :  businessRepo.query()) {
 			channelCtrl.sendMessage(business, message);
 		}
 		
@@ -294,7 +294,7 @@ public class AdminResource {
 	@Path("businesses/{businessId}/infopages/{count}")
 	@Produces("application/json; charset=UTF-8")
 	public List<InfoPageDTO> generateInfoPages(@PathParam("businessId")Long businessId, @PathParam("count") int count) {
-		return infoPageGen.get().generate(Location.getKey(businessId), count );
+		return infoPageGen.get().generate(Business.getKey(businessId), count );
 	}
 	
 	/**

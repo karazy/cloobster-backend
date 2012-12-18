@@ -16,7 +16,7 @@ import org.quartz.xml.ValidationException;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.representation.BillDTO;
 
 import com.google.inject.Inject;
@@ -28,14 +28,14 @@ public class BillsResource {
 	private ResourceContext resourceContext;
 	
 	private BillController billController;
-	private Location business;
+	private Business business;
 		
 	@Inject
 	public BillsResource(BillController billController) {
 		this.billController = billController;
 	}
 	
-	public void setBusiness(Location business) {
+	public void setBusiness(Business business) {
 		this.business = business;
 	}
 	

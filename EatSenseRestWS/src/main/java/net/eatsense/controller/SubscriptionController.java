@@ -1,7 +1,7 @@
 package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.NewLocationEvent;
@@ -134,7 +134,7 @@ public class SubscriptionController {
 		}
 	}
 	
-	public Subscription getActiveSubscription(Location business) {
+	public Subscription getActiveSubscription(Business business) {
 		if(business.getActiveSubscription() == null) {
 			return null;
 		}

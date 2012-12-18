@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import java.util.Date;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Product;
 
 import org.apache.bval.guice.ValidationModule;
@@ -42,7 +42,7 @@ public class TrashEntityTest {
 	@Test
 	public void testSaveNewTrashEntryAndDelete() throws Exception {
 		Product product = productRepo.newEntity();
-		product.setBusiness(new Key<Location>(Location.class, 1));
+		product.setBusiness(new Key<Business>(Business.class, 1));
 		product.setName("test product");
 		productRepo.saveOrUpdate(product);
 		assertThat(productRepo.getAll().isEmpty(), is(false));
@@ -55,7 +55,7 @@ public class TrashEntityTest {
 	@Test
 	public void testMixedEntries() throws Exception {
 		Product product = productRepo.newEntity();
-		Location business = businessRepo.newEntity();
+		Business business = businessRepo.newEntity();
 		business.setName("test business");
 		
 		product.setBusiness(businessRepo.saveOrUpdate(business));

@@ -9,7 +9,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
 
 public class MenuRepository extends GenericRepository<Menu> {
@@ -19,12 +19,12 @@ public class MenuRepository extends GenericRepository<Menu> {
 		super(Menu.class);
 	}
 	
-	public List<Menu> getActiveMenusForBusiness(Key<Location> businessKey) {
+	public List<Menu> getActiveMenusForBusiness(Key<Business> businessKey) {
 		logger.info("business: {}", businessKey);
 		return ofy().query(Menu.class).ancestor(businessKey).filter("active", true).list();
 	}
 	
-	public List<Menu> getActiveMenusForBusinessAndArea(Key<Location> businessKey, long areaId) {
+	public List<Menu> getActiveMenusForBusinessAndArea(Key<Business> businessKey, long areaId) {
 		logger.info("areaId: {}",areaId);
 		Area area;
 		try {

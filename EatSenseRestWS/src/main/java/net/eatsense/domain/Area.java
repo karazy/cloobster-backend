@@ -14,7 +14,7 @@ public class Area extends GenericEntity<Area> {
 	private String description;
 	
 	@Parent
-	private Key<Location> business;
+	private Key<Business> business;
 	
 	private List<Key<Menu>> menus;
 	
@@ -53,11 +53,11 @@ public class Area extends GenericEntity<Area> {
 		}
 	}
 
-	public Key<Location> getBusiness() {
+	public Key<Business> getBusiness() {
 		return business;
 	}
 
-	public void setBusiness(Key<Location> business) {
+	public void setBusiness(Key<Business> business) {
 		if(!Objects.equal(this.business, business)) {
 			this.setDirty(true);
 			this.business = business;

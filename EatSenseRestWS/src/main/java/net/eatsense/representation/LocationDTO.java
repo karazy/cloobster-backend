@@ -9,7 +9,7 @@ import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Strings;
 
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.PaymentMethod;
 
 public class LocationDTO {
@@ -42,7 +42,7 @@ public class LocationDTO {
 		super();
 	}
 	
-	public LocationDTO(Location business) {
+	public LocationDTO(Business business) {
 		if(business == null)
 			return;
 		this.name = business.getName();

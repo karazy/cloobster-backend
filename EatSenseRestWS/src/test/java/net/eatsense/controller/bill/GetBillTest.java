@@ -12,7 +12,7 @@ import net.eatsense.controller.BillController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Location;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Product;
@@ -58,7 +58,7 @@ public class GetBillTest {
 	private BillRepository br;
 
 	private CheckIn checkIn;
-	private Location business;
+	private Business business;
 	private SpotDTO spotDto;
 
 	private BillDTO billData;
@@ -211,14 +211,14 @@ public class GetBillTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testGetBillNullBusinessId() {
-		business = new Location();
+		business = new Business();
 		
 		billCtrl.getBill(business, billData.getId());
 	}
 	
 	@Test
 	public void testGetBillUnknownBusinessId() {
-		business = new Location();
+		business = new Business();
 		business.setId(12345l);
 		assertThat(billCtrl.getBill(business, billData.getId()), nullValue());
 	}
