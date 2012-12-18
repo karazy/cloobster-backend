@@ -28,7 +28,7 @@ public class SubscriptionTemplatesResource {
 
 	@GET
 	@Produces("application/json")
-	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate, @QueryParam("businessId") Long businessId, @QueryParam("status") SubscriptionStatus status) {
+	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate, @QueryParam("businessId") long businessId, @QueryParam("status") SubscriptionStatus status) {
 		return Iterables.transform(subCtrl.get(isTemplate, businessId, status), SubscriptionDTO.toDTO);
 	}
 	
