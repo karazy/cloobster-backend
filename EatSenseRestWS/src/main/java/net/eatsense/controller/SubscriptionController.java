@@ -1,6 +1,9 @@
 package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Date;
+
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
@@ -40,10 +43,19 @@ public class SubscriptionController {
 	}
 	
 	/**
-	 * @return All saved Subscription packages
+	 * @param template return only Subscription entities flagged as template
+	 * @return All saved Subscription entities 
 	 */
 	public Iterable<Subscription> getAll(boolean template) {
 		return ofy.query(Subscription.class).filter("template", template).fetch();
+	}
+	
+	/**
+	 * @param businessId
+	 * @return All Subscriptions for this entity.
+	 */
+	public Iterable<Subscription> get(long businessId) {
+		return ofy.query(Subscription.class).filter("business", Business.getKey(businessId));
 	}
 	
 	/**
@@ -122,18 +134,49 @@ public class SubscriptionController {
 		ofy.delete(Subscription.class, id);
 	}
 	
+	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status, Key<Business> businessKey) {
+		checkNotNull(template, "subscription template was null");
+		checkNotNull(status, "status was null");
+		checkNotNull(businessKey, "businessKey was null");
+		
+		Subscription subscription = new Subscription();
+		
+		if(status == SubscriptionStatus.APPROVED) {
+			subscription.setStartDate(new Date());
+			
+		}
+		
+		subscription.setStatus(status);
+		subscription.setBasic(template.isBasic());
+		subscription.setBusiness(businessKey);
+		subscription.setFee(template.getFee());
+		subscription.setMaxSpotCount(template.getMaxSpotCount());
+		subscription.setName(template.getName());
+		subscription.setTemplate(false);
+		subscription.setTemplateKey(template.getKey());
+		
+		ofy.put(subscription);
+		
+		return subscription;
+	}
+	
 	@Subscribe
 	public void handleNewBusinessEvent(NewLocationEvent event) {
-		Key<Subscription> basicSubscriptionKey = ofy.query(Subscription.class).filter("template", true).filter("basic", true).getKey();
+		Subscription basicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
 		
-		if(basicSubscriptionKey == null) {
+		if(basicSubscription == null) {
 			logger.warn("No Subscription flagged as basic found for setting at new business");
 		}
 		else {
-			event.getLocation().setActiveSubscription(basicSubscriptionKey);
+			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation().getKey());
+			event.getLocation().setActiveSubscription( newSubscription.getKey());
 		}
 	}
 	
+	/**
+	 * @param business
+	 * @return
+	 */
 	public Subscription getActiveSubscription(Business business) {
 		if(business.getActiveSubscription() == null) {
 			return null;

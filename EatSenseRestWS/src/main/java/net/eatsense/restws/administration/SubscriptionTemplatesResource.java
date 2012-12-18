@@ -1,6 +1,5 @@
 package net.eatsense.restws.administration;
 
-import javax.activation.MimeType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,25 +10,28 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import com.google.common.collect.Iterables;
-import com.google.inject.Inject;
-
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.representation.SubscriptionDTO;
 
-public class SubscriptionPackageResource {
+import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
+
+public class SubscriptionTemplatesResource {
 	private final SubscriptionController subCtrl;
 	
 	@Inject
-	public SubscriptionPackageResource(SubscriptionController subCtrl) {
+	public SubscriptionTemplatesResource(SubscriptionController subCtrl) {
 		super();
 		this.subCtrl = subCtrl;
 	}
 
 	@GET
 	@Produces("application/json")
-	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate) {
-		return Iterables.transform(subCtrl.getAll(isTemplate), SubscriptionDTO.toDTO);
+	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate, @QueryParam("businessId") Long businessId) {
+		if(businessId != null) 
+			return Iterables.transform(subCtrl.get(businessId), SubscriptionDTO.toDTO);
+		else
+			return Iterables.transform(subCtrl.getAll(isTemplate), SubscriptionDTO.toDTO);
 	}
 	
 	@POST

@@ -42,6 +42,8 @@ public class Subscription {
 	
 	private boolean template;
 	
+	private Key<Subscription> templateKey;
+	
 	public Key<Business> getBusiness() {
 		return business;
 	}
@@ -121,5 +123,11 @@ public class Subscription {
 	}
 	public void setId(Long id) {
 		this.id = id;
+	}
+	public Key<Subscription> getTemplateKey() {
+		return templateKey;
+	}
+	public void setTemplateKey(Key<Subscription> templateKey) {
+		this.templateKey = templateKey;
 	}
 }

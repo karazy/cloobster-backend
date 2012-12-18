@@ -322,8 +322,8 @@ public class AdminResource {
 	}
 	
 	@Path("subscriptions")
-	public SubscriptionPackageResource getSubsriptionsResource() {
-		return resourceContext.getResource(SubscriptionPackageResource.class);
+	public SubscriptionTemplatesResource getSubsriptionsResource() {
+		return resourceContext.getResource(SubscriptionTemplatesResource.class);
 	}
 	
 	@Path("companies")

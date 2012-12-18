@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
+import net.eatsense.validation.CreationChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -15,6 +16,10 @@ import com.google.common.base.Function;
 
 public class SubscriptionDTO {
 	private Long id;
+	
+	@NotNull(groups= {CreationChecks.class })
+	@Min(value = 1, groups= {CreationChecks.class })
+	private Long templateId;
 	@NotEmpty
 	@NotNull
 	private String name;
@@ -126,6 +131,14 @@ public class SubscriptionDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 
 	/**
