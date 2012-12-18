@@ -30,7 +30,7 @@ public class LocationsResource {
 	
 	@GET
 	@Produces("application/json")
-	public List<LocationProfileDTO> getLocations(@QueryParam("id") long companyId) {
+	public List<LocationProfileDTO> getLocations(@QueryParam("companyId") long companyId) {
 		return Lists.transform(ctrl.getLocations(companyId), LocationProfileDTO.toDTO);
 	}
 	
