@@ -151,6 +151,7 @@ public class SubscriptionController {
 	}
 	
 	public Subscription createAndSetSubscription(long templateId, SubscriptionStatus status,  Long businessId) {
+		checkNotNull(templateId, "no templateId given");
 		checkArgument(templateId > 0, "templateId must be >0");
 		
 		Subscription newSubscription = createSubscriptionFromTemplate(getTemplate(templateId), status, Business.getKey(businessId));
