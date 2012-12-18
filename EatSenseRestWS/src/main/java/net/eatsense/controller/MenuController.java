@@ -15,7 +15,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.groups.Default;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
@@ -53,12 +53,10 @@ public class MenuController {
 	private final Transformer transform;
 	private final ValidationHelper validator;
 	private final ChoiceRepository choiceRepo;
-	private final AreaRepository areaRepo;
 
 	@Inject
 	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator) {
 		this.choiceRepo = cr;
-		this.areaRepo = areaRepo;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
@@ -71,7 +69,7 @@ public class MenuController {
 	 * @param business entity id of the business
 	 * @return list of menus with products
 	 */
-	public Collection<MenuDTO> getMenusWithProducts(Key<Business> businessKey, long areaId){
+	public Collection<MenuDTO> getMenusWithProducts(Key<Location> businessKey, long areaId){
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		if(businessKey == null)
 			return menuDTOs;
@@ -129,7 +127,7 @@ public class MenuController {
 	 * @param business 
 	 * @return List of transfer objects without embedded Products.
 	 */
-	public List<MenuDTO> getMenus(Business business) {
+	public List<MenuDTO> getMenus(Location business) {
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		if(business == null )
 			return menuDTOs;
@@ -149,7 +147,7 @@ public class MenuController {
 	 * @param id
 	 * @return
 	 */
-	public Menu getMenu(Business business, long id) {
+	public Menu getMenu(Location business, long id) {
 		checkNotNull(business, "business was null");
 		checkArgument(id != 0, "id was 0");
 		
@@ -171,7 +169,7 @@ public class MenuController {
 	 * @param id
 	 * @return
 	 */
-	public MenuDTO getMenuDTOWithProducts(Business business, long id) {
+	public MenuDTO getMenuDTOWithProducts(Location business, long id) {
 		Menu menu = getMenu(business, id);
 		MenuDTO menuData = new MenuDTO(menu);
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
@@ -194,7 +192,7 @@ public class MenuController {
 	 * @param menuData Transfer object
 	 * @return
 	 */
-	public MenuDTO createMenu(Business business, MenuDTO menuData) {
+	public MenuDTO createMenu(Location business, MenuDTO menuData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(menuData, "menuData was null");
 				
@@ -248,7 +246,7 @@ public class MenuController {
 	 * @param business
 	 * @param id
 	 */
-	public void deleteMenu(Business business, long id) {
+	public void deleteMenu(Location business, long id) {
 		checkNotNull(business, "business was null");
 		checkArgument(id != 0, "id was 0");
 		
@@ -269,7 +267,7 @@ public class MenuController {
 	 * @param business
 	 * @return
 	 */
-	public Collection<ProductDTO> getProductsWithChoices(Business business) {
+	public Collection<ProductDTO> getProductsWithChoices(Location business) {
 		return transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(business.getKey()));
 	}
 	
@@ -280,7 +278,7 @@ public class MenuController {
 	 * @param id
 	 * @return Product entity with the given id.
 	 */
-	public Product getProduct(Key<Business> businessKey, long id) {
+	public Product getProduct(Key<Location> businessKey, long id) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkArgument(id != 0, "id was 0");
 		
@@ -297,7 +295,7 @@ public class MenuController {
 	 * @param noMenu If true list Products with no menu associated.
 	 * @return
 	 */
-	public List<ProductDTO> getProductsForMenu(Business business, long menuId) {
+	public List<ProductDTO> getProductsForMenu(Location business, long menuId) {
 		checkNotNull(business, "business was null");
 		checkArgument(menuId != 0, "menuId was 0");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
@@ -318,7 +316,7 @@ public class MenuController {
 	 * @param noMenu If true list Products with no menu associated.
 	 * @return
 	 */
-	public List<ProductDTO> getProductsWithNoMenu(Business business) {
+	public List<ProductDTO> getProductsWithNoMenu(Location business) {
 		checkNotNull(business, "business was null");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
@@ -338,7 +336,7 @@ public class MenuController {
 	 * @param menuId
 	 * @return List of Product transfer objects.
 	 */
-	public List<ProductDTO> getProductsForChoice(Business business, long choiceId) {
+	public List<ProductDTO> getProductsForChoice(Location business, long choiceId) {
 		checkNotNull(business, "business was null");
 		checkArgument(choiceId != 0, "choiceId was 0");
 		
@@ -360,7 +358,7 @@ public class MenuController {
 	 * @param menuId
 	 * @return List of Product transfer objects.
 	 */
-	public List<ProductDTO> getProducts(Business business) {
+	public List<ProductDTO> getProducts(Location business) {
 		checkNotNull(business, "business was null");
 		List<ProductDTO> productsData = new ArrayList<ProductDTO>();
 		
@@ -380,7 +378,7 @@ public class MenuController {
 	 * @param id
 	 * @return product DTO
 	 */
-	public ProductDTO getProductWithChoices(Key<Business> businessKey, long id) {
+	public ProductDTO getProductWithChoices(Key<Location> businessKey, long id) {
 		return transform.productToDto(getProduct(businessKey,id));
 	}
 	
@@ -389,7 +387,7 @@ public class MenuController {
 	 * @param productData
 	 * @return
 	 */
-	public ProductDTO createProduct(Business business, ProductDTO productData) {
+	public ProductDTO createProduct(Location business, ProductDTO productData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(productData, "productData was null");
 		
@@ -470,7 +468,7 @@ public class MenuController {
 	 * @param id
 	 * @return Entity
 	 */
-	public Choice getChoice(Key<Business> businessKey, long id) {
+	public Choice getChoice(Key<Location> businessKey, long id) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkArgument(id != 0, "id was 0");
 		
@@ -492,7 +490,7 @@ public class MenuController {
 	 * @param productId
 	 * @return
 	 */
-	public List<ChoiceDTO> getChoices(Key<Business> businessKey, long productId) {
+	public List<ChoiceDTO> getChoices(Key<Location> businessKey, long productId) {
 		checkNotNull(businessKey, "businessKey was null");
 
 		ArrayList<ChoiceDTO> choiceDtos = new ArrayList<ChoiceDTO>();
@@ -532,7 +530,7 @@ public class MenuController {
 	 * @param choiceData
 	 * @return
 	 */
-	public ChoiceDTO createChoice(Key<Business> businessKey, ChoiceDTO choiceData) {
+	public ChoiceDTO createChoice(Key<Location> businessKey, ChoiceDTO choiceData) {
 		return createChoice(businessKey, choiceData, false);
 	}
 	
@@ -544,7 +542,7 @@ public class MenuController {
 	 * @param dontUpdateProduct 
 	 * @return
 	 */
-	public ChoiceDTO createChoice(Key<Business> businessKey, ChoiceDTO choiceData, boolean dontUpdateProduct) {
+	public ChoiceDTO createChoice(Key<Location> businessKey, ChoiceDTO choiceData, boolean dontUpdateProduct) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(choiceData, "choiceData was null");
 		
@@ -612,7 +610,7 @@ public class MenuController {
 	 * @param business
 	 * @param choiceId
 	 */
-	public void deleteChoice(Key<Business> businessKey, long choiceId, long productId) {
+	public void deleteChoice(Key<Location> businessKey, long choiceId, long productId) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkArgument(choiceId != 0, "choiceId was 0");
 		

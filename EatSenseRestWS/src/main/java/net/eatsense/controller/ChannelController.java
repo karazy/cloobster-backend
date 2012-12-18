@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -12,11 +11,11 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.embedded.Channel;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -39,7 +38,7 @@ import com.googlecode.objectify.NotFoundException;
 public class ChannelController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	BusinessRepository businessRepo;
+	LocationRepository businessRepo;
 	
 	ChannelService channelService;
 	private ObjectMapper mapper;
@@ -47,7 +46,7 @@ public class ChannelController {
 	private CheckInRepository checkInRepo;
 	
 	@Inject
-	public ChannelController(BusinessRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService) {
+	public ChannelController(LocationRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService) {
 		super();
 		this.businessRepo = rr;
 		this.checkInRepo = checkInRepo;
@@ -63,7 +62,7 @@ public class ChannelController {
 	 * @param clientId
 	 * @return the token to send to the client
 	 */
-	public String createCockpitChannel(Business business, String clientId) throws ChannelFailureException {
+	public String createCockpitChannel(Location business, String clientId) throws ChannelFailureException {
 		return createCockpitChannel(business, clientId, Optional.<Integer>absent());
 	}
 	
@@ -76,7 +75,7 @@ public class ChannelController {
 	 * @return the token to send to the client
 	 * @throws ChannelFailureException if channel creation failed
 	 */
-	public String createCockpitChannel(Business business, String clientId , Optional<Integer> timeout) throws ChannelFailureException {
+	public String createCockpitChannel(Location business, String clientId , Optional<Integer> timeout) throws ChannelFailureException {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkNotNull(clientId, "clientId was null");
@@ -193,7 +192,7 @@ public class ChannelController {
 	 * @param businessId
 	 * @param messages
 	 */
-	public void sendMessage(Business business, MessageDTO messageData)  {
+	public void sendMessage(Location business, MessageDTO messageData)  {
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(messageData, "messageData cannot be null");
 		checkNotNull(messageData.getType(), "message type cannot be null");
@@ -210,7 +209,7 @@ public class ChannelController {
 	 * @param businessId
 	 * @param messages
 	 */
-	public void sendMessages(Business business, List<MessageDTO> content)  {
+	public void sendMessages(Location business, List<MessageDTO> content)  {
 		checkNotNull(business, "business cannot be null");
 		if(content != null && !content.isEmpty())
 			sendJsonObject(business, content);
@@ -218,7 +217,7 @@ public class ChannelController {
 			logger.info("nothing to send, content null or empty");
 	}
 	
-	private void sendJsonObject(Business business, Object content)  {
+	private void sendJsonObject(Location business, Object content)  {
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(content, "content cannot be null");
 		
@@ -292,7 +291,7 @@ public class ChannelController {
 		boolean connected = false;
 		logger.info("recieved online check from clientId:" + clientId);
 
-		Business business;
+		Location business;
 		try {
 			business = businessRepo.getById(businessId);
 		} catch (NotFoundException e) {
@@ -375,7 +374,7 @@ public class ChannelController {
 		checkNotNull(clientId, "clientId cannot be null");
 		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
 
-		Business business = parseBusiness(clientId);
+		Location business = parseBusiness(clientId);
 		if(business == null) {
 			return;
 		}
@@ -398,7 +397,7 @@ public class ChannelController {
 	 * @param clientId
 	 * @return Business entity
 	 */
-	private Business parseBusiness(String clientId) {
+	private Location parseBusiness(String clientId) {
 		checkNotNull(clientId, "clientId cannot be null");
 		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
 		checkArgument(clientId.matches("b[1-9]\\d*\\|.*"), "invalid clientId %s", clientId);
@@ -444,7 +443,7 @@ public class ChannelController {
 		checkNotNull(clientId, "clientId cannot be null");
 		checkArgument(!clientId.isEmpty(), "clientId cannot be empty");
 		
-		Business business = parseBusiness(clientId);
+		Location business = parseBusiness(clientId);
 		if(business == null)
 			return;
 		

@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.GenericEntity;
 import net.eatsense.domain.TranslatedEntity;
 import net.eatsense.domain.TrashEntry;
@@ -368,10 +368,9 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * @return
 	 * 		Collection of entities of type T
 	 */
-	public Collection<T> getAll() {
+	public List<T> getAll() {
 		logger.info("{}", clazz);
-		Collection<T> list = ofy().query(clazz).list();
-		return list;
+		return  ofy().query(clazz).list();
 	}
 	
 	/**

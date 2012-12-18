@@ -9,7 +9,7 @@ import java.util.List;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -93,7 +93,7 @@ public class BillController {
 	 * @param checkInId entity id
 	 * @return bill DTO or null if not found 
 	 */
-	public BillDTO getBillForCheckIn(Business business, long checkInId) {
+	public BillDTO getBillForCheckIn(Location business, long checkInId) {
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
 		checkArgument(checkInId != 0 , "checkInId cannot be zero");
@@ -110,7 +110,7 @@ public class BillController {
 	 * @param billData
 	 * @return updated bill DTO
 	 */
-	public BillDTO updateBill(final Business business, Bill bill , BillDTO billData) {
+	public BillDTO updateBill(final Location business, Bill bill , BillDTO billData) {
 		checkNotNull(business, "Bill cannot be updated, business is null");
 		checkNotNull(business.getId(), "Bill cannot be updated, id for business is null");
 		checkNotNull(bill, "Bill cannot be updated, bill is null");
@@ -197,7 +197,7 @@ public class BillController {
 	 * @param billData must have checkInId and paymentMethod set.
 	 * @return transfer object for the newly created Bill
 	 */
-	public BillDTO createBillForCheckIn(final Business business, BillDTO billData) {
+	public BillDTO createBillForCheckIn(final Location business, BillDTO billData) {
 		checkNotNull(billData, "billData was null");
 		
 		validator.validate(billData);
@@ -208,14 +208,14 @@ public class BillController {
 	}
 	
 	/**
-	 * Calls {@link #createBill(Business, CheckIn, BillDTO, boolean)}.
+	 * Calls {@link #createBill(Location, CheckIn, BillDTO, boolean)}.
 	 * 
 	 * @param business
 	 * @param checkIn
 	 * @param billData
 	 * @return
 	 */
-	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData) {
+	public BillDTO createBill(final Location business, CheckIn checkIn, BillDTO billData) {
 		return createBill(business, checkIn, billData, false);
 	}
 	
@@ -227,7 +227,7 @@ public class BillController {
 	 * @param billData
 	 * @return bill DTO saved
 	 */
-	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData, boolean fromBusiness) {
+	public BillDTO createBill(final Location business, CheckIn checkIn, BillDTO billData, boolean fromBusiness) {
 		// Check preconditions.
 		checkNotNull(business, "business is null");
 		checkNotNull(business.getId(), "id for business is null");
@@ -376,7 +376,7 @@ public class BillController {
 	 * @param billId
 	 * @return
 	 */
-	public Bill getBill(Business business, long billId) {
+	public Bill getBill(Location business, long billId) {
 		checkNotNull(business, "business is null");
 		checkArgument(billId != 0, "billid must be different from 0");
 		

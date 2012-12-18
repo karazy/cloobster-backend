@@ -15,24 +15,24 @@ import javax.ws.rs.Produces;
 import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.representation.AreaDTO;
 
 @Produces("application/json; charset=UTF-8")
 public class AreasResource {
-	private Business business;
+	private Location business;
 	
-	public void setBusiness(Business business) {
+	public void setBusiness(Location business) {
 		this.business = business;
 	}
 
-	private final BusinessController businessCtrl;
+	private final LocationController businessCtrl;
 	private Account account;
 	
 	@Inject
-	public AreasResource(BusinessController businessCtrl) {
+	public AreasResource(LocationController businessCtrl) {
 		super();
 		this.businessCtrl = businessCtrl;
 	}

@@ -15,7 +15,7 @@ import com.googlecode.objectify.annotation.Unindexed;
 @Cached
 public class Subscription {
 	@Parent
-	private Key<Business> business;
+	private Key<Location> business;
 
 	@Id
 	private Long id;
@@ -42,10 +42,10 @@ public class Subscription {
 	
 	private boolean template;
 	
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		this.business = business;
 	}
 	public String getName() {

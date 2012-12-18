@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.OrderController;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Order;
 import net.eatsense.representation.OrderDTO;
 
@@ -30,9 +30,9 @@ public class OrdersResource {
 	private ResourceContext resourceContext;
 	
 	private OrderController orderController;
-	private Business business;
+	private Location business;
 	
-	public void setBusiness(Business business) {
+	public void setBusiness(Location business) {
 		this.business = business;
 	}
 

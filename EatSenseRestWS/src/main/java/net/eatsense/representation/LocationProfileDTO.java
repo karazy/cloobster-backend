@@ -1,18 +1,18 @@
 package net.eatsense.representation;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Company;
+import net.eatsense.domain.Location;
+
 import org.apache.bval.constraints.NotEmpty;
 
-import net.eatsense.domain.Business;
-import net.eatsense.domain.embedded.PaymentMethod;
+import com.google.common.base.Function;
 
-public class BusinessProfileDTO extends BusinessDTO {
+public class LocationProfileDTO extends LocationDTO {
 
 	@NotNull
 	@NotEmpty
@@ -27,7 +27,7 @@ public class BusinessProfileDTO extends BusinessDTO {
 	
 	/**
 	 * Maps to a json object images.{id}.
-	 * Containing {@link Business#images}
+	 * Containing {@link Location#images}
 	 */
 	private LinkedHashMap<String,ImageDTO> images;
 	
@@ -40,14 +40,14 @@ public class BusinessProfileDTO extends BusinessDTO {
 	@Min(0)
 	private int stars;
 
-	public BusinessProfileDTO() {
+	public LocationProfileDTO() {
 		super();
 	}
 
 	/**
 	 * @param business - Business entity to copy the data from.
 	 */
-	public BusinessProfileDTO(Business business) {
+	public LocationProfileDTO(Location business) {
 		super(business);
 		this.address = business.getAddress();
 		this.city = business.getCity();
@@ -128,5 +128,13 @@ public class BusinessProfileDTO extends BusinessDTO {
 
 	public void setStars(int stars) {
 		this.stars = stars;
-	}	
+	}
+	
+	public final static Function<Location, LocationProfileDTO> toDTO = 
+			new Function<Location, LocationProfileDTO>() {
+				@Override
+				public LocationProfileDTO apply(Location input) {
+					return new LocationProfileDTO(input);
+				}
+		    };
 }

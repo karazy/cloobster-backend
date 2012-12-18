@@ -5,7 +5,7 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 
 @XmlRootElement
@@ -33,7 +33,7 @@ public class VisitDTO {
 	 * @param business
 	 * @param bill
 	 */
-	public VisitDTO(CheckIn checkIn, Business business, Bill bill) {
+	public VisitDTO(CheckIn checkIn, Location business, Bill bill) {
 		if(checkIn != null) {
 			nickname = checkIn.getNickname();
 			id = checkIn.getId();

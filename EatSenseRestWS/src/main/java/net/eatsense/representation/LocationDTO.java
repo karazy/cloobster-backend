@@ -9,10 +9,10 @@ import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Strings;
 
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.embedded.PaymentMethod;
 
-public class BusinessDTO {
+public class LocationDTO {
 	@NotNull
 	@NotEmpty
 	String name;
@@ -38,11 +38,11 @@ public class BusinessDTO {
 	
 	private boolean basic;
 	
-	public BusinessDTO() {
+	public LocationDTO() {
 		super();
 	}
 	
-	public BusinessDTO(Business business) {
+	public LocationDTO(Location business) {
 		if(business == null)
 			return;
 		this.name = business.getName();

@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.Menu;
@@ -15,7 +15,7 @@ import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -34,7 +34,7 @@ public class DummyDataDumper {
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private BusinessRepository rr;
+	private LocationRepository rr;
 	private SpotRepository br;
 
 	private MenuRepository mr;
@@ -49,7 +49,7 @@ public class DummyDataDumper {
 	private final AreaRepository areaRepo;
 
 	@Inject
-	public DummyDataDumper(BusinessRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo, AreaRepository areaRepo) {
+	public DummyDataDumper(LocationRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo, AreaRepository areaRepo) {
 		this.ar = ar;
 		this.areaRepo = areaRepo;
 		this.rr = rr;
@@ -62,7 +62,7 @@ public class DummyDataDumper {
 	
 	public void generateDummyUsers() {
 		//generate admin user for businesses
-		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
+		List<Key<Location>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
 		
 
 		if(!testBusinesses.isEmpty()) {
@@ -91,7 +91,7 @@ public class DummyDataDumper {
 
 	}
 
-	private void createSergioMenu(Key<Business> kR, Area area) {
+	private void createSergioMenu(Key<Location> kR, Area area) {
 
 		//Getränke
 		Key<Menu> kM = createMenu(kR, "Getränke", "Alkoholische, nicht-Alkoholische, heisse und kalte Getränke.");
@@ -203,16 +203,16 @@ public class DummyDataDumper {
 	    areaRepo.saveOrUpdate(area);
 	}
 
-	private Key<Business> createAndSaveDummyBusiness(String name, String desc, String areaName, String barcode, Area area) {
+	private Key<Location> createAndSaveDummyBusiness(String name, String desc, String areaName, String barcode, Area area) {
 		logger.info("Create dummy with data " + name + " " + desc + " " + areaName + " " + barcode);
-		Business r = new Business();
+		Location r = new Location();
 		r.setName(name);
 		r.setDescription(desc);
 		ArrayList<PaymentMethod> methods = new ArrayList<PaymentMethod>();
 		methods.add(new PaymentMethod("EC"));
 		methods.add(new PaymentMethod("Bar"));
 		r.setPaymentMethods(methods);
-		Key<Business> kR = rr.saveOrUpdate(r);
+		Key<Location> kR = rr.saveOrUpdate(r);
 
 		Spot spot = new Spot();
 		
@@ -230,7 +230,7 @@ public class DummyDataDumper {
 		return kR;
 	}
 	
-	private Key<Menu> createMenu (Key<Business> business, String title, String description) {
+	private Key<Menu> createMenu (Key<Location> business, String title, String description) {
 		
 		Menu menu = new Menu();
 		
@@ -242,7 +242,7 @@ public class DummyDataDumper {
 		return mr.saveOrUpdate(menu);
 	}
 
-	private Product createProduct(Key<Menu> menu, Key<Business> business, String name, Float price, String shortDesc, String longDesc)	{
+	private Product createProduct(Key<Menu> menu, Key<Location> business, String name, Float price, String shortDesc, String longDesc)	{
 		Product product = new Product();
 		
 		product.setMenu(menu);
@@ -257,7 +257,7 @@ public class DummyDataDumper {
 		return product;
 	}
 	
-	private Key<Product> createAndSaveProduct(Key<Menu> menu,Key<Business> business , String name, Float price, String shortDesc, String longDesc)	{
+	private Key<Product> createAndSaveProduct(Key<Menu> menu,Key<Location> business , String name, Float price, String shortDesc, String longDesc)	{
 	
 		return pr.saveOrUpdate(createProduct(menu,business,name,price,shortDesc,longDesc));
 	}

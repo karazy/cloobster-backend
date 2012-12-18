@@ -24,7 +24,7 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -42,7 +42,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
@@ -77,7 +77,7 @@ public class CheckInControllerTest {
 	public ExpectedException thrown = ExpectedException.none();
 	private CheckInController ctr;
 	@Mock
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	@Mock
 	private SpotRepository spotRepo;
 	@Mock
@@ -87,7 +87,7 @@ public class CheckInControllerTest {
 	@Mock
 	private ObjectMapper mapper;
 	@Mock
-	private Business business;
+	private Location business;
 	
 	@Mock
 	private RequestRepository requestRepo;
@@ -98,7 +98,7 @@ public class CheckInControllerTest {
 	@Mock
 	private Spot spot;
 	@Mock
-	Key<Business> businessKey;
+	Key<Location> businessKey;
 	@Mock
 	Key<Spot> spotKey;
 	
@@ -120,7 +120,7 @@ public class CheckInControllerTest {
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo, billRepo);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo, billRepo);
 	}
 
 	@After
@@ -581,7 +581,7 @@ public class CheckInControllerTest {
 		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
 		when(checkIn.getBusiness()).thenReturn(businessKey);
 		@SuppressWarnings("unchecked")
-		Key<Business> anotherBusiness = mock(Key.class);
+		Key<Location> anotherBusiness = mock(Key.class);
 		when(business.getKey()).thenReturn(anotherBusiness);
 		
 		thrown.expect(IllegalArgumentException.class);
@@ -702,7 +702,7 @@ public class CheckInControllerTest {
 		CheckInStatusDTO checkInData = new CheckInStatusDTO();
 		CheckIn checkIn = mock (CheckIn.class);
 		@SuppressWarnings("unchecked")
-		Key<Business> anotherBusiness = mock(Key.class);
+		Key<Location> anotherBusiness = mock(Key.class);
 		
 		when(checkInRepo.getById(checkInId)).thenReturn(checkIn);
 		when(checkIn.getBusiness()).thenReturn(businessKey);

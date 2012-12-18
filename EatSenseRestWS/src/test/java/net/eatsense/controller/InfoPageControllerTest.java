@@ -14,7 +14,7 @@ import java.util.Locale;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.InfoPage;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.localization.LocalizationProvider;
@@ -51,7 +51,7 @@ public class InfoPageControllerTest {
 	
 	private InfoPageController ctrl;
 	@Mock
-	private Key<Business> businessKey;
+	private Key<Location> businessKey;
 	@Mock
 	private ValidationHelper validator;
 	

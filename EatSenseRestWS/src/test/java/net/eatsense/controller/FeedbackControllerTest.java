@@ -14,7 +14,7 @@ import java.util.List;
 
 import javax.validation.Validator;
 
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
@@ -55,12 +55,12 @@ public class FeedbackControllerTest {
 	private FeedbackFormRepository feedbackFormRepo;
 	private FeedbackController ctrl;
 	@Mock
-	private Business business;
+	private Location business;
 	@Mock
 	private CheckIn checkIn;
 	private long businessId;
 	@Mock
-	private Key<Business> businessKey;
+	private Key<Location> businessKey;
 	@Mock
 	private Key<FeedbackForm> formKey;
 	@Mock
@@ -81,7 +81,7 @@ public class FeedbackControllerTest {
 	}
 	
 	/**
-	 * Test method for {@link net.eatsense.controller.FeedbackController#addFeedback(net.eatsense.domain.Business, net.eatsense.domain.CheckIn, net.eatsense.representation.FeedbackDTO)}.
+	 * Test method for {@link net.eatsense.controller.FeedbackController#addFeedback(net.eatsense.domain.Location, net.eatsense.domain.CheckIn, net.eatsense.representation.FeedbackDTO)}.
 	 */
 	@Test
 	public void testAddFeedback() {

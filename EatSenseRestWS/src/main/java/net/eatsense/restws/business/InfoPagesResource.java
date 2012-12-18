@@ -20,7 +20,7 @@ import com.sun.jersey.api.NotFoundException;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.InfoPageController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 
@@ -33,7 +33,7 @@ import net.eatsense.representation.InfoPageDTO;
 @Produces("application/json; charset=UTF-8")
 public class InfoPagesResource {
 	private final InfoPageController infoPageCtrl;
-	private Business business;
+	private Location business;
 	private Account account;
 	
 	@Inject
@@ -117,7 +117,7 @@ public class InfoPagesResource {
 		}
 	}
 
-	public void setBusiness(Business business) {
+	public void setBusiness(Location business) {
 		this.business = business;
 	}
 

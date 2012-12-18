@@ -4,23 +4,18 @@ import java.util.List;
 
 import javax.persistence.Embedded;
 
-import net.eatsense.annotations.Translate;
 import net.eatsense.representation.ImageDTO;
 
-import com.google.appengine.api.images.ImagesServicePb.ImageData;
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
 public class InfoPage extends GenericEntity<InfoPage> {
-	@Translate
 	private String title;
-	@Translate
 	private String shortText;
 	
 	@Unindexed
-	@Translate
 	private String html;
 	
 	@Embedded
@@ -66,7 +61,7 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	}
 
 	@Parent
-	private Key<Business> business;
+	private Key<Location> business;
 	
 
 	@Override
@@ -75,12 +70,12 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	}
 
 
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
 
 
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		if(!Objects.equal(this.business, business)) {
 			this.setDirty(true);
 			this.business = business;

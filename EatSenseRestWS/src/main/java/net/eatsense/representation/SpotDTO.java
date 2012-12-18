@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.validation.CreationChecks;
@@ -98,7 +98,7 @@ public class SpotDTO {
 		}
 	}
 	
-	public SpotDTO(Spot spot, Business business, Area area) {
+	public SpotDTO(Spot spot, Location business, Area area) {
 		this(spot);
 		if(business != null) {
 			this.business = business.getName();			

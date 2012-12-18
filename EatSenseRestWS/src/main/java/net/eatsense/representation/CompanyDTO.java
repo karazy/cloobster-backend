@@ -5,8 +5,11 @@ import java.util.LinkedHashMap;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Company;
+import net.eatsense.domain.Spot;
 
 import org.apache.bval.constraints.NotEmpty;
+
+import com.google.common.base.Function;
 
 public class CompanyDTO {
 	@NotNull
@@ -16,10 +19,7 @@ public class CompanyDTO {
 	String city;
 	String country;
 	String postcode;
-	
 	String url;
-	
-
 	String phone;
 	
 	private LinkedHashMap<String,ImageDTO> images;
@@ -112,4 +112,12 @@ public class CompanyDTO {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+	
+	public final static Function<Company, CompanyDTO> toDTO = 
+			new Function<Company, CompanyDTO>() {
+				@Override
+				public CompanyDTO apply(Company input) {
+					return new CompanyDTO(input);
+				}
+		    };
 }

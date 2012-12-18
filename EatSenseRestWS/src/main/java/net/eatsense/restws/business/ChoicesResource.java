@@ -16,12 +16,12 @@ import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.representation.ChoiceDTO;
 
 public class ChoicesResource {
 	
-	private Business business;
+	private Location business;
 	private final MenuController menuCtrl;
 	
 	@Inject
@@ -30,7 +30,7 @@ public class ChoicesResource {
 		this.menuCtrl = menuCtrl;
 	}
 
-	public void setBusiness(Business business) {
+	public void setBusiness(Location business) {
 		this.business = business;
 	}
 	

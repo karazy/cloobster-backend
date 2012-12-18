@@ -12,7 +12,7 @@ import net.eatsense.controller.BillController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Product;
@@ -21,7 +21,7 @@ import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.BillRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
@@ -50,7 +50,7 @@ public class GetBillTest {
     private Injector injector;
     private OrderController orderCtrl;
     private CheckInController checkinCtrl;
-    private BusinessRepository rr;
+    private LocationRepository rr;
     private ProductRepository pr;
     private DummyDataDumper ddd;
 	private Transformer transform;
@@ -58,7 +58,7 @@ public class GetBillTest {
 	private BillRepository br;
 
 	private CheckIn checkIn;
-	private Business business;
+	private Location business;
 	private SpotDTO spotDto;
 
 	private BillDTO billData;
@@ -72,7 +72,7 @@ public class GetBillTest {
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		billCtrl = injector.getInstance(BillController.class);
-		rr = injector.getInstance(BusinessRepository.class);
+		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		br = injector.getInstance(BillRepository.class);
 		
@@ -211,14 +211,14 @@ public class GetBillTest {
 	
 	@Test(expected= NullPointerException.class)
 	public void testGetBillNullBusinessId() {
-		business = new Business();
+		business = new Location();
 		
 		billCtrl.getBill(business, billData.getId());
 	}
 	
 	@Test
 	public void testGetBillUnknownBusinessId() {
-		business = new Business();
+		business = new Location();
 		business.setId(12345l);
 		assertThat(billCtrl.getBill(business, billData.getId()), nullValue());
 	}

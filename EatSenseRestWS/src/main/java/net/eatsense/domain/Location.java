@@ -28,7 +28,7 @@ import com.googlecode.objectify.annotation.Unindexed;
  * @author Nils Weiher
  */
 @Cached
-public class Business extends GenericEntity<Business> {
+public class Location extends GenericEntity<Location> {
  
 	/**
 	 * Name of location.
@@ -88,7 +88,7 @@ public class Business extends GenericEntity<Business> {
 	private List<ImageDTO> images;
 
 	@Transient
-	private Key<Business> key;
+	private Key<Location> key;
 
 	@Unindexed
 	private String currency;
@@ -128,7 +128,7 @@ public class Business extends GenericEntity<Business> {
 	 */
 	private int stars;
 	
-	public Business() {
+	public Location() {
 	}
 	
 	public String getAddress() {
@@ -200,7 +200,7 @@ public class Business extends GenericEntity<Business> {
 
 	@Transient
 	@JsonIgnore
-	public Key<Business> getKey() {
+	public Key<Location> getKey() {
 		if(key == null)
 			this.key = getKey(super.getId());
 		return key;
@@ -208,9 +208,9 @@ public class Business extends GenericEntity<Business> {
 	
 	@Transient
 	@JsonIgnore
-	public static Key<Business> getKey(Long id) {
+	public static Key<Location> getKey(Long id) {
 		
-		return new Key<Business>(Business.class, id);
+		return new Key<Location>(Location.class, id);
 	}
 
 	public List<PaymentMethod> getPaymentMethods() {

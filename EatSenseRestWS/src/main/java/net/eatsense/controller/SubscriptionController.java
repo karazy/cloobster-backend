@@ -1,19 +1,17 @@
 package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
-import net.eatsense.event.NewBusinessEvent;
+import net.eatsense.event.NewLocationEvent;
 import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
@@ -24,14 +22,12 @@ public class SubscriptionController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Objectify ofy;
 	private final ValidationHelper validator;
-	private final OfyService ofyService;
 
 	@Inject
 	public SubscriptionController(OfyService ofy,  ValidationHelper validator) {
 		super();
 		
 		this.ofy = ofy.ofy();
-		this.ofyService = ofy;
 		this.validator = validator;
 	}
 	
@@ -127,18 +123,18 @@ public class SubscriptionController {
 	}
 	
 	@Subscribe
-	public void handleNewBusinessEvent(NewBusinessEvent event) {
+	public void handleNewBusinessEvent(NewLocationEvent event) {
 		Key<Subscription> basicSubscriptionKey = ofy.query(Subscription.class).filter("template", true).filter("basic", true).getKey();
 		
 		if(basicSubscriptionKey == null) {
 			logger.warn("No Subscription flagged as basic found for setting at new business");
 		}
 		else {
-			event.getBusiness().setActiveSubscription(basicSubscriptionKey);
+			event.getLocation().setActiveSubscription(basicSubscriptionKey);
 		}
 	}
 	
-	public Subscription getActiveSubscription(Business business) {
+	public Subscription getActiveSubscription(Location business) {
 		if(business.getActiveSubscription() == null) {
 			return null;
 		}

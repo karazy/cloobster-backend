@@ -1,22 +1,22 @@
 package net.eatsense.event;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 
 public class BillEvent {
-	private Business business;
+	private Location business;
 	private Bill bill;
 	private CheckIn checkIn;
 	
-	public BillEvent(Business business, Bill bill, CheckIn checkIn) {
+	public BillEvent(Location business, Bill bill, CheckIn checkIn) {
 		super();
 		this.business = business;
 		this.bill = bill;
 		this.checkIn = checkIn;
 	}
 
-	public Business getBusiness() {
+	public Location getBusiness() {
 		return business;
 	}
 

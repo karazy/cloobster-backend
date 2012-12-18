@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
@@ -18,7 +18,7 @@ import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -51,7 +51,7 @@ public class OrderControllerTest {
 	    private Injector injector;
 	    private OrderController orderCtrl;
 	    private CheckInController checkinCtrl;
-	    private BusinessRepository rr;
+	    private LocationRepository rr;
 	    private MenuRepository mr;
 	    private ProductRepository pr;
 	    private ChoiceRepository cr;
@@ -68,7 +68,7 @@ public class OrderControllerTest {
 
 		private CheckIn checkIn;
 
-		private Business business;
+		private Location business;
 
 	@Before
 	public void setUp() throws Exception {
@@ -76,7 +76,7 @@ public class OrderControllerTest {
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
-		rr = injector.getInstance(BusinessRepository.class);
+		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
@@ -250,7 +250,7 @@ public class OrderControllerTest {
 		orderCtrl.deleteOrder(business, placedOrder , checkIn);
 		
 		Iterable<Order> orders = orderCtrl.getOrdersByCheckInOrStatus(business, checkIn.getKey(), null);
-		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Business.getKey(checkInData.getBusinessId()), orderId));
+		List<OrderChoice> choices = ocr.getByParent(Order.getKey(Location.getKey(checkInData.getBusinessId()), orderId));
 		assertThat(choices.isEmpty(), is(true));
 		assertThat(orders.iterator().hasNext(), is(false));
 		

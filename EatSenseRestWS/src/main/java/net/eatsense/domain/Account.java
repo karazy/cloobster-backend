@@ -46,10 +46,10 @@ public class Account extends GenericEntity<Account> {
 	 * (DEPRECATED) We keep this because we got a typo in this field.
 	 */
 	@NotSaved
-	List<Key<Business>> businessess;
+	List<Key<Location>> businessess;
 	
 	//TODO: Refactor to a Set.
-	List<Key<Business>> businesses;
+	List<Key<Location>> businesses;
 	
 	@NotNull
 	@NotEmpty
@@ -133,11 +133,11 @@ public class Account extends GenericEntity<Account> {
 		}
 	}
 
-	public List<Key<Business>> getBusinesses() {
+	public List<Key<Location>> getBusinesses() {
 		//Temporary: Remove after all entities are converted.
 		if(businessess != null && !businessess.isEmpty()) {
 			if(businesses == null) {
-				businesses = new ArrayList<Key<Business>>();
+				businesses = new ArrayList<Key<Location>>();
 			}
 			businesses.addAll(businessess);
 			businessess = null;
@@ -145,7 +145,7 @@ public class Account extends GenericEntity<Account> {
 		return businesses;
 	}
 
-	public void setBusinesses(List<Key<Business>> businesses) {
+	public void setBusinesses(List<Key<Location>> businesses) {
 		if(!Objects.equal(this.businesses, businesses)) {
 			this.setDirty(true);
 			this.businesses = businesses;

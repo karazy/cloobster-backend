@@ -15,8 +15,6 @@ import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import net.eatsense.auth.AccessToken.TokenType;
-import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
@@ -33,7 +31,6 @@ import net.eatsense.persistence.CompanyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;

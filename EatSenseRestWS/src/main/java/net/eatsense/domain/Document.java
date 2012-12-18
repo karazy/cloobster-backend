@@ -20,7 +20,7 @@ public class Document extends GenericEntity<Document>{
 	
 	@Parent
 	@NotNull
-	private Key<Business> business;
+	private Key<Location> business;
 	
 	private String name;
 	
@@ -45,11 +45,11 @@ public class Document extends GenericEntity<Document>{
 		return new Key<Document>(getBusiness(), Document.class, super.getId());
 	}
 
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
 
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		if(!Objects.equal(this.business, business)) {
 			this.setDirty(true);
 			this.business = business;

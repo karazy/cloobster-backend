@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.representation.ProductDTO;
 
 /**
@@ -31,7 +31,7 @@ public class ProductsResource {
 
 	private final MenuController menuCtrl;
 
-	private Business business;
+	private Location business;
 
 	private Account account;
 
@@ -41,7 +41,7 @@ public class ProductsResource {
 		this.menuCtrl = menuCtrl;
 	}
 
-	public void setBusiness(Business business) {
+	public void setBusiness(Location business) {
 		this.business = business;
 		
 	}

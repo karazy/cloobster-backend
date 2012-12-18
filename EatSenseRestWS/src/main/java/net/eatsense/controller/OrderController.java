@@ -17,7 +17,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
@@ -36,7 +36,7 @@ import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -81,7 +81,7 @@ public class OrderController {
 	@Inject
 	public OrderController(OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
-			ProductRepository productRepo, BusinessRepository businessRepo,
+			ProductRepository productRepo, LocationRepository businessRepo,
 			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
 			RequestRepository rr, Transformer trans, ValidationHelper validator,
 			EventBus eventBus, SpotRepository spotRepo) {
@@ -122,7 +122,7 @@ public class OrderController {
 	 * @param business
 	 * @param checkInId Id of CheckIn entity
 	 */
-	public void confirmPlacedOrdersForCheckIn(Business business, long checkInId) {
+	public void confirmPlacedOrdersForCheckIn(Location business, long checkInId) {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
 		checkArgument(checkInId != 0, "checkInId was 0");
@@ -208,7 +208,7 @@ public class OrderController {
 	 * @param comment
 	 * @return key of the new entity
 	 */
-	public Key<Order> createAndSaveOrder(Key<Business> business, Key<CheckIn> checkIn, Product product, int amount, List<OrderChoice> choices, String comment) {
+	public Key<Order> createAndSaveOrder(Key<Location> business, Key<CheckIn> checkIn, Product product, int amount, List<OrderChoice> choices, String comment) {
 		checkNotNull(product, "product was null");
 		Key<Order> orderKey = null;
 		Order order = new Order();
@@ -281,7 +281,7 @@ public class OrderController {
 	 * @param order
 	 * @param checkIn 
 	 */
-	public void deleteOrder(Business business, Order order, CheckIn checkIn) {
+	public void deleteOrder(Location business, Order order, CheckIn checkIn) {
 		checkNotNull(order, "order was null");
 		checkNotNull(order.getId(), "order id was null");
 		checkNotNull(checkIn, "checkIn was null");
@@ -302,7 +302,7 @@ public class OrderController {
 	 * @param orderId
 	 * @return the Order entity, if existing
 	 */
-	public Order getOrder(Business business, Long orderId) {
+	public Order getOrder(Location business, Long orderId) {
 		checkNotNull(business, "business was null");
 			
 		try {
@@ -320,7 +320,7 @@ public class OrderController {
 	 * @param orderId
 	 * @return
 	 */
-	public OrderDTO getOrderAsDTO(Business business, Long orderId) {
+	public OrderDTO getOrderAsDTO(Location business, Long orderId) {
 		return transform.orderToDto( getOrder(business, orderId) );
 	}
 	
@@ -332,7 +332,7 @@ public class OrderController {
 	 * @param status 
 	 * @return
 	 */
-	public Iterable<Order> getOrdersByCheckInOrStatus(Business business, Key<CheckIn> checkInKey, String status) {
+	public Iterable<Order> getOrdersByCheckInOrStatus(Location business, Key<CheckIn> checkInKey, String status) {
 		//Return empty list if we have no checkin
 		if(checkInKey == null)
 			return new ArrayList<Order>();
@@ -358,7 +358,7 @@ public class OrderController {
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDto(Business business, Key<CheckIn> checkInKey, String status) {
+	public Collection<OrderDTO> getOrdersAsDto(Location business, Key<CheckIn> checkInKey, String status) {
 		return transform.ordersToDto(getOrdersByCheckInOrStatus( business, checkInKey, status));
 	}
 	
@@ -369,7 +369,7 @@ public class OrderController {
 	 * @param status
 	 * @return
 	 */
-	public Collection<OrderDTO> getOrdersAsDtoForVisit(Business business, Account account, Key<CheckIn> checkInKey, String status) {
+	public Collection<OrderDTO> getOrdersAsDtoForVisit(Location business, Account account, Key<CheckIn> checkInKey, String status) {
 		CheckIn checkIn;
 		try {
 			checkIn = checkInRepo.getByKey(checkInKey);
@@ -393,7 +393,7 @@ public class OrderController {
 	 * @param checkInId filter by checkin if not null
 	 * @return list of the orders found
 	 */
-	public Iterable<Order> getOrdersBySpot(Business business, Long spotId, Long checkInId) {
+	public Iterable<Order> getOrdersBySpot(Location business, Long spotId, Long checkInId) {
 		Query<Order> query = orderRepo.getOfy().query(Order.class).ancestor(business)
 				.filter("status !=", OrderStatus.CART.toString());
 		
@@ -404,7 +404,7 @@ public class OrderController {
 		return query;
 	}
 	
-	public Collection<OrderDTO> getOrdersBySpotAsDto(Business business, Long spotId, Long checkInId) {
+	public Collection<OrderDTO> getOrdersBySpotAsDto(Location business, Long spotId, Long checkInId) {
 		return transform.ordersToDto(getOrdersBySpot( business, spotId, checkInId));
 	}
 
@@ -416,7 +416,7 @@ public class OrderController {
 	 * @param orderData
 	 * @return id of the order
 	 */
-	public Long placeOrderInCart(Business business, CheckIn checkIn, OrderDTO orderData) {
+	public Long placeOrderInCart(Location business, CheckIn checkIn, OrderDTO orderData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(checkIn, "checkIn was null");
 		
@@ -565,7 +565,7 @@ public class OrderController {
 	 * @param checkIn
 	 * @return the updated OrderDTO
 	 */
-	public OrderDTO updateOrder(Business business, Order order, OrderDTO orderData, CheckIn checkIn) {
+	public OrderDTO updateOrder(Location business, Order order, OrderDTO orderData, CheckIn checkIn) {
 		checkNotNull(business, "business was null");
 		checkNotNull(order, "order was null");
 		checkNotNull(orderData, "orderData was null");
@@ -667,7 +667,7 @@ public class OrderController {
 	 * @param orderData new data update
 	 * @return updated Data
 	 */
-	public OrderDTO updateOrderForBusiness(Business business, Order order, OrderDTO orderData) {
+	public OrderDTO updateOrderForBusiness(Location business, Order order, OrderDTO orderData) {
 		if(order == null) {
 			throw new IllegalArgumentException("Order cannot be updated, order is null.");
 		}

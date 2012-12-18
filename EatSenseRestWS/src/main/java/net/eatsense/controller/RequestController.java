@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.persistence.AreaRepository;
@@ -49,7 +49,7 @@ public class RequestController {
 	 * @param areaId
 	 * @return
 	 */
-	public List<RequestDTO> getRequests(Key<Business> businessKey, long areaId, long spotId, long checkInId, Set<RequestType> types) {
+	public List<RequestDTO> getRequests(Key<Location> businessKey, long areaId, long spotId, long checkInId, Set<RequestType> types) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(types, "types was null");
 		

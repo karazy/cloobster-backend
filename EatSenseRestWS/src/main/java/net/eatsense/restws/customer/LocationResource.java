@@ -25,13 +25,13 @@ import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Subscription;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.BillDTO;
-import net.eatsense.representation.BusinessProfileDTO;
+import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.InfoPageDTO;
@@ -44,14 +44,14 @@ import com.googlecode.objectify.Key;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
-public class BusinessResource {
+public class LocationResource {
 	@Context
 	private ResourceContext resourceContext;
 
 	private CheckIn checkIn;
 	private Account account;
 	
-	private Business business;
+	private Location business;
 	
 	private MenuController menuCtrl;
 	private OrderController orderCtrl;
@@ -63,7 +63,7 @@ public class BusinessResource {
 	private InfoPageController infoPageCtrl;
 	
 	@Inject
-	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
+	public LocationResource(MenuController menuCtrl, OrderController orderCtrl,
 			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl, SubscriptionController subCtrl) {
 		super();
 		this.subCtrl = subCtrl;
@@ -81,14 +81,14 @@ public class BusinessResource {
 		this.checkIn = checkIn;
 	}
 
-	public void setBusiness(Business business) {
+	public void setBusiness(Location business) {
 		this.business = business;
 	}
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public BusinessProfileDTO getBusiness() {
-		BusinessProfileDTO businessDto = new BusinessProfileDTO(business);
+	public LocationProfileDTO getBusiness() {
+		LocationProfileDTO businessDto = new LocationProfileDTO(business);
 		Subscription activeSubscription = subCtrl.getActiveSubscription(business);
 		businessDto.setBasic(activeSubscription != null ? activeSubscription.isBasic() : false);
 		return businessDto;

@@ -25,7 +25,7 @@ import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.administration.AdminResource;
 import net.eatsense.restws.business.AccountsResource;
-import net.eatsense.restws.business.BusinessesResource;
+import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.CompaniesResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
@@ -91,9 +91,9 @@ public class EatSenseGuiceServletContextListener extends
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
 						bind(AccountsResource.class);
-						bind(BusinessesResource.class);
+						bind(LocationsResource.class);
 						bind(net.eatsense.restws.customer.AccountsResource.class);
-						bind(net.eatsense.restws.customer.BusinessesResource.class);
+						bind(net.eatsense.restws.customer.LocationsResource.class);
 						bind(NicknameResource.class);
 						bind(NewsletterResource.class);
 						bind(SpotResource.class);

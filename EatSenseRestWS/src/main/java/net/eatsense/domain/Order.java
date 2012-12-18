@@ -35,7 +35,7 @@ public class Order extends GenericEntity<Order> {
 	
 	@Parent
 	@NotNull
-	Key<Business> business;
+	Key<Location> business;
 
 
 	@NotNull
@@ -78,7 +78,7 @@ public class Order extends GenericEntity<Order> {
 	}
 
 
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
 	
@@ -100,7 +100,7 @@ public class Order extends GenericEntity<Order> {
 	
 	@Transient
 	@JsonIgnore
-	public static Key<Order> getKey(Key<Business> parent, Long id) {
+	public static Key<Order> getKey(Key<Location> parent, Long id) {
 		
 		return new Key<Order>(parent, Order.class, id);
 	}
@@ -139,7 +139,7 @@ public class Order extends GenericEntity<Order> {
 	}
 
 
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		this.business = business;
 	}
 

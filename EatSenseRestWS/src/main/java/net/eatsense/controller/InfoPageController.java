@@ -6,18 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
-
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
+import net.eatsense.domain.Location;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.validation.ValidationHelper;
+
+import org.owasp.html.PolicyFactory;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -54,7 +53,7 @@ public class InfoPageController {
 	 * @param businessKey
 	 * @return
 	 */
-	public List<InfoPageDTO> getAll(Key<Business> businessKey) {
+	public List<InfoPageDTO> getAll(Key<Location> businessKey) {
 		Locale locale = localizationProvider.getAcceptableLanguage();
 		if(locale.getLanguage().equals("*")) {
 			return getAll(businessKey, Optional.<Locale>absent());
@@ -72,7 +71,7 @@ public class InfoPageController {
 	 * @param optLocale Optional Locale, if present load the specified translation
 	 * @return List of all InfoPage entities for this business.
 	 */
-	public List<InfoPageDTO> getAll(Key<Business> businessKey, Optional<Locale> optLocale) {
+	public List<InfoPageDTO> getAll(Key<Location> businessKey, Optional<Locale> optLocale) {
 		checkNotNull(businessKey, "businessKey was null");
 		List<InfoPage> infoPages;
 		
@@ -97,7 +96,7 @@ public class InfoPageController {
 	 * @param id
 	 * @return InfoPage entity from the datastore.
 	 */
-	public InfoPage get(Key<Business> businessKey, Long id) {
+	public InfoPage get(Key<Location> businessKey, Long id) {
 		try {
 			return infoPageRepo.getById(businessKey, id);
 		} catch (NotFoundException e) {
@@ -113,7 +112,7 @@ public class InfoPageController {
 	 * @param infoPageData
 	 * @return
 	 */
-	public InfoPageDTO create(Key<Business> businessKey, InfoPageDTO infoPageData) {
+	public InfoPageDTO create(Key<Location> businessKey, InfoPageDTO infoPageData) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(infoPageData, "infoPageData was null");
 		
@@ -201,7 +200,7 @@ public class InfoPageController {
 	 * @param businessKey Parent key
 	 * @param id for the InfoPage entity to delete
 	 */
-	public void delete(Key<Business> businessKey, Long id) {
+	public void delete(Key<Location> businessKey, Long id) {
 		infoPageRepo.deleteWithTranslation(infoPageRepo.getKey(businessKey, id));
 	}
 }

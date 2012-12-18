@@ -1,13 +1,13 @@
 package net.eatsense.event;
 
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Request;
 
 public class CustomerRequestEvent {
-	private final Business business;
+	private final Location business;
 	private final Request request;
 	
-	public Business getBusiness() {
+	public Location getBusiness() {
 		return business;
 	}
 
@@ -15,7 +15,7 @@ public class CustomerRequestEvent {
 		return request;
 	}
 
-	public CustomerRequestEvent(Business business, Request request) {
+	public CustomerRequestEvent(Location business, Request request) {
 		super();
 		this.business = business;
 		this.request = request;

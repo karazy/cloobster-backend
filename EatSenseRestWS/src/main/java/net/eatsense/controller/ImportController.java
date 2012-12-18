@@ -3,7 +3,6 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,14 +15,13 @@ import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.configuration.Configuration;
-import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.FeedbackQuestion;
@@ -36,20 +34,19 @@ import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
-import net.eatsense.persistence.GenericRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.AreaImportDTO;
 import net.eatsense.representation.ChoiceDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.representation.LocationImportDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
-import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.validation.ImportChecks;
 
@@ -71,7 +68,7 @@ import com.googlecode.objectify.Key;
  */
 public class ImportController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	private SpotRepository spotRepo;
 	private MenuRepository menuRepo;
 	private ProductRepository productRepo;
@@ -97,7 +94,7 @@ public class ImportController {
 	
 
 	@Inject
-	public ImportController(BusinessRepository businessRepo, SpotRepository sr,
+	public ImportController(LocationRepository businessRepo, SpotRepository sr,
 			MenuRepository mr, ProductRepository pr, ChoiceRepository cr,
 			CheckInRepository chkr, OrderRepository or,
 			OrderChoiceRepository ocr, BillRepository br,
@@ -125,7 +122,7 @@ public class ImportController {
     
     /**
      * Creates a new {@link FeedbackForm} entity based on the given data
-     * and adds it to a {@link Business} identified by the given id.
+     * and adds it to a {@link Location} identified by the given id.
      * 
      * @param businessId - Id of the business to which the form will be added.
      * @param feedbackFormData - Data for the new {@link FeedbackForm} entity.
@@ -136,7 +133,7 @@ public class ImportController {
     	checkNotNull(feedbackFormData, "feedbackFormData was null");
     	checkNotNull(feedbackFormData.getQuestions(), "questions list was null");
     	
-    	Business business = businessRepo.getById(businessId);
+    	Location business = businessRepo.getById(businessId);
     	
     	FeedbackForm feedbackForm = new FeedbackForm();
     	feedbackForm.setDescription(feedbackFormData.getDescription());
@@ -189,7 +186,7 @@ public class ImportController {
 		return new FeedbackFormDTO(feedbackForm);
 	}
 
-	public Long addBusiness(BusinessImportDTO businessData) {
+	public Long addBusiness(LocationImportDTO businessData) {
 		if (!isValidBusinessData(businessData)) {
 			logger.error("Invalid business data, import aborted.");
 			logger.error(returnMessage);
@@ -198,7 +195,7 @@ public class ImportController {
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
-		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
+		Key<Location> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
@@ -259,10 +256,10 @@ public class ImportController {
 		return kR.getId();
 	}
 	
-	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
+	private Key<Location> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
 		logger.info("Creating new business with data: " + name + ", " + desc );
 		
-		Business business = new Business();
+		Location business = new Location();
 		business.setName(name);
 		business.setDescription(desc);
 		business.setAddress(address);
@@ -270,12 +267,12 @@ public class ImportController {
 		business.setPostcode(postcode);
 		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
-		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
+		Key<Location> businessKey = businessRepo.saveOrUpdate(business);
 		logger.info("Created new business with id: " + businessKey.getId());
 		return businessKey;
 	}
 	
-	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description) {
+	private Key<Area> createAndSaveArea(Key<Location> businessKey, String name, String description) {
 		checkNotNull(businessKey, "businessKey was null");
 		Area area = new Area();
 		area.setBusiness(businessKey);
@@ -288,7 +285,7 @@ public class ImportController {
 		return kA;
 	}
 	
-	private Key<Spot> createAndSaveSpot(Key<Business> businessKey, String name, String barcode, Key<Area> areaKey) {
+	private Key<Spot> createAndSaveSpot(Key<Location> businessKey, String name, String barcode, Key<Area> areaKey) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new spot for business ("+ businessKey.getId() + ") with name: " + name );
@@ -304,7 +301,7 @@ public class ImportController {
 		return kS;
 	}
 	
-	private Key<Menu> createAndSaveMenu (Key<Business> businessKey, String title, String description, Integer order) {
+	private Key<Menu> createAndSaveMenu (Key<Location> businessKey, String title, String description, Integer order) {
 		if(businessKey == null)
 			throw new NullPointerException("businessKey was not set");
 		logger.info("Creating new menu for business ("+ businessKey.getId() + ") with title: " + title );
@@ -321,7 +318,7 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Location> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
@@ -340,7 +337,7 @@ public class ImportController {
 	}
 	
 	private Key<Choice> createAndSaveChoice(Key<Product> productKey,
-			Key<Business> businessKey, String text, Money price,
+			Key<Location> businessKey, String text, Money price,
 			ChoiceOverridePrice overridePrice, int minOccurence,
 			int maxOccurence, int includedChoices,
 			Collection<ProductOption> availableOptions) {
@@ -366,11 +363,11 @@ public class ImportController {
 		return kC;
 	}
 	
-	private boolean isValidBusinessData(BusinessImportDTO business) throws IllegalArgumentException,NullPointerException {
+	private boolean isValidBusinessData(LocationImportDTO business) throws IllegalArgumentException,NullPointerException {
 		StringBuilder messageBuilder = new StringBuilder();
 		boolean isValid = true;
 		if( business != null ) {
-			Set<ConstraintViolation<BusinessImportDTO>> violation = validator.validate(business,Default.class, ImportChecks.class);
+			Set<ConstraintViolation<LocationImportDTO>> violation = validator.validate(business,Default.class, ImportChecks.class);
 			
 			if(violation.isEmpty()) {
 				isValid = true;
@@ -378,7 +375,7 @@ public class ImportController {
 			else {
 				isValid = false;
 				messageBuilder.append("business data not valid:\n");
-				for (ConstraintViolation<BusinessImportDTO> constraintViolation : violation) {
+				for (ConstraintViolation<LocationImportDTO> constraintViolation : violation) {
 					messageBuilder.append("\n").append(constraintViolation.getPropertyPath()).append(" ").append(constraintViolation.getMessage());
 				}
 			}

@@ -1,13 +1,13 @@
 package net.eatsense.event;
 
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Request;
 
 public class DeleteCustomerRequestEvent extends CustomerRequestEvent {
 
 	private boolean fromCheckIn = false;
 
-	public DeleteCustomerRequestEvent(Business business, Request request, boolean fromCheckIn) {
+	public DeleteCustomerRequestEvent(Location business, Request request, boolean fromCheckIn) {
 		super(business, request);
 		
 		this.setFromCheckIn(fromCheckIn);

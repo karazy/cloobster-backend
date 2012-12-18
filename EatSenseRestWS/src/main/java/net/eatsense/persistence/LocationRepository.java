@@ -3,25 +3,25 @@ package net.eatsense.persistence;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import net.eatsense.domain.Spot;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.TrashEntry;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
 
-public class BusinessRepository extends GenericRepository<Business> {
+public class LocationRepository extends GenericRepository<Location> {
 	
-	final static Class<Business> entityClass = Business.class;
+	final static Class<Location> entityClass = Location.class;
 	
-	public BusinessRepository() {
-		super(Business.class);
+	public LocationRepository() {
+		super(Location.class);
 	}
 	
-	public Business findByBarcode(String code) {
+	public Location findByBarcode(String code) {
 		Query<Spot> query = ofy().query(Spot.class).filter("barcode", code);		
 		Spot bc = query.get();
-		Business business = null;
+		Location business = null;
 		if(bc != null) {
 			business = ofy().find(bc.getBusiness());
 		}
@@ -33,13 +33,13 @@ public class BusinessRepository extends GenericRepository<Business> {
 	 * @param trashEntryKey
 	 * @return
 	 */
-	public Business restoreBusiness(Key<TrashEntry> trashEntryKey) {
+	public Location restoreLocation(Key<TrashEntry> trashEntryKey) {
 		checkNotNull(trashEntryKey, "trashEntryKey was null");
 		TrashEntry trashEntry = ofy().get(trashEntryKey);
-		checkArgument(trashEntry.getEntityKey().getKind() == Key.getKind(Business.class), "Trashed entity not of type Business");
+		checkArgument(trashEntry.getEntityKey().getKind() == Key.getKind(Location.class), "Trashed entity not of type Business");
 		
 		@SuppressWarnings("unchecked")
-		Business business = ofy().get((Key<Business>)trashEntry.getEntityKey());
+		Location business = ofy().get((Key<Location>)trashEntry.getEntityKey());
 		business.setTrash(false);
 		
 		saveOrUpdate(business);

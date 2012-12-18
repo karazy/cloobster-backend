@@ -17,7 +17,7 @@ import com.googlecode.objectify.annotation.Unindexed;
 public class Bill extends GenericEntity<Bill> {
 	@Parent
 	@NotNull
-	private Key<Business> business;
+	private Key<Location> business;
 	
 	@NotNull
 	private Key<CheckIn> checkIn;
@@ -37,11 +37,11 @@ public class Bill extends GenericEntity<Bill> {
 	
 	private boolean cleared;
 
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
 
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		this.business = business;
 	}
 

@@ -20,12 +20,12 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.HistoryStatusDTO;
 import net.eatsense.representation.VisitDTO;
@@ -44,10 +44,10 @@ public class CheckInsResource {
 	private ResourceContext resourceContext;
 	@Context
 	HttpServletRequest servletRequest;
-	private final BusinessRepository businessRepo;	
+	private final LocationRepository businessRepo;	
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl, BusinessRepository businessRepo) {
+	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl, LocationRepository businessRepo) {
 		super();
 		this.channelCtrlProvider = channelCtrl;
 		this.checkInCtrl = checkInCtr;
@@ -119,7 +119,7 @@ public class CheckInsResource {
 		
 		if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
 			// Check for read-only mode.
-			Business business = businessRepo.getByKey(checkIn.getBusiness());
+			Location business = businessRepo.getByKey(checkIn.getBusiness());
 			if(business.isTrash())
 				throw new IllegalAccessException("Business for this CheckIn has been deleted.");
 		}

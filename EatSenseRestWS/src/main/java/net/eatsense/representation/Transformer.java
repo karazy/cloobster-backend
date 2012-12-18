@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -39,12 +39,12 @@ public class Transformer {
 	private ChoiceRepository choiceRepo;
 	private ProductRepository productRepo;
 	private OrderChoiceRepository orderChoiceRepo;
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	private SpotRepository spotRepo;
 	
 	
 	@Inject
-	private Transformer(SpotRepository spotRepo, ChoiceRepository choiceRepo, ProductRepository productRepo, OrderChoiceRepository orderChoiceRepo, BusinessRepository businessRepo) {
+	private Transformer(SpotRepository spotRepo, ChoiceRepository choiceRepo, ProductRepository productRepo, OrderChoiceRepository orderChoiceRepo, LocationRepository businessRepo) {
 		super();
 		this.choiceRepo = choiceRepo;
 		this.productRepo = productRepo;
@@ -218,7 +218,7 @@ public class Transformer {
 		dto.setUserId(checkIn.getUserId());
 		
 		if(loadAll) {
-			Business business = businessRepo.getByKey(checkIn.getBusiness());
+			Location business = businessRepo.getByKey(checkIn.getBusiness());
 			dto.setBusinessName(business.getName());
 		}
 		

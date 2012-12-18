@@ -17,28 +17,27 @@ import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessAccountDTO;
-import net.eatsense.representation.BusinessDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.CustomerAccountDTO;
-import net.eatsense.representation.CustomerProfileDTO;
 import net.eatsense.representation.ImageDTO;
+import net.eatsense.representation.LocationDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
 import net.eatsense.service.FacebookService;
@@ -49,13 +48,10 @@ import net.eatsense.validation.PasswordChecks;
 import net.eatsense.validation.ValidationHelper;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.tools.development.DynamicLatencyAdjuster.Default;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -72,7 +68,7 @@ public class AccountController {
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final AccountRepository accountRepo;
-	private final BusinessRepository businessRepo;
+	private final LocationRepository businessRepo;
 	private final NewsletterRecipientRepository recipientRepo;
 	private final ValidationHelper validator;
 	private final CompanyRepository companyRepo;
@@ -84,7 +80,7 @@ public class AccountController {
 	private final CheckInRepository checkInRepo;
 
 	@Inject
-	public AccountController(AccountRepository accountRepo, BusinessRepository businessRepository,
+	public AccountController(AccountRepository accountRepo, LocationRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
 			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus, CustomerProfileRepository customerProfileRepo, CheckInRepository checkInRepo) {
@@ -115,7 +111,7 @@ public class AccountController {
 			return false;
 		
 		if(account.getBusinesses() != null) {
-			for (Key<Business> businessKey : account.getBusinesses()) {
+			for (Key<Location> businessKey : account.getBusinesses()) {
 				if(businessKey.getId() == businessId) 
 					return true;
 			}
@@ -242,12 +238,12 @@ public class AccountController {
 	 * @param login the login of the account
 	 * @return list of BusinessDTO objects the account manages
 	 */
-	public List<BusinessDTO> getBusinessDtos(String login) {
+	public List<LocationDTO> getBusinessDtos(String login) {
 		Account account = accountRepo.getByProperty("login", login);
-		ArrayList<BusinessDTO> businessDtos = new ArrayList<BusinessDTO>();
+		ArrayList<LocationDTO> businessDtos = new ArrayList<LocationDTO>();
 		if(account != null && account.getBusinesses() != null) {
-			for (Business business :businessRepo.getByKeys(account.getBusinesses())) {
-				BusinessDTO businessData = new BusinessDTO(business);
+			for (Location business :businessRepo.getByKeys(account.getBusinesses())) {
+				LocationDTO businessData = new LocationDTO(business);
 				businessDtos.add(businessData);
 			}
 		}
@@ -703,11 +699,11 @@ public class AccountController {
 			throw new IllegalAccessException("Can only update company accounts");
 		}
 		
-		ArrayList<Key<Business>> businessKeys = new ArrayList<Key<Business>>();
+		ArrayList<Key<Location>> businessKeys = new ArrayList<Key<Location>>();
 		
 		if(accountData.getBusinessIds() != null) {
 			for (Long businessId : accountData.getBusinessIds()) {
-				Key<Business> businessKey = businessRepo.getKey(businessId);
+				Key<Location> businessKey = businessRepo.getKey(businessId);
 				// Check that we only add business keys, that come from the owner account.
 				if(ownerAccount.getBusinesses().contains(businessKey) && !businessKeys.contains(businessKey)) {
 					businessKeys.add(businessKey);

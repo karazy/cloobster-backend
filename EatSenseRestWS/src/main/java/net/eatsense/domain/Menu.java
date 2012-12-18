@@ -18,7 +18,7 @@ public class Menu extends GenericEntity<Menu>{
 	private String description;
 	
 	@Parent
-	private Key<Business> business;
+	private Key<Location> business;
 	
 	@Unindexed
 	private Integer order;
@@ -54,11 +54,11 @@ public class Menu extends GenericEntity<Menu>{
 		}
 	}
 
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
 
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		if(!Objects.equal(this.business, business)) {
 			this.setDirty(true);
 			this.business = business;

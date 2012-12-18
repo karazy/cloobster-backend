@@ -12,7 +12,7 @@ import com.googlecode.objectify.annotation.Parent;
 
 public class Feedback extends GenericEntity<Feedback> {
 	@Parent
-	private Key<Business> business;
+	private Key<Location> business;
 	private Key<CheckIn> checkIn;
 	private Key<FeedbackForm> form;
 	@Embedded
@@ -62,10 +62,10 @@ public class Feedback extends GenericEntity<Feedback> {
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	public Key<Business> getBusiness() {
+	public Key<Location> getBusiness() {
 		return business;
 	}
-	public void setBusiness(Key<Business> business) {
+	public void setBusiness(Key<Location> business) {
 		this.business = business;
 	}
 	public Key<CheckIn> getCheckIn() {

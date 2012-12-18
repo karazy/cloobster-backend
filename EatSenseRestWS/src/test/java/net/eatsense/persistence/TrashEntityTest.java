@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import java.util.Date;
 
 import net.eatsense.EatSenseDomainModule;
-import net.eatsense.domain.Business;
+import net.eatsense.domain.Location;
 import net.eatsense.domain.Product;
 
 import org.apache.bval.guice.ValidationModule;
@@ -24,14 +24,14 @@ public class TrashEntityTest {
 	private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 	private ProductRepository productRepo;
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	
 	@Before
 	public void setUp() {
 		helper.setUp();
 		Injector injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		productRepo = injector.getInstance(ProductRepository.class);
-		businessRepo = injector.getInstance(BusinessRepository.class);
+		businessRepo = injector.getInstance(LocationRepository.class);
 	}
 	
 	@After
@@ -42,7 +42,7 @@ public class TrashEntityTest {
 	@Test
 	public void testSaveNewTrashEntryAndDelete() throws Exception {
 		Product product = productRepo.newEntity();
-		product.setBusiness(new Key<Business>(Business.class, 1));
+		product.setBusiness(new Key<Location>(Location.class, 1));
 		product.setName("test product");
 		productRepo.saveOrUpdate(product);
 		assertThat(productRepo.getAll().isEmpty(), is(false));
@@ -55,7 +55,7 @@ public class TrashEntityTest {
 	@Test
 	public void testMixedEntries() throws Exception {
 		Product product = productRepo.newEntity();
-		Business business = businessRepo.newEntity();
+		Location business = businessRepo.newEntity();
 		business.setName("test business");
 		
 		product.setBusiness(businessRepo.saveOrUpdate(business));
