@@ -746,4 +746,12 @@ public class LocationController {
 		else 
 			return locationRepo.getListByProperty("company", Company.getKey(companyId));
 	}
+	
+	/**
+	 * @param locationId
+	 * @return Location(Business) entity
+	 */
+	public Business get(long locationId) {
+		return locationRepo.getById(locationId);
+	}
 }

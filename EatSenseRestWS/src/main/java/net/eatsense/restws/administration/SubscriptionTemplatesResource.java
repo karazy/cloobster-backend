@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import net.eatsense.controller.SubscriptionController;
+import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.representation.SubscriptionDTO;
 
 import com.google.common.collect.Iterables;
@@ -27,25 +28,22 @@ public class SubscriptionTemplatesResource {
 
 	@GET
 	@Produces("application/json")
-	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate, @QueryParam("businessId") Long businessId) {
-		if(businessId != null) 
-			return Iterables.transform(subCtrl.get(businessId), SubscriptionDTO.toDTO);
-		else
-			return Iterables.transform(subCtrl.getAll(isTemplate), SubscriptionDTO.toDTO);
+	public Iterable<SubscriptionDTO> getSubscriptions(@QueryParam("template") boolean isTemplate, @QueryParam("businessId") Long businessId, @QueryParam("status") SubscriptionStatus status) {
+		return Iterables.transform(subCtrl.get(isTemplate, businessId, status), SubscriptionDTO.toDTO);
 	}
 	
 	@POST
 	@Consumes("application/json")
 	@Produces("application/json")
 	public SubscriptionDTO createPackage(SubscriptionDTO subscriptionData) {
-		return SubscriptionDTO.toDTO.apply(subCtrl.createAndSavePackage(subscriptionData));
+		return SubscriptionDTO.toDTO.apply(subCtrl.createAndSaveTemplate(subscriptionData));
 	}
 	
 	@GET
 	@Path("{id}")
 	@Produces("application/json")
 	public SubscriptionDTO getPackage(@PathParam("id") Long id) {
-		return SubscriptionDTO.toDTO.apply(subCtrl.getPackage(id));
+		return SubscriptionDTO.toDTO.apply(subCtrl.getTemplate(id));
 	}
 	
 	@PUT
@@ -53,7 +51,7 @@ public class SubscriptionTemplatesResource {
 	@Consumes("application/json")
 	@Produces("application/json")
 	public SubscriptionDTO updatePackage(@PathParam("id") Long id, SubscriptionDTO subscriptionData) {
-		return SubscriptionDTO.toDTO.apply(subCtrl.update(subCtrl.getPackage(id), subscriptionData));
+		return SubscriptionDTO.toDTO.apply(subCtrl.update(subCtrl.getTemplate(id), subscriptionData));
 	}
 	
 	@DELETE

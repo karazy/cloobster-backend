@@ -21,6 +21,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.Query;
 
 public class SubscriptionController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -35,7 +36,7 @@ public class SubscriptionController {
 		this.validator = validator;
 	}
 	
-	public Subscription createAndSavePackage(SubscriptionDTO subscriptionData) {
+	public Subscription createAndSaveTemplate(SubscriptionDTO subscriptionData) {
 		Subscription subscription = new Subscription();
 		subscription.setTemplate(true);
 		subscriptionData.setStatus(SubscriptionStatus.PENDING);
@@ -44,26 +45,40 @@ public class SubscriptionController {
 	}
 	
 	/**
-	 * @param template return only Subscription entities flagged as template
-	 * @return All saved Subscription entities 
+	 * Shortcut method for {@link #get(boolean, long, SubscriptionStatus)}
+	 * @param businessId
+	 * @return All Subscriptions for this entity.
 	 */
-	public Iterable<Subscription> getAll(boolean template) {
-		return ofy.query(Subscription.class).filter("template", template).fetch();
+	public Iterable<Subscription> get(long businessId) {
+		return get(false, businessId, null);
 	}
 	
 	/**
 	 * @param businessId
 	 * @return All Subscriptions for this entity.
 	 */
-	public Iterable<Subscription> get(long businessId) {
-		return ofy.query(Subscription.class).filter("business", Business.getKey(businessId));
+	public Iterable<Subscription> get(boolean isTemplate, long businessId, SubscriptionStatus status) {
+		Query<Subscription> query = ofy.query(Subscription.class);
+		
+		if(isTemplate) {
+			query = query.filter("template", isTemplate);
+		}
+		else if(businessId != 0) {
+			query = query.ancestor(Business.getKey(businessId));
+		}
+		
+		if(status != null) {
+			query = query.filter("status", status);
+		}
+		
+		return query;
 	}
 	
 	/**
 	 * @param name
 	 * @return Subscription entity saved with that name
 	 */
-	public Subscription getPackage(long	id) throws NotFoundException{
+	public Subscription getTemplate(long id) throws NotFoundException{
 		try {
 			return ofy.get(Subscription.getKey(id));
 		} catch (com.googlecode.objectify.NotFoundException e) {
@@ -138,7 +153,7 @@ public class SubscriptionController {
 	public Subscription createAndSetSubscription(long templateId, SubscriptionStatus status,  Long businessId) {
 		checkArgument(templateId > 0, "templateId must be >0");
 		
-		Subscription newSubscription = createSubscriptionFromTemplate(getPackage(templateId), status, Business.getKey(businessId));
+		Subscription newSubscription = createSubscriptionFromTemplate(getTemplate(templateId), status, Business.getKey(businessId));
 		Business location = ofy.get(Business.getKey(businessId));
 		
 		setActiveSubscription(location, newSubscription, true);

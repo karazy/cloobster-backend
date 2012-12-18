@@ -57,6 +57,7 @@ public class SubscriptionDTO {
 		this.quotaExceeded = subscription.isQuotaExceeded();
 		this.startDate = subscription.getStartDate();
 		this.status = subscription.getStatus();
+		this.templateId = subscription.getTemplateKey() != null ? subscription.getTemplateKey().getId() : null;
 	}
 	
 	public String getName() {

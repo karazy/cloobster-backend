@@ -2,6 +2,7 @@ package net.eatsense.restws.administration;
 
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -9,6 +10,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -34,9 +36,26 @@ public class LocationsResource {
 		return Lists.transform(ctrl.getLocations(companyId), LocationProfileDTO.toDTO);
 	}
 	
+	@GET
+	@Path("{locationId}")
+	@Produces("application/json")
+	public LocationProfileDTO getLocation(@PathParam("locationId") long locationId) {
+		return new LocationProfileDTO(ctrl.get(locationId));
+	}
+	
 	@POST
 	@Path("{locationId}/subscriptions")
+	@Consumes("application/json")
+	@Produces("application/json")
 	public SubscriptionDTO createNewSubscription(@PathParam("locationId") long locationId, SubscriptionDTO subscriptionData) {
 		return new SubscriptionDTO(subCtrl.createAndSetSubscription(subscriptionData.getTemplateId(), subscriptionData.getStatus(), locationId));
+	}
+	
+	@GET
+	@Path("{locationId}/subscriptions")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Iterable<SubscriptionDTO> getSubscriptionsForLocation(@PathParam("locationId") long locationId) {
+		return Iterables.transform(subCtrl.get(locationId), SubscriptionDTO.toDTO);
 	}
 }
