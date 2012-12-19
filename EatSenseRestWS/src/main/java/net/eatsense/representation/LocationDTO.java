@@ -38,6 +38,9 @@ public class LocationDTO {
 	
 	private boolean basic;
 	
+	private Long activeSubscriptionId;
+	private Long pendingSubscriptionId;
+	
 	public LocationDTO() {
 		super();
 	}
@@ -55,6 +58,8 @@ public class LocationDTO {
 		this.paymentMethods = business.getPaymentMethods();
 		this.url = business.getUrl();
 		this.fbUrl = business.getFbUrl();
+		this.activeSubscriptionId = business.getActiveSubscription() != null ? business.getActiveSubscription().getId() : null;
+		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
 	}
 	
 	public String getName() {
@@ -138,5 +143,21 @@ public class LocationDTO {
 
 	public void setBasic(boolean basic) {
 		this.basic = basic;
+	}
+
+	public Long getActiveSubscriptionId() {
+		return activeSubscriptionId;
+	}
+
+	public void setActiveSubscriptionId(Long activeSubsriptionId) {
+		this.activeSubscriptionId = activeSubsriptionId;
+	}
+
+	public Long getPendingSubscriptionId() {
+		return pendingSubscriptionId;
+	}
+
+	public void setPendingSubscriptionId(Long pendingSubsriptionId) {
+		this.pendingSubscriptionId = pendingSubsriptionId;
 	}
 }

@@ -40,7 +40,7 @@ public class LocationsResource {
 	@Path("{locationId}")
 	@Produces("application/json")
 	public LocationProfileDTO getLocation(@PathParam("locationId") long locationId) {
-		return new LocationProfileDTO(ctrl.get(locationId));
+		return new LocationProfileDTO(ctrl.get(locationId, true));
 	}
 	
 	@POST

@@ -776,9 +776,16 @@ public class LocationController {
 	
 	/**
 	 * @param locationId
+	 * @param countSpots
 	 * @return Location(Business) entity
 	 */
-	public Business get(long locationId) {
-		return locationRepo.getById(locationId);
+	public Business get(long locationId, boolean countSpots) {
+		Business location = locationRepo.getById(locationId);
+		
+		if(countSpots) {
+			
+		}
+		
+		return location;
 	}
 }

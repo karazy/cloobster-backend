@@ -81,6 +81,9 @@ public class Business extends GenericEntity<Business> {
 	
 	private Key<Company> company;
 	
+	@Transient
+	private int spotCount;
+	
 	/**
 	 * List of images used by the Business, at the moment we use 'logo' and several scrapbook images.
 	 */
@@ -362,5 +365,13 @@ public class Business extends GenericEntity<Business> {
 
 	public void setPendingSubscription(Key<Subscription> pendingSubscription) {
 		this.pendingSubscription = pendingSubscription;
+	}
+
+	public int getSpotCount() {
+		return spotCount;
+	}
+
+	public void setSpotCount(int spotCount) {
+		this.spotCount = spotCount;
 	}
 }
