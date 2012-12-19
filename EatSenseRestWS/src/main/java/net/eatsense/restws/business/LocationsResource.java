@@ -68,7 +68,6 @@ public class LocationsResource {
 		return businessCtrl.createBusinessForAccount(account, businessData);
 	}
 	
-	
 	@Path("{businessId}")
 	public LocationResource getBusinessResource(@PathParam("businessId") Long businessId) {
 		Business business;

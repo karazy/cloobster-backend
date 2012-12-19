@@ -104,6 +104,12 @@ public class Subscription {
 		return Key.create(Subscription.class, id);
 	}
 	
+	@Transient
+	public static Key<Subscription> getKey(long businessId, long id) {
+		return Key.create(Business.getKey(businessId), Subscription.class, id);
+	}
+	
+	@Transient
 	public  Key<Subscription> getKey() {
 		if(business == null) {
 			return Key.create(Subscription.class, id);

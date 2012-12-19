@@ -1,8 +1,6 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -14,8 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-
-import org.apache.lucene.index.CheckIndex;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
@@ -29,12 +25,10 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Subscription;
-import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.BillDTO;
-import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
-import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
@@ -90,7 +84,7 @@ public class LocationResource {
 	public LocationProfileDTO getBusiness() {
 		LocationProfileDTO businessDto = new LocationProfileDTO(business);
 		Subscription activeSubscription = subCtrl.getActiveSubscription(business);
-		businessDto.setBasic(activeSubscription != null ? activeSubscription.isBasic() : false);
+		businessDto.setBasic(activeSubscription != null ? activeSubscription.isBasic() : true);
 		return businessDto;
 	}
 	

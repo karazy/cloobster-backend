@@ -1,6 +1,5 @@
 package net.eatsense.controller;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
@@ -79,7 +78,7 @@ public class SubscriptionController {
 	
 	/**
 	 * @param name
-	 * @return Subscription entity saved with that name
+	 * @return Subscription entity template saved with that id
 	 */
 	public Subscription getTemplate(long id) throws NotFoundException{
 		try {
@@ -87,6 +86,19 @@ public class SubscriptionController {
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			logger.error("No Subscription package found with id={}", id);
 			throw new NotFoundException("No package found with id: " + id);
+		}
+	}
+	
+	/**
+	 * @param businessId
+	 * @param subscriptionId
+	 * @return Subscription entity
+	 */
+	public Subscription get(long businessId, long subscriptionId) {
+		try {
+			return ofy.get(Subscription.getKey(businessId, subscriptionId));
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new NotFoundException();
 		}
 	}
 	
@@ -171,13 +183,37 @@ public class SubscriptionController {
 		}
 		
 		Subscription newSubscription = createSubscriptionFromTemplate(getTemplate(templateId), status, Business.getKey(businessId));
+		
 		Business location = ofy.get(Business.getKey(businessId));
 		
-		setActiveSubscription(location, newSubscription, true);
+		if(status == SubscriptionStatus.PENDING) {
+			setPendingSubscription(location, newSubscription, true);
+		}
+		else if(status == SubscriptionStatus.APPROVED){
+			setActiveSubscription(location, newSubscription, true);
+		}
 		
 		return newSubscription;
 	}
 	
+	public void removePendingSubscription(Business location, long subscriptionId) {
+		checkNotNull(location, "location was null");
+		
+		if(location.getPendingSubscription() != null) {
+			if(location.getPendingSubscription().getId() == subscriptionId) {
+				ofy.delete(location.getPendingSubscription());
+				location.setPendingSubscription(null);
+			}
+			else {
+				throw new NotFoundException();
+			}
+		}
+		else {
+			throw new NotFoundException();
+		}
+		
+		
+	}
 	
 	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status,  Key<Business> businessKey) {
 		checkNotNull(template, "subscription template was null");
@@ -222,6 +258,23 @@ public class SubscriptionController {
 		}
 				
 		location.setActiveSubscription(newSubscription.getKey());
+		
+		if(saveBusiness) {
+			ofy.put(location);
+		}
+		
+		return location;
+	}
+	
+	public Business setPendingSubscription(Business location, Subscription newSubscription, boolean saveBusiness) {
+		checkNotNull(location, "business was null");
+		checkNotNull(newSubscription, "newSubcription was null");
+		
+		if(location.getPendingSubscription() != null) {
+			ofy.delete(location.getPendingSubscription());
+		}
+				
+		location.setPendingSubscription(newSubscription.getKey());
 		
 		if(saveBusiness) {
 			ofy.put(location);
