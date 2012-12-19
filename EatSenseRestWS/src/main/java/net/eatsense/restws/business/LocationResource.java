@@ -74,10 +74,12 @@ public class LocationResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public LocationProfileDTO getBusiness() {
+	public LocationProfileDTO getBusiness(@QueryParam("countSpots")boolean countSpots) {
 		if(business == null)
 			throw new NotFoundException();
-		
+		if(countSpots) {
+			businessCtrl.setSpotCount(business);
+		}
 		return new LocationProfileDTO(business);
 	}
 	

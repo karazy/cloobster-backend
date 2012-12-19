@@ -783,9 +783,20 @@ public class LocationController {
 		Business location = locationRepo.getById(locationId);
 		
 		if(countSpots) {
-			
+			setSpotCount(location);
 		}
 		
+		return location;
+	}
+	
+	/**
+	 * @param location Business entity 
+	 * @return Business entity with spotcount set
+	 */
+	
+	public Business setSpotCount(Business location) {
+		checkNotNull(location, "location was null");
+		location.setSpotCount(spotRepo.query().ancestor(location).count());
 		return location;
 	}
 }
