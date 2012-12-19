@@ -133,6 +133,7 @@ public class SubscriptionController {
 		
 		if(subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.APPROVED) {
 			Business location = ofy.get(subscription.getBusiness());
+			location.setPendingSubscription(null);
 			setActiveSubscription(location, Optional.of(subscription), true);
 		}
 		else if (subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.CANCELED) {
