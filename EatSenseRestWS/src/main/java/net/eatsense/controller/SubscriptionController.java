@@ -20,6 +20,7 @@ import net.eatsense.validation.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -130,13 +131,24 @@ public class SubscriptionController {
 		
 		validator.validate(subscriptionData);
 		
-		subscription.setEndData(subscriptionData.getEndDate());
+		if(subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.APPROVED) {
+			Business location = ofy.get(subscription.getBusiness());
+			setActiveSubscription(location, Optional.of(subscription), true);
+		}
+		else if (subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.CANCELED) {
+			Business location = ofy.get(subscription.getBusiness());
+			cancelPendingSubscription(location);
+		}
+		else if(subscription.getStatus() == SubscriptionStatus.APPROVED && subscriptionData.getStatus() == SubscriptionStatus.ARCHIVED) {
+			Business location = ofy.get(subscription.getBusiness());
+			setBasicSubscription(location);
+		}
+		
 		subscription.setFee(subscriptionData.getFeeMinor());
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
 		subscription.setName(subscriptionData.getName());
-		subscription.setStartDate(subscriptionData.getStartDate());
 		subscription.setStatus(subscriptionData.getStatus());
-		
+				
 		ofy.put(subscription);
 		
 		return subscription;
@@ -228,7 +240,7 @@ public class SubscriptionController {
 			setPendingSubscription(location, newSubscription, true);
 		}
 		else if(status == SubscriptionStatus.APPROVED){
-			setActiveSubscription(location, newSubscription, true);
+			setActiveSubscription(location, Optional.of(newSubscription), true);
 		}
 		
 		return newSubscription;
@@ -239,8 +251,9 @@ public class SubscriptionController {
 		
 		if(location.getPendingSubscription() != null) {
 			if(location.getPendingSubscription().getId() == subscriptionId) {
-				ofy.delete(location.getPendingSubscription());
+				ofy.async().delete(location.getPendingSubscription());
 				location.setPendingSubscription(null);
+				ofy.put(location);
 			}
 			else {
 				throw new NotFoundException();
@@ -249,8 +262,19 @@ public class SubscriptionController {
 		else {
 			throw new NotFoundException();
 		}
+	}
+	
+	private void cancelPendingSubscription(Business location) {
+		checkNotNull(location, "location was null");
 		
-		
+		if(location.getPendingSubscription() != null) {
+			Subscription pendingSubscription = ofy.get(location.getPendingSubscription());
+			
+			pendingSubscription.setStatus(SubscriptionStatus.CANCELED);
+			location.setPendingSubscription(null);
+			
+			ofy.put(pendingSubscription, location);
+		}
 	}
 	
 	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status,  Key<Business> businessKey) {
@@ -278,7 +302,7 @@ public class SubscriptionController {
 		return newSubscription;
 	}
 	
-	public Business setActiveSubscription(Business location, Subscription newSubscription, boolean saveBusiness) {
+	public Business setActiveSubscription(Business location, Optional<Subscription> newSubscription, boolean saveBusiness) {
 		checkNotNull(location, "business was null");
 		checkNotNull(newSubscription, "newSubcription was null");
 		
@@ -294,8 +318,8 @@ public class SubscriptionController {
 				logger.warn("Corrupt Location data, unable to find previous activeSubscription.");
 			}
 		}
-				
-		location.setActiveSubscription(newSubscription.getKey());
+		Key<Subscription> newSubscriptionKey = newSubscription.isPresent() ? newSubscription.get().getKey() : null;
+		location.setActiveSubscription(newSubscriptionKey);
 		
 		if(saveBusiness) {
 			ofy.put(location);
@@ -321,8 +345,6 @@ public class SubscriptionController {
 		return location;
 	}
 	
-
-	
 	/**
 	 * @param business
 	 * @return active Subcription entity if found, <code>null</code> otherwise
@@ -334,19 +356,30 @@ public class SubscriptionController {
 		
 		return ofy.find(business.getActiveSubscription());
 	}
-
 	
-	@Subscribe
-	public void handleNewLocationEvent(NewLocationEvent event) {
+	private Subscription setBasicSubscription(Business location) {
 		Subscription basicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
 		
 		if(basicSubscription == null) {
 			logger.warn("No Subscription flagged as basic found, unable to set active subscription for new Location.");
+			setActiveSubscription(location, Optional.<Subscription>absent(), false);
 		}
 		else {
-			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation().getKey());
+			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, location.getKey());
 			
-			setActiveSubscription(event.getLocation(), newSubscription, false);
+			setActiveSubscription(location, Optional.of(newSubscription), false);
 		}
+		
+		return basicSubscription;
+	}
+		
+	/**
+	 * Handles basic Subscription creation before creation of a new Business in the store.
+	 * 
+	 * @param event
+	 */
+	@Subscribe
+	public void handleNewLocationEvent(NewLocationEvent event) {
+		setBasicSubscription(event.getLocation());
 	}
 }
