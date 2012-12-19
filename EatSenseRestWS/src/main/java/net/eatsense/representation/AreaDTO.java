@@ -22,6 +22,7 @@ public class AreaDTO {
 	private String description;
 	private List<Long> menuIds;
 	private Long businessId;
+	private boolean welcome;
 	private boolean active;
 	
 	public AreaDTO() {
@@ -86,5 +87,13 @@ public class AreaDTO {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public boolean isWelcome() {
+		return welcome;
+	}
+
+	public void setWelcome(boolean welcome) {
+		this.welcome = welcome;
 	}
 }

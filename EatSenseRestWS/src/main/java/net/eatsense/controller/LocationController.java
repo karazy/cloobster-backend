@@ -372,10 +372,35 @@ public class LocationController {
 		// Let other controllers know we created a new business.
 		eventBus.post(new NewLocationEvent(business));
 		
-		account.getBusinesses().add(updateBusiness(business, businessData));
+		Key<Business> businessKey = updateBusiness(business, businessData);
+		
+		createWelcomeAreaAndSpot(businessKey);
+		account.getBusinesses().add(businessKey);
 		accountRepo.saveOrUpdate(account);
 		
 		return businessData;
+	}
+
+	private void createWelcomeAreaAndSpot(Key<Business> businessKey) {
+		checkNotNull(businessKey, "businessKey was null");
+		
+		AreaDTO areaData = new AreaDTO();
+		areaData.setActive(true);
+		areaData.setDescription("Welcome Area");
+		areaData.setName("Welcome Area");
+		areaData.setWelcome(true);
+		
+		Area welcomeArea = createArea(businessKey, areaData );
+		
+		Key<Area> areaKey = areaRepo.getKey(welcomeArea);
+		
+		SpotDTO spotData = new SpotDTO();
+		spotData.setActive(true);
+		spotData.setAreaId(welcomeArea.getId());
+		spotData.setName("Welcome Spot");
+		spotData.setWelcome(true);
+		
+		createSpot(businessKey, spotData );
 	}
 
 	/**
@@ -549,6 +574,7 @@ public class LocationController {
 		
 		Spot spot = spotRepo.newEntity();
 		spot.setBusiness(businessKey);
+		spot.setWelcome(spotData.isWelcome());
 		
 		updateSpot(spot, spotData);
 		// Generate the barcode like this: {businessId}-{spotId}
@@ -654,6 +680,7 @@ public class LocationController {
 		
 		Area area = areaRepo.newEntity();
 		area.setBusiness(businessKey);
+		area.setWelcome(areaData.isWelcome());
 		updateArea(area, areaData);
 		
 		return area;

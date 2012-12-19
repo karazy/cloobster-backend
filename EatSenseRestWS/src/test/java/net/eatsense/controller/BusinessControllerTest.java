@@ -30,6 +30,7 @@ import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.exceptions.ValidationException;
@@ -92,8 +93,9 @@ public class BusinessControllerTest {
 	private ChoiceRepository cr;
 	private OrderRepository or;
 	private DummyDataDumper ddd;
-
-	private SpotRepository br;
+	
+	
+	private SpotRepository spotRepo;
 
 	private Transformer transform;
 
@@ -146,7 +148,7 @@ public class BusinessControllerTest {
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
-		br = injector.getInstance(SpotRepository.class);
+		spotRepo = injector.getInstance(SpotRepository.class);
 		or = injector.getInstance(OrderRepository.class);
 		ocr = injector.getInstance(OrderChoiceRepository.class);
 		accountRepo = injector.getInstance(AccountRepository.class);
@@ -155,7 +157,7 @@ public class BusinessControllerTest {
 		
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
-		businessCtrl = new LocationController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider);
+		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -479,7 +481,7 @@ public class BusinessControllerTest {
 	 * @return New instance of {@link LocationController}
 	 */
 	private LocationController createController() {
-		return new LocationController(requestRepo, checkInrepo, br, rr,
+		return new LocationController(requestRepo, checkInrepo, spotRepo, rr,
 				eventBus, accountRepo, imageController, areaRepo, validator,
 				mr, feedbackRepo, configProvider);
 	}
@@ -558,6 +560,7 @@ public class BusinessControllerTest {
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
 		business = new Business();
+		spotRepo = mock(SpotRepository.class);
 		businessCtrl = createController();
 		Configuration config = mock(Configuration.class);
 		when(configProvider.get()).thenReturn(config );
@@ -574,6 +577,7 @@ public class BusinessControllerTest {
 		// Mock arguments and stub method calls.
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock(Key.class);
+		when(businessKey.getId()).thenReturn(1l);
 		when(rr.getKey(business)).thenReturn(businessKey);
 		// Return the mocked class, when the controller retrieves the new instance.
 		when(rr.newEntity()).thenReturn(business);
@@ -582,7 +586,12 @@ public class BusinessControllerTest {
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		when(account.getBusinesses()).thenReturn(businessesList);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
+		Area welcomeArea = new Area();
+		when(areaRepo.newEntity()).thenReturn(welcomeArea );
 		LocationProfileDTO testProfileData = getTestProfileData();
+		
+		Spot welcomeSpot = mock(Spot.class);
+		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
 		
 		// Run the method.
 		businessCtrl.createBusinessForAccount(account, testProfileData);
@@ -596,7 +605,17 @@ public class BusinessControllerTest {
 		
 		// Default FeedbackForm creation verifications.
 		verify(defaultFeedbackForm).setId(null);
-		assertThat(business.getFeedbackForm(), is(newFormKey));		
+		assertThat(business.getFeedbackForm(), is(newFormKey));
+		
+		// Verify welcome area creation
+		verify(areaRepo).saveOrUpdate(welcomeArea);
+		assertThat(welcomeArea.isWelcome(), is(true));
+		
+		// verify welcome spot creation
+		
+		verify(spotRepo).saveOrUpdate(welcomeSpot);
+		verify(welcomeSpot).generateBarcode();
+		verify(welcomeSpot).setWelcome(true);
 	}
 	
 	@Test
@@ -604,6 +623,7 @@ public class BusinessControllerTest {
 		//TODO after refactoring of whole test suite remove this initializiation
 		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
+		spotRepo = mock(SpotRepository.class);
 		business = new Business();
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock(Key.class);
@@ -618,8 +638,11 @@ public class BusinessControllerTest {
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		// First we return null, to test the case of no businesses added.
 		when(account.getBusinesses()).thenReturn(null, businessesList );
-		
+		Spot welcomeSpot = mock(Spot.class);
+		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
+		Area welcomeArea = new Area();
+		when(areaRepo.newEntity()).thenReturn(welcomeArea );
 		// Get test data object.
 		LocationProfileDTO testProfileData = getTestProfileData();
 		// Run the method.
@@ -629,6 +652,12 @@ public class BusinessControllerTest {
 		// Verify that the new list was set at the account.
 		verify(account).setBusinesses(anyList());
 		assertThat(businessesList, hasItem(businessKey));
+		
+		// verify creation of welcome area
+		verify(areaRepo).saveOrUpdate(welcomeArea);
+		
+		assertThat(welcomeArea.isWelcome(), is(true));
+		verify(spotRepo).saveOrUpdate(welcomeSpot);
 	}
 	
 	@Test
@@ -750,7 +779,7 @@ public class BusinessControllerTest {
 		businessCtrl.updateArea(area , areaData);
 		
 		verify(areaRepo).saveOrUpdate(area);
-		assertThat(area.getMenus(), hasItems(menuKey1, menuKey2));	
+		assertThat(area.getMenus(), hasItems(menuKey1, menuKey2));
 	}
 	
 	@Test

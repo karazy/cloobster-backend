@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
@@ -15,10 +18,12 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
 public class SpotController {
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public static final String NAME_FORMAT = "%s %03d";
 	private final SpotRepository spotRepo;
@@ -137,5 +142,4 @@ public class SpotController {
 				
 		return new ArrayList<Spot>(spots);
 	}
-	
 }
