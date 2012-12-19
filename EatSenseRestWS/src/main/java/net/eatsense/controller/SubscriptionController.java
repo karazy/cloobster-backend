@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
 
+import javax.validation.groups.Default;
+
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
@@ -13,6 +15,7 @@ import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
+import net.eatsense.validation.TemplateChecks;
 import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
@@ -40,8 +43,7 @@ public class SubscriptionController {
 	public Subscription createAndSaveTemplate(SubscriptionDTO subscriptionData) {
 		Subscription subscription = new Subscription();
 		subscription.setTemplate(true);
-		subscriptionData.setStatus(SubscriptionStatus.PENDING);
-		
+		subscriptionData.setStatus(null);
 		return update(subscription, subscriptionData);	
 	}
 	
@@ -99,7 +101,13 @@ public class SubscriptionController {
 		checkNotNull(subscription, "subscription was null");
 		checkNotNull(subscriptionData, "subscriptionData was null");
 		
-		validator.validate(subscriptionData);
+		if(subscription.isTemplate()) {
+			validator.validate(subscriptionData, TemplateChecks.class);
+		}
+		else {
+			validator.validate(subscriptionData, Default.class);
+		}
+		
 		
 		boolean subscriptionWasBasic = subscription.isBasic();
 		

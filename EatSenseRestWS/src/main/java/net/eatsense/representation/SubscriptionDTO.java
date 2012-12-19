@@ -4,10 +4,12 @@ import java.util.Date;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.validation.CreationChecks;
+import net.eatsense.validation.TemplateChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -20,8 +22,8 @@ public class SubscriptionDTO {
 	@NotNull(groups= {CreationChecks.class })
 	@Min(value = 1, groups= {CreationChecks.class })
 	private Long templateId;
-	@NotEmpty
-	@NotNull
+	@NotEmpty(groups= {TemplateChecks.class, Default.class})
+	@NotNull(groups= {TemplateChecks.class, Default.class})
 	private String name;
 	
 	@Min(0)
@@ -31,6 +33,7 @@ public class SubscriptionDTO {
 	
 	private boolean basic;
 	
+	@Min(0)
 	private double fee;
 	
 	@NotNull
