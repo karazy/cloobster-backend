@@ -283,4 +283,11 @@ public class LocationResource {
 	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
 		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
 	}
+	
+	@Path("subscriptions")
+	public SubscriptionsResource getSubscriptionsResource() {
+		SubscriptionsResource resource = resourceContext.getResource(SubscriptionsResource.class);
+		resource.setBusiness(business);
+		return resource;
+	}
 }
