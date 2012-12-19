@@ -64,8 +64,8 @@ public class LocationsResource {
 	@Path("{locationId}/subscriptions/{subscriptionId}")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Iterable<SubscriptionDTO> getSubscription(@PathParam("locationId") long locationId, @PathParam("subscriptionId") long subscriptionId) {
-		return Iterables.transform(subCtrl.get(locationId), SubscriptionDTO.toDTO);
+	public SubscriptionDTO getSubscription(@PathParam("locationId") long locationId, @PathParam("subscriptionId") long subscriptionId) {
+		return new SubscriptionDTO(subCtrl.get(locationId, subscriptionId));
 	}
 	
 	@PUT
