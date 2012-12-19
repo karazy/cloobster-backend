@@ -57,6 +57,6 @@ public class SubscriptionTemplatesResource {
 	@DELETE
 	@Path("{id}")
 	public void deletePackage(@PathParam("id") Long id) {
-		subCtrl.deletePackage(id);
+		subCtrl.deleteTemplate(id);
 	}	
 }

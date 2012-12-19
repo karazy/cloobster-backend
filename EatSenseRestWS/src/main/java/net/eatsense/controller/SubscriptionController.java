@@ -102,6 +102,21 @@ public class SubscriptionController {
 		}
 	}
 	
+
+	/**
+	 * Shortcut method.
+	 * Load and update a current Subscription entity from a Business.
+	 * 
+	 * @param locationId
+	 * @param subscriptionId
+	 * @param subscriptionData
+	 * @return updated Subscription entity
+	 */
+	public Subscription getAndUpdateSubcription(long locationId,
+			long subscriptionId, SubscriptionDTO subscriptionData) {
+		return updateSubscription(get(locationId, subscriptionId), subscriptionData);
+	}
+	
 	/**
 	 * Update a Subscription template entity
 	 * 
@@ -190,7 +205,7 @@ public class SubscriptionController {
 	 * 
 	 * @param name unique name for the package
 	 */
-	public void deletePackage(long id) {
+	public void deleteTemplate(long id) {
 		ofy.delete(Subscription.class, id);
 	}
 	
@@ -306,19 +321,7 @@ public class SubscriptionController {
 		return location;
 	}
 	
-	@Subscribe
-	public void handleNewLocationEvent(NewLocationEvent event) {
-		Subscription basicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
-		
-		if(basicSubscription == null) {
-			logger.warn("No Subscription flagged as basic found, unable to set active subscription for new Location.");
-		}
-		else {
-			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation().getKey());
-			
-			setActiveSubscription(event.getLocation(), newSubscription, false);
-		}
-	}
+
 	
 	/**
 	 * @param business
@@ -332,8 +335,18 @@ public class SubscriptionController {
 		return ofy.find(business.getActiveSubscription());
 	}
 
-	public Subscription getAndUpdateSubcription(long locationId,
-			long subscriptionId, SubscriptionDTO subscriptionData) {
-		return updateSubscription(get(locationId, subscriptionId), subscriptionData);
+	
+	@Subscribe
+	public void handleNewLocationEvent(NewLocationEvent event) {
+		Subscription basicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
+		
+		if(basicSubscription == null) {
+			logger.warn("No Subscription flagged as basic found, unable to set active subscription for new Location.");
+		}
+		else {
+			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, event.getLocation().getKey());
+			
+			setActiveSubscription(event.getLocation(), newSubscription, false);
+		}
 	}
 }
