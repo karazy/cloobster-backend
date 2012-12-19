@@ -24,7 +24,9 @@ import net.eatsense.domain.Menu;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
+import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.NewLocationEvent;
@@ -780,10 +782,34 @@ public class LocationController {
 	 * @return Location(Business) entity
 	 */
 	public Business get(long locationId, boolean countSpots) {
-		Business location = locationRepo.getById(locationId);
+		Business location;
+		try {
+			location = locationRepo.getById(locationId);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			throw new NotFoundException("No location found with id=" + locationId);
+		}
+		
+		checkAndSetBasicMode(location);
 		
 		if(countSpots) {
 			setSpotCount(location);
+		}
+		
+		return location;
+	}
+
+	/**
+	 * @param location
+	 */
+	private Business checkAndSetBasicMode(Business location) {
+		if(location.getActiveSubscription() != null) {
+			Subscription activeSubscription = locationRepo.ofy().find(location.getActiveSubscription());
+			if(activeSubscription != null && activeSubscription.getStatus() == SubscriptionStatus.APPROVED && !activeSubscription.isBasic()) {
+				location.setBasic(false);	
+			}
+			else {
+				logger.warn("Corrupt Location, active Subscription not found. key={}", location.getActiveSubscription());
+			}
 		}
 		
 		return location;

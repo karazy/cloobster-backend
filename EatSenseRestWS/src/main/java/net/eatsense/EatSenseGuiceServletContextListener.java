@@ -27,6 +27,7 @@ import net.eatsense.restws.administration.AdminResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.CompaniesResource;
+import net.eatsense.restws.business.SubscriptionsResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
@@ -110,12 +111,14 @@ public class EatSenseGuiceServletContextListener extends
 						bind(CompaniesResource.class);
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						bind(ProfilesResource.class);
+						bind(SubscriptionsResource.class);
 						
 						// Create Configuration binding to automatically load configuration if needed.
 						bind(Configuration.class).toProvider(ConfigurationProvider.class);
 												
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*c/profiles(.)*",
+						serveRegex("(.)*b/subscriptions(.)*",
+								"(.)*c/profiles(.)*",
 								"(.)*c/accounts(.)*",
 								"(.)*b/companies(.)*",
 								"(.)*uploads(.)*",

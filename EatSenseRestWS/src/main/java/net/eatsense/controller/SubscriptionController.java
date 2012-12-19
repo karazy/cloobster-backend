@@ -246,7 +246,7 @@ public class SubscriptionController {
 	
 	/**
 	 * @param business
-	 * @return
+	 * @return active Subcription entity if found, <code>null</code> otherwise
 	 */
 	public Subscription getActiveSubscription(Business business) {
 		if(business.getActiveSubscription() == null) {

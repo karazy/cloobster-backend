@@ -131,6 +131,9 @@ public class Business extends GenericEntity<Business> {
 	 */
 	private int stars;
 	
+	@Transient
+	private boolean basic = true;
+	
 	public Business() {
 	}
 	
@@ -373,5 +376,13 @@ public class Business extends GenericEntity<Business> {
 
 	public void setSpotCount(int spotCount) {
 		this.spotCount = spotCount;
+	}
+
+	public boolean isBasic() {
+		return basic;
+	}
+
+	public void setBasic(boolean basic) {
+		this.basic = basic;
 	}
 }
