@@ -51,7 +51,7 @@ public class SubscriptionTemplatesResource {
 	@Consumes("application/json")
 	@Produces("application/json")
 	public SubscriptionDTO updatePackage(@PathParam("id") Long id, SubscriptionDTO subscriptionData) {
-		return SubscriptionDTO.toDTO.apply(subCtrl.update(subCtrl.getTemplate(id), subscriptionData));
+		return SubscriptionDTO.toDTO.apply(subCtrl.updateTemplate(subCtrl.getTemplate(id), subscriptionData));
 	}
 	
 	@DELETE

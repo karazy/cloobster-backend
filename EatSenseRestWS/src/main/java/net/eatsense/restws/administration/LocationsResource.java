@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -57,5 +58,21 @@ public class LocationsResource {
 	@Produces("application/json")
 	public Iterable<SubscriptionDTO> getSubscriptionsForLocation(@PathParam("locationId") long locationId) {
 		return Iterables.transform(subCtrl.get(locationId), SubscriptionDTO.toDTO);
+	}
+	
+	@GET
+	@Path("{locationId}/subscriptions/{subscriptionId}")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Iterable<SubscriptionDTO> getSubscription(@PathParam("locationId") long locationId, @PathParam("subscriptionId") long subscriptionId) {
+		return Iterables.transform(subCtrl.get(locationId), SubscriptionDTO.toDTO);
+	}
+	
+	@PUT
+	@Path("{locationId}/subscriptions/{subscriptionId}")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public SubscriptionDTO updateSubscription(@PathParam("locationId") long locationId, @PathParam("subscriptionId") long subscriptionId, SubscriptionDTO subscriptionData) {
+		return new SubscriptionDTO(subCtrl.getAndUpdateSubcription(locationId, subscriptionId, subscriptionData));
 	}
 }

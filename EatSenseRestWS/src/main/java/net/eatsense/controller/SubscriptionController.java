@@ -43,7 +43,7 @@ public class SubscriptionController {
 		Subscription subscription = new Subscription();
 		subscription.setTemplate(true);
 		subscriptionData.setStatus(null);
-		return update(subscription, subscriptionData);	
+		return updateTemplate(subscription, subscriptionData);	
 	}
 	
 	/**
@@ -103,23 +103,46 @@ public class SubscriptionController {
 	}
 	
 	/**
-	 * Update a subscription package or a specific subscription.
+	 * Update a Subscription template entity
+	 * 
+	 * @param subscription
+	 * @param subscriptionData
+	 * @return
+	 */
+	public Subscription updateSubscription(Subscription subscription, SubscriptionDTO subscriptionData) {
+		checkNotNull(subscription, "subscription was null");
+		checkNotNull(subscriptionData, "subscriptionData was null");
+		
+		validator.validate(subscriptionData);
+		
+		subscription.setEndData(subscriptionData.getEndDate());
+		subscription.setFee(subscriptionData.getFeeMinor());
+		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
+		subscription.setName(subscriptionData.getName());
+		subscription.setStartDate(subscriptionData.getStartDate());
+		subscription.setStatus(subscriptionData.getStatus());
+		
+		ofy.put(subscription);
+		
+		return subscription;
+	}
+	
+	/**
+	 * Update a Subscription template entity
 	 * 
 	 * @param subscription
 	 * @param subscriptionData
 	 * @return Updated entity.
 	 */
-	public Subscription update(Subscription subscription, SubscriptionDTO subscriptionData) {
+	public Subscription updateTemplate(Subscription subscription, SubscriptionDTO subscriptionData) {
 		checkNotNull(subscription, "subscription was null");
 		checkNotNull(subscriptionData, "subscriptionData was null");
 		
-		if(subscription.isTemplate()) {
-			validator.validate(subscriptionData, TemplateChecks.class);
+		if(!subscription.isTemplate()) {
+			throw new ValidationException("Subscription is not a template");
+			
 		}
-		else {
-			validator.validate(subscriptionData, Default.class);
-		}
-		
+		validator.validate(subscriptionData, TemplateChecks.class);
 		
 		boolean subscriptionWasBasic = subscription.isBasic();
 		
@@ -307,5 +330,10 @@ public class SubscriptionController {
 		}
 		
 		return ofy.find(business.getActiveSubscription());
+	}
+
+	public Subscription getAndUpdateSubcription(long locationId,
+			long subscriptionId, SubscriptionDTO subscriptionData) {
+		return updateSubscription(get(locationId, subscriptionId), subscriptionData);
 	}
 }
