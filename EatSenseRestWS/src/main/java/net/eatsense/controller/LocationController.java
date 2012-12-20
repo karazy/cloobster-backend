@@ -594,6 +594,21 @@ public class LocationController {
 		
 		updateSpot(spot, spotData);
 		// Generate the barcode like this: {businessId}-{spotId}
+		Key<Area> areaKey = null;
+		if(spotData.getAreaId() != null) {
+			areaKey = areaRepo.getKey(spot.getBusiness(), spotData.getAreaId());
+			if(!welcome) {
+				try {
+					Area area = areaRepo.getByKey(areaKey);
+					if(area.isWelcome()) {
+						throw new ValidationException("Unable to create new Spots at welcome area");
+					}
+				} catch (com.googlecode.objectify.NotFoundException e) {
+					logger.error("Area for spot creation not found.");
+					throw new ValidationException("No Area found with id=" + areaKey.getId());
+				}
+			}			
+		}
 		
 		spot.generateBarcode();
 		
@@ -628,17 +643,7 @@ public class LocationController {
 		Key<Area> areaKey = null;
 		if(spotData.getAreaId() != null) {
 			areaKey = areaRepo.getKey(spot.getBusiness(), spotData.getAreaId());
-			if(!spot.isWelcome()) {
-				try {
-					Area area = areaRepo.getByKey(areaKey);
-					if(area.isWelcome()) {
-						throw new ValidationException("Unable to create new Spots at welcome area");
-					}
-				} catch (com.googlecode.objectify.NotFoundException e) {
-					logger.error("Area for spot creation not found.");
-					throw new ValidationException("No Area found with id=" + areaKey.getId());
-				}
-			}
+			
 		}
 		spot.setArea(areaKey);
 		
