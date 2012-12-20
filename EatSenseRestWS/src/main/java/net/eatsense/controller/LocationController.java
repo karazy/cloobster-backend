@@ -541,15 +541,19 @@ public class LocationController {
 	/**
 	 * @param businessKey
 	 * @param areaId If different from 0, filter by area.
+	 * @param welcome 
 	 * @return List of spots for the business and for the area if specified.
 	 */
-	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId) {
+	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId, boolean welcome) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
 		
 		List<Spot> spots;
-		if(areaId != 0) {
+		if(welcome) {
+			spots = spotRepo.getListByParentAndProperty(businessKey, "welcome", true);
+		}
+		else if(areaId != 0) {
 			Key<Area> areaKey = areaRepo.getKey(businessKey, areaId);
 			spots = spotRepo.getListByParentAndProperty(businessKey, "area", areaKey);
 		}
