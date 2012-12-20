@@ -4,8 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
 
-import javax.validation.groups.Default;
-
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
@@ -241,7 +239,8 @@ public class SubscriptionController {
 			setPendingSubscription(location, newSubscription, true);
 		}
 		else if(status == SubscriptionStatus.APPROVED){
-			setActiveSubscription(location, Optional.of(newSubscription), true);
+			setActiveSubscription(location, Optional.of(newSubscription), false);
+			cancelPendingSubscription(location);
 		}
 		
 		return newSubscription;
@@ -334,7 +333,7 @@ public class SubscriptionController {
 		checkNotNull(newSubscription, "newSubcription was null");
 		
 		if(location.getPendingSubscription() != null) {
-			ofy.delete(location.getPendingSubscription());
+			ofy.async().delete(location.getPendingSubscription());
 		}
 				
 		location.setPendingSubscription(newSubscription.getKey());
