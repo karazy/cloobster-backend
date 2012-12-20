@@ -30,6 +30,7 @@ import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.NewLocationEvent;
+import net.eatsense.event.NewSpotEvent;
 import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
@@ -585,12 +586,20 @@ public class LocationController {
 	 * @param spotData
 	 * @return 
 	 */
-	public SpotDTO createSpot(Key<Business> businessKey, SpotDTO spotData, boolean welcome) {
-		checkNotNull(businessKey, "businessKey was null");
+	public SpotDTO createSpot(Key<Business> locationKey, SpotDTO spotData, boolean welcome) {
+		checkNotNull(locationKey, "businessKey was null");
 		
+		int spotCount = 0;
 		Spot spot = spotRepo.newEntity();
-		spot.setBusiness(businessKey);
+		
+		spot.setBusiness(locationKey);
 		spot.setWelcome(welcome);
+		
+		
+		if(!welcome) {
+			spotCount = spotRepo.query().ancestor(locationKey).count();
+		}
+		
 		
 		updateSpot(spot, spotData);
 		// Generate the barcode like this: {businessId}-{spotId}
@@ -613,6 +622,10 @@ public class LocationController {
 		spot.generateBarcode();
 		
 		spotRepo.saveOrUpdate(spot);
+		
+		
+		if(!welcome)
+			eventBus.post(new NewSpotEvent(locationKey, spot, spotCount + 1, false));
 		
 		return new SpotDTO(spot);
 	}

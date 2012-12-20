@@ -76,6 +76,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BusinessControllerTest {
@@ -136,6 +137,9 @@ public class BusinessControllerTest {
 	
 	@Mock
 	private FeedbackFormRepository feedbackRepo;
+
+	@Mock
+	private Query<Spot> spotQueryMock;
 
 	@Before
 	public void setUp() throws Exception {
@@ -593,6 +597,8 @@ public class BusinessControllerTest {
 		Spot welcomeSpot = mock(Spot.class);
 		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
 		
+		when(spotRepo.query()).thenReturn(spotQueryMock);
+		
 		// Run the method.
 		businessCtrl.createBusinessForAccount(account, testProfileData);
 		
@@ -640,6 +646,7 @@ public class BusinessControllerTest {
 		when(account.getBusinesses()).thenReturn(null, businessesList );
 		Spot welcomeSpot = mock(Spot.class);
 		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
+		when(spotRepo.query()).thenReturn(spotQueryMock);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		Area welcomeArea = new Area();
 		when(areaRepo.newEntity()).thenReturn(welcomeArea );

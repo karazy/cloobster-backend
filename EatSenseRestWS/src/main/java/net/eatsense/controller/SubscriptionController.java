@@ -8,6 +8,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.NewLocationEvent;
+import net.eatsense.event.NewSpotEvent;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.OfyService;
@@ -387,5 +388,33 @@ public class SubscriptionController {
 	@Subscribe
 	public void handleNewLocationEvent(NewLocationEvent event) {
 		setBasicSubscription(event.getLocation());
+	}
+	
+	@Subscribe
+	public void handleNewSpotEvent(NewSpotEvent event) {
+		if(event.getLocation() == null) {
+			logger.error("Corrupt event received, locationKey was null");
+			return;
+		}
+		
+		Business location = ofy.find(event.getLocation());
+		if(location == null) {
+			logger.error("Unable to find Location for new spot");
+			return;
+		}
+		
+		if(location.getActiveSubscription() == null) {
+			logger.error("No active subscription, no spot should be able to be created");
+			return;
+		}
+		
+		Subscription activeSub = ofy.get(location.getActiveSubscription());
+		
+		if(activeSub.getMaxSpotCount() < event.getNewSpotCount()) {
+			logger.warn("Quota exceeded for {}. newSpotCount={}, maxSpotCount={}", event.getLocation(), event.getNewSpotCount());
+			activeSub.setQuotaExceeded(true);
+			ofy.async().put(activeSub);
+			//TODO Send email for the first time the quota was exceeded
+		}
 	}
 }
