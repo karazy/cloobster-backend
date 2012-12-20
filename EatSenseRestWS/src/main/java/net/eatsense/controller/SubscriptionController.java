@@ -319,7 +319,14 @@ public class SubscriptionController {
 			}
 		}
 		Key<Subscription> newSubscriptionKey = newSubscription.isPresent() ? newSubscription.get().getKey() : null;
+		
+		// Reset Basic flag on business if we have an extended subscription
+		if(newSubscription.isPresent() && !newSubscription.get().isBasic()) {
+			location.setBasic(false);
+		}
+		
 		location.setActiveSubscription(newSubscriptionKey);
+		
 		
 		if(saveBusiness) {
 			ofy.put(location);

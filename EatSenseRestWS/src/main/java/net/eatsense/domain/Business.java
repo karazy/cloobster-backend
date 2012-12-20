@@ -130,8 +130,8 @@ public class Business extends GenericEntity<Business> {
 	 * Number of stars (for hotels and restaurants)
 	 */
 	private int stars;
-	
-	@Transient
+
+	@Unindexed
 	private boolean basic = true;
 	
 	public Business() {

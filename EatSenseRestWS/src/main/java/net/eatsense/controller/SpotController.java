@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -134,8 +135,14 @@ public class SpotController {
 				
 		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
 		
-		for (Spot spot : spots) {
-			spot.setActive(false);
+		for (Iterator<Spot> iterator = spots.iterator(); iterator.hasNext();) {
+			Spot spot = iterator.next();
+			if(spot.isWelcome()) {
+				iterator.remove();
+			}
+			else {
+				spot.setActive(false);
+			}
 		}
 		
 		spotRepo.trashEntities(spots, account.getEmail());
