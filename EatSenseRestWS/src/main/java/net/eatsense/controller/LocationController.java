@@ -640,6 +640,10 @@ public class LocationController {
 		checkNotNull(spot, "spot was null");
 		checkNotNull(account, "account was null");
 		
+		if(spot.isWelcome()) {
+			throw new IllegalAccessException("Not allowed to delete welcome spot");
+		}
+		
 		spot.setActive(false);
 		spotRepo.trashEntity(spot, account.getLogin());
 	}
@@ -757,6 +761,10 @@ public class LocationController {
 	 */
 	public void deleteArea(Area area, Account account) {
 		checkNotNull(area, "area was null");
+		
+		if(area.isWelcome()) {
+			throw new IllegalAccessException("Not allowed to delete welcome area.");
+		}
 		
 		List<Spot> spots = spotRepo.getListByParentAndProperty(area.getBusiness(), "area", area);
 		
