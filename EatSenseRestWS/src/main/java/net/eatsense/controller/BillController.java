@@ -260,6 +260,11 @@ public class BillController {
 			throw new OrderFailureException("Unable to find Spot for CheckIn.");
 		}
 		
+		if(spot.isWelcome()) {
+			logger.error("Unable to create Bill for checkin at welcome spot");
+			throw new IllegalAccessException("Unable to create Bill for checkin at welcome spot");
+		}
+		
 		Long billId = null;
 		for (Iterator<Order> iterator = ordersQuery.iterator(); iterator.hasNext() && !foundOrderToBill;) {
 			Order order = iterator.next();
