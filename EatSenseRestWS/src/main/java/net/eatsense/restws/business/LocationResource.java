@@ -240,7 +240,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO createSpot(SpotDTO spotData) {
-		return businessCtrl.createSpot(business.getKey(), spotData);
+		return businessCtrl.createSpot(business.getKey(), spotData, false);
 	}
 	
 	@Path("spotsdata/{spotId}")

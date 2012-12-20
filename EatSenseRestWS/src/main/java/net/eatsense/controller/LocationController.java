@@ -394,15 +394,13 @@ public class LocationController {
 		
 		Area welcomeArea = createArea(businessKey, areaData );
 		
-		Key<Area> areaKey = areaRepo.getKey(welcomeArea);
-		
 		SpotDTO spotData = new SpotDTO();
 		spotData.setActive(true);
 		spotData.setAreaId(welcomeArea.getId());
 		spotData.setName("Welcome Spot");
 		spotData.setWelcome(true);
 		
-		createSpot(businessKey, spotData );
+		createSpot(businessKey, spotData, true );
 	}
 
 	/**
@@ -575,12 +573,12 @@ public class LocationController {
 	 * @param spotData
 	 * @return 
 	 */
-	public SpotDTO createSpot(Key<Business> businessKey, SpotDTO spotData) {
+	public SpotDTO createSpot(Key<Business> businessKey, SpotDTO spotData, boolean welcome) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		Spot spot = spotRepo.newEntity();
 		spot.setBusiness(businessKey);
-		spot.setWelcome(spotData.isWelcome());
+		spot.setWelcome(welcome);
 		
 		updateSpot(spot, spotData);
 		// Generate the barcode like this: {businessId}-{spotId}
@@ -618,6 +616,17 @@ public class LocationController {
 		Key<Area> areaKey = null;
 		if(spotData.getAreaId() != null) {
 			areaKey = areaRepo.getKey(spot.getBusiness(), spotData.getAreaId());
+			if(!spot.isWelcome()) {
+				try {
+					Area area = areaRepo.getByKey(areaKey);
+					if(area.isWelcome()) {
+						throw new ValidationException("Unable to create new Spots at welcome area");
+					}
+				} catch (com.googlecode.objectify.NotFoundException e) {
+					logger.error("Area for spot creation not found.");
+					throw new ValidationException("No Area found with id=" + areaKey.getId());
+				}
+			}
 		}
 		spot.setArea(areaKey);
 		

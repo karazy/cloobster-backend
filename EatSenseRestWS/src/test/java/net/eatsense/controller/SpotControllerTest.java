@@ -21,13 +21,16 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -41,6 +44,10 @@ import com.googlecode.objectify.Key;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpotControllerTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
 	SpotController ctrl;
 	@Mock
 	private AreaRepository areaRepo;
@@ -86,6 +93,8 @@ public class SpotControllerTest {
 		when(spotRepo.newEntity()).thenReturn(spot);
 		Key<Area> areaKey = mock(Key.class);
 		when(areaRepo.getKey(businessKey, spotsData.getAreaId())).thenReturn(areaKey );
+		Area area = mock(Area.class);
+		when(areaRepo.getByKey(areaKey)).thenReturn(area );
 		
 		ctrl.createSpots(businessKey, spotsData);
 		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
@@ -101,6 +110,21 @@ public class SpotControllerTest {
 		inOrder.verify(spotRepo).saveOrUpdate(spotListCaptor.capture());
 		
 		assertThat(spotListCaptor.getValue().size(), is(spotsData.getCount()));
+	}
+	
+	@Test
+	public void testCreateSpotsForWelcomeArea() throws Exception {
+		SpotsData spotsData = getTestSpotsData();
+		@SuppressWarnings("unchecked")
+		Key<Area> areaKey = mock(Key.class);
+		when(areaRepo.getKey(businessKey, spotsData.getAreaId())).thenReturn(areaKey );
+		Area area = mock(Area.class);
+		when(area.isWelcome()).thenReturn(true);
+		when(areaRepo.getByKey(areaKey)).thenReturn(area );
+		
+		thrown.expect(ValidationException.class);
+				
+		ctrl.createSpots(businessKey, spotsData);
 	}
 
 	@Test
