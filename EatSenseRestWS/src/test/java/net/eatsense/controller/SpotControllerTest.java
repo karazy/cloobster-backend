@@ -40,7 +40,9 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpotControllerTest {
@@ -66,9 +68,15 @@ public class SpotControllerTest {
 	@Mock
 	private Key<Spot> spotKey;
 
+	@Mock
+	private EventBus eventBus;
+
+	@Mock
+	private Query<Spot> spotQuery;
+
 	@Before
 	public void setUp() throws Exception {
-		ctrl = new SpotController(spotRepo, validationHelper, areaRepo);
+		ctrl = new SpotController(spotRepo, validationHelper, areaRepo, eventBus);
 	}
 
 	/** 
@@ -95,6 +103,9 @@ public class SpotControllerTest {
 		when(areaRepo.getKey(businessKey, spotsData.getAreaId())).thenReturn(areaKey );
 		Area area = mock(Area.class);
 		when(areaRepo.getByKey(areaKey)).thenReturn(area );
+		when(spotQuery.count()).thenReturn(1);
+		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
+		when(spotRepo.query()).thenReturn(spotQuery);
 		
 		ctrl.createSpots(businessKey, spotsData);
 		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
@@ -122,6 +133,10 @@ public class SpotControllerTest {
 		when(area.isWelcome()).thenReturn(true);
 		when(areaRepo.getByKey(areaKey)).thenReturn(area );
 		
+		when(spotQuery.count()).thenReturn(1);
+		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
+		when(spotRepo.query()).thenReturn(spotQuery);
+	
 		thrown.expect(ValidationException.class);
 				
 		ctrl.createSpots(businessKey, spotsData);
