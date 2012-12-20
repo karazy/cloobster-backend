@@ -18,12 +18,14 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.validation.ValidationHelper;
 
@@ -70,11 +72,14 @@ public class FeedbackControllerTest {
 	@Mock
 	private CheckInRepository checkInRepo;
 
+	@Mock
+	private SpotRepository spotRepo;
+
 	@Before
 	public void setUp() throws Exception {
 		Injector injector = Guice.createInjector(new ValidationModule());
 		
-		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(ValidationHelper.class));
+		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(ValidationHelper.class), spotRepo);
 		
 		businessId = 1l;
 		when(business.getKey()).thenReturn(businessKey);
@@ -90,6 +95,11 @@ public class FeedbackControllerTest {
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		when(feedbackFormRepo.getKey(testFeedbackData.getFormId())).thenReturn(formKey);
 		Feedback feedback = new Feedback();
+		Key<Spot> spotKey = mock(Key.class);
+		when(checkIn.getSpot()).thenReturn(spotKey );
+		Spot spot = mock(Spot.class);
+		when(spot.isWelcome()).thenReturn(false);
+		when(spotRepo.getByKey(spotKey)).thenReturn(spot );
 		when(feedbackRepo.newEntity()).thenReturn(feedback );
 		ctrl.createFeedback(business, checkIn, testFeedbackData);
 		verify(feedbackRepo).saveOrUpdate(feedback);
@@ -155,6 +165,12 @@ public class FeedbackControllerTest {
 	public void testAddFeedbackInvalidAnswer2() {
 		Feedback feedback = new Feedback();
 		when(feedbackRepo.newEntity()).thenReturn(feedback );
+		Key<Spot> spotKey = mock(Key.class);
+		when(checkIn.getSpot()).thenReturn(spotKey );
+		Spot spot = mock(Spot.class);
+		when(spot.isWelcome()).thenReturn(false);
+		when(spotRepo.getByKey(spotKey)).thenReturn(spot );
+
 
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		testFeedbackData.getAnswers().get(0).setRating(-1);
@@ -169,6 +185,12 @@ public class FeedbackControllerTest {
 	public void testAddFeedbackInvalidAnswer() {
 		Feedback feedback = new Feedback();
 		when(feedbackRepo.newEntity()).thenReturn(feedback );
+		Key<Spot> spotKey = mock(Key.class);
+		when(checkIn.getSpot()).thenReturn(spotKey );
+		Spot spot = mock(Spot.class);
+		when(spot.isWelcome()).thenReturn(false);
+		when(spotRepo.getByKey(spotKey)).thenReturn(spot );
+
 
 		FeedbackDTO testFeedbackData = getTestFeedbackData();
 		testFeedbackData.getAnswers().get(0).setRating(10);

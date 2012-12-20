@@ -26,6 +26,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.validation.ValidationHelper;
@@ -36,14 +37,16 @@ public class FeedbackController {
 	private final FeedbackRepository feedbackRepo;
 	private final ValidationHelper validator;
 	private final CheckInRepository checkInRepo;
+	private final SpotRepository spotRepo;
 
 	@Inject
-	public FeedbackController(CheckInRepository checkInRepo, FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, ValidationHelper validator) {
+	public FeedbackController(CheckInRepository checkInRepo, FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, ValidationHelper validator, SpotRepository spotRepo) {
 		super();
 		this.checkInRepo = checkInRepo;
 		this.validator = validator;
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.feedbackRepo = feedbackRepo;
+		this.spotRepo = spotRepo;
 	}
 	
 	/**
@@ -85,10 +88,14 @@ public class FeedbackController {
 			logger.error("Unable to post feedback at Business with basic subscription.");
 			throw new IllegalAccessException("Unable to post feedback at Business with basic subscription.");
 		}
-
+		
+		if(spotRepo.getByKey(checkIn.getSpot()).isWelcome()) {
+			logger.error("Unable to post feedback for checkin at welcome spot");
+			throw new IllegalAccessException("Unable to post feedback for checkin at welcome spot");
+			
+		}
 		
 		Feedback feedback = feedbackRepo.newEntity();
-		
 		
 		validateAndUpdateFeedbackData(feedbackData, feedback);
 		
