@@ -408,13 +408,22 @@ public class SubscriptionController {
 			return;
 		}
 		
-		Subscription activeSub = ofy.get(location.getActiveSubscription());
+		Subscription activeSub = ofy.find(location.getActiveSubscription());
+		if(activeSub == null) {
+			logger.error("Corrupt Location data, activeSubscription not found");
+			return;
+		}
 		
 		if(activeSub.getMaxSpotCount() < event.getNewSpotCount()) {
-			logger.warn("Quota exceeded for {}. newSpotCount={}, maxSpotCount={}", event.getLocation(), event.getNewSpotCount());
+			logger.warn("Quota exceeded for {}.", event.getLocation());
+			logger.warn("newSpotCount={}, maxSpotCount={}", event.getNewSpotCount(), activeSub.getMaxSpotCount());
+			
 			activeSub.setQuotaExceeded(true);
 			ofy.async().put(activeSub);
 			//TODO Send email for the first time the quota was exceeded
+		}
+		else {
+			logger.info("newSpotCount={}", event.getNewSpotCount());
 		}
 	}
 }
