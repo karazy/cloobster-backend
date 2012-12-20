@@ -208,6 +208,8 @@ public class DummyDataDumper {
 		Business r = new Business();
 		r.setName(name);
 		r.setDescription(desc);
+		// We only created Locations with extended subscription.
+		r.setBasic(false);
 		ArrayList<PaymentMethod> methods = new ArrayList<PaymentMethod>();
 		methods.add(new PaymentMethod("EC"));
 		methods.add(new PaymentMethod("Bar"));

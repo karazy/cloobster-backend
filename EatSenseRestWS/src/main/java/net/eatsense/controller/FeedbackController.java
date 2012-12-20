@@ -9,6 +9,9 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -18,21 +21,24 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
+import net.eatsense.validation.ValidationHelper;
 
 public class FeedbackController {
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final FeedbackFormRepository feedbackFormRepo;
 	private final FeedbackRepository feedbackRepo;
-	private final Validator validator;
+	private final ValidationHelper validator;
 	private final CheckInRepository checkInRepo;
 
 	@Inject
-	public FeedbackController(CheckInRepository checkInRepo, FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, Validator validator) {
+	public FeedbackController(CheckInRepository checkInRepo, FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, ValidationHelper validator) {
 		super();
 		this.checkInRepo = checkInRepo;
 		this.validator = validator;
@@ -69,13 +75,20 @@ public class FeedbackController {
 	 * @param feedbackData - Transfer object containing the data for the entity.
 	 * @return Transfer object representing the new Feedback entity.
 	 */
-	public Feedback addFeedback(Business business, CheckIn checkIn,
+	public Feedback createFeedback(Business business, CheckIn checkIn,
 			FeedbackDTO feedbackData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(feedbackData, "feedbackData was null");
 		checkArgument(feedbackData.getFormId() != 0, "feedbackData formId was zero");
 		
+		if(business.isBasic()) {
+			logger.error("Unable to post feedback at Business with basic subscription.");
+			throw new IllegalAccessException("Unable to post feedback at Business with basic subscription.");
+		}
+
+		
 		Feedback feedback = feedbackRepo.newEntity();
+		
 		
 		validateAndUpdateFeedbackData(feedbackData, feedback);
 		
@@ -126,15 +139,9 @@ public class FeedbackController {
 			Feedback feedback) {
 		checkNotNull(feedback, "feedback was null");
 		checkNotNull(feedbackData, "feedbackData object was null");
-		Set<ConstraintViolation<FeedbackDTO>> violations = validator.validate(feedbackData);
-		if(!violations.isEmpty()) {
-			StringBuilder sb = new StringBuilder("validation errors:");
-			for (ConstraintViolation<FeedbackDTO> constraintViolation : violations) {
-				sb.append(String.format(" \"%s\" %s.", constraintViolation.getPropertyPath(), constraintViolation.getMessage()));
-			}
-			throw new ValidationException(sb.toString());
-		}
 		
+		validator.validate(feedbackData);
+				
 		feedback.setAnswers(feedbackData.getAnswers());
 		feedback.setComment(feedbackData.getComment());
 		feedback.setDate(new Date());

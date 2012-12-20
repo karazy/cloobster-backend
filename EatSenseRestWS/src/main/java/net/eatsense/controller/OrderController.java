@@ -420,6 +420,17 @@ public class OrderController {
 		checkNotNull(business, "business was null");
 		checkNotNull(checkIn, "checkIn was null");
 		
+		if(business.isBasic()) {
+			logger.error("Unable to place order at business with basic subscription.");
+			throw new IllegalAccessException("Unable to place Orders at Business with basic subscription");
+		}
+		
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot.isWelcome()) {
+			logger.error("Unable to place order at welcome spot.");
+			throw new IllegalAccessException("Unable to place Orders at welcome spot.");
+		}
+		
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
 		}

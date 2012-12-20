@@ -25,6 +25,7 @@ import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.representation.FeedbackDTO;
+import net.eatsense.validation.ValidationHelper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class FeedbackControllerTest {
 	public void setUp() throws Exception {
 		Injector injector = Guice.createInjector(new ValidationModule());
 		
-		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(Validator.class));
+		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(ValidationHelper.class));
 		
 		businessId = 1l;
 		when(business.getKey()).thenReturn(businessKey);
@@ -81,7 +82,7 @@ public class FeedbackControllerTest {
 	}
 	
 	/**
-	 * Test method for {@link net.eatsense.controller.FeedbackController#addFeedback(net.eatsense.domain.Business, net.eatsense.domain.CheckIn, net.eatsense.representation.FeedbackDTO)}.
+	 * Test method for {@link net.eatsense.controller.FeedbackController#createFeedback(net.eatsense.domain.Business, net.eatsense.domain.CheckIn, net.eatsense.representation.FeedbackDTO)}.
 	 */
 	@Test
 	public void testAddFeedback() {
@@ -90,7 +91,7 @@ public class FeedbackControllerTest {
 		when(feedbackFormRepo.getKey(testFeedbackData.getFormId())).thenReturn(formKey);
 		Feedback feedback = new Feedback();
 		when(feedbackRepo.newEntity()).thenReturn(feedback );
-		ctrl.addFeedback(business, checkIn, testFeedbackData);
+		ctrl.createFeedback(business, checkIn, testFeedbackData);
 		verify(feedbackRepo).saveOrUpdate(feedback);
 		
 		assertThat(feedback.getAnswers(), is(testFeedbackData.getAnswers()));
@@ -147,7 +148,7 @@ public class FeedbackControllerTest {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("formId");
 				
-		ctrl.addFeedback(business, checkIn, testFeedbackData);
+		ctrl.createFeedback(business, checkIn, testFeedbackData);
 	}
 	
 	@Test
@@ -161,7 +162,7 @@ public class FeedbackControllerTest {
 		thrown.expectMessage("rating");
 		
 		
-		ctrl.addFeedback(business, checkIn, testFeedbackData);
+		ctrl.createFeedback(business, checkIn, testFeedbackData);
 	}
 	
 	@Test
@@ -174,7 +175,7 @@ public class FeedbackControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("rating");
 				
-		ctrl.addFeedback(business, checkIn, testFeedbackData);
+		ctrl.createFeedback(business, checkIn, testFeedbackData);
 	}
 
 	private FeedbackDTO getTestFeedbackData() {

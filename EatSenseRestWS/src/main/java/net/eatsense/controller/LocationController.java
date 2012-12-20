@@ -160,9 +160,20 @@ public class LocationController {
 		checkArgument("CALL_WAITER".equals(requestData.getType()), "invalid request type %s", requestData.getType());
 		checkArgument(!checkIn.isArchived(), "checkin cannot be archived entity");
 		
+		Business location = locationRepo.getByKey(checkIn.getBusiness());
+		if(location.isBasic()) {
+			logger.error("Unable to post request at Business with basic subscription");
+			throw new IllegalAccessException("Unable to post request at Business with basic subscription");
+		}
+		
 		Spot spot = spotRepo.getByKey(checkIn.getSpot());
 		if(spot == null) {
 			throw new ServiceException("Unable to find Spot for this CheckIn.");
+		}
+		
+		if(spot.isWelcome()) {
+			logger.error("Unable to post request at welcome spot");
+			throw new IllegalAccessException("Unable to post request at welcome spot");
 		}
 		
 		requestData.setCheckInId(checkIn.getId());
@@ -187,7 +198,8 @@ public class LocationController {
 		
 		requestData.setId(request.getId());
 		
-		eventBus.post(new NewCustomerRequestEvent(locationRepo.getByKey(checkIn.getBusiness()), checkIn, request));								
+		
+		eventBus.post(new NewCustomerRequestEvent(location, checkIn, request));								
 		return requestData;
 	}
 	

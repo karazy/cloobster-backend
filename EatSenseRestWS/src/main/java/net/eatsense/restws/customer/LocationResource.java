@@ -187,7 +187,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
 	public FeedbackDTO postFeedback(FeedbackDTO feedbackData) {
-		return new FeedbackDTO(feedbackCtrl.addFeedback(business, checkIn, feedbackData));
+		return new FeedbackDTO(feedbackCtrl.createFeedback(business, checkIn, feedbackData));
 	}
 	
 	@GET
