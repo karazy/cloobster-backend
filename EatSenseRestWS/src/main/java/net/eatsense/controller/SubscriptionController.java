@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Date;
 
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.DeleteSpotEvent;
@@ -469,6 +470,6 @@ public class SubscriptionController {
 	 * @return
 	 */
 	private int countSpots(Key<Business> locationKey) {
-		return ofy.query().ancestor(locationKey).filter("trash", false).count();
+		return ofy.query(Spot.class).ancestor(locationKey).filter("trash", false).count();
 	}
 }
