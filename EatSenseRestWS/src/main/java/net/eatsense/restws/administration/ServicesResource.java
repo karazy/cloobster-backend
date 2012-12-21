@@ -1,7 +1,6 @@
 package net.eatsense.restws.administration;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -22,21 +21,20 @@ import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
-import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
-import net.eatsense.representation.LocationDTO;
-import net.eatsense.representation.LocationImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.representation.LocationDTO;
+import net.eatsense.representation.LocationImportDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
@@ -62,7 +60,6 @@ public class ServicesResource {
 	protected final Logger logger;
 	private final boolean devEnvironment;
 	private final TemplateController templateCtrl;
-	private final AccountRepository accountRepo;
 	private final ChannelController channelCtrl;
 	private Configuration configuration;
 	private FeedbackFormRepository feedbackFormRepo;
@@ -76,14 +73,13 @@ public class ServicesResource {
 			ImportController importCtr, LocationRepository businessRepo,
 			NicknameAdjectiveRepository adjRepo,
 			NicknameNounRepository nounRepo, TemplateController templateCtrl,
-			AccountRepository accountRepo, ChannelController channelCtrl,
+			ChannelController channelCtrl,
 			FeedbackFormRepository feedbackFormRepo,
 			Configuration configuration,
 			Provider<InfoPageGenerator> infoPageGenerator,
 			ValidationHelper validator) {
 		super();
 		this.channelCtrl = channelCtrl;
-		this.accountRepo = accountRepo;
 		this.templateCtrl = templateCtrl;
 		this.validator = validator;
 		this.logger = LoggerFactory.getLogger(this.getClass());
