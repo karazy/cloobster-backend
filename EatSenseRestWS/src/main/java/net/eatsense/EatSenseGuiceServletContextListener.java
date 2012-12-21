@@ -24,6 +24,7 @@ import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.administration.AdminResource;
+import net.eatsense.restws.administration.ServicesResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.CompaniesResource;
@@ -133,7 +134,7 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*nickname(.)*",
 								"(.)*download(.)*",
 								"(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*",								
+								"(.)*_ah/channel/disconnected(.)*",
 								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);

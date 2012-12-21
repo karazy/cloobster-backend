@@ -1,318 +1,54 @@
 package net.eatsense.restws.administration;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 
-import net.eatsense.configuration.Configuration;
-import net.eatsense.configuration.SpotPurePDFConfiguration;
-import net.eatsense.controller.ChannelController;
-import net.eatsense.controller.ImportController;
-import net.eatsense.controller.TemplateController;
-import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.FeedbackForm;
-import net.eatsense.domain.NicknameAdjective;
-import net.eatsense.domain.NicknameNoun;
-import net.eatsense.domain.TrashEntry;
-import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.LocationRepository;
-import net.eatsense.persistence.FeedbackFormRepository;
-import net.eatsense.persistence.NicknameAdjectiveRepository;
-import net.eatsense.persistence.NicknameNounRepository;
-import net.eatsense.representation.LocationDTO;
-import net.eatsense.representation.LocationImportDTO;
-import net.eatsense.representation.FeedbackFormDTO;
-import net.eatsense.representation.InfoPageDTO;
-import net.eatsense.representation.cockpit.MessageDTO;
-import net.eatsense.templates.Template;
-import net.eatsense.util.DummyDataDumper;
-import net.eatsense.util.InfoPageGenerator;
-import net.eatsense.validation.ValidationHelper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.eatsense.auth.AwesomeUserAuthorizer;
+import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.representation.ManagementUserDTO;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
-@Path("admin/services")
+@Path("admin")
 public class AdminResource {
-	private final NicknameAdjectiveRepository adjectiveRepo;
-	private final NicknameNounRepository nounRepo;
-	private final DummyDataDumper ddd;
-	private final ImportController importCtrl;
+	
+	private final AwesomeUserAuthorizer auth;
+	
+	
+	@Inject
+	public AdminResource(AwesomeUserAuthorizer auth) {
+		super();
+		this.auth = auth;
+	}
 
-	private final LocationRepository businessRepo;
-	protected final Logger logger;
-	private final boolean devEnvironment;
-	private final TemplateController templateCtrl;
-	private final AccountRepository accountRepo;
-	private final ChannelController channelCtrl;
-	private Configuration configuration;
-	private FeedbackFormRepository feedbackFormRepo;
-	private Provider<InfoPageGenerator> infoPageGen;
-	private final ValidationHelper validator;
 	@Context
 	private ResourceContext resourceContext;
-
-	@Inject
-	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
-			ImportController importCtr, LocationRepository businessRepo,
-			NicknameAdjectiveRepository adjRepo,
-			NicknameNounRepository nounRepo, TemplateController templateCtrl,
-			AccountRepository accountRepo, ChannelController channelCtrl,
-			FeedbackFormRepository feedbackFormRepo,
-			Configuration configuration,
-			Provider<InfoPageGenerator> infoPageGenerator,
-			ValidationHelper validator) {
-		super();
-		this.channelCtrl = channelCtrl;
-		this.accountRepo = accountRepo;
-		this.templateCtrl = templateCtrl;
-		this.validator = validator;
-		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.ddd = ddd;
-		this.importCtrl = importCtr;
-		this.adjectiveRepo = adjRepo;
-		this.nounRepo = nounRepo;
-		this.configuration = configuration;
-		this.businessRepo = businessRepo;
-		this.feedbackFormRepo = feedbackFormRepo;
-		this.infoPageGen = infoPageGenerator;
-		String environment = servletContext
-				.getInitParameter("net.karazy.environment");
-		logger.info("net.karazy.environment: {}", environment);
-		// Check for dev environment
-		devEnvironment = "dev".equals(environment);
+	
+	@Context
+	private SecurityContext securityContext;
+	
+	@Path("user")
+	public ManagementUserDTO getAuthorizedUser() {
+		String email = securityContext.getUserPrincipal().getName();
+		return new ManagementUserDTO(email, auth.isAwesome(email));
 	}
 
-	@GET
-	@Path("trash")
-	@Produces("application/json; charset=UTF-8")
-	public List<TrashEntry> getAllTrash() {
-		return businessRepo.getAllTrash();
-	}
-
-	@DELETE
-	@Path("trash/{id}")
-	@Produces("application/json; charset=UTF-8")
-	public void restoreTrash(@PathParam("id") Long trashEntryId, @QueryParam("restore") boolean restore) {
-		if(restore == true) {
-			try {
-				businessRepo.restoreTrashedEntity(new Key<TrashEntry>(TrashEntry.class, trashEntryId));
-			} catch (NotFoundException e) {
-				throw new net.eatsense.exceptions.NotFoundException();
-			}
+	
+	@Path("s")
+	public ServicesResource getServiceResource() {
+		String email = securityContext.getUserPrincipal().getName();
+		if(auth.isAwesome(email)) {
+			return resourceContext.getResource(ServicesResource.class);
+		}
+		else {
+			throw new IllegalAccessException(email + " is not an awesome user!");
 		}
 	}
 	
-	@PUT
-	@Path("templates/{id}")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("application/json; charset=UTF-8")
-	public Template addOrSaveTemplate(@PathParam("id") String id, Template template) {
-		return templateCtrl.saveOrUpdateTemplate(template);
-	}
-	
-	@GET
-	@Path("templates")
-	@Produces("application/json; charset=UTF-8")
-	public List<Template> getTemplates() {
-		return templateCtrl.getTemplates();
-	}
-	
-	@POST
-	@Path("templates")
-	@Produces("application/json; charset=UTF-8")
-	public List<Template> createTemplates() {
-		return templateCtrl.initTemplates("account-confirm-email",
-				"newsletter-email-registered", "account-confirmed",
-				"account-forgotpassword-email", "account-setup-email",
-				"account-notice-password-update",
-				"account-confirm-email-update", "account-notice-email-update",
-				"customer-account-confirm-email");
-	}
-	
-	@POST
-	@Path("nicknames/adjectives")
-	@Consumes("application/json; charset=UTF-8")
-	public void addNicknameAdjectives(List<NicknameAdjective> adjectives) {
-		adjectiveRepo.ofy().put(adjectives);
-	}
-	
-	@POST
-	@Path("nicknames/nouns")
-	@Consumes("application/json; charset=UTF-8")
-	public void addNicknameNouns(List<NicknameNoun> nouns) {
-		nounRepo.ofy().put(nouns);
-	}
-	
-	@POST
-	@Path("accounts/dummies")
-	public void dummyUsers() {
-		ddd.generateDummyUsers();
-	}
-	
-	@POST
-	@Path("businesses/dummies")
-	public void dummyData() {
-		ddd.generateDummyBusinesses();
-	}
-	
-	@GET
-	@Path("businesses")
-	@Produces("application/json; charset=UTF-8")
-	public List<LocationDTO> getBusinesses() {
-		List<LocationDTO> businesses = new ArrayList<LocationDTO>();
-		for (Business business : businessRepo.getAll()) {
-			businesses.add(new LocationDTO(business));
-		}
-		return businesses;
-	}
-			
-	@POST
-	@Path("businesses")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("text/plain; charset=UTF-8")
-	public String importNewBusiness(LocationImportDTO newBusiness ) {
-		Long id =  importCtrl.addBusiness(newBusiness);
-		
-		if(id == null)
-			return "Error:\n" + importCtrl.getReturnMessage();
-		else
-		    return id.toString();
-	}
-	
-	@GET
-	@Path("configuration/defaultfeedbackform")
-	@Produces("application/json; charset=UTF-8")
-	public FeedbackFormDTO getDefaultFeedbackForm() {
-		Key<FeedbackForm> defaultFeedbackFormKey = configuration.getDefaultFeedbackForm();
-		
-		if(defaultFeedbackFormKey == null) {
-			return new FeedbackFormDTO();			
-		}
-		
-		FeedbackForm defaultFeedbackForm;
-		try {
-			defaultFeedbackForm = feedbackFormRepo.getByKey(defaultFeedbackFormKey);
-		} catch (NotFoundException e) {
-			return new FeedbackFormDTO();
-		}
-			
-		return new FeedbackFormDTO(defaultFeedbackForm);
-	}
-	
-	@PUT
-	@Path("configuration/defaultfeedbackform")
-	@Produces("application/json; charset=UTF-8")
-	public FeedbackFormDTO importDefaultBusinessFeedback(FeedbackFormDTO feedbackFormData ) {
-		return importCtrl.importDefaultFeedbackForm(feedbackFormData);
-	}
-	
-	@GET
-	@Path("configuration/spotpurepdf")
-	public SpotPurePDFConfiguration getSpotPurePDFConfiguration() {
-		return configuration.getSpotPurePdfConfiguration();
-	}
-	
-	@PUT
-	@Path("configuration/spotpurepdf")
-	public SpotPurePDFConfiguration updateSpotPurePDFConfiguration(SpotPurePDFConfiguration spotConfig) {
-		validator.validate(spotConfig);
-		
-		configuration.setSpotPurePdfConfiguration(spotConfig);
-		configuration.save();
-		
-		return configuration.getSpotPurePdfConfiguration();
-	}
-	
-	@POST
-	@Path("businesses/{id}/feedbackforms")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("application/json; charset=UTF-8")
-	public FeedbackFormDTO importNewBusinessFeedback(@PathParam("id") Long businessId, FeedbackFormDTO feedbackFormData ) {
-		return importCtrl.importFeedbackForm(businessId, feedbackFormData);
-	}
-	
-	@POST
-	@Path("channels/messages")
-	@Consumes("application/json; charset=UTF-8")
-	@Produces("application/json; charset=UTF-8")
-	public MessageDTO sendCockpitUpdateMessage(MessageDTO message) {
-		
-		for(Business business :  businessRepo.query()) {
-			channelCtrl.sendMessage(business, message);
-		}
-		
-		return message;
-	}
-	
-	@POST
-	@Path("businesses/{businessId}/infopages/{count}")
-	@Produces("application/json; charset=UTF-8")
-	public List<InfoPageDTO> generateInfoPages(@PathParam("businessId")Long businessId, @PathParam("count") int count) {
-		return infoPageGen.get().generate(Business.getKey(businessId), count );
-	}
-	
-	/**
-	 * Deletes all data. Use at your own risk.
-	 */
-	@DELETE
-	@Path("datastore/all")
-	public void deleteAllData() {
-		if(devEnvironment)
-			importCtrl.deleteAllData();
-		else
-			throw new WebApplicationException(405);
-	}
-	
-	/**
-	 * Delete all live data (Orders with customer choices, CheckIns, Bills, Requests)
-	 */
-	@DELETE
-	@Path("datastore/live")
-	public void deleteLiveData() {
-		if(devEnvironment)
-			importCtrl.deleteLiveData();
-		else
-			throw new WebApplicationException(405);
-	}
-	
-	@Path("subscriptions")
-	public SubscriptionTemplatesResource getSubsriptionsResource() {
-		return resourceContext.getResource(SubscriptionTemplatesResource.class);
-	}
-	
-	@Path("companies")
-	public CompaniesResource getCompaniesResource() {
-		return resourceContext.getResource(CompaniesResource.class);
-	}
-	
-	@Path("locations")
-	public LocationsResource getLocationsResource() {
-		return resourceContext.getResource(LocationsResource.class);
-	}
-	
-	@Path("dataupgrades")
-	public DataUpgradesResource getDataUpgradesResource() {
-		return resourceContext.getResource(DataUpgradesResource.class);
+	@Path("m")
+	public ManagementResource getManagementResource() {
+		return resourceContext.getResource(ManagementResource.class);
 	}
 }
