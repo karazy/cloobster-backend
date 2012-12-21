@@ -392,16 +392,17 @@ public class SubscriptionController {
 		setBasicSubscription(event.getLocation());
 	}
 	
-	@Subscribe
-	public void handleNewSpotEvent(NewSpotEvent event) {
-		logger.info("newSpotCount={}", event.getNewSpotCount());
+
+	/**
+	 * @param locationKey
+	 * @param newSpotCount
+	 */
+	private void recalculateQuota(Key<Business> locationKey, int newSpotCount) {
+		checkNotNull(locationKey, "locationKey was null");
 		
-		if(event.getLocation() == null) {
-			logger.error("Corrupt event received, locationKey was null");
-			return;
-		}
+		logger.info("newSpotCount={}", newSpotCount);
 		
-		Business location = ofy.find(event.getLocation());
+		Business location = ofy.find(locationKey);
 		if(location == null) {
 			logger.error("Unable to find Location for new spot");
 			return;
@@ -422,52 +423,49 @@ public class SubscriptionController {
 			return;
 		}
 		
-		if(activeSub.getMaxSpotCount() > 0 && activeSub.getMaxSpotCount() < event.getNewSpotCount()) {
-			logger.warn("Quota exceeded for {}.", event.getLocation());
-			logger.warn("newSpotCount={}, maxSpotCount={}", event.getNewSpotCount(), activeSub.getMaxSpotCount());
-			
-			activeSub.setQuotaExceeded(true);
-			ofy.async().put(activeSub);
-			//TODO Send email for the first time the quota was exceeded
+		if(activeSub.getMaxSpotCount() > 0) {
+			logger.info("newSpotCount={}, maxSpotCount={}", newSpotCount, activeSub.getMaxSpotCount());
+			if(activeSub.getMaxSpotCount() < newSpotCount) {
+				logger.warn("Quota exceeded for {}.", locationKey);
+				
+				activeSub.setQuotaExceeded(true);
+				ofy.async().put(activeSub);
+				//TODO Send email for the first time the quota was exceeded
+			}
+			else {
+				logger.info("Quota no longer exceeded for {}.", locationKey);
+				activeSub.setQuotaExceeded(false);
+				ofy.async().put(activeSub);
+			}
 		}
+			
 	}
 	
 	@Subscribe
-	public void handleDeleteSpotEvent(DeleteSpotEvent event) {
-		logger.info("newSpotCount={}", event.getNewSpotCount());
+	public void handleNewSpotEvent(NewSpotEvent event) {
 		
 		if(event.getLocation() == null) {
 			logger.error("Corrupt event received, locationKey was null");
 			return;
 		}
 		
-		Business location = ofy.find(event.getLocation());
-		if(location == null) {
-			logger.error("Unable to find Location for new spot");
+		Key<Business> locationKey = event.getLocation();
+		int newSpotCount = event.getNewSpotCount();
+		
+		recalculateQuota(locationKey, newSpotCount);
+	}
+
+	
+	@Subscribe
+	public void handleDeleteSpotEvent(DeleteSpotEvent event) {
+		if(event.getLocation() == null) {
+			logger.error("Corrupt event received, locationKey was null");
 			return;
 		}
 		
-		if(location.getActiveSubscription() == null) {
-			logger.error("No active subscription, no spot should be able to be created");
-			return;
-		}
-		if(location.isBasic()) {
-			logger.error("Business with basic subscription created spot. This should not happen.");
-			return;
-		}
+		Key<Business> locationKey = event.getLocation();
+		int newSpotCount = event.getNewSpotCount();
 		
-		Subscription activeSub = ofy.find(location.getActiveSubscription());
-		if(activeSub == null) {
-			logger.error("Corrupt Location data, activeSubscription not found");
-			return;
-		}
-		
-		if(activeSub.getMaxSpotCount() > 0 && activeSub.getMaxSpotCount() >= event.getNewSpotCount()) {
-			logger.warn("Quota not exceeded anymore for {}.", event.getLocation());
-			logger.warn("newSpotCount={}, maxSpotCount={}", event.getNewSpotCount(), activeSub.getMaxSpotCount());
-			
-			activeSub.setQuotaExceeded(false);
-			ofy.async().put(activeSub);
-		}
+		recalculateQuota(locationKey, newSpotCount);
 	}
 }
