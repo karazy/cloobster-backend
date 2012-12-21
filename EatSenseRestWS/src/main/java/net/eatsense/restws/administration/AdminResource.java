@@ -1,6 +1,8 @@
 package net.eatsense.restws.administration;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 
@@ -30,6 +32,8 @@ public class AdminResource {
 	private SecurityContext securityContext;
 	
 	@Path("user")
+	@GET
+	@Produces("application/json")
 	public ManagementUserDTO getAuthorizedUser() {
 		String email = securityContext.getUserPrincipal().getName();
 		return new ManagementUserDTO(email, auth.isAwesome(email));
