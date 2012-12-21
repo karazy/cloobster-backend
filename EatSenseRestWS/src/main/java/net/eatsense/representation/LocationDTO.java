@@ -58,6 +58,7 @@ public class LocationDTO {
 		this.paymentMethods = business.getPaymentMethods();
 		this.url = business.getUrl();
 		this.fbUrl = business.getFbUrl();
+		this.basic = business.isBasic();
 		this.activeSubscriptionId = business.getActiveSubscription() != null ? business.getActiveSubscription().getId() : null;
 		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
 	}

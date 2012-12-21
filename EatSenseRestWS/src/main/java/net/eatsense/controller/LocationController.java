@@ -597,7 +597,7 @@ public class LocationController {
 		
 		
 		if(!welcome) {
-			spotCount = spotRepo.query().ancestor(locationKey).count();
+			spotCount = countSpots(locationKey);
 		}
 		
 		
@@ -840,8 +840,6 @@ public class LocationController {
 			throw new NotFoundException("No location found with id=" + locationId);
 		}
 		
-		checkAndSetBasicMode(location);
-		
 		if(countSpots) {
 			setSpotCount(location);
 		}
@@ -850,30 +848,21 @@ public class LocationController {
 	}
 
 	/**
-	 * @param location
-	 */
-	private Business checkAndSetBasicMode(Business location) {
-		if(location.getActiveSubscription() != null) {
-			Subscription activeSubscription = locationRepo.ofy().find(location.getActiveSubscription());
-			if(activeSubscription != null && activeSubscription.getStatus() == SubscriptionStatus.APPROVED && !activeSubscription.isBasic()) {
-				location.setBasic(false);	
-			}
-			else {
-				logger.warn("Corrupt Location, active Subscription not found. key={}", location.getActiveSubscription());
-			}
-		}
-		
-		return location;
-	}
-	
-	/**
 	 * @param location Business entity 
 	 * @return Business entity with spotcount set
 	 */
 	
 	public Business setSpotCount(Business location) {
 		checkNotNull(location, "location was null");
-		location.setSpotCount(spotRepo.query().ancestor(location).count());
+		location.setSpotCount(countSpots(location.getKey()));
 		return location;
+	}
+
+	/**
+	 * @param locationKey
+	 * @return
+	 */
+	private int countSpots(Key<Business> locationKey) {
+		return spotRepo.query().ancestor(locationKey).filter("trash", false).count();
 	}
 }
