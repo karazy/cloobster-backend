@@ -46,7 +46,7 @@ public class AreaDTO {
 				menuIds.add(menuKey.getId());
 			}
 		}
-		
+		welcome = area.isWelcome();		
 	}
 	
 	
