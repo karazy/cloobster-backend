@@ -397,7 +397,7 @@ public class LocationController {
 		return businessData;
 	}
 
-	private void createWelcomeAreaAndSpot(Key<Business> businessKey) {
+	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		AreaDTO areaData = new AreaDTO();

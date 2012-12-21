@@ -10,8 +10,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.embedded.SubscriptionStatus;
+import net.eatsense.exceptions.ServiceException;
 import net.eatsense.representation.SubscriptionDTO;
 
 import com.google.common.collect.Iterables;

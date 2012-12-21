@@ -176,31 +176,6 @@ public class AdminResource {
 		ddd.generateDummyBusinesses();
 	}
 	
-	/**
-	 * Fix for a temporary bug, reload all accounts.
-	 */
-	@PUT
-	@Path("accounts/fixbusinesses")
-	public void reloadAccounts() {
-		Collection<Account> allAccounts = accountRepo.getAll();
-		for (Account account : allAccounts) {
-			// Readd Oriental to demo account.
-			logger.info("Rewriting account with id: {}", account.getId());
-			if(account.getId().longValue() == 12) {
-				if(account.getBusinesses() == null) {
-					account.setBusinesses(new ArrayList<Key<Business>>());
-				}
-				 Key<Business> orientalKey = new Key<Business>(Business.class, 10002);
-				 logger.info("adding business {} to demo account", orientalKey);
-				 if(!account.getBusinesses().contains(orientalKey)) {
-					 account.getBusinesses().add(orientalKey);
-				 }
-			}
-			account.getBusinesses();
-		}
-		accountRepo.saveOrUpdate(allAccounts);
-	}
-		
 	@GET
 	@Path("businesses")
 	@Produces("application/json; charset=UTF-8")
@@ -334,5 +309,10 @@ public class AdminResource {
 	@Path("locations")
 	public LocationsResource getLocationsResource() {
 		return resourceContext.getResource(LocationsResource.class);
+	}
+	
+	@Path("dataupgrades")
+	public DataUpgradesResource getDataUpgradesResource() {
+		return resourceContext.getResource(DataUpgradesResource.class);
 	}
 }

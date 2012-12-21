@@ -366,7 +366,7 @@ public class SubscriptionController {
 		return ofy.find(business.getActiveSubscription());
 	}
 	
-	private Subscription setBasicSubscription(Business location) {
+	public Subscription setBasicSubscription(Business location) {
 		Subscription basicSubscription = ofy.query(Subscription.class).filter("template", true).filter("basic", true).get();
 		
 		if(basicSubscription == null) {
@@ -381,17 +381,6 @@ public class SubscriptionController {
 		
 		return basicSubscription;
 	}
-		
-	/**
-	 * Handles basic Subscription creation before creation of a new Business in the store.
-	 * 
-	 * @param event
-	 */
-	@Subscribe
-	public void handleNewLocationEvent(NewLocationEvent event) {
-		setBasicSubscription(event.getLocation());
-	}
-	
 
 	/**
 	 * @param locationKey
@@ -439,6 +428,17 @@ public class SubscriptionController {
 			}
 		}
 			
+	}
+	
+	
+	/**
+	 * Handles basic Subscription creation before creation of a new Business in the store.
+	 * 
+	 * @param event
+	 */
+	@Subscribe
+	public void handleNewLocationEvent(NewLocationEvent event) {
+		setBasicSubscription(event.getLocation());
 	}
 	
 	@Subscribe
