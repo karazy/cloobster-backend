@@ -74,7 +74,7 @@ public class SpotController {
 			throw new ValidationException("No Area found with id="+areaKey.getId());
 		}
 
-		int spotCount = spotRepo.query().ancestor(locationKey).count();
+		int spotCount = countSpots(locationKey);
 
 		for (int i = 0; i < spotsData.getCount(); i++) {
 			Spot spot = spotRepo.newEntity();			
@@ -172,5 +172,13 @@ public class SpotController {
 		spotRepo.trashEntities(spots, account.getEmail());
 				
 		return new ArrayList<Spot>(spots);
+	}
+	
+	/**
+	 * @param locationKey
+	 * @return
+	 */
+	private int countSpots(Key<Business> locationKey) {
+		return spotRepo.query().ancestor(locationKey).filter("trash", false).count();
 	}
 }

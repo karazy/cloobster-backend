@@ -104,6 +104,7 @@ public class SpotControllerTest {
 		Area area = mock(Area.class);
 		when(areaRepo.getByKey(areaKey)).thenReturn(area );
 		when(spotQuery.count()).thenReturn(1);
+		when(spotQuery.filter("trash",false)).thenReturn(spotQuery);
 		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
 		when(spotRepo.query()).thenReturn(spotQuery);
 		
