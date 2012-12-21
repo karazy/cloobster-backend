@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
@@ -31,17 +32,18 @@ public class SubscriptionController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Objectify ofy;
 	private final ValidationHelper validator;
+	private final Provider<Subscription> subscriptionProvider;
 
 	@Inject
-	public SubscriptionController(OfyService ofy,  ValidationHelper validator) {
+	public SubscriptionController(OfyService ofy,  ValidationHelper validator, Provider<Subscription> subscriptionProvider) {
 		super();
-		
+		this.subscriptionProvider = subscriptionProvider;
 		this.ofy = ofy.ofy();
 		this.validator = validator;
 	}
 	
 	public Subscription createAndSaveTemplate(SubscriptionDTO subscriptionData) {
-		Subscription subscription = new Subscription();
+		Subscription subscription = subscriptionProvider.get();
 		subscription.setTemplate(true);
 		subscriptionData.setStatus(null);
 		return updateTemplate(subscription, subscriptionData);	
@@ -139,7 +141,7 @@ public class SubscriptionController {
 		}
 		else if (subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.CANCELED) {
 			Business location = ofy.get(subscription.getBusiness());
-			cancelPendingSubscription(location);
+			cancelPendingSubscription(location, true);
 		}
 		else if(subscription.getStatus() == SubscriptionStatus.APPROVED && subscriptionData.getStatus() == SubscriptionStatus.ARCHIVED) {
 			Business location = ofy.get(subscription.getBusiness());
@@ -243,7 +245,7 @@ public class SubscriptionController {
 		}
 		else if(status == SubscriptionStatus.APPROVED){
 			setActiveSubscription(location, Optional.of(newSubscription), false);
-			cancelPendingSubscription(location);
+			cancelPendingSubscription(location, true);
 		}
 		
 		return newSubscription;
@@ -267,7 +269,7 @@ public class SubscriptionController {
 		}
 	}
 	
-	private void cancelPendingSubscription(Business location) {
+	private void cancelPendingSubscription(Business location, boolean saveLocation) {
 		checkNotNull(location, "location was null");
 		
 		if(location.getPendingSubscription() != null) {
@@ -275,8 +277,10 @@ public class SubscriptionController {
 			
 			pendingSubscription.setStatus(SubscriptionStatus.CANCELED);
 			location.setPendingSubscription(null);
-			
-			ofy.put(pendingSubscription, location);
+			ofy.async().put(pendingSubscription);
+		}
+		if(saveLocation) {
+			ofy.put(location);
 		}
 	}
 	
@@ -285,7 +289,7 @@ public class SubscriptionController {
 		checkNotNull(status, "status was null");
 		checkNotNull(businessKey, "businessId was null");
 		
-		Subscription newSubscription = new Subscription();
+		Subscription newSubscription = subscriptionProvider.get();
 		
 		if(status == SubscriptionStatus.APPROVED) {
 			newSubscription.setStartDate(new Date());
