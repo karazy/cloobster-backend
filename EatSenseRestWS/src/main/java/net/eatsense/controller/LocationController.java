@@ -28,6 +28,7 @@ import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.DeleteCustomerRequestEvent;
+import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.event.NewSpotEvent;
@@ -683,8 +684,12 @@ public class LocationController {
 			throw new IllegalAccessException("Not allowed to delete welcome spot");
 		}
 		
+		int spotCount = countSpots(spot.getBusiness());
+		
 		spot.setActive(false);
 		spotRepo.trashEntity(spot, account.getLogin());
+		
+		eventBus.post(new DeleteSpotEvent(spot.getBusiness(), spot, spotCount - 1, false));
 	}
 
 	/**

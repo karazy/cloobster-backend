@@ -15,6 +15,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
+import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewSpotEvent;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
@@ -158,6 +159,7 @@ public class SpotController {
 		List<Key<Spot>> spotKeys = createKeys(businessKey, spotIds);
 				
 		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
+		int spotCount = countSpots(businessKey);
 		
 		for (Iterator<Spot> iterator = spots.iterator(); iterator.hasNext();) {
 			Spot spot = iterator.next();
@@ -169,6 +171,8 @@ public class SpotController {
 			}
 		}
 		
+		eventBus.post(new DeleteSpotEvent(businessKey, null, spotCount - spots.size(), true));		
+				
 		spotRepo.trashEntities(spots, account.getEmail());
 				
 		return new ArrayList<Spot>(spots);

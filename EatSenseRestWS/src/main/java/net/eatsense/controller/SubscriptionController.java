@@ -7,6 +7,7 @@ import java.util.Date;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
+import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.event.NewSpotEvent;
 import net.eatsense.exceptions.NotFoundException;
@@ -131,6 +132,7 @@ public class SubscriptionController {
 		validator.validate(subscriptionData);
 		
 		if(subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.APPROVED) {
+			subscription.setStartDate(new Date());
 			Business location = ofy.get(subscription.getBusiness());
 			location.setPendingSubscription(null);
 			setActiveSubscription(location, Optional.of(subscription), true);
@@ -427,6 +429,45 @@ public class SubscriptionController {
 			activeSub.setQuotaExceeded(true);
 			ofy.async().put(activeSub);
 			//TODO Send email for the first time the quota was exceeded
+		}
+	}
+	
+	@Subscribe
+	public void handleDeleteSpotEvent(DeleteSpotEvent event) {
+		logger.info("newSpotCount={}", event.getNewSpotCount());
+		
+		if(event.getLocation() == null) {
+			logger.error("Corrupt event received, locationKey was null");
+			return;
+		}
+		
+		Business location = ofy.find(event.getLocation());
+		if(location == null) {
+			logger.error("Unable to find Location for new spot");
+			return;
+		}
+		
+		if(location.getActiveSubscription() == null) {
+			logger.error("No active subscription, no spot should be able to be created");
+			return;
+		}
+		if(location.isBasic()) {
+			logger.error("Business with basic subscription created spot. This should not happen.");
+			return;
+		}
+		
+		Subscription activeSub = ofy.find(location.getActiveSubscription());
+		if(activeSub == null) {
+			logger.error("Corrupt Location data, activeSubscription not found");
+			return;
+		}
+		
+		if(activeSub.getMaxSpotCount() > 0 && activeSub.getMaxSpotCount() >= event.getNewSpotCount()) {
+			logger.warn("Quota not exceeded anymore for {}.", event.getLocation());
+			logger.warn("newSpotCount={}, maxSpotCount={}", event.getNewSpotCount(), activeSub.getMaxSpotCount());
+			
+			activeSub.setQuotaExceeded(false);
+			ofy.async().put(activeSub);
 		}
 	}
 }

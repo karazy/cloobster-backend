@@ -177,6 +177,11 @@ public class SpotControllerTest {
 		spots.add(spot);
 		spots.add(spot);
 		
+		when(spotQuery.count()).thenReturn(5);
+		when(spotQuery.filter("trash",false)).thenReturn(spotQuery);
+		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
+		when(spotRepo.query()).thenReturn(spotQuery);
+		
 		when(spotRepo.getKey(businessKey, spotIds.get(0))).thenReturn(spotKey);
 		when(spotRepo.getKey(businessKey, spotIds.get(1))).thenReturn(spotKey);
 		when(spotRepo.getKey(businessKey, spotIds.get(2))).thenReturn(spotKey);
