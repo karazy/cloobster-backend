@@ -325,14 +325,20 @@ public class SubscriptionController {
 				logger.warn("Corrupt Location data, unable to find previous activeSubscription.");
 			}
 		}
-		Key<Subscription> newSubscriptionKey = newSubscription.isPresent() ? newSubscription.get().getKey() : null;
 		
 		// Reset Basic flag on business to the correct state
 		if(newSubscription.isPresent()) {
+			Key<Subscription> newSubscriptionKey = newSubscription.isPresent() ? newSubscription.get().getKey() : null;
 			location.setBasic(newSubscription.get().isBasic());
+			location.setActiveSubscription(newSubscriptionKey);
+			if(location.getSpotCount() == null) {
+				location.setSpotCount(countSpots(location.getKey()));
+			}
+			recalculateQuota(location, location.getSpotCount(), false);
 		}
-		
-		location.setActiveSubscription(newSubscriptionKey);
+		else {
+			location.setActiveSubscription(null);
+		}
 		
 		if(saveBusiness) {
 			ofy.put(location);
@@ -390,23 +396,17 @@ public class SubscriptionController {
 	 * @param locationKey
 	 * @param newSpotCount
 	 */
-	private void recalculateQuota(Key<Business> locationKey, int newSpotCount) {
-		checkNotNull(locationKey, "locationKey was null");
+	private void recalculateQuota(Business location, int newSpotCount, boolean save) {
 		
 		logger.info("newSpotCount={}", newSpotCount);
 		
-		Business location = ofy.find(locationKey);
 		if(location == null) {
-			logger.error("Unable to find Location for new spot");
+			logger.error("No Location supplied for quota calculation");
 			return;
 		}
-		
-		if(location.getActiveSubscription() == null) {
-			logger.error("No active subscription, no spot should be able to be created");
-			return;
-		}
-		if(location.isBasic()) {
-			logger.error("Business with basic subscription created spot. This should not happen.");
+
+		if(location.isBasic() || location.getActiveSubscription() == null) {
+			logger.info("Skipped quota check for basic business.");
 			return;
 		}
 		
@@ -419,21 +419,19 @@ public class SubscriptionController {
 		if(activeSub.getMaxSpotCount() > 0) {
 			logger.info("newSpotCount={}, maxSpotCount={}", newSpotCount, activeSub.getMaxSpotCount());
 			if(activeSub.getMaxSpotCount() < newSpotCount) {
-				logger.warn("Quota exceeded for {}.", locationKey);
+				logger.warn("Quota exceeded for Location. name={}, id={}", location.getName(), location.getId());
 				
 				activeSub.setQuotaExceeded(true);
 				ofy.async().put(activeSub);
 				//TODO Send email for the first time the quota was exceeded
 			}
 			else {
-				logger.info("Quota no longer exceeded for {}.", locationKey);
+				logger.info("Quota no longer exceeded for Location. name={}, id={}", location.getName(), location.getId());
 				activeSub.setQuotaExceeded(false);
 				ofy.async().put(activeSub);
 			}
-		}
-			
+		}	
 	}
-	
 	
 	/**
 	 * Handles basic Subscription creation before creation of a new Business in the store.
@@ -448,19 +446,14 @@ public class SubscriptionController {
 	
 	@Subscribe
 	public void handleNewSpotEvent(NewSpotEvent event) {
-		
 		if(event.getLocation() == null) {
 			logger.error("Corrupt event received, locationKey was null");
 			return;
 		}
 		
-		Key<Business> locationKey = event.getLocation();
-		int newSpotCount = event.getNewSpotCount();
-		
-		recalculateQuota(locationKey, newSpotCount);
+		recalculateQuota(ofy.find(event.getLocation()), event.getNewSpotCount(), true);
 	}
 
-	
 	@Subscribe
 	public void handleDeleteSpotEvent(DeleteSpotEvent event) {
 		if(event.getLocation() == null) {
@@ -468,9 +461,14 @@ public class SubscriptionController {
 			return;
 		}
 		
-		Key<Business> locationKey = event.getLocation();
-		int newSpotCount = event.getNewSpotCount();
-		
-		recalculateQuota(locationKey, newSpotCount);
+		recalculateQuota(ofy.find(event.getLocation()), event.getNewSpotCount(), true);
+	}
+	
+	/**
+	 * @param locationKey
+	 * @return
+	 */
+	private int countSpots(Key<Business> locationKey) {
+		return ofy.query().ancestor(locationKey).filter("trash", false).count();
 	}
 }

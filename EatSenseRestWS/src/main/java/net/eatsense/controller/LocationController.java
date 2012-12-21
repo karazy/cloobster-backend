@@ -438,6 +438,9 @@ public class LocationController {
 			throw new ValidationException(stringBuilder.toString());
 		}
 		
+		// Pass through of spot count
+		business.setSpotCount(businessData.getSpotCount());
+		
 		business.setAddress(businessData.getAddress());
 		business.setCity(businessData.getCity());
 		business.setDescription(businessData.getDescription());

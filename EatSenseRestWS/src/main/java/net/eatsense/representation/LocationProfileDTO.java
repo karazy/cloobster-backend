@@ -33,7 +33,7 @@ public class LocationProfileDTO extends LocationDTO {
 	@Min(0)
 	private int stars;
 	
-	private int spotCount;
+	private Integer spotCount;
 
 	public LocationProfileDTO() {
 		super();
@@ -126,11 +126,11 @@ public class LocationProfileDTO extends LocationDTO {
 		this.stars = stars;
 	}
 	
-	public int getSpotCount() {
+	public Integer getSpotCount() {
 		return spotCount;
 	}
 
-	public void setSpotCount(int spotCount) {
+	public void setSpotCount(Integer spotCount) {
 		this.spotCount = spotCount;
 	}
 
