@@ -371,12 +371,12 @@ public class SubscriptionController {
 		
 		if(basicSubscription == null) {
 			logger.warn("No Subscription flagged as basic found, unable to set active subscription for new Location.");
-			setActiveSubscription(location, Optional.<Subscription>absent(), false);
+			setActiveSubscription(location, Optional.<Subscription>absent(), true);
 		}
 		else {
 			Subscription newSubscription = createSubscriptionFromTemplate(basicSubscription, SubscriptionStatus.APPROVED, location.getKey());
 			
-			setActiveSubscription(location, Optional.of(newSubscription), false);
+			setActiveSubscription(location, Optional.of(newSubscription), true);
 		}
 		
 		return basicSubscription;
@@ -438,6 +438,7 @@ public class SubscriptionController {
 	 */
 	@Subscribe
 	public void handleNewLocationEvent(NewLocationEvent event) {
+		logger.info("Adding basic subscription ...");
 		setBasicSubscription(event.getLocation());
 	}
 	

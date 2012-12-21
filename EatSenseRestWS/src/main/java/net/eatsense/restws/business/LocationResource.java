@@ -90,7 +90,7 @@ public class LocationResource {
 	public LocationProfileDTO updateBusinessProfile(LocationProfileDTO businessData) {
 		//Update Business synchronizes data between the entity and transfer object.
 		businessCtrl.updateBusiness(business, businessData);
-		return businessData;
+		return new LocationProfileDTO(business);
 	}
 	
 	@DELETE

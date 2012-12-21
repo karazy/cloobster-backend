@@ -385,16 +385,17 @@ public class LocationController {
 		business.getPaymentMethods().add(new PaymentMethod("Bar"));
 		business.setCompany(account.getCompany());
 		
-		// Let other controllers know we created a new business.
-		eventBus.post(new NewLocationEvent(business));
 		
 		Key<Business> businessKey = updateBusiness(business, businessData);
+		
+		// Let other controllers know we created a new business.
+		eventBus.post(new NewLocationEvent(business));
 		
 		createWelcomeAreaAndSpot(businessKey);
 		account.getBusinesses().add(businessKey);
 		accountRepo.saveOrUpdate(account);
 		
-		return businessData;
+		return new LocationProfileDTO(business);
 	}
 
 	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
@@ -470,8 +471,6 @@ public class LocationController {
 		else {
 			key = locationRepo.getKey(business);
 		}
-		
-		businessData = new LocationProfileDTO(business);
 		
 		return key;
 	}
