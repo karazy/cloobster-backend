@@ -38,7 +38,6 @@ public class AdminResource {
 		String email = securityContext.getUserPrincipal().getName();
 		return new ManagementUserDTO(email, auth.isAwesome(email));
 	}
-
 	
 	@Path("s")
 	public ServicesResource getServiceResource() {

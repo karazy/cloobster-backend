@@ -124,7 +124,7 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*b/companies(.)*",
 								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",
-								"(.)*admin/services(.)*",
+								"(.)*admin(.)*",
 								"(.)*newsletter(.)*",
 								"(.)*b/businesses(.)*",
 								"(.)*c/businesses(.)*",
