@@ -2,8 +2,7 @@ package net.eatsense.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.isNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import net.eatsense.domain.Subscription;
@@ -17,7 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.owasp.html.Sanitizers;
 
 import com.google.inject.Provider;
 import com.googlecode.objectify.Objectify;
@@ -41,6 +39,15 @@ public class SubscriptionControllerTest {
 		
 		ctrl = new SubscriptionController(ofyService, validator, subscriptionProvider);
 	}
+
+	private SubscriptionDTO getTestTemplateData() {
+		
+		SubscriptionDTO sub = new SubscriptionDTO();
+		sub.setName("Test Package");
+		sub.setMaxSpotCount(100);
+		
+		return sub ;
+	}
 	
 	@Test
 	public void testCreateAndSaveTemplate() throws Exception {
@@ -52,14 +59,5 @@ public class SubscriptionControllerTest {
 		assertThat(newSub.isTemplate(), is(true));
 		assertThat(newSub.getStatus(), nullValue(SubscriptionStatus.class));
 		verify(ofy).put(newSub);
-	}
-
-	private SubscriptionDTO getTestTemplateData() {
-		
-		SubscriptionDTO sub = new SubscriptionDTO();
-		sub.setName("Test Package");
-		sub.setMaxSpotCount(100);
-		
-		return sub ;
 	}
 }
