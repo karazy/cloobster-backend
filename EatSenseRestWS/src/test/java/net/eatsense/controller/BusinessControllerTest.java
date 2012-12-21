@@ -502,45 +502,6 @@ public class BusinessControllerTest {
 		businessCtrl.updateBusiness(business, businessData );
 		verify(rr, times(2)).saveOrUpdate(business);
 	}
-	
-	@Test
-	public void testUpdateBusinessPostcodeViolation() throws Exception {
-		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(LocationRepository.class);
-		businessCtrl = createController();
-		
-		LocationProfileDTO businessData = getTestProfileData();
-		businessData.setPostcode("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("postcode");
-		businessCtrl.updateBusiness(business, businessData );
-	}
-	
-	@Test
-	public void testUpdateBusinessCityViolation() throws Exception {
-		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(LocationRepository.class);
-		businessCtrl = createController();
-		
-		LocationProfileDTO businessData = getTestProfileData();
-		businessData.setCity("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("city");
-		businessCtrl.updateBusiness(business, businessData );
-	}
-	
-	@Test
-	public void testUpdateBusinessAddressViolation() throws Exception {
-		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(LocationRepository.class);
-		businessCtrl = createController();
-		
-		LocationProfileDTO businessData = getTestProfileData();
-		businessData.setAddress("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("address");
-		businessCtrl.updateBusiness(business, businessData );
-	}
 
 	/**
 	 * @return Test data to user for update or create business

@@ -14,15 +14,8 @@ import com.google.common.base.Function;
 
 public class LocationProfileDTO extends LocationDTO {
 
-	@NotNull
-	@NotEmpty
 	private String city;
-	@NotEmpty
-	@NotNull
 	private String address;
-	
-	@NotEmpty
-	@NotNull
 	private String postcode;
 	
 	/**

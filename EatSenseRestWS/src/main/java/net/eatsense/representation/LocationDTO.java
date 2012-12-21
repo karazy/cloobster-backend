@@ -15,14 +15,10 @@ import net.eatsense.domain.embedded.PaymentMethod;
 public class LocationDTO {
 	@NotNull
 	@NotEmpty
-	String name;
-	@NotNull
-	@NotEmpty
-	String description;
-	Long id;
+	private String name;
+	private String description;
+	private Long id;
 
-	@NotNull
-	@NotEmpty
 	private String currency;
 	
 	private boolean trash;
