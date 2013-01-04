@@ -211,6 +211,27 @@
 									</resources>
 								</configuration>
 							</execution>
+							<execution>
+								<id>copy-app-test-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/app/tests/siesta</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.app}/siesta</directory>
+<!-- 											<excludes> -->
+<!-- 											    <exclude>**/docs/*</exclude> -->
+<!-- 											    <exclude>examples/**/*.js</exclude> -->
+<!-- 											    <exclude>examples-touch/*</exclude> -->
+<!-- 											    <exclude>tests/*</exclude> -->
+<!-- 											</excludes> -->
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
         		</plugins>
