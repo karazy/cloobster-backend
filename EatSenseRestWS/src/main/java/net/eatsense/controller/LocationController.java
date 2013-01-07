@@ -396,6 +396,9 @@ public class LocationController {
 		return new LocationProfileDTO(business);
 	}
 
+	/**
+	 * @param businessKey
+	 */
 	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
 		
@@ -475,7 +478,6 @@ public class LocationController {
 		
 		return key;
 	}
-	
 	
 	/**
 	 * Update the images of the given Business entity, with the supplied image

@@ -91,6 +91,7 @@ public class ImportController {
 	private FeedbackFormRepository feedbackFormRepo;
 	private AreaRepository areaRepo;
 	private Provider<Configuration> configProvider;
+	private LocationController locationController;
 	
 
 	@Inject
@@ -99,7 +100,7 @@ public class ImportController {
 			CheckInRepository chkr, OrderRepository or,
 			OrderChoiceRepository ocr, BillRepository br,
 			RequestRepository reqr, AccountRepository acr,
-			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo, Provider<Configuration> configProvider) {
+			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo, Provider<Configuration> configProvider, LocationController locationController) {
 		this.areaRepo = areaRepo;
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
@@ -114,6 +115,7 @@ public class ImportController {
 		this.accountRepo = acr;
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.configProvider = configProvider;
+		this.locationController = locationController;
 	}
 
     public void setValidator(Validator validator) {
@@ -196,10 +198,14 @@ public class ImportController {
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
 		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
+		
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
 		}
+		
+		// Create welcome area and spot
+		locationController.createWelcomeAreaAndSpot(kR);
 		
 		// Create service area and spots.
 		for(AreaImportDTO area : businessData.getAreas()) {
