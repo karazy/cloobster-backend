@@ -160,20 +160,20 @@ public class SpotController {
 				
 		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
 		int spotCount = countSpots(businessKey);
-		
+		int deletedSpots = 0;
 		for (Iterator<Spot> iterator = spots.iterator(); iterator.hasNext();) {
 			Spot spot = iterator.next();
 			if(spot.isWelcome()) {
 				iterator.remove();
 			}
 			else {
+				deletedSpots++;
 				spot.setActive(false);
 			}
 		}
-		
-		eventBus.post(new DeleteSpotEvent(businessKey, null, spotCount - spots.size(), true));		
 				
 		spotRepo.trashEntities(spots, account.getEmail());
+		eventBus.post(new DeleteSpotEvent(businessKey, null, spotCount - deletedSpots, true));
 				
 		return new ArrayList<Spot>(spots);
 	}

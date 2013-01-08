@@ -685,7 +685,6 @@ public class LocationController {
 		if(spot.isWelcome()) {
 			throw new IllegalAccessException("Not allowed to delete welcome spot");
 		}
-		
 		int spotCount = countSpots(spot.getBusiness());
 		
 		spot.setActive(false);
@@ -811,13 +810,16 @@ public class LocationController {
 		if(area.isWelcome()) {
 			throw new IllegalAccessException("Not allowed to delete welcome area.");
 		}
-		
+		int spotCount = countSpots(area.getBusiness());		
 		List<Spot> spots = spotRepo.getListByParentAndProperty(area.getBusiness(), "area", area);
 		
+		int deletedSpots = 0;
 		for (Spot spot : spots) {
 			spot.setActive(false);
-			trashSpot(spot, account);
+			deletedSpots++;
 		}
+		spotRepo.trashEntities(spots, account.getEmail());
+		eventBus.post(new DeleteSpotEvent(area.getBusiness(), null, spotCount - deletedSpots, true));
 		
 		area.setActive(false);
 		areaRepo.trashEntity(area, account.getLogin());
