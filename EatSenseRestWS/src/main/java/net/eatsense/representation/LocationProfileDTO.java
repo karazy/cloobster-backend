@@ -1,28 +1,21 @@
 package net.eatsense.representation;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Company;
+import net.eatsense.domain.Business;
+
 import org.apache.bval.constraints.NotEmpty;
 
-import net.eatsense.domain.Business;
-import net.eatsense.domain.embedded.PaymentMethod;
+import com.google.common.base.Function;
 
-public class BusinessProfileDTO extends BusinessDTO {
+public class LocationProfileDTO extends LocationDTO {
 
-	@NotNull
-	@NotEmpty
 	private String city;
-	@NotEmpty
-	@NotNull
 	private String address;
-	
-	@NotEmpty
-	@NotNull
 	private String postcode;
 	
 	/**
@@ -39,15 +32,17 @@ public class BusinessProfileDTO extends BusinessDTO {
 	
 	@Min(0)
 	private int stars;
+	
+	private Integer spotCount;
 
-	public BusinessProfileDTO() {
+	public LocationProfileDTO() {
 		super();
 	}
 
 	/**
 	 * @param business - Business entity to copy the data from.
 	 */
-	public BusinessProfileDTO(Business business) {
+	public LocationProfileDTO(Business business) {
 		super(business);
 		this.address = business.getAddress();
 		this.city = business.getCity();
@@ -64,6 +59,7 @@ public class BusinessProfileDTO extends BusinessDTO {
 		this.phone = business.getPhone();
 		this.postcode = business.getPostcode();
 		this.slogan = business.getSlogan();
+		this.spotCount = business.getSpotCount();
 	}
 
 	public String getCity() {
@@ -128,5 +124,21 @@ public class BusinessProfileDTO extends BusinessDTO {
 
 	public void setStars(int stars) {
 		this.stars = stars;
-	}	
+	}
+	
+	public Integer getSpotCount() {
+		return spotCount;
+	}
+
+	public void setSpotCount(Integer spotCount) {
+		this.spotCount = spotCount;
+	}
+
+	public final static Function<Business, LocationProfileDTO> toDTO = 
+			new Function<Business, LocationProfileDTO>() {
+				@Override
+				public LocationProfileDTO apply(Business input) {
+					return new LocationProfileDTO(input);
+				}
+		    };
 }

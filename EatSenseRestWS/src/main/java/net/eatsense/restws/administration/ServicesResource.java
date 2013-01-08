@@ -1,7 +1,6 @@
-package net.eatsense.restws;
+package net.eatsense.restws.administration;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -15,27 +14,27 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
-import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
 import net.eatsense.persistence.NicknameNounRepository;
-import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.BusinessImportDTO;
 import net.eatsense.representation.FeedbackFormDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.representation.LocationDTO;
+import net.eatsense.representation.LocationImportDTO;
 import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
@@ -49,38 +48,38 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.sun.jersey.api.core.ResourceContext;
 
-@Path("admin/services")
-public class AdminResource {
+public class ServicesResource {
 	private final NicknameAdjectiveRepository adjectiveRepo;
 	private final NicknameNounRepository nounRepo;
 	private final DummyDataDumper ddd;
 	private final ImportController importCtrl;
 
-	private final BusinessRepository businessRepo;
+	private final LocationRepository businessRepo;
 	protected final Logger logger;
 	private final boolean devEnvironment;
 	private final TemplateController templateCtrl;
-	private final AccountRepository accountRepo;
 	private final ChannelController channelCtrl;
 	private Configuration configuration;
 	private FeedbackFormRepository feedbackFormRepo;
 	private Provider<InfoPageGenerator> infoPageGen;
 	private final ValidationHelper validator;
+	@Context
+	private ResourceContext resourceContext;
 
 	@Inject
-	public AdminResource(ServletContext servletContext, DummyDataDumper ddd,
-			ImportController importCtr, BusinessRepository businessRepo,
+	public ServicesResource(ServletContext servletContext, DummyDataDumper ddd,
+			ImportController importCtr, LocationRepository businessRepo,
 			NicknameAdjectiveRepository adjRepo,
 			NicknameNounRepository nounRepo, TemplateController templateCtrl,
-			AccountRepository accountRepo, ChannelController channelCtrl,
+			ChannelController channelCtrl,
 			FeedbackFormRepository feedbackFormRepo,
 			Configuration configuration,
 			Provider<InfoPageGenerator> infoPageGenerator,
 			ValidationHelper validator) {
 		super();
 		this.channelCtrl = channelCtrl;
-		this.accountRepo = accountRepo;
 		this.templateCtrl = templateCtrl;
 		this.validator = validator;
 		this.logger = LoggerFactory.getLogger(this.getClass());
@@ -143,7 +142,7 @@ public class AdminResource {
 				"account-forgotpassword-email", "account-setup-email",
 				"account-notice-password-update",
 				"account-confirm-email-update", "account-notice-email-update",
-				"customer-account-confirm-email");
+				"customer-account-confirm-email", "location-upgrade-request");
 	}
 	
 	@POST
@@ -172,38 +171,13 @@ public class AdminResource {
 		ddd.generateDummyBusinesses();
 	}
 	
-	/**
-	 * Fix for a temporary bug, reload all accounts.
-	 */
-	@PUT
-	@Path("accounts/fixbusinesses")
-	public void reloadAccounts() {
-		Collection<Account> allAccounts = accountRepo.getAll();
-		for (Account account : allAccounts) {
-			// Readd Oriental to demo account.
-			logger.info("Rewriting account with id: {}", account.getId());
-			if(account.getId().longValue() == 12) {
-				if(account.getBusinesses() == null) {
-					account.setBusinesses(new ArrayList<Key<Business>>());
-				}
-				 Key<Business> orientalKey = new Key<Business>(Business.class, 10002);
-				 logger.info("adding business {} to demo account", orientalKey);
-				 if(!account.getBusinesses().contains(orientalKey)) {
-					 account.getBusinesses().add(orientalKey);
-				 }
-			}
-			account.getBusinesses();
-		}
-		accountRepo.saveOrUpdate(allAccounts);
-	}
-		
 	@GET
 	@Path("businesses")
 	@Produces("application/json; charset=UTF-8")
-	public List<BusinessDTO> getBusinesses() {
-		List<BusinessDTO> businesses = new ArrayList<BusinessDTO>();
+	public List<LocationDTO> getBusinesses() {
+		List<LocationDTO> businesses = new ArrayList<LocationDTO>();
 		for (Business business : businessRepo.getAll()) {
-			businesses.add(new BusinessDTO(business));
+			businesses.add(new LocationDTO(business));
 		}
 		return businesses;
 	}
@@ -212,7 +186,7 @@ public class AdminResource {
 	@Path("businesses")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("text/plain; charset=UTF-8")
-	public String importNewBusiness(BusinessImportDTO newBusiness ) {
+	public String importNewBusiness(LocationImportDTO newBusiness ) {
 		Long id =  importCtrl.addBusiness(newBusiness);
 		
 		if(id == null)
@@ -315,5 +289,10 @@ public class AdminResource {
 			importCtrl.deleteLiveData();
 		else
 			throw new WebApplicationException(405);
+	}
+	
+	@Path("dataupgrades")
+	public DataUpgradesResource getDataUpgradesResource() {
+		return resourceContext.getResource(DataUpgradesResource.class);
 	}
 }

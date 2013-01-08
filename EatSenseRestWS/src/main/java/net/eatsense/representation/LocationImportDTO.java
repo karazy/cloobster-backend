@@ -18,7 +18,7 @@ import org.apache.bval.constraints.NotEmpty;
  *
  */
 @XmlRootElement
-public class BusinessImportDTO {
+public class LocationImportDTO {
 
 	/**
 	 * Name of location.
@@ -96,7 +96,7 @@ public class BusinessImportDTO {
 	@Valid
 	private Collection<PaymentMethod> payments;
 
-	public BusinessImportDTO() {
+	public LocationImportDTO() {
 	}
 
 	public String getName() {

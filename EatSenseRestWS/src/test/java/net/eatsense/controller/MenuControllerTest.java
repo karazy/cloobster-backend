@@ -29,7 +29,7 @@ import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -70,7 +70,7 @@ public class MenuControllerTest {
     
     private Injector injector;
     private MenuController ctr;
-    private BusinessRepository rr;
+    private LocationRepository rr;
     private MenuRepository mr;
     private ProductRepository pr;
     private ChoiceRepository cr;
@@ -89,7 +89,7 @@ public class MenuControllerTest {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		ctr = injector.getInstance(MenuController.class);
-		rr = injector.getInstance(BusinessRepository.class);
+		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);

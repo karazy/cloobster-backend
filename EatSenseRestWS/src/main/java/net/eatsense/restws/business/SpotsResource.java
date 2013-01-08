@@ -8,7 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 
@@ -24,11 +24,11 @@ public class SpotsResource {
 	@Context
 	private ResourceContext resourceContext;
 	
-	private BusinessController businessController;
+	private LocationController businessController;
 	private Business business;
 	
 	@Inject
-	public SpotsResource(BusinessController businessController) {
+	public SpotsResource(LocationController businessController) {
 		super();
 		this.businessController = businessController;
 	}

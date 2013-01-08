@@ -49,6 +49,7 @@ public class Spot extends GenericEntity<Spot>{
 	
 	private Key<Area> area;
 	
+	private boolean welcome;
 
 	public Key<Area> getArea() {
 		return area;
@@ -152,6 +153,14 @@ public class Spot extends GenericEntity<Spot>{
 	public String generateBarcode() {
 		this.barcode = generateBarcode(business.getId(), getId()); 
 		return barcode;
+	}
+
+	public boolean isWelcome() {
+		return welcome;
+	}
+
+	public void setWelcome(boolean welcome) {
+		this.welcome = welcome;
 	}
 }
 

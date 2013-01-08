@@ -211,6 +211,27 @@
 									</resources>
 								</configuration>
 							</execution>
+							<execution>
+								<id>copy-app-test-dev</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/${project.build.finalName}/app/tests/siesta</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${cloobster.app}/siesta</directory>
+<!-- 											<excludes> -->
+<!-- 											    <exclude>**/docs/*</exclude> -->
+<!-- 											    <exclude>examples/**/*.js</exclude> -->
+<!-- 											    <exclude>examples-touch/*</exclude> -->
+<!-- 											    <exclude>tests/*</exclude> -->
+<!-- 											</excludes> -->
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
         		</plugins>
@@ -258,33 +279,33 @@
 									</resources>
 								</configuration>
 							</execution>
-							<execution>
-								<id>copy-admin-dev</id>
-								<phase>compile</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory>
-									<resources>
-										<resource>
-											<directory>src/main/admin</directory>
-											<includes>
-												<include>js/app.js</include>
-											</includes>
-											<!-- Filter app.js with properties. -->
-											<filtering>true</filtering>
-										</resource>
-										<resource>
-											<directory>src/main/admin</directory>
-											<excludes>
-												<exclude>js/app.js</exclude>
-											</excludes>
-											<filtering>false</filtering>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
+<!-- 							<execution> -->
+<!-- 								<id>copy-admin-dev</id> -->
+<!-- 								<phase>compile</phase> -->
+<!-- 								<goals> -->
+<!-- 									<goal>copy-resources</goal> -->
+<!-- 								</goals> -->
+<!-- 								<configuration> -->
+<!-- 									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory> -->
+<!-- 									<resources> -->
+<!-- 										<resource> -->
+<!-- 											<directory>src/main/admin</directory> -->
+<!-- 											<includes> -->
+<!-- 												<include>js/app.js</include> -->
+<!-- 											</includes> -->
+<!-- 											Filter app.js with properties. -->
+<!-- 											<filtering>true</filtering> -->
+<!-- 										</resource> -->
+<!-- 										<resource> -->
+<!-- 											<directory>src/main/admin</directory> -->
+<!-- 											<excludes> -->
+<!-- 												<exclude>js/app.js</exclude> -->
+<!-- 											</excludes> -->
+<!-- 											<filtering>false</filtering> -->
+<!-- 										</resource> -->
+<!-- 									</resources> -->
+<!-- 								</configuration> -->
+<!-- 							</execution> -->
 							<execution>
 								<id>copy-cockpit-dev</id>
 								<phase>compile</phase>
@@ -403,7 +424,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/admin</directory>
+											<directory>${cloobster.frontend}/src/admin</directory>
 											<includes>
 												<include>js/app.js</include>
 											</includes>
@@ -411,7 +432,7 @@
 											<filtering>true</filtering>
 										</resource>
 										<resource>
-											<directory>src/main/admin</directory>
+											<directory>${cloobster.frontend}/src/admin</directory>
 											<excludes>
 												<exclude>js/app.js</exclude>
 											</excludes>

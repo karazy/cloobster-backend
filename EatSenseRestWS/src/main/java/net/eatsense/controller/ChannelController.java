@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -12,11 +11,11 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.Channel;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -39,7 +38,7 @@ import com.googlecode.objectify.NotFoundException;
 public class ChannelController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	BusinessRepository businessRepo;
+	LocationRepository businessRepo;
 	
 	ChannelService channelService;
 	private ObjectMapper mapper;
@@ -47,7 +46,7 @@ public class ChannelController {
 	private CheckInRepository checkInRepo;
 	
 	@Inject
-	public ChannelController(BusinessRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService) {
+	public ChannelController(LocationRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService) {
 		super();
 		this.businessRepo = rr;
 		this.checkInRepo = checkInRepo;

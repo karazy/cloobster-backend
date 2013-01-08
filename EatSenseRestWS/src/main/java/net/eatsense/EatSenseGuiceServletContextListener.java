@@ -11,9 +11,11 @@ import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
+import net.eatsense.controller.SubscriptionController;
+import net.eatsense.domain.Subscription;
 import net.eatsense.exceptions.ServiceExceptionMapper;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
-import net.eatsense.restws.AdminResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.DownloadResource;
@@ -21,9 +23,12 @@ import net.eatsense.restws.NewsletterResource;
 import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.UploadsResource;
+import net.eatsense.restws.administration.AdminResource;
+import net.eatsense.restws.administration.ServicesResource;
 import net.eatsense.restws.business.AccountsResource;
-import net.eatsense.restws.business.BusinessesResource;
+import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.CompaniesResource;
+import net.eatsense.restws.business.SubscriptionTemplatesResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.util.NicknameGenerator;
@@ -50,6 +55,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.googlecode.objectify.Objectify;
 import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
@@ -87,9 +93,9 @@ public class EatSenseGuiceServletContextListener extends
 						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
 				                RolesAllowedResourceFilterFactory.class.getName());
 						bind(AccountsResource.class);
-						bind(BusinessesResource.class);
+						bind(LocationsResource.class);
 						bind(net.eatsense.restws.customer.AccountsResource.class);
-						bind(net.eatsense.restws.customer.BusinessesResource.class);
+						bind(net.eatsense.restws.customer.LocationsResource.class);
 						bind(NicknameResource.class);
 						bind(NewsletterResource.class);
 						bind(SpotResource.class);
@@ -106,17 +112,21 @@ public class EatSenseGuiceServletContextListener extends
 						bind(CompaniesResource.class);
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						bind(ProfilesResource.class);
+						bind(SubscriptionTemplatesResource.class);
 						
 						// Create Configuration binding to automatically load configuration if needed.
 						bind(Configuration.class).toProvider(ConfigurationProvider.class);
 												
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*c/profiles(.)*",
+						serveRegex("(.)*b/subscriptions(.)*",
+								"(.)*c/profiles(.)*",
 								"(.)*c/accounts(.)*",
 								"(.)*b/companies(.)*",
 								"(.)*uploads(.)*",
 								"(.)*b/accounts(.)*",
-								"(.)*admin/services(.)*",
+								"(.)*admin/user(.)*",
+								"(.)*admin/m(.)*",
+								"(.)*admin/s(.)*",
 								"(.)*newsletter(.)*",
 								"(.)*b/businesses(.)*",
 								"(.)*c/businesses(.)*",
@@ -126,7 +136,7 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*nickname(.)*",
 								"(.)*download(.)*",
 								"(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*",								
+								"(.)*_ah/channel/disconnected(.)*",
 								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
 //						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
@@ -168,6 +178,7 @@ public class EatSenseGuiceServletContextListener extends
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
+		eventBus.register(injector.getInstance(SubscriptionController.class));
 		eventBus.register(injector.getInstance(MessageController.class));
 		eventBus.register(injector.getInstance(MailController.class));
 		

@@ -15,13 +15,13 @@ import javax.ws.rs.core.Context;
 
 import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.ReadOnlyException;
-import net.eatsense.persistence.BusinessRepository;
-import net.eatsense.representation.BusinessDTO;
-import net.eatsense.representation.BusinessProfileDTO;
+import net.eatsense.persistence.LocationRepository;
+import net.eatsense.representation.LocationDTO;
+import net.eatsense.representation.LocationProfileDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +30,10 @@ import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
 @Path("b/businesses")
-public class BusinessesResource {
+public class LocationsResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	
 	@Context
 	private ResourceContext resourceContext;
@@ -41,10 +41,10 @@ public class BusinessesResource {
 	@Context
 	HttpServletRequest servletRequest;
 
-	private final BusinessController businessCtrl;
+	private final LocationController businessCtrl;
 	
 	@Inject
-	public BusinessesResource(BusinessRepository businessRepo, BusinessController businessCtrl) {
+	public LocationsResource(LocationRepository businessRepo, LocationController businessCtrl) {
 		super();
 		this.businessRepo = businessRepo;
 		this.businessCtrl = businessCtrl;
@@ -53,7 +53,7 @@ public class BusinessesResource {
 	@GET
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	@Produces("application/json; charset=UTF-8")
-	public Collection<BusinessDTO> getBusinessesForAccount(@QueryParam("account") Long accountId) {
+	public Collection<LocationDTO> getBusinessesForAccount(@QueryParam("account") Long accountId) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		//TODO Don't ignore the accountId and implement methods to view businesses of subordinate accounts.
 		return businessCtrl.getBusinessDtosForAccount(account);
@@ -63,14 +63,13 @@ public class BusinessesResource {
 	@RolesAllowed(Role.COMPANYOWNER)
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	public BusinessProfileDTO newBusiness(BusinessProfileDTO businessData) {
+	public LocationProfileDTO newBusiness(LocationProfileDTO businessData) {
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		return businessCtrl.createBusinessForAccount(account, businessData);
 	}
 	
-	
 	@Path("{businessId}")
-	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
+	public LocationResource getBusinessResource(@PathParam("businessId") Long businessId) {
 		Business business;
 		try {
 			business = businessRepo.getById(businessId);
@@ -84,7 +83,7 @@ public class BusinessesResource {
 			}
 		}
 
-		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class); 
+		LocationResource businessResource = resourceContext.getResource(LocationResource.class); 
 		businessResource.setBusiness(business);
 		businessResource.setAccount((Account)servletRequest.getAttribute("net.eatsense.domain.Account"));
 		

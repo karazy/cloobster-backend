@@ -79,6 +79,8 @@ public class SpotDTO {
 	@NotNull(groups= {CreationChecks.class})
 	private Long areaId;
 	
+	private boolean welcome;
+	
 	public SpotDTO(Spot spot) {
 		super();
 		if(spot == null)
@@ -96,6 +98,7 @@ public class SpotDTO {
 		if(spot.getArea()!=null) {
 			this.areaId = spot.getArea().getId();
 		}
+		this.welcome = spot.isWelcome();
 	}
 	
 	public SpotDTO(Spot spot, Business business, Area area) {
@@ -285,6 +288,14 @@ public class SpotDTO {
 
 	public void setChecked(boolean checked) {
 		this.checked = checked;
+	}
+
+	public boolean isWelcome() {
+		return welcome;
+	}
+
+	public void setWelcome(boolean welcome) {
+		this.welcome = welcome;
 	}
 
 	public final static Function<Spot, SpotDTO> toDTO = 

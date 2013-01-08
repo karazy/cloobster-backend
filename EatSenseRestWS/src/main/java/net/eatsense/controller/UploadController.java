@@ -3,9 +3,6 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -14,9 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.embedded.UploadToken;
@@ -28,19 +22,17 @@ import net.eatsense.representation.ImageCropDTO;
 import net.eatsense.representation.ImageUploadDTO;
 import net.eatsense.service.FileServiceHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.files.AppEngineFile;
-import com.google.appengine.api.files.FileService;
-import com.google.appengine.api.files.FileWriteChannel;
-import com.google.appengine.api.files.FinalizationException;
-import com.google.appengine.api.files.LockException;
 import com.google.appengine.api.images.Image;
 import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ServingUrlOptions;
 import com.google.appengine.api.images.ImagesService.OutputEncoding;
+import com.google.appengine.api.images.ServingUrlOptions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 

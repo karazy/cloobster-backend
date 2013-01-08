@@ -23,7 +23,7 @@ import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.persistence.BillRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.CheckInDTO;
@@ -58,7 +58,7 @@ public class UpdateBillTest {
 	    private Injector injector;
 	    private OrderController orderCtrl;
 	    private CheckInController checkinCtrl;
-	    private BusinessRepository rr;
+	    private LocationRepository rr;
 	    private ProductRepository pr;
 	    private DummyDataDumper ddd;
 
@@ -85,7 +85,7 @@ public class UpdateBillTest {
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		billCtrl = injector.getInstance(BillController.class);
-		rr = injector.getInstance(BusinessRepository.class);
+		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		br = injector.getInstance(BillRepository.class);
 		

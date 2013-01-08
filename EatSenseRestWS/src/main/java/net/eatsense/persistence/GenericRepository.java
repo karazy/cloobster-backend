@@ -368,10 +368,9 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * @return
 	 * 		Collection of entities of type T
 	 */
-	public Collection<T> getAll() {
+	public List<T> getAll() {
 		logger.info("{}", clazz);
-		Collection<T> list = ofy().query(clazz).list();
-		return list;
+		return  ofy().query(clazz).list();
 	}
 	
 	/**

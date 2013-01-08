@@ -24,7 +24,7 @@ import java.util.Set;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.Channel;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.representation.cockpit.MessageDTO;
 
@@ -48,7 +48,7 @@ public class ChannelControllerTest {
 	
     private ChannelController ctr;
     @Mock
-    private BusinessRepository rr;
+    private LocationRepository rr;
     @Mock
     private CheckInRepository cr;
     

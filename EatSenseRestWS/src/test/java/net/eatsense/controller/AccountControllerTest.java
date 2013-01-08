@@ -30,7 +30,7 @@ import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
@@ -71,7 +71,7 @@ public class AccountControllerTest {
 	private AccountController ctr;
 	
 	@Mock
-	private BusinessRepository rr;
+	private LocationRepository rr;
 	
 	private String password;
 	
