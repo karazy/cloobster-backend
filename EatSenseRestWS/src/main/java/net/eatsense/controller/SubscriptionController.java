@@ -10,6 +10,7 @@ import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewLocationEvent;
+import net.eatsense.event.NewPendingSubscription;
 import net.eatsense.event.NewSpotEvent;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
@@ -22,24 +23,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
+import com.googlecode.objectify.cache.Pending;
 
 public class SubscriptionController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Objectify ofy;
 	private final ValidationHelper validator;
 	private final Provider<Subscription> subscriptionProvider;
+	private final EventBus eventBus;
 
 	@Inject
-	public SubscriptionController(OfyService ofy,  ValidationHelper validator, Provider<Subscription> subscriptionProvider) {
+	public SubscriptionController(OfyService ofy,  ValidationHelper validator, Provider<Subscription> subscriptionProvider, EventBus eventBus) {
 		super();
 		this.subscriptionProvider = subscriptionProvider;
 		this.ofy = ofy.ofy();
+		this.eventBus = eventBus;
 		this.validator = validator;
 	}
 	
@@ -243,6 +248,7 @@ public class SubscriptionController {
 		
 		if(status == SubscriptionStatus.PENDING) {
 			setPendingSubscription(location, newSubscription, true);
+			eventBus.post(new NewPendingSubscription(newSubscription, location));
 		}
 		else if(status == SubscriptionStatus.APPROVED){
 			setActiveSubscription(location, Optional.of(newSubscription), false);

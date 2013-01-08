@@ -1,0 +1,14 @@
+Location {1} wünscht Paket Wechsel auf {4}
+
+Ein Upgradewunsch wurde registriert.
+Einloggen für die weitere Bearbeitung: {6}
+
+Wunschpaket: {4}
+Datum der Anfrage: {5}
+
+Unternehmen: {0}
+Location: {1}
+E-Mail: {2}
+Telefon: {3}
+
+(Automatisierte Systemnachricht)

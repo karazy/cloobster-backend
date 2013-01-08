@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -45,11 +46,14 @@ public class SubscriptionControllerTest {
 	@Mock
 	private Provider<Subscription> subscriptionProvider;
 	
+	@Mock
+	private EventBus eventBus;
+	
 	@Before
 	public void setUp() throws Exception {
 		when(ofyService.ofy()).thenReturn(ofy);
 		
-		ctrl = new SubscriptionController(ofyService, validator, subscriptionProvider);
+		ctrl = new SubscriptionController(ofyService, validator, subscriptionProvider, eventBus);
 	}
 
 	private SubscriptionDTO getTestTemplateData() {

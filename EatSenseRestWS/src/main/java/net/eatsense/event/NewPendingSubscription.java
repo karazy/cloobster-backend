@@ -1,6 +1,7 @@
 package net.eatsense.event;
 
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.Subscription;
 
 public class NewPendingSubscription {
@@ -21,5 +22,4 @@ public class NewPendingSubscription {
 	public Business getLocation() {
 		return location;
 	}
-	
 }

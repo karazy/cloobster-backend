@@ -142,7 +142,7 @@ public class ServicesResource {
 				"account-forgotpassword-email", "account-setup-email",
 				"account-notice-password-update",
 				"account-confirm-email-update", "account-notice-email-update",
-				"customer-account-confirm-email");
+				"customer-account-confirm-email", "location-upgrade-request");
 	}
 	
 	@POST

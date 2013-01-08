@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -17,12 +18,15 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.domain.Subscription;
 import net.eatsense.event.ConfirmedAccountEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
+import net.eatsense.event.NewPendingSubscription;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
@@ -306,6 +310,29 @@ public class MailController {
 		try {
 			// Send e-mail with password reset link.
 			sendMail(account.getEmail(), confirmationText);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendNewSubscriptionUpgradeRequestMail(NewPendingSubscription event) {
+		Subscription newSubscription = event.getNewSubscription();
+		Business location = event.getLocation();
+		
+		String companyName = "(no company)";
+		if(location.getCompany() != null) {
+			Company company = companyRepo.getByKey(location.getCompany());
+			companyName = company.getName(); 
+		}
+		String adminUri = UriBuilder.fromUri(baseUri).path("admin/").fragment("/packages").build().toString();
+		String mailText = templateCtrl.getAndReplace("location-upgrade-request", companyName, location.getName(), location.getEmail(), location.getPhone(), newSubscription.getName(), new Date().toString(), adminUri);
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail("info@cloobster.com", mailText);
 		} catch (AddressException e) {
 			logger.error("Error with e-mail address",e);
 		} catch (MessagingException e) {
