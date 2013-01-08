@@ -273,7 +273,7 @@ public class LocationResource {
 	@DELETE
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void deleteSpot(@PathParam("spotId") long spotId) {
-		businessCtrl.trashSpot(businessCtrl.getSpot(business.getKey(), spotId), account, false);
+		businessCtrl.trashSpot(businessCtrl.getSpot(business.getKey(), spotId), account);
 	}
 	
 	@Path("spotsdata/{spotId}")
