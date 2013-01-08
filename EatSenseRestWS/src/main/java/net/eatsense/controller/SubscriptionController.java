@@ -142,7 +142,7 @@ public class SubscriptionController {
 		}
 		else if (subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.CANCELED) {
 			Business location = ofy.get(subscription.getBusiness());
-			cancelPendingSubscription(location, true);
+			cancelPendingSubscription(location, Optional.of(subscription), true, false);
 		}
 		else if(subscription.getStatus() == SubscriptionStatus.APPROVED && subscriptionData.getStatus() == SubscriptionStatus.ARCHIVED) {
 			Business location = ofy.get(subscription.getBusiness());
@@ -246,7 +246,7 @@ public class SubscriptionController {
 		}
 		else if(status == SubscriptionStatus.APPROVED){
 			setActiveSubscription(location, Optional.of(newSubscription), false);
-			cancelPendingSubscription(location, true);
+			cancelPendingSubscription(location, Optional.<Subscription>absent(), true, true);
 		}
 		
 		return newSubscription;
@@ -270,15 +270,22 @@ public class SubscriptionController {
 		}
 	}
 	
-	private void cancelPendingSubscription(Business location, boolean saveLocation) {
+	private void cancelPendingSubscription(Business location, Optional<Subscription> pendingSubscriptionOpt, boolean saveLocation, boolean saveSubscription) {
 		checkNotNull(location, "location was null");
 		
 		if(location.getPendingSubscription() != null) {
-			Subscription pendingSubscription = ofy.get(location.getPendingSubscription());
+			Subscription pendingSubscription;
+			if(pendingSubscriptionOpt.isPresent())
+				pendingSubscription = pendingSubscriptionOpt.get();
+			else
+				pendingSubscription = ofy.get(location.getPendingSubscription());
 			
 			pendingSubscription.setStatus(SubscriptionStatus.CANCELED);
 			location.setPendingSubscription(null);
-			ofy.async().put(pendingSubscription);
+			
+			if(saveSubscription) {
+				ofy.async().put(pendingSubscription);
+			}
 		}
 		if(saveLocation) {
 			ofy.put(location);
@@ -288,7 +295,7 @@ public class SubscriptionController {
 	public Subscription createSubscriptionFromTemplate(Subscription template, SubscriptionStatus status,  Key<Business> businessKey) {
 		checkNotNull(template, "subscription template was null");
 		checkNotNull(status, "status was null");
-		checkNotNull(businessKey, "businessId was null");
+		checkNotNull(businessKey, "businessKey was null");
 		
 		Subscription newSubscription = subscriptionProvider.get();
 		
