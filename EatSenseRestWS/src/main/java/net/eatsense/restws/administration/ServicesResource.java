@@ -187,12 +187,12 @@ public class ServicesResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("text/plain; charset=UTF-8")
 	public String importNewBusiness(LocationImportDTO newBusiness ) {
-		Long id =  importCtrl.addBusiness(newBusiness);
+		Key<Business> key =  importCtrl.addBusiness(newBusiness, null);
 		
-		if(id == null)
+		if(key == null)
 			return "Error:\n" + importCtrl.getReturnMessage();
 		else
-		    return id.toString();
+		    return String.valueOf(key.getId());
 	}
 	
 	@GET
@@ -264,7 +264,7 @@ public class ServicesResource {
 	@Path("businesses/{businessId}/infopages/{count}")
 	@Produces("application/json; charset=UTF-8")
 	public List<InfoPageDTO> generateInfoPages(@PathParam("businessId")Long businessId, @PathParam("count") int count) {
-		return infoPageGen.get().generate(Business.getKey(businessId), count );
+		return infoPageGen.get().generate(Business.getKey(businessId), count , null);
 	}
 	
 	/**

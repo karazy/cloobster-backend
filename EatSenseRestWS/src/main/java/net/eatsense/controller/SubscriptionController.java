@@ -14,6 +14,7 @@ import net.eatsense.event.NewPendingSubscription;
 import net.eatsense.event.NewSpotEvent;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.ObjectifyKeyFactory;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.TemplateChecks;
@@ -30,11 +31,11 @@ import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
-import com.googlecode.objectify.cache.Pending;
 
 public class SubscriptionController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Objectify ofy;
+	private final ObjectifyKeyFactory ofyKeys;
 	private final ValidationHelper validator;
 	private final Provider<Subscription> subscriptionProvider;
 	private final EventBus eventBus;
@@ -44,6 +45,7 @@ public class SubscriptionController {
 		super();
 		this.subscriptionProvider = subscriptionProvider;
 		this.ofy = ofy.ofy();
+		this.ofyKeys = ofy.keys();
 		this.eventBus = eventBus;
 		this.validator = validator;
 	}
@@ -91,7 +93,7 @@ public class SubscriptionController {
 	 */
 	public Subscription getTemplate(long id) throws NotFoundException{
 		try {
-			return ofy.get(Subscription.getKey(id));
+			return ofy.get(Subscription.class, id);
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			logger.error("No Subscription package found with id={}", id);
 			throw new NotFoundException("No package found with id: " + id);
@@ -183,7 +185,7 @@ public class SubscriptionController {
 		
 		boolean subscriptionWasBasic = subscription.isBasic();
 		
-		if(!subscription.isBasic()) {
+		if(!subscriptionWasBasic) {
 			subscription.setBasic(subscriptionData.isBasic());
 		}
 		
@@ -231,6 +233,14 @@ public class SubscriptionController {
 		ofy.delete(Subscription.class, id);
 	}
 	
+	/**
+	 * Create and save new Subscription entity for a Business from a template.
+	 * 
+	 * @param templateId
+	 * @param status
+	 * @param businessId
+	 * @return new {@link Subscription} entity
+	 */
 	public Subscription createAndSetSubscription(Long templateId, SubscriptionStatus status,  Long businessId) {
 		if(templateId == null || templateId.longValue() == 0) {
 			throw new ValidationException("templateId can't be null or 0");
@@ -242,9 +252,10 @@ public class SubscriptionController {
 			throw new ValidationException("businessId can't be null or 0");
 		}
 		
-		Subscription newSubscription = createSubscriptionFromTemplate(getTemplate(templateId), status, Business.getKey(businessId));
+		Key<Business> locationKey = ofyKeys.create(Business.class, businessId);
+		Subscription newSubscription = createSubscriptionFromTemplate(getTemplate(templateId), status, locationKey);
 		
-		Business location = ofy.get(Business.getKey(businessId));
+		Business location = ofy.get(locationKey);
 		
 		if(status == SubscriptionStatus.PENDING) {
 			setPendingSubscription(location, newSubscription, true);
@@ -333,22 +344,23 @@ public class SubscriptionController {
 			if(activeSubscription != null) {
 				activeSubscription.setEndData(new Date());
 				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
-				ofy.put(activeSubscription);
+				ofy.async().put(activeSubscription);
 			}
 			else {
 				logger.warn("Corrupt Location data, unable to find previous activeSubscription.");
 			}
 		}
 		
-		// Reset Basic flag on business to the correct state
+
 		if(newSubscription.isPresent()) {
 			Key<Subscription> newSubscriptionKey = newSubscription.isPresent() ? newSubscription.get().getKey() : null;
+			// Reset Basic flag on business to the correct state
 			location.setBasic(newSubscription.get().isBasic());
 			location.setActiveSubscription(newSubscriptionKey);
 			if(location.getSpotCount() == null) {
 				location.setSpotCount(countSpots(location.getKey()));
 			}
-			recalculateQuota(location, location.getSpotCount(), false);
+			recalculateQuota(location, newSubscription, location.getSpotCount(), false);
 		}
 		else {
 			location.setActiveSubscription(null);
@@ -410,7 +422,7 @@ public class SubscriptionController {
 	 * @param locationKey
 	 * @param newSpotCount
 	 */
-	private void recalculateQuota(Business location, int newSpotCount, boolean save) {
+	private void recalculateQuota(Business location, Optional<Subscription> activeSubOpt, int newSpotCount, boolean save) {
 		
 		logger.info("newSpotCount={}", newSpotCount);
 		
@@ -423,8 +435,14 @@ public class SubscriptionController {
 			logger.info("Skipped quota check for basic business.");
 			return;
 		}
-		
-		Subscription activeSub = ofy.find(location.getActiveSubscription());
+		Subscription activeSub;
+		if(activeSubOpt.isPresent()) {
+			activeSub = activeSubOpt.get();
+		}
+		else {
+			activeSub = ofy.find(location.getActiveSubscription());
+		}
+		 
 		if(activeSub == null) {
 			logger.error("Corrupt Location data, activeSubscription not found");
 			return;
@@ -465,7 +483,7 @@ public class SubscriptionController {
 			return;
 		}
 		
-		recalculateQuota(ofy.find(event.getLocation()), event.getNewSpotCount(), true);
+		recalculateQuota(ofy.find(event.getLocation()),Optional.<Subscription>absent(), event.getNewSpotCount(), true);
 	}
 
 	@Subscribe
@@ -475,7 +493,7 @@ public class SubscriptionController {
 			return;
 		}
 		
-		recalculateQuota(ofy.find(event.getLocation()), event.getNewSpotCount(), true);
+		recalculateQuota(ofy.find(event.getLocation()),Optional.<Subscription>absent(), event.getNewSpotCount(), true);
 	}
 	
 	/**
