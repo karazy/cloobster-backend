@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertThat;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.Date;
 
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 import net.eatsense.event.NewPendingSubscription;
@@ -21,6 +23,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ObjectifyKeyFactory;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
+import net.eatsense.restws.customer.LocationsResource;
 import net.eatsense.validation.ValidationHelper;
 
 import org.junit.Before;
@@ -33,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Provider;
 import com.googlecode.objectify.AsyncObjectify;
@@ -311,7 +315,79 @@ public class SubscriptionControllerTest {
 		ctrl.createSubscriptionFromTemplate(template, SubscriptionStatus.APPROVED, businessKey);
 		ArgumentCaptor<Date> captor = ArgumentCaptor.forClass(Date.class);
 		verify(newSubscription).setStartDate(captor.capture());
-		assertThat(captor.getValue(), lessThan(new Date()));
+		assertThat(captor.getValue(), lessThanOrEqualTo(new Date()));
 		verify(ofy).put(newSubscription);
+	}
+	
+	@Test
+	public void testSetActiveSubscription() throws Exception {
+		Subscription newActiveSub = mock(Subscription.class);
+		Business location = mock(Business.class);
+		Integer spotCount = 100;
+		Key<Subscription> oldActiveSubKey = mock(Key.class);
+		when(location.getActiveSubscription()).thenReturn(oldActiveSubKey );
+		when(location.getSpotCount()).thenReturn(null, spotCount);
+		Subscription oldActiveSub = mock(Subscription.class);
+		when(ofy.find(oldActiveSubKey)).thenReturn(oldActiveSub );
+		Key<Subscription> newSubKey = mock(Key.class);
+		when(newActiveSub.getKey()).thenReturn(newSubKey );
+		Query<Spot> spotQuery = mock(Query.class);
+		when(ofy.query(Spot.class)).thenReturn(spotQuery );
+		Key<Business> locationKey = mock(Key.class);
+		when(location.getKey()).thenReturn(locationKey );
+		when(spotQuery.ancestor(locationKey)).thenReturn(spotQuery);
+		
+		when(spotQuery.filter("trash", false)).thenReturn(spotQuery);
+		
+		when(spotQuery.count()).thenReturn(spotCount );
+		
+		ctrl.setActiveSubscription(location , Optional.of(newActiveSub ), true);
+		
+		// Verify archiving of old active subscription
+		verify(oldActiveSub).setStatus(SubscriptionStatus.ARCHIVED);
+		verify(oldActiveSub).setEndData(any(Date.class));
+		verify(ofyAsync).put(oldActiveSub);
+		
+		verify(location).setBasic(false);
+		verify(location).setActiveSubscription(newSubKey);
+		verify(location).setSpotCount(spotCount);
+		
+		verify(ofy).put(location);
 	}	
+
+	@Test
+	public void testSetPendingSubscription() throws Exception {
+		Key<Subscription> newPendingSubKey = mock(Key.class);
+		Subscription newPendingSub = when(mock(Subscription.class).getKey()).thenReturn(newPendingSubKey ).getMock();
+		Business location = mock(Business.class);
+		Key<Subscription> oldSubKey = mock(Key.class);
+		when(location.getPendingSubscription()).thenReturn(oldSubKey );
+
+		ctrl.setPendingSubscription(location, newPendingSub, true);
+		
+		verify(location).setPendingSubscription(newPendingSubKey);
+		verify(ofy).put(location);
+		verify(ofyAsync).delete(oldSubKey);
+	}
+	
+	@Test
+	public void testSetBasicSubscriptions() throws Exception {
+		Business location = mock(Business.class);
+		Key<Business> locationKey = mock(Key.class);
+		Subscription newSub = mock(Subscription.class);
+		Key<Subscription> newSubKey = mock(Key.class);
+		when(newSub.getKey()).thenReturn(newSubKey );
+		when(subscriptionProvider.get()).thenReturn(newSub );
+		when(location.getKey()).thenReturn(locationKey );
+		when(ofy.query(Subscription.class)).thenReturn(query);
+		when(query.filter("template", true)).thenReturn(query);
+		when(query.filter("basic", true)).thenReturn(query);
+		Subscription basicSub = mock(Subscription.class);
+		when(query.get()).thenReturn(basicSub );
+		
+		ctrl.setBasicSubscription(location);
+		
+		verify(ofy).put(newSub);
+		verify(location).setActiveSubscription(newSubKey);
+	}
 }

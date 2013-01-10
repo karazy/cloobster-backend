@@ -344,22 +344,23 @@ public class SubscriptionController {
 			if(activeSubscription != null) {
 				activeSubscription.setEndData(new Date());
 				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
-				ofy.put(activeSubscription);
+				ofy.async().put(activeSubscription);
 			}
 			else {
 				logger.warn("Corrupt Location data, unable to find previous activeSubscription.");
 			}
 		}
 		
-		// Reset Basic flag on business to the correct state
+
 		if(newSubscription.isPresent()) {
 			Key<Subscription> newSubscriptionKey = newSubscription.isPresent() ? newSubscription.get().getKey() : null;
+			// Reset Basic flag on business to the correct state
 			location.setBasic(newSubscription.get().isBasic());
 			location.setActiveSubscription(newSubscriptionKey);
 			if(location.getSpotCount() == null) {
 				location.setSpotCount(countSpots(location.getKey()));
 			}
-			recalculateQuota(location, location.getSpotCount(), false);
+			recalculateQuota(location, newSubscription, location.getSpotCount(), false);
 		}
 		else {
 			location.setActiveSubscription(null);
@@ -421,7 +422,7 @@ public class SubscriptionController {
 	 * @param locationKey
 	 * @param newSpotCount
 	 */
-	private void recalculateQuota(Business location, int newSpotCount, boolean save) {
+	private void recalculateQuota(Business location, Optional<Subscription> activeSubOpt, int newSpotCount, boolean save) {
 		
 		logger.info("newSpotCount={}", newSpotCount);
 		
@@ -434,8 +435,14 @@ public class SubscriptionController {
 			logger.info("Skipped quota check for basic business.");
 			return;
 		}
-		
-		Subscription activeSub = ofy.find(location.getActiveSubscription());
+		Subscription activeSub;
+		if(activeSubOpt.isPresent()) {
+			activeSub = activeSubOpt.get();
+		}
+		else {
+			activeSub = ofy.find(location.getActiveSubscription());
+		}
+		 
 		if(activeSub == null) {
 			logger.error("Corrupt Location data, activeSubscription not found");
 			return;
@@ -476,7 +483,7 @@ public class SubscriptionController {
 			return;
 		}
 		
-		recalculateQuota(ofy.find(event.getLocation()), event.getNewSpotCount(), true);
+		recalculateQuota(ofy.find(event.getLocation()),Optional.<Subscription>absent(), event.getNewSpotCount(), true);
 	}
 
 	@Subscribe
@@ -486,7 +493,7 @@ public class SubscriptionController {
 			return;
 		}
 		
-		recalculateQuota(ofy.find(event.getLocation()), event.getNewSpotCount(), true);
+		recalculateQuota(ofy.find(event.getLocation()),Optional.<Subscription>absent(), event.getNewSpotCount(), true);
 	}
 	
 	/**
