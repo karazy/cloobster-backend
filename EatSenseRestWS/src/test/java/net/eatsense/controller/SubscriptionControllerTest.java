@@ -16,19 +16,26 @@ import java.util.Date;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Subscription;
 import net.eatsense.domain.embedded.SubscriptionStatus;
+import net.eatsense.event.NewPendingSubscription;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.ObjectifyKeyFactory;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.SubscriptionDTO;
 import net.eatsense.validation.ValidationHelper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Provider;
+import com.googlecode.objectify.AsyncObjectify;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
@@ -37,6 +44,8 @@ import com.googlecode.objectify.Query;
 
 public class SubscriptionControllerTest {
 	private SubscriptionController ctrl;
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	@Mock
 	private OfyService ofyService;
 	@Mock
@@ -48,10 +57,18 @@ public class SubscriptionControllerTest {
 	
 	@Mock
 	private EventBus eventBus;
+	@Mock
+	private Query<Subscription> query;
+	@Mock
+	private ObjectifyKeyFactory keyFactory;
+	@Mock
+	private AsyncObjectify ofyAsync;
 	
 	@Before
 	public void setUp() throws Exception {
 		when(ofyService.ofy()).thenReturn(ofy);
+		when(ofyService.keys()).thenReturn(keyFactory);
+		when(ofy.async()).thenReturn(ofyAsync);
 		
 		ctrl = new SubscriptionController(ofyService, validator, subscriptionProvider, eventBus);
 	}
@@ -173,4 +190,128 @@ public class SubscriptionControllerTest {
 		verify(location).setActiveSubscription(newBasicKey);
 		
 	}
+	
+	@Test
+	public void testUpdateTemplateNoTemplate() throws Exception {
+		Subscription subscription = mock(Subscription.class);
+		SubscriptionDTO subscriptionData = getTestTemplateData();
+		
+		thrown.expect(ValidationException.class);
+		
+		ctrl.updateTemplate(subscription, subscriptionData);
+	}
+	
+	@Test
+	public void testUpdateTemplateBasic() throws Exception {
+		Subscription subscription = mock(Subscription.class);
+		SubscriptionDTO subscriptionData = getTestTemplateData();
+		subscriptionData.setBasic(true);
+		
+		when(subscription.isBasic()).thenReturn(false, true);
+		when(subscription.isTemplate()).thenReturn(true);
+		when(ofy.query(Subscription.class)).thenReturn(query );
+		when(query.filter("template", true)).thenReturn(query);
+		when(query.filter("basic", true)).thenReturn(query);
+		
+		ctrl.updateTemplate(subscription, subscriptionData);
+		
+		verify(subscription).setBasic(true);
+		verify(ofy).put(subscription);
+	}
+	
+	@Test
+	public void testUpdateTemplateExistingBasic() throws Exception {
+		Subscription subscription = mock(Subscription.class);
+		Subscription basicSub = mock(Subscription.class);
+		SubscriptionDTO subscriptionData = getTestTemplateData();
+		subscriptionData.setBasic(true);
+		
+		when(subscription.isBasic()).thenReturn(false, true);
+		when(subscription.isTemplate()).thenReturn(true);
+		when(ofy.query(Subscription.class)).thenReturn(query );
+		when(query.filter("template", true)).thenReturn(query);
+		when(query.filter("basic", true)).thenReturn(query);
+		
+		when(query.get()).thenReturn(basicSub);
+		
+		ctrl.updateTemplate(subscription, subscriptionData);
+		verify(basicSub).setBasic(false);
+		
+		verify(subscription).setBasic(true);
+		
+		verify(ofy).put(basicSub, subscription);
+	}
+	
+	@Test
+	public void testCreateAndSetSubscriptionWithPendingStatus() throws Exception {
+		Long businessId = 1l;
+		Long templateId = 11l;
+		
+		Subscription template = mock(Subscription.class);
+		when(ofy.get(Subscription.class, templateId)).thenReturn(template );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		when(keyFactory.create(Business.class, businessId)).thenReturn(businessKey );
+		Subscription newSubscription = mock(Subscription.class);
+		when(subscriptionProvider.get()).thenReturn(newSubscription );
+		Key<Subscription> newSubKey = mock(Key.class);
+		when(newSubscription.getKey()).thenReturn(newSubKey );
+		Business business = mock(Business.class);
+		when(ofy.get(businessKey)).thenReturn(business );
+		
+		
+		ctrl.createAndSetSubscription(templateId , SubscriptionStatus.PENDING, businessId);
+		
+		verify(business).setPendingSubscription(newSubKey);
+		verify(ofy).put(business);
+		verify(ofy).put(newSubscription);
+		verify(eventBus).post(any(NewPendingSubscription.class));
+	}
+	
+	@Test
+	public void testCreateAndSetSubscriptionWithApprovedStatus() throws Exception {
+		Long businessId = 1l;
+		Long templateId = 11l;
+		
+		Subscription template = mock(Subscription.class);
+		when(ofy.get(Subscription.class, templateId)).thenReturn(template );
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		when(keyFactory.create(Business.class, businessId)).thenReturn(businessKey );
+		Subscription newSubscription = mock(Subscription.class);
+		when(subscriptionProvider.get()).thenReturn(newSubscription );
+		Key<Subscription> newSubKey = mock(Key.class);
+		when(newSubscription.getKey()).thenReturn(newSubKey );
+		Business business = mock(Business.class);
+		when(ofy.get(businessKey)).thenReturn(business );
+		Key<Subscription> oldPendingKey = mock(Key.class);
+		when(business.getPendingSubscription()).thenReturn(oldPendingKey );
+		Subscription oldPendingSub = mock(Subscription.class);
+		when(ofy.get(oldPendingKey)).thenReturn(oldPendingSub);
+		
+		
+		ctrl.createAndSetSubscription(templateId , SubscriptionStatus.APPROVED, businessId);
+		
+		verify(business).setActiveSubscription(newSubKey);
+		verify(business).setPendingSubscription(null);
+		verify(ofy).put(business);
+		verify(ofy).put(newSubscription);
+		verify(oldPendingSub).setStatus(SubscriptionStatus.CANCELED);
+		verify(ofyAsync).put(oldPendingSub);
+	}
+	
+	@Test
+	public void testCreateSubscriptionFromTemplateApproved() throws Exception {
+		Subscription newSubscription = mock(Subscription.class);
+		when(subscriptionProvider.get()).thenReturn(newSubscription );
+		Subscription template = mock(Subscription.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		
+		ctrl.createSubscriptionFromTemplate(template, SubscriptionStatus.APPROVED, businessKey);
+		ArgumentCaptor<Date> captor = ArgumentCaptor.forClass(Date.class);
+		verify(newSubscription).setStartDate(captor.capture());
+		assertThat(captor.getValue(), lessThan(new Date()));
+		verify(ofy).put(newSubscription);
+	}	
 }
