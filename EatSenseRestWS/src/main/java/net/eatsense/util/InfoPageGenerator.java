@@ -7,6 +7,7 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -60,6 +61,8 @@ public class InfoPageGenerator {
 	public final static String HTML = "<h2>Lorem</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed nulla in tellus mollis eleifend a quis risus. Sed nibh magna, blandit vel molestie at, adipiscing fringilla justo. Pellentesque molestie euismod ante vitae vestibulum. In lobortis suscipit quam ut interdum. Nunc vitae ligula purus, euismod faucibus nibh. Nam et arcu ut ligula viverra consectetur. Pellentesque cursus dui dapibus purus vestibulum lacinia. Aliquam gravida mollis est sit amet malesuada. Etiam id tortor at leo dignissim placerat. Nulla vel massa arcu, vitae volutpat libero. Sed id magna quam. Pellentesque sit amet nisi non libero pretium euismod quis vitae arcu. Integer porta, enim sed mollis iaculis, felis velit accumsan lacus, sed laoreet orci tellus eu tellus. Nunc pretium fringilla ornare.</p>"+
 		"<h2>Ipsum</h2><p>Curabitur blandit auctor augue, ac eleifend turpis accumsan eu. Phasellus lacus quam, vestibulum et condimentum in, vestibulum mollis orci. Nam tellus est, lobortis at pharetra et, tincidunt quis metus. Cras vestibulum turpis nec nisl mollis ultrices. Pellentesque vitae libero eros, tincidunt suscipit tellus. Sed rutrum consequat pharetra. Aenean nunc erat, egestas ut ullamcorper in, placerat et libero. Curabitur a felis sed lorem porttitor semper. Morbi neque magna, sagittis in elementum id, gravida vitae libero. Proin id ipsum lacinia lorem vulputate gravida sed sit amet augue.</p>"+
 		"<h2>Dolor</h2><p>Nunc blandit dolor ac sapien varius cursus. Nunc sit amet vehicula est. Mauris ac ligula mollis lorem mollis porttitor. Praesent in lacus elit. In hac habitasse platea dictumst. Nullam nec purus lorem, vitae consectetur velit. Cras fringilla, nisl eu mollis semper, tellus nisi tempus ipsum, non iaculis dui sapien ac leo.</p>";
+	public final static String HTML_EN = "<h2>PUCK</h2><blockquote><A NAME=2.1.18>The king doth keep his revels here to-night:</A><br><A NAME=2.1.19>Take heed the queen come not within his sight;</A><br><A NAME=2.1.20>For Oberon is passing fell and wrath,</A><br><A NAME=2.1.21>Because that she as her attendant hath</A><br><A NAME=2.1.22>A lovely boy, stolen from an Indian king;</A><br><A NAME=2.1.23>She never had so sweet a changeling;</A><br><A NAME=2.1.24>And jealous Oberon would have the child</A><br><A NAME=2.1.25>Knight of his train, to trace the forests wild;</A><br><A NAME=2.1.26>But she perforce withholds the loved boy,</A><br><A NAME=2.1.27>Crowns him with flowers and makes him all her joy:</A><br><A NAME=2.1.28>And now they never meet in grove or green,</A><br><A NAME=2.1.29>By fountain clear, or spangled starlight sheen,</A><br><A NAME=2.1.30>But, they do square, that all their elves for fear</A><br><A NAME=2.1.31>Creep into acorn-cups and hide them there.</A><br></blockquote>";
+	public final static String SHORT_TEXT_EN = "Excerpt from Midsummer Night's Dream";
 	public final static String SHORT_TEXT ="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed nulla in tellus mollis eleifend a quis risus. Sed nibh magna, blandit vel molestie at, adipiscing fringilla justo.";
 	
 	public static final String IMAGEURL = "http://robohash.org/";
@@ -72,7 +75,7 @@ public class InfoPageGenerator {
 		this.localizationProvider = localizationProvider;
 	}
 	
-	public List<InfoPageDTO> generate(Key<Business> businessKey, int count) {
+	public List<InfoPageDTO> generate(Key<Business> businessKey, int count , Locale localeOverride) {
 		
 		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
 		List<InfoPage> infoPages = new ArrayList<InfoPage>();
@@ -94,15 +97,17 @@ public class InfoPageGenerator {
 		}
 		repo.saveOrUpdate(infoPages);
 		
-		Locale locale = localizationProvider.getContentLanguage();		
+		Locale locale = localeOverride != null ? localeOverride : localizationProvider.getContentLanguage();		
 		if(locale != null) {
 			logger.info("Generating translation, lang={}", locale.getLanguage());
 			for (InfoPage infoPage : infoPages) {
-				infoPage.setShortText("Lang: "+ locale + SHORT_TEXT);
+				infoPage.setTitle(infoPage.getTitle() + " " + locale);
+				infoPage.setShortText("Lang: "+ locale + SHORT_TEXT_EN);
+				infoPage.setHtml(HTML_EN);
 				repo.saveOrUpdateTranslation(infoPage, locale);
 			}
 		}
 		
-		return infoPageDtos ;
+		return infoPageDtos;
 	}
 }

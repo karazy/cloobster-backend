@@ -18,6 +18,7 @@ import net.eatsense.configuration.Configuration;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.Company;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Menu;
@@ -188,7 +189,7 @@ public class ImportController {
 		return new FeedbackFormDTO(feedbackForm);
 	}
 
-	public Long addBusiness(LocationImportDTO businessData) {
+	public Key<Business> addBusiness(LocationImportDTO businessData, Key<Company> companyKey) {
 		if (!isValidBusinessData(businessData)) {
 			logger.error("Invalid business data, import aborted.");
 			logger.error(returnMessage);
@@ -197,7 +198,7 @@ public class ImportController {
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
-		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments() );
+		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments(), companyKey );
 		
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
@@ -259,10 +260,10 @@ public class ImportController {
 		}
 		
 		logger.info("Import finished for business: " +businessData.getName() );
-		return kR.getId();
+		return kR;
 	}
 	
-	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods) {
+	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods, Key<Company> companyKey) {
 		logger.info("Creating new business with data: " + name + ", " + desc );
 		
 		Business business = new Business();
@@ -271,10 +272,11 @@ public class ImportController {
 		business.setAddress(address);
 		business.setCity(city);
 		business.setPostcode(postcode);
+		business.setCompany(companyKey);
 		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
 		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
-		logger.info("Created new business with id: " + businessKey.getId());
+		logger.info("Created new business: {}", businessKey);
 		return businessKey;
 	}
 	
