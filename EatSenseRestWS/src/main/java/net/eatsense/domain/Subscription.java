@@ -8,6 +8,7 @@ import javax.persistence.Transient;
 import net.eatsense.domain.embedded.SubscriptionStatus;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.AlsoLoad;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -38,7 +39,8 @@ public class Subscription {
 	private SubscriptionStatus status;
 	
 	private Date startDate;
-	private Date endData;
+	@AlsoLoad("endData")
+	private Date endDate;
 	
 	private boolean template;
 	
@@ -86,11 +88,11 @@ public class Subscription {
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
-	public Date getEndData() {
-		return endData;
+	public Date getEndDate() {
+		return endDate;
 	}
-	public void setEndData(Date endData) {
-		this.endData = endData;
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 	public boolean isQuotaExceeded() {
 		return quotaExceeded;

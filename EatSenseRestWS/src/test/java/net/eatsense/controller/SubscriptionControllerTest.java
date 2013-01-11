@@ -196,6 +196,18 @@ public class SubscriptionControllerTest {
 	}
 	
 	@Test
+	public void testUpdateSubscriptionInvalidStatusChange() throws Exception {
+		SubscriptionDTO subscriptionData = getTestSubscriptionData();
+		subscriptionData.setStatus(SubscriptionStatus.CANCELED);
+		
+		Subscription subscription = mock(Subscription.class);
+		when(subscription.getStatus()).thenReturn(SubscriptionStatus.APPROVED);
+		
+		thrown.expect(ValidationException.class);
+		ctrl.updateSubscription(subscription, subscriptionData );
+	}
+	
+	@Test
 	public void testUpdateTemplateNoTemplate() throws Exception {
 		Subscription subscription = mock(Subscription.class);
 		SubscriptionDTO subscriptionData = getTestTemplateData();
@@ -345,7 +357,7 @@ public class SubscriptionControllerTest {
 		
 		// Verify archiving of old active subscription
 		verify(oldActiveSub).setStatus(SubscriptionStatus.ARCHIVED);
-		verify(oldActiveSub).setEndData(any(Date.class));
+		verify(oldActiveSub).setEndDate(any(Date.class));
 		verify(ofyAsync).put(oldActiveSub);
 		
 		verify(location).setBasic(false);

@@ -12,6 +12,7 @@ import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.event.NewPendingSubscription;
 import net.eatsense.event.NewSpotEvent;
+import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ObjectifyKeyFactory;
@@ -141,26 +142,47 @@ public class SubscriptionController {
 		
 		validator.validate(subscriptionData);
 		
-		if(subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.APPROVED) {
-			subscription.setStartDate(new Date());
-			Business location = ofy.get(subscription.getBusiness());
-			location.setPendingSubscription(null);
-			setActiveSubscription(location, Optional.of(subscription), true);
-		}
-		else if (subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.CANCELED) {
-			Business location = ofy.get(subscription.getBusiness());
-			cancelPendingSubscription(location, Optional.of(subscription), true, false);
-		}
-		else if(subscription.getStatus() == SubscriptionStatus.APPROVED && subscriptionData.getStatus() == SubscriptionStatus.ARCHIVED) {
-			Business location = ofy.get(subscription.getBusiness());
-			setBasicSubscription(location);
+		if(subscription.getStatus() != subscriptionData.getStatus()) {
+			SubscriptionStatus oldStatus = subscription.getStatus();
+			SubscriptionStatus newStatus = subscriptionData.getStatus();
+			
+			// Status will be changed, check that the change is valid.
+			switch(oldStatus) {
+				case PENDING:
+					switch(newStatus) {
+						case APPROVED:
+							subscription.setStartDate(new Date());
+							Business location = ofy.get(subscription.getBusiness());
+							location.setPendingSubscription(null);
+							setActiveSubscription(location, Optional.of(subscription), true);
+							break;
+						case CANCELED:
+							location = ofy.get(subscription.getBusiness());
+							cancelPendingSubscription(location, Optional.of(subscription), true, false);
+							break;
+						default:
+							throw new ValidationException("Unable to change status from PENDING to " + newStatus);							
+					}
+					break;
+				case APPROVED:
+					if(newStatus == SubscriptionStatus.ARCHIVED) {
+						Business location = ofy.get(subscription.getBusiness());
+						setBasicSubscription(location);
+					}
+					else {
+						throw new ValidationException("Unable to change status from APPROVED to " + newStatus); 
+					}
+					break;
+				default:
+					throw new ValidationException(String.format("Unable to change status from %s to %s",oldStatus, newStatus));
+			}
 		}
 		
 		subscription.setFee(subscriptionData.getFeeMinor());
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
 		subscription.setName(subscriptionData.getName());
 		subscription.setStatus(subscriptionData.getStatus());
-				
+		
 		ofy.put(subscription);
 		
 		return subscription;
@@ -189,7 +211,7 @@ public class SubscriptionController {
 			subscription.setBasic(subscriptionData.isBasic());
 		}
 		
-		subscription.setEndData(subscriptionData.getEndDate());
+		subscription.setEndDate(subscriptionData.getEndDate());
 		subscription.setFee(subscriptionData.getFeeMinor());
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
 		subscription.setName(subscriptionData.getName());
@@ -279,11 +301,11 @@ public class SubscriptionController {
 				ofy.put(location);
 			}
 			else {
-				throw new NotFoundException();
+				throw new DataConflictException("Can only delete the current pending subscription.");
 			}
 		}
 		else {
-			throw new NotFoundException();
+			throw new DataConflictException("No pending subscription found.");
 		}
 	}
 	
@@ -342,7 +364,7 @@ public class SubscriptionController {
 			Subscription activeSubscription = ofy.find(location.getActiveSubscription());
 			
 			if(activeSubscription != null) {
-				activeSubscription.setEndData(new Date());
+				activeSubscription.setEndDate(new Date());
 				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
 				ofy.async().put(activeSubscription);
 			}
