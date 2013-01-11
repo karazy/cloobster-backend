@@ -25,7 +25,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.HistoryStatusDTO;
 import net.eatsense.representation.VisitDTO;
@@ -44,10 +44,10 @@ public class CheckInsResource {
 	private ResourceContext resourceContext;
 	@Context
 	HttpServletRequest servletRequest;
-	private final BusinessRepository businessRepo;	
+	private final LocationRepository businessRepo;	
 	
 	@Inject
-	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl, BusinessRepository businessRepo) {
+	public CheckInsResource(CheckInController checkInCtr, Provider<ChannelController> channelCtrl, LocationRepository businessRepo) {
 		super();
 		this.channelCtrlProvider = channelCtrl;
 		this.checkInCtrl = checkInCtr;

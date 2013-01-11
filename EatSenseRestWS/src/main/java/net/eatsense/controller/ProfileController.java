@@ -5,7 +5,6 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
-import net.eatsense.persistence.GenericRepository;
 import net.eatsense.representation.CustomerProfileDTO;
 
 import com.google.common.base.Optional;

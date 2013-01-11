@@ -26,7 +26,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.BusinessAccountDTO;
-import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.LocationDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +138,7 @@ public class AccountResource {
 	@Path("{login}/businesses")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public Collection<BusinessDTO> getBusinessesForAccount(@PathParam("login") String login) {
+	public Collection<LocationDTO> getBusinessesForAccount(@PathParam("login") String login) {
 		//TODO Refactor call to getBusinessesForAccount
 		return accountCtr.getBusinessDtos(login);
 	}

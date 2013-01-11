@@ -12,7 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.controller.RequestController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Request.RequestType;
@@ -26,13 +26,13 @@ public class RequestsResource {
 	@Context
 	private ResourceContext resourceContext;
 	
-	private BusinessController businessCtrl;
+	private LocationController businessCtrl;
 	private final RequestController requestCtrl;
 
 	private Business business;
 
 	@Inject
-	public RequestsResource(BusinessController checkInController, RequestController requestCtrl) {
+	public RequestsResource(LocationController checkInController, RequestController requestCtrl) {
 		this.businessCtrl = checkInController;
 		this.requestCtrl = requestCtrl;
 	}

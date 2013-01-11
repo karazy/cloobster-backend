@@ -1,8 +1,6 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -15,24 +13,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
-import org.apache.lucene.index.CheckIndex;
-
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.FeedbackController;
 import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
+import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
-import net.eatsense.persistence.InfoPageRepository;
+import net.eatsense.domain.Subscription;
 import net.eatsense.representation.BillDTO;
-import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
-import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
@@ -42,7 +38,7 @@ import com.googlecode.objectify.Key;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
 
-public class BusinessResource {
+public class LocationResource {
 	@Context
 	private ResourceContext resourceContext;
 
@@ -54,15 +50,17 @@ public class BusinessResource {
 	private MenuController menuCtrl;
 	private OrderController orderCtrl;
 	private BillController billCtrl;
+	private SubscriptionController subCtrl;
 
 	private FeedbackController feedbackCtrl;
 
 	private InfoPageController infoPageCtrl;
 	
 	@Inject
-	public BusinessResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl) {
+	public LocationResource(MenuController menuCtrl, OrderController orderCtrl,
+			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl, SubscriptionController subCtrl) {
 		super();
+		this.subCtrl = subCtrl;
 		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
@@ -83,8 +81,11 @@ public class BusinessResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public BusinessProfileDTO getBusiness() {
-		return new BusinessProfileDTO(business);
+	public LocationProfileDTO getBusiness() {
+		LocationProfileDTO businessDto = new LocationProfileDTO(business);
+		Subscription activeSubscription = subCtrl.getActiveSubscription(business);
+		businessDto.setBasic(activeSubscription != null ? activeSubscription.isBasic() : true);
+		return businessDto;
 	}
 	
 	@GET
@@ -186,7 +187,7 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
 	public FeedbackDTO postFeedback(FeedbackDTO feedbackData) {
-		return new FeedbackDTO(feedbackCtrl.addFeedback(business, checkIn, feedbackData));
+		return new FeedbackDTO(feedbackCtrl.createFeedback(business, checkIn, feedbackData));
 	}
 	
 	@GET

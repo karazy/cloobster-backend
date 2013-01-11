@@ -1,7 +1,7 @@
 package net.eatsense;
 
 import net.eatsense.domain.Spot;
-import net.eatsense.restws.customer.BusinessesResource;
+import net.eatsense.restws.customer.LocationsResource;
 
 import com.google.inject.AbstractModule;
 import com.googlecode.objectify.ObjectifyService;
@@ -19,7 +19,7 @@ public class EatSenseDomainModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(BusinessesResource.class);
+		bind(LocationsResource.class);
 		bind(Spot.class);
 		bind(ObjectifyService.class);
 	}

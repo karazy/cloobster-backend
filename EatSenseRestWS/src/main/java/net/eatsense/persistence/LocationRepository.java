@@ -10,11 +10,11 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
 
-public class BusinessRepository extends GenericRepository<Business> {
+public class LocationRepository extends GenericRepository<Business> {
 	
 	final static Class<Business> entityClass = Business.class;
 	
-	public BusinessRepository() {
+	public LocationRepository() {
 		super(Business.class);
 	}
 	
@@ -33,7 +33,7 @@ public class BusinessRepository extends GenericRepository<Business> {
 	 * @param trashEntryKey
 	 * @return
 	 */
-	public Business restoreBusiness(Key<TrashEntry> trashEntryKey) {
+	public Business restoreLocation(Key<TrashEntry> trashEntryKey) {
 		checkNotNull(trashEntryKey, "trashEntryKey was null");
 		TrashEntry trashEntry = ofy().get(trashEntryKey);
 		checkArgument(trashEntry.getEntityKey().getKind() == Key.getKind(Business.class), "Trashed entity not of type Business");

@@ -12,17 +12,13 @@ import com.google.common.base.Strings;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.PaymentMethod;
 
-public class BusinessDTO {
+public class LocationDTO {
 	@NotNull
 	@NotEmpty
-	String name;
-	@NotNull
-	@NotEmpty
-	String description;
-	Long id;
+	private String name;
+	private String description;
+	private Long id;
 
-	@NotNull
-	@NotEmpty
 	private String currency;
 	
 	private boolean trash;
@@ -36,11 +32,16 @@ public class BusinessDTO {
 	@Valid
 	private List<PaymentMethod> paymentMethods;
 	
-	public BusinessDTO() {
+	private boolean basic;
+	
+	private Long activeSubscriptionId;
+	private Long pendingSubscriptionId;
+	
+	public LocationDTO() {
 		super();
 	}
 	
-	public BusinessDTO(Business business) {
+	public LocationDTO(Business business) {
 		if(business == null)
 			return;
 		this.name = business.getName();
@@ -53,6 +54,9 @@ public class BusinessDTO {
 		this.paymentMethods = business.getPaymentMethods();
 		this.url = business.getUrl();
 		this.fbUrl = business.getFbUrl();
+		this.basic = business.isBasic();
+		this.activeSubscriptionId = business.getActiveSubscription() != null ? business.getActiveSubscription().getId() : null;
+		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
 	}
 	
 	public String getName() {
@@ -128,5 +132,29 @@ public class BusinessDTO {
 
 	public void setLang(List<String> lang) {
 		this.lang = lang;
+	}
+
+	public boolean isBasic() {
+		return basic;
+	}
+
+	public void setBasic(boolean basic) {
+		this.basic = basic;
+	}
+
+	public Long getActiveSubscriptionId() {
+		return activeSubscriptionId;
+	}
+
+	public void setActiveSubscriptionId(Long activeSubsriptionId) {
+		this.activeSubscriptionId = activeSubsriptionId;
+	}
+
+	public Long getPendingSubscriptionId() {
+		return pendingSubscriptionId;
+	}
+
+	public void setPendingSubscriptionId(Long pendingSubsriptionId) {
+		this.pendingSubscriptionId = pendingSubsriptionId;
 	}
 }

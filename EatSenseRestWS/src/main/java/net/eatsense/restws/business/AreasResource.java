@@ -15,7 +15,7 @@ import javax.ws.rs.Produces;
 import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.AreaDTO;
@@ -28,11 +28,11 @@ public class AreasResource {
 		this.business = business;
 	}
 
-	private final BusinessController businessCtrl;
+	private final LocationController businessCtrl;
 	private Account account;
 	
 	@Inject
-	public AreasResource(BusinessController businessCtrl) {
+	public AreasResource(LocationController businessCtrl) {
 		super();
 		this.businessCtrl = businessCtrl;
 	}

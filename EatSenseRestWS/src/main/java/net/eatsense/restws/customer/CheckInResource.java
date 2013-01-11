@@ -16,7 +16,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
@@ -44,7 +44,7 @@ public class CheckInResource {
 	private CheckIn checkIn;
 
 	private final Provider<CheckInController> checkInCtrlprovider;
-	private final Provider<BusinessController> businessCtrlProvider;
+	private final Provider<LocationController> businessCtrlProvider;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private final Provider<OrderController> orderCtrlProvider;
 	private Optional<Account> accountOpt;
@@ -55,7 +55,7 @@ public class CheckInResource {
 
 	@Inject
 	public CheckInResource(Provider<CheckInController> checkInController,
-			Provider<BusinessController> businessCtrl,
+			Provider<LocationController> businessCtrl,
 			Provider<ChannelController> channelCtrl,
 			Provider<OrderController> orderCtrlProvider) {
 		super();

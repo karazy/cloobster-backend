@@ -30,12 +30,13 @@ import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
@@ -47,7 +48,7 @@ import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.AreaDTO;
-import net.eatsense.representation.BusinessProfileDTO;
+import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.RequestDTO;
 import net.eatsense.representation.ImageDTO;
@@ -75,6 +76,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BusinessControllerTest {
@@ -86,14 +88,15 @@ public class BusinessControllerTest {
 
 	private Injector injector;
 	private CheckInController checkinCtrl;
-	private BusinessRepository rr;
+	private LocationRepository rr;
 	private MenuRepository mr;
 	private ProductRepository pr;
 	private ChoiceRepository cr;
 	private OrderRepository or;
 	private DummyDataDumper ddd;
-
-	private SpotRepository br;
+	
+	
+	private SpotRepository spotRepo;
 
 	private Transformer transform;
 
@@ -101,7 +104,7 @@ public class BusinessControllerTest {
 
 	private CheckInDTO checkInData;
 
-	private BusinessController businessCtrl;
+	private LocationController businessCtrl;
 
 	private CheckIn checkIn;
 
@@ -135,6 +138,9 @@ public class BusinessControllerTest {
 	@Mock
 	private FeedbackFormRepository feedbackRepo;
 
+	@Mock
+	private Query<Spot> spotQueryMock;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -142,11 +148,11 @@ public class BusinessControllerTest {
 		
 		
 		checkinCtrl = injector.getInstance(CheckInController.class);
-		rr = injector.getInstance(BusinessRepository.class);
+		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
-		br = injector.getInstance(SpotRepository.class);
+		spotRepo = injector.getInstance(SpotRepository.class);
 		or = injector.getInstance(OrderRepository.class);
 		ocr = injector.getInstance(OrderChoiceRepository.class);
 		accountRepo = injector.getInstance(AccountRepository.class);
@@ -155,7 +161,7 @@ public class BusinessControllerTest {
 		
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
-		businessCtrl = new BusinessController(requestRepo, checkInrepo , br, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider);
+		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -434,10 +440,10 @@ public class BusinessControllerTest {
 	@Test
 	public void testUpdateBusiness() throws Exception {
 		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		businessCtrl = createController();
 		
-		BusinessProfileDTO businessData = getTestProfileData();
+		LocationProfileDTO businessData = getTestProfileData();
 		List<PaymentMethod> paymentMethods = new ArrayList<PaymentMethod>();
 		paymentMethods.add(new PaymentMethod("Visa"));
 		paymentMethods.add(new PaymentMethod("EC"));
@@ -465,10 +471,10 @@ public class BusinessControllerTest {
 	@Test
 	public void testUpdateBusinessNoChanges() throws Exception {
 		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		businessCtrl = createController();
 		
-		BusinessProfileDTO businessData = getTestProfileData();
+		LocationProfileDTO businessData = getTestProfileData();
 		businessCtrl.updateBusiness(business, businessData );
 		business.setDirty(false);
 		businessCtrl.updateBusiness(business, businessData );
@@ -476,10 +482,10 @@ public class BusinessControllerTest {
 	}
 
 	/**
-	 * @return New instance of {@link BusinessController}
+	 * @return New instance of {@link LocationController}
 	 */
-	private BusinessController createController() {
-		return new BusinessController(requestRepo, checkInrepo, br, rr,
+	private LocationController createController() {
+		return new LocationController(requestRepo, checkInrepo, spotRepo, rr,
 				eventBus, accountRepo, imageController, areaRepo, validator,
 				mr, feedbackRepo, configProvider);
 	}
@@ -487,60 +493,21 @@ public class BusinessControllerTest {
 	@Test
 	public void testUpdateBusinessSingleProperty() throws Exception {
 		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		businessCtrl = createController();
 		
-		BusinessProfileDTO businessData = getTestProfileData();
+		LocationProfileDTO businessData = getTestProfileData();
 		businessCtrl.updateBusiness(business, businessData );
 		businessData.setName("AnotherTest");
 		businessCtrl.updateBusiness(business, businessData );
 		verify(rr, times(2)).saveOrUpdate(business);
 	}
-	
-	@Test
-	public void testUpdateBusinessPostcodeViolation() throws Exception {
-		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
-		businessCtrl = createController();
-		
-		BusinessProfileDTO businessData = getTestProfileData();
-		businessData.setPostcode("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("postcode");
-		businessCtrl.updateBusiness(business, businessData );
-	}
-	
-	@Test
-	public void testUpdateBusinessCityViolation() throws Exception {
-		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
-		businessCtrl = createController();
-		
-		BusinessProfileDTO businessData = getTestProfileData();
-		businessData.setCity("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("city");
-		businessCtrl.updateBusiness(business, businessData );
-	}
-	
-	@Test
-	public void testUpdateBusinessAddressViolation() throws Exception {
-		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
-		businessCtrl = createController();
-		
-		BusinessProfileDTO businessData = getTestProfileData();
-		businessData.setAddress("");
-		thrown.expect(ValidationException.class);
-		thrown.expectMessage("address");
-		businessCtrl.updateBusiness(business, businessData );
-	}
 
 	/**
 	 * @return Test data to user for update or create business
 	 */
-	private BusinessProfileDTO getTestProfileData() {
-		BusinessProfileDTO businessData = new BusinessProfileDTO();
+	private LocationProfileDTO getTestProfileData() {
+		LocationProfileDTO businessData = new LocationProfileDTO();
 		businessData.setAddress("test");
 		businessData.setCurrency("EUR");
 		businessData.setCity("test");
@@ -555,9 +522,10 @@ public class BusinessControllerTest {
 	@Test
 	public void testNewBussinessForAccount() throws Exception {
 		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
 		business = new Business();
+		spotRepo = mock(SpotRepository.class);
 		businessCtrl = createController();
 		Configuration config = mock(Configuration.class);
 		when(configProvider.get()).thenReturn(config );
@@ -574,6 +542,7 @@ public class BusinessControllerTest {
 		// Mock arguments and stub method calls.
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock(Key.class);
+		when(businessKey.getId()).thenReturn(1l);
 		when(rr.getKey(business)).thenReturn(businessKey);
 		// Return the mocked class, when the controller retrieves the new instance.
 		when(rr.newEntity()).thenReturn(business);
@@ -582,7 +551,14 @@ public class BusinessControllerTest {
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		when(account.getBusinesses()).thenReturn(businessesList);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
-		BusinessProfileDTO testProfileData = getTestProfileData();
+		Area welcomeArea = new Area();
+		when(areaRepo.newEntity()).thenReturn(welcomeArea );
+		LocationProfileDTO testProfileData = getTestProfileData();
+		
+		Spot welcomeSpot = mock(Spot.class);
+		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
+		
+		when(spotRepo.query()).thenReturn(spotQueryMock);
 		
 		// Run the method.
 		businessCtrl.createBusinessForAccount(account, testProfileData);
@@ -596,14 +572,25 @@ public class BusinessControllerTest {
 		
 		// Default FeedbackForm creation verifications.
 		verify(defaultFeedbackForm).setId(null);
-		assertThat(business.getFeedbackForm(), is(newFormKey));		
+		assertThat(business.getFeedbackForm(), is(newFormKey));
+		
+		// Verify welcome area creation
+		verify(areaRepo).saveOrUpdate(welcomeArea);
+		assertThat(welcomeArea.isWelcome(), is(true));
+		
+		// verify welcome spot creation
+		
+		verify(spotRepo).saveOrUpdate(welcomeSpot);
+		verify(welcomeSpot).generateBarcode();
+		verify(welcomeSpot).setWelcome(true);
 	}
 	
 	@Test
 	public void testNewBussinessForAccountNoBusinesses() throws Exception {
 		//TODO after refactoring of whole test suite remove this initializiation
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
+		spotRepo = mock(SpotRepository.class);
 		business = new Business();
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey = mock(Key.class);
@@ -618,10 +605,14 @@ public class BusinessControllerTest {
 		List<Key<Business>> businessesList = new ArrayList<Key<Business>>();
 		// First we return null, to test the case of no businesses added.
 		when(account.getBusinesses()).thenReturn(null, businessesList );
-		
+		Spot welcomeSpot = mock(Spot.class);
+		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
+		when(spotRepo.query()).thenReturn(spotQueryMock);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
+		Area welcomeArea = new Area();
+		when(areaRepo.newEntity()).thenReturn(welcomeArea );
 		// Get test data object.
-		BusinessProfileDTO testProfileData = getTestProfileData();
+		LocationProfileDTO testProfileData = getTestProfileData();
 		// Run the method.
 		businessCtrl.createBusinessForAccount(account, testProfileData);
 		
@@ -629,11 +620,17 @@ public class BusinessControllerTest {
 		// Verify that the new list was set at the account.
 		verify(account).setBusinesses(anyList());
 		assertThat(businessesList, hasItem(businessKey));
+		
+		// verify creation of welcome area
+		verify(areaRepo).saveOrUpdate(welcomeArea);
+		
+		assertThat(welcomeArea.isWelcome(), is(true));
+		verify(spotRepo).saveOrUpdate(welcomeSpot);
 	}
 	
 	@Test
 	public void testUpdateBusinessImage() throws Exception {
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
 		business = mock(Business.class);
 				
@@ -660,7 +657,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testUpdateBusinessImageNoChanges() throws Exception {
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
 		business = mock(Business.class);
 				
@@ -686,7 +683,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testRemoveBusinessImageNoChanges() throws Exception {
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
 		business = mock(Business.class);
 				
@@ -702,7 +699,7 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testRemoveBusinessImage() throws Exception {
-		rr = mock(BusinessRepository.class);
+		rr = mock(LocationRepository.class);
 		accountRepo = mock(AccountRepository.class);
 		business = mock(Business.class);
 				
@@ -750,7 +747,7 @@ public class BusinessControllerTest {
 		businessCtrl.updateArea(area , areaData);
 		
 		verify(areaRepo).saveOrUpdate(area);
-		assertThat(area.getMenus(), hasItems(menuKey1, menuKey2));	
+		assertThat(area.getMenus(), hasItems(menuKey1, menuKey2));
 	}
 	
 	@Test

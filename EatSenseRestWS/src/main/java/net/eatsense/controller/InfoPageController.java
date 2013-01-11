@@ -6,18 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
-
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.InfoPage;
+import net.eatsense.domain.Business;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.validation.ValidationHelper;
+
+import org.owasp.html.PolicyFactory;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;

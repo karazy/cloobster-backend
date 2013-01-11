@@ -3,28 +3,18 @@ package net.eatsense.persistence;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import net.eatsense.annotations.Translate;
 import net.eatsense.domain.GenericEntity;
 import net.eatsense.domain.TranslatedEntity;
-import net.eatsense.domain.embedded.TranslatedField;
-import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ServiceException;
 
-import org.apache.commons.beanutils.BeanUtils;
-
-import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.base.Optional;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
@@ -67,6 +57,7 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 			throw new NotFoundException("No entity found for key: " + entityKey.toString());
 		}
 		
+		@SuppressWarnings("unchecked")
 		U transEntity = (U) resultMap.get(translationKey);
 		
 		if(transEntity != null) {

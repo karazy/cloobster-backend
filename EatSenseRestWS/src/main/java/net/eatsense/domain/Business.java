@@ -81,6 +81,9 @@ public class Business extends GenericEntity<Business> {
 	
 	private Key<Company> company;
 	
+	@Transient
+	private Integer spotCount;
+	
 	/**
 	 * List of images used by the Business, at the moment we use 'logo' and several scrapbook images.
 	 */
@@ -93,6 +96,13 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private String currency;
 	
+	@Unindexed
+	private Key<Subscription> activeSubscription;
+	@Unindexed
+	private Key<Subscription> pendingSubscription;
+	
+
+
 	/**
 	 * Link to a website for this location (e.g. for facebook posts)
 	 */
@@ -120,6 +130,9 @@ public class Business extends GenericEntity<Business> {
 	 * Number of stars (for hotels and restaurants)
 	 */
 	private int stars;
+
+	@Unindexed
+	private boolean basic = true;
 	
 	public Business() {
 	}
@@ -339,5 +352,37 @@ public class Business extends GenericEntity<Business> {
 			this.setDirty(true);
 			this.stars = stars;
 		}
+	}
+	
+	public Key<Subscription> getActiveSubscription() {
+		return activeSubscription;
+	}
+
+	public void setActiveSubscription(Key<Subscription> activeSubscription) {
+		this.activeSubscription = activeSubscription;
+	}
+
+	public Key<Subscription> getPendingSubscription() {
+		return pendingSubscription;
+	}
+
+	public void setPendingSubscription(Key<Subscription> pendingSubscription) {
+		this.pendingSubscription = pendingSubscription;
+	}
+
+	public Integer getSpotCount() {
+		return spotCount;
+	}
+
+	public void setSpotCount(Integer spotCount) {
+		this.spotCount = spotCount;
+	}
+
+	public boolean isBasic() {
+		return basic;
+	}
+
+	public void setBasic(boolean basic) {
+		this.basic = basic;
 	}
 }

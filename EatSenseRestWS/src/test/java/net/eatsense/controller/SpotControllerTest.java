@@ -21,13 +21,16 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,10 +40,16 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpotControllerTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
 	SpotController ctrl;
 	@Mock
 	private AreaRepository areaRepo;
@@ -59,9 +68,15 @@ public class SpotControllerTest {
 	@Mock
 	private Key<Spot> spotKey;
 
+	@Mock
+	private EventBus eventBus;
+
+	@Mock
+	private Query<Spot> spotQuery;
+
 	@Before
 	public void setUp() throws Exception {
-		ctrl = new SpotController(spotRepo, validationHelper, areaRepo);
+		ctrl = new SpotController(spotRepo, validationHelper, areaRepo, eventBus);
 	}
 
 	/** 
@@ -86,6 +101,12 @@ public class SpotControllerTest {
 		when(spotRepo.newEntity()).thenReturn(spot);
 		Key<Area> areaKey = mock(Key.class);
 		when(areaRepo.getKey(businessKey, spotsData.getAreaId())).thenReturn(areaKey );
+		Area area = mock(Area.class);
+		when(areaRepo.getByKey(areaKey)).thenReturn(area );
+		when(spotQuery.count()).thenReturn(1);
+		when(spotQuery.filter("trash",false)).thenReturn(spotQuery);
+		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
+		when(spotRepo.query()).thenReturn(spotQuery);
 		
 		ctrl.createSpots(businessKey, spotsData);
 		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
@@ -101,6 +122,25 @@ public class SpotControllerTest {
 		inOrder.verify(spotRepo).saveOrUpdate(spotListCaptor.capture());
 		
 		assertThat(spotListCaptor.getValue().size(), is(spotsData.getCount()));
+	}
+	
+	@Test
+	public void testCreateSpotsForWelcomeArea() throws Exception {
+		SpotsData spotsData = getTestSpotsData();
+		@SuppressWarnings("unchecked")
+		Key<Area> areaKey = mock(Key.class);
+		when(areaRepo.getKey(businessKey, spotsData.getAreaId())).thenReturn(areaKey );
+		Area area = mock(Area.class);
+		when(area.isWelcome()).thenReturn(true);
+		when(areaRepo.getByKey(areaKey)).thenReturn(area );
+		
+		when(spotQuery.count()).thenReturn(1);
+		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
+		when(spotRepo.query()).thenReturn(spotQuery);
+	
+		thrown.expect(ValidationException.class);
+				
+		ctrl.createSpots(businessKey, spotsData);
 	}
 
 	@Test
@@ -136,6 +176,11 @@ public class SpotControllerTest {
 		spots.add(spot);
 		spots.add(spot);
 		spots.add(spot);
+		
+		when(spotQuery.count()).thenReturn(5);
+		when(spotQuery.filter("trash",false)).thenReturn(spotQuery);
+		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
+		when(spotRepo.query()).thenReturn(spotQuery);
 		
 		when(spotRepo.getKey(businessKey, spotIds.get(0))).thenReturn(spotKey);
 		when(spotRepo.getKey(businessKey, spotIds.get(1))).thenReturn(spotKey);

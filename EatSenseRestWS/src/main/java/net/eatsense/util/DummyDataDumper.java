@@ -15,7 +15,7 @@ import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -34,7 +34,7 @@ public class DummyDataDumper {
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private BusinessRepository rr;
+	private LocationRepository rr;
 	private SpotRepository br;
 
 	private MenuRepository mr;
@@ -49,7 +49,7 @@ public class DummyDataDumper {
 	private final AreaRepository areaRepo;
 
 	@Inject
-	public DummyDataDumper(BusinessRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo, AreaRepository areaRepo) {
+	public DummyDataDumper(LocationRepository rr, SpotRepository br, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, AccountRepository ar, CompanyRepository companyRepo, AreaRepository areaRepo) {
 		this.ar = ar;
 		this.areaRepo = areaRepo;
 		this.rr = rr;
@@ -208,6 +208,8 @@ public class DummyDataDumper {
 		Business r = new Business();
 		r.setName(name);
 		r.setDescription(desc);
+		// We only created Locations with extended subscription.
+		r.setBasic(false);
 		ArrayList<PaymentMethod> methods = new ArrayList<PaymentMethod>();
 		methods.add(new PaymentMethod("EC"));
 		methods.add(new PaymentMethod("Bar"));

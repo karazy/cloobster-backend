@@ -5,35 +5,47 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import javax.validation.Validator;
-
-import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
+import net.eatsense.event.DeleteSpotEvent;
+import net.eatsense.event.NewSpotEvent;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
+
 public class SpotController {
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public static final String NAME_FORMAT = "%s %03d";
 	private final SpotRepository spotRepo;
 	private final AreaRepository areaRepo;
 	private final ValidationHelper validator;
 
+	private final EventBus eventBus;
+
 	@Inject
-	public SpotController(SpotRepository spotRepo, ValidationHelper validationHelper, AreaRepository areaRepo) {
+	public SpotController(SpotRepository spotRepo, ValidationHelper validationHelper, AreaRepository areaRepo, EventBus eventBus) {
 		super();
 		this.areaRepo = areaRepo;
 		this.spotRepo = spotRepo;
 		this.validator = validationHelper;
+		this.eventBus = eventBus;
 	}
 	
 	/**
@@ -42,7 +54,7 @@ public class SpotController {
 	 * @param spotsData
 	 * @return List of auto generated Spots
 	 */
-	public List<Spot> createSpots(Key<Business> businessKey, SpotsData spotsData) {
+	public List<Spot> createSpots(Key<Business> locationKey, SpotsData spotsData) {
 		checkNotNull(spotsData);		
 		validator.validate(spotsData);
 		
@@ -52,11 +64,25 @@ public class SpotController {
 			spotsData.setStartNumber(1);
 		}
 		
+		Key<Area> areaKey = areaRepo.getKey(locationKey, spotsData.getAreaId());
+		try {
+			Area area = areaRepo.getByKey(areaKey);
+			if(area.isWelcome()) {
+				throw new ValidationException("Unable to create new Spots at Welcome area");
+			}
+		} catch (NotFoundException e) {
+			logger.error("Unable to create Spots for unknown Area. key={}", areaKey);
+			throw new ValidationException("No Area found with id="+areaKey.getId());
+		}
+
+		int spotCount = countSpots(locationKey);
+
 		for (int i = 0; i < spotsData.getCount(); i++) {
 			Spot spot = spotRepo.newEntity();			
 			spot.setActive(true);
-			spot.setArea(areaRepo.getKey(businessKey, spotsData.getAreaId()));
-			spot.setBusiness(businessKey);
+			
+			spot.setArea(areaKey);
+			spot.setBusiness(locationKey);
 			spot.setName(String.format(NAME_FORMAT, spotsData.getName(), spotsData.getStartNumber() + i));
 			
 			spots.add(spot);
@@ -69,6 +95,8 @@ public class SpotController {
 		}
 		
 		spotRepo.saveOrUpdate(spots);
+		
+		eventBus.post(new NewSpotEvent(locationKey, null, spotCount + spotsData.getCount(), true));
 			 
 		return spots;
 	}
@@ -131,14 +159,30 @@ public class SpotController {
 		List<Key<Spot>> spotKeys = createKeys(businessKey, spotIds);
 				
 		Collection<Spot> spots = spotRepo.getByKeys(spotKeys);
-		
-		for (Spot spot : spots) {
-			spot.setActive(false);
+		int spotCount = countSpots(businessKey);
+		int deletedSpots = 0;
+		for (Iterator<Spot> iterator = spots.iterator(); iterator.hasNext();) {
+			Spot spot = iterator.next();
+			if(spot.isWelcome()) {
+				iterator.remove();
+			}
+			else {
+				deletedSpots++;
+				spot.setActive(false);
+			}
 		}
-		
+				
 		spotRepo.trashEntities(spots, account.getEmail());
+		eventBus.post(new DeleteSpotEvent(businessKey, null, spotCount - deletedSpots, true));
 				
 		return new ArrayList<Spot>(spots);
 	}
 	
+	/**
+	 * @param locationKey
+	 * @return
+	 */
+	private int countSpots(Key<Business> locationKey) {
+		return spotRepo.query().ancestor(locationKey).filter("trash", false).count();
+	}
 }

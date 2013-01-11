@@ -23,6 +23,7 @@ import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
+import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.BillRepository;
@@ -246,12 +247,22 @@ public class BillController {
 		checkArgument(checkIn.getBusiness().getId() == business.getId(),
 				"checkin is not at the same business to which the request was sent: id=%s", checkIn.getBusiness().getId());
 		
+		if(business.isBasic()) {
+			logger.error("Unable to create Bill at Business with basic subscription");
+			throw new IllegalAccessException("Unable to create Bill at Business with basic subscription");
+		}
+		
 		Query<Order> ordersQuery = orderRepo.getOfy().query(Order.class).ancestor(business).filter("checkIn", checkIn.getKey());
 		boolean foundOrderToBill = false;
 		
 		Spot spot = spotRepo.getByKey(checkIn.getSpot());
 		if(spot == null) {
 			throw new OrderFailureException("Unable to find Spot for CheckIn.");
+		}
+		
+		if(spot.isWelcome()) {
+			logger.error("Unable to create Bill for checkin at welcome spot");
+			throw new IllegalAccessException("Unable to create Bill for checkin at welcome spot");
 		}
 		
 		Long billId = null;

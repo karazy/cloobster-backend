@@ -1,6 +1,5 @@
 package net.eatsense.restws.business;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
@@ -18,14 +17,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.auth.Role;
-import net.eatsense.controller.BusinessController;
 import net.eatsense.controller.ChannelController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SpotController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.representation.BusinessProfileDTO;
 import net.eatsense.representation.ImageDTO;
+import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.SpotsData;
 
@@ -43,7 +42,7 @@ import com.sun.jersey.api.core.ResourceContext;
  * @author Nils Weiher
  *
  */
-public class BusinessResource {
+public class LocationResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Context
 	ResourceContext resourceContext;
@@ -51,7 +50,7 @@ public class BusinessResource {
 	HttpServletRequest servletRequest;
 	
 	private Business business;
-	private BusinessController businessCtrl;
+	private LocationController businessCtrl;
 	private Account account;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private SpotController spotController;
@@ -65,7 +64,7 @@ public class BusinessResource {
 	}
 	
 	@Inject
-	public BusinessResource(BusinessController businessCtrl, SpotController spotCtrl, Provider<ChannelController> channelCtrlProvider) {
+	public LocationResource(LocationController businessCtrl, SpotController spotCtrl, Provider<ChannelController> channelCtrlProvider) {
 		super();
 		this.channelCtrlProvider = channelCtrlProvider;
 		this.businessCtrl = businessCtrl;
@@ -75,21 +74,23 @@ public class BusinessResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public BusinessProfileDTO getBusiness() {
+	public LocationProfileDTO getBusiness(@QueryParam("countSpots")boolean countSpots) {
 		if(business == null)
 			throw new NotFoundException();
-		
-		return new BusinessProfileDTO(business);
+		if(countSpots) {
+			businessCtrl.setSpotCount(business);
+		}
+		return new LocationProfileDTO(business);
 	}
 	
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public BusinessProfileDTO updateBusinessProfile(BusinessProfileDTO businessData) {
+	public LocationProfileDTO updateBusinessProfile(LocationProfileDTO businessData) {
 		//Update Business synchronizes data between the entity and transfer object.
 		businessCtrl.updateBusiness(business, businessData);
-		return businessData;
+		return new LocationProfileDTO(business);
 	}
 	
 	@DELETE
@@ -229,8 +230,8 @@ public class BusinessResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public List<SpotDTO> getSpots(@QueryParam("areaId") long areaId) {
-		return businessCtrl.getSpots(business.getKey(), areaId);
+	public List<SpotDTO> getSpots(@QueryParam("areaId") long areaId, @QueryParam("welcome") boolean welcome) {
+		return businessCtrl.getSpots(business.getKey(), areaId, welcome);
 	}
 	
 	@Path("spotsdata")
@@ -239,7 +240,7 @@ public class BusinessResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO createSpot(SpotDTO spotData) {
-		return businessCtrl.createSpot(business.getKey(), spotData);
+		return businessCtrl.createSpot(business.getKey(), spotData, false);
 	}
 	
 	@Path("spotsdata/{spotId}")
@@ -281,5 +282,12 @@ public class BusinessResource {
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
 		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
+	}
+	
+	@Path("subscriptions")
+	public SubscriptionsResource getSubscriptionsResource() {
+		SubscriptionsResource resource = resourceContext.getResource(SubscriptionsResource.class);
+		resource.setBusiness(business);
+		return resource;
 	}
 }

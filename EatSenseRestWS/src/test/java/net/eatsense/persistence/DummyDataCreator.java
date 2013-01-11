@@ -20,14 +20,14 @@ public class DummyDataCreator {
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
         
         private Injector injector;
-        private BusinessRepository rr;
+        private LocationRepository rr;
         private SpotRepository br;
          
     	@Before
     	public void setUp() throws Exception {
     		helper.setUp();
     		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-    		rr = injector.getInstance(BusinessRepository.class);
+    		rr = injector.getInstance(LocationRepository.class);
     		br = injector.getInstance(SpotRepository.class);
     	}
     	

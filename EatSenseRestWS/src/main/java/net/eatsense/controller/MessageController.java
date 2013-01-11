@@ -18,10 +18,10 @@ import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.TrashBusinessEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.event.UpdateOrderEvent;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.RequestRepository;
-import net.eatsense.representation.BusinessDTO;
+import net.eatsense.representation.LocationDTO;
 import net.eatsense.representation.RequestDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.Transformer;
@@ -47,11 +47,11 @@ public class MessageController {
 	private Transformer transform;
 	private CheckInRepository checkInRepo;
 	private RequestRepository requestRepo;
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	
 	@Inject
 	public MessageController(ChannelController channelCtrl, Transformer transform, CheckInRepository checkInRepo,
-			RequestRepository requestRepo, BusinessRepository businessRepo) {
+			RequestRepository requestRepo, LocationRepository businessRepo) {
 		super();
 		this.requestRepo = requestRepo;
 		this.businessRepo = businessRepo;
@@ -62,7 +62,7 @@ public class MessageController {
 	
 	@Subscribe
 	public void sendTrashBusinessMessage(TrashBusinessEvent event) {
-		channelCtrl.sendMessage(event.getBusiness(), new MessageDTO("business", "delete", new BusinessDTO(event.getBusiness())));
+		channelCtrl.sendMessage(event.getBusiness(), new MessageDTO("business", "delete", new LocationDTO(event.getBusiness())));
 	}
 	
 	@Subscribe

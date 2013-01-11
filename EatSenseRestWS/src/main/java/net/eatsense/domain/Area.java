@@ -19,6 +19,8 @@ public class Area extends GenericEntity<Area> {
 	private List<Key<Menu>> menus;
 	
 	private boolean active = true;
+	
+	private boolean welcome;
 
 	public List<Key<Menu>> getMenus() {
 		return menus;
@@ -78,6 +80,14 @@ public class Area extends GenericEntity<Area> {
 			this.setDirty(true);
 			this.active = active;
 		}
+	}
+
+	public boolean isWelcome() {
+		return welcome;
+	}
+
+	public void setWelcome(boolean welcome) {
+		this.welcome = welcome;
 	}
 
 }

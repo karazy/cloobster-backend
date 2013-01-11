@@ -53,12 +53,10 @@ public class MenuController {
 	private final Transformer transform;
 	private final ValidationHelper validator;
 	private final ChoiceRepository choiceRepo;
-	private final AreaRepository areaRepo;
 
 	@Inject
 	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator) {
 		this.choiceRepo = cr;
-		this.areaRepo = areaRepo;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;

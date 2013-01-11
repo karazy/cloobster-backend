@@ -24,14 +24,14 @@ public class TrashEntityTest {
 	private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 	private ProductRepository productRepo;
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	
 	@Before
 	public void setUp() {
 		helper.setUp();
 		Injector injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
 		productRepo = injector.getInstance(ProductRepository.class);
-		businessRepo = injector.getInstance(BusinessRepository.class);
+		businessRepo = injector.getInstance(LocationRepository.class);
 	}
 	
 	@After

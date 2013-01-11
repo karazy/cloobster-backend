@@ -36,7 +36,7 @@ import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -81,7 +81,7 @@ public class OrderController {
 	@Inject
 	public OrderController(OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
-			ProductRepository productRepo, BusinessRepository businessRepo,
+			ProductRepository productRepo, LocationRepository businessRepo,
 			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
 			RequestRepository rr, Transformer trans, ValidationHelper validator,
 			EventBus eventBus, SpotRepository spotRepo) {
@@ -419,6 +419,17 @@ public class OrderController {
 	public Long placeOrderInCart(Business business, CheckIn checkIn, OrderDTO orderData) {
 		checkNotNull(business, "business was null");
 		checkNotNull(checkIn, "checkIn was null");
+		
+		if(business.isBasic()) {
+			logger.error("Unable to place order at business with basic subscription.");
+			throw new IllegalAccessException("Unable to place Orders at Business with basic subscription");
+		}
+		
+		Spot spot = spotRepo.getByKey(checkIn.getSpot());
+		if(spot.isWelcome()) {
+			logger.error("Unable to place order at welcome spot.");
+			throw new IllegalAccessException("Unable to place Orders at welcome spot.");
+		}
 		
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");

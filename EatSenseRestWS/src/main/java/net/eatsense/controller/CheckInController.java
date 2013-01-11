@@ -4,11 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -18,8 +15,8 @@ import javax.validation.Validator;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Request;
@@ -38,31 +35,26 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
-import net.eatsense.persistence.BusinessRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CheckInHistoryDTO;
-import net.eatsense.representation.ErrorDTO;
 import net.eatsense.representation.HistoryStatusDTO;
-import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.VisitDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 import net.eatsense.util.IdHelper;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.labs.repackaged.com.google.common.collect.Collections2;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -78,11 +70,10 @@ import com.googlecode.objectify.Query;
 public class CheckInController {
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	private CheckInRepository checkInRepo;
 	private SpotRepository spotRepo;
 	private Transformer transform;
-	private ObjectMapper mapper;
     private Validator validator;
 	private RequestRepository requestRepo;
 	private OrderRepository orderRepo;
@@ -104,10 +95,9 @@ public class CheckInController {
 	 * @param validator
 	 */
 	@Inject
-	public CheckInController(BusinessRepository businessRepository,
+	public CheckInController(LocationRepository businessRepository,
 			CheckInRepository checkInRepository, SpotRepository spotRepository,
-			Transformer transformer,
-			ObjectMapper objectMapper, Validator validator,
+			Transformer transformer, Validator validator,
 			RequestRepository requestRepository, OrderRepository orderRepo, OrderChoiceRepository orderChoiceRepo, AreaRepository areaRepository,
 			EventBus eventBus, AccountRepository accountRepo, BillRepository billRepo) {
 		this.businessRepo = businessRepository;
@@ -118,7 +108,6 @@ public class CheckInController {
 		this.orderRepo = orderRepo;
 		this.transform = transformer;
 		this.areaRepo = areaRepository;
-		this.mapper = objectMapper;
 		this.validator = validator;
 		this.orderChoiceRepo = orderChoiceRepo;
 		this.accountRepo = accountRepo;

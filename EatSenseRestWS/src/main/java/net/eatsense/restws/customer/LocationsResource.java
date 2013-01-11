@@ -15,7 +15,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 
 import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
 import com.google.common.collect.Collections2;
@@ -31,22 +31,22 @@ import com.sun.jersey.api.core.ResourceContext;
  * 
  */
 @Path("c/businesses")
-public class BusinessesResource{
+public class LocationsResource{
 	@Context
 	private ResourceContext resourceContext;
 
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 
 	@Context
 	HttpServletRequest servletRequest;
 	
 	@Inject
-	public BusinessesResource(BusinessRepository repo) {
+	public LocationsResource(LocationRepository repo) {
 		this.businessRepo = repo;
 	}
 
 	@Path("{businessId}")
-	public BusinessResource getBusinessResource(@PathParam("businessId") Long businessId) {
+	public LocationResource getBusinessResource(@PathParam("businessId") Long businessId) {
 		Business business;
 		try {
 			business = businessRepo.getById(businessId);
@@ -62,7 +62,7 @@ public class BusinessesResource{
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		
-		BusinessResource businessResource = resourceContext.getResource(BusinessResource.class);
+		LocationResource businessResource = resourceContext.getResource(LocationResource.class);
 		
 		
 		businessResource.setAccount(account);

@@ -42,7 +42,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
-import net.eatsense.persistence.BusinessRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
@@ -77,7 +77,7 @@ public class CheckInControllerTest {
 	public ExpectedException thrown = ExpectedException.none();
 	private CheckInController ctr;
 	@Mock
-	private BusinessRepository businessRepo;
+	private LocationRepository businessRepo;
 	@Mock
 	private SpotRepository spotRepo;
 	@Mock
@@ -120,7 +120,7 @@ public class CheckInControllerTest {
 	public void setUp() throws Exception {
 		ValidatorFactory avf =
 	            Validation.byProvider(ApacheValidationProvider.class).configure().buildValidatorFactory();
-		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, mapper, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo, billRepo);
+		ctr = new CheckInController(businessRepo, checkInRepo, spotRepo, transform, avf.getValidator(), requestRepo, orderRepo, orderChoiceRepo, areaRepo, eventBus, accountRepo, billRepo);
 	}
 
 	@After
