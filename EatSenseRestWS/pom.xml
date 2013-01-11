@@ -410,33 +410,17 @@
 									<resources>
 										<resource>
 											<directory>${cloobster.frontend}/build</directory>
+											<excludes>
+												<exclude>admin/app-all.min.js</exclude>
+											</excludes>
 										</resource>
-									</resources>
-								</configuration>
-							</execution>
-							<execution>
-								<id>copy-admin-prod</id>
-								<phase>compile</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin</outputDirectory>
-									<resources>
 										<resource>
-											<directory>${cloobster.frontend}/src/admin</directory>
+											<directory>${cloobster.frontend}/build</directory>
 											<includes>
-												<include>js/app.js</include>
+												<include>admin/app-all.min.js</include>
 											</includes>
 											<!-- Filter app.js with properties. -->
 											<filtering>true</filtering>
-										</resource>
-										<resource>
-											<directory>${cloobster.frontend}/src/admin</directory>
-											<excludes>
-												<exclude>js/app.js</exclude>
-											</excludes>
-											<filtering>false</filtering>
 										</resource>
 									</resources>
 								</configuration>

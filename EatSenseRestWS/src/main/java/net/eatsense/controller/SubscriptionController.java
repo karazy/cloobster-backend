@@ -160,7 +160,7 @@ public class SubscriptionController {
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
 		subscription.setName(subscriptionData.getName());
 		subscription.setStatus(subscriptionData.getStatus());
-				
+		
 		ofy.put(subscription);
 		
 		return subscription;
