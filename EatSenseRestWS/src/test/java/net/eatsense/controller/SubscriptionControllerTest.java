@@ -345,7 +345,7 @@ public class SubscriptionControllerTest {
 		
 		// Verify archiving of old active subscription
 		verify(oldActiveSub).setStatus(SubscriptionStatus.ARCHIVED);
-		verify(oldActiveSub).setEndData(any(Date.class));
+		verify(oldActiveSub).setEndDate(any(Date.class));
 		verify(ofyAsync).put(oldActiveSub);
 		
 		verify(location).setBasic(false);

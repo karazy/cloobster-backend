@@ -53,7 +53,7 @@ public class SubscriptionDTO {
 		this.setId(subscription.getId());
 		this.basic = subscription.isBasic();
 		this.businessId = subscription.getBusiness() != null ? subscription.getBusiness().getId() : null;
-		this.endDate = subscription.getEndData();
+		this.endDate = subscription.getEndDate();
 		this.fee = subscription.getFee() / 100d;
 		this.maxSpotCount = subscription.getMaxSpotCount();
 		this.name = subscription.getName();

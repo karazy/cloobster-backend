@@ -189,7 +189,7 @@ public class SubscriptionController {
 			subscription.setBasic(subscriptionData.isBasic());
 		}
 		
-		subscription.setEndData(subscriptionData.getEndDate());
+		subscription.setEndDate(subscriptionData.getEndDate());
 		subscription.setFee(subscriptionData.getFeeMinor());
 		subscription.setMaxSpotCount(subscriptionData.getMaxSpotCount());
 		subscription.setName(subscriptionData.getName());
@@ -342,7 +342,7 @@ public class SubscriptionController {
 			Subscription activeSubscription = ofy.find(location.getActiveSubscription());
 			
 			if(activeSubscription != null) {
-				activeSubscription.setEndData(new Date());
+				activeSubscription.setEndDate(new Date());
 				activeSubscription.setStatus(SubscriptionStatus.ARCHIVED);
 				ofy.async().put(activeSubscription);
 			}
