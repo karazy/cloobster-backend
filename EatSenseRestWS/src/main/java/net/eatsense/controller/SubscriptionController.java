@@ -12,6 +12,7 @@ import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.event.NewPendingSubscription;
 import net.eatsense.event.NewSpotEvent;
+import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.ObjectifyKeyFactory;
@@ -300,11 +301,11 @@ public class SubscriptionController {
 				ofy.put(location);
 			}
 			else {
-				throw new NotFoundException();
+				throw new DataConflictException("Can only delete the current pending subscription.");
 			}
 		}
 		else {
-			throw new NotFoundException();
+			throw new DataConflictException("No pending subscription found.");
 		}
 	}
 	
