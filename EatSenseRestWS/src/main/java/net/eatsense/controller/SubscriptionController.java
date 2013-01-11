@@ -141,19 +141,40 @@ public class SubscriptionController {
 		
 		validator.validate(subscriptionData);
 		
-		if(subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.APPROVED) {
-			subscription.setStartDate(new Date());
-			Business location = ofy.get(subscription.getBusiness());
-			location.setPendingSubscription(null);
-			setActiveSubscription(location, Optional.of(subscription), true);
-		}
-		else if (subscription.getStatus() == SubscriptionStatus.PENDING && subscriptionData.getStatus() == SubscriptionStatus.CANCELED) {
-			Business location = ofy.get(subscription.getBusiness());
-			cancelPendingSubscription(location, Optional.of(subscription), true, false);
-		}
-		else if(subscription.getStatus() == SubscriptionStatus.APPROVED && subscriptionData.getStatus() == SubscriptionStatus.ARCHIVED) {
-			Business location = ofy.get(subscription.getBusiness());
-			setBasicSubscription(location);
+		if(subscription.getStatus() != subscriptionData.getStatus()) {
+			SubscriptionStatus oldStatus = subscription.getStatus();
+			SubscriptionStatus newStatus = subscriptionData.getStatus();
+			
+			// Status will be changed, check that the change is valid.
+			switch(oldStatus) {
+				case PENDING:
+					switch(newStatus) {
+						case APPROVED:
+							subscription.setStartDate(new Date());
+							Business location = ofy.get(subscription.getBusiness());
+							location.setPendingSubscription(null);
+							setActiveSubscription(location, Optional.of(subscription), true);
+							break;
+						case CANCELED:
+							location = ofy.get(subscription.getBusiness());
+							cancelPendingSubscription(location, Optional.of(subscription), true, false);
+							break;
+						default:
+							throw new ValidationException("Unable to change status from PENDING to " + newStatus);							
+					}
+					break;
+				case APPROVED:
+					if(newStatus == SubscriptionStatus.ARCHIVED) {
+						Business location = ofy.get(subscription.getBusiness());
+						setBasicSubscription(location);
+					}
+					else {
+						throw new ValidationException("Unable to change status from APPROVED to " + newStatus); 
+					}
+					break;
+				default:
+					throw new ValidationException(String.format("Unable to change status from %s to %s",oldStatus, newStatus));
+			}
 		}
 		
 		subscription.setFee(subscriptionData.getFeeMinor());
