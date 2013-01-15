@@ -49,8 +49,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.datastore.Blob;
@@ -60,6 +62,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
 
+@RunWith(MockitoJUnitRunner.class)
 public class MenuControllerTest {
 	
 	@Rule
@@ -84,16 +87,24 @@ public class MenuControllerTest {
 
 	private Spot spot;
 
+	@Mock
+	private ImageController imageCtrl;
+
+	private Transformer trans;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
-		ctr = injector.getInstance(MenuController.class);
+		
 		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
 		mr = injector.getInstance(MenuRepository.class);
 		cr = injector.getInstance(ChoiceRepository.class);
 		spotRepo = injector.getInstance(SpotRepository.class);
+		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
+		trans = injector.getInstance(Transformer.class);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -106,10 +117,11 @@ public class MenuControllerTest {
 		mr = mock(MenuRepository.class);
 		pr = mock(ProductRepository.class);
 		cr = mock(ChoiceRepository.class);
+		
 		Transformer trans = mock(Transformer.class);
 		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
 		
-		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl);
 	}
 
 	@After
