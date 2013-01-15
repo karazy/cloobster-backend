@@ -420,12 +420,14 @@ public class MenuController {
 		if(productData.getMenuId() != null)
 			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
 		
+		
 		product.setLongDesc(productData.getLongDesc());
 		product.setName(productData.getName());
 		product.setOrder(productData.getOrder());
 		product.setPrice(productData.getPriceMinor());
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
+		product.setSpecial(productData.isSpecial());
 		
 		if(productData.getChoices() != null) {
 			// Update Choices

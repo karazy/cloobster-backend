@@ -195,6 +195,9 @@ public class Product extends GenericEntity<Product> {
 
 
 	public void setSpecial(boolean special) {
-		this.special = special;
+		if(!Objects.equal(this.special, special)) {
+			this.setDirty(true);
+			this.special = special;
+		}
 	}
 }
