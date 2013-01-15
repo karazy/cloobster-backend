@@ -69,22 +69,17 @@ public class ProductDTO {
 		this.active = product.isActive();
 	}
 
-
-
 	public String getName() {
 		return name;
 	}
-
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
-
 	public String getShortDesc() {
 		return shortDesc;
 	}
-
 
 	public void setShortDesc(String shortDesc) {
 		this.shortDesc = shortDesc;
