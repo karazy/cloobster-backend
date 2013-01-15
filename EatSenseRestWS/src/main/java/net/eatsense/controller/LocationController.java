@@ -751,7 +751,7 @@ public class LocationController {
 		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
 		
 		List<Area> areas;
-		if(onlyActive) {
+		if(!onlyActive) {
 			areas = areaRepo.getByParent(businessKey);
 		} else {
 			areas = areaRepo.getListByParentAndProperty(businessKey, "active", true);
