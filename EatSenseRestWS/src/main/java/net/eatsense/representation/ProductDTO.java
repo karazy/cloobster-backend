@@ -36,7 +36,9 @@ public class ProductDTO {
 	
 	private Integer order;
 	
-	private boolean active;	
+	private boolean active;
+
+	private boolean special;	
 	
 	public ProductDTO() {
 		super();
@@ -58,6 +60,7 @@ public class ProductDTO {
 		this.price = product.getPrice() / 100d;
 		this.order = product.getOrder();
 		this.active = product.isActive();
+		this.setSpecial(product.isSpecial());
 	}
 
 
@@ -155,5 +158,13 @@ public class ProductDTO {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public boolean isSpecial() {
+		return special;
+	}
+
+	public void setSpecial(boolean special) {
+		this.special = special;
 	}
 }

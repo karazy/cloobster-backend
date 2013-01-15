@@ -40,6 +40,8 @@ public class Product extends GenericEntity<Product> {
 	
 	private boolean active = false;
 	
+	private boolean special;
+	
 	public String getName() {
 		return name;
 	}
@@ -184,5 +186,15 @@ public class Product extends GenericEntity<Product> {
 			this.setDirty(true);
 			this.active = active;
 		}
+	}
+
+
+	public boolean isSpecial() {
+		return special;
+	}
+
+
+	public void setSpecial(boolean special) {
+		this.special = special;
 	}
 }
