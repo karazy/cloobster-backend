@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
@@ -114,7 +115,9 @@ public class ProductsResource {
 	@Path("{id}/image")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void removeImage(@PathParam("id") long id) {
-		//TODO stub
+		if(!menuCtrl.removeProductImage(menuCtrl.getProduct(business.getKey(), id))) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
 	}
 	
 	@POST
@@ -122,8 +125,7 @@ public class ProductsResource {
 	@Produces("application/json; charset=UTF-8")
 	@Path("{id}/image")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public ImageDTO updateImage(ImageDTO imageData) {
-		//TODO stub
-		return null;
+	public ImageDTO updateImage(@PathParam("id") long id, ImageDTO imageData) {
+		return menuCtrl.updateProductImage(account, menuCtrl.getProduct(business.getKey(), id), imageData);
 	}
 }

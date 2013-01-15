@@ -5,12 +5,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
+
+import net.eatsense.representation.ImageDTO;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Product extends GenericEntity<Product> {
@@ -39,6 +43,10 @@ public class Product extends GenericEntity<Product> {
 	private List<Key<Choice>> choices;
 	
 	private boolean active = false;
+	
+	@Embedded
+	@Unindexed
+	private List<ImageDTO> images;
 	
 	public String getName() {
 		return name;
@@ -184,5 +192,15 @@ public class Product extends GenericEntity<Product> {
 			this.setDirty(true);
 			this.active = active;
 		}
+	}
+
+
+	public List<ImageDTO> getImages() {
+		return images;
+	}
+
+
+	public void setImages(List<ImageDTO> images) {
+		this.images = images;
 	}
 }
