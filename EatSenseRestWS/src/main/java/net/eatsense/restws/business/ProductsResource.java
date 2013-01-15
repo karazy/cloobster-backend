@@ -19,6 +19,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.ProductDTO;
 
 /**
@@ -107,5 +108,22 @@ public class ProductsResource {
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void markProductForDeletion(@PathParam("id") long id) {
 		menuCtrl.trashProduct(menuCtrl.getProduct(business.getKey(), id), account);
+	}
+	
+	@DELETE
+	@Path("{id}/image")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void removeImage(@PathParam("id") long id) {
+		//TODO stub
+	}
+	
+	@POST
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@Path("{id}/image")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public ImageDTO updateImage(ImageDTO imageData) {
+		//TODO stub
+		return null;
 	}
 }
