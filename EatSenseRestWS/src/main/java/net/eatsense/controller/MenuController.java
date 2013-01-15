@@ -442,7 +442,6 @@ public class MenuController {
 			product.setChoices(choices);
 		}
 		
-		
 		if(product.isDirty())
 			productRepo.saveOrUpdate(product);
 		

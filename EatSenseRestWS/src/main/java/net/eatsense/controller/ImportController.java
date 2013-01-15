@@ -94,6 +94,12 @@ public class ImportController {
 	private Provider<Configuration> configProvider;
 	private LocationController locationController;
 	
+	private List<Product> importedProducts = new ArrayList<Product>();
+	
+
+	public List<Product> getImportedProducts() {
+		return importedProducts;
+	}
 
 	@Inject
 	public ImportController(LocationRepository businessRepo, SpotRepository sr,
@@ -195,6 +201,7 @@ public class ImportController {
 			logger.error(returnMessage);
 			throw new ValidationException(returnMessage);
 		}
+		importedProducts.clear();
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		
@@ -340,6 +347,8 @@ public class ImportController {
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
 		product.setOrder(order);
+		
+		importedProducts.add(product);
 		
 		return product;
 	}

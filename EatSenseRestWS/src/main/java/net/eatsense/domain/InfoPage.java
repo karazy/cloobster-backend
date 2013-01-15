@@ -21,6 +21,17 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	@Embedded
 	@Unindexed
 	private List<ImageDTO> images;
+
+
+	@Parent
+	private Key<Business> business;
+	
+
+	@Override
+	public Key<InfoPage> getKey() {
+		return Key.create(business, InfoPage.class, getId());
+	}
+	
 	
 	public String getTitle() {
 		return title;
@@ -59,16 +70,6 @@ public class InfoPage extends GenericEntity<InfoPage> {
 			this.html = html;
 		}
 	}
-
-	@Parent
-	private Key<Business> business;
-	
-
-	@Override
-	public Key<InfoPage> getKey() {
-		return Key.create(business, InfoPage.class, getId());
-	}
-
 
 	public Key<Business> getBusiness() {
 		return business;

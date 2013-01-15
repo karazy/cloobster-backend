@@ -33,6 +33,20 @@
 		            "barcode": "tst002"
 		        }
 		    ]
+		},
+		{
+    		"name": "Zimmerservice",
+    		"description": "Der Zimmerservice.",
+			"spots": [
+		        {
+		            "name": "Zimmer 001",
+		            "barcode": "room001"
+		        },
+		        {
+		            "name": "Zimmer 002",
+		            "barcode": "room002"
+		        }
+		    ]
 		}
     ],
     "menus": [
