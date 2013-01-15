@@ -1,6 +1,7 @@
 package net.eatsense.restws.customer;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -17,6 +18,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.FeedbackController;
 import net.eatsense.controller.InfoPageController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.controller.MenuController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.controller.SubscriptionController;
@@ -25,6 +27,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Subscription;
+import net.eatsense.representation.AreaDTO;
 import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.FeedbackDTO;
 import net.eatsense.representation.FeedbackFormDTO;
@@ -55,16 +58,19 @@ public class LocationResource {
 	private FeedbackController feedbackCtrl;
 
 	private InfoPageController infoPageCtrl;
+
+	private LocationController locationCtrl;
 	
 	@Inject
 	public LocationResource(MenuController menuCtrl, OrderController orderCtrl,
-			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl, SubscriptionController subCtrl) {
+			BillController billCtrl, FeedbackController feedbackCtrl, InfoPageController infoPageCtrl, SubscriptionController subCtrl, LocationController locationCtrl) {
 		super();
 		this.subCtrl = subCtrl;
 		this.feedbackCtrl = feedbackCtrl;
 		this.menuCtrl = menuCtrl;
 		this.orderCtrl = orderCtrl;
 		this.billCtrl = billCtrl;
+		this.locationCtrl = locationCtrl;
 	}
 	
 	public void setAccount(Account account) {
@@ -219,5 +225,13 @@ public class LocationResource {
 		infoPageResource.setBusiness(business);
 		
 		return infoPageResource;
+	}
+	
+	@GET
+	@Path("areas")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.GUEST)
+	public List<AreaDTO> getAreas() {
+		return locationCtrl.getAreas(business.getKey());
 	}
 }
