@@ -18,11 +18,11 @@
 			"spots": [
 		        {
 		            "name": "Basic Spot 1",
-		            "barcode": "basic001"
+		            "barcode": "tstbasic001"
 		        },
 		        {
 		            "name": "Basic Spot 2",
-		            "barcode": "basic002"
+		            "barcode": "tstbasic002"
 		        }
 		    ],
 		    "menus": ["Menu 1", "Menu 2"]

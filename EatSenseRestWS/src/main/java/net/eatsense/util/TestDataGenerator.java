@@ -91,6 +91,8 @@ public class TestDataGenerator {
 		this.orderRepo = orderRepo;
 	}
 	
+	
+	
 	public void createTestData() {
 		random = new Random();
 		deleteTestData();
@@ -131,7 +133,21 @@ public class TestDataGenerator {
 	private Business createBasicBusiness(LocationImportDTO locationData,
 			Account account) {
 		Business business = importController.addBusiness(locationData, account.getCompany() );
-		Key<Business> businessKey = business.getKey(); 
+		Key<Business> businessKey = business.getKey();
+		
+		Subscription sub = new Subscription();
+		sub.setBasic(true);
+		sub.setBusiness(businessKey);
+		sub.setFee(0);
+		sub.setMaxSpotCount(1);
+		sub.setName("Test Basic Subscription");
+		sub.setStartDate(new Date());
+		sub.setStatus(SubscriptionStatus.APPROVED);
+		Key<Subscription> subKey = ofy.put(sub);
+		business.setBasic(true);
+		business.setActiveSubscription(subKey);
+		
+		ofy.put(business);
 		
 		infoPageGenerator.generate(businessKey, 20, new Locale("en"));
 		return business;
@@ -148,7 +164,7 @@ public class TestDataGenerator {
 		}
 	}
 
-	private void deleteTestData() {
+	public void deleteTestData() {
 		logger.info("deleting all previous data for test account: {}", TEST_LOGIN );
 		
 		Account companyAccount = accountRepo.getByProperty("login", TEST_LOGIN);

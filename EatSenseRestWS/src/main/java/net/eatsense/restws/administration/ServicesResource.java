@@ -304,6 +304,18 @@ public class ServicesResource {
 	@POST
 	@Path("testdata")
 	public void createTestData() {
-		testDataGen.createTestData();
+		if(devEnvironment)
+			testDataGen.createTestData();
+		else
+			throw new WebApplicationException(405);
+	}
+	
+	@DELETE
+	@Path("testdata")
+	public void deleteTestData() {
+		if(devEnvironment)
+			testDataGen.deleteTestData();
+		else
+			throw new WebApplicationException(405);
 	}
 }
