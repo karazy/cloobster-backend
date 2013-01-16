@@ -1,0 +1,112 @@
+{
+    "name": "Cloobster Basic Location",
+    "description": "For testing purposes",
+    "city": "Test",
+    "postcode": "12345",
+    "address": "Test",
+    "currency": "EUR",
+    "payments": [
+        {
+            "name": "Hotelrechung",
+            "order": 1
+        }
+    ],
+    "areas": [
+    	{
+    		"name": "Basic Mode Area",
+    		"description": "Basic Mode Area",
+			"spots": [
+		        {
+		            "name": "Basic Spot 1",
+		            "barcode": "basic001"
+		        },
+		        {
+		            "name": "Basic Spot 2",
+		            "barcode": "basic002"
+		        }
+		    ],
+		    "menus": ["Menu 1", "Menu 2"]
+		}
+    ],
+    "menus": [
+        {
+            "description": null,
+            "title": "Menu 1",
+            "order": 1,
+            "products": [
+                {
+                    "name": "Product 1.1",
+                    "longDesc": "Knackfrischer Salat mit gegrillten Putenbrustfilets, Parmesan, Croûtons, Tomaten und Ceasar-Dressing",
+                    "shortDesc": "Salat mit gegrillten Putenbrustfilets, Parmesan, ...",
+                    "price": 1.1
+                },
+                {
+                    "name": "Product 1.2",
+                    "longDesc": "Rucola Salat mit gratiniertem Ziegenkäse und Feigendip, sowie Cherrytomaten und Walnüssen",
+                    "shortDesc": "Rucola Salat mit gratiniertem Ziegenkäse...",
+                    "price": 1.2
+                },
+                {
+                    "name": "Product 1.3",
+                    "longDesc": "Kleiner Krautsalat oder kleiner gemischter Salat",
+                    "shortDesc": "Krautsalat oder gemischter Salat",
+                    "price": 1.3,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Option 1",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Option 2",
+                                    "id": null,
+                                    "price": 1
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Choose me",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": null,
+            "title": "Menu 2",
+            "order": 2,
+            "products": [
+                {
+                    "name": "Product 2.1",
+                    "longDesc": "",
+                    "shortDesc": "0,25l",
+                    "price": 1.6
+                },
+                {
+                    "name": "Product 2.2",
+                    "longDesc": "",
+                    "shortDesc": "0,25l",
+                    "price": 1.6
+                },
+                {
+                    "name": "Product 2.3",
+                    "longDesc": "",
+                    "shortDesc": "0,33l",
+                    "price": 1.8
+                },
+                {
+                    "name": "Product 2.4",
+                    "longDesc": "",
+                    "shortDesc": "0,33l",
+                    "price": 1.8
+                }
+            ]
+        }
+    ]
+}

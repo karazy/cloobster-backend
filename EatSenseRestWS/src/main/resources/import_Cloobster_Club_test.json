@@ -1,0 +1,809 @@
+{
+    "name": "Cloobster Club",
+    "description": "Test case",
+    "city": "Test",
+    "postcode": "12345",
+    "address": "Test",
+    "currency": "EUR",
+    "payments": [
+        {
+            "name": "EC",
+            "order": 2
+        },
+        {
+            "name": "Bar",
+            "order": 1
+        },
+        {
+            "name": "Kreditkarte",
+            "order": 3
+        }
+    ],
+    "areas": [
+    	{
+    		"name": "Restaurant",
+    		"description": "Der Restaurantbereich.",
+			"spots": [
+		        {
+		            "name": "Tisch 1",
+		            "barcode": "tst001"
+		        },
+		        {
+		            "name": "Tisch 2",
+		            "barcode": "tst002"
+		        }
+		    ],
+		    "menus": [ "Rindfleischburger", "Geflügelburger", "Vegetarische Burger", "Salate", "Getränke"]
+		},
+		{
+    		"name": "Zimmerservice",
+    		"description": "Der Zimmerservice.",
+			"spots": [
+		        {
+		            "name": "Zimmer 001",
+		            "barcode": "room001"
+		        },
+		        {
+		            "name": "Zimmer 002",
+		            "barcode": "room002"
+		        },
+		        {
+		            "name": "Zimmer 003",
+		            "barcode": "room003"
+		        },
+		        {
+		            "name": "Zimmer 004",
+		            "barcode": "room004"
+		        },
+		        {
+		            "name": "Zimmer 005",
+		            "barcode": "room005"
+		        },
+		        {
+		            "name": "Zimmer 006",
+		            "barcode": "room006"
+		        },
+		        {
+		            "name": "Zimmer 007",
+		            "barcode": "room007"
+		        },
+		        {
+		            "name": "Zimmer 008",
+		            "barcode": "room008"
+		        },
+		        {
+		            "name": "Zimmer 009",
+		            "barcode": "room009"
+		        },
+		        {
+		            "name": "Zimmer 010",
+		            "barcode": "room010"
+		        },
+		        {
+		            "name": "Zimmer 011",
+		            "barcode": "room011"
+		        },
+		        {
+		            "name": "Zimmer 012",
+		            "barcode": "room012"
+		        },
+		        {
+		            "name": "Zimmer 013",
+		            "barcode": "room013"
+		        },
+		        {
+		            "name": "Zimmer 014",
+		            "barcode": "room014"
+		        },
+		        {
+		            "name": "Zimmer 015",
+		            "barcode": "room015"
+		        },
+		        {
+		            "name": "Zimmer 016",
+		            "barcode": "room016"
+		        },
+		        {
+		            "name": "Zimmer 017",
+		            "barcode": "room017"
+		        },
+		        {
+		            "name": "Zimmer 018",
+		            "barcode": "room018"
+		        },
+		        {
+		            "name": "Zimmer 019",
+		            "barcode": "room019"
+		        },
+		        {
+		            "name": "Zimmer 020",
+		            "barcode": "room020"
+		        }
+		        
+		    ],
+		    "menus": [ "Rindfleischburger", "Geflügelburger", "Vegetarische Burger", "Salate", "Getränke"]
+		}
+    ],
+    "menus": [
+        {
+            "description": "100% saftiges, lockeres Bio-Rinderhackfleisch",
+            "title": "Rindfleischburger",
+            "order": 1,
+            "products": [
+                {
+                    "name": "Der Pure",
+                    "longDesc": "Mit Bio-Rindfleisch, Salatherzen, Käse, Bio-Ketchup und Mayonnaise",
+                    "shortDesc": "Mit Bio-Rindfleisch, Salatherzen, Käse...",
+                    "price": 4.25,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "mit Bio-Weißmehlbrötchen",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "mit Bio-Dinkel-Hafer-Bröcthen",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Burger Brötchen",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
+                                    "name": "Tomate",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Käse",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bacon",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spiegelei",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "gegrillte Paprika",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Rucola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Mozzarella",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 0.5,
+                            "maxOccurence": 8,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Burger Extras",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Coca-Cola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Coca-Cola light",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bionade",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Selters",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spezi",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 3.3,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "OVERRIDE_FIXED_SUM",
+                            "text": "Menü mit Pommes & Getränk",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Der Klassiker",
+                    "longDesc": "Mit leckerem Bio-Rindfleisch, Tomaten, roten Zwiebeln, Gürkchen, Salatherzen und einer hausgemachten Burgersauce",
+                    "shortDesc": "Mit Bio-Rindfleisch, Tomaten, Gürkchen...",
+                    "price": 5.75,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "mit Bio-Weißmehlbrötchen",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "mit Bio-Dinkel-Hafer-Bröcthen",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Burger Brötchen",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
+                                    "name": "Tomate",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Käse",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bacon",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spiegelei",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "gegrillte Paprika",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Rucola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Mozzarella",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 0.5,
+                            "maxOccurence": 8,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Burger Extras",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Coca-Cola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Coca-Cola light",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bionade",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Selters",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spezi",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 3.3,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "OVERRIDE_FIXED_SUM",
+                            "text": "Menü mit Pommes & Getränk",
+                            "included": 0,
+                            "selected": null
+                        }
+                     ]
+                } 
+            ]
+        },
+        {
+            "description": "100% zartes Hühnchenbrustfilet aus der Region, saftig und mild im Geschmack",
+            "title": "Geflügelburger",
+            "order": 2,
+            "products": [
+                {
+                    "name": "Der Geflügelte",
+                    "longDesc": "Mit zartem Hühnchenbrustfilet, Senfgurken, Tomaten, roten Zwiebeln, Salatblatt, leckerer Cocktailsauce und einer hausgemachten Remoulade",
+                    "shortDesc": "Mit Hühnchenbrustfilet, Tomaten, Cocktailsauce...",
+                    "price": 5.95,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "mit Bio-Weißmehlbrötchen",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "mit Bio-Dinkel-Hafer-Bröcthen",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Burger Brötchen",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
+                                    "name": "Tomate",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Käse",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bacon",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spiegelei",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "gegrillte Paprika",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Rucola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Mozzarella",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 0.5,
+                            "maxOccurence": 8,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Burger Extras",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Coca-Cola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Coca-Cola light",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bionade",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Selters",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spezi",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 3.3,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "OVERRIDE_FIXED_SUM",
+                            "text": "Menü mit Pommes & Getränk",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Der Geflügelte mit Käse",
+                    "longDesc": "Schmeckt so gut wie der Geflügelte - mit einer Portion Cheddarkäse extra",
+                    "shortDesc": "Wie der Geflügelte, aber mit Käse",
+                    "price": 6.15,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "mit Bio-Weißmehlbrötchen",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "mit Bio-Dinkel-Hafer-Bröcthen",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Burger Brötchen",
+                            "included": 0,
+                            "selected": null
+                        },
+                         {
+                            "options": [
+                                {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
+                                    "name": "Tomate",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Käse",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bacon",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spiegelei",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "gegrillte Paprika",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Rucola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Mozzarella",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 0.5,
+                            "maxOccurence": 8,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Burger Extras",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Coca-Cola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Coca-Cola light",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bionade",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Selters",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spezi",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 3.3,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "OVERRIDE_FIXED_SUM",
+                            "text": "Menü mit Pommes & Getränk",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": null,
+            "title": "Vegetarische Burger",
+            "order": 3,
+            "products": [
+                {
+                    "name": "Der Grüne",
+                    "longDesc": "Mit einem Bio-Grünkernbratling, Tomaten, Zwiebeln, Gürkchen, Salatherzen, Ketchup und Bone’s Suckin Sauce",
+                    "shortDesc": "Mit Grünkernbratling, Tomaten, Gürkchen...",
+                    "price": 4.95,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "mit Bio-Weißmehlbrötchen",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "mit Bio-Dinkel-Hafer-Bröcthen",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Burger Brötchen",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Zusätzliches Bio-Rindfleisch-Patty",
+                                    "id": null,
+                                    "price": 2.5
+                                },
+                                {
+                                    "name": "Tomate",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Käse",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bacon",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spiegelei",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "gegrillte Paprika",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Rucola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Mozzarella",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 0.5,
+                            "maxOccurence": 8,
+                            "minOccurence": 0,
+                            "overridePrice": "NONE",
+                            "text": "Burger Extras",
+                            "included": 0,
+                            "selected": null
+                        },
+                        {
+                            "options": [
+                                {
+                                    "name": "Coca-Cola",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Coca-Cola light",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Bionade",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Selters",
+                                    "id": null,
+                                    "price": 0.5
+                                },
+                                {
+                                    "name": "Spezi",
+                                    "id": null,
+                                    "price": 0.5
+                                }
+                            ],
+                            "price": 3.3,
+                            "maxOccurence": 1,
+                            "minOccurence": 0,
+                            "overridePrice": "OVERRIDE_FIXED_SUM",
+                            "text": "Menü mit Pommes & Getränk",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": null,
+            "title": "Salate",
+            "order": 6,
+            "products": [
+                {
+                    "name": "Caesar Salad nach Pauls Art",
+                    "longDesc": "Knackfrischer Salat mit gegrillten Putenbrustfilets, Parmesan, Croûtons, Tomaten und Ceasar-Dressing",
+                    "shortDesc": "Salat mit gegrillten Putenbrustfilets, Parmesan, ...",
+                    "price": 6.8
+                },
+                {
+                    "name": "Der Rucola Salat",
+                    "longDesc": "Rucola Salat mit gratiniertem Ziegenkäse und Feigendip, sowie Cherrytomaten und Walnüssen",
+                    "shortDesc": "Rucola Salat mit gratiniertem Ziegenkäse...",
+                    "price": 6.9
+                },
+                {
+                    "name": "Der Beilagensalat",
+                    "longDesc": "Kleiner Krautsalat oder kleiner gemischter Salat",
+                    "shortDesc": "Krautsalat oder gemischter Salat",
+                    "price": 2.5,
+                    "choices": [
+                        {
+                            "options": [
+                                {
+                                    "name": "Kleiner Krautsalat",
+                                    "id": null,
+                                    "price": 0
+                                },
+                                {
+                                    "name": "Kleiner gemischter Salat",
+                                    "id": null,
+                                    "price": 0
+                                }
+                            ],
+                            "price": 0,
+                            "maxOccurence": 1,
+                            "minOccurence": 1,
+                            "overridePrice": "NONE",
+                            "text": "Beilagensalat",
+                            "included": 0,
+                            "selected": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": null,
+            "title": "Getränke",
+            "order": 9,
+            "products": [
+                {
+                    "name": "Selters Classic",
+                    "longDesc": "",
+                    "shortDesc": "0,25l",
+                    "price": 1.6
+                },
+                {
+                    "name": "Selters Naturell",
+                    "longDesc": "",
+                    "shortDesc": "0,25l",
+                    "price": 1.6
+                },
+                {
+                    "name": "Coca-Cola",
+                    "longDesc": "",
+                    "shortDesc": "0,33l",
+                    "price": 1.8
+                },
+                {
+                    "name": "Coca-Cola light",
+                    "longDesc": "",
+                    "shortDesc": "0,33l",
+                    "price": 1.8
+                }
+            ]
+        }
+    ]
+}

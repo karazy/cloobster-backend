@@ -95,7 +95,14 @@ public class ImportController {
 	private LocationController locationController;
 	
 	private List<Product> importedProducts = new ArrayList<Product>();
+	private List<Area> areas = new ArrayList<Area>();
+	private Map<String, Menu> menuMap = new HashMap<String, Menu>();
+	private List<Spot> spots = new ArrayList<Spot>();
 	
+
+	public List<Spot> getSpots() {
+		return spots;
+	}
 
 	public List<Product> getImportedProducts() {
 		return importedProducts;
@@ -195,17 +202,21 @@ public class ImportController {
 		return new FeedbackFormDTO(feedbackForm);
 	}
 
-	public Key<Business> addBusiness(LocationImportDTO businessData, Key<Company> companyKey) {
+	public Business addBusiness(LocationImportDTO businessData, Key<Company> companyKey) {
 		if (!isValidBusinessData(businessData)) {
 			logger.error("Invalid business data, import aborted.");
 			logger.error(returnMessage);
 			throw new ValidationException(returnMessage);
 		}
+		
+		// Clear all in memory collections of imported entities
 		importedProducts.clear();
+		menuMap.clear();
+		spots.clear();
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
-		
-		Key<Business> kR = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments(), companyKey );
+		Business business = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments(), companyKey );
+		Key<Business> kR = business.getKey();
 		
 		if(kR == null) {
 			logger.info("Creation of business in datastore failed, import aborted.");
@@ -214,17 +225,6 @@ public class ImportController {
 		
 		// Create welcome area and spot
 		locationController.createWelcomeAreaAndSpot(kR);
-		
-		// Create service area and spots.
-		for(AreaImportDTO area : businessData.getAreas()) {
-			Key<Area> kA = createAndSaveArea(kR, area.getName(), area.getDescription());
-			
-			for(SpotDTO spot : area.getSpots()) {
-				if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), kA) == null )
-					logger.info("Error while saving spot with name: " + spot.getName());
-			}
-		}
-		
 		
 		CurrencyUnit currencyUnit = CurrencyUnit.of(businessData.getCurrency());
 		
@@ -266,11 +266,26 @@ public class ImportController {
 
 		}
 		
+		// Create service area and spots.
+		for(AreaImportDTO area : businessData.getAreas()) {
+			ArrayList<Key<Menu>> menuKeys = new ArrayList<Key<Menu>>();
+			for (String menuTitle : area.getMenus()) {
+				menuKeys.add(menuMap.get(menuTitle).getKey());
+			}
+			
+			Key<Area> kA = createAndSaveArea(kR, area.getName(), area.getDescription(), menuKeys);
+			
+			for(SpotDTO spot : area.getSpots()) {
+				if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), kA) == null )
+					logger.info("Error while saving spot with name: " + spot.getName());
+			}
+		}
+		
 		logger.info("Import finished for business: " +businessData.getName() );
-		return kR;
+		return business;
 	}
 	
-	private Key<Business> createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods, Key<Company> companyKey) {
+	private Business createAndSaveBusiness(String name, String desc, String address, String city, String postcode, Collection<PaymentMethod> paymentMethods, Key<Company> companyKey) {
 		logger.info("Creating new business with data: " + name + ", " + desc );
 		
 		Business business = new Business();
@@ -284,16 +299,17 @@ public class ImportController {
 		
 		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
 		logger.info("Created new business: {}", businessKey);
-		return businessKey;
+		return business;
 	}
 	
-	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description) {
+	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description, List<Key<Menu>> menuKeys) {
 		checkNotNull(businessKey, "businessKey was null");
 		Area area = new Area();
 		area.setBusiness(businessKey);
 		area.setDescription(description);
 		area.setName(name);
 		area.setActive(true);
+		area.setMenus(menuKeys);
 		
 		Key<Area> kA = areaRepo.saveOrUpdate(area);
 		logger.info("Created new area with id: " + kA.getId());
@@ -310,7 +326,7 @@ public class ImportController {
 		s.setName(name);
 		s.setBarcode(barcode);
 		s.setArea(areaKey);
-		
+		spots .add(s);
 		Key<Spot> kS = spotRepo.saveOrUpdate(s);
 		logger.info("Created new spot with id: " + kS.getId());
 		return kS;
@@ -327,6 +343,8 @@ public class ImportController {
 		menu.setBusiness(businessKey);
 		menu.setDescription(description);
 		menu.setOrder(order);
+		
+		menuMap.put(title, menu);
 				
 		Key<Menu> kM = menuRepo.saveOrUpdate(menu);
 		logger.info("Created new menu with id: " + kM.getId());
