@@ -14,6 +14,7 @@
 		<property name="net.karazy.uploads.token.timeout" value="120"/>
 		<property name="net.karazy.app.download.url" value="http://www.cloobster.com/download"/>
 		<property name="net.karazy.url.outside" value="https://cloobster-test.appspot.com"/>
+		<property name="net.karazy.api.version" value="1"/>
 	</system-properties>
 
 	<inbound-services>
