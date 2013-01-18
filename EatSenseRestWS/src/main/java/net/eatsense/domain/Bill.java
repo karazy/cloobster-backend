@@ -36,6 +36,47 @@ public class Bill extends GenericEntity<Bill> {
 	private Long total;
 	
 	private boolean cleared;
+	
+	private Key<Spot> spot;
+	@Unindexed
+	private String spotName;
+	
+	private Key<Area> area;
+	@Unindexed
+	private String areaName;
+
+	public Key<Spot> getSpot() {
+		return spot;
+	}
+
+	public void setSpot(Key<Spot> spot) {
+		this.spot = spot;
+	}
+
+	public String getSpotName() {
+		return spotName;
+	}
+
+	public void setSpotName(String spotName) {
+		this.spotName = spotName;
+	}
+
+	public Key<Area> getArea() {
+		return area;
+	}
+
+	public void setArea(Key<Area> area) {
+		this.area = area;
+	}
+
+	public String getAreaName() {
+		return areaName;
+	}
+
+	public void setAreaName(String areaName) {
+		this.areaName = areaName;
+	}
+
 
 	public Key<Business> getBusiness() {
 		return business;
