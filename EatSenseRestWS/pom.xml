@@ -859,7 +859,7 @@
 										<execute />
 									</action>
 								</pluginExecution>
-								<!-- <pluginExecution>
+								<pluginExecution>
                   					<pluginExecutionFilter>
                     					<groupId>net.kindleit</groupId>
 					                    <artifactId>maven-gae-plugin</artifactId>
@@ -872,7 +872,7 @@
 					                	<execute />
 					                </action>
 				                </pluginExecution>
-				                 -->
+				                 
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
