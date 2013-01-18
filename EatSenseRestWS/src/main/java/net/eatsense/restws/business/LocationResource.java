@@ -108,7 +108,7 @@ public class LocationResource {
 	public String requestToken( @FormParam("clientId") String clientId ) {
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
 		
-		String token = channelCtrlProvider.get().createCockpitChannel(business, clientId, timeout);
+		String token = channelCtrlProvider.get().createCockpitChannel(business,account, clientId, timeout);
 		if(token == null)
 			throw new NotFoundException();
 		return token;
