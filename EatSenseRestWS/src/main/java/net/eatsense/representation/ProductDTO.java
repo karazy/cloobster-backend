@@ -40,6 +40,10 @@ public class ProductDTO {
 
 	private boolean special;	
 	
+	private ImageDTO image;
+
+	private String imageUrl;
+	
 	public ProductDTO() {
 		super();
 	}
@@ -54,6 +58,11 @@ public class ProductDTO {
 		this.id = product.getId();
 		
 		this.menuId = product.getMenu() != null ? product.getMenu().getId():null;
+		this.image = (product.getImages() != null && !product.getImages().isEmpty())
+				? product.getImages().get(0)
+				: null;
+		this.setImageUrl((image != null) ? image.getUrl()
+				: null);
 		this.name = product.getName();
 		this.shortDesc = product.getShortDesc();
 		this.longDesc = product.getLongDesc();
@@ -143,6 +152,7 @@ public class ProductDTO {
 		this.active = active;
 	}
 
+
 	public boolean isSpecial() {
 		return special;
 	}
@@ -150,4 +160,22 @@ public class ProductDTO {
 	public void setSpecial(boolean special) {
 		this.special = special;
 	}
+	
+	public ImageDTO getImage() {
+		return image;
+	}
+
+	public void setImage(ImageDTO image) {
+		this.image = image;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 }
+
+
