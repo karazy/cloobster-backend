@@ -9,6 +9,7 @@ import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
+import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.controller.SubscriptionController;
@@ -181,6 +182,7 @@ public class EatSenseGuiceServletContextListener extends
 		eventBus.register(injector.getInstance(SubscriptionController.class));
 		eventBus.register(injector.getInstance(MessageController.class));
 		eventBus.register(injector.getInstance(MailController.class));
+		eventBus.register(injector.getInstance(InfoPageController.class));
 		
 		// Register Objectify instances.
 		
