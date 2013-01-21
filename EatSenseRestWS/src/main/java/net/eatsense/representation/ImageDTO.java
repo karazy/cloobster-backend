@@ -27,6 +27,15 @@ public class ImageDTO {
 	 */
 	String url;
 	
+	public ImageDTO() {
+	}
+	
+	public ImageDTO(String blobKey, String id, String url) {
+		super();
+		this.blobKey = blobKey;
+		this.id = id;
+		this.url = url;
+	}
 	/**
 	 * @return {@link #blobKey}
 	 */

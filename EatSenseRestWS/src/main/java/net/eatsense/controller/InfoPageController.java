@@ -2,7 +2,11 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +20,7 @@ import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.service.FileServiceHelper;
 import net.eatsense.templates.TemplateRepository;
 import net.eatsense.validation.ValidationHelper;
 
@@ -26,8 +31,11 @@ import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.blobstore.BlobKey;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.io.Files;
+import com.google.common.primitives.Bytes;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -40,6 +48,8 @@ import com.googlecode.objectify.NotFoundException;
  *
  */
 public class InfoPageController {
+	private static final String INFOPAGE_IMAGE_PATH = "admin/img/templates/infopage_demo.jpg";
+
 	private static final String INFOPAGE_TEMPLATE_NAME = "infopage-demo-de.json";
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -51,8 +61,10 @@ public class InfoPageController {
 	private final TemplateController templateCtrl;
 	private final ObjectMapper objectMapper;
 
+	private final FileServiceHelper fileService;
+
 	@Inject
-	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider, ValidationHelper validator, PolicyFactory sanitizer, TemplateController templateCtrl, ObjectMapper objectMapper) {
+	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider, ValidationHelper validator, PolicyFactory sanitizer, TemplateController templateCtrl, ObjectMapper objectMapper, FileServiceHelper fileService) {
 		super();
 		this.sanitizer = sanitizer;
 		this.validator = validator;
@@ -61,6 +73,7 @@ public class InfoPageController {
 		this.localizationProvider = localizationProvider;
 		this.templateCtrl = templateCtrl;
 		this.objectMapper = objectMapper;
+		this.fileService = fileService;
 	}
 	
 	/**
@@ -217,7 +230,15 @@ public class InfoPageController {
 	 * @param id for the InfoPage entity to delete
 	 */
 	public void delete(Key<Business> businessKey, Long id) {
-		infoPageRepo.deleteWithTranslation(infoPageRepo.getKey(businessKey, id));
+		InfoPage infoPage;
+		try {
+			infoPage = infoPageRepo.getById(businessKey, id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		
+		imageCtrl.removeImage("image", infoPage.getImages());
+		infoPageRepo.deleteWithTranslation(infoPage.getKey());
 	}
 	
 	/**
@@ -243,9 +264,26 @@ public class InfoPageController {
 			logger.error("Unable to parse \"{}\" as JSON represation of InfoPageDTO",e);
 			return;
 		}
-		
 		Key<Business> locationKey = event.getLocation().getKey();
-		create(locationKey, infoPageData);
+		InfoPage infoPage = infoPageRepo.newEntity();
+		infoPage.setBusiness(locationKey);
+		
+		try {
+			File demoImageFile = new File(INFOPAGE_IMAGE_PATH);
+			byte[] bytes = Files.toByteArray(demoImageFile);
+			String mimeType = URLConnection.guessContentTypeFromName(demoImageFile.getName());
+			
+			BlobKey demoImageBlobKey = fileService.saveNewBlob(demoImageFile.getName(), mimeType, bytes);
+			String blobKeyString = demoImageBlobKey.getKeyString();
+			
+			infoPage.setImages(new ArrayList<ImageDTO>());
+			infoPage.getImages().add(new ImageDTO(blobKeyString, "image", imageCtrl.createServingUrl(blobKeyString)));
+		} catch (Exception e) {
+			logger.error("Unable to read demo InfoPage file from path: " + INFOPAGE_IMAGE_PATH, e);
+		}
+		
+		update(infoPage, infoPageData);
+		
 		logger.info("Created demo InfoPage for {}.", locationKey);
 	}
 }

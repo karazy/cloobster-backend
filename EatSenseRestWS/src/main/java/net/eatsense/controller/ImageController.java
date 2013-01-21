@@ -127,7 +127,7 @@ public class ImageController {
 			}
 			else {
 				// Create new serving url from the new blob key.
-				image.setUrl(imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey( new BlobKey( image.getBlobKey()) )));
+				image.setUrl(createServingUrl(image.getBlobKey()));
 			}
 			if(account.getImageUploads() == null || account.getImageUploads().isEmpty()) {
 				throw new ValidationException("No uploaded images for Account"+ account.getId());
@@ -152,6 +152,14 @@ public class ImageController {
 		}
 		
 		return new UpdateImagesResult(images, dirty, image);
+	}
+
+	/**
+	 * @param image
+	 * @return
+	 */
+	public String createServingUrl(String blobKey) {
+		return imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey( new BlobKey( blobKey) ));
 	}
 	
 	/**
