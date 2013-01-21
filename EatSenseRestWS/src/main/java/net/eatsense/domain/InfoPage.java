@@ -26,17 +26,14 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	@Parent
 	private Key<Business> business;
 	
-
 	@Override
 	public Key<InfoPage> getKey() {
 		return Key.create(business, InfoPage.class, getId());
-	}
-	
+	}	
 	
 	public String getTitle() {
 		return title;
 	}
-
 
 	public void setTitle(String title) {
 		if(!Objects.equal(this.title, title)) {

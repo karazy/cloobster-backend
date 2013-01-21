@@ -25,6 +25,7 @@ import net.eatsense.templates.Template;
 import net.eatsense.templates.TemplateRepository;
 import net.eatsense.validation.ValidationHelper;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,12 +57,16 @@ public class InfoPageControllerTest {
 	private ValidationHelper validator;
 	
 	private PolicyFactory sanitizer;
+	@Mock
+	private TemplateController templateCtrl;
+	@Mock
+	private ObjectMapper mapper;
 
 	@Before
 	public void setUp() throws Exception {
 		
 		sanitizer = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);
-		ctrl = new InfoPageController(infoPageRepo, imageCtrl, localeProvider, validator, sanitizer);
+		ctrl = new InfoPageController(infoPageRepo, imageCtrl, localeProvider, validator, sanitizer, templateCtrl, mapper);
 	}
 	
 	@Test

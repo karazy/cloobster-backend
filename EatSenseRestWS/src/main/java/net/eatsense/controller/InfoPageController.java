@@ -2,6 +2,7 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -10,15 +11,23 @@ import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.InfoPage;
 import net.eatsense.domain.Business;
+import net.eatsense.event.NewLocationEvent;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.templates.TemplateRepository;
 import net.eatsense.validation.ValidationHelper;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.owasp.html.PolicyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -31,20 +40,27 @@ import com.googlecode.objectify.NotFoundException;
  *
  */
 public class InfoPageController {
+	private static final String INFOPAGE_TEMPLATE_NAME = "infopage-demo-de.json";
+	
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final InfoPageRepository infoPageRepo;
 	private final LocalizationProvider localizationProvider;
 	private final ImageController imageCtrl;
 	private final ValidationHelper validator;
 	private final PolicyFactory sanitizer;
+	private final TemplateController templateCtrl;
+	private final ObjectMapper objectMapper;
 
 	@Inject
-	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider, ValidationHelper validator, PolicyFactory sanitizer) {
+	public InfoPageController(InfoPageRepository infoPageRepo, ImageController imageCtrl, LocalizationProvider localizationProvider, ValidationHelper validator, PolicyFactory sanitizer, TemplateController templateCtrl, ObjectMapper objectMapper) {
 		super();
 		this.sanitizer = sanitizer;
 		this.validator = validator;
 		this.infoPageRepo = infoPageRepo;
 		this.imageCtrl = imageCtrl;
 		this.localizationProvider = localizationProvider;
+		this.templateCtrl = templateCtrl;
+		this.objectMapper = objectMapper;
 	}
 	
 	/**
@@ -202,5 +218,34 @@ public class InfoPageController {
 	 */
 	public void delete(Key<Business> businessKey, Long id) {
 		infoPageRepo.deleteWithTranslation(infoPageRepo.getKey(businessKey, id));
+	}
+	
+	/**
+	 * Handles basic Subscription creation before creation of a new Business in the store.
+	 * 
+	 * @param event
+	 */
+	@Subscribe
+	public void handleNewLocationEvent(NewLocationEvent event) {
+		logger.info("Adding german demo InfoPage to new location ...");
+		
+		String infoPageJson = templateCtrl.getAndReplace(INFOPAGE_TEMPLATE_NAME);
+		
+		if(infoPageJson == null) {
+			logger.warn("No template \"{}\" found.", INFOPAGE_TEMPLATE_NAME);
+			return;
+		}
+		
+		InfoPageDTO infoPageData = null;
+		try {
+			infoPageData = objectMapper.readValue(infoPageJson, InfoPageDTO.class);
+		} catch (Exception e) {
+			logger.error("Unable to parse \"{}\" as JSON represation of InfoPageDTO",e);
+			return;
+		}
+		
+		Key<Business> locationKey = event.getLocation().getKey();
+		create(locationKey, infoPageData);
+		logger.info("Created demo InfoPage for {}.", locationKey);
 	}
 }
