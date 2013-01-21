@@ -12,6 +12,7 @@ import com.googlecode.objectify.annotation.Parent;
 public class Channel {
 	@Id
 	private String clientId;
+	private String lastChannelId;
 	private Date creationTime;
 	private Date lastOnlineCheck;
 	@Parent
@@ -61,5 +62,11 @@ public class Channel {
 	}
 	public void setChannelCount(int channelCount) {
 		this.channelCount = channelCount;
+	}
+	public String getLastChannelId() {
+		return lastChannelId;
+	}
+	public void setLastChannelId(String lastChannelId) {
+		this.lastChannelId = lastChannelId;
 	}
 }

@@ -7,6 +7,7 @@ import javax.ws.rs.Path;
 
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessTokenRepository;
+import net.eatsense.controller.ChannelController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +21,12 @@ public class CronResource {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final AccessTokenRepository accessTokenRepo;
+	private final ChannelController channelCtrl;
 
 	@Inject
-	public CronResource(AccessTokenRepository accessTokenRepo) {
+	public CronResource(AccessTokenRepository accessTokenRepo, ChannelController channelCtrl) {
 		this.accessTokenRepo = accessTokenRepo;
+		this.channelCtrl = channelCtrl;
 	}
 	
 	/**
@@ -37,6 +40,14 @@ public class CronResource {
 		QueryResultIterable<Key<AccessToken>> expiredTokens = this.accessTokenRepo.query().filter("expires <=", new Date()).fetchKeys();
 		
 		accessTokenRepo.delete(expiredTokens);
+		
+		return "OK";
+	}
+	
+	@GET
+	@Path("checkcockpitchannels")
+	public String checkCockpitChannels(){
+		channelCtrl.checkAllOnlineChannels();
 		
 		return "OK";
 	}

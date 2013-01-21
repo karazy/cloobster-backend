@@ -44,6 +44,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -76,6 +77,8 @@ public class ChannelControllerTest {
 	private Key<Account> accountKey;
 	@Mock
 	private net.eatsense.domain.Channel newChannel;
+	@Mock
+	private EventBus eventBus;
 
 	@Before
 	public void setUp() throws Exception {
@@ -84,7 +87,7 @@ public class ChannelControllerTest {
 		when(ofyService.keys()).thenReturn(ofyKeys);
 		when(account.getKey()).thenReturn(accountKey);
 		when(channelProvider.get()).thenReturn(newChannel);
-		ctr = new ChannelController(rr, cr, jsonMapper, channelService, ofyService, channelProvider);
+		ctr = new ChannelController(rr, cr, jsonMapper, channelService, ofyService, channelProvider, eventBus);
 	}
 
 	@After

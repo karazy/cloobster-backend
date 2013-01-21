@@ -1,0 +1,17 @@
+cloobster - Cockpit Verbindung unterbrochen
+Sehr geehrtes {0},
+
+
+die Kommunikation mit Ihrem cloobster Cockpit ist seit {1} unterbrochen. Mögliche Gründe dafür können sein:
+- Das Gerät auf dem Ihr cloobster Cockpit läuft hat keine Verbindung zum Internet.
+- Der Chrome Browser wurde geschlossen.
+
+So können Sie das Problem beheben.
+- Prüfen Sie die Internetverbindung.
+- Starten Sie den Internetbrowser "Chrome" neu und klicken Sie auf "Seite neu laden".
+- Öffnen Sie die Internetseite Ihres Cockpits (https://www.cloobster.com/cockpit).
+- Loggen Sie sich erneut ein.
+
+Dies ist eine automatisch generierte Systembenachrichtigung. Wenn Sie weiterhin Probleme haben, können Sie sich gerne bei uns melden
+
+Das cloobster Service Team
