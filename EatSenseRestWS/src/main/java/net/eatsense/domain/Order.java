@@ -7,14 +7,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.representation.ImageDTO;
+
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
-
-import net.eatsense.domain.embedded.OrderStatus;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
@@ -64,6 +66,10 @@ public class Order extends GenericEntity<Order> {
 	
 	@Min(0)
 	private long productPrice;
+	
+	@Embedded
+	@Unindexed
+	private ImageDTO image;
 	
 	@Unindexed
 	private List<Key<OrderChoice>> choices = new ArrayList<Key<OrderChoice>>();
@@ -217,4 +223,13 @@ public class Order extends GenericEntity<Order> {
 		this.productName = productName;
 	}
 
+
+	public ImageDTO getProductImage() {
+		return image;
+	}
+
+
+	public void setProductImage(ImageDTO productImage) {
+		this.image = productImage;
+	}
 }
