@@ -45,7 +45,7 @@ public class CronResource {
 	}
 	
 	@GET
-	@Path("checkcockpitchannels")
+	@Path("checkcockpits")
 	public String checkCockpitChannels(){
 		channelCtrl.checkAllOnlineChannels();
 		

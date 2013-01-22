@@ -652,8 +652,9 @@ public class ChannelController {
 		}
 
 		calendar.add(Calendar.MINUTE, -onlineCheckTimeout);
-		
+		int channelsActive = 0;
 		for (net.eatsense.domain.Channel channel : channelQueryResult) {
+			channelsActive++;
 			if(channel.getLastOnlineCheck().before(calendar.getTime())) {
 				logger.warn("Channel={} had no online check for {} minutes", channel.getLastChannelId(), onlineCheckTimeout);
 				if(!channel.isWarningSent()) {
@@ -666,5 +667,6 @@ public class ChannelController {
 				}
 			}
 		}
+		logger.info("{} cockpit client should be active.", channelsActive);
 	}
 }
