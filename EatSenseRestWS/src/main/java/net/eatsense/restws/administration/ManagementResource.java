@@ -10,6 +10,7 @@ import net.eatsense.controller.ChannelController;
 import net.eatsense.representation.ChannelDTO;
 
 import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class ManagementResource {
@@ -18,6 +19,7 @@ public class ManagementResource {
 	private ResourceContext resourceContext;
 	private final ChannelController channelCtrl;
 	
+	@Inject
 	public ManagementResource(ChannelController channelCtrl) {
 		this.channelCtrl = channelCtrl;
 	}

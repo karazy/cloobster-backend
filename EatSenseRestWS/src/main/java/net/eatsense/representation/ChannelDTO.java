@@ -16,6 +16,7 @@ public class ChannelDTO {
 	private long locationId;
 	private String locationName;
 	private long accountId;
+	private boolean warningSent;
 	
 	public ChannelDTO() {
 	}
@@ -29,6 +30,7 @@ public class ChannelDTO {
 		this.creationTime = channel.getCreationTime();
 		this.lastChannelId = channel.getLastChannelId();
 		this.lastOnlineCheck = channel.getLastOnlineCheck();
+		this.setWarningSent(channel.isWarningSent());
 	}
 	
 	public String getId() {
@@ -93,6 +95,14 @@ public class ChannelDTO {
 
 	public void setLocationName(String locationName) {
 		this.locationName = locationName;
+	}
+
+	public boolean isWarningSent() {
+		return warningSent;
+	}
+
+	public void setWarningSent(boolean warningSent) {
+		this.warningSent = warningSent;
 	}
 
 	public final static Function<Channel, ChannelDTO> toDTO = 
