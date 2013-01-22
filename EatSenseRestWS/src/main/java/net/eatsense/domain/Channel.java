@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Channel {
@@ -17,8 +18,11 @@ public class Channel {
 	private Date lastOnlineCheck;
 	@Parent
 	private Key<Business> business;
+	@Unindexed
+	private String locationName;
 	private Key<Account> account;
 	private boolean warningSent;
+	@Unindexed
 	private int channelCount;
 	
 	public String getClientId() {
@@ -68,5 +72,11 @@ public class Channel {
 	}
 	public void setLastChannelId(String lastChannelId) {
 		this.lastChannelId = lastChannelId;
+	}
+	public String getLocationName() {
+		return locationName;
+	}
+	public void setLocationName(String locationName) {
+		this.locationName = locationName;
 	}
 }

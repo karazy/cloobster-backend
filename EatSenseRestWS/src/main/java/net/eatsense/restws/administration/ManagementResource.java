@@ -1,16 +1,25 @@
 package net.eatsense.restws.administration;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.controller.ChannelController;
+import net.eatsense.representation.ChannelDTO;
+
+import com.google.common.collect.Iterables;
 import com.sun.jersey.api.core.ResourceContext;
 
 public class ManagementResource {
 	
 	@Context
 	private ResourceContext resourceContext;
+	private final ChannelController channelCtrl;
 	
-	public ManagementResource() {
+	public ManagementResource(ChannelController channelCtrl) {
+		this.channelCtrl = channelCtrl;
 	}
 	
 	@Path("subscriptions")
@@ -26,5 +35,12 @@ public class ManagementResource {
 	@Path("locations")
 	public LocationsResource getLocationsResource() {
 		return resourceContext.getResource(LocationsResource.class);
+	}
+	
+	@GET
+	@Path("channels")
+	@Produces("application/json")
+	public Iterable<ChannelDTO> getChannels(@QueryParam("locationId") long locationId) {
+		return Iterables.transform(channelCtrl.getActiveChannels(locationId),ChannelDTO.toDTO);
 	}
 }

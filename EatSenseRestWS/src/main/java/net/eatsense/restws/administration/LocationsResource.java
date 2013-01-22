@@ -3,6 +3,7 @@ package net.eatsense.restws.administration;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -15,20 +16,24 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SubscriptionController;
+import net.eatsense.representation.ChannelDTO;
 import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.SubscriptionDTO;
 
 public class LocationsResource {
 	private final LocationController ctrl;
 	private final SubscriptionController subCtrl;
+	private final ChannelController channelController;
 
 	@Inject
-	public LocationsResource(LocationController ctrl, SubscriptionController subCtrl) {
+	public LocationsResource(LocationController ctrl, SubscriptionController subCtrl, ChannelController channelController) {
 		super();
 		this.ctrl = ctrl;
 		this.subCtrl = subCtrl;
+		this.channelController = channelController;
 	}
 	
 	@GET
@@ -74,5 +79,19 @@ public class LocationsResource {
 	@Produces("application/json")
 	public SubscriptionDTO updateSubscription(@PathParam("locationId") long locationId, @PathParam("subscriptionId") long subscriptionId, SubscriptionDTO subscriptionData) {
 		return new SubscriptionDTO(subCtrl.getAndUpdateSubcription(locationId, subscriptionId, subscriptionData));
+	}
+	
+	@POST
+	@Path("{locationId}/channels/{clientId}")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public ChannelDTO sendChannelWarning(@PathParam("locationId") long locationId, @PathParam("clientId") String clientId) {
+		return new ChannelDTO(channelController.getAndPostChannelWarningEvent(locationId, clientId));
+	}
+	
+	@DELETE
+	@Path("{locationId}/channels/{clientId}")
+	public void removeChannel(@PathParam("locationId") long locationId, @PathParam("clientId") String clientId) {
+		channelController.removeChannelTracking(locationId, clientId);
 	}
 }

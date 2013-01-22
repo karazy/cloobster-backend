@@ -120,6 +120,7 @@ public class ChannelController {
 		net.eatsense.domain.Channel channel = channelPrv.get();
 		channel.setAccount(account.getKey());
 		channel.setBusiness(business.getKey());
+		channel.setLocationName(business.getName());
 		channel.setClientId(pureClientId);
 		channel.setCreationTime(new Date());
 		ofy.put(channel);
@@ -631,7 +632,17 @@ public class ChannelController {
 		removeChannelFromBusiness(clientId, business);
 		
 		// Remove tracking entity from datastore
-		ofy.delete(ofyKeys.create(business.getKey(), net.eatsense.domain.Channel.class, pureClientId));
+		removeChannelTracking(business.getId(), pureClientId);
+	}
+	
+	/**
+	 * Delete tracking entity for channel with the given clientId
+	 * 
+	 * @param locationId
+	 * @param pureClientId
+	 */
+	public void removeChannelTracking(long locationId, String pureClientId) {
+		ofy.delete(ofyKeys.create(ofyKeys.create(Business.class, locationId), net.eatsense.domain.Channel.class, pureClientId));
 	}
 	
 	/**
@@ -653,20 +664,61 @@ public class ChannelController {
 
 		calendar.add(Calendar.MINUTE, -onlineCheckTimeout);
 		int channelsActive = 0;
+		int channelsAssumedInactive = 0;
 		for (net.eatsense.domain.Channel channel : channelQueryResult) {
 			channelsActive++;
 			if(channel.getLastOnlineCheck().before(calendar.getTime())) {
-				logger.warn("Channel={} had no online check for {} minutes", channel.getLastChannelId(), onlineCheckTimeout);
+				logger.warn("Channel={} had no online check for over {} minutes", channel.getLastChannelId(), onlineCheckTimeout);
+				channelsAssumedInactive++;
 				if(!channel.isWarningSent()) {
-					eventBus.post(new ChannelOnlineCheckTimeOutEvent(channel));
-					channel.setWarningSent(true);
-					ofy.async().put(channel);
+					postChannelWarningEvent(channel);
 				}
 				else {
 					logger.warn("E-mail alert already sent.");
 				}
 			}
 		}
-		logger.info("{} cockpit client should be active.", channelsActive);
+		logger.info("{} cockpit client should be active.\n{} assumed inactive.", channelsActive, channelsAssumedInactive);
+	}
+	
+	/**
+	 * Load and send an e-mail alert for this specific channel.
+	 * 
+	 * @param businessId
+	 * @param clientId
+	 * @return
+	 */
+	public net.eatsense.domain.Channel getAndPostChannelWarningEvent(long businessId, String clientId) {
+		try {
+			return postChannelWarningEvent(ofy.get(ofyKeys.create(ofyKeys.create(Business.class, businessId), net.eatsense.domain.Channel.class, clientId)));
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException("No channel found with clientId="+clientId);
+		}
+	}
+
+	/**
+	 * @param channel
+	 */
+	private net.eatsense.domain.Channel postChannelWarningEvent(net.eatsense.domain.Channel channel) {
+		eventBus.post(new ChannelOnlineCheckTimeOutEvent(channel));
+		channel.setWarningSent(true);
+		ofy.async().put(channel);
+		
+		return channel;
+	}
+	
+	/**
+	 * Retrieve all tracked channels
+	 * 
+	 * @param businessId
+	 * @return
+	 */
+	public Iterable<net.eatsense.domain.Channel> getActiveChannels(long businessId) {
+		Query<net.eatsense.domain.Channel> query = ofy.query(net.eatsense.domain.Channel.class);
+		if(businessId != 0) {
+			query = query.filter("business", ofyKeys.create(Business.class, businessId));
+		}
+		
+		return query.fetch();
 	}
 }
