@@ -671,7 +671,7 @@ public class ChannelController {
 				logger.warn("Channel={} had no online check for over {} minutes", channel.getLastChannelId(), onlineCheckTimeout);
 				channelsAssumedInactive++;
 				if(!channel.isWarningSent()) {
-					postChannelWarningEvent(channel);
+					postWarningEvent(channel);
 				}
 				else {
 					logger.warn("E-mail alert already sent.");
@@ -688,9 +688,9 @@ public class ChannelController {
 	 * @param clientId
 	 * @return
 	 */
-	public net.eatsense.domain.Channel getAndPostChannelWarningEvent(long businessId, String clientId) {
+	public net.eatsense.domain.Channel getChannelAndPostWarningEvent(long businessId, String clientId) {
 		try {
-			return postChannelWarningEvent(ofy.get(ofyKeys.create(ofyKeys.create(Business.class, businessId), net.eatsense.domain.Channel.class, clientId)));
+			return postWarningEvent(ofy.get(ofyKeys.create(ofyKeys.create(Business.class, businessId), net.eatsense.domain.Channel.class, clientId)));
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException("No channel found with clientId="+clientId);
 		}
@@ -699,7 +699,7 @@ public class ChannelController {
 	/**
 	 * @param channel
 	 */
-	private net.eatsense.domain.Channel postChannelWarningEvent(net.eatsense.domain.Channel channel) {
+	private net.eatsense.domain.Channel postWarningEvent(net.eatsense.domain.Channel channel) {
 		eventBus.post(new ChannelOnlineCheckTimeOutEvent(channel));
 		channel.setWarningSent(true);
 		ofy.async().put(channel);

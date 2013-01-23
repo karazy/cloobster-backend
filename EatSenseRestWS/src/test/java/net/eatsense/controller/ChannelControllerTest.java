@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -79,6 +80,8 @@ public class ChannelControllerTest {
 	private net.eatsense.domain.Channel newChannel;
 	@Mock
 	private EventBus eventBus;
+	@Mock
+	private Key<Business> businessKey;
 
 	@Before
 	public void setUp() throws Exception {
@@ -87,6 +90,7 @@ public class ChannelControllerTest {
 		when(ofyService.keys()).thenReturn(ofyKeys);
 		when(account.getKey()).thenReturn(accountKey);
 		when(channelProvider.get()).thenReturn(newChannel);
+		when(business.getKey()).thenReturn(businessKey);
 		ctr = new ChannelController(rr, cr, jsonMapper, channelService, ofyService, channelProvider, eventBus);
 	}
 
@@ -690,9 +694,14 @@ public class ChannelControllerTest {
 		when(business.getId()).thenReturn(businessId);
 		when(channelService.createChannel(ctr.buildCockpitClientId(businessId, clientId))).thenReturn("newclienttoken");
 		
-		//#2 Request token with valid uid ...
-		
 		String result = ctr.createCockpitChannel(business,account, clientId, timeout);
+		verify(newChannel).setBusiness(businessKey);
+		verify(newChannel).setLocationName(business.getName());
+		verify(newChannel).setClientId(clientId);
+		verify(newChannel).setCreationTime(any(Date.class));
+		verify(newChannel).setAccount(accountKey);
+		verify(ofy).put(newChannel);
+		
 		assertThat(result, is("newclienttoken"));
 	}
 }

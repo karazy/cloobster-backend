@@ -86,7 +86,7 @@ public class LocationsResource {
 	@Consumes("application/json")
 	@Produces("application/json")
 	public ChannelDTO sendChannelWarning(@PathParam("locationId") long locationId, @PathParam("clientId") String clientId) {
-		return new ChannelDTO(channelController.getAndPostChannelWarningEvent(locationId, clientId));
+		return new ChannelDTO(channelController.getChannelAndPostWarningEvent(locationId, clientId));
 	}
 	
 	@DELETE
