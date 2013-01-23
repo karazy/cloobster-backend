@@ -55,6 +55,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 
 public class TestDataGenerator {
+	private static final String TEST_USERMAIL = "auto-test@karazy.net";
 	private static final String FULL_LOCATION_IMPORT_FILE = "WEB-INF/classes/import_Cloobster_Club_test.json";
 	private static final String BASIC_LOCATION_IMPORT_FILE = "WEB-INF/classes/Basicmode_Test_Location.json";
 
@@ -154,7 +155,7 @@ public class TestDataGenerator {
 	}
 
 	private void createTestUserAccount(Business business, int numberOfPastCheckIns) {
-		Account account = accountRepo.createAndSaveAccount("Cloobster Test User", TEST_USERLOGIN, "test11", "developer@karazy.net", Role.USER, null, null, null, null, true, true);
+		Account account = accountRepo.createAndSaveAccount("Cloobster Test User", TEST_USERLOGIN, "test11", TEST_USERMAIL, Role.USER, null, null, null, null, true, true);
 		
 		for (int i = 0; i < numberOfPastCheckIns; i++) {
 			Spot spot = spots.get(random.nextInt(spots.size()));
