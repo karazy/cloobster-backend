@@ -34,6 +34,21 @@ public class TemplateController {
 		this.templateRepo = templateRepo;
 	}
 	
+	public List<Template> initAllTemplate() {
+		return initTemplates("account-confirm-email",
+				"newsletter-email-registered",
+				"account-confirmed",
+				"account-forgotpassword-email",
+				"account-setup-email",
+				"account-notice-password-update",
+				"account-confirm-email-update",
+				"account-notice-email-update",
+				"customer-account-confirm-email",
+				"location-upgrade-request",
+				"infopage-demo-de.json",
+				"email-cockpit-offline-alert-de");
+	}
+	
 	/**
 	 * 
 	 * 
@@ -74,6 +89,10 @@ public class TemplateController {
 	public String replace(Template template, String... substitutions) {
 		checkNotNull(template , "template was null");
 		checkArgument(!Strings.isNullOrEmpty(template.getTemplateText()), "templateText was null or empty");
+		
+		if(substitutions.length == 0) {
+			return template.getTemplateText();
+		}
 		
 		Pattern pattern = Pattern.compile("\\{(\\d+?)\\}");
         Matcher matcher = pattern.matcher(template.getTemplateText());
@@ -119,6 +138,6 @@ public class TemplateController {
 			return null;
 		}
 		
-        return replace(template, substitutions);
+		return replace(template, substitutions);
 	}
 }

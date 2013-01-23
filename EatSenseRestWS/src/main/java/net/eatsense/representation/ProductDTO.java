@@ -36,7 +36,13 @@ public class ProductDTO {
 	
 	private Integer order;
 	
-	private boolean active;	
+	private boolean active;
+
+	private boolean special;	
+	
+	private ImageDTO image;
+
+	private String imageUrl;
 	
 	public ProductDTO() {
 		super();
@@ -52,45 +58,43 @@ public class ProductDTO {
 		this.id = product.getId();
 		
 		this.menuId = product.getMenu() != null ? product.getMenu().getId():null;
+		this.image = (product.getImages() != null && !product.getImages().isEmpty())
+				? product.getImages().get(0)
+				: null;
+		this.setImageUrl((image != null) ? image.getUrl()
+				: null);
 		this.name = product.getName();
 		this.shortDesc = product.getShortDesc();
 		this.longDesc = product.getLongDesc();
 		this.price = product.getPrice() / 100d;
 		this.order = product.getOrder();
 		this.active = product.isActive();
+		this.setSpecial(product.isSpecial());
 	}
-
-
 
 	public String getName() {
 		return name;
 	}
 
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
 
 	public String getShortDesc() {
 		return shortDesc;
 	}
 
-
 	public void setShortDesc(String shortDesc) {
 		this.shortDesc = shortDesc;
 	}
-
 
 	public String getLongDesc() {
 		return longDesc;
 	}
 
-
 	public void setLongDesc(String longDesc) {
 		this.longDesc = longDesc;
 	}
-
 
 	public double getPrice() {
 		return price;
@@ -107,43 +111,34 @@ public class ProductDTO {
 	public void setPrice(float price) {
 		this.price = price;
 	}
-
 	
-
 	public Long getId() {
 		return id;
 	}
-
 
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-
 	public Collection<ChoiceDTO> getChoices() {
 		return choices;
 	}
-
 
 	public void setChoices(Collection<ChoiceDTO> choices) {
 		this.choices = choices;
 	}
 
-
 	public Long getMenuId() {
 		return menuId;
 	}
-
 
 	public void setMenuId(Long menuId) {
 		this.menuId = menuId;
 	}
 
-
 	public Integer getOrder() {
 		return order;
 	}
-
 
 	public void setOrder(Integer order) {
 		this.order = order;
@@ -156,4 +151,31 @@ public class ProductDTO {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+
+
+	public boolean isSpecial() {
+		return special;
+	}
+
+	public void setSpecial(boolean special) {
+		this.special = special;
+	}
+	
+	public ImageDTO getImage() {
+		return image;
+	}
+
+	public void setImage(ImageDTO image) {
+		this.image = image;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 }
+
+

@@ -11,11 +11,15 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.Channel;
+import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.LocationRepository;
+import net.eatsense.persistence.ObjectifyKeyFactory;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -25,9 +29,15 @@ import org.slf4j.LoggerFactory;
 import com.google.appengine.api.channel.ChannelFailureException;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.Query;
 
 /**
  * Sends push messages via the Google Channel Service.
@@ -44,14 +54,26 @@ public class ChannelController {
 	private ObjectMapper mapper;
 
 	private CheckInRepository checkInRepo;
+
+	private final ObjectifyKeyFactory ofyKeys;
+
+	private Objectify ofy;
+
+	private final Provider<net.eatsense.domain.Channel> channelPrv;
+
+	private final EventBus eventBus;
 	
 	@Inject
-	public ChannelController(LocationRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService) {
+	public ChannelController(LocationRepository rr, CheckInRepository checkInRepo, ObjectMapper mapper, ChannelService channelService,OfyService ofyService, Provider<net.eatsense.domain.Channel> channelPrv, EventBus eventBus) {
 		super();
 		this.businessRepo = rr;
 		this.checkInRepo = checkInRepo;
 		this.mapper = mapper;
 		this.channelService = channelService;
+		this.channelPrv = channelPrv;
+		this.eventBus = eventBus;
+		this.ofyKeys = ofyService.keys();
+		this.ofy = ofyService.ofy();
 	}
 	
 	/**
@@ -62,8 +84,8 @@ public class ChannelController {
 	 * @param clientId
 	 * @return the token to send to the client
 	 */
-	public String createCockpitChannel(Business business, String clientId) throws ChannelFailureException {
-		return createCockpitChannel(business, clientId, Optional.<Integer>absent());
+	public String createCockpitChannel(Business business,Account account, String clientId) throws ChannelFailureException {
+		return createCockpitChannel(business, account,  clientId, Optional.<Integer>absent());
 	}
 	
 	/**
@@ -75,15 +97,34 @@ public class ChannelController {
 	 * @return the token to send to the client
 	 * @throws ChannelFailureException if channel creation failed
 	 */
-	public String createCockpitChannel(Business business, String clientId , Optional<Integer> timeout) throws ChannelFailureException {
+	public String createCockpitChannel(Business business, Account account, String clientId , Optional<Integer> timeout) throws ChannelFailureException {
 		checkNotNull(business, "business was null");
 		checkNotNull(business.getId(), "business id was null");
+		checkNotNull(account, "account was null");
 		checkNotNull(clientId, "clientId was null");
 		checkArgument(!clientId.isEmpty(), "clientId was empty");
 		checkArgument(!timeout.isPresent() || ( timeout.get() > 0 && timeout.get() < 24*60),"timeout expected > 0 and < 24*60 minutes, but was %s",timeout.orNull());
 		
 		String token = null;
 		// create a channel id with the format "businessId|clientId"
+		
+		int lastIndexOf = clientId.lastIndexOf("-");
+		String pureClientId;
+		if(lastIndexOf == -1) {
+			pureClientId = clientId;
+		}
+		else {
+			pureClientId = clientId.substring(0 , lastIndexOf);
+		}
+		
+		net.eatsense.domain.Channel channel = channelPrv.get();
+		channel.setAccount(account.getKey());
+		channel.setBusiness(business.getKey());
+		channel.setLocationName(business.getName());
+		channel.setClientId(pureClientId);
+		channel.setCreationTime(new Date());
+		ofy.put(channel);
+		
 		clientId = buildCockpitClientId(business.getId(), clientId);
 		
 		logger.debug("clientId: {}, timeout: {}", clientId, timeout);
@@ -298,6 +339,25 @@ public class ChannelController {
 			logger.warn("Unknown businessId");
 			business = null;
 		}
+		int lastIndexOf = clientId.lastIndexOf("-");
+		
+		String pureClientId;
+		if(lastIndexOf == -1) {
+			pureClientId = clientId;
+		}
+		else {
+			pureClientId = clientId.substring(0, lastIndexOf);
+		}
+		
+		net.eatsense.domain.Channel channelEntity = ofy.find(ofyKeys.create(business.getKey(), net.eatsense.domain.Channel.class, pureClientId));
+		if(channelEntity == null) {
+			logger.warn("Unable to track channel status, can't find Channel logging entity for clientId: {}", pureClientId);
+		}
+		else {
+			channelEntity.setLastOnlineCheck(new Date());
+			ofy.async().put(channelEntity);
+		}
+		
 		clientId = buildCockpitClientId(businessId, clientId);
 		
 		connected = (business != null && business.getChannels().contains( Channel.fromClientId(clientId)));
@@ -379,15 +439,23 @@ public class ChannelController {
 			return;
 		}
 		else {
-			if (business.getChannels().isEmpty())	{
-				return;
-			}
-			Channel channel = Channel.fromClientId(clientId);
-			if(business.getChannels().contains(channel)) {
-				business.getChannels().remove(channel);
-				logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
-				businessRepo.saveOrUpdate(business);
-			}
+			removeChannelFromBusiness(clientId, business);
+		}
+	}
+
+	/**
+	 * @param clientId
+	 * @param business
+	 */
+	private void removeChannelFromBusiness(String clientId, Business business) {
+		if (business.getChannels().isEmpty())	{
+			return;
+		}
+		Channel channel = Channel.fromClientId(clientId);
+		if(business.getChannels().contains(channel)) {
+			business.getChannels().remove(channel);
+			logger.info("Unsubscribing channel {} from business {} ", clientId, business.getName());
+			businessRepo.saveOrUpdate(business);
 		}
 	}
 	
@@ -458,6 +526,26 @@ public class ChannelController {
 		
 		Channel newChannel = Channel.fromClientId(clientId);
 		
+		int lastIndexOf = clientId.lastIndexOf("-");
+		String pureClientId;
+		if(lastIndexOf == -1) {
+			pureClientId = clientId.substring(clientId.lastIndexOf("|")+1);
+		}
+		else {
+			pureClientId = clientId.substring(clientId.lastIndexOf("|")+1 , lastIndexOf);
+		}
+		
+		net.eatsense.domain.Channel channelEntity = ofy.find(ofyKeys.create(business.getKey(), net.eatsense.domain.Channel.class, pureClientId));
+		if(channelEntity == null) {
+			logger.warn("Unable to track channel status, can't find Channel logging entity for clientId: {}", pureClientId);
+		}
+		else {
+			channelEntity.setLastChannelId(clientId);
+			channelEntity.setChannelCount(channelEntity.getChannelCount()+1);
+			channelEntity.setLastOnlineCheck(new Date());
+			ofy.async().put(channelEntity);
+		}
+		
 		for (Iterator<Channel> iterator = business.getChannels().iterator(); iterator.hasNext();) {
 			Channel channel  = iterator.next();
 			if(channel.getCreationDate().before(calendar.getTime())) {
@@ -519,5 +607,118 @@ public class ChannelController {
 		checkNotNull(clientId, "clientId was null");
 		return "b"+ String.valueOf(businessId) + "|" + String.valueOf(clientId);
 	}
+	
+	/**
+	 * Handle called by the cockpit after a manual logout
+	 * 
+	 * @param business
+	 * @param clientId
+	 */
+	public void disconnectCockpitChannel(Business business, String clientId ) {
+		checkNotNull(business, "business was null");
+		checkNotNull(clientId, "clientId was null");
+		
+		logger.info("Logout received from clientId={}, removing channel.", clientId);
+		int lastIndexOf = clientId.lastIndexOf("-");
+		
+		String pureClientId;
+		if(lastIndexOf == -1) {
+			pureClientId = clientId;
+		}
+		else {
+			pureClientId = clientId.substring(0, lastIndexOf);
+		}
+		clientId = buildCockpitClientId(business.getId(), clientId);
+		removeChannelFromBusiness(clientId, business);
+		
+		// Remove tracking entity from datastore
+		removeChannelTracking(business.getId(), pureClientId);
+	}
+	
+	/**
+	 * Delete tracking entity for channel with the given clientId
+	 * 
+	 * @param locationId
+	 * @param pureClientId
+	 */
+	public void removeChannelTracking(long locationId, String pureClientId) {
+		ofy.delete(ofyKeys.create(ofyKeys.create(Business.class, locationId), net.eatsense.domain.Channel.class, pureClientId));
+	}
+	
+	/**
+	 * Iterate over all channel tracking entities and check the time of the last online ping.
+	 * Issue an e-mail alert if the online check was longer than a set amout of minutes ago.
+	 */
+	public void checkAllOnlineChannels() {
+		QueryResultIterable<net.eatsense.domain.Channel> channelQueryResult = ofy.query(net.eatsense.domain.Channel.class).fetch();
+		logger.info("Checking all availabe cockpit channels ...");
+		// Time in minutes the last online check of an active channel should be ago.
+		int onlineCheckTimeout = 30;
+		
+		Calendar calendar = Calendar.getInstance();
+		try {
+			onlineCheckTimeout = Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.offlinewarning"));
+		} catch (NumberFormatException e) {
+			logger.warn("net.karazy.channels.cockpit.offlinewarning property not set correctly.");
+		}
 
+		calendar.add(Calendar.MINUTE, -onlineCheckTimeout);
+		int channelsActive = 0;
+		int channelsAssumedInactive = 0;
+		for (net.eatsense.domain.Channel channel : channelQueryResult) {
+			channelsActive++;
+			if(channel.getLastOnlineCheck().before(calendar.getTime())) {
+				logger.warn("Channel={} had no online check for over {} minutes", channel.getLastChannelId(), onlineCheckTimeout);
+				channelsAssumedInactive++;
+				if(!channel.isWarningSent()) {
+					postWarningEvent(channel);
+				}
+				else {
+					logger.warn("E-mail alert already sent.");
+				}
+			}
+		}
+		logger.info("{} cockpit client should be active.\n{} assumed inactive.", channelsActive, channelsAssumedInactive);
+	}
+	
+	/**
+	 * Load and send an e-mail alert for this specific channel.
+	 * 
+	 * @param businessId
+	 * @param clientId
+	 * @return
+	 */
+	public net.eatsense.domain.Channel getChannelAndPostWarningEvent(long businessId, String clientId) {
+		try {
+			return postWarningEvent(ofy.get(ofyKeys.create(ofyKeys.create(Business.class, businessId), net.eatsense.domain.Channel.class, clientId)));
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException("No channel found with clientId="+clientId);
+		}
+	}
+
+	/**
+	 * @param channel
+	 */
+	private net.eatsense.domain.Channel postWarningEvent(net.eatsense.domain.Channel channel) {
+		eventBus.post(new ChannelOnlineCheckTimeOutEvent(channel));
+		channel.setWarningSent(true);
+		ofy.async().put(channel);
+		
+		return channel;
+	}
+	
+	/**
+	 * Retrieve all tracked channels
+	 * 
+	 * @param businessId
+	 * @return
+	 */
+	public Iterable<net.eatsense.domain.Channel> getActiveChannels(long businessId) {
+		Query<net.eatsense.domain.Channel> query = ofy.query(net.eatsense.domain.Channel.class);
+		if(businessId != 0) {
+			query = query.filter("business", ofyKeys.create(Business.class, businessId));
+		}
+		
+		return query.fetch();
+	}
 }

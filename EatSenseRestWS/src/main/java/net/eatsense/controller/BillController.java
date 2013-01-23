@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -26,6 +27,7 @@ import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.persistence.AccountRepository;
+import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
@@ -67,12 +69,13 @@ public class BillController {
 	private final SpotRepository spotRepo;
 	private final AccountRepository accountRepo;
 	private final ValidationHelper validator;
+	private final AreaRepository areaRepo;
 	
 	@Inject
 	public BillController(RequestRepository rr, OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, CheckInRepository checkInRepo,
-			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo, ValidationHelper validator) {
+			BillRepository billRepo, Transformer transformer, EventBus eventBus, SpotRepository spotRepo, AccountRepository accountRepo, ValidationHelper validator, AreaRepository areaRepo) {
 		super();
 		this.accountRepo = accountRepo;
 		this.spotRepo = spotRepo;
@@ -85,6 +88,7 @@ public class BillController {
 		this.checkInRepo = checkInRepo;
 		this.billRepo = billRepo;
 		this.validator = validator;
+		this.areaRepo = areaRepo;
 	}
 	
 	/**
@@ -282,12 +286,18 @@ public class BillController {
 			throw new BillFailureException("no orders to bill where found.");
 		}
 		else {
+			Area area = areaRepo.getByKey(checkIn.getArea());
+			
 			Bill bill = new Bill();
 			bill.setPaymentMethod(billData.getPaymentMethod());
 			bill.setBusiness(business.getKey());
 			bill.setCheckIn(checkIn.getKey());
 			bill.setCreationTime(new Date());
 			bill.setCleared(false);
+			bill.setSpot(checkIn.getSpot());
+			bill.setSpotName(spot.getName());
+			bill.setArea(checkIn.getArea());
+			bill.setAreaName(area.getName());
 			billRepo.saveOrUpdate(bill);
 		
 			billData = transform.billToDto(bill);
@@ -313,6 +323,7 @@ public class BillController {
 			
 			eventBus.post(newEvent);
 		}
+		
 		return billData;
 	}
 

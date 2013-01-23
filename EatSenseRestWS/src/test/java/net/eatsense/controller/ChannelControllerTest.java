@@ -16,16 +16,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
+import net.eatsense.persistence.ObjectifyKeyFactory;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.cockpit.MessageDTO;
 
 import org.codehaus.jackson.map.JsonMappingException;
@@ -41,7 +45,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
+import com.google.inject.Provider;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Objectify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelControllerTest {
@@ -58,10 +66,32 @@ public class ChannelControllerTest {
 	private Business business;
 	@Mock
 	private ObjectMapper jsonMapper;
+	@Mock
+	private ObjectifyKeyFactory ofyKeys;
+	@Mock
+	private Objectify ofy;
+	@Mock
+	private Provider<net.eatsense.domain.Channel> channelProvider;
+	@Mock
+	private Account account;
+	@Mock
+	private Key<Account> accountKey;
+	@Mock
+	private net.eatsense.domain.Channel newChannel;
+	@Mock
+	private EventBus eventBus;
+	@Mock
+	private Key<Business> businessKey;
 
 	@Before
 	public void setUp() throws Exception {
-		ctr = new ChannelController(rr, cr, jsonMapper, channelService);
+		OfyService ofyService = mock(OfyService.class);
+		when(ofyService.ofy()).thenReturn(ofy);
+		when(ofyService.keys()).thenReturn(ofyKeys);
+		when(account.getKey()).thenReturn(accountKey);
+		when(channelProvider.get()).thenReturn(newChannel);
+		when(business.getKey()).thenReturn(businessKey);
+		ctr = new ChannelController(rr, cr, jsonMapper, channelService, ofyService, channelProvider, eventBus);
 	}
 
 	@After
@@ -185,7 +215,8 @@ public class ChannelControllerTest {
 		when(business.getChannels()).thenReturn(channelList );
 		when(rr.getById(businessId)).thenReturn(business);
 				
-		String clientId = ctr.buildCockpitClientId(businessId, "test");
+		String pureClientId = "test";
+		String clientId = ctr.buildCockpitClientId(businessId, pureClientId);
 		ctr.subscribeToBusiness(clientId);
 				
 		verify(rr).saveOrUpdate(business);
@@ -613,7 +644,7 @@ public class ChannelControllerTest {
 		
 		//#2 Request token with valid uid ...
 		
-		String result = ctr.createCockpitChannel(business, clientId, timeout);
+		String result = ctr.createCockpitChannel(business,account, clientId, timeout);
 		assertThat(result, is("newclienttoken"));
 	}
 	
@@ -623,7 +654,7 @@ public class ChannelControllerTest {
 		String clientId = "test";
 		Optional<Integer> timeout = Optional.absent();
 		
-		ctr.createCockpitChannel(business, clientId, timeout);
+		ctr.createCockpitChannel(business,account, clientId, timeout);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -633,7 +664,7 @@ public class ChannelControllerTest {
 		String clientId = "";
 		Optional<Integer> timeout = Optional.absent();
 		
-		ctr.createCockpitChannel(business, clientId, timeout);
+		ctr.createCockpitChannel(business,account, clientId, timeout);
 	}
 	
 	@Test(expected=NullPointerException.class)
@@ -643,7 +674,7 @@ public class ChannelControllerTest {
 		String clientId = null;
 		Optional<Integer> timeout = Optional.absent();
 		
-		ctr.createCockpitChannel(business, clientId, timeout);
+		ctr.createCockpitChannel(business,account, clientId, timeout);
 	}
 	
 	@Test(expected=NullPointerException.class)
@@ -652,7 +683,7 @@ public class ChannelControllerTest {
 		String clientId = "test";
 		Optional<Integer> timeout = Optional.absent();
 		
-		ctr.createCockpitChannel(business, clientId, timeout);
+		ctr.createCockpitChannel(business,account, clientId, timeout);
 	}
 	
 	@Test
@@ -663,9 +694,14 @@ public class ChannelControllerTest {
 		when(business.getId()).thenReturn(businessId);
 		when(channelService.createChannel(ctr.buildCockpitClientId(businessId, clientId))).thenReturn("newclienttoken");
 		
-		//#2 Request token with valid uid ...
+		String result = ctr.createCockpitChannel(business,account, clientId, timeout);
+		verify(newChannel).setBusiness(businessKey);
+		verify(newChannel).setLocationName(business.getName());
+		verify(newChannel).setClientId(clientId);
+		verify(newChannel).setCreationTime(any(Date.class));
+		verify(newChannel).setAccount(accountKey);
+		verify(ofy).put(newChannel);
 		
-		String result = ctr.createCockpitChannel(business, clientId, timeout);
 		assertThat(result, is("newclienttoken"));
 	}
 }

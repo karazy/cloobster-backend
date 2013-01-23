@@ -17,7 +17,7 @@
 
 		<!-- GAE properties -->
 		<gae.version>1.7.4</gae.version>
-		<!-- <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home> -->
+		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.application.version>1</gae.application.version>
 		<maven-gae-plugin.version>0.9.5</maven-gae-plugin.version>
 
@@ -772,8 +772,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-			<!-- <plugin>
+			<plugin>
                 <groupId>net.kindleit</groupId>
                 <artifactId>maven-gae-plugin</artifactId>
                 <version>${maven-gae-plugin.version}</version>
@@ -794,7 +793,7 @@
 	            		</goals>
 	          		</execution>
 	        	</executions>
-            </plugin> -->
+            </plugin>
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -859,7 +858,7 @@
 										<execute />
 									</action>
 								</pluginExecution>
-								<!-- <pluginExecution>
+								<pluginExecution>
                   					<pluginExecutionFilter>
                     					<groupId>net.kindleit</groupId>
 					                    <artifactId>maven-gae-plugin</artifactId>
@@ -872,7 +871,6 @@
 					                	<execute />
 					                </action>
 				                </pluginExecution>
-				                 -->
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>

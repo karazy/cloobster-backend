@@ -32,6 +32,7 @@ public class OrderDTO {
 	private String productShortDesc;
 	private String productLongDesc;
 	private double productPrice;
+	private String productImageUrl;
 	
 	private Collection<ChoiceDTO> choices;
 	
@@ -61,6 +62,7 @@ public class OrderDTO {
 		productShortDesc = order.getProductShortDesc();
 		productLongDesc = order.getProductLongDesc();
 		productPrice = order.getProductPrice() / 100d;
+		productImageUrl = order.getProductImage() != null ? order.getProductImage().getUrl() : null;
 	}
 	
 	public OrderDTO() {
@@ -138,5 +140,13 @@ public class OrderDTO {
 	}
 	public void setChoices(Collection<ChoiceDTO> choices) {
 		this.choices = choices;
+	}
+
+	public String getProductImageUrl() {
+		return productImageUrl;
+	}
+
+	public void setProductImageUrl(String productImageUrl) {
+		this.productImageUrl = productImageUrl;
 	}
 }

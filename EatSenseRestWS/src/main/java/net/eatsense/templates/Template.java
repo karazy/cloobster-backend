@@ -1,6 +1,5 @@
 package net.eatsense.templates;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Id;
@@ -16,7 +15,6 @@ public class Template {
 	public Template() {
 		super();
 	}
-	
 
 	/**
 	 * @param id Unique identifier of this Template. 
@@ -25,7 +23,6 @@ public class Template {
 		this();
 		this.id = id;
 	}
-
 
 	public String getId() {
 		return id;
@@ -60,5 +57,4 @@ public class Template {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
 }

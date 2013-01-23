@@ -73,12 +73,12 @@ public class Request extends GenericEntity<Request> {
 			this.business = checkIn.getBusiness();
 			this.checkIn = checkIn.getKey();
 			this.checkInName = checkIn.getNickname();
+			this.spot = checkIn.getSpot();
+			this.area = checkIn.getArea();
 		}
 		
 		if(spot != null) {
-			this.spot = spot.getKey();
 			this.spotName = spot.getName();
-			this.area = spot.getArea();
 		}
 	}
 	

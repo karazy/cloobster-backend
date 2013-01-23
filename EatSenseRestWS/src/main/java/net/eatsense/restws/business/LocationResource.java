@@ -105,14 +105,21 @@ public class LocationResource {
 	@Produces("text/plain; charset=UTF-8")
 	@Consumes("application/x-www-form-urlencoded; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public String requestToken( @FormParam("clientId") String clientId ) {
+	public String createChannel( @FormParam("clientId") String clientId ) {
 		Optional<Integer> timeout = Optional.of( Integer.valueOf(System.getProperty("net.karazy.channels.cockpit.timeout")));
 		
-		String token = channelCtrlProvider.get().createCockpitChannel(business, clientId, timeout);
+		String token = channelCtrlProvider.get().createCockpitChannel(business,account, clientId, timeout);
 		if(token == null)
 			throw new NotFoundException();
 		return token;
 	};
+	
+	@DELETE
+	@Path("channels/{clientId}")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void removeChannel( @PathParam("clientId") String clientId ) {
+		channelCtrlProvider.get().disconnectCockpitChannel(business, clientId);
+	}
 	
 	@POST
 	@Path("images/{id}")
