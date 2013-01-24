@@ -34,6 +34,8 @@ public class LocationProfileDTO extends LocationDTO {
 	private int stars;
 	
 	private Integer spotCount;
+	
+	private boolean offlineEmailAlertActive;
 
 	public LocationProfileDTO() {
 		super();
@@ -132,6 +134,14 @@ public class LocationProfileDTO extends LocationDTO {
 
 	public void setSpotCount(Integer spotCount) {
 		this.spotCount = spotCount;
+	}
+
+	public boolean isOfflineEmailAlertActive() {
+		return offlineEmailAlertActive;
+	}
+
+	public void setOfflineEmailAlertActive(boolean offlineEmailAlertActive) {
+		this.offlineEmailAlertActive = offlineEmailAlertActive;
 	}
 
 	public final static Function<Business, LocationProfileDTO> toDTO = 
