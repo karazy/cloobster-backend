@@ -62,6 +62,7 @@ public class LocationProfileDTO extends LocationDTO {
 		this.postcode = business.getPostcode();
 		this.slogan = business.getSlogan();
 		this.spotCount = business.getSpotCount();
+		this.offlineEmailAlertActive = business.isOfflineEmailAlertActive();
 	}
 
 	public String getCity() {
