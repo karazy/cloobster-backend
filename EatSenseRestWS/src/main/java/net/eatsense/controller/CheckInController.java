@@ -399,7 +399,7 @@ public class CheckInController {
 		if (orderRepo.queryForCheckInAndStatus(checkIn, OrderStatus.COMPLETE,
 								OrderStatus.INPROCESS, OrderStatus.PLACED,
 								OrderStatus.RECEIVED).getKey() != null) {
-			throw new IllegalAccessException("Unable to delete checkIn while orders exist");
+			throw new IllegalAccessException("Unable to check out while orders exist");
 		}
 		
 		int checkInCount = checkInRepo.countActiveCheckInsAtSpot(checkIn.getSpot());
