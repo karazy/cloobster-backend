@@ -26,6 +26,7 @@ import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.domain.Subscription;
 import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
 import net.eatsense.event.ConfirmedAccountEvent;
+import net.eatsense.event.LocationCockpitsOfflineEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
@@ -370,6 +371,32 @@ public class MailController {
 			}
 		}
 		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(mailAddress, mailText);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendAllCockpitsOfflineEmail(LocationCockpitsOfflineEvent event) {
+		Business location = ofy.get(event.getLocationKey());
+		String mailText = templateCtrl.getAndReplace("email-cockpit-offline-alert-de", location.getName(), "unbekanntem Zeitpunkt");
+		
+		// find company owner account
+		String mailAddress = null;
+		Account companyAccount = ofy.query(Account.class).filter("company", location.getCompany()).filter("role", Role.COMPANYOWNER).get();
+		if(companyAccount != null) {
+			mailAddress = companyAccount.getEmail();
+		}
+		else {
+			logger.error("Unable to sent E-Mail, could not find COMPANYOWNER account for {}", location.getCompany());
+			return;
+		}
+	
 		try {
 			// Send e-mail with password reset link.
 			sendMail(mailAddress, mailText);

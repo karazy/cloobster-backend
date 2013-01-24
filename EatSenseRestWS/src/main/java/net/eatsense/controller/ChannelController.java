@@ -18,6 +18,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
+import net.eatsense.event.LocationCockpitsOfflineEvent;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ObjectifyKeyFactory;
@@ -738,5 +739,14 @@ public class ChannelController {
 		}
 		
 		return query.fetch();
+	}
+	
+	/**
+	 * Post new event to send e-mail notifiying 
+	 * 
+	 * @param locationId
+	 */
+	public void sendLocationOfflineWarning(long locationId) {
+		eventBus.post(new LocationCockpitsOfflineEvent(ofyKeys.create(Business.class, locationId)));
 	}
 }
