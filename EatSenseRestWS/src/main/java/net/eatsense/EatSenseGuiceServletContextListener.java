@@ -184,6 +184,10 @@ public class EatSenseGuiceServletContextListener extends
 		eventBus.register(injector.getInstance(MailController.class));
 		eventBus.register(injector.getInstance(InfoPageController.class));
 		
+		// Register Objectify instances.
+		
+		OfyService.registerEntities();
+		
 		return injector;
 	}
 

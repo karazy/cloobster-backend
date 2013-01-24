@@ -130,6 +130,9 @@ public class Business extends GenericEntity<Business> {
 	 * Number of stars (for hotels and restaurants)
 	 */
 	private int stars;
+	
+	@Unindexed	
+	private boolean offlineEmailAlertActive = true;
 
 	@Unindexed
 	private boolean basic = true;
@@ -384,5 +387,16 @@ public class Business extends GenericEntity<Business> {
 
 	public void setBasic(boolean basic) {
 		this.basic = basic;
+	}
+
+	public boolean isOfflineEmailAlertActive() {
+		return offlineEmailAlertActive;
+	}
+
+	public void setOfflineEmailAlertActive(boolean offlineEmailAlertActive) {
+		if(!Objects.equal(this.offlineEmailAlertActive, offlineEmailAlertActive)) {
+			this.setDirty(true);
+			this.offlineEmailAlertActive = offlineEmailAlertActive;
+		}
 	}
 }

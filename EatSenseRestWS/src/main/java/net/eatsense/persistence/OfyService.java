@@ -1,5 +1,6 @@
 package net.eatsense.persistence;
 
+import net.eatsense.domain.Channel;
 import net.eatsense.domain.Subscription;
 
 import com.google.inject.Inject;
@@ -10,8 +11,9 @@ import com.googlecode.objectify.ObjectifyService;
 public class OfyService {
 	private final ObjectifyKeyFactory keyFactory;
 
-	static {
+	public static void registerEntities() {
 		ObjectifyService.register(Subscription.class);
+		ObjectifyService.register(Channel.class);
 	}
 	
 	@Inject

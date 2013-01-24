@@ -45,7 +45,8 @@ public class TemplateController {
 				"account-notice-email-update",
 				"customer-account-confirm-email",
 				"location-upgrade-request",
-				"infopage-demo-de.json");
+				"infopage-demo-de.json",
+				"email-cockpit-offline-alert-de");
 	}
 	
 	/**
