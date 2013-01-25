@@ -47,6 +47,7 @@ import com.google.appengine.api.channel.ChannelService;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Provider;
+import com.googlecode.objectify.AsyncObjectify;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
@@ -82,12 +83,15 @@ public class ChannelControllerTest {
 	private EventBus eventBus;
 	@Mock
 	private Key<Business> businessKey;
+	@Mock
+	private AsyncObjectify asyncOfy;
 
 	@Before
 	public void setUp() throws Exception {
 		OfyService ofyService = mock(OfyService.class);
 		when(ofyService.ofy()).thenReturn(ofy);
 		when(ofyService.keys()).thenReturn(ofyKeys);
+		when(ofy.async()).thenReturn(asyncOfy);
 		when(account.getKey()).thenReturn(accountKey);
 		when(channelProvider.get()).thenReturn(newChannel);
 		when(business.getKey()).thenReturn(businessKey);
@@ -703,5 +707,23 @@ public class ChannelControllerTest {
 		verify(ofy).put(newChannel);
 		
 		assertThat(result, is("newclienttoken"));
+	}
+	
+	@Test
+	public void testCheckOnlineStatus() throws Exception {
+		long businessId = 1;
+		when(rr.getById(businessId)).thenReturn(business);
+		String clientId = "clientid";
+		Key<net.eatsense.domain.Channel> channelKey = mock(Key.class);
+		net.eatsense.domain.Channel channel = mock(net.eatsense.domain.Channel.class);
+
+		when(ofyKeys.create(businessKey, net.eatsense.domain.Channel.class, clientId)).thenReturn(channelKey );
+		
+		when(ofy.find(channelKey)).thenReturn(channel );
+
+		ctr.checkOnlineStatus(businessId , clientId);		
+		
+		verify(channel).setLastOnlineCheck(any(java.util.Date.class));
+		verify(asyncOfy).put(channel);
 	}
 }
