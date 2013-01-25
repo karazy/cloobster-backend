@@ -457,6 +457,7 @@ public class LocationController {
 		business.setLang(businessData.getLang());
 		business.setEmail(businessData.getEmail());
 		business.setStars(businessData.getStars());
+		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme

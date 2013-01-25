@@ -171,7 +171,7 @@ public class ImageController {
 	 */
 	public UpdateImagesResult removeImage(String id, List<ImageDTO> images) {
 		if( images == null || images.isEmpty()) {
-			new UpdateImagesResult(images, false, null);
+			return new UpdateImagesResult(images, false, null);
 		}
 		
 		boolean dirty = false;

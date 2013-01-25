@@ -82,7 +82,7 @@ public class LocationsResource {
 	}
 	
 	@POST
-	@Path("{locationId}/channels/{clientId}")
+	@Path("{locationId}/channels/{clientId}/warning")
 	@Consumes("application/json")
 	@Produces("application/json")
 	public ChannelDTO sendChannelWarning(@PathParam("locationId") long locationId, @PathParam("clientId") String clientId) {
@@ -94,4 +94,13 @@ public class LocationsResource {
 	public void removeChannel(@PathParam("locationId") long locationId, @PathParam("clientId") String clientId) {
 		channelController.removeChannelTracking(locationId, clientId);
 	}
+	
+	@POST
+	@Path("{locationId}/offlinewarning")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public void sendOfflineWarning(@PathParam("locationId") long locationId) {
+		channelController.sendLocationOfflineWarning(locationId);
+	}
+	
 }

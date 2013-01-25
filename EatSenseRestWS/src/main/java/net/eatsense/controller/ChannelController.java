@@ -6,8 +6,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,6 +18,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.embedded.Channel;
 import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
+import net.eatsense.event.LocationCockpitsOfflineEvent;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ObjectifyKeyFactory;
@@ -34,7 +37,6 @@ import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Query;
@@ -651,6 +653,7 @@ public class ChannelController {
 	 */
 	public void checkAllOnlineChannels() {
 		QueryResultIterable<net.eatsense.domain.Channel> channelQueryResult = ofy.query(net.eatsense.domain.Channel.class).fetch();
+		Map<Long, Business> businessMap = new HashMap<Long, Business>();
 		logger.info("Checking all availabe cockpit channels ...");
 		// Time in minutes the last online check of an active channel should be ago.
 		int onlineCheckTimeout = 30;
@@ -667,18 +670,34 @@ public class ChannelController {
 		int channelsAssumedInactive = 0;
 		for (net.eatsense.domain.Channel channel : channelQueryResult) {
 			channelsActive++;
+			Business location = businessMap.get(channel.getBusiness().getId());
+			if(location == null) {
+				location = ofy.find(channel.getBusiness());
+			}
+			if(location == null) {
+				logger.error("Could not find location for active channel!");
+			}
+			else {
+				businessMap.put(location.getId(), location);
+			}
+			
 			if(channel.getLastOnlineCheck().before(calendar.getTime())) {
 				logger.warn("Channel={} had no online check for over {} minutes", channel.getLastChannelId(), onlineCheckTimeout);
 				channelsAssumedInactive++;
 				if(!channel.isWarningSent()) {
-					postWarningEvent(channel);
+					if(!location.isBasic() && location.isOfflineEmailAlertActive())	{
+						postWarningEvent(channel);
+					}
+					else {
+						logger.warn("Location is in Basic mode or e-mail alerts are disabled");
+					}						
 				}
 				else {
 					logger.warn("E-mail alert already sent.");
 				}
 			}
 		}
-		logger.info("{} cockpit client should be active.\n{} assumed inactive.", channelsActive, channelsAssumedInactive);
+		logger.info("{} cockpit clients should be active.\n{} assumed inactive.", channelsActive, channelsAssumedInactive);
 	}
 	
 	/**
@@ -720,5 +739,14 @@ public class ChannelController {
 		}
 		
 		return query.fetch();
+	}
+	
+	/**
+	 * Post new event to send e-mail notifiying 
+	 * 
+	 * @param locationId
+	 */
+	public void sendLocationOfflineWarning(long locationId) {
+		eventBus.post(new LocationCockpitsOfflineEvent(ofyKeys.create(Business.class, locationId)));
 	}
 }

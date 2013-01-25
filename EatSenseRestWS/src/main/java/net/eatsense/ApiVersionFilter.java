@@ -29,7 +29,9 @@ public class ApiVersionFilter implements ContainerRequestFilter {
 		String systemApiVersion = System.getProperty("net.karazy.api.version");
 		
 		if(!appApiVersion.equals(systemApiVersion)) {
-			throw new ApiVersionException(String.format("Incompatible API version. Request version is %s, but system version is %s", appApiVersion, systemApiVersion),"error.version");
+			String message = String.format("Incompatible API version. Request version is %s, but system version is %s", appApiVersion, systemApiVersion);
+			logger.error(message);
+			throw new ApiVersionException(message,"error.version");
 		}
 		
 		return request;
