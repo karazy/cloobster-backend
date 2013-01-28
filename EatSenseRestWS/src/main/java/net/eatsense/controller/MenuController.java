@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.groups.Default;
 
+import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
@@ -25,6 +26,7 @@ import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.ChoiceDTO;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.ProductDTO;
 import net.eatsense.representation.Transformer;
@@ -53,13 +55,15 @@ public class MenuController {
 	private final Transformer transform;
 	private final ValidationHelper validator;
 	private final ChoiceRepository choiceRepo;
+	private final ImageController imageCtrl;
 
 	@Inject
-	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator) {
+	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl) {
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
 		this.transform = trans;
+		this.imageCtrl = imageCtrl;
 		this.validator = validator;
 	}
 	
@@ -420,12 +424,14 @@ public class MenuController {
 		if(productData.getMenuId() != null)
 			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
 		
+		
 		product.setLongDesc(productData.getLongDesc());
 		product.setName(productData.getName());
 		product.setOrder(productData.getOrder());
 		product.setPrice(productData.getPriceMinor());
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
+		product.setSpecial(productData.isSpecial());
 		
 		if(productData.getChoices() != null) {
 			// Update Choices
@@ -439,7 +445,6 @@ public class MenuController {
 			}
 			product.setChoices(choices);
 		}
-		
 		
 		if(product.isDirty())
 			productRepo.saveOrUpdate(product);
@@ -461,6 +466,52 @@ public class MenuController {
 		
 		product.setActive(false);
 		productRepo.trashEntity(product, account.getLogin());
+	}
+	
+	/**
+	 * Create or override the image for a Product entity.
+	 * 
+	 * @param account
+	 * @param product
+	 * @param imageData
+	 * @return
+	 */
+	public ImageDTO updateProductImage(Account account, Product product, ImageDTO imageData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(product, "product was null");
+		checkNotNull(imageData, "imageData was null");
+		
+		// For the moment we only have one image per info page.
+		// Always override this image.
+		imageData.setId("image");
+		
+		UpdateImagesResult result = imageCtrl.updateImages(account, product.getImages(), imageData);
+		
+		if(result.isDirty()) {
+			product.setImages(result.getImages());
+			productRepo.saveOrUpdate(product);
+		}
+		
+		return result.getUpdatedImage();
+	}
+	
+	/**
+	 * Remove the image from the Product entity and from the blobstore.
+	 * 
+	 * @param product
+	 * @return
+	 */
+	public boolean removeProductImage(Product product) {
+		checkNotNull(product, "product was null");
+		
+		UpdateImagesResult result = imageCtrl.removeImage("image", product.getImages());
+		
+		if(result.isDirty()) {
+			product.setImages(result.getImages());
+			productRepo.saveOrUpdate(product);
+		}
+		
+		return result.isDirty();
 	}
 	
 	/**

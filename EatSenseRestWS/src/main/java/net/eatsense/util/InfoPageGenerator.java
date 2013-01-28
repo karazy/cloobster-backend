@@ -76,7 +76,7 @@ public class InfoPageGenerator {
 	}
 	
 	public List<InfoPageDTO> generate(Key<Business> businessKey, int count , Locale localeOverride) {
-		
+		logger.info("Generating {} info pages for {}", count, businessKey);
 		List<InfoPageDTO> infoPageDtos = new ArrayList<InfoPageDTO>();
 		List<InfoPage> infoPages = new ArrayList<InfoPage>();
 		for (int i = 0; i < count; i++) {

@@ -15,6 +15,7 @@ public class AreaImportDTO extends AreaDTO {
 	@Valid
 	@NotEmpty
 	private List<SpotDTO> spots;
+	private List<String> menus;
 
 	public AreaImportDTO() {
 		super();
@@ -30,5 +31,13 @@ public class AreaImportDTO extends AreaDTO {
 
 	public void setSpots(List<SpotDTO> spots) {
 		this.spots = spots;
+	}
+
+	public List<String> getMenus() {
+		return menus;
+	}
+
+	public void setMenus(List<String> menus) {
+		this.menus = menus;
 	}
 }

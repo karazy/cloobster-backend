@@ -26,6 +26,7 @@ import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
+import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.LocationRepository;
@@ -39,6 +40,7 @@ import net.eatsense.representation.cockpit.MessageDTO;
 import net.eatsense.templates.Template;
 import net.eatsense.util.DummyDataDumper;
 import net.eatsense.util.InfoPageGenerator;
+import net.eatsense.util.TestDataGenerator;
 import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
@@ -67,6 +69,7 @@ public class ServicesResource {
 	private final ValidationHelper validator;
 	@Context
 	private ResourceContext resourceContext;
+	private final TestDataGenerator testDataGen;
 
 	@Inject
 	public ServicesResource(ServletContext servletContext, DummyDataDumper ddd,
@@ -77,11 +80,13 @@ public class ServicesResource {
 			FeedbackFormRepository feedbackFormRepo,
 			Configuration configuration,
 			Provider<InfoPageGenerator> infoPageGenerator,
-			ValidationHelper validator) {
+			ValidationHelper validator,
+			TestDataGenerator testDataGen) {
 		super();
 		this.channelCtrl = channelCtrl;
 		this.templateCtrl = templateCtrl;
 		this.validator = validator;
+		this.testDataGen = testDataGen;
 		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.ddd = ddd;
 		this.importCtrl = importCtr;
@@ -137,12 +142,7 @@ public class ServicesResource {
 	@Path("templates")
 	@Produces("application/json; charset=UTF-8")
 	public List<Template> createTemplates() {
-		return templateCtrl.initTemplates("account-confirm-email",
-				"newsletter-email-registered", "account-confirmed",
-				"account-forgotpassword-email", "account-setup-email",
-				"account-notice-password-update",
-				"account-confirm-email-update", "account-notice-email-update",
-				"customer-account-confirm-email", "location-upgrade-request");
+		return templateCtrl.initAllTemplate();
 	}
 	
 	@POST
@@ -187,12 +187,12 @@ public class ServicesResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("text/plain; charset=UTF-8")
 	public String importNewBusiness(LocationImportDTO newBusiness ) {
-		Key<Business> key =  importCtrl.addBusiness(newBusiness, null);
+		Business business =  importCtrl.addBusiness(newBusiness, null);
 		
-		if(key == null)
-			return "Error:\n" + importCtrl.getReturnMessage();
+		if(business.getId() == null)
+			throw new ServiceException("Error:\n" + importCtrl.getReturnMessage());
 		else
-		    return String.valueOf(key.getId());
+		    return String.valueOf(business.getId());
 	}
 	
 	@GET
@@ -294,5 +294,23 @@ public class ServicesResource {
 	@Path("dataupgrades")
 	public DataUpgradesResource getDataUpgradesResource() {
 		return resourceContext.getResource(DataUpgradesResource.class);
+	}
+	
+	@POST
+	@Path("testdata")
+	public void createTestData() {
+		if(devEnvironment)
+			testDataGen.createTestData();
+		else
+			throw new WebApplicationException(405);
+	}
+	
+	@DELETE
+	@Path("testdata")
+	public void deleteTestData() {
+		if(devEnvironment)
+			testDataGen.deleteTestData();
+		else
+			throw new WebApplicationException(405);
 	}
 }

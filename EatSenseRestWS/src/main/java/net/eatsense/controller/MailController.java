@@ -2,7 +2,9 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -22,7 +24,9 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.domain.Subscription;
+import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
 import net.eatsense.event.ConfirmedAccountEvent;
+import net.eatsense.event.LocationCockpitsOfflineEvent;
 import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
@@ -31,6 +35,8 @@ import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
 import net.eatsense.persistence.CompanyRepository;
+import net.eatsense.persistence.LocationRepository;
+import net.eatsense.persistence.OfyService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +47,7 @@ import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Objectify;
 
 public class MailController {
 	private static final String ACCOUNTS_CUSTOMER_CONFIRM = "/confirm/{token}";
@@ -53,13 +60,16 @@ public class MailController {
 	
 	public static final String FROM_ADDRESS = "info@karazy.net";
 	public static final String REPLY_TO_ADDRESS = "info@cloobster.com";
+	private Objectify ofy;
 	
 	@Inject
-	public MailController( TemplateController templateCtrl, CompanyRepository companyRepo, AccountController accountCtrl) {
+	public MailController( TemplateController templateCtrl, CompanyRepository companyRepo, AccountController accountCtrl, OfyService ofyService) {
 		super();
 		this.companyRepo = companyRepo;
 		this.accountCtrl = accountCtrl;
 		this.templateCtrl = templateCtrl;
+		this.ofy = ofyService.ofy();
+		
 		// Get uri for email links from system property or use default if not set.
 		this.baseUri = Objects.firstNonNull(Strings.emptyToNull(System.getProperty("net.karazy.url.outside")),
 				"https://www.cloobster.com");
@@ -333,6 +343,63 @@ public class MailController {
 		try {
 			// Send e-mail with password reset link.
 			sendMail("info@cloobster.com", mailText);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendChannelOfflineAlertMail(ChannelOnlineCheckTimeOutEvent event) {
+		Business location = ofy.get(event.getChannel().getBusiness());
+		Account account = ofy.get(event.getChannel().getAccount());
+		DateFormat df = DateFormat.getDateTimeInstance( DateFormat.SHORT, DateFormat.SHORT, Locale.GERMANY );
+		
+		String mailText = templateCtrl.getAndReplace("email-cockpit-offline-alert-de", location.getName(), df.format(event.getChannel().getLastOnlineCheck()));
+		String mailAddress = account.getEmail();
+		
+		if(Strings.isNullOrEmpty(mailAddress)) {
+			
+			// find company owner account
+			Account companyAccount = ofy.query(Account.class).filter("company", account.getCompany()).filter("role", Role.COMPANYOWNER).get();
+			if(companyAccount != null) {
+				mailAddress = companyAccount.getEmail();
+			}
+			else {
+				logger.error("Unable to find COMPANYOWNER account for {}", account.getCompany());
+			}
+		}
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(mailAddress, mailText);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendAllCockpitsOfflineEmail(LocationCockpitsOfflineEvent event) {
+		Business location = ofy.get(event.getLocationKey());
+		String mailText = templateCtrl.getAndReplace("email-cockpit-offline-alert-de", location.getName(), "unbekanntem Zeitpunkt");
+		
+		// find company owner account
+		String mailAddress = null;
+		Account companyAccount = ofy.query(Account.class).filter("company", location.getCompany()).filter("role", Role.COMPANYOWNER).get();
+		if(companyAccount != null) {
+			mailAddress = companyAccount.getEmail();
+		}
+		else {
+			logger.error("Unable to sent E-Mail, could not find COMPANYOWNER account for {}", location.getCompany());
+			return;
+		}
+	
+		try {
+			// Send e-mail with password reset link.
+			sendMail(mailAddress, mailText);
 		} catch (AddressException e) {
 			logger.error("Error with e-mail address",e);
 		} catch (MessagingException e) {

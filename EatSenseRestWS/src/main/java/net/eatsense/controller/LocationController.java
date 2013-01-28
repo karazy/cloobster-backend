@@ -457,6 +457,7 @@ public class LocationController {
 		business.setLang(businessData.getLang());
 		business.setEmail(businessData.getEmail());
 		business.setStars(businessData.getStars());
+		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme
@@ -746,11 +747,18 @@ public class LocationController {
 	 * @param businessKey
 	 * @return List of areas as transfer objects.
 	 */
-	public List<AreaDTO> getAreas(Key<Business> businessKey) {
+	public List<AreaDTO> getAreas(Key<Business> businessKey, boolean onlyActive) {
 		checkNotNull(businessKey, "businessKey was null");
 		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
 		
-		for(Area area : areaRepo.getByParent(businessKey)) {
+		List<Area> areas;
+		if(!onlyActive) {
+			areas = areaRepo.getByParent(businessKey);
+		} else {
+			areas = areaRepo.getListByParentAndProperty(businessKey, "active", true);
+		}
+		
+		for(Area area : areas) {
 			if(!area.isTrash()) {
 				areaDtos.add(new AreaDTO(area));
 			}

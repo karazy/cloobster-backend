@@ -21,10 +21,12 @@ import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.service.FileServiceHelper;
 import net.eatsense.templates.Template;
 import net.eatsense.templates.TemplateRepository;
 import net.eatsense.validation.ValidationHelper;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,12 +58,18 @@ public class InfoPageControllerTest {
 	private ValidationHelper validator;
 	
 	private PolicyFactory sanitizer;
+	@Mock
+	private TemplateController templateCtrl;
+	@Mock
+	private ObjectMapper mapper;
+	@Mock
+	private FileServiceHelper fileService;
 
 	@Before
 	public void setUp() throws Exception {
 		
-		sanitizer = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);
-		ctrl = new InfoPageController(infoPageRepo, imageCtrl, localeProvider, validator, sanitizer);
+		sanitizer = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING);		
+		ctrl = new InfoPageController(infoPageRepo, imageCtrl, localeProvider, validator, sanitizer, templateCtrl, mapper, fileService);
 	}
 	
 	@Test
@@ -252,7 +260,9 @@ public class InfoPageControllerTest {
 		@SuppressWarnings("unchecked")
 		Key<InfoPage> key = mock(Key.class);
 		
-		when(infoPageRepo.getKey(businessKey, id)).thenReturn(key );
+		InfoPage infoPage = mock(InfoPage.class);
+		when(infoPageRepo.getById(businessKey, id)).thenReturn(infoPage );
+		when(infoPage.getKey()).thenReturn(key);
 		
 		ctrl.delete(businessKey, id );
 		

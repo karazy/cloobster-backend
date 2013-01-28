@@ -32,7 +32,8 @@
 		            "name": "Tisch 2",
 		            "barcode": "tst002"
 		        }
-		    ]
+		    ],
+		    "menus": [ "Rindfleischburger", "Geflügelburger", "Vegetarische Burger", "Salate", "Getränke"]
 		},
 		{
     		"name": "Zimmerservice",
@@ -45,8 +46,82 @@
 		        {
 		            "name": "Zimmer 002",
 		            "barcode": "room002"
+		        },
+		        {
+		            "name": "Zimmer 003",
+		            "barcode": "room003"
+		        },
+		        {
+		            "name": "Zimmer 004",
+		            "barcode": "room004"
+		        },
+		        {
+		            "name": "Zimmer 005",
+		            "barcode": "room005"
+		        },
+		        {
+		            "name": "Zimmer 006",
+		            "barcode": "room006"
+		        },
+		        {
+		            "name": "Zimmer 007",
+		            "barcode": "room007"
+		        },
+		        {
+		            "name": "Zimmer 008",
+		            "barcode": "room008"
+		        },
+		        {
+		            "name": "Zimmer 009",
+		            "barcode": "room009"
+		        },
+		        {
+		            "name": "Zimmer 010",
+		            "barcode": "room010"
+		        },
+		        {
+		            "name": "Zimmer 011",
+		            "barcode": "room011"
+		        },
+		        {
+		            "name": "Zimmer 012",
+		            "barcode": "room012"
+		        },
+		        {
+		            "name": "Zimmer 013",
+		            "barcode": "room013"
+		        },
+		        {
+		            "name": "Zimmer 014",
+		            "barcode": "room014"
+		        },
+		        {
+		            "name": "Zimmer 015",
+		            "barcode": "room015"
+		        },
+		        {
+		            "name": "Zimmer 016",
+		            "barcode": "room016"
+		        },
+		        {
+		            "name": "Zimmer 017",
+		            "barcode": "room017"
+		        },
+		        {
+		            "name": "Zimmer 018",
+		            "barcode": "room018"
+		        },
+		        {
+		            "name": "Zimmer 019",
+		            "barcode": "room019"
+		        },
+		        {
+		            "name": "Zimmer 020",
+		            "barcode": "room020"
 		        }
-		    ]
+		        
+		    ],
+		    "menus": [ "Rindfleischburger", "Geflügelburger", "Vegetarische Burger", "Salate", "Getränke"]
 		}
     ],
     "menus": [
