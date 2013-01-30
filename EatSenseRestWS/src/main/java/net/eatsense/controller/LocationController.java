@@ -781,6 +781,7 @@ public class LocationController {
 		area.setActive(areaData.isActive());
 		area.setDescription(areaData.getDescription());
 		area.setName(areaData.getName());
+		area.setBarcodeRequired(areaData.isBarcodeRequired());
 		
 		List<Key<Menu>> menus = null;
 		

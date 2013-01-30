@@ -1055,7 +1055,7 @@ public class AccountController {
 		if(isCheckInSet) {
 			checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
 			if(checkIn == null) {
-				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+				throw new ValidationException("CheckIn unknown", "error.checkin.unknown");
 			}
 			else {
 				newAccount.setActiveCheckIn(checkIn.getKey());

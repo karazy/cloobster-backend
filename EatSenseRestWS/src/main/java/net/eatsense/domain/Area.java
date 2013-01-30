@@ -6,6 +6,7 @@ import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 @Cached
 public class Area extends GenericEntity<Area> {
@@ -19,6 +20,9 @@ public class Area extends GenericEntity<Area> {
 	private List<Key<Menu>> menus;
 	
 	private boolean active = true;
+	
+	@Unindexed
+	private boolean barcodeRequired;
 	
 	private boolean welcome;
 
@@ -90,4 +94,11 @@ public class Area extends GenericEntity<Area> {
 		this.welcome = welcome;
 	}
 
+	public boolean isBarcodeRequired() {
+		return barcodeRequired;
+	}
+
+	public void setBarcodeRequired(boolean barcodeRequired) {
+		this.barcodeRequired = barcodeRequired;
+	}
 }
