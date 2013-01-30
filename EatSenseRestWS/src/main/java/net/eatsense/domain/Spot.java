@@ -5,6 +5,8 @@ import java.net.URLEncoder;
 
 import javax.persistence.Transient;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import net.eatsense.exceptions.ServiceException;
 
 import com.google.common.base.Objects;
@@ -144,7 +146,7 @@ public class Spot extends GenericEntity<Spot>{
 	 * @return
 	 */
 	public static String generateBarcode(long businessId, long id) {		
-		return String.format(BARCODE_FORMAT, businessId, id);
+		return BCrypt.hashpw(String.format(BARCODE_FORMAT, businessId, id), BCrypt.gensalt());
 	}
 	
 	/**
