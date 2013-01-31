@@ -80,6 +80,8 @@ public class SpotDTO {
 	private Long areaId;
 	
 	private boolean welcome;
+
+	private boolean master;
 	
 	public SpotDTO(Spot spot) {
 		super();
@@ -99,6 +101,7 @@ public class SpotDTO {
 			this.areaId = spot.getArea().getId();
 		}
 		this.welcome = spot.isWelcome();
+		this.setMaster(spot.isMaster());
 	}
 	
 	public SpotDTO(Spot spot, Business business, Area area) {
@@ -298,11 +301,19 @@ public class SpotDTO {
 		this.welcome = welcome;
 	}
 
+	public boolean isMaster() {
+		return master;
+	}
+
+	public void setMaster(boolean master) {
+		this.master = master;
+	}
+
 	public final static Function<Spot, SpotDTO> toDTO = 
-			new Function<Spot, SpotDTO>() {
-				@Override
-				public SpotDTO apply(Spot input) {
-					return new SpotDTO(input);
-				}
-		    };
+		new Function<Spot, SpotDTO>() {
+			@Override
+			public SpotDTO apply(Spot input) {
+				return new SpotDTO(input);
+			}
+	    };
 }
