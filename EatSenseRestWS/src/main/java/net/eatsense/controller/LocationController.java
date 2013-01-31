@@ -749,10 +749,23 @@ public class LocationController {
 		area.setWelcome(areaData.isWelcome());
 		updateArea(area, areaData);
 	
+		createMasterSpot(businessKey, areaRepo.getKey(area));
+		
+		return area;
+	}
+
+	/**
+	 * Helper function to create a master Spot for an Area. 
+	 * 
+	 * @param businessKey
+	 * @param area
+	 * @return 
+	 */
+	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey) {
 		// create "master" Spot
 		Spot spot = spotRepo.newEntity();
 		spot.setActive(true);
-		spot.setArea(area.getKey());
+		spot.setArea(areaKey);
 		spot.setBusiness(businessKey);
 		spot.setMaster(true);
 		spot.setName("Master Spot");
@@ -762,7 +775,7 @@ public class LocationController {
 		
 		spotRepo.saveOrUpdate(spot);
 		
-		return area;
+		return spot;
 	}
 	
 	/**
