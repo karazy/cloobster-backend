@@ -312,7 +312,10 @@ public class ImportController {
 		area.setMenus(menuKeys);
 		
 		Key<Area> kA = areaRepo.saveOrUpdate(area);
+		
 		logger.info("Created new area with id: " + kA.getId());
+		// create Master Spot for Area
+		locationController.createMasterSpot(businessKey, kA);
 		return kA;
 	}
 	
