@@ -49,21 +49,24 @@ public class DataUpgradesResource {
 	public DataUpgradesResultDTO updateAreasAddMasterSpot() {
 		int updateCount = 0;
 		
-		QueryResultIterable<Key<Area>> areas = areaRepo.query().filter("welcome", false).fetchKeys();
+		QueryResultIterable<Area> areas = areaRepo.query().fetch();
 		
-		for (Key<Area> areaKey : areas) {
-			boolean hasMasterSpot = false;
-			for (Spot spot : spotRepo.query().filter("area", areaKey)) {
-				if(spot.isMaster()) {
-					hasMasterSpot = true;
+		for (Area area : areas) {
+			if(!area.isWelcome()) {
+				boolean hasMasterSpot = false;
+				Key<Area> areaKey = area.getKey();
+				for (Spot spot : spotRepo.query().filter("area", areaKey)) {
+					if(spot.isMaster()) {
+						hasMasterSpot = true;
+					}
 				}
+				if(!hasMasterSpot) {
+					updateCount++;
+					// No master Spot found, add it.
+					
+					locationCtrl.createMasterSpot(area.getBusiness(), areaKey);
+				}				
 			}
-			if(!hasMasterSpot) {
-				updateCount++;
-				// No master Spot found, add it.
-				locationCtrl.createMasterSpot(areaKey.<Business>getParent(), areaKey);
-			}
-			
 		}
 		logger.info("Areas updated:  {}", updateCount);
 		return new DataUpgradesResultDTO("OK", updateCount);
