@@ -764,6 +764,7 @@ public class LocationController {
 	 */
 	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey) {
 		// create "master" Spot
+		logger.info("Creating master Spot for {}.", areaKey);
 		Spot spot = spotRepo.newEntity();
 		spot.setActive(true);
 		spot.setArea(areaKey);

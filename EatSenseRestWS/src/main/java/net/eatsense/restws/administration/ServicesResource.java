@@ -159,18 +159,6 @@ public class ServicesResource {
 		nounRepo.ofy().put(nouns);
 	}
 	
-	@POST
-	@Path("accounts/dummies")
-	public void dummyUsers() {
-		ddd.generateDummyUsers();
-	}
-	
-	@POST
-	@Path("businesses/dummies")
-	public void dummyData() {
-		ddd.generateDummyBusinesses();
-	}
-	
 	@GET
 	@Path("businesses")
 	@Produces("application/json; charset=UTF-8")

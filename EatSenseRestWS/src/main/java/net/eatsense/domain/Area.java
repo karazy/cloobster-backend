@@ -72,7 +72,7 @@ public class Area extends GenericEntity<Area> {
 
 	@Override
 	public Key<Area> getKey() {
-		return new Key<Area>(Area.class, getId());
+		return new Key<Area>(business, Area.class, getId());
 	}
 
 	public boolean isActive() {
