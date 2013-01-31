@@ -633,6 +633,7 @@ public class LocationController {
 		spot.setId(ofyService.factory().allocateId(Spot.class));
 		spot.setWelcome(true);
 		spot.setName("Welcome Spot");
+		spot.setArea(welcomeAreaKey);
 		// Generate the  new barcode
 		spot.generateBarcode();
 		

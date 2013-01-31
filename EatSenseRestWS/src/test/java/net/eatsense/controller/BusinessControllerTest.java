@@ -562,6 +562,9 @@ public class BusinessControllerTest {
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
 		Area welcomeArea = new Area();
 		when(areaRepo.newEntity()).thenReturn(welcomeArea );
+		@SuppressWarnings("unchecked")
+		Key<Area> welcomeAreaKey = mock(Key.class);
+		when(areaRepo.getKey(welcomeArea)).thenReturn(welcomeAreaKey );
 		LocationProfileDTO testProfileData = getTestProfileData();
 		
 		Spot welcomeSpot = mock(Spot.class);
@@ -593,6 +596,7 @@ public class BusinessControllerTest {
 		verify(spotRepo).saveOrUpdate(welcomeSpot);
 		verify(welcomeSpot).generateBarcode();
 		verify(welcomeSpot).setWelcome(true);
+		verify(welcomeSpot).setArea(welcomeAreaKey);
 	}
 	
 	@Test
