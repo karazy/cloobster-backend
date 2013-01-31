@@ -690,9 +690,12 @@ public class LocationController {
 		checkNotNull(spot, "spot was null");
 		checkNotNull(account, "account was null");
 		
-		if(spot.isWelcome()) {
-			throw new IllegalAccessException("Not allowed to delete welcome spot");
+		if(spot.isWelcome() || spot.isMaster()) {
+			String message = "Not allowed to delete welcome or master Spot.";
+			logger.error(message);
+			throw new IllegalAccessException(message);
 		}
+		
 		int spotCount = countSpots(spot.getBusiness());
 		
 		spot.setActive(false);
@@ -753,7 +756,7 @@ public class LocationController {
 		spot.setBusiness(businessKey);
 		spot.setMaster(true);
 		spot.setName("Master Spot");
-		// Get a new Id from the datastore, so we can generate the barcode from the start.
+		// Get a new Id from the datastore, so we can generate the barcode immediately
 		spot.setId(ofyService.factory().allocateId(Spot.class));
 		spot.generateBarcode();
 		

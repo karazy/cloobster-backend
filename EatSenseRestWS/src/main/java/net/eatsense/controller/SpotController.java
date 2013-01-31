@@ -8,9 +8,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
@@ -23,8 +20,10 @@ import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -162,8 +161,9 @@ public class SpotController {
 		int spotCount = countSpots(businessKey);
 		int deletedSpots = 0;
 		for (Iterator<Spot> iterator = spots.iterator(); iterator.hasNext();) {
-			Spot spot = iterator.next();
-			if(spot.isWelcome()) {
+			Spot spot = iterator.next();			
+			if(spot.isWelcome() || spot.isMaster()) {
+				logger.warn("Filtered master/welcome Spot from deletion request.");
 				iterator.remove();
 			}
 			else {
