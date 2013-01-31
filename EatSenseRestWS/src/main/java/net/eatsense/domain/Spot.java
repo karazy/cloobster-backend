@@ -13,6 +13,7 @@ import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindexed;
 
 
 /**
@@ -51,7 +52,16 @@ public class Spot extends GenericEntity<Spot>{
 	
 	private Key<Area> area;
 	
+	/**
+	 * Determines if the Spot restricts the application to a view-only mode, no orders can be made on this Spot if true.
+	 */
 	private boolean welcome;
+	
+	/**
+	 * Determines if the Spot is the master for the Area it belongs to.
+	 */
+	@Unindexed
+	private boolean master;
 
 	public Key<Area> getArea() {
 		return area;
@@ -163,6 +173,14 @@ public class Spot extends GenericEntity<Spot>{
 
 	public void setWelcome(boolean welcome) {
 		this.welcome = welcome;
+	}
+
+	public boolean isMaster() {
+		return master;
+	}
+
+	public void setMaster(boolean master) {
+		this.master = master;
 	}
 }
 

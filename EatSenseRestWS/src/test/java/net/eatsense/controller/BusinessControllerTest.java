@@ -42,6 +42,7 @@ import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.FeedbackRepository;
 import net.eatsense.persistence.MenuRepository;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -76,6 +77,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -141,6 +143,12 @@ public class BusinessControllerTest {
 	@Mock
 	private Query<Spot> spotQueryMock;
 
+	@Mock
+	private OfyService ofyService;
+
+	@Mock
+	private ObjectifyFactory ofyFactory;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -161,7 +169,8 @@ public class BusinessControllerTest {
 		
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
-		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider);
+		when(ofyService.factory()).thenReturn(ofyFactory);
+		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, ofyService);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -487,7 +496,7 @@ public class BusinessControllerTest {
 	private LocationController createController() {
 		return new LocationController(requestRepo, checkInrepo, spotRepo, rr,
 				eventBus, accountRepo, imageController, areaRepo, validator,
-				mr, feedbackRepo, configProvider);
+				mr, feedbackRepo, configProvider, ofyService);
 	}
 	
 	@Test
@@ -557,6 +566,7 @@ public class BusinessControllerTest {
 		
 		Spot welcomeSpot = mock(Spot.class);
 		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
+		when(welcomeSpot.isDirty()).thenReturn(true);
 		
 		when(spotRepo.query()).thenReturn(spotQueryMock);
 		
@@ -606,6 +616,7 @@ public class BusinessControllerTest {
 		// First we return null, to test the case of no businesses added.
 		when(account.getBusinesses()).thenReturn(null, businessesList );
 		Spot welcomeSpot = mock(Spot.class);
+		when(welcomeSpot.isDirty()).thenReturn(true);
 		when(spotRepo.newEntity()).thenReturn(welcomeSpot );
 		when(spotRepo.query()).thenReturn(spotQueryMock);
 		when(rr.saveOrUpdate(business)).thenReturn(businessKey);
@@ -804,15 +815,28 @@ public class BusinessControllerTest {
 	
 	@Test
 	public void testCreateArea() throws Exception {
-		
+		spotRepo = mock(SpotRepository.class);
+		businessCtrl = createController();
 		@SuppressWarnings("unchecked")
 		Key<Business> businessKey= mock(Key.class);
-		Area area = new Area();
+		Area area = mock(Area.class);
+		@SuppressWarnings("unchecked")
+		Key<Area> areaKey = mock(Key.class);
+		when(area.getKey()).thenReturn(areaKey );
 		when(areaRepo.newEntity()).thenReturn(area);
+		when(area.isDirty()).thenReturn(true);
+		Spot masterSpot = mock(Spot.class);
+		when(spotRepo.newEntity()).thenReturn(masterSpot );
 		
 		businessCtrl.createArea(businessKey, getTestAreaData());
+		
 		verify(areaRepo).saveOrUpdate(area);
-		assertThat(area.getBusiness(), is(businessKey));
+		verify(area).setBusiness(businessKey);
+		
+		//verify master spot creation
+		verify(masterSpot).setMaster(true);
+		verify(masterSpot).generateBarcode();
+		verify(spotRepo).saveOrUpdate(masterSpot);
 	}
 	
 	private AreaDTO getTestAreaData() {

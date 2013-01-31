@@ -41,6 +41,7 @@ import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.MenuRepository;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.AreaDTO;
@@ -85,11 +86,17 @@ public class LocationController {
 	private final MenuRepository menuRepo;
 	private final Provider<Configuration> configProvider;
 	private FeedbackFormRepository feedbackRepo;
+	private final OfyService ofyService;
 	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, LocationRepository br, EventBus eventBus,
-			AccountRepository accountRepo, ImageController imageController,AreaRepository areaRepository, Validator validator, MenuRepository menuRepository,FeedbackFormRepository feedbackRepository, Provider<Configuration> configProvider) {
+			AccountRepository accountRepo, ImageController imageController,
+			AreaRepository areaRepository, Validator validator,
+			MenuRepository menuRepository,
+			FeedbackFormRepository feedbackRepository,
+			Provider<Configuration> configProvider,
+			OfyService ofyService) {
 		this.areaRepo = areaRepository;
 		this.menuRepo = menuRepository;
 		this.validator = validator;
@@ -102,6 +109,7 @@ public class LocationController {
 		this.imageController = imageController;
 		this.configProvider = configProvider;
 		this.feedbackRepo = feedbackRepository;
+		this.ofyService = ofyService;
 	}
 	
 	/**
@@ -402,21 +410,9 @@ public class LocationController {
 	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
 		checkNotNull(businessKey, "businessKey was null");
 		
-		AreaDTO areaData = new AreaDTO();
-		areaData.setActive(true);
-		areaData.setDescription("Welcome Area");
-		areaData.setName("Welcome Area");
-		areaData.setWelcome(true);
+		Area welcomeArea = createWelcomeArea(businessKey);
 		
-		Area welcomeArea = createArea(businessKey, areaData );
-		
-		SpotDTO spotData = new SpotDTO();
-		spotData.setActive(true);
-		spotData.setAreaId(welcomeArea.getId());
-		spotData.setName("Welcome Spot");
-		spotData.setWelcome(true);
-		
-		createSpot(businessKey, spotData, true );
+		createWelcomeSpot(businessKey, areaRepo.getKey(welcomeArea));
 	}
 
 	/**
@@ -593,23 +589,9 @@ public class LocationController {
 	public SpotDTO createSpot(Key<Business> locationKey, SpotDTO spotData, boolean welcome) {
 		checkNotNull(locationKey, "businessKey was null");
 		
-		int spotCount = 0;
-		Spot spot = spotRepo.newEntity();
-		
-		spot.setBusiness(locationKey);
-		spot.setWelcome(welcome);
-		
-		
-		if(!welcome) {
-			spotCount = countSpots(locationKey);
-		}
-		
-		
-		updateSpot(spot, spotData);
-		// Generate the barcode like this: {businessId}-{spotId}
-		Key<Area> areaKey = null;
+		// Make sure to not create a new Spot at the "welcome" Area
 		if(spotData.getAreaId() != null) {
-			areaKey = areaRepo.getKey(spot.getBusiness(), spotData.getAreaId());
+			Key<Area> areaKey = areaRepo.getKey(locationKey, spotData.getAreaId());
 			if(!welcome) {
 				try {
 					Area area = areaRepo.getByKey(areaKey);
@@ -623,15 +605,40 @@ public class LocationController {
 			}			
 		}
 		
+		Spot spot = spotRepo.newEntity();
+		
+		spot.setBusiness(locationKey);
+		spot.setWelcome(welcome);
+		spot.setId(ofyService.factory().allocateId(Spot.class));
+		// Generate the  new barcode
 		spot.generateBarcode();
 		
-		spotRepo.saveOrUpdate(spot);
+		int spotCount = 0;
+		if(!welcome) {
+			spotCount = countSpots(locationKey);
+		}
 		
+		updateSpot(spot, spotData);
 		
 		if(!welcome)
 			eventBus.post(new NewSpotEvent(locationKey, spot, spotCount + 1, false));
 		
 		return new SpotDTO(spot);
+	}
+	
+	private Spot createWelcomeSpot(Key<Business> locationKey, Key<Area> welcomeAreaKey) {
+		Spot spot = spotRepo.newEntity();
+		spot.setActive(true);
+		spot.setBusiness(locationKey);
+		spot.setId(ofyService.factory().allocateId(Spot.class));
+		spot.setWelcome(true);
+		spot.setName("Welcome Spot");
+		// Generate the  new barcode
+		spot.generateBarcode();
+		
+		spotRepo.saveOrUpdate(spot);
+		
+		return spot;
 	}
 
 	/**
@@ -738,6 +745,38 @@ public class LocationController {
 		area.setBusiness(businessKey);
 		area.setWelcome(areaData.isWelcome());
 		updateArea(area, areaData);
+	
+		// create "master" Spot
+		Spot spot = spotRepo.newEntity();
+		spot.setActive(true);
+		spot.setArea(area.getKey());
+		spot.setBusiness(businessKey);
+		spot.setMaster(true);
+		spot.setName("Master Spot");
+		// Get a new Id from the datastore, so we can generate the barcode from the start.
+		spot.setId(ofyService.factory().allocateId(Spot.class));
+		spot.generateBarcode();
+		
+		spotRepo.saveOrUpdate(spot);
+		
+		return area;
+	}
+	
+	/**
+	 * Create the welcome area for this business.
+	 * 
+	 * @param businessKey
+	 * @return
+	 */
+	private Area createWelcomeArea(Key<Business> businessKey) {
+		Area area = areaRepo.newEntity();
+		area.setBusiness(businessKey);
+		area.setActive(true);
+		area.setDescription("Welcome Area");
+		area.setName("Welcome Area");
+		area.setWelcome(true);
+		
+		areaRepo.saveOrUpdate(area);
 		
 		return area;
 	}
