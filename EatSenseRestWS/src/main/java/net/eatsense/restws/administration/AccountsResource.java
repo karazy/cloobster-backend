@@ -3,6 +3,7 @@ package net.eatsense.restws.administration;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -13,12 +14,14 @@ import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.BusinessAccountDTO;
 
 import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
 import com.googlecode.objectify.Objectify;
 
 public class AccountsResource {
 	private final AccountController accountCtrl;
 	private Objectify ofy;
 
+	@Inject
 	public AccountsResource(AccountController accountCtrl, OfyService ofyService) {
 		super();
 		this.ofy = ofyService.ofy();
@@ -32,6 +35,7 @@ public class AccountsResource {
 	}
 	
 	@PUT
+	@Path("{accountId}")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")	
 	public BusinessAccountDTO updateAccount(@PathParam("accountId") long accountId, BusinessAccountDTO accountDto) {
