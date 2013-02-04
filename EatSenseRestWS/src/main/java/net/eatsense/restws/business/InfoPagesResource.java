@@ -54,6 +54,20 @@ public class InfoPagesResource {
 	}
 	
 	/**
+	 * @param id
+	 * @param locale
+	 * @return InfoPage transfer object for this specific language.
+	 */
+	@GET
+	@Path("{infoPageId}")
+	public InfoPageDTO getInfoPage(@PathParam("infoPageId") long id,@QueryParam("lang") Locale locale) {
+		if(locale == null)
+			return new InfoPageDTO(infoPageCtrl.get(business.getKey(), id));
+		else
+			return new InfoPageDTO(infoPageCtrl.get(business.getKey(), id , locale));
+	}
+	
+	/**
 	 * Create a new InfoPage entity
 	 * 
 	 * @param infoPageData content for the new InfoPage entity
