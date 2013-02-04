@@ -80,15 +80,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
 		String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
 		Account account = null;
-
-		if(checkInId != null && !checkInId.isEmpty()) {
-			 Authorizer auth = authenticateCheckIn(checkInId);
-			 if(auth != null) {
-				 request.setSecurityContext(auth);
-				 return request;
-			 }
-		}
-				
+		
 		if(login != null && !login.isEmpty()) {
 			logger.info("recieved login request from user: " +login);
 			if(passwordHash != null && !passwordHash.isEmpty()) {
@@ -99,7 +91,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 			if(password != null && !password.isEmpty()) {
 				account = accountCtrl.authenticate(login, password);
 			}
-
+		
 			if(account != null) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, null,null));
 				logger.info("Basic authentication success for user: {}", login);
@@ -113,15 +105,32 @@ public class SecurityFilter implements ContainerRequestFilter {
 			
 			logger.info("Facebook authentication success for user: {}", account.getEmail());
 		}
+		else if(!Strings.isNullOrEmpty(checkInId)) {
+			// Set authorization for GUEST role, no account data was supplied.
+			Authorizer auth = authenticateCheckIn(checkInId);
+			if(auth != null) {
+				request.setSecurityContext(auth);
+				return request;
+			}
+		}
 		
 		servletRequest.setAttribute("net.eatsense.domain.Account", account);
 		
-		if( account != null && account.getActiveCheckIn() != null) {
-			try {
-				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
-			} catch (com.googlecode.objectify.NotFoundException e) {
-				logger.info("activeCheckin for account not found, removing reference");
-				accountCtrl.removeActiveCheckIn(account);
+		if( account != null) {
+			if(account.getActiveCheckIn() != null) {
+				try {
+					servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
+				} catch (com.googlecode.objectify.NotFoundException e) {
+					logger.info("activeCheckin for account not found, removing reference");
+					accountCtrl.removeActiveCheckIn(account);
+				}
+			}
+			else if(!Strings.isNullOrEmpty(checkInId)) {
+				CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+				if(checkIn == null) {
+					logger.warn("Invalid checkInId given {}", checkInId);
+				}
+				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
 			}
 		}
 		
