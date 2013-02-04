@@ -134,7 +134,7 @@ public class SpotDTO {
 			this.areaName = area.getName();
 			if(area.getMenus() != null && !area.getMenus().isEmpty()) {
 				for (Key<Menu> menuKey : area.getMenus()) {
-					areaMenuIds.add(menuKey.getId());
+					getAreaMenuIds().add(menuKey.getId());
 				}
 			}
 		}
@@ -316,6 +316,14 @@ public class SpotDTO {
 
 	public void setMaster(boolean master) {
 		this.master = master;
+	}
+
+	public ArrayList<Long> getAreaMenuIds() {
+		return areaMenuIds;
+	}
+
+	public void setAreaMenuIds(ArrayList<Long> areaMenuIds) {
+		this.areaMenuIds = areaMenuIds;
 	}
 
 	public final static Function<Spot, SpotDTO> toDTO = 
