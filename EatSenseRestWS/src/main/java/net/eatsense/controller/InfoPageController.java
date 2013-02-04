@@ -135,6 +135,20 @@ public class InfoPageController {
 	}
 	
 	/**
+	 * @param businessKey
+	 * @param id
+	 * @return InfoPage entity from the datastore.
+	 */
+	public InfoPage get(Key<Business> businessKey, Long id, Locale locale) {
+		try {
+			return infoPageRepo.get(infoPageRepo.getKey(businessKey, id), locale);
+		} catch (NotFoundException e) {
+			
+			throw new net.eatsense.exceptions.NotFoundException("Could not find entity with id: "+id,e);
+		}
+	}
+	
+	/**
 	 * Create and save new InfoPage entity with data.
 	 * 
 	 * @param businessKey
