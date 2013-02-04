@@ -124,7 +124,9 @@ public class ChannelController {
 		channel.setBusiness(business.getKey());
 		channel.setLocationName(business.getName());
 		channel.setClientId(pureClientId);
-		channel.setCreationTime(new Date());
+		Date creationTime = new Date();
+		channel.setCreationTime(creationTime);
+		channel.setLastOnlineCheck(creationTime);
 		ofy.put(channel);
 		
 		clientId = buildCockpitClientId(business.getId(), clientId);
