@@ -6,6 +6,10 @@ package net.eatsense.domain.embedded;
  * @author Frederik Reifschneider
  *
  */
+/**
+ * @author Nils
+ *
+ */
 public enum CheckInStatus {
 	
 	/**
@@ -24,6 +28,9 @@ public enum CheckInStatus {
 	 * User requested the bill.
 	 */
 	PAYMENT_REQUEST,
-	
-	COMPLETE
+	COMPLETE,
+	/**
+	 * User switched/checked out without placing orders.
+	 */
+	WAS_INACTIVE
 }

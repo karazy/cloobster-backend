@@ -412,13 +412,16 @@ public class CheckInController {
 		requestRepo.delete(requestRepo.getKeysByProperty("checkIn", checkIn));
 		orderChoiceRepo.delete(orderChoiceKeys);
 		orderRepo.delete(orderKeys);
-		checkInRepo.delete(checkIn);
+		
+		checkIn.setStatus(CheckInStatus.WAS_INACTIVE);
+		checkIn.setArchived(true);
+		checkInRepo.saveOrUpdate(checkIn);
 		
 		// Remove active checkIn from the account, if this was authenticated with an user account.
 		if(optAccount.isPresent()) {
 			optAccount.get().setActiveCheckIn(null);
 			accountRepo.saveOrUpdate(optAccount.get());
-		}	
+		}
 		
 		DeleteCheckInEvent event = new DeleteCheckInEvent(checkIn, businessRepo.getByKey(checkIn.getBusiness()), true);
 		event.setCheckInCount(checkInCount == 0 ? 0 : checkInCount-1 );
