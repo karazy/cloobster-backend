@@ -233,7 +233,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
 	public List<AreaDTO> getAreas() {
-		return locationCtrl.getAreas(business.getKey(),true);
+		return locationCtrl.getAreas(business.getKey(),true, true);
 	}
 	
 	/**
@@ -247,6 +247,6 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
 	public List<SpotDTO> getSpots(@QueryParam("areaId")long areaId) {
-		return locationCtrl.getSpots(business.getKey(), areaId, false);
+		return locationCtrl.getSpots(business.getKey(), areaId, false, true);
 	}
 }

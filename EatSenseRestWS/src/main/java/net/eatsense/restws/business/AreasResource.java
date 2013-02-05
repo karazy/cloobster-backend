@@ -43,7 +43,7 @@ public class AreasResource {
 	@GET
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public List<AreaDTO> getAreas() {
-		return businessCtrl.getAreas(business.getKey(), false);
+		return businessCtrl.getAreas(business.getKey(), false, false);
 	}
 	
 	/**

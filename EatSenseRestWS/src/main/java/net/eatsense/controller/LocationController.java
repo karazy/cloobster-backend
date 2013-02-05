@@ -553,9 +553,10 @@ public class LocationController {
 	 * @param businessKey
 	 * @param areaId If different from 0, filter by area.
 	 * @param welcome 
+	 * @param noMaster 
 	 * @return List of spots for the business and for the area if specified.
 	 */
-	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId, boolean welcome) {
+	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId, boolean welcome, boolean noMaster) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
@@ -573,6 +574,10 @@ public class LocationController {
 		}
 		
 		for(Spot spot :  spots) {
+			// Dont return master Spot if noMaster is true
+			if(noMaster && spot.isMaster())
+				break;
+			
 			if(!spot.isTrash()) {
 				spotDTOList.add(new SpotDTO(spot));
 			}
@@ -802,23 +807,21 @@ public class LocationController {
 	/**
 	 * 
 	 * @param businessKey
+	 * @param noWelcome 
 	 * @return List of areas as transfer objects.
 	 */
-	public List<AreaDTO> getAreas(Key<Business> businessKey, boolean onlyActive) {
+	public List<AreaDTO> getAreas(Key<Business> businessKey, boolean onlyActive, boolean noWelcome) {
 		checkNotNull(businessKey, "businessKey was null");
 		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
-		
-		List<Area> areas;
-		if(!onlyActive) {
-			areas = areaRepo.getByParent(businessKey);
-		} else {
-			areas = areaRepo.getListByParentAndProperty(businessKey, "active", true);
-		}
+		List<Area> areas = areaRepo.getListByParentAndProperty(businessKey, "trash", false);
 		
 		for(Area area : areas) {
-			if(!area.isTrash()) {
-				areaDtos.add(new AreaDTO(area));
+			if(noWelcome && area.isWelcome())
+				break;
+			if(onlyActive && !area.isActive()) {
+				break;
 			}
+			areaDtos.add(new AreaDTO(area));
 		}
 		
 		return areaDtos;

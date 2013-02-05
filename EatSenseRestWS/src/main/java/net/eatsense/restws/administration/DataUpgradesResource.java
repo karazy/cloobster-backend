@@ -81,7 +81,7 @@ public class DataUpgradesResource {
 		for (Business business : allLocations) {
 			logger.info("Checking {} for incomplete data.", business.getKey());
 			// Check for a welcome spot
-			if(locationCtrl.getSpots(business.getKey(), 0, true).isEmpty()) {
+			if(locationCtrl.getSpots(business.getKey(), 0, true, false).isEmpty()) {
 				logger.info("Creating welcome area and spot ...");
 				locationCtrl.createWelcomeAreaAndSpot(business.getKey());
 				updateCount++;
