@@ -156,6 +156,7 @@ public class AccountController {
 	 * @param hashedPassword as bcrypt hash
 	 * @return the authenticated Account object for the given login
 	 */
+	@Deprecated
 	public Account authenticateHashed(String login, String hashedPassword) {
 		login = Strings.nullToEmpty(login).toLowerCase();
 		
@@ -211,7 +212,7 @@ public class AccountController {
 			return null;
 		
 		if(!account.isActive())
-			return null;
+			throw new IllegalAccessException("Account deactivated", "error.account.inactive");
 		
 		if( accountRepo.checkPassword(password, account.getHashedPassword())) {
 			// Reset failed attempts counter
