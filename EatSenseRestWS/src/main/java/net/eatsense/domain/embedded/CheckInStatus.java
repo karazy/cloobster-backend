@@ -25,5 +25,5 @@ public enum CheckInStatus {
 	 */
 	PAYMENT_REQUEST,
 	
-	COMPLETE,	
+	COMPLETE
 }

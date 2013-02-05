@@ -99,6 +99,9 @@ public class Area extends GenericEntity<Area> {
 	}
 
 	public void setBarcodeRequired(boolean barcodeRequired) {
-		this.barcodeRequired = barcodeRequired;
+		if(!Objects.equal(this.barcodeRequired, barcodeRequired)) {
+			this.setDirty(true);
+			this.barcodeRequired = barcodeRequired;
+		}
 	}
 }
