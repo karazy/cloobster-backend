@@ -140,6 +140,10 @@ public class AccountsResource {
 			accountCtrl.addCustomerProfile(account);
 		}
 		
+		if(checkIn != null && account.getActiveCheckIn() == null) {
+			accountCtrl.linkAccountAndCheckIn(account, checkIn);
+		}
+		
 		CustomerAccountDTO accountDto = new CustomerAccountDTO(account, checkIn);
 		AccessToken authToken = accountCtrl.createCustomerAuthToken(account);
 		

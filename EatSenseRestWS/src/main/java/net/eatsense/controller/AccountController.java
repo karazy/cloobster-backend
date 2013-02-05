@@ -596,6 +596,19 @@ public class AccountController {
 		return updateAccount(account, accountData, true);
 	}
 	
+	public Account linkAccountAndCheckIn(Account account, CheckIn checkIn) {
+		checkNotNull(account, "account as null");
+		checkNotNull(checkIn, "checkIn as null");
+
+		account.setActiveCheckIn(checkIn.getKey());
+		checkIn.setAccount(account.getKey());
+		
+		checkInRepo.saveOrUpdate(checkIn);
+		accountRepo.saveOrUpdate(account);
+		
+		return account;
+	}
+	
 	/**
 	 * Update account profile data.
 	 * 

@@ -114,9 +114,18 @@ public class CheckInsResource {
 		
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		// Check that the authenticated checkin owns the entity
-		boolean authenticated = (checkIn == null ? false : checkInFromPath.getId().equals(checkIn.getId()))
-								|| (account!= null && checkInFromPath.getAccount().getId() == account.getId().longValue());
-		
+		boolean authenticated = false;
+		if(checkIn != null && checkInFromPath.getId().equals(checkIn.getId())) {
+			authenticated = true;
+		}
+		if (!authenticated
+				&& account != null
+				&& checkInFromPath.getAccount() != null
+				&& checkInFromPath.getAccount().getId() == account.getId().longValue()) {
+			// CheckIn belongs to authenticated Account
+			authenticated = true;
+		}
+
 		if(HttpMethods.WRITE_METHODS.contains(servletRequest.getMethod())) {
 			// Check for read-only mode.
 			Business business = businessRepo.getByKey(checkIn.getBusiness());
