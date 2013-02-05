@@ -131,7 +131,6 @@ public class CheckInController {
     		throw new NotFoundException();
     	}
     	
-    	
     	if(spot.getArea() == null) {
     		throw new NotFoundException(); 
     	}
