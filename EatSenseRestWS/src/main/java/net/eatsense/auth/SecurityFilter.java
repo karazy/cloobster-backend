@@ -12,7 +12,6 @@ import javax.ws.rs.core.UriInfo;
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.service.FacebookService;
 
@@ -108,9 +107,22 @@ public class SecurityFilter implements ContainerRequestFilter {
 		
 		if( account != null) {
 			servletRequest.setAttribute("net.eatsense.domain.Account", account);
+			
 			if(account.getActiveCheckIn() != null) {
 				try {
-					servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
+					CheckIn checkIn = checkInRepo.getByKey(account.getActiveCheckIn());
+					
+					// We check here, if the activeCheckIn of the account is
+					// different to the supplied checkIn from the header
+					// parameter.
+					if (!Strings.isNullOrEmpty(checkInId) && !checkInId.equals(checkIn.getUserId())) {
+						// If it is different, there was an older checkIn from the account not completed.
+						// Override the CheckIn for this request with the new checkin.
+						servletRequest.setAttribute( "net.eatsense.domain.CheckIn",	checkInRepo.getByProperty("userId", checkInId));
+					}
+					else {
+						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+					}
 				} catch (com.googlecode.objectify.NotFoundException e) {
 					logger.warn("activeCheckin for account not found, removing reference");
 					accountCtrl.removeActiveCheckIn(account);
