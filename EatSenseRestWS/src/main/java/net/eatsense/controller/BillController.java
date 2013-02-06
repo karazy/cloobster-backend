@@ -163,8 +163,6 @@ public class BillController {
 		
 		allBills.saveOrUpdate(bill);
 		
-		billData = transform.billToDto(bill);
-
 		// ...update the status of the checkIn in the datastore ...
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);
