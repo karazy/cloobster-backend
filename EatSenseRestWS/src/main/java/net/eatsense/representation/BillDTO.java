@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.embedded.PaymentMethod;
 
 public class BillDTO {
@@ -23,6 +24,24 @@ public class BillDTO {
 	@NotNull
 	@Min(0)
 	private Long checkInId;
+	
+	public BillDTO() {
+	}
+	
+	public BillDTO(Bill bill) {
+		if(bill == null)
+			return;
+		
+		// convert from stored minor values to decimal
+		if(bill.getTotal() != null) {
+			this.setTotal( (bill.getTotal() == 0) ? 0 : bill.getTotal() / 100d );
+		}
+		this.setCheckInId(bill.getCheckIn().getId());
+		this.setCleared(bill.isCleared());
+		this.setId(bill.getId());
+		this.setTime(bill.getCreationTime());
+		this.setPaymentMethod(bill.getPaymentMethod());
+	}
 	
 	public Long getId() {
 		return id;

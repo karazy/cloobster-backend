@@ -68,7 +68,7 @@ public class BillsResource {
 		if(bill == null)
 			throw new NotFoundException();
 
-		return billController.updateBill(business, bill, billData);
+		return new BillDTO(billController.updateBill(business, bill, billData));
 	}
 
 }
