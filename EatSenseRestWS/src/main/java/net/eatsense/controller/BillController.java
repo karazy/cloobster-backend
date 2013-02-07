@@ -120,24 +120,21 @@ public class BillController {
 	 */
 	public Bill updateBill(final Business business, Bill bill , BillDTO billData) {
 		checkNotNull(business, "Bill cannot be updated, business is null");
-		checkNotNull(business.getId(), "Bill cannot be updated, id for business is null");
 		checkNotNull(bill, "Bill cannot be updated, bill is null");
-		checkNotNull(bill.getId(), "Bill cannot be updated, id for bill is null");
-		checkNotNull(bill.getCheckIn(), "Bill cannot be updated, checkin for bill is null");
 		checkNotNull(billData, "Bill cannot be updated, billdata is null");
 		checkArgument(!bill.isCleared(), "Bill cannot be updated, bill already cleared");
 		checkArgument(billData.isCleared(), "Bill cannot be updated, cleared must be set to true");
 		
-		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
 		Iterable<Order> ordersForCheckIn = allOrders.belongingToLocationAndCheckIn(business, bill.getCheckIn());
+		
+		if(!ordersForCheckIn.iterator().hasNext())
+			throw new BillFailureException("Bill cannot be updated, no orders found.");
+		
 		List<Order> ordersToBill = new ArrayList<Order>(); 
 		
 		// Currency used for this business.
 		CurrencyUnit currencyUnit = CurrencyUnit.of(business.getCurrency());
 		Money billTotal = Money.of(currencyUnit, 0);
-		
-		if(!ordersForCheckIn.iterator().hasNext())
-			throw new BillFailureException("Bill cannot be updated, no orders found.");
 		
 		// Check all orders for the CheckIn skip orders, that are already completed,not yet placed or already cancelled.
 		// Thrown an exception if there are unconfirmed orders.
@@ -164,6 +161,8 @@ public class BillController {
 		
 		allBills.saveOrUpdate(bill);
 		
+		CheckIn checkIn = checkInRepo.getByKey(bill.getCheckIn());
+
 		// ...update the status of the checkIn in the datastore ...
 		checkIn.setStatus(CheckInStatus.COMPLETE);
 		checkIn.setArchived(true);

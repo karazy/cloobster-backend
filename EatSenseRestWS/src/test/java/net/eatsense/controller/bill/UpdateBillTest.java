@@ -201,13 +201,6 @@ public class UpdateBillTest {
 		billCtrl.updateBill(business, newBill, new BillDTO());
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void testUpdateBillInvalidBusiness() {
-		BillDTO billData = new BillDTO();
-		billData.setCleared(true);
-		billCtrl.updateBill(new Business(), newBill, billData);
-	}
-	
 	@Test(expected = BillFailureException.class)
 	public void testUpdateBillInvalidBusinessId() {
 		BillDTO billData = new BillDTO();

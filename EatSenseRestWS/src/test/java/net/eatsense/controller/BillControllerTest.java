@@ -16,6 +16,7 @@ import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.BillDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.validation.ValidationHelper;
 
@@ -132,5 +133,22 @@ public class BillControllerTest {
 		assertThat(billCtrl.getBillForCheckIn(location, checkInId), is(bill));
 	}
 	
+	@Test
+	public void testUpdateBillWithNullBusiness() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("business");
+		
+		Bill bill = mock(Bill.class);
+		BillDTO billData = new BillDTO();
+		billCtrl.updateBill(null, bill , billData );
+	}
 	
+	@Test
+	public void testUpdateBillWithNullBill() throws Exception {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("bill");
+		
+		BillDTO billData = new BillDTO();
+		billCtrl.updateBill(location, null , billData );
+	}
 }
