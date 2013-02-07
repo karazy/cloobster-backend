@@ -99,14 +99,15 @@ public class BillController {
 	 * @param checkInId entity id
 	 * @return bill DTO or null if not found 
 	 */
-	public BillDTO getBillForCheckIn(Business business, long checkInId) {
+	public Bill getBillForCheckIn(Business business, long checkInId) {
 		checkNotNull(business, "business cannot be null");
-		checkNotNull(business.getId(), "business id cannot be null");
 		checkArgument(checkInId != 0 , "checkInId cannot be zero");
 		
 		Bill bill = allBills.belongingToCheckInAndLocation(business, checkInId);
-		
-		return transform.billToDto(bill);
+		if(bill == null) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		return bill;
 	}
 	
 	/**
@@ -413,7 +414,7 @@ public class BillController {
 	 */
 	public Bill getBill(Business business, long billId) {
 		checkNotNull(business, "business is null");
-		checkArgument(billId != 0, "billid must be different from 0");
+		checkArgument(billId != 0, "billId must be different from 0");
 		
 		try {
 			return allBills.getById(business.getKey(), billId);
