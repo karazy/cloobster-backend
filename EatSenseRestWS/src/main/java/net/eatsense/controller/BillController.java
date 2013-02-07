@@ -273,7 +273,7 @@ public class BillController {
 		try {
 			spot = spotRepo.getByKey(checkIn.getSpot());
 		} catch (NotFoundException e) {
-			throw new OrderFailureException("Unable to find Spot for CheckIn.");
+			throw new BillFailureException("Unable to find Spot for CheckIn.");
 		}
 		
 		if(spot.isWelcome()) {
@@ -291,11 +291,12 @@ public class BillController {
 				billId = order.getBill().getId();
 			}
 			else {
-				if ( order.getStatus() == OrderStatus.RECEIVED)
+				if ( order.getStatus() == OrderStatus.RECEIVED || order.getStatus() == OrderStatus.PLACED)
 					foundOrderToBill = true;
 			}
 		}
 		if(!foundOrderToBill) {
+			logger.error("no orders to bill where found.");
 			throw new BillFailureException("no orders to bill where found.");
 		}
 		Area area = areaRepo.getByKey(checkIn.getArea());
