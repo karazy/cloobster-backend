@@ -19,6 +19,8 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.exceptions.BillFailureException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.BillDTO;
@@ -180,31 +182,31 @@ public class CreateBillTest {
 		billCtrl.createBill(business, checkIn, null);
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test(expected = ValidationException.class)
 	public void testCreateBillNullPaymentMethod() {
 		billCtrl.createBill(business, checkIn, new BillDTO());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test(expected = BillFailureException.class)
 	public void testCreateBillNullBusinessPaymentMethod() {
 		business.setPaymentMethods(null);
 		billCtrl.createBill(business, checkIn, billData);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = BillFailureException.class)
 	public void testCreateBillEmptyBusinessPaymentMethod() {
 		business.setPaymentMethods(new ArrayList<PaymentMethod>());
 		billCtrl.createBill(business, checkIn, billData);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = ValidationException.class)
 	public void testCreateBillInvalidPaymentMethod() {
 		BillDTO invalidData = new BillDTO();
 		invalidData.setPaymentMethod(new PaymentMethod());
 		billCtrl.createBill(business, checkIn, invalidData);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = BillFailureException.class)
 	public void testCreateBillInvalidCheckInStatus() {
 		checkIn.setStatus(null);
 		billCtrl.createBill(business, checkIn, billData);

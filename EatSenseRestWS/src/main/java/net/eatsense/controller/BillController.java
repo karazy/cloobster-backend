@@ -170,7 +170,7 @@ public class BillController {
 		allOrders.saveOrUpdateAsync(ordersToBill);
 		
 		bill.setTotal(billTotal.getAmountMinorLong());
-		bill.setCleared(billData.isCleared());
+		bill.setCleared(true);
 		
 		allBills.saveOrUpdate(bill);
 		
@@ -188,7 +188,7 @@ public class BillController {
 			} catch (NotFoundException e) {
 				logger.warn("Could not find associated Account for CheckIn({}).",checkIn.getId());
 			}
-			if( account != null && account.getActiveCheckIn() != null && (account.getActiveCheckIn().getId() == checkIn.getId().longValue())) {
+			if( account != null && account.getActiveCheckIn() != null && account.getActiveCheckIn().equals(bill.getCheckIn()) ) {
 				account.setActiveCheckIn(null);
 				accountRepo.saveOrUpdate(account);
 			}
@@ -200,7 +200,7 @@ public class BillController {
 		
 		for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext();) {
 			Request request = iterator.next();
-			if(request.getCheckIn().getId() == checkIn.getId().longValue()) {
+			if(request.getCheckIn().equals(bill.getCheckIn())) {
 				requestRepo.delete(request);
 			}
 			else if(nextOldestRequest == null) {
@@ -260,22 +260,40 @@ public class BillController {
 	 */
 	public BillDTO createBill(final Business business, CheckIn checkIn, BillDTO billData, boolean fromBusiness) {
 		// Check preconditions.
-		checkNotNull(business, "business is null");
-		checkNotNull(business.getId(), "id for business is null");
-		checkNotNull(checkIn, "checkin is null");
-		checkNotNull(checkIn.getId(), "id for checkin is null");
-		checkNotNull(checkIn.getSpot(), "spot for checkin is null");
-		checkNotNull(billData, "billData is null");
-		checkNotNull(billData.getPaymentMethod(), "billData must have a payment method");
-		checkNotNull(business.getPaymentMethods(), "business must have at least one payment method");
-		checkArgument(!business.getPaymentMethods().isEmpty(), "business must have at least one payment method");
-		checkArgument(business.getPaymentMethods().contains(billData.getPaymentMethod()),
-				"no matching payment method in business for %s",
-				billData.getPaymentMethod());
-		checkArgument(checkIn.getStatus() == CheckInStatus.CHECKEDIN ||	checkIn.getStatus() == CheckInStatus.ORDER_PLACED,
-				"invalid checkin status %s", checkIn.getStatus());
-		checkArgument(checkIn.getBusiness().getId() == business.getId(),
-				"checkin is not at the same business to which the request was sent: id=%s", checkIn.getBusiness().getId());
+		checkNotNull(business, "business was null");
+		checkNotNull(checkIn, "checkIn was null");
+		checkNotNull(billData, "billData was null");
+		
+		if(billData.getPaymentMethod() == null) {
+			logger.error("billData must have a payment method");
+			throw new ValidationException("billData must have a payment method");
+		}
+		
+		if(business.getPaymentMethods() == null || business.getPaymentMethods().isEmpty()) {
+			logger.error("business must have at least one payment method");
+			throw new BillFailureException("business must have at least one payment method");
+		}
+		
+		if(!business.getPaymentMethods().contains(billData.getPaymentMethod())) {
+			String message = String.format("No matching payment method in business for %s",
+					billData.getPaymentMethod());
+			logger.error(message);
+			throw new ValidationException(message);
+		}
+		
+		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
+			String message = String.format("Unable to create Bill, invalid checkin status %s", checkIn.getStatus());
+			logger.error(message);
+			throw new BillFailureException(message);
+		}
+		
+		if(checkIn.getBusiness().getId() != business.getId()) {
+			String message= String.format("checkin is not at the same business to which the request was sent: id=%s",
+					checkIn.getBusiness().getId());
+			
+			logger.error(message);
+			throw new ValidationException(message);
+		}
 		
 		if(business.isBasic()) {
 			logger.error("Unable to create Bill at Business with basic subscription");
