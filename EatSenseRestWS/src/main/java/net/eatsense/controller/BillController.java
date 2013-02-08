@@ -26,7 +26,7 @@ import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
@@ -47,9 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
-import com.googlecode.objectify.Query;
 
 /**
  * Handles creation of bills and price calculations.
@@ -122,22 +120,32 @@ public class BillController {
 		checkNotNull(business, "Bill cannot be updated, business is null");
 		checkNotNull(bill, "Bill cannot be updated, bill is null");
 		checkNotNull(billData, "Bill cannot be updated, billdata is null");
-		checkArgument(!bill.isCleared(), "Bill cannot be updated, bill already cleared");
-		checkArgument(billData.isCleared(), "Bill cannot be updated, cleared must be set to true");
+		
+		if(!billData.isCleared()) {
+			logger.error("Bill cannot be updated, cleared must be set to true.");
+			throw new ValidationException("Bill cannot be updated, cleared must be set to true.");
+		}
+		
+		if(bill.isCleared()) {
+			logger.error("Bill cannot be updated, bill already cleared.");
+			throw new BillFailureException("Bill cannot be updated, bill already cleared.");
+		}
 		
 		Iterable<Order> ordersForCheckIn = allOrders.belongingToLocationAndCheckIn(business, bill.getCheckIn());
 		
-		if(!ordersForCheckIn.iterator().hasNext())
-			throw new BillFailureException("Bill cannot be updated, no orders found.");
+		if(!ordersForCheckIn.iterator().hasNext()) {
+			logger.error("Bill cannot be updated, no orders found.");
+			throw new BillFailureException("Bill cannot be updated, no orders found.");			
+		}
 		
+		// Holds all Orders ready to be billed.
 		List<Order> ordersToBill = new ArrayList<Order>(); 
-		
 		// Currency used for this business.
 		CurrencyUnit currencyUnit = CurrencyUnit.of(business.getCurrency());
 		Money billTotal = Money.of(currencyUnit, 0);
 		
-		// Check all orders for the CheckIn skip orders, that are already completed,not yet placed or already cancelled.
-		// Thrown an exception if there are unconfirmed orders.
+		// Check all orders for the CheckIn. Skip orders, that are already completed, in the cart or cancelled.
+		// Throw an exception if there are placed (unconfirmed) orders.
 		for (Iterator<Order> iterator = ordersForCheckIn.iterator(); iterator.hasNext();) {
 			Order order = iterator.next();
 			if(order.getStatus() == OrderStatus.PLACED) {
@@ -152,6 +160,11 @@ public class BillController {
 				order.setBill(bill.getKey());
 				ordersToBill.add(order);
 			}
+		}
+		
+		if(ordersToBill.isEmpty()) {
+			logger.warn("Bill not updated, no Orders ready to be completed.");
+			return bill;
 		}
 		
 		allOrders.saveOrUpdateAsync(ordersToBill);

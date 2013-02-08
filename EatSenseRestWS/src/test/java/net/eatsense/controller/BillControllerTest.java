@@ -4,9 +4,19 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Iterator;
+
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.CheckIn;
+import net.eatsense.domain.Order;
+import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.exceptions.BillFailureException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.BillRepository;
@@ -68,8 +78,14 @@ public class BillControllerTest {
 	@Mock
 	private Key<Business> locationKey;
 
+	@Mock
+	private Key<CheckIn> checkInKey;
+
 	@Before
 	public void setUp() throws Exception {
+		// Configure location to return euro currency.
+		when(location.getCurrency()).thenReturn("EUR");
+		
 		billCtrl = new BillController(rr, orderRepo, orderChoiceRepo, productRepo, checkInRepo, billRepo, transformer, eventBus, spotRepo, accountRepo, validator, areaRepo);
 	}
 	
@@ -150,5 +166,132 @@ public class BillControllerTest {
 		
 		BillDTO billData = new BillDTO();
 		billCtrl.updateBill(location, null , billData );
+	}
+	
+	@Test
+	public void testUpdateBillWithInvalidBillData() throws Exception {
+		thrown.expect(ValidationException.class);
+		thrown.expectMessage("cleared");
+		
+		BillDTO billData = new BillDTO();
+		billData.setCleared(false);
+		Bill bill = mock(Bill.class);
+		
+		billCtrl.updateBill(location, bill , billData );
+	}
+	
+	@Test
+	public void testUpdateBillAlreadyCleared() throws Exception {
+		thrown.expect(BillFailureException.class);
+		thrown.expectMessage("cleared");
+		
+		BillDTO billData = new BillDTO();
+		billData.setCleared(true);
+		Bill bill = mock(Bill.class);
+		
+		when(bill.isCleared()).thenReturn(true);
+		
+		billCtrl.updateBill(location, bill , billData );
+	}
+	
+	@Test
+	public void testUpdateBillWithNoOrders() throws Exception {
+		thrown.expect(BillFailureException.class);
+		thrown.expectMessage("orders");
+		
+		BillDTO billData = new BillDTO();
+		billData.setCleared(true);
+		
+		Bill bill = mock(Bill.class);
+		when(bill.getCheckIn()).thenReturn(checkInKey);
+		
+		Iterable<Order> orders = mock(Iterable.class);
+		Iterator<Order> ordersIterator = mock(Iterator.class);
+		when(orders.iterator()).thenReturn(ordersIterator );
+		
+		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		
+		billCtrl.updateBill(location, bill , billData );
+	}
+	
+	@Test
+	public void testUpdateBillWithPlacedOrder() throws Exception {
+		thrown.expect(BillFailureException.class);
+		thrown.expectMessage("unconfirmed orders");
+		
+		BillDTO billData = new BillDTO();
+		billData.setCleared(true);
+		
+		Bill bill = mock(Bill.class);
+		when(bill.getCheckIn()).thenReturn(checkInKey);
+		
+		Iterable<Order> orders = mock(Iterable.class);
+		Iterator<Order> ordersIterator = mock(Iterator.class);
+		when(orders.iterator()).thenReturn(ordersIterator );
+		// Configure the iterator to return true for the first check.
+		// The next time return true for the for loop.
+		// After that return false, we only want to return one Order.
+		when(ordersIterator.hasNext()).thenReturn(true,true, false);
+		Order placedOrder = mock(Order.class);
+		when(placedOrder.getStatus()).thenReturn(OrderStatus.PLACED);
+		when(ordersIterator.next()).thenReturn(placedOrder );
+		
+		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		
+		billCtrl.updateBill(location, bill , billData );
+	}
+	
+	@Test
+	public void testUpdateBillWithNoConfirmedOrders() throws Exception {
+		BillDTO billData = new BillDTO();
+		billData.setCleared(true);
+		
+		Bill bill = mock(Bill.class);
+		when(bill.getCheckIn()).thenReturn(checkInKey);
+		
+		Iterable<Order> orders = mock(Iterable.class);
+		Iterator<Order> ordersIterator = mock(Iterator.class);
+		when(orders.iterator()).thenReturn(ordersIterator );
+		// Configure the iterator to return true for the first check.
+		// The next time return true for the for loop.
+		// After that return false, we only want to return one Order.
+		when(ordersIterator.hasNext()).thenReturn(true,true, false);
+		Order placedOrder = mock(Order.class);
+		when(placedOrder.getStatus()).thenReturn(OrderStatus.CART);
+		when(ordersIterator.next()).thenReturn(placedOrder );
+		
+		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		
+		billCtrl.updateBill(location, bill , billData );
+		
+		verify(bill, never()).setCleared(true);
+		verify(billRepo,never()).saveOrUpdate(bill);
+	}
+	
+	@Test
+	public void testUpdateBill() throws Exception {
+		BillDTO billData = new BillDTO();
+		billData.setCleared(true);
+		
+		Bill bill = mock(Bill.class);
+		when(bill.getCheckIn()).thenReturn(checkInKey);
+		
+		Iterable<Order> orders = mock(Iterable.class);
+		Iterator<Order> ordersIterator = mock(Iterator.class);
+		when(orders.iterator()).thenReturn(ordersIterator );
+		// Configure the iterator to return true for the first check.
+		// The next time return true for the for loop.
+		// After that return false, we only want to return one Order.
+		when(ordersIterator.hasNext()).thenReturn(true,true, false);
+		Order placedOrder = mock(Order.class);
+		when(placedOrder.getStatus()).thenReturn(OrderStatus.RECEIVED);
+		when(ordersIterator.next()).thenReturn(placedOrder );
+		
+		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		
+		billCtrl.updateBill(location, bill , billData );
+		
+		verify(bill, never()).setCleared(true);
+		verify(billRepo,never()).saveOrUpdate(bill);
 	}
 }
