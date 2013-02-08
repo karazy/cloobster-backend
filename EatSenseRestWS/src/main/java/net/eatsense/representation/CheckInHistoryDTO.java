@@ -37,6 +37,7 @@ public class CheckInHistoryDTO {
 		if(checkIn != null) {
 			checkInId = checkIn.getId();
 			nickname = checkIn.getNickname();
+			areaId = checkIn.getArea() != null ?  checkIn.getArea().getId() : null;
 			checkInTime = checkIn.getCheckInTime();
 		}
 		if(bill != null) {
@@ -49,8 +50,10 @@ public class CheckInHistoryDTO {
 		}
 		if(spot != null) {
 			spotId = spot.getId();
-			areaId = spot.getArea().getId();
 			spotName = spot.getName();
+			if(areaId == null) {
+				areaId = spot.getArea().getId();
+			}
 		}
 	}
 	
