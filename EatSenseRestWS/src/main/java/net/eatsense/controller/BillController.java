@@ -345,10 +345,8 @@ public class BillController {
 		
 		allBills.saveOrUpdate(bill);
 	
-		billData = transform.billToDto(bill);
-		
 		Request request = new Request(checkIn, spot, bill);
-		request.setObjectText(bill.getPaymentMethod().getName());
+		request.setObjectText(billData.getPaymentMethod().getName());
 		request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
 		requestRepo.saveOrUpdate(request);
 		
@@ -379,8 +377,6 @@ public class BillController {
 	 */
 	public Money calculateTotalPrice(Order order, CurrencyUnit currencyUnit) {
 		checkNotNull(order, "order is null");
-		checkNotNull(order.getId(), "id for order is null");
-		checkNotNull(order.getProduct(), "product for oder is null");
 		
 		Money total = Money.of(currencyUnit, 0);
 		
@@ -391,14 +387,7 @@ public class BillController {
 			}
 		}
 		
-		Product product;
-		try {
-			product = productRepo.getByKey(order.getProduct());
-		} catch (NotFoundException e) {
-			throw new IllegalArgumentException("Product " + order.getProduct() + " not found for order with id: " + order.getId() ,e);
-		}
-		
-		total = total.plusMinor(product.getPrice());
+		total = total.plusMinor(order.getProductPrice());
 		
 		return total.multipliedBy( order.getAmount() );
 	}
