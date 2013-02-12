@@ -1,0 +1,43 @@
+package net.eatsense.restws;
+
+import java.util.Date;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import com.google.inject.Inject;
+
+import net.eatsense.counter.CounterService;
+import net.eatsense.counter.Counter.PeriodType;
+
+@Path("tasks/counter")
+public class CounterTasksResource {
+	private final CounterService counterService;
+
+	@Inject
+	public CounterTasksResource(CounterService counterService) {
+		super();
+		this.counterService = counterService;
+	}
+	
+	@POST
+	@Path("worker")
+	public void processWriteback(@FormParam("name") String name,
+			@FormParam("locationId") long locationId,
+			@FormParam("areaId") long areaId,
+			@FormParam("period") long periodTimestamp,
+			@FormParam("periodType") PeriodType periodType) {
+		counterService.persistCounter(name, periodType, new Date(periodTimestamp), locationId, areaId);
+	}
+	
+	@GET
+	@Path("test")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String testCounter() {
+		return counterService.loadAndIncrementCounter("test", PeriodType.ALL, null, 0, 0, 1).toString();
+	}
+}

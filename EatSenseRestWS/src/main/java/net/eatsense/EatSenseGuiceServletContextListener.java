@@ -18,6 +18,7 @@ import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ChannelResource;
+import net.eatsense.restws.CounterTasksResource;
 import net.eatsense.restws.CronResource;
 import net.eatsense.restws.DownloadResource;
 import net.eatsense.restws.NewsletterResource;
@@ -48,6 +49,10 @@ import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.eventbus.EventBus;
@@ -55,6 +60,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.googlecode.objectify.Objectify;
 import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
@@ -114,12 +120,17 @@ public class EatSenseGuiceServletContextListener extends
 						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
 						bind(ProfilesResource.class);
 						bind(SubscriptionTemplatesResource.class);
+						bind(CounterTasksResource.class);
 						
 						// Create Configuration binding to automatically load configuration if needed.
 						bind(Configuration.class).toProvider(ConfigurationProvider.class);
+						
+						// Add binding for counter task queue
+						bind(Queue.class).annotatedWith(Names.named("counter-writebacks")).toInstance(QueueFactory.getQueue("counter-writebacks"));
 												
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*b/subscriptions(.)*",
+						serveRegex("(.)*tasks/counter(.)*",
+								"(.)*b/subscriptions(.)*",
 								"(.)*c/profiles(.)*",
 								"(.)*c/accounts(.)*",
 								"(.)*b/companies(.)*",
@@ -139,14 +150,6 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*_ah/channel/connected(.)*",
 								"(.)*_ah/channel/disconnected(.)*",
 								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*b/businesses(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*c/businesses(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*c/checkins(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*accounts(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*spots(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*nickname(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*").with(GuiceContainer.class, parameters);
-//						serveRegex("(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
 					@Provides
 					public ChannelService providesChannelService() {						
@@ -168,6 +171,11 @@ public class EatSenseGuiceServletContextListener extends
 					@Provides
 					public FileService providesFileService() {
 						return FileServiceFactory.getFileService();
+					}
+					
+					@Provides
+					public MemcacheService providesMemcacheService() {
+						return MemcacheServiceFactory.getMemcacheService();
 					}
 					
 					@Provides
