@@ -13,6 +13,7 @@ import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.controller.SubscriptionController;
+import net.eatsense.counter.CounterController;
 import net.eatsense.domain.Subscription;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.persistence.OfyService;
@@ -191,8 +192,9 @@ public class EatSenseGuiceServletContextListener extends
 		eventBus.register(injector.getInstance(MessageController.class));
 		eventBus.register(injector.getInstance(MailController.class));
 		eventBus.register(injector.getInstance(InfoPageController.class));
+		eventBus.register(injector.getInstance(CounterController.class));
 		
-		// Register Objectify instances.
+		// Register Objectify datastore entities.
 		
 		OfyService.registerEntities();
 		

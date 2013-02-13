@@ -168,7 +168,7 @@ public class OrderController {
 				iterator.remove();
 			}
 		}
-		ConfirmAllOrdersEvent confirmAllEvent = new ConfirmAllOrdersEvent(checkIn);
+		ConfirmAllOrdersEvent confirmAllEvent = new ConfirmAllOrdersEvent(checkIn, orders.size());
 		
 		String newSpotStatus;
 		// Save the status of the next request in line, if there is one.
@@ -563,7 +563,7 @@ public class OrderController {
 		
 		Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 		// If we have no older request in the database ...
-		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn);
+		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size());
 		if( oldestRequest == null ) {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}
