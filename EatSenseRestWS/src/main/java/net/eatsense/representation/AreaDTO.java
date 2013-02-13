@@ -24,7 +24,7 @@ public class AreaDTO {
 	private Long businessId;
 	private boolean welcome;
 	private boolean active;
-	private boolean barcodeRequired;
+	private boolean barcodeRequired = true;
 	
 	public AreaDTO() {
 		super();

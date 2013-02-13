@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
@@ -83,7 +84,7 @@ public class DataUpgradesResource {
 			// Check for a welcome spot
 			if(locationCtrl.getSpots(business.getKey(), 0, true, false).isEmpty()) {
 				logger.info("Creating welcome area and spot ...");
-				locationCtrl.createWelcomeAreaAndSpot(business.getKey());
+				locationCtrl.createWelcomeAreaAndSpot(business.getKey(), null);
 				updateCount++;
 			}
 			

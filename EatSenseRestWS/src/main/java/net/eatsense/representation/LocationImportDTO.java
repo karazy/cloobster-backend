@@ -95,6 +95,8 @@ public class LocationImportDTO {
 	@NotEmpty
 	@Valid
 	private Collection<PaymentMethod> payments;
+	
+	private String welcomeBarcode;
 
 	public LocationImportDTO() {
 	}
@@ -145,5 +147,13 @@ public class LocationImportDTO {
 
 	public void setAreas(Collection<AreaImportDTO> areas) {
 		this.areas = areas;
+	}
+
+	public String getWelcomeBarcode() {
+		return welcomeBarcode;
+	}
+
+	public void setWelcomeBarcode(String welcomeBarcode) {
+		this.welcomeBarcode = welcomeBarcode;
 	}
 }

@@ -6,7 +6,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 	<context-param>
     	<param-name>net.karazy.environment</param-name>
-    	<param-value>${karazy.environment}</param-value>
+    	<param-value>dev</param-value>
+    	<!-- <param-value>${karazy.environment}</param-value> -->
 	</context-param>
 	<mime-mapping>
         <extension>manifest</extension>

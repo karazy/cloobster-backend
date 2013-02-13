@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -408,11 +409,19 @@ public class LocationController {
 	 * @param businessKey
 	 */
 	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
+		createWelcomeAreaAndSpot(businessKey, Optional.<String>absent());
+	}
+
+	/**
+	 * @param businessKey
+	 * @param optWelcomeBarcode Override auto generated barcode
+	 */
+	public void createWelcomeAreaAndSpot(Key<Business> businessKey, Optional<String> optWelcomeBarcode) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		Area welcomeArea = createWelcomeArea(businessKey);
 		
-		createWelcomeSpot(businessKey, areaRepo.getKey(welcomeArea));
+		createWelcomeSpot(businessKey, areaRepo.getKey(welcomeArea), optWelcomeBarcode);
 	}
 
 	/**
@@ -631,7 +640,7 @@ public class LocationController {
 		return new SpotDTO(spot);
 	}
 	
-	private Spot createWelcomeSpot(Key<Business> locationKey, Key<Area> welcomeAreaKey) {
+	private Spot createWelcomeSpot(Key<Business> locationKey, Key<Area> welcomeAreaKey, Optional<String> optionalBarcode) {
 		Spot spot = spotRepo.newEntity();
 		spot.setActive(true);
 		spot.setBusiness(locationKey);
@@ -639,8 +648,14 @@ public class LocationController {
 		spot.setWelcome(true);
 		spot.setName("Welcome Spot");
 		spot.setArea(welcomeAreaKey);
-		// Generate the  new barcode
-		spot.generateBarcode();
+		if(optionalBarcode.isPresent()) {
+			logger.info("Creating welcome Spot with barcode={}", optionalBarcode.get() );
+			spot.setBarcode(optionalBarcode.get());
+		}
+		else {
+			// Generate the  new barcode
+			spot.generateBarcode();
+		}
 		
 		spotRepo.saveOrUpdate(spot);
 		
@@ -768,6 +783,18 @@ public class LocationController {
 	 * @return 
 	 */
 	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey) {
+		return createMasterSpot(businessKey, areaKey, Optional.<String>absent());
+	}
+
+	/**
+	 * Helper function to create a master Spot for an Area. 
+	 * 
+	 * @param businessKey
+	 * @param optBarcode TODO
+	 * @param area
+	 * @return 
+	 */
+	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey, Optional<String> optBarcode) {
 		// create "master" Spot
 		logger.info("Creating master Spot for {}.", areaKey);
 		Spot spot = spotRepo.newEntity();
@@ -778,7 +805,14 @@ public class LocationController {
 		spot.setName("Master Spot");
 		// Get a new Id from the datastore, so we can generate the barcode immediately
 		spot.setId(ofyService.factory().allocateId(Spot.class));
-		spot.generateBarcode();
+		if(optBarcode.isPresent()) {
+			// Set Barcode if override is present.
+			spot.setBarcode(optBarcode.get());
+		}
+		else {
+			spot.generateBarcode();
+		}
+		
 		
 		spotRepo.saveOrUpdate(spot);
 		
@@ -817,10 +851,11 @@ public class LocationController {
 		
 		for(Area area : areas) {
 			if(noWelcome && area.isWelcome())
-				break;
+				continue;
 			if(onlyActive && !area.isActive()) {
-				break;
+				continue;
 			}
+			
 			areaDtos.add(new AreaDTO(area));
 		}
 		

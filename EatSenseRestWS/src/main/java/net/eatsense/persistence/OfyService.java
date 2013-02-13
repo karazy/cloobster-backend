@@ -2,6 +2,7 @@ package net.eatsense.persistence;
 
 import net.eatsense.counter.Counter;
 import net.eatsense.domain.Channel;
+import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.Subscription;
 
 import com.google.inject.Inject;
@@ -11,11 +12,25 @@ import com.googlecode.objectify.ObjectifyService;
 
 public class OfyService {
 	private final ObjectifyKeyFactory keyFactory;
+	
+	/**
+	 * Try to register entity with Objectify and silently fail if already registered.
+	 * 
+	 * @param clazz
+	 */
+	public static void register(Class<?> clazz) {
+		try {
+			ObjectifyService.register(clazz);
+		} catch (IllegalArgumentException e) {
+			// We already registered the entity, okay to skip this.
+		}
+	}
 
 	public static void registerEntities() {
-		ObjectifyService.register(Subscription.class);
-		ObjectifyService.register(Channel.class);
-		ObjectifyService.register(Counter.class);
+		register(Subscription.class);
+		register(Channel.class);
+		register(CustomerProfile.class);
+		register(Counter.class);
 	}
 	
 	@Inject
