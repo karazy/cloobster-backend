@@ -57,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
@@ -224,7 +226,7 @@ public class ImportController {
 		}
 		
 		// Create welcome area and spot
-		locationController.createWelcomeAreaAndSpot(kR);
+		locationController.createWelcomeAreaAndSpot(kR, Optional.fromNullable(Strings.emptyToNull(businessData.getWelcomeBarcode())));
 		
 		CurrencyUnit currencyUnit = CurrencyUnit.of(businessData.getCurrency());
 		
@@ -235,7 +237,7 @@ public class ImportController {
 				// Continue with adding products to the menu ...
 				for (ProductDTO productData : menu.getProducts()) {
 					
-					Product newProduct = createProduct(kM,kR, productData.getName(), Money.ofMinor(currencyUnit, productData.getPriceMinor() ), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder());
+					Product newProduct = createProduct(kM,kR, productData.getName(), Money.ofMinor(currencyUnit, productData.getPriceMinor() ), productData.getShortDesc(), productData.getLongDesc(), productData.getOrder(), productData.isSpecial());
 					Key<Product> kP = productRepo.saveOrUpdate(newProduct);
 					if(kP != null) {
 						if(productData.getChoices() != null) {
@@ -273,7 +275,9 @@ public class ImportController {
 				menuKeys.add(menuMap.get(menuTitle).getKey());
 			}
 			
-			Key<Area> kA = createAndSaveArea(kR, area.getName(), area.getDescription(), menuKeys);
+			Key<Area> kA = createAndSaveArea(kR, area.getName(),
+					area.getDescription(), menuKeys, area.isBarcodeRequired(),
+					Optional.fromNullable(Strings.emptyToNull(area.getMasterBarcode())));
 			
 			for(SpotDTO spot : area.getSpots()) {
 				if( createAndSaveSpot(kR, spot.getName(), spot.getBarcode(), kA) == null )
@@ -302,7 +306,7 @@ public class ImportController {
 		return business;
 	}
 	
-	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description, List<Key<Menu>> menuKeys) {
+	private Key<Area> createAndSaveArea(Key<Business> businessKey, String name, String description, List<Key<Menu>> menuKeys, boolean barcodeRequired, Optional<String> optBarcode) {
 		checkNotNull(businessKey, "businessKey was null");
 		Area area = new Area();
 		area.setBusiness(businessKey);
@@ -310,12 +314,12 @@ public class ImportController {
 		area.setName(name);
 		area.setActive(true);
 		area.setMenus(menuKeys);
-		
+		area.setBarcodeRequired(barcodeRequired);
 		Key<Area> kA = areaRepo.saveOrUpdate(area);
 		
 		logger.info("Created new area with id: " + kA.getId());
 		// create Master Spot for Area
-		locationController.createMasterSpot(businessKey, kA);
+		locationController.createMasterSpot(businessKey, kA, optBarcode);
 		return kA;
 	}
 	
@@ -354,7 +358,7 @@ public class ImportController {
 		return kM;
 	}
 	
-	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Money price, String shortDesc, String longDesc, Integer order)	{
+	private Product createProduct(Key<Menu> menuKey, Key<Business> business, String name, Money price, String shortDesc, String longDesc, Integer order, boolean special)	{
 		if(menuKey == null)
 			throw new NullPointerException("menuKey was not set");
 		logger.info("Creating new product for menu ("+ menuKey.getId() + ") with name: " + name );
@@ -368,6 +372,7 @@ public class ImportController {
 		product.setShortDesc(shortDesc);
 		product.setLongDesc(longDesc);
 		product.setOrder(order);
+		product.setSpecial(special);
 		
 		importedProducts.add(product);
 		

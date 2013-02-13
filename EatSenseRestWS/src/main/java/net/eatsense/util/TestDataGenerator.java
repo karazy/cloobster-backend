@@ -20,6 +20,7 @@ import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
+import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.Product;
@@ -155,7 +156,9 @@ public class TestDataGenerator {
 	}
 
 	private void createTestUserAccount(Business business, int numberOfPastCheckIns) {
-		Account account = accountRepo.createAndSaveAccount("Cloobster Test User", TEST_USERLOGIN, "test11", TEST_USERMAIL, Role.USER, null, null, null, null, true, true);
+		Account account = accountRepo.createAndSaveAccount("Cloobstr Test User", TEST_USERLOGIN, "test11", TEST_USERMAIL, Role.USER, null, null, null, null, true, true);
+		// Add customer profile
+		account.setCustomerProfile(ofy.put(new CustomerProfile()));
 		
 		for (int i = 0; i < numberOfPastCheckIns; i++) {
 			Spot spot = spots.get(random.nextInt(spots.size()));
