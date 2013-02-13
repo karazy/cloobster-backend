@@ -38,6 +38,13 @@ public class CounterTasksResource {
 	@Path("test")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String testCounter() {
+		counterService.loadAndIncrementCounter("test", PeriodType.HOUR, new Date(), 0, 0, 1);
+		counterService.loadAndIncrementCounter("test", PeriodType.DAY, new Date(), 0, 0, 1);
+		counterService.loadAndIncrementCounter("test", PeriodType.MINUTE, new Date(), 0, 0, 1);
+		counterService.loadAndIncrementCounter("test", PeriodType.SECOND, new Date(), 0, 0, 1);
+		counterService.loadAndIncrementCounter("test", PeriodType.YEAR, new Date(), 0, 0, 1);
+		counterService.loadAndIncrementCounter("test", PeriodType.WEEK, new Date(), 0, 0, 1);
+		counterService.loadAndIncrementCounter("test", PeriodType.MONTH, new Date(), 0, 0, 1);
 		return counterService.loadAndIncrementCounter("test", PeriodType.ALL, null, 0, 0, 1).toString();
 	}
 }
