@@ -301,6 +301,8 @@ public class ImportController {
 		business.setCompany(companyKey);
 		business.setPaymentMethods(new ArrayList<PaymentMethod>(paymentMethods));
 		
+		locationController.addDefaultFeedbackForm(business);
+		
 		Key<Business> businessKey = businessRepo.saveOrUpdate(business);
 		logger.info("Created new business: {}", businessKey);
 		return business;

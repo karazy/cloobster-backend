@@ -364,6 +364,34 @@ public class LocationController {
 			account.setBusinesses(new ArrayList<Key<Business>>());	
 		}
 		Business business = locationRepo.newEntity();
+		
+		addDefaultFeedbackForm(business);
+		
+		
+		
+		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
+		business.getPaymentMethods().add(new PaymentMethod("Bar"));
+		business.setCompany(account.getCompany());
+		
+		
+		Key<Business> businessKey = updateBusiness(business, businessData);
+		
+		// Let other controllers know we created a new business.
+		eventBus.post(new NewLocationEvent(business));
+		
+		createWelcomeAreaAndSpot(businessKey);
+		account.getBusinesses().add(businessKey);
+		accountRepo.saveOrUpdate(account);
+		
+		return new LocationProfileDTO(business);
+	}
+
+	/**
+	 * Load default FeedbackForm, copy and set it for the given Business entity.
+	 * 
+	 * @param business
+	 */
+	public Business addDefaultFeedbackForm(Business business) {
 		Configuration config = configProvider.get();
 		
 		if(config.getDefaultFeedbackForm() != null) {
@@ -386,23 +414,7 @@ public class LocationController {
 			logger.warn("defaultFeedbackForm not set in default configuration.");
 		}
 		
-		
-		
-		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
-		business.getPaymentMethods().add(new PaymentMethod("Bar"));
-		business.setCompany(account.getCompany());
-		
-		
-		Key<Business> businessKey = updateBusiness(business, businessData);
-		
-		// Let other controllers know we created a new business.
-		eventBus.post(new NewLocationEvent(business));
-		
-		createWelcomeAreaAndSpot(businessKey);
-		account.getBusinesses().add(businessKey);
-		accountRepo.saveOrUpdate(account);
-		
-		return new LocationProfileDTO(business);
+		return business;
 	}
 
 	/**
