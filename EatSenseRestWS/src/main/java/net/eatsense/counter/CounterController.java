@@ -12,6 +12,12 @@ import net.eatsense.event.PlaceAllOrdersEvent;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
+/**
+ * Handles all counting, listens to all events we are interested in and updates corresponding counters.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class CounterController {
 	
 	private final CounterService counterService;

@@ -1,5 +1,7 @@
 package net.eatsense.restws;
 
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.ws.rs.FormParam;
@@ -11,17 +13,21 @@ import javax.ws.rs.core.MediaType;
 
 import com.google.inject.Inject;
 
+import net.eatsense.counter.Counter;
+import net.eatsense.counter.CounterRepository;
 import net.eatsense.counter.CounterService;
 import net.eatsense.counter.Counter.PeriodType;
 
 @Path("tasks/counter")
 public class CounterTasksResource {
 	private final CounterService counterService;
+	private final CounterRepository counterRepo;
 
 	@Inject
-	public CounterTasksResource(CounterService counterService) {
+	public CounterTasksResource(CounterService counterService, CounterRepository counterRepo) {
 		super();
 		this.counterService = counterService;
+		this.counterRepo = counterRepo;
 	}
 	
 	@POST
@@ -34,7 +40,7 @@ public class CounterTasksResource {
 		counterService.persistCounter(name, periodType, new Date(periodTimestamp), locationId, areaId);
 	}
 	
-	@GET
+	@POST
 	@Path("test")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String testCounter() {
@@ -46,5 +52,16 @@ public class CounterTasksResource {
 		counterService.loadAndIncrementCounter("test", PeriodType.WEEK, new Date(), 0, 0, 1);
 		counterService.loadAndIncrementCounter("test", PeriodType.MONTH, new Date(), 0, 0, 1);
 		return counterService.loadAndIncrementCounter("test", PeriodType.ALL, null, 0, 0, 1).toString();
+	}
+	
+	@GET
+	@Path("test")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<Counter> getTestCounters() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MONTH, -1);
+		
+		
+		return counterRepo.getDailyCountsByNameAreaLocationAndDateRange("test", 0, 0, calendar.getTime(), new Date()); 
 	}
 }

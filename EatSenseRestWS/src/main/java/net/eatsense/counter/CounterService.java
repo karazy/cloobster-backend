@@ -44,7 +44,7 @@ public class CounterService {
 		this.ofy = ofyService.ofy();
 	}
 
-	private String getCounterKeyName(String name, long locationId, long areaId, PeriodType periodType, Date period) {
+	public String getCounterKeyName(String name, long locationId, long areaId, PeriodType periodType, Date period) {
 		// Format like this locationId:areaId:periodType:scopedPeriod:name ( e.g. "1001:101:DAY:2012-02-12:checkins")
 		return String.format("%d:%d:%s:%s:%s", locationId, areaId, periodType, periodType.getScope(period), name);
 	}
