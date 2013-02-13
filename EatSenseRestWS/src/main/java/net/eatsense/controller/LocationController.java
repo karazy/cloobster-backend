@@ -851,10 +851,11 @@ public class LocationController {
 		
 		for(Area area : areas) {
 			if(noWelcome && area.isWelcome())
-				break;
+				continue;
 			if(onlyActive && !area.isActive()) {
-				break;
+				continue;
 			}
+			
 			areaDtos.add(new AreaDTO(area));
 		}
 		
