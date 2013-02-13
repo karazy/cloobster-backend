@@ -59,26 +59,6 @@ public class DummyDataDumper {
 		this.cr = cr;
 		this.companyRepo = companyRepo;
 	}
-	
-	public void generateDummyUsers() {
-		//generate admin user for businesses
-		List<Key<Business>> testBusinesses = rr.getKeysByProperty("name", "Cloobster Club");
-		
-
-		if(!testBusinesses.isEmpty()) {
-			Company company = new Company();
-			company.setName("Cloobster Test Company");
-			Key<Company> key = companyRepo.saveOrUpdate(company);
-
-			logger.info("Create account for Cloobster Club");
-			ar.createAndSaveAccount("Test Account","cloobster", "test!1", "test@karazy.net", Role.COMPANYOWNER, testBusinesses, key, null, null, true, true);
-		}
-
-		Company company = new Company();
-		company.setName("Karazy GmbH");
-		Key<Company> key = companyRepo.saveOrUpdate(company);
-		ar.createAndSaveAccount("Administrator","admin", "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, rr.getAllKeys(), key, null, null, true, true);
-	}	
 
 	public void generateDummyBusinesses() {
 		logger.info("Generate Dummy Businesses.");

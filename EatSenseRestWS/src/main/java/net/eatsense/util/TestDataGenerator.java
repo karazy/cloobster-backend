@@ -106,7 +106,7 @@ public class TestDataGenerator {
 		testCompany.setPostcode("65760");
 		testCompany.setUrl("http://www.karazy.net/");
 		Key<Company> companyKey = ofy.put(testCompany);
-		Account account = accountRepo.createAndSaveAccount("Cloobster Test Admin", TEST_LOGIN, "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, null, companyKey, null, null, true, true);
+		Account account = accountRepo.createAndSaveAccount("Cloobster Test Admin", TEST_LOGIN, "cl00bster!", "developer@karazy.net", Role.COMPANYOWNER, null, companyKey, null, null, true, true, null);
 		LocationImportDTO fullLocationImport; 
 		try {
 			fullLocationImport = mapper.readValue(new File(FULL_LOCATION_IMPORT_FILE), LocationImportDTO.class);
@@ -156,9 +156,9 @@ public class TestDataGenerator {
 	}
 
 	private void createTestUserAccount(Business business, int numberOfPastCheckIns) {
-		Account account = accountRepo.createAndSaveAccount("Cloobstr Test User", TEST_USERLOGIN, "test11", TEST_USERMAIL, Role.USER, null, null, null, null, true, true);
 		// Add customer profile
-		account.setCustomerProfile(ofy.put(new CustomerProfile()));
+		Key<CustomerProfile> profileKey = ofy.put(new CustomerProfile());
+		Account account = accountRepo.createAndSaveAccount("Cloobster Test User", TEST_USERLOGIN, "test11", TEST_USERMAIL, Role.USER, null, null, null, null, true, true, profileKey );
 		
 		for (int i = 0; i < numberOfPastCheckIns; i++) {
 			Spot spot = spots.get(random.nextInt(spots.size()));
