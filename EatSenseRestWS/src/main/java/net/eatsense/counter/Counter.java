@@ -13,11 +13,7 @@ public class Counter {
 	private String id;
 	private String name;
 	private Long locationId;
-	@Unindexed
-	private String locationName;
 	private Long areaId;
-	@Unindexed
-	private String areaName;
 	private long count;
 	private PeriodType periodType;
 	private String period;
@@ -96,23 +92,11 @@ public class Counter {
 	public void setLocationId(Long locationId) {
 		this.locationId = locationId;
 	}
-	public String getLocationName() {
-		return locationName;
-	}
-	public void setLocationName(String locationName) {
-		this.locationName = locationName;
-	}
 	public Long getAreaId() {
 		return areaId;
 	}
 	public void setAreaId(Long areaId) {
 		this.areaId = areaId;
-	}
-	public String getAreaName() {
-		return areaName;
-	}
-	public void setAreaName(String areaName) {
-		this.areaName = areaName;
 	}
 	public long getCount() {
 		return count;

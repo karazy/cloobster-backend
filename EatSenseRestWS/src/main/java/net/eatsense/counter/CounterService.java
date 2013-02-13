@@ -19,6 +19,12 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.googlecode.objectify.Objectify;
 
+/**
+ * Handles counter creation and counting as well as persisting counters in the datastore.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class CounterService {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -41,6 +47,22 @@ public class CounterService {
 	private String getCounterKeyName(String name, long locationId, long areaId, PeriodType periodType, Date period) {
 		// Format like this locationId:areaId:periodType:scopedPeriod:name ( e.g. "1001:101:DAY:2012-02-12:checkins")
 		return String.format("%d:%d:%s:%s:%s", locationId, areaId, periodType, periodType.getScope(period), name);
+	}
+	
+	public Long loadAndGetCounter(String name, PeriodType periodType, Date period, long locationId, long areaId) {
+		String keyName = getCounterKeyName(name, locationId, areaId, periodType, period);
+		
+		Long count = (Long) memcache.get(keyName);
+		
+		if(count == null) {
+			Counter counter = ofy.find(Counter.class, keyName);
+			if(counter != null) {
+				count = counter.getCount();
+				memcache.put(keyName, count);
+			}
+		}
+		
+		return count;
 	}
 	
 	public Long loadAndIncrementCounter(String name, PeriodType periodType, Date period, long locationId, long areaId, int delta) {
@@ -101,7 +123,7 @@ public class CounterService {
 		}
 		
 		counter.setCount(cachedCount);
-		logger.info("Saving Counter: id={}, value={}", keyName,cachedCount);
+		logger.info("Saving Counter: id={}, value={}", keyName, cachedCount);
 		ofy.put(counter);
 		
 		memcache.delete(keyName + "_dirty");

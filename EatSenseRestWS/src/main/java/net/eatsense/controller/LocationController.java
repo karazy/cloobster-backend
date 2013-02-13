@@ -585,7 +585,7 @@ public class LocationController {
 		for(Spot spot :  spots) {
 			// Dont return master Spot if noMaster is true
 			if(noMaster && spot.isMaster())
-				break;
+				continue;
 			
 			if(!spot.isTrash()) {
 				spotDTOList.add(new SpotDTO(spot));
