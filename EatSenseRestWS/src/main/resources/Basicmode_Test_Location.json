@@ -6,6 +6,7 @@
     "address": "Test",
     "currency": "EUR",
     "welcomeBarcode": "welcome002",
+    "welcomeMenus": ["Menu 1", "Menu 2"],
     "payments": [
         {
             "name": "Hotelrechung",
