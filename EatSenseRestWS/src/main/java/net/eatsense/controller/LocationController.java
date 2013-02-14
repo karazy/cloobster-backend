@@ -419,21 +419,24 @@ public class LocationController {
 
 	/**
 	 * @param businessKey
+	 * @return 
 	 */
-	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
-		createWelcomeAreaAndSpot(businessKey, Optional.<String>absent());
+	public Area createWelcomeAreaAndSpot(Key<Business> businessKey) {
+		return createWelcomeAreaAndSpot(businessKey, Optional.<String>absent()); 
 	}
 
 	/**
 	 * @param businessKey
 	 * @param optWelcomeBarcode Override auto generated barcode
 	 */
-	public void createWelcomeAreaAndSpot(Key<Business> businessKey, Optional<String> optWelcomeBarcode) {
+	public Area createWelcomeAreaAndSpot(Key<Business> businessKey, Optional<String> optWelcomeBarcode) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		Area welcomeArea = createWelcomeArea(businessKey);
 		
 		createWelcomeSpot(businessKey, areaRepo.getKey(welcomeArea), optWelcomeBarcode);
+		
+		return welcomeArea;
 	}
 
 	/**

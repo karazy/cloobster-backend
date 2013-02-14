@@ -226,7 +226,7 @@ public class ImportController {
 		}
 		
 		// Create welcome area and spot
-		locationController.createWelcomeAreaAndSpot(kR, Optional.fromNullable(Strings.emptyToNull(businessData.getWelcomeBarcode())));
+		Area welcomeArea = locationController.createWelcomeAreaAndSpot(kR, Optional.fromNullable(Strings.emptyToNull(businessData.getWelcomeBarcode())));
 		
 		CurrencyUnit currencyUnit = CurrencyUnit.of(businessData.getCurrency());
 		
@@ -266,6 +266,16 @@ public class ImportController {
 				logger.error("Error while saving menu with title: " +menu.getTitle());
 			}
 
+		}
+		
+		welcomeArea.setMenus(new ArrayList<Key<Menu>>());
+		
+		if(businessData.getWelcomeMenus() != null && !businessData.getWelcomeMenus().isEmpty()) {
+			for (String menuTitle : businessData.getWelcomeMenus()) {
+				welcomeArea.getMenus().add(menuMap.get(menuTitle).getKey());
+			}
+			
+			areaRepo.saveOrUpdate(welcomeArea);
 		}
 		
 		// Create service area and spots.

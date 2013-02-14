@@ -6,6 +6,7 @@
     "address": "Test",
     "currency": "EUR",
     "welcomeBarcode": "welcome001",
+    "welcomeMenus": [ "Rindfleischburger", "Geflügelburger", "Vegetarische Burger", "Salate", "Getränke"],
     "payments": [
         {
             "name": "EC",
