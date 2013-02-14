@@ -37,6 +37,10 @@ public class CounterRepository {
 	public Collection<Counter> getDailyCountsByNameAreaLocationAndDateRange(String name, long locationId, long areaId, Date fromDate, Date toDate) {
 		List<Key<Counter>> counterKeys = new ArrayList<Key<Counter>>();
 		
+		if(toDate == null) {
+			toDate = new Date();
+		}
+		
 		// Create keys
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(fromDate);
