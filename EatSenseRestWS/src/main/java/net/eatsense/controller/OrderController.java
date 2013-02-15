@@ -17,9 +17,11 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Choice;
+import net.eatsense.domain.Menu;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.OrderChoice;
 import net.eatsense.domain.Product;
@@ -35,7 +37,10 @@ import net.eatsense.event.UpdateOrderEvent;
 import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.OrderFailureException;
+import net.eatsense.exceptions.UnauthorizedException;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -66,6 +71,7 @@ import com.googlecode.objectify.Query;
  *
  */
 public class OrderController {
+	private static final String ERROR_PRODUCT_NOT_FROM_AREA = "Unable to place order for Product not assigned to the current area for this CheckIn.";
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final OrderRepository orderRepo;
 	private final ProductRepository productRepo;
@@ -78,14 +84,16 @@ public class OrderController {
 	private final SpotRepository spotRepo;
 	
 	private ValidationHelper validator;
+	private AreaRepository areaRepo;
 	@Inject
 	public OrderController(OrderRepository orderRepo,
 			OrderChoiceRepository orderChoiceRepo,
 			ProductRepository productRepo, LocationRepository businessRepo,
 			CheckInRepository checkInRepo, ChoiceRepository choiceRepo,
 			RequestRepository rr, Transformer trans, ValidationHelper validator,
-			EventBus eventBus, SpotRepository spotRepo) {
+			EventBus eventBus, SpotRepository spotRepo, AreaRepository areaRepo) {
 		super();
+		this.areaRepo = areaRepo;
 		this.spotRepo = spotRepo;
 		this.eventBus = eventBus;
 		this.validator = validator;
@@ -430,12 +438,6 @@ public class OrderController {
 			throw new IllegalAccessException("Unable to place Orders at Business with basic subscription");
 		}
 		
-		Spot spot = spotRepo.getByKey(checkIn.getSpot());
-		if(spot.isWelcome()) {
-			logger.error("Unable to place order at welcome spot.");
-			throw new IllegalAccessException("Unable to place Orders at welcome spot.");
-		}
-		
 		if(checkIn.getStatus() != CheckInStatus.CHECKEDIN && checkIn.getStatus() != CheckInStatus.ORDER_PLACED) {
 			throw new OrderFailureException("Order cannot be placed, payment already requested or not checked in");
 		}
@@ -449,12 +451,31 @@ public class OrderController {
 			throw new ValidationException("Order cannot be placed, checkin is not at the same business to which the order was sent: id="+checkIn.getBusiness().getId());
 		}
 		
+		Area area = areaRepo.getByKey(checkIn.getArea());
+		if(area.isWelcome()) {
+			logger.error("Unable to place order at welcome area.");
+			throw new IllegalAccessException("Unable to place Orders at welcome area.");
+		}
+		
 		// Check if the product to be ordered exists	
 		Product product;
 		try {
 			product = productRepo.getById(checkIn.getBusiness(), orderData.getProductId());
 		} catch (com.googlecode.objectify.NotFoundException e) {
 			throw new ValidationException("Order cannot be placed, productId unknown",e);
+		}
+		boolean isProductAssignedToArea = false;
+		
+		// Check if the Menu of the ordered Product is assigned to this Area.
+		for (Key<Menu> menuKey : area.getMenus()) {
+			if(menuKey.equals(product.getMenu())) {
+				isProductAssignedToArea = true;
+			}
+		}
+		
+		if(!isProductAssignedToArea) {
+			logger.error(ERROR_PRODUCT_NOT_FROM_AREA);
+			throw new ValidationException(ERROR_PRODUCT_NOT_FROM_AREA);
 		}
 		
 		Long orderId = null;
@@ -527,6 +548,11 @@ public class OrderController {
 			throw new OrderFailureException("Unable to find Spot for this CheckIn.");
 		}
 		
+		// Disabled until app store update - Nils 15.02.2013
+//		if(checkIn.getAccount() == null) {
+//			throw new UnauthorizedException("Login required to place orders", "error.account.required");
+//		}
+//		
 		List<Order> orders = orderRepo.query().ancestor(checkIn.getBusiness())
 				.filter("checkIn", checkIn.getKey())
 				.filter("status", OrderStatus.CART.toString()).list();

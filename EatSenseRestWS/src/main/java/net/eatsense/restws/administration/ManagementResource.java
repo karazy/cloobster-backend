@@ -45,4 +45,9 @@ public class ManagementResource {
 	public Iterable<ChannelDTO> getChannels(@QueryParam("locationId") long locationId) {
 		return Iterables.transform(channelCtrl.getActiveChannels(locationId),ChannelDTO.toDTO);
 	}
+	
+	@Path("accounts")
+	public AccountsResource getAccountsResource() {
+		return resourceContext.getResource(AccountsResource.class);
+	}
 }

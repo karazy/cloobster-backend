@@ -129,7 +129,7 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	}
 	
 	@Transient
-	public static Key<CheckIn> getKey(Long id) {
+	public static Key<CheckIn> getKey(long id) {
 		return new Key<CheckIn>(CheckIn.class, id);
 	}
 

@@ -22,6 +22,7 @@ import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.BillFailureException;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ProductRepository;
@@ -196,16 +197,9 @@ public class UpdateBillTest {
 		billCtrl.updateBill(business, new Bill(), null);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = ValidationException.class)
 	public void testUpdateBillInvalidBillData() {
 		billCtrl.updateBill(business, newBill, new BillDTO());
-	}
-	
-	@Test(expected = NullPointerException.class)
-	public void testUpdateBillInvalidBusiness() {
-		BillDTO billData = new BillDTO();
-		billData.setCleared(true);
-		billCtrl.updateBill(new Business(), newBill, billData);
 	}
 	
 	@Test(expected = BillFailureException.class)

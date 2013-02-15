@@ -238,7 +238,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public List<SpotDTO> getSpots(@QueryParam("areaId") long areaId, @QueryParam("welcome") boolean welcome) {
-		return businessCtrl.getSpots(business.getKey(), areaId, welcome);
+		return businessCtrl.getSpots(business.getKey(), areaId, welcome, false);
 	}
 	
 	@Path("spotsdata")

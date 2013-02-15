@@ -5,6 +5,8 @@
     "postcode": "12345",
     "address": "Test",
     "currency": "EUR",
+    "welcomeBarcode": "welcome002",
+    "welcomeMenus": ["Menu 1", "Menu 2"],
     "payments": [
         {
             "name": "Hotelrechung",
@@ -15,6 +17,7 @@
     	{
     		"name": "Basic Mode Area",
     		"description": "Basic Mode Area",
+    		"masterBarcode": "masterb001",
 			"spots": [
 		        {
 		            "name": "Basic Spot 1",

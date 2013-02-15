@@ -1,8 +1,6 @@
 package net.eatsense;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
-import net.eatsense.ApiVersionFilter;
 import net.eatsense.exceptions.ApiVersionException;
 
 import org.junit.Before;

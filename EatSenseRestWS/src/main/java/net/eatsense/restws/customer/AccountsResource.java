@@ -140,6 +140,11 @@ public class AccountsResource {
 			accountCtrl.addCustomerProfile(account);
 		}
 		
+		if(checkIn != null && (account.getActiveCheckIn() == null || account.getActiveCheckIn().getId() != checkIn.getId().longValue())) {
+			// Update the activeCheckIn of the Account, if it is not set or the supplied CheckIn is different from it.
+			accountCtrl.linkAccountAndCheckIn(account, checkIn);
+		}
+		
 		CustomerAccountDTO accountDto = new CustomerAccountDTO(account, checkIn);
 		AccessToken authToken = accountCtrl.createCustomerAuthToken(account);
 		

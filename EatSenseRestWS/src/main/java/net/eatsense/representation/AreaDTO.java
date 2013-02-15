@@ -24,6 +24,7 @@ public class AreaDTO {
 	private Long businessId;
 	private boolean welcome;
 	private boolean active;
+	private boolean barcodeRequired = true;
 	
 	public AreaDTO() {
 		super();
@@ -36,6 +37,7 @@ public class AreaDTO {
 		name = area.getName();
 		description = area.getDescription();
 		active = area.isActive();
+		barcodeRequired = area.isBarcodeRequired();
 		
 		if(area.getBusiness() != null) {
 			businessId = area.getBusiness().getId();
@@ -95,5 +97,13 @@ public class AreaDTO {
 
 	public void setWelcome(boolean welcome) {
 		this.welcome = welcome;
+	}
+
+	public boolean isBarcodeRequired() {
+		return barcodeRequired;
+	}
+
+	public void setBarcodeRequired(boolean barcodeRequired) {
+		this.barcodeRequired = barcodeRequired;
 	}
 }

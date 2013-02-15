@@ -1,5 +1,6 @@
 package net.eatsense.exceptions;
 
+
 public class ServiceException extends RuntimeException {
 	
 	String errorKey;
@@ -62,5 +63,4 @@ public class ServiceException extends RuntimeException {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}
-	
 }

@@ -12,7 +12,6 @@ import javax.ws.rs.core.UriInfo;
 import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
-import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.service.FacebookService;
 
@@ -80,15 +79,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
 		String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
 		Account account = null;
-
-		if(checkInId != null && !checkInId.isEmpty()) {
-			 Authorizer auth = authenticateCheckIn(checkInId);
-			 if(auth != null) {
-				 request.setSecurityContext(auth);
-				 return request;
-			 }
-		}
-				
+		
 		if(login != null && !login.isEmpty()) {
 			logger.info("recieved login request from user: " +login);
 			if(passwordHash != null && !passwordHash.isEmpty()) {
@@ -99,7 +90,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 			if(password != null && !password.isEmpty()) {
 				account = accountCtrl.authenticate(login, password);
 			}
-
+		
 			if(account != null) {
 				request.setSecurityContext(authorizerFactory.createForAccount(account, null,null));
 				logger.info("Basic authentication success for user: {}", login);
@@ -114,31 +105,52 @@ public class SecurityFilter implements ContainerRequestFilter {
 			logger.info("Facebook authentication success for user: {}", account.getEmail());
 		}
 		
-		servletRequest.setAttribute("net.eatsense.domain.Account", account);
-		
-		if( account != null && account.getActiveCheckIn() != null) {
-			try {
-				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkInRepo.getByKey(account.getActiveCheckIn()));
-			} catch (com.googlecode.objectify.NotFoundException e) {
-				logger.info("activeCheckin for account not found, removing reference");
-				accountCtrl.removeActiveCheckIn(account);
+		if( account != null) {
+			servletRequest.setAttribute("net.eatsense.domain.Account", account);
+			
+			if(account.getActiveCheckIn() != null) {
+				try {
+					CheckIn checkIn = checkInRepo.getByKey(account.getActiveCheckIn());
+					
+					// We check here, if the activeCheckIn of the account is
+					// different to the supplied checkIn from the header
+					// parameter.
+					if (!Strings.isNullOrEmpty(checkInId) && !checkInId.equals(checkIn.getUserId())) {
+						// If it is different, there was an older checkIn from the account not completed.
+						// Override the CheckIn for this request with the new checkin.
+						servletRequest.setAttribute( "net.eatsense.domain.CheckIn",	checkInRepo.getByProperty("userId", checkInId));
+					}
+					else {
+						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+					}
+				} catch (com.googlecode.objectify.NotFoundException e) {
+					logger.warn("activeCheckin for account not found, removing reference");
+					accountCtrl.removeActiveCheckIn(account);
+				}
+			}
+			else if (!Strings.isNullOrEmpty(checkInId)) {
+				CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+				if(checkIn == null) {
+					logger.warn("Invalid checkInId given {}", checkInId);
+				}
+				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+			}
+		}
+		else if(!Strings.isNullOrEmpty(checkInId)) {
+			CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
+			if(checkIn == null) {
+				logger.warn("Invalid checkInId given {}", checkInId);
+			}
+			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+			
+			// Set authorization for GUEST role, no account data was supplied.
+			logger.info("Valid guest request recieved from " + checkIn.getNickname());
+			Authorizer auth = authorizerFactory.createForCheckIn(checkIn);
+			if(auth != null) {
+				request.setSecurityContext(auth);
 			}
 		}
 		
 		return request;
-	}
-
-	private Authorizer authenticateCheckIn(String checkInId) {
-		CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
-		if(checkIn == null) {
-			logger.warn("Invalid checkin uid given {}", checkInId);
-			return null;
-		}
-		else {
-			logger.info("Valid user request recieved from " + checkIn.getNickname());
-			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
-			// return a security context build around the checkIn
-			return authorizerFactory.createForCheckIn(checkIn);
-		}
 	}
 }

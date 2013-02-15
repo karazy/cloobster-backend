@@ -16,6 +16,8 @@ public class AreaImportDTO extends AreaDTO {
 	@NotEmpty
 	private List<SpotDTO> spots;
 	private List<String> menus;
+	
+	private String masterBarcode;
 
 	public AreaImportDTO() {
 		super();
@@ -39,5 +41,13 @@ public class AreaImportDTO extends AreaDTO {
 
 	public void setMenus(List<String> menus) {
 		this.menus = menus;
+	}
+
+	public String getMasterBarcode() {
+		return masterBarcode;
+	}
+
+	public void setMasterBarcode(String masterBarcode) {
+		this.masterBarcode = masterBarcode;
 	}
 }

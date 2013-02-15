@@ -36,9 +36,10 @@ public class AccountRepository extends GenericRepository<Account> {
 	 * @param businessKeys
 	 * @param emailConfirmed 
 	 * @param active 
+	 * @param customerProfile 
 	 * @return new Account entity
 	 */
-	public Account createAndSaveAccount( String name, String login, String password, String email, String role, List<Key<Business>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active) {
+	public Account createAndSaveAccount( String name, String login, String password, String email, String role, List<Key<Business>> businessKeys, Key<Company> companyKey, String phone, String facebookUID,  boolean emailConfirmed, boolean active, Key<CustomerProfile> customerProfile) {
 		Account account = new Account();
 		account.setActive(active);
 		account.setCreationDate(new Date());
@@ -51,6 +52,7 @@ public class AccountRepository extends GenericRepository<Account> {
 		account.setPhone(phone);
 		account.setFacebookUid(facebookUID);
 		account.setEmailConfirmed(emailConfirmed);
+		account.setCustomerProfile(customerProfile);
 		account.setHashedPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
 		
 		if(saveOrUpdate(account) == null)

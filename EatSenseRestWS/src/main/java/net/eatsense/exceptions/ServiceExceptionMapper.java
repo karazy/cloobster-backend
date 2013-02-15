@@ -5,13 +5,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import com.google.inject.Singleton;
-
 import net.eatsense.representation.ErrorDTO;
+
+import com.google.inject.Singleton;
 
 @Provider
 @Singleton
@@ -37,6 +36,8 @@ public class ServiceExceptionMapper implements
 			builder = Response.status(422);
 		else if(arg0 instanceof ApiVersionException)
 			builder = Response.status(460);
+		else if(arg0 instanceof UnauthorizedException)
+			builder = Response.status(Status.UNAUTHORIZED);
 		else
 			builder = Response.status(Status.INTERNAL_SERVER_ERROR);
 		

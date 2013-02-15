@@ -35,7 +35,7 @@ public class BillResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public BillDTO updateBill(BillDTO billData) {
-		return billController.updateBill(business, bill, billData);
+		return new BillDTO(billController.updateBill(business, bill, billData));
 	}
 
 	public void setBusiness(Business business) {

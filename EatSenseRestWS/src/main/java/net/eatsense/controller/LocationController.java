@@ -41,6 +41,7 @@ import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.MenuRepository;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.AreaDTO;
@@ -56,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -85,11 +87,17 @@ public class LocationController {
 	private final MenuRepository menuRepo;
 	private final Provider<Configuration> configProvider;
 	private FeedbackFormRepository feedbackRepo;
+	private final OfyService ofyService;
 	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, LocationRepository br, EventBus eventBus,
-			AccountRepository accountRepo, ImageController imageController,AreaRepository areaRepository, Validator validator, MenuRepository menuRepository,FeedbackFormRepository feedbackRepository, Provider<Configuration> configProvider) {
+			AccountRepository accountRepo, ImageController imageController,
+			AreaRepository areaRepository, Validator validator,
+			MenuRepository menuRepository,
+			FeedbackFormRepository feedbackRepository,
+			Provider<Configuration> configProvider,
+			OfyService ofyService) {
 		this.areaRepo = areaRepository;
 		this.menuRepo = menuRepository;
 		this.validator = validator;
@@ -102,6 +110,7 @@ public class LocationController {
 		this.imageController = imageController;
 		this.configProvider = configProvider;
 		this.feedbackRepo = feedbackRepository;
+		this.ofyService = ofyService;
 	}
 	
 	/**
@@ -355,6 +364,34 @@ public class LocationController {
 			account.setBusinesses(new ArrayList<Key<Business>>());	
 		}
 		Business business = locationRepo.newEntity();
+		
+		addDefaultFeedbackForm(business);
+		
+		
+		
+		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
+		business.getPaymentMethods().add(new PaymentMethod("Bar"));
+		business.setCompany(account.getCompany());
+		
+		
+		Key<Business> businessKey = updateBusiness(business, businessData);
+		
+		// Let other controllers know we created a new business.
+		eventBus.post(new NewLocationEvent(business));
+		
+		createWelcomeAreaAndSpot(businessKey);
+		account.getBusinesses().add(businessKey);
+		accountRepo.saveOrUpdate(account);
+		
+		return new LocationProfileDTO(business);
+	}
+
+	/**
+	 * Load default FeedbackForm, copy and set it for the given Business entity.
+	 * 
+	 * @param business
+	 */
+	public Business addDefaultFeedbackForm(Business business) {
 		Configuration config = configProvider.get();
 		
 		if(config.getDefaultFeedbackForm() != null) {
@@ -377,46 +414,29 @@ public class LocationController {
 			logger.warn("defaultFeedbackForm not set in default configuration.");
 		}
 		
-		
-		
-		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
-		business.getPaymentMethods().add(new PaymentMethod("Bar"));
-		business.setCompany(account.getCompany());
-		
-		
-		Key<Business> businessKey = updateBusiness(business, businessData);
-		
-		// Let other controllers know we created a new business.
-		eventBus.post(new NewLocationEvent(business));
-		
-		createWelcomeAreaAndSpot(businessKey);
-		account.getBusinesses().add(businessKey);
-		accountRepo.saveOrUpdate(account);
-		
-		return new LocationProfileDTO(business);
+		return business;
 	}
 
 	/**
 	 * @param businessKey
+	 * @return 
 	 */
-	public void createWelcomeAreaAndSpot(Key<Business> businessKey) {
+	public Area createWelcomeAreaAndSpot(Key<Business> businessKey) {
+		return createWelcomeAreaAndSpot(businessKey, Optional.<String>absent()); 
+	}
+
+	/**
+	 * @param businessKey
+	 * @param optWelcomeBarcode Override auto generated barcode
+	 */
+	public Area createWelcomeAreaAndSpot(Key<Business> businessKey, Optional<String> optWelcomeBarcode) {
 		checkNotNull(businessKey, "businessKey was null");
 		
-		AreaDTO areaData = new AreaDTO();
-		areaData.setActive(true);
-		areaData.setDescription("Welcome Area");
-		areaData.setName("Welcome Area");
-		areaData.setWelcome(true);
+		Area welcomeArea = createWelcomeArea(businessKey);
 		
-		Area welcomeArea = createArea(businessKey, areaData );
+		createWelcomeSpot(businessKey, areaRepo.getKey(welcomeArea), optWelcomeBarcode);
 		
-		SpotDTO spotData = new SpotDTO();
-		spotData.setActive(true);
-		spotData.setAreaId(welcomeArea.getId());
-		spotData.setName("Welcome Spot");
-		spotData.setWelcome(true);
-		
-		createSpot(businessKey, spotData, true );
+		return welcomeArea;
 	}
 
 	/**
@@ -557,9 +577,10 @@ public class LocationController {
 	 * @param businessKey
 	 * @param areaId If different from 0, filter by area.
 	 * @param welcome 
+	 * @param noMaster 
 	 * @return List of spots for the business and for the area if specified.
 	 */
-	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId, boolean welcome) {
+	public List<SpotDTO> getSpots(Key<Business> businessKey, long areaId, boolean welcome, boolean noMaster) {
 		checkNotNull(businessKey, "businessKey was null");
 		
 		ArrayList<SpotDTO> spotDTOList = new ArrayList<SpotDTO>();
@@ -577,6 +598,10 @@ public class LocationController {
 		}
 		
 		for(Spot spot :  spots) {
+			// Dont return master Spot if noMaster is true
+			if(noMaster && spot.isMaster())
+				continue;
+			
 			if(!spot.isTrash()) {
 				spotDTOList.add(new SpotDTO(spot));
 			}
@@ -593,23 +618,9 @@ public class LocationController {
 	public SpotDTO createSpot(Key<Business> locationKey, SpotDTO spotData, boolean welcome) {
 		checkNotNull(locationKey, "businessKey was null");
 		
-		int spotCount = 0;
-		Spot spot = spotRepo.newEntity();
-		
-		spot.setBusiness(locationKey);
-		spot.setWelcome(welcome);
-		
-		
-		if(!welcome) {
-			spotCount = countSpots(locationKey);
-		}
-		
-		
-		updateSpot(spot, spotData);
-		// Generate the barcode like this: {businessId}-{spotId}
-		Key<Area> areaKey = null;
+		// Make sure to not create a new Spot at the "welcome" Area
 		if(spotData.getAreaId() != null) {
-			areaKey = areaRepo.getKey(spot.getBusiness(), spotData.getAreaId());
+			Key<Area> areaKey = areaRepo.getKey(locationKey, spotData.getAreaId());
 			if(!welcome) {
 				try {
 					Area area = areaRepo.getByKey(areaKey);
@@ -623,15 +634,47 @@ public class LocationController {
 			}			
 		}
 		
+		Spot spot = spotRepo.newEntity();
+		
+		spot.setBusiness(locationKey);
+		spot.setWelcome(welcome);
+		spot.setId(ofyService.factory().allocateId(Spot.class));
+		// Generate the  new barcode
 		spot.generateBarcode();
 		
-		spotRepo.saveOrUpdate(spot);
+		int spotCount = 0;
+		if(!welcome) {
+			spotCount = countSpots(locationKey);
+		}
 		
+		updateSpot(spot, spotData);
 		
 		if(!welcome)
 			eventBus.post(new NewSpotEvent(locationKey, spot, spotCount + 1, false));
 		
 		return new SpotDTO(spot);
+	}
+	
+	private Spot createWelcomeSpot(Key<Business> locationKey, Key<Area> welcomeAreaKey, Optional<String> optionalBarcode) {
+		Spot spot = spotRepo.newEntity();
+		spot.setActive(true);
+		spot.setBusiness(locationKey);
+		spot.setId(ofyService.factory().allocateId(Spot.class));
+		spot.setWelcome(true);
+		spot.setName("Welcome Spot");
+		spot.setArea(welcomeAreaKey);
+		if(optionalBarcode.isPresent()) {
+			logger.info("Creating welcome Spot with barcode={}", optionalBarcode.get() );
+			spot.setBarcode(optionalBarcode.get());
+		}
+		else {
+			// Generate the  new barcode
+			spot.generateBarcode();
+		}
+		
+		spotRepo.saveOrUpdate(spot);
+		
+		return spot;
 	}
 
 	/**
@@ -683,9 +726,12 @@ public class LocationController {
 		checkNotNull(spot, "spot was null");
 		checkNotNull(account, "account was null");
 		
-		if(spot.isWelcome()) {
-			throw new IllegalAccessException("Not allowed to delete welcome spot");
+		if(spot.isWelcome() || spot.isMaster()) {
+			String message = "Not allowed to delete welcome or master Spot.";
+			logger.error(message);
+			throw new IllegalAccessException(message);
 		}
+		
 		int spotCount = countSpots(spot.getBusiness());
 		
 		spot.setActive(false);
@@ -738,6 +784,71 @@ public class LocationController {
 		area.setBusiness(businessKey);
 		area.setWelcome(areaData.isWelcome());
 		updateArea(area, areaData);
+	
+		createMasterSpot(businessKey, areaRepo.getKey(area));
+		
+		return area;
+	}
+
+	/**
+	 * Helper function to create a master Spot for an Area. 
+	 * 
+	 * @param businessKey
+	 * @param area
+	 * @return 
+	 */
+	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey) {
+		return createMasterSpot(businessKey, areaKey, Optional.<String>absent());
+	}
+
+	/**
+	 * Helper function to create a master Spot for an Area. 
+	 * 
+	 * @param businessKey
+	 * @param optBarcode TODO
+	 * @param area
+	 * @return 
+	 */
+	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey, Optional<String> optBarcode) {
+		// create "master" Spot
+		logger.info("Creating master Spot for {}.", areaKey);
+		Spot spot = spotRepo.newEntity();
+		spot.setActive(true);
+		spot.setArea(areaKey);
+		spot.setBusiness(businessKey);
+		spot.setMaster(true);
+		spot.setName("Master Spot");
+		// Get a new Id from the datastore, so we can generate the barcode immediately
+		spot.setId(ofyService.factory().allocateId(Spot.class));
+		if(optBarcode.isPresent()) {
+			// Set Barcode if override is present.
+			spot.setBarcode(optBarcode.get());
+		}
+		else {
+			spot.generateBarcode();
+		}
+		
+		
+		spotRepo.saveOrUpdate(spot);
+		
+		return spot;
+	}
+	
+	/**
+	 * Create the welcome area for this business.
+	 * 
+	 * @param businessKey
+	 * @return
+	 */
+	private Area createWelcomeArea(Key<Business> businessKey) {
+		Area area = areaRepo.newEntity();
+		area.setBusiness(businessKey);
+		area.setActive(true);
+		area.setDescription("Welcome Area");
+		area.setName("Welcome Area");
+		area.setWelcome(true);
+		
+		areaRepo.saveOrUpdate(area);
 		
 		return area;
 	}
@@ -745,23 +856,22 @@ public class LocationController {
 	/**
 	 * 
 	 * @param businessKey
+	 * @param noWelcome 
 	 * @return List of areas as transfer objects.
 	 */
-	public List<AreaDTO> getAreas(Key<Business> businessKey, boolean onlyActive) {
+	public List<AreaDTO> getAreas(Key<Business> businessKey, boolean onlyActive, boolean noWelcome) {
 		checkNotNull(businessKey, "businessKey was null");
 		ArrayList<AreaDTO> areaDtos = new ArrayList<AreaDTO>();
-		
-		List<Area> areas;
-		if(!onlyActive) {
-			areas = areaRepo.getByParent(businessKey);
-		} else {
-			areas = areaRepo.getListByParentAndProperty(businessKey, "active", true);
-		}
+		List<Area> areas = areaRepo.getListByParentAndProperty(businessKey, "trash", false);
 		
 		for(Area area : areas) {
-			if(!area.isTrash()) {
-				areaDtos.add(new AreaDTO(area));
+			if(noWelcome && area.isWelcome())
+				continue;
+			if(onlyActive && !area.isActive()) {
+				continue;
 			}
+			
+			areaDtos.add(new AreaDTO(area));
 		}
 		
 		return areaDtos;
@@ -781,6 +891,7 @@ public class LocationController {
 		area.setActive(areaData.isActive());
 		area.setDescription(areaData.getDescription());
 		area.setName(areaData.getName());
+		area.setBarcodeRequired(areaData.isBarcodeRequired());
 		
 		List<Key<Menu>> menus = null;
 		
