@@ -33,7 +33,7 @@ public class ApiVersionFilter implements ContainerRequestFilter {
 		
 		if(appApiVersion == null) {
 			appApiVersion = "1";
-			logger.warn("No valid \"cloobster-api\" value set in header. Assuming version 1.");
+			logger.info("No valid \"cloobster-api\" value set in header. Assuming version 1.");
 		}
 		
 		String systemApiVersion = System.getProperty("net.karazy.api.version");
@@ -43,7 +43,7 @@ public class ApiVersionFilter implements ContainerRequestFilter {
 			logger.error(message);
 			throw new ApiVersionException(message,"error.version");
 		}
-		
+			
 		return request;
 	}
 }
