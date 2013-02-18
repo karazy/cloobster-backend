@@ -140,6 +140,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 			CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
 			if(checkIn == null) {
 				logger.warn("Invalid checkInId given {}", checkInId);
+				return request;
 			}
 			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
 			
