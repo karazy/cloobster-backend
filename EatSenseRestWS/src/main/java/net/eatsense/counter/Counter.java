@@ -14,9 +14,12 @@ public class Counter {
 	private String name;
 	private Long locationId;
 	private Long areaId;
+	
+	@Unindexed
 	private long count;
+	
 	private PeriodType periodType;
-	private String period;
+	private Date period;
 	
 	public enum PeriodType {
 		SECOND {
@@ -110,10 +113,10 @@ public class Counter {
 	public void setPeriodType(PeriodType periodType) {
 		this.periodType = periodType;
 	}
-	public String getPeriod() {
+	public Date getPeriod() {
 		return period;
 	}
-	public void setPeriod(String period) {
+	public void setPeriod(Date period) {
 		this.period = period;
 	}
 }

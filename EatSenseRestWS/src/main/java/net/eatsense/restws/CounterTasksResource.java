@@ -57,11 +57,7 @@ public class CounterTasksResource {
 	@GET
 	@Path("test")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Counter> getTestCounters() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.MONTH, -1);
-		
-		
-		return counterRepo.getDailyCountsByNameAreaLocationAndDateRange("test", 0, 0, calendar.getTime(), new Date()); 
+	public Iterable<Counter> getTestCounters() {
+		return counterRepo.getDailyCountsByNameAreaAndLocation("test", 0, 0); 
 	}
 }

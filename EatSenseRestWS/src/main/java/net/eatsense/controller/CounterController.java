@@ -1,7 +1,8 @@
-package net.eatsense.counter;
+package net.eatsense.controller;
 
 import java.util.Date;
 
+import net.eatsense.counter.CounterService;
 import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.event.CustomerRequestEvent;
 import net.eatsense.event.NewCheckInEvent;

@@ -108,8 +108,6 @@ public class CounterService {
 			throw new ServiceException();
 		}
 		
-		String scopedPeriod = periodType.getScope(period);
-		
 		Counter counter = ofy.find(Counter.class, keyName);
 		
 		if(counter == null) {
@@ -118,7 +116,7 @@ public class CounterService {
 			counter.setId(keyName);
 			counter.setLocationId(locationId);
 			counter.setName(name);
-			counter.setPeriod(scopedPeriod);
+			counter.setPeriod(period);
 			counter.setPeriodType(periodType);
 		}
 		

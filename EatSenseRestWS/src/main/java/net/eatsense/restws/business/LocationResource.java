@@ -297,4 +297,11 @@ public class LocationResource {
 		resource.setBusiness(business);
 		return resource;
 	}
+
+	@Path("reports")
+	public ReportsResource getReportsResource() {
+		ReportsResource resource = resourceContext.getResource(ReportsResource.class);
+		resource.setLocation(business);
+		return resource;
+	}
 }
