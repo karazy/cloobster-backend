@@ -228,7 +228,7 @@ public class AccountController {
 			account.setFailedLoginAttempts(account.getFailedLoginAttempts()+1);
 			account.setLastFailedLogin(new Date());
 			accountRepo.saveOrUpdate(account);
-			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
+			logger.warn("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
 	}
