@@ -152,7 +152,7 @@ public class BillController {
 				throw new BillFailureException("Bill cannot be updated, unconfirmed orders available.");
 			}
 			else if(order.getStatus().equals(OrderStatus.CANCELED) || order.getStatus().equals(OrderStatus.CART) || order.getStatus() == OrderStatus.COMPLETE ) {
-				break;
+				continue;
 			}
 			else {
 				billTotal = billTotal.plus(calculateTotalPrice(order, currencyUnit));

@@ -350,14 +350,16 @@ public class BillControllerTest {
 		// Configure the iterator to return true for the first check.
 		// The next time return true for the for loop.
 		// After that return false, we only want to return one Order.
-		when(ordersIterator.hasNext()).thenReturn(true,true, false);
+		when(ordersIterator.hasNext()).thenReturn(true,true, true, false);
 		
 		Order placedOrder = mock(Order.class);
+		Order cartOrder = mock(Order.class);
+		when(cartOrder.getStatus()).thenReturn(OrderStatus.CART);
 		when(placedOrder.getStatus()).thenReturn(OrderStatus.RECEIVED);
 		
 		when(placedOrder.getProduct()).thenReturn(productKey  );
 		
-		when(ordersIterator.next()).thenReturn(placedOrder );
+		when(ordersIterator.next()).thenReturn(cartOrder, placedOrder );
 		
 		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
 		
@@ -389,6 +391,9 @@ public class BillControllerTest {
 		
 		verify(placedOrder).setStatus(OrderStatus.COMPLETE);		
 		verify(placedOrder).setBill(billKey);
+		
+		// Verify we dont touch cart orders
+		verify(cartOrder, never()).setStatus(any(OrderStatus.class));
 
 		ArgumentCaptor<java.util.List> orderListCaptor = ArgumentCaptor.forClass(java.util.List.class);
 		
