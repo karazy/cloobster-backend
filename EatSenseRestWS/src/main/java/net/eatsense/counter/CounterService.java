@@ -44,11 +44,31 @@ public class CounterService {
 		this.ofy = ofyService.ofy();
 	}
 
+	/**
+	 * Build the id of a counter from the arguments.
+	 * 
+	 * @param name
+	 * @param locationId
+	 * @param areaId
+	 * @param periodType
+	 * @param period
+	 * @return {@link String} identifier unique for this counter.
+	 */
 	public String getCounterKeyName(String name, long locationId, long areaId, PeriodType periodType, Date period) {
 		// Format like this locationId:areaId:periodType:scopedPeriod:name ( e.g. "1001:101:DAY:2012-02-12:checkins")
 		return String.format("%d:%d:%s:%s:%s", locationId, areaId, periodType, periodType.getScope(period), name);
 	}
 	
+	/**
+	 * Load a counter from memcache or the datastore if not existing in cache.
+	 * 
+	 * @param name
+	 * @param periodType
+	 * @param period
+	 * @param locationId
+	 * @param areaId
+	 * @return Value of the counter or <code>null</code> if not existing.
+	 */
 	public Long loadAndGetCounter(String name, PeriodType periodType, Date period, long locationId, long areaId) {
 		String keyName = getCounterKeyName(name, locationId, areaId, periodType, period);
 		
@@ -65,6 +85,18 @@ public class CounterService {
 		return count;
 	}
 	
+	/**
+	 * Increment a counter identified by the supplied arguments.
+	 * Creates a new counter if none exists under the given name.
+	 * 
+	 * @param name
+	 * @param periodType
+	 * @param period
+	 * @param locationId
+	 * @param areaId
+	 * @param delta
+	 * @return
+	 */
 	public Long loadAndIncrementCounter(String name, PeriodType periodType, Date period, long locationId, long areaId, int delta) {
 		checkNotNull(name, "name was null");
 		
@@ -99,6 +131,16 @@ public class CounterService {
 		return result;
 	}
 	
+	/**
+	 * Worker method to save a counter to the datastore.
+	 * Usually called by a task queue resource asynchronously.
+	 * 
+	 * @param name
+	 * @param periodType
+	 * @param period
+	 * @param locationId
+	 * @param areaId
+	 */
 	public void persistCounter(String name, PeriodType periodType, Date period, long locationId, long areaId) {
 		String keyName = getCounterKeyName(name, locationId, areaId, periodType, period);
 		

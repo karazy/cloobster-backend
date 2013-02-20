@@ -8,6 +8,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import net.eatsense.controller.ReportController;
@@ -17,6 +20,7 @@ import net.eatsense.representation.CounterReportDTO;
 public class ReportsResource {
 	private Business location;
 	private final ReportController reportController;
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Inject
 	public ReportsResource(ReportController reportController) {

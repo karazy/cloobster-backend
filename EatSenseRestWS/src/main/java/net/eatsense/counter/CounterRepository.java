@@ -60,8 +60,9 @@ public class CounterRepository {
 		
 		List<Key<Counter>> counterKeys = new ArrayList<Key<Counter>>();
 		
+		Date now = new Date();
 		if(toDate == null) {
-			toDate = new Date();
+			toDate = now;
 		}
 		
 		if(fromDate.after(toDate)) {
@@ -69,13 +70,16 @@ public class CounterRepository {
 			throw new ValidationException("fromDate can't be after toDate");
 		}
 		
+		if(toDate.after(now))
+			toDate = now;
+		
 		// Create keys
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(fromDate);
 		
 		String keyName = counterService.getCounterKeyName(name, locationId, areaId, PeriodType.DAY, fromDate);
 		// Add first key
-		logger.info("First load counter={}", keyName);
+		//logger.info("First load counter={}", keyName);
 		counterKeys.add(ofyService.keys().create(Counter.class, keyName));
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		while(calendar.getTime().compareTo(toDate) <= 0) {
