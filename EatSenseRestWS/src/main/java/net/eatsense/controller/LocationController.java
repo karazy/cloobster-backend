@@ -638,7 +638,7 @@ public class LocationController {
 		
 		spot.setBusiness(locationKey);
 		spot.setWelcome(welcome);
-		spot.setId(ofyService.factory().allocateId(Spot.class));
+		spot.setId(ofyService.factory().allocateId(locationKey, Spot.class));
 		// Generate the  new barcode
 		spot.generateBarcode();
 		
@@ -659,7 +659,7 @@ public class LocationController {
 		Spot spot = spotRepo.newEntity();
 		spot.setActive(true);
 		spot.setBusiness(locationKey);
-		spot.setId(ofyService.factory().allocateId(Spot.class));
+		spot.setId(ofyService.factory().allocateId(locationKey, Spot.class));
 		spot.setWelcome(true);
 		spot.setName("Welcome Spot");
 		spot.setArea(welcomeAreaKey);
@@ -804,22 +804,22 @@ public class LocationController {
 	/**
 	 * Helper function to create a master Spot for an Area. 
 	 * 
-	 * @param businessKey
+	 * @param locationKey
 	 * @param optBarcode TODO
 	 * @param area
 	 * @return 
 	 */
-	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey, Optional<String> optBarcode) {
+	public Spot createMasterSpot(Key<Business> locationKey, Key<Area> areaKey, Optional<String> optBarcode) {
 		// create "master" Spot
 		logger.info("Creating master Spot for {}.", areaKey);
 		Spot spot = spotRepo.newEntity();
 		spot.setActive(true);
 		spot.setArea(areaKey);
-		spot.setBusiness(businessKey);
+		spot.setBusiness(locationKey);
 		spot.setMaster(true);
 		spot.setName("Master Spot");
 		// Get a new Id from the datastore, so we can generate the barcode immediately
-		spot.setId(ofyService.factory().allocateId(Spot.class));
+		spot.setId(ofyService.factory().allocateId(locationKey, Spot.class));
 		if(optBarcode.isPresent()) {
 			// Set Barcode if override is present.
 			spot.setBarcode(optBarcode.get());
