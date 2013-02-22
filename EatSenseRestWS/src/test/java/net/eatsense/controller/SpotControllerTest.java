@@ -23,6 +23,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.SpotsData;
 import net.eatsense.validation.ValidationHelper;
@@ -74,9 +75,12 @@ public class SpotControllerTest {
 	@Mock
 	private Query<Spot> spotQuery;
 
+	@Mock
+	private OfyService ofyService;
+
 	@Before
 	public void setUp() throws Exception {
-		ctrl = new SpotController(spotRepo, validationHelper, areaRepo, eventBus);
+		ctrl = new SpotController(spotRepo, validationHelper, areaRepo, ofyService, eventBus);
 	}
 
 	/** 

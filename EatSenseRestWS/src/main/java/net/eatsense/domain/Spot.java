@@ -10,6 +10,8 @@ import org.mindrot.jbcrypt.BCrypt;
 import net.eatsense.exceptions.ServiceException;
 
 import com.google.common.base.Objects;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Parent;
@@ -156,7 +158,8 @@ public class Spot extends GenericEntity<Spot>{
 	 * @return
 	 */
 	public static String generateBarcode(long businessId, long id) {		
-		return BCrypt.hashpw(String.format(BARCODE_FORMAT, businessId, id), BCrypt.gensalt());
+		return Long.toHexString(businessId) + Hashing.md5().hashString(String.format(BARCODE_FORMAT, businessId, id)).toString();
+		//return BCrypt.hashpw(String.format(BARCODE_FORMAT, businessId, id), BCrypt.gensalt());
 	}
 	
 	/**
