@@ -144,7 +144,34 @@ public class CounterServiceTest {
 	}
 
 	@Test
-	public void testPersistCounter() {
+	public void testPersistCounterNewCounter() {
+		String name = "test";
+		long locationId = 123;
+		long areaId = 456;
+		PeriodType periodType = PeriodType.DAY;
+		Date period = new Date();
+		int delta = 1;
+		String keyName = counterService.getCounterKeyName(name, locationId, areaId, periodType, period );
+		Long value = 2l;
+		
+		when(memcache.get(keyName)).thenReturn(value );
+
+		counterService.persistCounter(name, periodType, period, locationId, areaId);
+		
+		ArgumentCaptor<Counter> counterCaptor = ArgumentCaptor.forClass(Counter.class);
+		
+		verify(ofy).put(counterCaptor.capture());
+		verify(memcache).delete(keyName+"_dirty");
+		
+		Counter counter = counterCaptor.getValue();
+		
+		assertThat(counter.getAreaId(), is(areaId));
+		assertThat(counter.getCount(), is(value));
+		assertThat(counter.getId(), is(keyName));
+		assertThat(counter.getLocationId(), is(locationId));
+		assertThat(counter.getName(), is(name));
+		assertThat(counter.getPeriod(), is(period));
+		assertThat(counter.getPeriodType(), is(periodType));
 		
 	}
 }

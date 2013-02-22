@@ -150,19 +150,15 @@ public class CounterService {
 			throw new ServiceException();
 		}
 		
-		Counter counter = ofy.find(Counter.class, keyName);
-		
-		if(counter == null) {
-			counter = new Counter();
-			counter.setAreaId(areaId);
-			counter.setId(keyName);
-			counter.setLocationId(locationId);
-			counter.setName(name);
-			counter.setPeriod(period);
-			counter.setPeriodType(periodType);
-		}
-		
+		Counter counter = new Counter();
+		counter.setAreaId(areaId);
+		counter.setId(keyName);
+		counter.setLocationId(locationId);
+		counter.setName(name);
+		counter.setPeriod(period);
+		counter.setPeriodType(periodType);
 		counter.setCount(cachedCount);
+		
 		logger.info("Saving Counter: id={}, value={}", keyName, cachedCount);
 		ofy.put(counter);
 		
