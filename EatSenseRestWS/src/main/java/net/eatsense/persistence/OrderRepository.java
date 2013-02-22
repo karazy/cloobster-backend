@@ -4,11 +4,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
 
-import com.googlecode.objectify.Query;
-
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
 import net.eatsense.domain.embedded.OrderStatus;
+
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Query;
 
 public class OrderRepository extends GenericRepository<Order> {
 	public OrderRepository() {
@@ -24,5 +26,9 @@ public class OrderRepository extends GenericRepository<Order> {
 		}
 		
 		return query;
+	}
+	
+	public Iterable<Order> belongingToLocationAndCheckIn(Business location, Key<CheckIn> checkInKey) {
+		return query().ancestor(location).filter("checkIn", checkInKey).fetch();
 	}
 }

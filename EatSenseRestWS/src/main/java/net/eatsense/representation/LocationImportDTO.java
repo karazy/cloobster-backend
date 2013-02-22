@@ -1,6 +1,7 @@
 package net.eatsense.representation;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -95,6 +96,10 @@ public class LocationImportDTO {
 	@NotEmpty
 	@Valid
 	private Collection<PaymentMethod> payments;
+	
+	private String welcomeBarcode;
+	
+	private List<String> welcomeMenus;
 
 	public LocationImportDTO() {
 	}
@@ -145,5 +150,21 @@ public class LocationImportDTO {
 
 	public void setAreas(Collection<AreaImportDTO> areas) {
 		this.areas = areas;
+	}
+
+	public String getWelcomeBarcode() {
+		return welcomeBarcode;
+	}
+
+	public void setWelcomeBarcode(String welcomeBarcode) {
+		this.welcomeBarcode = welcomeBarcode;
+	}
+
+	public List<String> getWelcomeMenus() {
+		return welcomeMenus;
+	}
+
+	public void setWelcomeMenus(List<String> welcomeMenus) {
+		this.welcomeMenus = welcomeMenus;
 	}
 }

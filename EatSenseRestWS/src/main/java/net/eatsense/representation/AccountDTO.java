@@ -42,6 +42,7 @@ public class AccountDTO {
 	
 	private String fbUserId;
 	private String fbAccessToken;
+	private boolean active;
 	
 	public AccountDTO() {
 		super();
@@ -60,6 +61,7 @@ public class AccountDTO {
 		this.role = account.getRole();
 		this.emailConfirmed = account.isEmailConfirmed();
 		this.fbUserId = account.getFacebookUid();
+		this.active = account.isActive();
 	}
 	public String getLogin() {
 		return login;
@@ -132,5 +134,13 @@ public class AccountDTO {
 
 	public void setFbAccessToken(String fbAccessToken) {
 		this.fbAccessToken = fbAccessToken;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}	
 }

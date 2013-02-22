@@ -156,6 +156,7 @@ public class AccountController {
 	 * @param hashedPassword as bcrypt hash
 	 * @return the authenticated Account object for the given login
 	 */
+	@Deprecated
 	public Account authenticateHashed(String login, String hashedPassword) {
 		login = Strings.nullToEmpty(login).toLowerCase();
 		
@@ -211,7 +212,7 @@ public class AccountController {
 			return null;
 		
 		if(!account.isActive())
-			return null;
+			throw new IllegalAccessException("Account deactivated", "error.account.inactive");
 		
 		if( accountRepo.checkPassword(password, account.getHashedPassword())) {
 			// Reset failed attempts counter
@@ -227,7 +228,7 @@ public class AccountController {
 			account.setFailedLoginAttempts(account.getFailedLoginAttempts()+1);
 			account.setLastFailedLogin(new Date());
 			accountRepo.saveOrUpdate(account);
-			logger.error("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
+			logger.warn("Failed login from {}, attempt nr. {}",login,account.getFailedLoginAttempts());
 			return null;
 		}
 	}
@@ -593,6 +594,19 @@ public class AccountController {
 		}		
 		
 		return updateAccount(account, accountData, true);
+	}
+	
+	public Account linkAccountAndCheckIn(Account account, CheckIn checkIn) {
+		checkNotNull(account, "account as null");
+		checkNotNull(checkIn, "checkIn as null");
+
+		account.setActiveCheckIn(checkIn.getKey());
+		checkIn.setAccount(account.getKey());
+		
+		checkInRepo.saveOrUpdate(checkIn);
+		accountRepo.saveOrUpdate(account);
+		
+		return account;
 	}
 	
 	/**
@@ -1055,7 +1069,7 @@ public class AccountController {
 		if(isCheckInSet) {
 			checkIn = checkInRepo.getByProperty("userId", accountData.getCheckInId());
 			if(checkIn == null) {
-				throw new ValidationException("CheckIn unknown", "account.error.checkin.unknown");
+				throw new ValidationException("CheckIn unknown", "error.checkin.unknown");
 			}
 			else {
 				newAccount.setActiveCheckIn(checkIn.getKey());

@@ -35,6 +35,7 @@ import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.MenuDTO;
 import net.eatsense.representation.OrderDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -232,6 +233,20 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed(Role.GUEST)
 	public List<AreaDTO> getAreas() {
-		return locationCtrl.getAreas(business.getKey(),true);
+		return locationCtrl.getAreas(business.getKey(),true, true);
+	}
+	
+	/**
+	 * Load Spot entities for this Business (and Area if specified).
+	 * 
+	 * @param areaId Specify the Area, for which to return the Spot entites.
+	 * @return All Spot entities for the Area specified by the areaId.
+	 */
+	@GET
+	@Path("spots")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed(Role.GUEST)
+	public List<SpotDTO> getSpots(@QueryParam("areaId")long areaId) {
+		return locationCtrl.getSpots(business.getKey(), areaId, false, true);
 	}
 }

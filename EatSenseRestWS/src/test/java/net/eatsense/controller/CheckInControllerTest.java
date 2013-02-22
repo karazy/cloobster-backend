@@ -562,7 +562,9 @@ public class CheckInControllerTest {
 		
 		inOrder.verify(orderRepo).getKeysByProperty("checkIn", checkIn);
 		inOrder.verify(orderRepo).delete(anyCollection());
-		verify(checkInRepo).delete(checkIn);
+		verify(checkIn).setStatus(CheckInStatus.WAS_INACTIVE);
+		verify(checkIn).setArchived(true);
+		verify(checkInRepo).saveOrUpdate(checkIn);
 		
 		ArgumentCaptor<DeleteCheckInEvent> eventArgument = ArgumentCaptor.forClass(DeleteCheckInEvent.class);
 		verify(eventBus).post(eventArgument.capture());

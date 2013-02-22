@@ -20,6 +20,7 @@ import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
+import com.googlecode.objectify.Result;
 import com.googlecode.objectify.util.DAOBase;
 
 /**
@@ -88,6 +89,19 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		logger.info("kind={}", Key.getKind(clazz));
 		
 		return ofy().put(obj);
+	}
+	
+	/**
+	 * Saves or update given entities with an asynchronous call.
+	 * @param obj
+	 * 		List containing objects to save.
+	 * @return
+	 * 		Map of generated/existing keys and entities
+	 */
+	public Result<Map<Key<T>, T>> saveOrUpdateAsync(Iterable<T> obj) {
+		logger.info("kind={}", Key.getKind(clazz));
+		
+		return ofy().async().put(obj);
 	}
 
 	/**

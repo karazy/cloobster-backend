@@ -82,8 +82,13 @@ public class EatSenseGuiceServletContextListener extends
 						HashMap<String, String> parameters = new HashMap<String, String>();
 						
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
-						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,ApiVersionFilter.class.getName() + "," +
-								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName()+ "," + SuffixFilter.class.getName());
+						// Disabled ApiVersionFilter until release of new app version in app store - Nils 15.02.2013
+//						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,ApiVersionFilter.class.getName() + "," +
+//								AccessTokenFilter.class.getName() + ","+ SecurityFilter.class.getName()+ "," + SuffixFilter.class.getName());
+//						
+						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName() + ","
+								+ SecurityFilter.class.getName()+ ","
+								+ SuffixFilter.class.getName());
 						
 						// add cross origin headers filter, deactivated for now.
 						// add cache control response filter.

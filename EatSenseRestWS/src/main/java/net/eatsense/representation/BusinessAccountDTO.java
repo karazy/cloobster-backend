@@ -6,6 +6,7 @@ import java.util.List;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 
+import com.google.common.base.Function;
 import com.googlecode.objectify.Key;
 
 public class BusinessAccountDTO  extends AccountDTO {
@@ -67,4 +68,12 @@ public class BusinessAccountDTO  extends AccountDTO {
 	public void setBusinessIds(List<Long> businessIds) {
 		this.businessIds = businessIds;
 	}
+	
+	public final static Function<Account, BusinessAccountDTO> toDTO = 
+		new Function<Account, BusinessAccountDTO>() {
+			@Override
+			public BusinessAccountDTO apply(Account input) {
+				return new BusinessAccountDTO(input);
+			}
+	    };
 }

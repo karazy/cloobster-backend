@@ -87,7 +87,7 @@ public class MailController {
 		String body = text.substring(firstNewline);
 		
 		mail.setSubject(subject, "utf-8");
-		logger.info("send mail: {}", text);
+		logger.info("mail text: {}", text);
 		mail.setText(body, "utf-8");
 	}
 	
@@ -116,6 +116,7 @@ public class MailController {
 		
 		applyTextAndSubject(mail, text);
 		
+		logger.info("Sending mail to: {}, from: {}", emailTo, FROM_ADDRESS);
 		Transport.send(mail);
 		
 		return mail;

@@ -1,11 +1,13 @@
 package net.eatsense.representation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Menu;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.validation.CreationChecks;
@@ -14,6 +16,7 @@ import net.eatsense.validation.ImportChecks;
 import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Function;
+import com.googlecode.objectify.Key;
 
 
 
@@ -80,6 +83,10 @@ public class SpotDTO {
 	private Long areaId;
 	
 	private boolean welcome;
+
+	private boolean master;
+
+	private ArrayList<Long> areaMenuIds = new ArrayList<Long>();
 	
 	public SpotDTO(Spot spot) {
 		super();
@@ -99,6 +106,7 @@ public class SpotDTO {
 			this.areaId = spot.getArea().getId();
 		}
 		this.welcome = spot.isWelcome();
+		this.setMaster(spot.isMaster());
 	}
 	
 	public SpotDTO(Spot spot, Business business, Area area) {
@@ -121,10 +129,14 @@ public class SpotDTO {
 	    		}
 	       	}
 		}
-		
 		if(area != null) {
 			this.areaDescription = area.getDescription();
 			this.areaName = area.getName();
+			if(area.getMenus() != null && !area.getMenus().isEmpty()) {
+				for (Key<Menu> menuKey : area.getMenus()) {
+					getAreaMenuIds().add(menuKey.getId());
+				}
+			}
 		}
 	}
 	
@@ -298,11 +310,27 @@ public class SpotDTO {
 		this.welcome = welcome;
 	}
 
+	public boolean isMaster() {
+		return master;
+	}
+
+	public void setMaster(boolean master) {
+		this.master = master;
+	}
+
+	public ArrayList<Long> getAreaMenuIds() {
+		return areaMenuIds;
+	}
+
+	public void setAreaMenuIds(ArrayList<Long> areaMenuIds) {
+		this.areaMenuIds = areaMenuIds;
+	}
+
 	public final static Function<Spot, SpotDTO> toDTO = 
-			new Function<Spot, SpotDTO>() {
-				@Override
-				public SpotDTO apply(Spot input) {
-					return new SpotDTO(input);
-				}
-		    };
+		new Function<Spot, SpotDTO>() {
+			@Override
+			public SpotDTO apply(Spot input) {
+				return new SpotDTO(input);
+			}
+	    };
 }

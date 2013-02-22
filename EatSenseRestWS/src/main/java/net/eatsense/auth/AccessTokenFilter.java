@@ -83,7 +83,7 @@ public class AccessTokenFilter implements ContainerRequestFilter {
 			
 			if( accessToken.getExpires() != null &&  accessToken.getExpires().before(new Date()) ) {
 				accessTokenRepo.delete(accessToken);
-				logger.info("Deleted expired access token for account {}", accessToken.getAccount());
+				logger.warn("Deleted expired access token for account {}", accessToken.getAccount());
 				throw new IllegalAccessException("Access token exired, please re-authenticate.");	
 			}
 			
