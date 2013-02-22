@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import net.eatsense.domain.Account;
@@ -38,11 +39,15 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.KeyRange;
+import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.Query;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,8 +83,13 @@ public class SpotControllerTest {
 	@Mock
 	private OfyService ofyService;
 
+	@Mock
+	private ObjectifyFactory ofyFactory;
+
 	@Before
 	public void setUp() throws Exception {
+		when(ofyService.factory()).thenReturn(ofyFactory);
+		
 		ctrl = new SpotController(spotRepo, validationHelper, areaRepo, ofyService, eventBus);
 	}
 
@@ -99,7 +109,7 @@ public class SpotControllerTest {
 
 	@Test
 	public void testCreateSpots() throws Exception {
-		SpotsData spotsData = getTestSpotsData();
+		final SpotsData spotsData = getTestSpotsData();
 		
 		Spot spot = mock(Spot.class);
 		when(spotRepo.newEntity()).thenReturn(spot);
@@ -111,17 +121,36 @@ public class SpotControllerTest {
 		when(spotQuery.filter("trash",false)).thenReturn(spotQuery);
 		when(spotQuery.ancestor(businessKey)).thenReturn(spotQuery);
 		when(spotRepo.query()).thenReturn(spotQuery);
+		KeyRange<Spot> keyRange = mock(KeyRange.class);
+		
+		Iterator<Key<Spot>> iterator = mock(Iterator.class);
+		when(spotKey.getId()).thenReturn(1l);
+		when(iterator.next()).thenReturn(spotKey);
+		when(iterator.hasNext()).thenAnswer(new Answer<Boolean>() {
+			private int count = 0;
+			@Override
+			public Boolean answer(InvocationOnMock invocation) throws Throwable {
+				if(++count <=spotsData.getCount())
+					return true;
+				else
+					return false;
+			}
+		});
+		when(keyRange.iterator()).thenReturn(iterator );
+		
+		
+		when(ofyFactory.allocateIds(businessKey, Spot.class, spotsData.getCount())).thenReturn(keyRange);
 		
 		ctrl.createSpots(businessKey, spotsData);
 		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
 		InOrder inOrder = Mockito.inOrder(spot, spotRepo);
+		verify(spot, times(spotsData.getCount())).setId(1l);
 		verify(spot, times(spotsData.getCount())).setActive(true);
 		verify(spot, times(spotsData.getCount())).setArea(areaKey);
 		verify(spot, times(spotsData.getCount())).setBusiness(businessKey);
 		verify(spot, atLeast(1)).setName(String.format(SpotController.NAME_FORMAT, spotsData.getName(), spotsData.getStartNumber()));
 		verify(spot, atLeast(1)).setName(String.format(SpotController.NAME_FORMAT, spotsData.getName(), spotsData.getStartNumber() + spotsData.getCount()-1));
 		
-		inOrder.verify(spotRepo).saveOrUpdate(spotListCaptor.capture());
 		inOrder.verify(spot, times(spotsData.getCount())).generateBarcode();
 		inOrder.verify(spotRepo).saveOrUpdate(spotListCaptor.capture());
 		
