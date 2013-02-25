@@ -348,6 +348,19 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	}
 	
 	/**
+	 * Returns iterator for children of a parent entity.
+	 * 
+	 * @param parentKey Key of parent. Doesn't have to be the direct parent.
+	 * @return
+	 * 			List with children of given parent
+	 */
+	public <V> Iterable<T> iterateByParent( Key<V> parentKey) {
+		logger.info("{}, parent: {}",clazz, parentKey);
+		return ofy().query(clazz).ancestor(parentKey).fetch();
+	}
+	
+	
+	/**
 	 * Returns children of a parent entity.
 	 * Performs an ancestor query.
 	 * 

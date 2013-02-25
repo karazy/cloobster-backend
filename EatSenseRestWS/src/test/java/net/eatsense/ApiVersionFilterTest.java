@@ -1,6 +1,13 @@
 package net.eatsense;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.core.PathSegment;
+
 import net.eatsense.exceptions.ApiVersionException;
 
 import org.junit.Before;
@@ -31,6 +38,10 @@ public class ApiVersionFilterTest {
 	
 	@Test
 	public void testFilterWrongVersion() throws Exception {
+		PathSegment pathSegment = mock(PathSegment.class);
+		when(pathSegment.getPath()).thenReturn("anypath");
+		List<PathSegment> pathList = Arrays.asList(pathSegment );
+		when(request.getPathSegments()).thenReturn(pathList );
 		when(request.getHeaderValue("cloobster-api")).thenReturn("2");
 		thrown.expect(ApiVersionException.class);
 		filter.filter(request);
@@ -38,12 +49,32 @@ public class ApiVersionFilterTest {
 	
 	@Test
 	public void testFilterNoVersionSet() throws Exception {
+		PathSegment pathSegment = mock(PathSegment.class);
+		when(pathSegment.getPath()).thenReturn("anypath");
+		List<PathSegment> pathList = Arrays.asList(pathSegment );
+		when(request.getPathSegments()).thenReturn(pathList );
+
 		filter.filter(request);
 	}
 	
 	@Test
 	public void testFilter() throws Exception {
+		PathSegment pathSegment = mock(PathSegment.class);
+		when(pathSegment.getPath()).thenReturn("anypath");
+		List<PathSegment> pathList = Arrays.asList(pathSegment );
+		when(request.getPathSegments()).thenReturn(pathList );
 		when(request.getHeaderValue("cloobster-api")).thenReturn("1");
+		
+		filter.filter(request);
+	}
+	
+	@Test
+	public void testFilterSkipTasks() throws Exception {
+		PathSegment pathSegment = mock(PathSegment.class);
+		when(pathSegment.getPath()).thenReturn("tasks");
+		List<PathSegment> pathList = Arrays.asList(pathSegment );
+		when(request.getPathSegments()).thenReturn(pathList );
+		when(request.getHeaderValue("cloobster-api")).thenReturn("4");
 		
 		filter.filter(request);
 	}

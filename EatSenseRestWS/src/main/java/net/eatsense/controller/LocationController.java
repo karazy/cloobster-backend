@@ -207,7 +207,6 @@ public class LocationController {
 		
 		requestData.setId(request.getId());
 		
-		
 		eventBus.post(new NewCustomerRequestEvent(location, checkIn, request));								
 		return requestData;
 	}

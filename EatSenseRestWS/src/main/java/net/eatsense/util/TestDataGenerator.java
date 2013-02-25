@@ -229,6 +229,7 @@ public class TestDataGenerator {
 		if(spots.size() == 0) {
 			// UNPOSSIBLE!!
 			logger.error("No Spot found in Test Data! Stopping creation");
+			throw new ServiceException("No Spot found in Test Data! Stopping creation");
 		}
 		Spot testSpot = spots.get(random.nextInt(spots.size()));
 						
@@ -242,6 +243,8 @@ public class TestDataGenerator {
 		checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.PAYMENT_REQUEST, "Test Payment Request", null);
 		List<Order> orders = createTestOrders(checkIn, testSpot, OrderStatus.RECEIVED, 2);
 		createTestBill(checkIn, orders, business.getPaymentMethods().get(0), testSpot, CurrencyUnit.of(business.getCurrency()), false);
+		
+		
 		
 		return business;
 	}
