@@ -21,11 +21,11 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
 public class ApiVersionFilter implements ContainerRequestFilter {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private final static ImmutableSet<String> ignorePrefixes = ImmutableSet.of("tasks","_ah");
+	private final static ImmutableSet<String> ignorePrefixes = ImmutableSet.of("tasks","cron","_ah");
 	
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
-		if(ignorePrefixes.contains(request.getPathSegments().get(0).getPath())) {
+		if(!request.getPathSegments().isEmpty() && ignorePrefixes.contains(request.getPathSegments().get(0).getPath())) {
 			// Skip api version check for task queue access
 			return request;
 		}
@@ -40,7 +40,7 @@ public class ApiVersionFilter implements ContainerRequestFilter {
 		
 		if(!appApiVersion.equals(systemApiVersion)) {
 			String message = String.format("Incompatible API version. Request version is %s, but system version is %s", appApiVersion, systemApiVersion);
-			logger.error(message);
+			logger.warn(message);
 			throw new ApiVersionException(message,"error.version");
 		}
 			
