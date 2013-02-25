@@ -21,7 +21,7 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
 public class ApiVersionFilter implements ContainerRequestFilter {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private final static ImmutableSet<String> ignorePrefixes = ImmutableSet.of("tasks","cron","_ah");
+	private final static ImmutableSet<String> ignorePrefixes = ImmutableSet.of("uploads","download","cron","tasks","cron","_ah");
 	
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
