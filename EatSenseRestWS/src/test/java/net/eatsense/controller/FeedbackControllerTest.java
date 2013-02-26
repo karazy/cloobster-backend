@@ -20,6 +20,7 @@ import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.FeedbackQuestion;
+import net.eatsense.event.NewFeedbackEvent;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
@@ -35,9 +36,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.googlecode.objectify.Key;
@@ -75,11 +78,14 @@ public class FeedbackControllerTest {
 	@Mock
 	private SpotRepository spotRepo;
 
+	@Mock
+	private EventBus eventBus;
+
 	@Before
 	public void setUp() throws Exception {
 		Injector injector = Guice.createInjector(new ValidationModule());
 		
-		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(ValidationHelper.class), spotRepo);
+		ctrl = new FeedbackController(checkInRepo, feedbackFormRepo, feedbackRepo, injector.getInstance(ValidationHelper.class), spotRepo, eventBus);
 		
 		businessId = 1l;
 		when(business.getKey()).thenReturn(businessKey);
@@ -103,6 +109,13 @@ public class FeedbackControllerTest {
 		when(feedbackRepo.newEntity()).thenReturn(feedback );
 		ctrl.createFeedback(business, checkIn, testFeedbackData);
 		verify(feedbackRepo).saveOrUpdate(feedback);
+		
+		ArgumentCaptor<NewFeedbackEvent> eventCaptor = ArgumentCaptor.forClass(NewFeedbackEvent.class);
+		
+		verify(eventBus).post(eventCaptor.capture());
+		NewFeedbackEvent event = eventCaptor.getValue();
+		assertThat(event.getCheckIn(), is(checkIn));
+		assertThat(event.getFeedback(), is(feedback));
 		
 		assertThat(feedback.getAnswers(), is(testFeedbackData.getAnswers()));
 		assertThat(feedback.getBusiness(), is(businessKey));

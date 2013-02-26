@@ -6,11 +6,13 @@ import net.eatsense.domain.CheckIn;
 
 public class MultiUpdateEvent extends CheckInEvent {
 	
+	private final int entityCount;
 	private Optional<String> newCheckInStatus;
 	private Optional<String> newSpotStatus;
 
-	public MultiUpdateEvent(CheckIn checkIn) {
+	public MultiUpdateEvent(CheckIn checkIn, int entityCount) {
 		super(checkIn);
+		this.entityCount = entityCount;
 		newCheckInStatus = Optional.absent();
 		newSpotStatus = Optional.absent();
 	}
@@ -29,5 +31,9 @@ public class MultiUpdateEvent extends CheckInEvent {
 
 	public void setNewSpotStatus(String newSpotStatus) {
 		this.newSpotStatus = Optional.fromNullable(newSpotStatus);
+	}
+
+	public int getEntityCount() {
+		return entityCount;
 	}
 }

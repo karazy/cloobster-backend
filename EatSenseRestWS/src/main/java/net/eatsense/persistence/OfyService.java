@@ -1,5 +1,6 @@
 package net.eatsense.persistence;
 
+import net.eatsense.counter.Counter;
 import net.eatsense.domain.Channel;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.Subscription;
@@ -29,6 +30,7 @@ public class OfyService {
 		register(Subscription.class);
 		register(Channel.class);
 		register(CustomerProfile.class);
+		register(Counter.class);
 	}
 	
 	@Inject

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -21,6 +22,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.event.NewFeedbackEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.CheckInRepository;
@@ -38,15 +40,17 @@ public class FeedbackController {
 	private final ValidationHelper validator;
 	private final CheckInRepository checkInRepo;
 	private final SpotRepository spotRepo;
+	private final EventBus eventBus;
 
 	@Inject
-	public FeedbackController(CheckInRepository checkInRepo, FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, ValidationHelper validator, SpotRepository spotRepo) {
+	public FeedbackController(CheckInRepository checkInRepo, FeedbackFormRepository feedbackFormRepo, FeedbackRepository feedbackRepo, ValidationHelper validator, SpotRepository spotRepo, EventBus eventBus) {
 		super();
 		this.checkInRepo = checkInRepo;
 		this.validator = validator;
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.feedbackRepo = feedbackRepo;
 		this.spotRepo = spotRepo;
+		this.eventBus = eventBus;
 	}
 	
 	/**
@@ -107,6 +111,8 @@ public class FeedbackController {
 		// Save the Key with the CheckIn so that we can find it quicker.
 		checkIn.setFeedback(key );
 		checkInRepo.saveOrUpdate(checkIn);
+		
+		eventBus.post(new NewFeedbackEvent(checkIn, feedback));
 		
 		return feedback;
 	}
