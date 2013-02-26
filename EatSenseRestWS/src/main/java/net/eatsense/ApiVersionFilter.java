@@ -1,8 +1,5 @@
 package net.eatsense;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import net.eatsense.exceptions.ApiVersionException;
 
 import org.slf4j.Logger;
