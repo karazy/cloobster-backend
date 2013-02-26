@@ -25,6 +25,11 @@ public class ApiVersionFilter implements ContainerRequestFilter {
 	
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
+		if(request.getHeaderValue("X-AppEngine-TaskName") != null || request.getHeaderValue("X-AppEngine-Cron") != null) {
+			// Skip api version check for task queue and cron job requests
+			return request;
+		}
+		
 		if(!request.getPathSegments().isEmpty() && ignorePrefixes.contains(request.getPathSegments().get(0).getPath())) {
 			// Skip api version check for task queue access
 			return request;
