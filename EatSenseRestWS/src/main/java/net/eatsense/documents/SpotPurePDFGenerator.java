@@ -28,18 +28,21 @@ import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ServiceException;
+import net.eatsense.persistence.SpotRepository;
 import net.eatsense.service.QRCodeGeneratorService;
 
-public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
+public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final ByteArrayOutputStream byteOutput;
 	private final SpotPurePDFConfiguration pdfConfig;
 	private Font font;
 	private final QRCodeGeneratorService qrImageService;
+	private final SpotRepository spotRepo;
 	
 	@Inject
-	public SpotPurePDFGenerator(Configuration config, QRCodeGeneratorService qrImageService) {
+	public SpotPurePDFGenerator(Configuration config, QRCodeGeneratorService qrImageService, SpotRepository spotRepo) {
 		this.qrImageService = qrImageService;
+		this.spotRepo = spotRepo;
 		byteOutput = new ByteArrayOutputStream();
 		
 		this.pdfConfig = config.getSpotPurePdfConfiguration();
@@ -52,13 +55,14 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 	}
 
 	@Override
-	public byte[] generate(Iterable<Spot> entities, Document document) {
-		checkNotNull(entities, "entities was null");
+	public byte[] generate(Document document) {
 		checkNotNull(document, "document was null");
 		
-		if(!entities.iterator().hasNext()) {
-			logger.error("No Spot entities supplied for PDF generation, for Document with key={}", document.getKey());
-			throw new ServiceException("Internal Error, no Spot entities supplied for PDF generation.");
+		Collection<Spot> entities = spotRepo.getByKeys(spotRepo.getKeys(document.getBusiness(), document.getEntityIds()));
+		
+		if(entities.isEmpty()) {
+			logger.error("No Spot entities found for PDF generation, for {}", document.getKey());
+			throw new ServiceException("Internal Error, no Spots found for PDF generation.");
 		}
 		
 		PDF pdf;

@@ -38,6 +38,9 @@ public class Document extends GenericEntity<Document>{
 	@Unindexed
 	private List<Long> entityIds;
 	
+	@Unindexed
+	private List<String> entityNames;
+	
 	private BlobKey blobKey;
 
 	@Transient
@@ -142,5 +145,13 @@ public class Document extends GenericEntity<Document>{
 			this.setDirty(true);
 			this.entityIds = entityIds;
 		}
+	}
+
+	public List<String> getEntityNames() {
+		return entityNames;
+	}
+
+	public void setEntityNames(List<String> entityNames) {
+		this.entityNames = entityNames;
 	}	
 }
