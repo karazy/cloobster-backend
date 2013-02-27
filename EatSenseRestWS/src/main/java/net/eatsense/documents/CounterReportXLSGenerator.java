@@ -81,7 +81,7 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 			for (Counter counter : entities) {
 				Area area = areaMap.get(counter.getAreaId());
 				if(area == null) {
-					area = areaRepo.getById(document.getBusiness(), counter.getLocationId());
+					area = areaRepo.getById(document.getBusiness(), counter.getAreaId());
 				}
 				
 				addCells(sheet, row, counter, location.getName(), area.getName());
@@ -117,7 +117,7 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 		sheet.addCell(valueCell);
 		Number dayCell = new Number(4, row, calendar.get(Calendar.DAY_OF_MONTH));
 		sheet.addCell(dayCell);
-		Number monthCell = new Number(5, row, calendar.get(Calendar.MONTH));
+		Number monthCell = new Number(5, row, calendar.get(Calendar.MONTH)+1);
 		sheet.addCell(monthCell);
 		Number yearCell = new Number(6, row, calendar.get(Calendar.YEAR));
 		sheet.addCell(yearCell);

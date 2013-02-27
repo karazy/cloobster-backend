@@ -32,6 +32,7 @@ import org.eclipse.jetty.http.AbstractGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -175,6 +176,20 @@ public class DocumentController {
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException("No Document found with id="+id);
 		}
+	}
+	
+	/**
+	 * @param document
+	 * @return the mime type of the processed document
+	 */
+	public String getContentType(Document document) {
+		if(document.getStatus() != DocumentStatus.COMPLETE) {
+			throw new ServiceException("Can only retrieve mime type for completed Documents");
+		}
+		
+		BlobInfoFactory blobInfoFact = new BlobInfoFactory();
+		
+		return blobInfoFact.loadBlobInfo(document.getBlobKey()).getContentType();
 	}
 	
 	/**
