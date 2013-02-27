@@ -85,6 +85,7 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 			}
 		} catch (Exception e) {
 			logger.error("Error during Page generation for Document with key={}", document.getKey());
+			logger.error("Exception", e);
 			throw new ServiceException("Internal Error while creating PDF page", e);
 		}
 		
@@ -92,6 +93,7 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 			pdf.flush();
 		} catch (Exception e) {
 			logger.error("Error while flushing PDF output for Document with key={}", document.getKey());
+			logger.error("Exception", e);
 			throw new ServiceException("Internal Error while generating PDF output", e);
 		}
 		

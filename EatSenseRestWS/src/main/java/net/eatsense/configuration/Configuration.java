@@ -85,6 +85,7 @@ public class Configuration {
 		config.setTextPositionX(300);
 		config.setTextPositionY(450);
 		config.setFontSize(10);
+		config.setQrImageDPI(300);
 		
 		return config;
 	}
