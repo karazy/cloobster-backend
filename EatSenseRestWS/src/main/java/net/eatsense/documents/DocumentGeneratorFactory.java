@@ -1,6 +1,5 @@
 package net.eatsense.documents;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import net.eatsense.counter.Counter;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Spot;
@@ -27,8 +26,6 @@ public class DocumentGeneratorFactory {
 		this.spotPurePDFGeneratorProvider = spotPurePDFGeneratorProvider;
 		this.counterReportXLSGenerator = counterReportXLSGenerator;
 	}
-
-
 
 	public AbstractDocumentGenerator createForDocument(Document document) {
 		AbstractDocumentGenerator generator = null;	

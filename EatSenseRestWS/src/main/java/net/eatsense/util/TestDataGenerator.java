@@ -3,6 +3,7 @@ package net.eatsense.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -14,6 +15,9 @@ import java.util.Random;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.ImportController;
+import net.eatsense.counter.CounterRepository;
+import net.eatsense.counter.CounterService;
+import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Bill;
@@ -80,15 +84,17 @@ public class TestDataGenerator {
 	private static final String TEST_USERLOGIN = "cusertest";
 
 	private final BillController billCtrl;
+	private final CounterService counterService;
 	
 	@Inject
-	public TestDataGenerator(BillController billCtrl, ImportController importController, InfoPageGenerator infoPageGenerator, OfyService ofyService, ProductRepository productRepo, OrderRepository orderRepo, AccountRepository accountRepo, ObjectMapper mapper) {
+	public TestDataGenerator(BillController billCtrl, ImportController importController, InfoPageGenerator infoPageGenerator, OfyService ofyService, ProductRepository productRepo, OrderRepository orderRepo, AccountRepository accountRepo, ObjectMapper mapper, CounterService counterService) {
 		this.billCtrl = billCtrl;
 		this.importController = importController;
 		this.infoPageGenerator = infoPageGenerator;
 		this.productRepo = productRepo;
 		this.accountRepo = accountRepo;
 		this.mapper = mapper;
+		this.counterService = counterService;
 		this.ofy = ofyService.ofy();
 		this.orderRepo = orderRepo;
 	}
@@ -244,11 +250,30 @@ public class TestDataGenerator {
 		List<Order> orders = createTestOrders(checkIn, testSpot, OrderStatus.RECEIVED, 2);
 		createTestBill(checkIn, orders, business.getPaymentMethods().get(0), testSpot, CurrencyUnit.of(business.getCurrency()), false);
 		
-		
+		List<Area> areas = importController.getAreas();
+		for (Area area : areas) {
+			createKPIData(area);
+		}
 		
 		return business;
 	}
 	
+	private void createKPIData(Area area) {
+		Calendar calendar = Calendar.getInstance();
+		// Create data for 30 days in the past
+		for (int i = 0; i < 30; i++) {
+			Random rand = new Random();
+			counterService.loadAndIncrementCounter("checkins", PeriodType.DAY, calendar.getTime(), area.getBusiness().getId(), area.getId(), rand.nextInt(11));
+			counterService.loadAndIncrementCounter("orders-placed", PeriodType.DAY, calendar.getTime(), area.getBusiness().getId(), area.getId(), rand.nextInt(51));
+			counterService.loadAndIncrementCounter("feedback", PeriodType.DAY, calendar.getTime(), area.getBusiness().getId(), area.getId(), rand.nextInt(6));
+			counterService.loadAndIncrementCounter("customer-requests", PeriodType.DAY, calendar.getTime(), area.getBusiness().getId(), area.getId(), rand.nextInt(11));
+			
+			calendar.add(Calendar.DAY_OF_MONTH, -1);
+		}
+	}
+
+
+
 	private Bill createTestBill(CheckIn checkIn, List<Order> orders, PaymentMethod method, Spot spot, CurrencyUnit currencyUnit, boolean cleared) {
 		Bill bill = new Bill();
 		bill.setPaymentMethod(method);
