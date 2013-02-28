@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -505,6 +507,40 @@ public class MenuController {
 		}
 		
 		return result.isDirty();
+	}
+	
+	/**
+	 * Update multiple products at once.
+	 * 
+	 * @return List containing the updated Product entities.
+	 */
+	public List<Product> getAndUpdateProducts(Key<Business> locationKey, List<Long> ids, Boolean active, Boolean special, Boolean hideInDashboard) {
+		checkNotNull(locationKey, "locationKey was null");
+		checkNotNull(ids, "ids were null");
+
+		if (ids.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Collection<Product> products = productRepo.getByKeys(productRepo.getKeys(locationKey,
+				ids));
+
+		// De-/Activate all spots
+		for (Product product : products) {
+			if(active != null) {
+				product.setActive(active);
+			}
+			if(special != null) {
+				product.setSpecial(special);
+			}
+			if(hideInDashboard != null) {
+				product.setHideInDashboard(hideInDashboard);
+			}
+		}
+
+		productRepo.saveOrUpdate(products);
+
+		return new ArrayList<Product>(products);
 	}
 	
 	/**

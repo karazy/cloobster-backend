@@ -6,11 +6,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Spot;
 import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.Validate;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.google.common.base.Function;
 
 public class ProductDTO {
 //	@NotNull
@@ -197,6 +200,14 @@ public class ProductDTO {
 	public void setHideInDashboard(boolean hideInDashboard) {
 		this.hideInDashboard = hideInDashboard;
 	}
+	
+	public final static Function<Product, ProductDTO> toDTO = 
+			new Function<Product, ProductDTO>() {
+				@Override
+				public ProductDTO apply(Product input) {
+					return new ProductDTO(input);
+				}
+		    };
 }
 
 

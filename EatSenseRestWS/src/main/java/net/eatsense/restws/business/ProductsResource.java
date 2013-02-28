@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 
@@ -22,6 +23,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.ProductDTO;
+import net.eatsense.representation.ProductsData;
 
 /**
  * Contains method to create update and query for Products with a business account.
@@ -87,6 +89,17 @@ public class ProductsResource {
 		return menuCtrl.createProduct(business, productData);
 	}
 	
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public List<ProductDTO> modifyProducts(ProductsData productsData) {
+		return Lists.transform(menuCtrl.getAndUpdateProducts(business.getKey(),
+				productsData.getIds(), productsData.getActive(),
+				productsData.getSpecial(), productsData.getHideInDashboard()),
+				ProductDTO.toDTO);
+	}
+	
 	@GET
 	@Path("{id}")
 	@Produces("application/json; charset=UTF-8")
@@ -121,9 +134,9 @@ public class ProductsResource {
 	}
 	
 	@POST
+	@Path("{id}/image")
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
-	@Path("{id}/image")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ImageDTO updateImage(@PathParam("id") long id, ImageDTO imageData) {
 		return menuCtrl.updateProductImage(account, menuCtrl.getProduct(business.getKey(), id), imageData);
