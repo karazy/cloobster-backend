@@ -34,6 +34,8 @@ public class InfoPageDTO {
 					: null;
 			imageUrl = (image != null) ? image.getUrl()
 					: null;
+			
+			hideInDashboard = infoPage.isHideInDashboard();
 		}
 	}
 	
