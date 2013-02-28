@@ -155,6 +155,26 @@ public class InfoPageControllerTest {
 	}
 	
 	@Test
+	public void testUpdateInfoPageHideInDashboard() throws Exception {
+		InfoPageDTO infoPageData = getTestInfoPageData();
+		
+		InfoPage infoPage = new InfoPage();
+		
+		infoPage.setBusiness(businessKey);
+		infoPage.setHtml(infoPageData.getHtml());
+		infoPage.setId(1l);
+		infoPage.setShortText(infoPageData.getShortText());
+		infoPage.setTitle(infoPageData.getTitle());
+		infoPage.setHideInDashboard(true);
+		// Reset dirty flag for test
+		infoPage.setDirty(false);
+		ctrl.update(infoPage, infoPageData);
+		
+		verify(infoPageRepo).saveOrUpdate(infoPage);
+		assertThat(infoPage.isHideInDashboard(), is(false));
+	}
+	
+	@Test
 	public void testGetAllLanguageAwareWithAcceptAll() throws Exception {
 		when(localeProvider.getAcceptableLanguage()).thenReturn(new Locale("*"));
 		ctrl.getAll(businessKey);
@@ -276,6 +296,7 @@ public class InfoPageControllerTest {
 		dto.setHtml("Test html");
 		dto.setShortText("short text");
 		dto.setTitle("Title");
+		dto.setHideInDashboard(false);
 		
 		return dto;
 	}

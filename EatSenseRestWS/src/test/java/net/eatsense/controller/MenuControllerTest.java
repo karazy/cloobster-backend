@@ -813,6 +813,7 @@ public class MenuControllerTest {
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
 		product.setLongDesc("another long desc");
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ProductDTO result = ctr.updateProduct(product, testProductData);
@@ -841,6 +842,7 @@ public class MenuControllerTest {
 		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc("another short desc");
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ProductDTO result = ctr.updateProduct(product, testProductData);
@@ -871,6 +873,7 @@ public class MenuControllerTest {
 		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey2);
 		product.setShortDesc(testProductData.getShortDesc());
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ctr.updateProduct(product, testProductData);
@@ -899,6 +902,7 @@ public class MenuControllerTest {
 		product.setPrice(999);
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ProductDTO result = ctr.updateProduct(product, testProductData);
@@ -927,6 +931,7 @@ public class MenuControllerTest {
 		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ProductDTO result = ctr.updateProduct(product, testProductData);
@@ -965,6 +970,7 @@ public class MenuControllerTest {
 		product.setMenu(menuKey);
 		product.setChoices(Collections.<Key<Choice>>emptyList());
 		product.setShortDesc(testProductData.getShortDesc());
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ProductDTO result = ctr.updateProduct(product, testProductData);
@@ -993,6 +999,7 @@ public class MenuControllerTest {
 		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
 		product.setMenu(menuKey);
 		product.setShortDesc(testProductData.getShortDesc());
+		product.setActive(testProductData.isActive());
 		product.setDirty(false);
 				
 		ProductDTO result = ctr.updateProduct(product, testProductData);
@@ -1000,6 +1007,66 @@ public class MenuControllerTest {
 		
 		assertThat(product.getName(), is(testProductData.getName()));
 		assertThat(result.getName(), is(testProductData.getName()));
+	}
+	
+	@Test
+	public void testUpdateProductSpecial() throws Exception {
+		newSetUp();
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Menu> menuKey = mock (Key.class);
+			
+		ProductDTO testProductData = getTestProductData();
+		when(mr.getKey(businessKey, testProductData.getMenuId())).thenReturn(menuKey);
+		
+		Product product = new Product();
+		product.setBusiness(businessKey);
+		product.setLongDesc(testProductData.getLongDesc());
+		product.setName(testProductData.getName());
+		product.setOrder(testProductData.getOrder());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
+		product.setMenu(menuKey);
+		product.setActive(testProductData.isActive());
+		product.setShortDesc(testProductData.getShortDesc());
+		product.setSpecial(true);
+		product.setDirty(false);
+				
+		ProductDTO result = ctr.updateProduct(product, testProductData);
+		verify(pr).saveOrUpdate(product);
+		
+		assertThat(product.isSpecial(), is(false));
+		assertThat(result.isSpecial(), is(false));
+	}
+	
+	@Test
+	public void testUpdateProductHideInDashboard() throws Exception {
+		newSetUp();
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock (Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Menu> menuKey = mock (Key.class);
+			
+		ProductDTO testProductData = getTestProductData();
+		when(mr.getKey(businessKey, testProductData.getMenuId())).thenReturn(menuKey);
+		
+		Product product = new Product();
+		product.setBusiness(businessKey);
+		product.setLongDesc(testProductData.getLongDesc());
+		product.setName("another name");
+		product.setOrder(testProductData.getOrder());
+		product.setPrice(Money.of(CurrencyUnit.EUR,testProductData.getPrice()).getAmountMinorInt());
+		product.setMenu(menuKey);
+		product.setShortDesc(testProductData.getShortDesc());
+		product.setActive(testProductData.isActive());
+		product.setHideInDashboard(true);
+		product.setDirty(false);
+				
+		ProductDTO result = ctr.updateProduct(product, testProductData);
+		verify(pr).saveOrUpdate(product);
+		
+		assertThat(product.isHideInDashboard(), is(false));
+		assertThat(result.isHideInDashboard(), is(false));
 	}
 	
 	@Test

@@ -230,6 +230,9 @@ public class Product extends GenericEntity<Product> {
 
 
 	public void setHideInDashboard(boolean hideInDashboard) {
-		this.hideInDashboard = hideInDashboard;
+		if(!Objects.equal(this.hideInDashboard, hideInDashboard)) {
+			this.setDirty(true);
+			this.hideInDashboard = hideInDashboard;
+		}
 	}
 }

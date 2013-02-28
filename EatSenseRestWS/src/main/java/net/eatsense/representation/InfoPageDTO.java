@@ -10,6 +10,7 @@ public class InfoPageDTO {
 	private String html;
 	private String imageUrl;
 	private ImageDTO image;
+	private boolean hideInDashboard;
 	
 	public ImageDTO getImage() {
 		return image;
@@ -67,5 +68,13 @@ public class InfoPageDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public boolean isHideInDashboard() {
+		return hideInDashboard;
+	}
+
+	public void setHideInDashboard(boolean hideInDashboard) {
+		this.hideInDashboard = hideInDashboard;
 	}	
 }

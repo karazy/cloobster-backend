@@ -26,6 +26,8 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	@Parent
 	private Key<Business> business;
 	
+	private boolean hideInDashboard;
+	
 	@Override
 	public Key<InfoPage> getKey() {
 		return Key.create(business, InfoPage.class, getId());
@@ -88,5 +90,16 @@ public class InfoPage extends GenericEntity<InfoPage> {
 
 	public void setImages(List<ImageDTO> images) {
 		this.images = images;
+	}
+
+	public boolean isHideInDashboard() {
+		return hideInDashboard;
+	}
+
+	public void setHideInDashboard(boolean hideInDashboard) {
+		if(!Objects.equal(this.hideInDashboard, hideInDashboard)) {
+			this.setDirty(true);
+			this.hideInDashboard = hideInDashboard;
+		}
 	}
 }
