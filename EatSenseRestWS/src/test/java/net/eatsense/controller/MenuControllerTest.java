@@ -3,10 +3,12 @@ package net.eatsense.controller;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +54,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.verification.VerificationMode;
 
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.datastore.Blob;
@@ -91,6 +95,9 @@ public class MenuControllerTest {
 	private ImageController imageCtrl;
 
 	private Transformer trans;
+
+	@Mock
+	private Key<Business> locationKey;
 
 	@Before
 	public void setUp() throws Exception {
@@ -1172,5 +1179,61 @@ public class MenuControllerTest {
 				
 		}
 	}
-
+	
+	@Test
+	public void testGetAndUpdateProductsSetActive() throws Exception {
+		newSetUp();
+		
+		List<Long> ids = Arrays.asList(1l,2l,3l);
+		Product product = mock(Product.class);
+		List<Product> products = Arrays.asList(product, product, product);
+		Key<Product> productKey = mock(Key.class);
+		List<Key<Product>> productKeys = Arrays.asList(productKey , productKey,productKey);
+		
+		when(pr.getKeys(locationKey, ids)).thenReturn(productKeys);
+		when(pr.getByKeys(productKeys)).thenReturn(products);
+		
+		ctr.getAndUpdateProducts(locationKey , ids , true, null, null);
+		
+		verify(product, times(ids.size())).setActive(true);
+		verify(pr).saveOrUpdate(products);
+	}
+	
+	@Test
+	public void testGetAndUpdateProductsSetSpecial() throws Exception {
+		newSetUp();
+		
+		List<Long> ids = Arrays.asList(1l,2l,3l);
+		Product product = mock(Product.class);
+		List<Product> products = Arrays.asList(product, product, product);
+		Key<Product> productKey = mock(Key.class);
+		List<Key<Product>> productKeys = Arrays.asList(productKey , productKey,productKey);
+		
+		when(pr.getKeys(locationKey, ids)).thenReturn(productKeys);
+		when(pr.getByKeys(productKeys)).thenReturn(products);
+		
+		ctr.getAndUpdateProducts(locationKey , ids , null, true, null);
+		
+		verify(product, times(ids.size())).setSpecial(true);
+		verify(pr).saveOrUpdate(products);
+	}
+	
+	@Test
+	public void testGetAndUpdateProductsSetHideInDashboard() throws Exception {
+		newSetUp();
+		
+		List<Long> ids = Arrays.asList(1l,2l,3l);
+		Product product = mock(Product.class);
+		List<Product> products = Arrays.asList(product, product, product);
+		Key<Product> productKey = mock(Key.class);
+		List<Key<Product>> productKeys = Arrays.asList(productKey , productKey,productKey);
+		
+		when(pr.getKeys(locationKey, ids)).thenReturn(productKeys);
+		when(pr.getByKeys(productKeys)).thenReturn(products);
+		
+		ctr.getAndUpdateProducts(locationKey , ids , null, null, true);
+		
+		verify(product, times(ids.size())).setHideInDashboard(true);
+		verify(pr).saveOrUpdate(products);
+	}
 }
