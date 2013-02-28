@@ -411,15 +411,7 @@ public class MenuController {
 		checkNotNull(product, "product was null");
 		checkNotNull(productData, "productData was null");
 		
-		Set<ConstraintViolation<ProductDTO>> violationSet = validator.validate(productData, Default.class);
-		if(!violationSet.isEmpty()) {
-			StringBuilder stringBuilder = new StringBuilder("validation errors:");
-			for (ConstraintViolation<ProductDTO> violation : violationSet) {
-				// Format the message like: '"{property}" {message}.'
-				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
-			}
-			throw new ValidationException(stringBuilder.toString());
-		}
+		validator.validate(productData, Default.class);
 		
 		if(productData.getMenuId() != null)
 			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
@@ -432,6 +424,7 @@ public class MenuController {
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
 		product.setSpecial(productData.isSpecial());
+		product.setHideInDashboard(productData.isHideInDashboard());
 		
 		if(productData.getChoices() != null) {
 			// Update Choices

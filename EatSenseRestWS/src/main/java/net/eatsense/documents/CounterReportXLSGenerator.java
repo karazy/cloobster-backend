@@ -97,8 +97,6 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 			throw new ServiceException("Error generating XLS output.");
 		}
 		
-		
-		
 		return byteOutput.toByteArray();
 	}
 
@@ -122,5 +120,4 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 		Number yearCell = new Number(6, row, calendar.get(Calendar.YEAR));
 		sheet.addCell(yearCell);
 	}
-
 }

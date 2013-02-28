@@ -44,6 +44,10 @@ public class ProductDTO {
 
 	private String imageUrl;
 	
+	private boolean checked;
+	
+	private boolean hideInDashboard;
+	
 	public ProductDTO() {
 		super();
 	}
@@ -70,6 +74,7 @@ public class ProductDTO {
 		this.order = product.getOrder();
 		this.active = product.isActive();
 		this.setSpecial(product.isSpecial());
+		this.hideInDashboard = product.isHideInDashboard();
 	}
 
 	public String getName() {
@@ -175,6 +180,22 @@ public class ProductDTO {
 
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
+	}
+
+	public boolean isChecked() {
+		return checked;
+	}
+
+	public void setChecked(boolean checked) {
+		this.checked = checked;
+	}
+
+	public boolean isHideInDashboard() {
+		return hideInDashboard;
+	}
+
+	public void setHideInDashboard(boolean hideInDashboard) {
+		this.hideInDashboard = hideInDashboard;
 	}
 }
 
