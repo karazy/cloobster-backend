@@ -17,6 +17,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import net.eatsense.counter.CounterRepository;
+import net.eatsense.documents.AbstractDocumentGenerator;
+import net.eatsense.documents.CounterReportXLSGenerator;
 import net.eatsense.documents.DocumentGeneratorFactory;
 import net.eatsense.documents.SpotPurePDFGenerator;
 import net.eatsense.domain.Business;
@@ -288,9 +291,6 @@ public class DocumentControllerTest {
 		// mock Factory
 		when(generatorFactory.createForDocument(doc)).thenReturn(spotPdfGenerator);
 		
-		// mock repository
-		when(spotRepo.getKeys(businessKey, entityIds)).thenReturn(spotKeys );
-		when(spotRepo.getByKeys(spotKeys)).thenReturn(spots);
 		byte[] bytes = {127,127,127,0};
 		
 		when(spotPdfGenerator.generate(doc)).thenReturn(bytes );

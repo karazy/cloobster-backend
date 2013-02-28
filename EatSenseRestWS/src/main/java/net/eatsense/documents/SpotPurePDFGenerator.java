@@ -101,6 +101,17 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 	}
 	
 	/**
+	 * @param pdf
+	 * @param inputStream
+	 * @param type
+	 * @return
+	 * @throws Exception
+	 */
+	Image makeImage(PDF pdf, InputStream inputStream, int type) throws Exception {
+		return new Image(pdf, inputStream , type);
+	}
+	
+	/**
 	 * Generate one PDF page with Data from the Spot entity.
 	 * 
 	 * @param pdf

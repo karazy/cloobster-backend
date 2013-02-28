@@ -74,7 +74,7 @@ public class Configuration {
 	 * 
 	 * @return
 	 */
-	private SpotPurePDFConfiguration getDefaultSpotPurePdfConfiguration() {
+	public static SpotPurePDFConfiguration getDefaultSpotPurePdfConfiguration() {
 		SpotPurePDFConfiguration config = new SpotPurePDFConfiguration();
 		// A6 paper size
 		config.setPageWidth(297);
