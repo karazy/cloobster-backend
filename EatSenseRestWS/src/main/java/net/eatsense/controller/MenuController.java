@@ -129,6 +129,27 @@ public class MenuController {
 		return menuDTOs;
 	}
 	
+	public List<MenuDTO> getMenusForArea(Key<Business> locationKey, long areaId) {
+		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
+		
+		List<Menu> menus;
+		
+		if(areaId == 0) {
+			menus = menuRepo.getActiveMenusForBusiness(locationKey);
+		}
+		else {
+			menus = menuRepo.getActiveMenusForBusinessAndArea(locationKey, areaId);
+		}
+		
+		for ( Menu menu : menus) {
+			MenuDTO menuDTO = new MenuDTO(menu);
+ 
+			menuDTOs.add(menuDTO);
+		}
+		
+		return menuDTOs;
+	}
+	
 	/**
 	 * @param business 
 	 * @return List of transfer objects without embedded Products.
@@ -137,6 +158,7 @@ public class MenuController {
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		if(business == null )
 			return menuDTOs;
+		
 		List<Menu> menus = menuRepo.getByParent( business );
 		
 		for ( Menu menu : menus) {
