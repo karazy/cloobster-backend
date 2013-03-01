@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.capabilities.CapabilitiesPb.CapabilityConfig.Status;
@@ -90,19 +91,24 @@ public class DocumentsResource {
 	@GET
 	@Path("{id}/download")
 	public Response getDownload(@Context HttpServletResponse response, @PathParam("id") Long id) {
-		BlobKey blobKey = docCtrl.get(business.getKey(), id).getBlobKey();
+		Document document = docCtrl.get(business.getKey(), id);
+		BlobKey blobKey = document.getBlobKey();
+		
 		if(blobKey == null) {
 			throw new NotFoundException("No Download available yet.");
 		}
 		
 		try {
+			
 			blobStoreService.serve(blobKey, response);
 		} catch (IOException e) {
 			logger.error("IO error trying to serve blob={]", blobKey);
 			throw new ServiceException("Internal error while trying to serve download.");
 		}
-		String mediaType = "application/pdf";		
-		return Response.ok().type(mediaType).build();
+		
+		response.setHeader("Content-Disposition", "attachment; filename="+document.getName()+ "."+document.getType());
+			
+		return Response.ok().type(docCtrl.getContentType(document)).build();
 	}
 	
 	@POST

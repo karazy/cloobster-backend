@@ -22,6 +22,7 @@ public class DocumentDTO {
 	private String representation;
 	private Date createDate;
 	private List<Long> ids;
+	private List<String> names;
 	
 	public DocumentDTO() {
 	}
@@ -101,6 +102,14 @@ public class DocumentDTO {
 
 	public void setRepresentation(String representation) {
 		this.representation = representation;
+	}
+
+	public List<String> getNames() {
+		return names;
+	}
+
+	public void setNames(List<String> names) {
+		this.names = names;
 	}
 	
 	

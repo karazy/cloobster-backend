@@ -17,6 +17,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import net.eatsense.counter.CounterRepository;
+import net.eatsense.documents.AbstractDocumentGenerator;
+import net.eatsense.documents.CounterReportXLSGenerator;
+import net.eatsense.documents.DocumentGeneratorFactory;
 import net.eatsense.documents.SpotPurePDFGenerator;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
@@ -63,7 +67,7 @@ public class DocumentControllerTest {
 	@Mock
 	private FileServiceHelper fileService;
 	@Mock
-	private SpotPurePDFGenerator generator;
+	private SpotPurePDFGenerator spotPdfGenerator;
 
 	@Mock
 	private List<Key<Spot>> spotKeys;
@@ -71,11 +75,18 @@ public class DocumentControllerTest {
 	@Mock
 	private Collection<Spot> spots;
 
+	@Mock
+	private Provider<DocumentGeneratorFactory> factoryProvider;
+
+	@Mock
+	private DocumentGeneratorFactory generatorFactory;
+
 	@Before
 	public void setUp() throws Exception {
-		ctrl = new DocumentController(docRepo, validationHelper, spotPurePDFGeneratorProvider, spotRepoProvider, fileService);
+		ctrl = new DocumentController(docRepo, validationHelper, fileService, factoryProvider);
 		when(spotRepoProvider.get()).thenReturn(spotRepo);
-		when(spotPurePDFGeneratorProvider.get()).thenReturn(generator);
+		when(spotPurePDFGeneratorProvider.get()).thenReturn(spotPdfGenerator);
+		when(factoryProvider.get()).thenReturn(generatorFactory);
 	}
 
 	/** 
@@ -266,6 +277,9 @@ public class DocumentControllerTest {
 	
 	@Test
 	public void testProcessAndSaveDocumentSpotPurePDF() throws Exception {
+		
+		
+		// mock Document
 		Document doc = mock(Document.class);
 		when(doc.getEntity()).thenReturn(Spot.class.getName());
 		when(doc.getRepresentation()).thenReturn("pure");
@@ -274,14 +288,15 @@ public class DocumentControllerTest {
 		when(doc.getName()).thenReturn(docName);
 		List<Long> entityIds = Arrays.asList(1l,2l,3l);
 		when(doc.getEntityIds()).thenReturn(entityIds );
-		when(spotRepo.getKeys(businessKey, entityIds)).thenReturn(spotKeys );
-		when(spotRepo.getByKeys(spotKeys)).thenReturn(spots);
+		// mock Factory
+		when(generatorFactory.createForDocument(doc)).thenReturn(spotPdfGenerator);
+		
 		byte[] bytes = {127,127,127,0};
 		
-		when(generator.generate(spots, doc)).thenReturn(bytes );
+		when(spotPdfGenerator.generate(doc)).thenReturn(bytes );
 		String mimeType = "mimeType";
 
-		when(generator.getMimeType()).thenReturn(mimeType);
+		when(spotPdfGenerator.getMimeType()).thenReturn(mimeType);
 		BlobKey blobKey = new BlobKey("TESTKEY");
 		when(fileService.saveNewBlob(docName, mimeType, bytes)).thenReturn(blobKey );
 		

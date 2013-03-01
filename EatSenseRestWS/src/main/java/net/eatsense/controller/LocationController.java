@@ -369,7 +369,7 @@ public class LocationController {
 		
 		
 		business.setPaymentMethods(new ArrayList<PaymentMethod>() );
-		business.getPaymentMethods().add(new PaymentMethod("Bar"));
+		business.getPaymentMethods().add(new PaymentMethod("Rechnung"));
 		business.setCompany(account.getCompany());
 		
 		

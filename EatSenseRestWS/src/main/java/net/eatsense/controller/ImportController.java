@@ -215,6 +215,7 @@ public class ImportController {
 		importedProducts.clear();
 		menuMap.clear();
 		spots.clear();
+		getAreas().clear();
 		
 		logger.info("New import request recieved for business: " + businessData.getName() );
 		Business business = createAndSaveBusiness(businessData.getName(), businessData.getDescription(), businessData.getAddress(), businessData.getCity(), businessData.getPostcode(), businessData.getPayments(), companyKey );
@@ -327,6 +328,9 @@ public class ImportController {
 		area.setActive(true);
 		area.setMenus(menuKeys);
 		area.setBarcodeRequired(barcodeRequired);
+		// Add Area to in memory list
+		getAreas().add(area);
+		
 		Key<Area> kA = areaRepo.saveOrUpdate(area);
 		
 		logger.info("Created new area with id: " + kA.getId());
@@ -475,4 +479,7 @@ public class ImportController {
 		billRepo.ofy().delete(billRepo.getAllKeys());
 	}
 
+	public List<Area> getAreas() {
+		return areas;
+	}
 }

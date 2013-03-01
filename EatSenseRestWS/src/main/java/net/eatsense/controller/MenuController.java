@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -127,6 +129,27 @@ public class MenuController {
 		return menuDTOs;
 	}
 	
+	public List<MenuDTO> getMenusForArea(Key<Business> locationKey, long areaId) {
+		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
+		
+		List<Menu> menus;
+		
+		if(areaId == 0) {
+			menus = menuRepo.getActiveMenusForBusiness(locationKey);
+		}
+		else {
+			menus = menuRepo.getActiveMenusForBusinessAndArea(locationKey, areaId);
+		}
+		
+		for ( Menu menu : menus) {
+			MenuDTO menuDTO = new MenuDTO(menu);
+ 
+			menuDTOs.add(menuDTO);
+		}
+		
+		return menuDTOs;
+	}
+	
 	/**
 	 * @param business 
 	 * @return List of transfer objects without embedded Products.
@@ -135,6 +158,7 @@ public class MenuController {
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		if(business == null )
 			return menuDTOs;
+		
 		List<Menu> menus = menuRepo.getByParent( business );
 		
 		for ( Menu menu : menus) {
@@ -411,19 +435,10 @@ public class MenuController {
 		checkNotNull(product, "product was null");
 		checkNotNull(productData, "productData was null");
 		
-		Set<ConstraintViolation<ProductDTO>> violationSet = validator.validate(productData, Default.class);
-		if(!violationSet.isEmpty()) {
-			StringBuilder stringBuilder = new StringBuilder("validation errors:");
-			for (ConstraintViolation<ProductDTO> violation : violationSet) {
-				// Format the message like: '"{property}" {message}.'
-				stringBuilder.append(String.format(" \"%s\" %s.", violation.getPropertyPath(), violation.getMessage()));
-			}
-			throw new ValidationException(stringBuilder.toString());
-		}
+		validator.validate(productData, Default.class);
 		
 		if(productData.getMenuId() != null)
 			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
-		
 		
 		product.setLongDesc(productData.getLongDesc());
 		product.setName(productData.getName());
@@ -432,6 +447,7 @@ public class MenuController {
 		product.setShortDesc(productData.getShortDesc());
 		product.setActive(productData.isActive());
 		product.setSpecial(productData.isSpecial());
+		product.setHideInDashboard(productData.isHideInDashboard());
 		
 		if(productData.getChoices() != null) {
 			// Update Choices
@@ -512,6 +528,40 @@ public class MenuController {
 		}
 		
 		return result.isDirty();
+	}
+	
+	/**
+	 * Update multiple products at once.
+	 * 
+	 * @return List containing the updated Product entities.
+	 */
+	public List<Product> getAndUpdateProducts(Key<Business> locationKey, List<Long> ids, Boolean active, Boolean special, Boolean hideInDashboard) {
+		checkNotNull(locationKey, "locationKey was null");
+		checkNotNull(ids, "ids were null");
+
+		if (ids.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Collection<Product> products = productRepo.getByKeys(productRepo.getKeys(locationKey,
+				ids));
+
+		// De-/Activate all spots
+		for (Product product : products) {
+			if(active != null) {
+				product.setActive(active);
+			}
+			if(special != null) {
+				product.setSpecial(special);
+			}
+			if(hideInDashboard != null) {
+				product.setHideInDashboard(hideInDashboard);
+			}
+		}
+
+		productRepo.saveOrUpdate(products);
+
+		return new ArrayList<Product>(products);
 	}
 	
 	/**

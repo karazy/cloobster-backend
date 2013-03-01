@@ -4,24 +4,35 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import net.eatsense.counter.Counter;
+import net.eatsense.counter.CounterRepository;
+import net.eatsense.documents.AbstractDocumentGenerator;
+import net.eatsense.documents.CounterReportXLSGenerator;
+import net.eatsense.documents.DocumentGeneratorFactory;
 import net.eatsense.documents.SpotPurePDFGenerator;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Document;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.DocumentStatus;
+import net.eatsense.exceptions.ServiceException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.DocumentRepository;
+import net.eatsense.persistence.GenericRepository;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.DocumentDTO;
 import net.eatsense.service.FileServiceHelper;
 import net.eatsense.validation.ValidationHelper;
 
+import org.eclipse.jetty.http.AbstractGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,23 +47,20 @@ public class DocumentController {
 	
 	private final DocumentRepository docRepo;
 	private final ValidationHelper validator;
-	private final Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider;
-	private final Provider<SpotRepository> spotRepoProvider;
 	private final FileServiceHelper fileService;
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Provider<DocumentGeneratorFactory> generatorFactoryProvider;
 	
 	@Inject
 	public DocumentController(DocumentRepository documentRepository,
-			ValidationHelper validator, Provider<SpotPurePDFGenerator> spotPurePDFGeneratorProvider,
-			Provider<SpotRepository> spotRepoProvider,
-			FileServiceHelper fileService) {
+			ValidationHelper validator, FileServiceHelper fileService, 
+			Provider<DocumentGeneratorFactory> generatorFactoryProvider) {
 		super();
 		this.docRepo = documentRepository;
 		this.validator = validator;
-		this.spotPurePDFGeneratorProvider = spotPurePDFGeneratorProvider;
-		this.spotRepoProvider = spotRepoProvider;
 		this.fileService = fileService;
+		this.generatorFactoryProvider = generatorFactoryProvider;
 	}
 	
 	/**
@@ -96,6 +104,7 @@ public class DocumentController {
 		doc.setType(docData.getType());
 		doc.setEntity(docData.getEntity());
 		doc.setEntityIds(docData.getIds());
+		doc.setEntityNames(docData.getNames());
 		doc.setName(docData.getName());
 		doc.setRepresentation(docData.getRepresentation());
 		
@@ -170,6 +179,20 @@ public class DocumentController {
 	}
 	
 	/**
+	 * @param document
+	 * @return the mime type of the processed document
+	 */
+	public String getContentType(Document document) {
+		if(document.getStatus() != DocumentStatus.COMPLETE) {
+			throw new ServiceException("Can only retrieve mime type for completed Documents");
+		}
+		
+		BlobInfoFactory blobInfoFact = new BlobInfoFactory();
+		
+		return blobInfoFact.loadBlobInfo(document.getBlobKey()).getContentType();
+	}
+	
+	/**
 	 * Generate a Document based on the saved meta data and entity type.
 	 * 
 	 * @param document
@@ -183,29 +206,28 @@ public class DocumentController {
 			return document;
 		}
 		
-		byte[] bytes = null;
-		String mimeType = null;
 		
-		if(document.getEntity().equals(Spot.class.getName()) && document.getRepresentation().equals("pure")) {
-			SpotPurePDFGenerator generator = spotPurePDFGeneratorProvider.get();
-			SpotRepository spotRepo = spotRepoProvider.get();
-			
-			bytes = generator.generate(spotRepo.getByKeys(spotRepo.getKeys(document.getBusiness(), document.getEntityIds())), document);
-			mimeType = generator.getMimeType();
-		}
-		else {
-			logger.error("Unknown entity name or representation: entity={}, representation={}", document.getEntity(), document.getRepresentation());
+		AbstractDocumentGenerator generator = generatorFactoryProvider.get().createForDocument(document);
+
+		if(generator == null) {
+			logger.error("Unable to get generator for Document: entity={}, representation={}", document.getEntity(), document.getRepresentation());
 			document.setStatus(DocumentStatus.ERROR);
 			docRepo.saveOrUpdate(document);
 			throw new ValidationException("Unkown entity name or representation in Document");
 		}
+				
+		byte[] bytes = generator.generate(document);
 		
 		if(bytes != null) {
-			BlobKey blobKey = fileService.saveNewBlob(document.getName(), mimeType, bytes);
+			BlobKey blobKey = fileService.saveNewBlob(document.getName(), generator.getMimeType(), bytes);
 			
 			document.setBlobKey(blobKey);
 			document.setStatus(DocumentStatus.COMPLETE);
 			docRepo.saveOrUpdate(document);
+		}
+		else {
+			logger.error("No Document data generated for {}", document.getKey());
+			throw new ServiceException("Document generation failed for Document");
 		}
 			
 		return document;

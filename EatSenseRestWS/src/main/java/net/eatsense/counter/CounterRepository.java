@@ -54,6 +54,10 @@ public class CounterRepository {
 		return query.fetch();		
 	}
 	
+	public Collection<Counter> getByKeys(List<String> ids) {
+		return ofy.get(Counter.class, ids).values();
+	}
+	
 	public Collection<Counter> getDailyCountsByNameAreaLocationAndDateRange(String name, long locationId, long areaId, Date fromDate, Date toDate) {
 		checkNotNull(name, "name was null");
 		checkNotNull(fromDate, "fromDate was null");

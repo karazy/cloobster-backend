@@ -185,6 +185,7 @@ public class InfoPageController {
 		
 		infoPage.setShortText(infoPageData.getShortText());
 		infoPage.setTitle(infoPageData.getTitle());
+		infoPage.setHideInDashboard(infoPageData.isHideInDashboard());		
 		
 		if(locale != null) {
 			if(infoPage.getId() == null) {
