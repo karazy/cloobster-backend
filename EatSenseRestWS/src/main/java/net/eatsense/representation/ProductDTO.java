@@ -6,11 +6,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Product;
+import net.eatsense.domain.Spot;
 import net.eatsense.validation.ImportChecks;
 
 import org.apache.bval.Validate;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.google.common.base.Function;
 
 public class ProductDTO {
 //	@NotNull
@@ -44,6 +47,10 @@ public class ProductDTO {
 
 	private String imageUrl;
 	
+	private boolean checked;
+	
+	private boolean hideInDashboard;
+	
 	public ProductDTO() {
 		super();
 	}
@@ -70,6 +77,7 @@ public class ProductDTO {
 		this.order = product.getOrder();
 		this.active = product.isActive();
 		this.setSpecial(product.isSpecial());
+		this.hideInDashboard = product.isHideInDashboard();
 	}
 
 	public String getName() {
@@ -176,6 +184,30 @@ public class ProductDTO {
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
 	}
+
+	public boolean isChecked() {
+		return checked;
+	}
+
+	public void setChecked(boolean checked) {
+		this.checked = checked;
+	}
+
+	public boolean isHideInDashboard() {
+		return hideInDashboard;
+	}
+
+	public void setHideInDashboard(boolean hideInDashboard) {
+		this.hideInDashboard = hideInDashboard;
+	}
+	
+	public final static Function<Product, ProductDTO> toDTO = 
+			new Function<Product, ProductDTO>() {
+				@Override
+				public ProductDTO apply(Product input) {
+					return new ProductDTO(input);
+				}
+		    };
 }
 
 

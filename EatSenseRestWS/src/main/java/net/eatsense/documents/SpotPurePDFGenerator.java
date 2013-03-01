@@ -6,15 +6,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collection;
+
+import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.SpotPurePDFConfiguration;
+import net.eatsense.domain.Document;
+import net.eatsense.domain.Spot;
+import net.eatsense.exceptions.ServiceException;
+import net.eatsense.persistence.SpotRepository;
+import net.eatsense.service.QRCodeGeneratorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.pdfjet.A4;
-import com.pdfjet.A5;
 import com.pdfjet.CoreFont;
 import com.pdfjet.Font;
 import com.pdfjet.Image;
@@ -23,23 +28,18 @@ import com.pdfjet.PDF;
 import com.pdfjet.Page;
 import com.pdfjet.TextLine;
 
-import net.eatsense.configuration.Configuration;
-import net.eatsense.configuration.SpotPurePDFConfiguration;
-import net.eatsense.domain.Document;
-import net.eatsense.domain.Spot;
-import net.eatsense.exceptions.ServiceException;
-import net.eatsense.service.QRCodeGeneratorService;
-
-public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
+public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final ByteArrayOutputStream byteOutput;
 	private final SpotPurePDFConfiguration pdfConfig;
 	private Font font;
 	private final QRCodeGeneratorService qrImageService;
+	private final SpotRepository spotRepo;
 	
 	@Inject
-	public SpotPurePDFGenerator(Configuration config, QRCodeGeneratorService qrImageService) {
+	public SpotPurePDFGenerator(Configuration config, QRCodeGeneratorService qrImageService, SpotRepository spotRepo) {
 		this.qrImageService = qrImageService;
+		this.spotRepo = spotRepo;
 		byteOutput = new ByteArrayOutputStream();
 		
 		this.pdfConfig = config.getSpotPurePdfConfiguration();
@@ -52,13 +52,14 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 	}
 
 	@Override
-	public byte[] generate(Iterable<Spot> entities, Document document) {
-		checkNotNull(entities, "entities was null");
+	public byte[] generate(Document document) {
 		checkNotNull(document, "document was null");
 		
-		if(!entities.iterator().hasNext()) {
-			logger.error("No Spot entities supplied for PDF generation, for Document with key={}", document.getKey());
-			throw new ServiceException("Internal Error, no Spot entities supplied for PDF generation.");
+		Collection<Spot> entities = spotRepo.getByKeys(spotRepo.getKeys(document.getBusiness(), document.getEntityIds()));
+		
+		if(entities.isEmpty()) {
+			logger.error("No Spot entities found for PDF generation, for {}", document.getKey());
+			throw new ServiceException("Internal Error, no Spots found for PDF generation.");
 		}
 		
 		PDF pdf;
@@ -94,6 +95,17 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator<Spot>{
 		}
 		
 		return byteOutput.toByteArray();
+	}
+	
+	/**
+	 * @param pdf
+	 * @param inputStream
+	 * @param type
+	 * @return
+	 * @throws Exception
+	 */
+	Image makeImage(PDF pdf, InputStream inputStream, int type) throws Exception {
+		return new Image(pdf, inputStream , type);
 	}
 	
 	/**

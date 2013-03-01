@@ -579,7 +579,7 @@ public class BusinessControllerTest {
 		// Verify that save gets called for the entity and for the account.
 		verify(accountRepo).saveOrUpdate(account);
 		// check that we have at least "bar" payment method
-		assertThat(business.getPaymentMethods().get(0).getName(), is("Bar"));
+		assertThat(business.getPaymentMethods().get(0).getName(), is("Rechnung"));
 		// The key for the new business should be added to the account.
 		assertThat(businessesList, hasItem(businessKey));
 		

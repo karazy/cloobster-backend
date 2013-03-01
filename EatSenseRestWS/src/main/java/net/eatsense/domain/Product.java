@@ -46,6 +46,8 @@ public class Product extends GenericEntity<Product> {
 	
 
 	private boolean special;
+	
+	private boolean hideInDashboard;
 
 	@Embedded
 	@Unindexed
@@ -219,5 +221,18 @@ public class Product extends GenericEntity<Product> {
 
 	public void setImages(List<ImageDTO> images) {
 		this.images = images;
+	}
+
+
+	public boolean isHideInDashboard() {
+		return hideInDashboard;
+	}
+
+
+	public void setHideInDashboard(boolean hideInDashboard) {
+		if(!Objects.equal(this.hideInDashboard, hideInDashboard)) {
+			this.setDirty(true);
+			this.hideInDashboard = hideInDashboard;
+		}
 	}
 }
