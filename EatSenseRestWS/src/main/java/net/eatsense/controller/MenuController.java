@@ -418,7 +418,6 @@ public class MenuController {
 		if(productData.getMenuId() != null)
 			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
 		
-		
 		product.setLongDesc(productData.getLongDesc());
 		product.setName(productData.getName());
 		product.setOrder(productData.getOrder());

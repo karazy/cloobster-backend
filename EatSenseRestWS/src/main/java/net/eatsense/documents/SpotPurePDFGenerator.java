@@ -6,22 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
-import com.pdfjet.A4;
-import com.pdfjet.A5;
-import com.pdfjet.CoreFont;
-import com.pdfjet.Font;
-import com.pdfjet.Image;
-import com.pdfjet.ImageType;
-import com.pdfjet.PDF;
-import com.pdfjet.Page;
-import com.pdfjet.TextLine;
 
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.SpotPurePDFConfiguration;
@@ -30,6 +15,18 @@ import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.service.QRCodeGeneratorService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
+import com.pdfjet.CoreFont;
+import com.pdfjet.Font;
+import com.pdfjet.Image;
+import com.pdfjet.ImageType;
+import com.pdfjet.PDF;
+import com.pdfjet.Page;
+import com.pdfjet.TextLine;
 
 public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
