@@ -213,6 +213,7 @@ public class CheckInController {
 		checkIn.setUserId(checkInId);
 		checkIn.setStatus(CheckInStatus.CHECKEDIN);
 		checkIn.setCheckInTime(new Date());
+		checkIn.setLastActivity(checkIn.getCheckInTime());
 		checkIn.setDeviceId(checkInDto.getDeviceId());
 		checkIn.setNickname(checkInDto.getNickname());
 
