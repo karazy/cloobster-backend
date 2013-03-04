@@ -637,4 +637,8 @@ public class CheckInController {
 		
 		return historyDTOList;
 	}
+	
+	public void checkForInactiveCheckIns() {
+		
+	}
 }
