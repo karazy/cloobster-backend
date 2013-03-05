@@ -136,4 +136,6 @@ public class CheckInDTO {
 	public void setLinkedCheckInId(String linkedCheckInId) {
 		this.linkedCheckInId = linkedCheckInId;
 	}
+	
+	
 }

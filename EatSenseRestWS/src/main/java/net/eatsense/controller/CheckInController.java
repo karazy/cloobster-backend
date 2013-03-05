@@ -4,9 +4,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -24,7 +28,9 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.CheckInEvent;
+import net.eatsense.event.CheckInInactiveEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
 import net.eatsense.event.NewCheckInEvent;
@@ -54,8 +60,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
@@ -418,7 +429,7 @@ public class CheckInController {
 		checkInRepo.saveOrUpdate(checkIn);
 		
 		// Remove active checkIn from the account, if this was authenticated with an user account.
-		if(optAccount.isPresent()) {
+		if(optAccount.isPresent() ) {
 			optAccount.get().setActiveCheckIn(null);
 			accountRepo.saveOrUpdate(optAccount.get());
 		}
@@ -639,7 +650,86 @@ public class CheckInController {
 		return historyDTOList;
 	}
 	
-	public void checkForInactiveCheckIns() {
+	/**
+	 * Return {@link Iterable} of all CheckIns that are past the inactivity timeout for the specified location.
+	 * 
+	 * @param locationKey
+	 * @return
+	 */
+	public Iterable<CheckIn> getInactiveCheckIns(Key<Business> locationKey) {
+		int inactiveHours = 24;
 		
+		try {
+			inactiveHours = Integer.parseInt(System.getProperty("net.karazy.checkins.inactive.timeout"));
+		} catch (Exception e) {
+			logger.warn("No net.karazy.checkins.inactive.timeout property set");
+		}
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.HOUR_OF_DAY, -inactiveHours);
+		final Date lastActivityTimeout = calendar.getTime();
+		
+		return Iterables.filter(checkInRepo.iterateByLocation(locationKey), new Predicate<CheckIn>() {
+			@Override
+			public boolean apply(CheckIn checkIn) {
+				if(checkIn.getLastActivity() != null && checkIn.getLastActivity().before(lastActivityTimeout)) {
+					return true;
+				}
+				return false;
+			}
+		} );
+	}
+	
+	
+	public void cleanInactiveCheckInsAndNotify() {
+		int inactiveHours = 24;
+		
+		try {
+			inactiveHours = Integer.parseInt(System.getProperty("net.karazy.checkins.inactive.timeout"));
+		} catch (Exception e) {
+			logger.warn("No net.karazy.checkins.inactive.timeout property set");
+		}
+		
+		Calendar lastActivityDeadline = Calendar.getInstance();
+		lastActivityDeadline.add(Calendar.HOUR_OF_DAY, -inactiveHours);
+		
+		Set<Long> locationIdsNotified = Sets.newHashSet();
+		
+		for(CheckIn checkIn : checkInRepo.iterateByProperty("archived", false)) {
+			if(checkIn.getLastActivity() != null && checkIn.getLastActivity().before(lastActivityDeadline.getTime())) {
+				boolean notifyBusiness = false;
+				if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED || checkIn.getStatus() == CheckInStatus.PAYMENT_REQUEST ) {
+					// CheckIn has unconfirmed orders or payment request, notify business.
+					notifyBusiness = true;
+				}
+				else {
+					// Try to checkout...
+					try {
+						checkOut(checkIn);
+					} catch (IllegalAccessException e) {
+						// ... notify cockpit if not possible.
+						notifyBusiness = true;
+					}
+				}
+				
+				if( notifyBusiness && !locationIdsNotified.contains(checkIn.getBusiness().getId())) {
+					// Only post events for locations we not already have.
+					Business location = businessRepo.getByKey(checkIn.getBusiness());
+					locationIdsNotified.add(checkIn.getBusiness().getId());
+					
+					eventBus.post(new CheckInInactiveEvent(checkIn, location));
+				}
+			}
+		}
+				
+	}
+	
+	@Subscribe
+	public void handleCheckInActivity(CheckInActivityEvent event) {
+		event.getCheckIn().setLastActivity(new Date());
+		logger.info("lastActivity updated for CheckIn({})", event.getCheckIn().getId());
+		if(event.isSave()) {
+			checkInRepo.saveOrUpdate(event.getCheckIn());
+		}
 	}
 }

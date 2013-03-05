@@ -16,6 +16,8 @@
 		<property name="net.karazy.app.download.url" value="http://www.cloobster.com/download"/>
 		<property name="net.karazy.url.outside" value="https://cloobster-test.appspot.com"/>
 		<property name="net.karazy.api.version" value="2"/>
+		<!-- Configure time out for inactive checkins -->	
+		<property name="net.karazy.checkins.inactive.timeout" value="24"/>
 	</system-properties>
 
 	<inbound-services>

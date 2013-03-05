@@ -8,6 +8,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -270,7 +271,7 @@ public class BillControllerTest {
 		Iterator<Order> ordersIterator = mock(Iterator.class);
 		when(orders.iterator()).thenReturn(ordersIterator );
 		
-		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		when(orderRepo.belongingToCheckIn(checkInKey)).thenReturn(orders );
 		
 		billCtrl.updateBill(location, bill , billData );
 	}
@@ -297,7 +298,7 @@ public class BillControllerTest {
 		when(placedOrder.getStatus()).thenReturn(OrderStatus.PLACED);
 		when(ordersIterator.next()).thenReturn(placedOrder );
 		
-		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		when(orderRepo.belongingToCheckIn(checkInKey)).thenReturn(orders );
 		
 		billCtrl.updateBill(location, bill , billData );
 	}
@@ -321,7 +322,7 @@ public class BillControllerTest {
 		when(placedOrder.getStatus()).thenReturn(OrderStatus.CART);
 		when(ordersIterator.next()).thenReturn(placedOrder );
 		
-		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		when(orderRepo.belongingToCheckIn(checkInKey)).thenReturn(orders );
 		
 		billCtrl.updateBill(location, bill , billData );
 		
@@ -361,7 +362,7 @@ public class BillControllerTest {
 		
 		when(ordersIterator.next()).thenReturn(cartOrder, placedOrder );
 		
-		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orders );
+		when(orderRepo.belongingToCheckIn(checkInKey)).thenReturn(orders );
 		
 		@SuppressWarnings("unchecked")
 		Iterable<Request> requests = mock(Iterable.class);
@@ -590,7 +591,7 @@ public class BillControllerTest {
 		when(spotRepo.getByKey(spotKey)).thenReturn(spot);
 		
 		java.util.List<Order> orderList = new ArrayList<Order>();
-		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orderList );
+		when(orderRepo.belongingToCheckIn(checkInKey)).thenReturn(orderList );
 		
 		thrown.expect(BillFailureException.class);
 		thrown.expectMessage("no orders");
@@ -623,7 +624,7 @@ public class BillControllerTest {
 		Order order1 = mock(Order.class);
 		when(order1.getStatus()).thenReturn(OrderStatus.RECEIVED);
 		orderList.add(order1 );
-		when(orderRepo.belongingToLocationAndCheckIn(location, checkInKey)).thenReturn(orderList );
+		when(orderRepo.belongingToCheckIn(checkInKey)).thenReturn(orderList );
 		
 		Bill newBill = new Bill();
 		when(billRepo.newEntity()).thenReturn(newBill );
@@ -661,7 +662,7 @@ public class BillControllerTest {
 		
 		ArgumentCaptor<NewBillEvent> newBillEventCaptor = ArgumentCaptor.forClass(NewBillEvent.class);
 		
-		verify(eventBus).post(newBillEventCaptor.capture());
+		verify(eventBus,times(2)).post(newBillEventCaptor.capture());
 		NewBillEvent newBillEvent = newBillEventCaptor.getValue();
 		assertThat(newBillEvent.getBill(), is(newBill));
 		assertThat(newBillEvent.getBusiness(), is(location));

@@ -25,6 +25,7 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
@@ -207,7 +208,8 @@ public class LocationController {
 		
 		requestData.setId(request.getId());
 		
-		eventBus.post(new NewCustomerRequestEvent(location, checkIn, request));								
+		eventBus.post(new NewCustomerRequestEvent(location, checkIn, request));
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 		return requestData;
 	}
 	
@@ -328,6 +330,7 @@ public class LocationController {
 		requestRepo.delete(request);
 		
 		eventBus.post(new DeleteCustomerRequestEvent(locationRepo.getByKey(checkIn.getBusiness()), request, true));
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 		
 		return requestData;
 	}
