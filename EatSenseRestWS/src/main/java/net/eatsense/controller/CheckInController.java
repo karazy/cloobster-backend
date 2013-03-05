@@ -24,6 +24,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.User;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.CheckInEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.MoveCheckInEvent;
@@ -56,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
@@ -641,5 +643,14 @@ public class CheckInController {
 	
 	public void checkForInactiveCheckIns() {
 		
+	}
+	
+	@Subscribe
+	public void handleCheckInActivity(CheckInActivityEvent event) {
+		event.getCheckIn().setLastActivity(new Date());
+		
+		if(event.isSave()) {
+			checkInRepo.saveOrUpdate(event.getCheckIn());
+		}
 	}
 }
