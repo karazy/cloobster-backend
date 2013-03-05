@@ -63,6 +63,6 @@ public class ProfilesResource {
 			throw new IllegalAccessException("Can only update the own account's profile.");
 		}
 		
-		return new CustomerProfileDTO( profileCtrl.updateCustomerProfile(account.getCustomerProfile(), profileData));
+		return new CustomerProfileDTO( profileCtrl.getAndUpdateCustomerProfile(account.getCustomerProfile(), profileData));
 	}
 }

@@ -31,6 +31,7 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.ConfirmAllOrdersEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.UpdateOrderEvent;
@@ -182,11 +183,18 @@ public class OrderController {
 		if(!oldSpotStatus.equals(newSpotStatus)) {
 			confirmAllEvent.setNewSpotStatus(newSpotStatus);
 		}
+		
+		
+		
 		if(checkIn.getStatus() == CheckInStatus.ORDER_PLACED)
 		{
 			confirmAllEvent.setNewCheckInStatus(CheckInStatus.CHECKEDIN.toString());
 			checkIn.setStatus(CheckInStatus.CHECKEDIN);
+			eventBus.post(new CheckInActivityEvent(checkIn, false));
 			checkInRepo.saveOrUpdate(checkIn);
+		}
+		else {
+			eventBus.post(new CheckInActivityEvent(checkIn, true));
 		}
 		
 		requestRepo.ofy().delete(requestsToDelete);
@@ -259,6 +267,7 @@ public class OrderController {
 			if(!order.getChoices().isEmpty())
 				orderRepo.saveOrUpdate(order);
 		}
+		
 		return orderKey;
 	}
 	
@@ -285,6 +294,8 @@ public class OrderController {
 		keysToDelete.addAll(orderKeys);
 		
 		ofy.delete(keysToDelete);
+		
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 	}
 	
 	/**
@@ -306,6 +317,8 @@ public class OrderController {
 		keysToDelete.addAll(order.getChoices());
 		keysToDelete.add(order.getKey());
 		orderRepo.ofy().delete(keysToDelete);
+		
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 	}
 
 	/**
@@ -521,6 +534,8 @@ public class OrderController {
 			orderId = orderKey.getId();
 		}
 		
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
+		
 		return orderId;
 	}
 
@@ -585,9 +600,14 @@ public class OrderController {
 		// Update the checkin status, if there is none set.
 		if(checkIn.getStatus() == CheckInStatus.CHECKEDIN) {
 			checkIn.setStatus(CheckInStatus.ORDER_PLACED);
+			eventBus.post(new CheckInActivityEvent(checkIn, false));
+			
 			checkInRepo.saveOrUpdate(checkIn);
 			
 			updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED.toString());
+		}
+		else {
+			eventBus.post(new CheckInActivityEvent(checkIn, true));
 		}
 		
 		eventBus.post(updateEvent);
@@ -678,7 +698,6 @@ public class OrderController {
 				// Update the checkin status, if there is none set.
 				if(checkIn.getStatus() == CheckInStatus.CHECKEDIN) {
 					checkIn.setStatus(CheckInStatus.ORDER_PLACED);
-					checkInRepo.saveOrUpdate(checkIn);
 					
 					updateEvent.setNewCheckInStatus(CheckInStatus.ORDER_PLACED);
 				}
@@ -696,6 +715,8 @@ public class OrderController {
 
 				eventBus.post(updateEvent);
 			}
+			// Post event to register checkin activity
+			eventBus.post(new CheckInActivityEvent(checkIn, true));
 		}
 
 		return orderData;
@@ -778,7 +799,6 @@ public class OrderController {
 				if(!checkIn.getStatus().equals(CheckInStatus.PAYMENT_REQUEST) && !checkIn.getStatus().equals(newCheckInStatus) ) {
 					// ...update the status of the checkIn in the datastore ...
 					checkIn.setStatus(newCheckInStatus);
-					checkInRepo.saveOrUpdate(checkIn);
 					
 					updateOrderEvent.setNewCheckInStatus(newCheckInStatus);
 					
@@ -789,6 +809,8 @@ public class OrderController {
 				updateOrderEvent.setOrderData(orderData);
 				eventBus.post(updateOrderEvent);
 			}
+			
+			eventBus.post(new CheckInActivityEvent(checkIn, true));
 		}
 		else {
 			// build validation error messages

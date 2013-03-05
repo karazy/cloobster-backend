@@ -429,6 +429,8 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		return q.get();
 	}
 	
+	
+	
 	/**
 	 * Convenience method to get the Key of the first object matching a single property.
 	 * 
@@ -469,6 +471,28 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		return q.list();
 
 	}
+	
+	/**
+	 * Convenience method to get all objects matching a single property
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public Iterable<T> iterateByProperty(String propName, Object propValue)
+	{
+		logger.info("{}, property: {}", clazz, propName);
+		Query<T> q = ofy().query(clazz);
+
+		q.filter(propName, propValue);
+
+		return q.fetch();
+	}
+	
+	
 	
 	/**
 	 * Convenience method to get all objects matching a single property and Parent
