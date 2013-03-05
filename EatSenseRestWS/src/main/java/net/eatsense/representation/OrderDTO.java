@@ -33,6 +33,7 @@ public class OrderDTO {
 	private String productLongDesc;
 	private double productPrice;
 	private String productImageUrl;
+	private boolean productSpecial;
 	
 	private Collection<ChoiceDTO> choices;
 	
@@ -63,6 +64,7 @@ public class OrderDTO {
 		productLongDesc = order.getProductLongDesc();
 		productPrice = order.getProductPrice() / 100d;
 		productImageUrl = order.getProductImage() != null ? order.getProductImage().getUrl() : null;
+		productSpecial = order.isProductSpecial();
 	}
 	
 	public OrderDTO() {
@@ -149,4 +151,15 @@ public class OrderDTO {
 	public void setProductImageUrl(String productImageUrl) {
 		this.productImageUrl = productImageUrl;
 	}
+
+	public boolean isProductSpecial() {
+		return productSpecial;
+	}
+
+	public void setProductSpecial(boolean productSpecial) {
+		this.productSpecial = productSpecial;
+	}
+	
+	
+	
 }

@@ -232,6 +232,7 @@ public class OrderController {
 		order.setProductPrice(product.getPrice());
 		order.setProductShortDesc(product.getShortDesc());
 		order.setProductLongDesc(product.getLongDesc());
+		order.setProductSpecial(product.isSpecial());
 		// Set product image, if it exists.
 		if(product.getImages() != null && product.getImages().get(0) != null) {
 			order.setProductImage(product.getImages().get(0));
