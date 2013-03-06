@@ -668,6 +668,7 @@ public class CheckInController {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.HOUR_OF_DAY, -inactiveHours);
 		final Date lastActivityTimeout = calendar.getTime();
+		logger.info("Retrieving CheckIns that have been inactive since {}", lastActivityTimeout);
 		
 		return Iterables.filter(checkInRepo.iterateByLocation(locationKey), new Predicate<CheckIn>() {
 			@Override
