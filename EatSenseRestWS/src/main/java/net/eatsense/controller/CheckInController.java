@@ -696,6 +696,8 @@ public class CheckInController {
 		
 		Set<Long> locationIdsNotified = Sets.newHashSet();
 		
+		logger.info("Retrieving CheckIns that have been inactive since {}", lastActivityDeadline.getTime());
+		int checkInsRemoved = 0;
 		for(CheckIn checkIn : checkInRepo.iterateByProperty("archived", false)) {
 			if(checkIn.getLastActivity() != null && checkIn.getLastActivity().before(lastActivityDeadline.getTime())) {
 				boolean notifyBusiness = false;
@@ -707,6 +709,8 @@ public class CheckInController {
 					// Try to checkout...
 					try {
 						checkOut(checkIn);
+						
+						checkInsRemoved++;
 					} catch (IllegalAccessException e) {
 						// ... notify cockpit if not possible.
 						notifyBusiness = true;
@@ -722,7 +726,7 @@ public class CheckInController {
 				}
 			}
 		}
-				
+		logger.info("CheckIns inactive and removed: {}, Locations notified: {}", checkInsRemoved, locationIdsNotified.size());
 	}
 	
 	@Subscribe
