@@ -184,9 +184,15 @@ public class ImageController {
 			if(imageDTO.getId().equals(id)) {
 				dirty = true;
 				iterator.remove();
-				BlobKey blobKey = new BlobKey(imageDTO.getBlobKey());
-				blobstoreService.delete(blobKey);
-				imagesService.deleteServingUrl(blobKey);
+				
+				if(!Strings.isNullOrEmpty(imageDTO.getBlobKey())) {
+					BlobKey blobKey = new BlobKey(imageDTO.getBlobKey());
+					blobstoreService.delete(blobKey);
+					imagesService.deleteServingUrl(blobKey);
+				}
+				else {
+					logger.warn("No BlobKey saved for image (id={}), probably test data.", id);
+				}
 				removedImage = imageDTO;
 			}
 		}
