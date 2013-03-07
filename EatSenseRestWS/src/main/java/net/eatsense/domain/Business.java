@@ -137,6 +137,8 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private boolean basic = true;
 	
+	private boolean notifyCheckInInactivityActive = true;
+	
 	public Business() {
 	}
 	
@@ -398,5 +400,14 @@ public class Business extends GenericEntity<Business> {
 			this.setDirty(true);
 			this.offlineEmailAlertActive = offlineEmailAlertActive;
 		}
+	}
+
+	public boolean isNotifyCheckInInactivityActive() {
+		return notifyCheckInInactivityActive;
+	}
+
+	public void setNotifyCheckInInactivityActive(
+			boolean notifyCheckInInactivityActive) {
+		this.notifyCheckInInactivityActive = notifyCheckInInactivityActive;
 	}
 }
