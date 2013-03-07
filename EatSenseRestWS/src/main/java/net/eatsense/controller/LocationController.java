@@ -480,7 +480,7 @@ public class LocationController {
 		business.setEmail(businessData.getEmail());
 		business.setStars(businessData.getStars());
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
-		business.setNotifyCheckInInactivityActive(businessData.isNotifyCheckInInActivityActive());
+		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme

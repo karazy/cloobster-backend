@@ -137,7 +137,7 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private boolean basic = true;
 	
-	private boolean notifyCheckInInactivityActive = true;
+	private boolean inactiveCheckInNotificationActive = true;
 	
 	public Business() {
 	}
@@ -402,12 +402,12 @@ public class Business extends GenericEntity<Business> {
 		}
 	}
 
-	public boolean isNotifyCheckInInactivityActive() {
-		return notifyCheckInInactivityActive;
+	public boolean isInactiveCheckInNotificationActive() {
+		return inactiveCheckInNotificationActive;
 	}
 
-	public void setNotifyCheckInInactivityActive(
-			boolean notifyCheckInInactivityActive) {
-		this.notifyCheckInInactivityActive = notifyCheckInInactivityActive;
+	public void setInactiveCheckInNotificationActive(
+			boolean inactiveCheckInNotificationActive) {
+		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
 	}
 }

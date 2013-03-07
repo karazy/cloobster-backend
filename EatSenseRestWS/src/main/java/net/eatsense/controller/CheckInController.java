@@ -722,7 +722,10 @@ public class CheckInController {
 					Business location = businessRepo.getByKey(checkIn.getBusiness());
 					locationIdsNotified.add(checkIn.getBusiness().getId());
 					
-					eventBus.post(new CheckInInactiveEvent(checkIn, location));
+					// Only notify if configuration flag is set.
+					if(location.isInactiveCheckInNotificationActive()) {
+						eventBus.post(new CheckInInactiveEvent(checkIn, location));
+					}
 				}
 			}
 		}
