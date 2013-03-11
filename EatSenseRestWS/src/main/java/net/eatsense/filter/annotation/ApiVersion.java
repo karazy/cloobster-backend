@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Retention (RUNTIME)
 @Target({TYPE, METHOD})
 public @interface ApiVersion {
-	int[] value();
+	int[] value() default {};
 	int min() default 0;
 }
