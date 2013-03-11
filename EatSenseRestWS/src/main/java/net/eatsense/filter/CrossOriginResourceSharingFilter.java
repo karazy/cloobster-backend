@@ -1,4 +1,4 @@
-package net.eatsense;
+package net.eatsense.filter;
 
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;

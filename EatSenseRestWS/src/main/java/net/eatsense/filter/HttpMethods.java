@@ -1,4 +1,4 @@
-package net.eatsense;
+package net.eatsense.filter;
 
 import javax.ws.rs.HttpMethod;
 

@@ -9,6 +9,7 @@ import java.util.List;
 import javax.ws.rs.core.PathSegment;
 
 import net.eatsense.exceptions.ApiVersionException;
+import net.eatsense.filter.ApiVersionFilter;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,8 +33,14 @@ public class ApiVersionFilterTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		filter = new ApiVersionFilter();
+		filter = new ApiVersionFilter( 0, Arrays.asList(1));
 		System.setProperty("net.karazy.api.version", "1");
+	}
+	@Test
+	public void testFilterMinVersion() throws Exception {
+		filter = new ApiVersionFilter( 2, null);
+		when(request.getHeaderValue("cloobster-api")).thenReturn("2");
+		filter.filter(request);
 	}
 	
 	@Test
@@ -64,17 +71,6 @@ public class ApiVersionFilterTest {
 		List<PathSegment> pathList = Arrays.asList(pathSegment );
 		when(request.getPathSegments()).thenReturn(pathList );
 		when(request.getHeaderValue("cloobster-api")).thenReturn("1");
-		
-		filter.filter(request);
-	}
-	
-	@Test
-	public void testFilterSkipTasks() throws Exception {
-		PathSegment pathSegment = mock(PathSegment.class);
-		when(pathSegment.getPath()).thenReturn("tasks");
-		List<PathSegment> pathList = Arrays.asList(pathSegment );
-		when(request.getPathSegments()).thenReturn(pathList );
-		when(request.getHeaderValue("cloobster-api")).thenReturn("4");
 		
 		filter.filter(request);
 	}
