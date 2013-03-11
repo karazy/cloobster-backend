@@ -1,6 +1,7 @@
 package net.eatsense;
 
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import net.eatsense.auth.AccessTokenFilter;
@@ -18,6 +19,7 @@ import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Subscription;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.filter.ApiVersionFilter;
+import net.eatsense.filter.ApiVersionFilterFactory;
 import net.eatsense.filter.CacheResponseFilter;
 import net.eatsense.filter.SuffixFilter;
 import net.eatsense.persistence.OfyService;
@@ -95,7 +97,6 @@ public class EatSenseGuiceServletContextListener extends
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
-								ApiVersionFilter.class.getName() + "," +
 								AccessTokenFilter.class.getName() + ","+
 								SecurityFilter.class.getName()+ "," + 
 								SuffixFilter.class.getName());
@@ -106,8 +107,8 @@ public class EatSenseGuiceServletContextListener extends
 						
 						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
 						
-						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
-				                RolesAllowedResourceFilterFactory.class.getName());
+						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,RolesAllowedResourceFilterFactory.class.getName() + "," +
+								ApiVersionFilterFactory.class.getName());
 						bind(AccountsResource.class);
 						bind(LocationsResource.class);
 						bind(net.eatsense.restws.customer.AccountsResource.class);
