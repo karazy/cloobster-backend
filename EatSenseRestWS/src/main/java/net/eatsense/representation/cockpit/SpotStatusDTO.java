@@ -1,5 +1,7 @@
 package net.eatsense.representation.cockpit;
 
+import net.eatsense.domain.Spot;
+
 public class SpotStatusDTO {
 	/**
 	 * A tag which can be used to group spots for easier organisation.
@@ -11,6 +13,19 @@ public class SpotStatusDTO {
 	private String status;
 	private Integer checkInCount;
 	private Long areaId;
+	
+	public SpotStatusDTO() {
+	}
+	
+	public SpotStatusDTO(Spot spot) {
+		if(spot == null)
+			return;
+		
+		this.name = spot.getName();
+		this.id = spot.getId();
+		if(spot.getArea() != null)
+			this.areaId = spot.getArea().getId();
+	}
 	
 	public String getGroupTag() {
 		return groupTag;

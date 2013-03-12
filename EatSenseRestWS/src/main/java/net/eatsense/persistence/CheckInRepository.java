@@ -2,6 +2,7 @@ package net.eatsense.persistence;
 
 import java.util.List;
 
+import com.google.appengine.api.datastore.QueryResultIterable;
 import com.googlecode.objectify.Key;
 
 import net.eatsense.domain.Business;
@@ -22,8 +23,15 @@ public class CheckInRepository extends GenericRepository<CheckIn> {
 	public List<CheckIn> getBySpot(Key<Spot> spotKey) {
 		return ofy().query(clazz).filter("spot", spotKey).filter("archived", false).list();
 	}
+	public Iterable<Key<CheckIn>> iterateKeysByLocation(Key<Business> locationKey) {
+		logger.info("for {}", locationKey);
+		
+		return ofy().query(clazz).filter("business", locationKey).filter("archived", false).fetchKeys();
+	}
 	
 	public Iterable<CheckIn> iterateByLocation(Key<Business> locationKey) {
+		logger.info("for {}", locationKey);
+		
 		return ofy().query(clazz).filter("business", locationKey).filter("archived", false).fetch();
 	}
 }
