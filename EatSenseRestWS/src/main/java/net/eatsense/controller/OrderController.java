@@ -564,11 +564,10 @@ public class OrderController {
 			throw new OrderFailureException("Unable to find Spot for this CheckIn.");
 		}
 		
-		// Disabled until app store update - Nils 15.02.2013
-//		if(checkIn.getAccount() == null) {
-//			throw new UnauthorizedException("Login required to place orders", "error.account.required");
-//		}
-//		
+		if(checkIn.getAccount() == null) {
+			throw new UnauthorizedException("Login required to place orders", "error.account.required");
+		}
+		
 		List<Order> orders = orderRepo.query().ancestor(checkIn.getBusiness())
 				.filter("checkIn", checkIn.getKey())
 				.filter("status", OrderStatus.CART.toString()).list();

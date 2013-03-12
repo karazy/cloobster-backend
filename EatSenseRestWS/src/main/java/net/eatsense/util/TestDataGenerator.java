@@ -6,8 +6,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 import net.eatsense.auth.Role;
@@ -46,7 +49,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.KeyRange;
@@ -221,20 +227,29 @@ public class TestDataGenerator {
 		
 		
 		spots = new ArrayList<Spot>();
+		ArrayListMultimap<Key<Area>, Spot> areaSpotMap = ArrayListMultimap.create();
+		
 		for(Spot spot : importController.getSpots()) {
-			if(!spot.isWelcome())
+			if(!spot.isWelcome()) {
 				spots.add(spot);
+				areaSpotMap.put(spot.getArea(), spot);
+			}
 		}
-		
-		
 		
 		if(spots.size() == 0) {
 			// UNPOSSIBLE!!
 			logger.error("No Spot found in Test Data! Stopping creation");
 			throw new ServiceException("No Spot found in Test Data! Stopping creation");
 		}
-		Spot testSpot = spots.get(random.nextInt(spots.size()));
-		Spot testSpot2 = spots.get(random.nextInt(spots.size()));
+		Iterator<Key<Area>> iterator = areaSpotMap.keySet().iterator();
+		Key<Area> nextAreaKey = iterator.next();
+		Spot testSpot = areaSpotMap.get(nextAreaKey).get(random.nextInt(areaSpotMap.get(nextAreaKey).size()));
+		if(iterator.hasNext())
+			nextAreaKey = iterator.next();
+		Spot testSpot2 = areaSpotMap.get(nextAreaKey).get(random.nextInt(areaSpotMap.get(nextAreaKey).size()));
+		if(iterator.hasNext())
+			nextAreaKey = iterator.next();	
+		Spot testSpot3 = areaSpotMap.get(nextAreaKey).get(random.nextInt(areaSpotMap.get(nextAreaKey).size()));
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DATE, -1);
@@ -243,18 +258,16 @@ public class TestDataGenerator {
 		CheckIn checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.ORDER_PLACED, "Test Open Orders", null, new Date());
 		createTestOrders(checkIn,testSpot, OrderStatus.PLACED, 3);
 		
-		checkIn = createAndSaveCheckIn(testSpot2, CheckInStatus.ORDER_PLACED, "Test Open Orders inactive", null, calendar.getTime());
-		createTestOrders(checkIn,testSpot2, OrderStatus.PLACED, 3);
+		checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.ORDER_PLACED, "Test Open Orders inactive", null, calendar.getTime());
+		createTestOrders(checkIn,testSpot, OrderStatus.PLACED, 3);
 		
-		testSpot = spots.get(random.nextInt(spots.size()));
-		createAndSaveCheckIn(testSpot, CheckInStatus.CHECKEDIN, "Test CheckedIn", null, null);
+		createAndSaveCheckIn(testSpot2, CheckInStatus.CHECKEDIN, "Test CheckedIn", null, null);
 		
 		createAndSaveCheckIn(testSpot2, CheckInStatus.CHECKEDIN, "Test CheckedIn inactive", null, calendar.getTime());
 		
-		testSpot = spots.get(random.nextInt(spots.size()));
-		checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.PAYMENT_REQUEST, "Test Payment Request", null, new Date());
-		List<Order> orders = createTestOrders(checkIn, testSpot, OrderStatus.RECEIVED, 2);
-		createTestBill(checkIn, orders, business.getPaymentMethods().get(0), testSpot, CurrencyUnit.of(business.getCurrency()), false);
+		checkIn = createAndSaveCheckIn(testSpot3, CheckInStatus.PAYMENT_REQUEST, "Test Payment Request", null, new Date());
+		List<Order> orders = createTestOrders(checkIn, testSpot3, OrderStatus.RECEIVED, 2);
+		createTestBill(checkIn, orders, business.getPaymentMethods().get(0), testSpot3, CurrencyUnit.of(business.getCurrency()), false);
 		
 		List<Area> areas = importController.getAreas();
 		for (Area area : areas) {

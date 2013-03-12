@@ -53,7 +53,11 @@ public class ApiVersionFilter implements ContainerRequestFilter,ResourceFilter {
 			logger.info("No valid \"cloobster-api\" value set in header. Assuming version 1.");
 		}
 		else {
-			requestApiVersionNumber = Integer.parseInt(requestApiVersionString);
+			try {
+				requestApiVersionNumber = Integer.parseInt(requestApiVersionString);
+			} catch (NumberFormatException e) {
+				logger.warn("No valid \"cloobster-api\" value set in header. Assuming version 1.",e);
+			}
 		}
 			
 		if(requestApiVersionNumber < acceptedMinVersion) {
