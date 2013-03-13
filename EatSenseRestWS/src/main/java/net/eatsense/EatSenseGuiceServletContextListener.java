@@ -16,6 +16,7 @@ import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Subscription;
+import net.eatsense.exceptions.CapabilityDisabledExceptionMapper;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
@@ -119,6 +120,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(AdminResource.class);
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
+						bind(CapabilityDisabledExceptionMapper.class);
 						bind(NicknameGenerator.class);
 						bind(UploadsResource.class);
 						bind(DownloadResource.class);
