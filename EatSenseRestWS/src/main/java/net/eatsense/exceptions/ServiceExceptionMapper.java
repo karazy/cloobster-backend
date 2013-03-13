@@ -10,6 +10,7 @@ import javax.ws.rs.ext.Provider;
 
 import net.eatsense.representation.ErrorDTO;
 
+import com.google.apphosting.api.ApiProxy.CapabilityDisabledException;
 import com.google.inject.Singleton;
 
 @Provider
