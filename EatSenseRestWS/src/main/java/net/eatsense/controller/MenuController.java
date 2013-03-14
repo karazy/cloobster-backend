@@ -17,6 +17,7 @@ import javax.validation.groups.Default;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -58,9 +59,11 @@ public class MenuController {
 	private final ValidationHelper validator;
 	private final ChoiceRepository choiceRepo;
 	private final ImageController imageCtrl;
+	private final AreaRepository areaRepo;
 
 	@Inject
 	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl) {
+		this.areaRepo = areaRepo;
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
@@ -227,6 +230,20 @@ public class MenuController {
 		Menu menu = menuRepo.newEntity();
 		menu.setBusiness(business.getKey());
 		menuData = updateMenu(menu, menuData);
+		
+		// Find welcome Area for this Location
+		List<Area> welcomeAreas = areaRepo.getListByParentAndProperty(business.getKey(), "welcome", true);
+		if(welcomeAreas.size() != 1) {
+			logger.warn("{} has no or more than one welcome Area!", business.getKey());
+		}
+		else {
+			Area welcomeArea = welcomeAreas.get(0);
+			if(welcomeArea.getMenus() == null)
+				welcomeArea.setMenus(new ArrayList<Key<Menu>>());
+			// Add Menu and save welcome Area
+			welcomeArea.getMenus().add(menu.getKey());
+			areaRepo.saveOrUpdate(welcomeArea);
+		}
 		
 		return menuData;
 	}
