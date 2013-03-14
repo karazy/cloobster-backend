@@ -37,8 +37,6 @@ public class RegistrationDTO {
 	@Pattern(regexp= "^(?=[!-~]*$)(?=.*([^A-Za-z0-9]|\\d))(?=.*[a-zA-Z]).*$")
 	String password;
 	
-	@NotNull
-	@NotEmpty
 	String phone;
 	
 	@Valid
