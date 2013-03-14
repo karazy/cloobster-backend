@@ -8,6 +8,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 import mediautil.gen.directio.OutStreamToIterativeReader;
 import net.eatsense.configuration.Configuration;
@@ -58,12 +62,25 @@ public class SpotPurePDFGenerator extends AbstractDocumentGenerator{
 	public byte[] generate(Document document) {
 		checkNotNull(document, "document was null");
 		
-		Collection<Spot> entities = spotRepo.getByKeys(spotRepo.getKeys(document.getBusiness(), document.getEntityIds()));
+		List<Spot> entities = new LinkedList<Spot>(spotRepo.getByKeys(spotRepo.getKeys(document.getBusiness(), document.getEntityIds())));
 		
 		if(entities.isEmpty()) {
 			logger.error("No Spot entities found for PDF generation, for {}", document.getKey());
 			throw new ServiceException("Internal Error, no Spots found for PDF generation.");
 		}
+		
+		// Create comparator for spot sorting by name ascending
+		Comparator<Spot> COMPARATOR = new Comparator<Spot>()
+				    {
+				    // This is where the sorting happens.
+				        public int compare(Spot o1, Spot o2)
+				        {
+				            return o1.getName().compareTo(o2.getName());
+				        }
+				    };
+
+		// Sort the spots
+		Collections.sort(entities, COMPARATOR);
 		
 		PDF pdf;
 		try {
