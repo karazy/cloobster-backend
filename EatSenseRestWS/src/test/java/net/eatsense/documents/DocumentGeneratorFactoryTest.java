@@ -1,4 +1,4 @@
-package net.eatsense.document;
+package net.eatsense.documents;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;

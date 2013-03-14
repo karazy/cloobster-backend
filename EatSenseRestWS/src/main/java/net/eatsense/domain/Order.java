@@ -67,6 +67,9 @@ public class Order extends GenericEntity<Order> {
 	@Min(0)
 	private long productPrice;
 	
+	@Unindexed
+	private boolean productSpecial;
+	
 	@Embedded
 	@Unindexed
 	private ImageDTO image;
@@ -232,4 +235,15 @@ public class Order extends GenericEntity<Order> {
 	public void setProductImage(ImageDTO productImage) {
 		this.image = productImage;
 	}
+
+
+	public boolean isProductSpecial() {
+		return productSpecial;
+	}
+
+	public void setProductSpecial(boolean productSpecial) {
+		this.productSpecial = productSpecial;
+	}
+	
+	
 }

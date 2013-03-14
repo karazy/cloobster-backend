@@ -60,6 +60,11 @@ public class CheckIn extends GenericEntity<CheckIn>{
 	private Date checkInTime;
 	
 	/**
+	 * Time of last known activity ( order placed, feedback sent, VIP call)
+	 */
+	private Date lastActivity;
+	
+	/**
 	 * The unique Id of the cloobster installation on a phone. Primarily used to block users
 	 * who try to abuse the service by issuing orders they don't
 	 * pay or need, also for anonymous history creation.
@@ -203,6 +208,14 @@ public class CheckIn extends GenericEntity<CheckIn>{
 
 	public void setArea(Key<Area> area) {
 		this.area = area;
+	}
+
+	public Date getLastActivity() {
+		return lastActivity;
+	}
+
+	public void setLastActivity(Date lastActivity) {
+		this.lastActivity = lastActivity;
 	}
 	
 	

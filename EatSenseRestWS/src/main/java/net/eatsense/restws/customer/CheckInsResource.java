@@ -15,7 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
-import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
@@ -25,6 +24,8 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.User;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.filter.HttpMethods;
+import net.eatsense.filter.annotation.ApiVersion;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.HistoryStatusDTO;

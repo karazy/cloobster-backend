@@ -29,6 +29,10 @@ public class OrderRepository extends GenericRepository<Order> {
 	}
 	
 	public Iterable<Order> belongingToLocationAndCheckIn(Business location, Key<CheckIn> checkInKey) {
-		return query().ancestor(location).filter("checkIn", checkInKey).fetch();
+		return belongingToCheckIn(checkInKey);
+	}
+
+	public Iterable<Order> belongingToCheckIn(Key<CheckIn> checkInKey) {
+		return query().filter("checkIn", checkInKey).fetch();
 	}
 }

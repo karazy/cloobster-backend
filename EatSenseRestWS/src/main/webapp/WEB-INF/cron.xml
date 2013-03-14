@@ -10,4 +10,9 @@
      <description>Check online status of cockpit channel connections.</description>
      <schedule>every 30 minutes</schedule>
    </cron>
+   <cron>
+     <url>/cron/checkinactivecheckins</url>
+     <description>Check last activity of checkins clean or notify the cockpit.</description>
+     <schedule>every 12 hours</schedule>
+   </cron>
 </cronentries>

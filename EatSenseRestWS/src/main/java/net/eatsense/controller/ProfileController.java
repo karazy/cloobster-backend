@@ -65,7 +65,7 @@ public class ProfileController {
 	 * @param profileData
 	 * @return updated profile
 	 */
-	public CustomerProfile updateCustomerProfile(Key<CustomerProfile> profileKey, CustomerProfileDTO profileData) {
+	public CustomerProfile getAndUpdateCustomerProfile(Key<CustomerProfile> profileKey, CustomerProfileDTO profileData) {
 		checkNotNull(profileKey, "profileKey was null");
 		
 		return updateCustomerProfile(get(profileKey), profileData);

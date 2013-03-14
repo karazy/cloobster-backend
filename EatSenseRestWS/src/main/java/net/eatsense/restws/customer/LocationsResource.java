@@ -10,11 +10,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
-import net.eatsense.HttpMethods;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.filter.HttpMethods;
 import net.eatsense.persistence.LocationRepository;
 
 import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;

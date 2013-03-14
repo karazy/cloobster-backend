@@ -4,16 +4,19 @@ import java.util.Date;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.controller.ChannelController;
+import net.eatsense.controller.CheckInController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 
 @Path("/cron")
@@ -21,12 +24,14 @@ public class CronResource {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final AccessTokenRepository accessTokenRepo;
-	private final ChannelController channelCtrl;
+	private final Provider<ChannelController> channelCtrlProvider;
+	private final Provider<CheckInController> checkInCtrlProvider;
 
 	@Inject
-	public CronResource(AccessTokenRepository accessTokenRepo, ChannelController channelCtrl) {
+	public CronResource(AccessTokenRepository accessTokenRepo, Provider<ChannelController> channelCtrlProvider, Provider<CheckInController> chekInCtrlProvider) {
 		this.accessTokenRepo = accessTokenRepo;
-		this.channelCtrl = channelCtrl;
+		this.channelCtrlProvider = channelCtrlProvider;
+		this.checkInCtrlProvider = chekInCtrlProvider;
 	}
 	
 	/**
@@ -36,19 +41,27 @@ public class CronResource {
 	 */
 	@GET
 	@Path("cleantokens")
-	public String deleteExpiredTokens() {
+	public Response deleteExpiredTokens() {
 		QueryResultIterable<Key<AccessToken>> expiredTokens = this.accessTokenRepo.query().filter("expires <=", new Date()).fetchKeys();
 		
 		accessTokenRepo.delete(expiredTokens);
 		
-		return "OK";
+		return Response.ok().build();
 	}
 	
 	@GET
 	@Path("checkcockpits")
-	public String checkCockpitChannels(){
-		channelCtrl.checkAllOnlineChannels();
+	public Response checkCockpitChannels(){
+		channelCtrlProvider.get().checkAllOnlineChannels();
 		
-		return "OK";
+		return Response.ok().build();
+	}
+	
+	@GET
+	@Path("checkinactivecheckins")
+	public Response checkInactiveCheckIns() {
+		checkInCtrlProvider.get().cleanInactiveCheckInsAndNotify();
+		
+		return Response.ok().build();
 	}
 }

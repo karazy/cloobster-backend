@@ -20,6 +20,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.ResourceContext;
@@ -46,7 +47,10 @@ public class CheckInsResource {
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public Collection<CheckInStatusDTO> getCheckIns(@QueryParam("spotId") Long spotId) {
+	public Iterable<CheckInStatusDTO> getCheckIns(@QueryParam("spotId") Long spotId, @QueryParam("inactive") boolean inactive) {
+		if(inactive) {
+			return Iterables.transform(checkInController.getInactiveCheckIns(business.getKey()),CheckInStatusDTO.toDTO);
+		}
 		return checkInController.getCheckInStatusesBySpot(business, spotId);	
 	}
 	

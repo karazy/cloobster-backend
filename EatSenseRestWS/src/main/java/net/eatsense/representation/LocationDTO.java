@@ -36,6 +36,7 @@ public class LocationDTO {
 	
 	private Long activeSubscriptionId;
 	private Long pendingSubscriptionId;
+	private boolean inactiveCheckInNotificationActive;
 	
 	public LocationDTO() {
 		super();
@@ -57,6 +58,8 @@ public class LocationDTO {
 		this.basic = business.isBasic();
 		this.activeSubscriptionId = business.getActiveSubscription() != null ? business.getActiveSubscription().getId() : null;
 		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
+		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();
+		
 	}
 	
 	public String getName() {
@@ -157,4 +160,14 @@ public class LocationDTO {
 	public void setPendingSubscriptionId(Long pendingSubsriptionId) {
 		this.pendingSubscriptionId = pendingSubsriptionId;
 	}
+
+	public boolean isInactiveCheckInNotificationActive() {
+		return inactiveCheckInNotificationActive;
+	}
+
+	public void setInactiveCheckInNotificationActive(
+			boolean inactiveCheckInNotificationActive) {
+		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
+	}
+
 }

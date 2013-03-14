@@ -6,6 +6,7 @@ package net.eatsense.controller;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -112,7 +113,7 @@ public class FeedbackControllerTest {
 		
 		ArgumentCaptor<NewFeedbackEvent> eventCaptor = ArgumentCaptor.forClass(NewFeedbackEvent.class);
 		
-		verify(eventBus).post(eventCaptor.capture());
+		verify(eventBus,times(2)).post(eventCaptor.capture());
 		NewFeedbackEvent event = eventCaptor.getValue();
 		assertThat(event.getCheckIn(), is(checkIn));
 		assertThat(event.getFeedback(), is(feedback));

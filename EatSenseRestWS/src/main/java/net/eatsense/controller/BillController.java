@@ -22,6 +22,7 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.NewBillEvent;
 import net.eatsense.event.UpdateBillEvent;
 import net.eatsense.exceptions.BillFailureException;
@@ -131,7 +132,7 @@ public class BillController {
 			throw new BillFailureException("Bill cannot be updated, bill already cleared.");
 		}
 		
-		Iterable<Order> ordersForCheckIn = allOrders.belongingToLocationAndCheckIn(business, bill.getCheckIn());
+		Iterable<Order> ordersForCheckIn = allOrders.belongingToCheckIn(bill.getCheckIn());
 		
 		if(!ordersForCheckIn.iterator().hasNext()) {
 			logger.error("Bill cannot be updated, no orders found.");
@@ -312,7 +313,7 @@ public class BillController {
 			throw new IllegalAccessException("Unable to create Bill for checkin at welcome spot");
 		}
 
-		Iterable<Order> ordersIterable = allOrders.belongingToLocationAndCheckIn(business, checkIn.getKey());
+		Iterable<Order> ordersIterable = allOrders.belongingToCheckIn(checkIn.getKey());
 		boolean foundOrderToBill = false;
 		
 		Long billId = null;
@@ -350,11 +351,11 @@ public class BillController {
 		request.setStatus(CheckInStatus.PAYMENT_REQUEST.toString());
 		requestRepo.saveOrUpdate(request);
 		
-		if(checkIn.getStatus() != CheckInStatus.PAYMENT_REQUEST) {
-			// Update the status of the checkIn
-			checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
-			checkInRepo.saveOrUpdate(checkIn);				
-		}
+		// Update the status of the checkIn
+		checkIn.setStatus(CheckInStatus.PAYMENT_REQUEST);
+		eventBus.post(new CheckInActivityEvent(checkIn, false));
+		checkInRepo.saveOrUpdate(checkIn);				
+		
 		NewBillEvent newEvent = new NewBillEvent(business, bill, checkIn, fromBusiness);
 		
 		Long oldestRequestId = requestRepo.getIdOfOldestRequestBelongingToSpot(checkIn.getSpot());
