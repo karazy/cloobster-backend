@@ -318,6 +318,7 @@ public class MenuController {
 		Iterable<Product> products = productRepo.iterateActiveProductsForBusiness(business.getKey());
 		
 		// Create set to check, if the menu key belonged to an active menu.
+		// TODO In the future maybe think of a better way to handle menu and product loading
 		ImmutableSet<Key<Menu>> menuSet = ImmutableSet.copyOf(activeMenus);
 		
 		List<Product> activeProducts = new ArrayList<Product>();
