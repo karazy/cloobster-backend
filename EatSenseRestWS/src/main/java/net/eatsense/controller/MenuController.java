@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -313,7 +314,21 @@ public class MenuController {
 	 * @return
 	 */
 	public Collection<ProductDTO> getProductsWithChoices(Business business) {
-		return transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(business.getKey()));
+		Iterable<Key<Menu>> activeMenus = menuRepo.iterateActiveMenuKeysForBusiness(business.getKey());
+		Iterable<Product> products = productRepo.iterateActiveProductsForBusiness(business.getKey());
+		
+		// Create set to check, if the menu key belonged to an active menu.
+		ImmutableSet<Key<Menu>> menuSet = ImmutableSet.copyOf(activeMenus);
+		
+		List<Product> activeProducts = new ArrayList<Product>();
+		for (Product product : products) {
+			if(menuSet.contains(product.getMenu())) {
+				// Only add to active products if the menu is in the active set.
+				activeProducts.add(product);
+			}
+		}
+		
+		return transform.productsToDtoWithChoices(activeProducts);
 	}
 	
 	/**
