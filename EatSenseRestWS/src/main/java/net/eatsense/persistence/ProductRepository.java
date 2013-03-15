@@ -16,4 +16,9 @@ public class ProductRepository extends GenericRepository<Product> {
 		logger.info("business: {}", businessKey);
 		return ofy().query(Product.class).ancestor(businessKey).filter("active", true).list();
 	}
+	
+	public Iterable<Product> iterateActiveProductsForBusiness(Key<Business> businessKey){
+		logger.info("business: {}", businessKey);
+		return ofy().query(Product.class).ancestor(businessKey).filter("active", true).fetch();
+	}
 }
