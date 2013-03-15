@@ -17,6 +17,7 @@ import javax.validation.groups.Default;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -39,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -58,9 +60,11 @@ public class MenuController {
 	private final ValidationHelper validator;
 	private final ChoiceRepository choiceRepo;
 	private final ImageController imageCtrl;
+	private final AreaRepository areaRepo;
 
 	@Inject
 	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl) {
+		this.areaRepo = areaRepo;
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
 		this.productRepo = pr;
@@ -228,6 +232,20 @@ public class MenuController {
 		menu.setBusiness(business.getKey());
 		menuData = updateMenu(menu, menuData);
 		
+		// Find welcome Area for this Location
+		List<Area> welcomeAreas = areaRepo.getListByParentAndProperty(business.getKey(), "welcome", true);
+		if(welcomeAreas.size() != 1) {
+			logger.warn("{} has no or more than one welcome Area!", business.getKey());
+		}
+		else {
+			Area welcomeArea = welcomeAreas.get(0);
+			if(welcomeArea.getMenus() == null)
+				welcomeArea.setMenus(new ArrayList<Key<Menu>>());
+			// Add Menu and save welcome Area
+			welcomeArea.getMenus().add(menu.getKey());
+			areaRepo.saveOrUpdate(welcomeArea);
+		}
+		
 		return menuData;
 	}
 
@@ -296,7 +314,21 @@ public class MenuController {
 	 * @return
 	 */
 	public Collection<ProductDTO> getProductsWithChoices(Business business) {
-		return transform.productsToDtoWithChoices(productRepo.getActiveProductsForBusiness(business.getKey()));
+		Iterable<Key<Menu>> activeMenus = menuRepo.iterateActiveMenuKeysForBusiness(business.getKey());
+		Iterable<Product> products = productRepo.iterateActiveProductsForBusiness(business.getKey());
+		
+		// Create set to check, if the menu key belonged to an active menu.
+		ImmutableSet<Key<Menu>> menuSet = ImmutableSet.copyOf(activeMenus);
+		
+		List<Product> activeProducts = new ArrayList<Product>();
+		for (Product product : products) {
+			if(menuSet.contains(product.getMenu())) {
+				// Only add to active products if the menu is in the active set.
+				activeProducts.add(product);
+			}
+		}
+		
+		return transform.productsToDtoWithChoices(activeProducts);
 	}
 	
 	/**

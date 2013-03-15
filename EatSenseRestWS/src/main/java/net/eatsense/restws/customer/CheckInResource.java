@@ -23,6 +23,7 @@ import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.filter.annotation.ApiVersion;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.RequestDTO;
 
@@ -138,9 +139,14 @@ public class CheckInResource {
 		return channelCtrlProvider.get().createCustomerChannel(checkIn, timeout);
 	}
 	
+	/**
+	 * Update all Orders with status cart to placed.
+	 * ApiVersion 2 - Account is now required.
+	 */
 	@PUT
 	@Path("cart")
 	@RolesAllowed(Role.GUEST)
+	@ApiVersion(min=2)
 	public void updateAllCartOrders() {
 		if(authenticated)
 			orderCtrlProvider.get().updateCartOrdersToPlaced(checkIn);

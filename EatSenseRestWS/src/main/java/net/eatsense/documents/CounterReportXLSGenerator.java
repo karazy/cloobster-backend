@@ -1,6 +1,8 @@
 package net.eatsense.documents;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,7 +47,34 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 	public String getMimeType() {
 		return "application/vnd.ms-excel";
 	}
+	
+	/**
+	 * @param column
+	 * @param row
+	 * @param text
+	 * @return
+	 */
+	Label makeLabel(int column, int row, String text) {
+		return new Label(column, row, text);
+	}
+	
+	/**
+	 * @param column
+	 * @param row
+	 * @param value
+	 * @return
+	 */
+	Number makeNumber(int column, int row, double value) {
+		return new Number(column, column, value);
+	}
+	
+	WritableWorkbook makeWorkbook(OutputStream outputStream) throws IOException {
+		return Workbook.createWorkbook(outputStream);
+	}
 
+	/* (non-Javadoc)
+	 * @see net.eatsense.documents.AbstractDocumentGenerator#generate(net.eatsense.domain.Document)
+	 */
 	@Override
 	public byte[] generate( Document document) {
 		Collection<Counter> entities = counterRepo.getByKeys(document.getEntityNames());
@@ -59,15 +88,15 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 		Business location = locationRepo.getByKey(document.getBusiness());
 		
 		try {
-			WritableWorkbook workbook = Workbook.createWorkbook(byteOutput);
+			WritableWorkbook workbook = makeWorkbook(byteOutput);
 			WritableSheet sheet = workbook.createSheet("cloobster Report", 0);
-			Label label = new Label(0, 0, "KPI");
-			Label label2 = new Label(1, 0, "Location");
-			Label label3 = new Label(2, 0, "Area");
-			Label label4 = new Label(3, 0, "Anzahl");
-			Label label5 = new Label(4, 0, "Tag");
-			Label label6 = new Label(5, 0, "Monat");
-			Label label7 = new Label(6, 0, "Jahr");
+			Label label = makeLabel(0, 0, "KPI");
+			Label label2 = makeLabel(1, 0, "Location");
+			Label label3 = makeLabel(2, 0, "Area");
+			Label label4 = makeLabel(3, 0, "Anzahl");
+			Label label5 = makeLabel(4, 0, "Tag");
+			Label label6 = makeLabel(5, 0, "Monat");
+			Label label7 = makeLabel(6, 0, "Jahr");
 			
 			sheet.addCell(label);
 			sheet.addCell(label2);
@@ -80,8 +109,10 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 			int row = 1;
 			for (Counter counter : entities) {
 				Area area = areaMap.get(counter.getAreaId());
+				
 				if(area == null) {
 					area = areaRepo.getById(document.getBusiness(), counter.getAreaId());
+					areaMap.put(area.getId(), area);
 				}
 				
 				addCells(sheet, row, counter, location.getName(), area.getName());
@@ -105,19 +136,19 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(counter.getPeriod());
 		
-		Label KPICell = new Label(0, row, counter.getName());
+		Label KPICell = makeLabel(0, row, counter.getName());
 		sheet.addCell(KPICell);
-		Label locationCell = new Label(1, row, locationName);
+		Label locationCell = makeLabel(1, row, locationName);
 		sheet.addCell(locationCell);
-		Label areaCell = new Label(2, row, areaName);
+		Label areaCell = makeLabel(2, row, areaName);
 		sheet.addCell(areaCell);
-		Number valueCell = new Number(3, row, counter.getCount());
+		Number valueCell = makeNumber(3, row, counter.getCount());
 		sheet.addCell(valueCell);
-		Number dayCell = new Number(4, row, calendar.get(Calendar.DAY_OF_MONTH));
+		Number dayCell = makeNumber(4, row, calendar.get(Calendar.DAY_OF_MONTH));
 		sheet.addCell(dayCell);
-		Number monthCell = new Number(5, row, calendar.get(Calendar.MONTH)+1);
+		Number monthCell = makeNumber(5, row, calendar.get(Calendar.MONTH)+1);
 		sheet.addCell(monthCell);
-		Number yearCell = new Number(6, row, calendar.get(Calendar.YEAR));
+		Number yearCell = makeNumber(6, row, calendar.get(Calendar.YEAR));
 		sheet.addCell(yearCell);
 	}
 }

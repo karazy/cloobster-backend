@@ -13,12 +13,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
-import net.eatsense.HttpMethods;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.ReadOnlyException;
+import net.eatsense.filter.HttpMethods;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.LocationDTO;
 import net.eatsense.representation.LocationProfileDTO;

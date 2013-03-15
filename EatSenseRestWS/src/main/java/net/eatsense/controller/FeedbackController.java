@@ -22,6 +22,7 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.NewFeedbackEvent;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.exceptions.ValidationException;
@@ -110,6 +111,9 @@ public class FeedbackController {
 		Key<Feedback> key = feedbackRepo.saveOrUpdate(feedback);
 		// Save the Key with the CheckIn so that we can find it quicker.
 		checkIn.setFeedback(key );
+		
+		eventBus.post(new CheckInActivityEvent(checkIn, false));
+		
 		checkInRepo.saveOrUpdate(checkIn);
 		
 		eventBus.post(new NewFeedbackEvent(checkIn, feedback));
@@ -137,7 +141,7 @@ public class FeedbackController {
 		validateAndUpdateFeedbackData(feedbackData, feedback);
 		
 		feedbackRepo.saveOrUpdate(feedback);
-		
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 		return feedback;
 	}
 

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.appengine.api.datastore.QueryResultIterable;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
@@ -22,6 +23,16 @@ public class MenuRepository extends GenericRepository<Menu> {
 	public List<Menu> getActiveMenusForBusiness(Key<Business> businessKey) {
 		logger.info("business: {}", businessKey);
 		return ofy().query(Menu.class).ancestor(businessKey).filter("active", true).list();
+	}
+	
+	public Iterable<Menu> iterateActiveMenusForBusiness(Key<Business> businessKey) {
+		logger.info("business: {}", businessKey);
+		return ofy().query(Menu.class).ancestor(businessKey).filter("active", true).fetch();
+	}
+	
+	public Iterable<Key<Menu>> iterateActiveMenuKeysForBusiness(Key<Business> businessKey) {
+		logger.info("business: {}", businessKey);
+		return ofy().query(Menu.class).ancestor(businessKey).filter("active", true).fetchKeys();
 	}
 	
 	public List<Menu> getActiveMenusForBusinessAndArea(Key<Business> businessKey, long areaId) {

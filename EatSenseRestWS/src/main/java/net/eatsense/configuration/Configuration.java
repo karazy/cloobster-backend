@@ -80,10 +80,10 @@ public class Configuration {
 		config.setPageWidth(297);
 		config.setPageHeight(421);
 		
-		config.setBarcodePositionX(150);
-		config.setBarcodePositionY(250);
-		config.setTextPositionX(300);
-		config.setTextPositionY(450);
+		config.setBarcodePositionX(179);
+		config.setBarcodePositionY(141);
+		config.setTextPositionX(230);
+		config.setTextPositionY(397);
 		config.setFontSize(10);
 		config.setQrImageDPI(300);
 		

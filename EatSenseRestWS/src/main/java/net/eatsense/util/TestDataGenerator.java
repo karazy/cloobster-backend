@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -15,9 +16,8 @@ import java.util.Random;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.ImportController;
-import net.eatsense.counter.CounterRepository;
-import net.eatsense.counter.CounterService;
 import net.eatsense.counter.Counter.PeriodType;
+import net.eatsense.counter.CounterService;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Bill;
@@ -35,7 +35,6 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.SubscriptionStatus;
-import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.exceptions.ServiceException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.OfyService;
@@ -49,15 +48,16 @@ import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.labs.repackaged.com.google.common.collect.Collections2;
-import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.KeyRange;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyFactory;
 
 public class TestDataGenerator {
 	private static final String TEST_USERMAIL = "auto-test@karazy.net";
@@ -85,6 +85,7 @@ public class TestDataGenerator {
 
 	private final BillController billCtrl;
 	private final CounterService counterService;
+	private ObjectifyFactory ofyFactory;
 	
 	@Inject
 	public TestDataGenerator(BillController billCtrl, ImportController importController, InfoPageGenerator infoPageGenerator, OfyService ofyService, ProductRepository productRepo, OrderRepository orderRepo, AccountRepository accountRepo, ObjectMapper mapper, CounterService counterService) {
@@ -96,6 +97,7 @@ public class TestDataGenerator {
 		this.mapper = mapper;
 		this.counterService = counterService;
 		this.ofy = ofyService.ofy();
+		this.ofyFactory = ofyService.factory();
 		this.orderRepo = orderRepo;
 	}
 	
@@ -168,7 +170,7 @@ public class TestDataGenerator {
 		
 		for (int i = 0; i < numberOfPastCheckIns; i++) {
 			Spot spot = spots.get(random.nextInt(spots.size()));
-			CheckIn checkIn = createAndSaveCheckIn(spot, CheckInStatus.COMPLETE, "Test User", account.getKey());
+			CheckIn checkIn = createAndSaveCheckIn(spot, CheckInStatus.COMPLETE, "Test User", account.getKey(), null);
 			List<Order> orders = createTestOrders(checkIn, spot, OrderStatus.COMPLETE, random.nextInt(3)+1);
 			createTestBill(checkIn, orders, business.getPaymentMethods().get(0), spot, CurrencyUnit.of(business.getCurrency()), true);
 		}
@@ -225,30 +227,47 @@ public class TestDataGenerator {
 		
 		
 		spots = new ArrayList<Spot>();
+		ArrayListMultimap<Key<Area>, Spot> areaSpotMap = ArrayListMultimap.create();
+		
 		for(Spot spot : importController.getSpots()) {
-			if(!spot.isWelcome())
+			if(!spot.isWelcome()) {
 				spots.add(spot);
+				areaSpotMap.put(spot.getArea(), spot);
+			}
 		}
-		
-		
 		
 		if(spots.size() == 0) {
 			// UNPOSSIBLE!!
 			logger.error("No Spot found in Test Data! Stopping creation");
 			throw new ServiceException("No Spot found in Test Data! Stopping creation");
 		}
-		Spot testSpot = spots.get(random.nextInt(spots.size()));
+		Iterator<Key<Area>> iterator = areaSpotMap.keySet().iterator();
+		Key<Area> nextAreaKey = iterator.next();
+		Spot testSpot = areaSpotMap.get(nextAreaKey).get(random.nextInt(areaSpotMap.get(nextAreaKey).size()));
+		if(iterator.hasNext())
+			nextAreaKey = iterator.next();
+		Spot testSpot2 = areaSpotMap.get(nextAreaKey).get(random.nextInt(areaSpotMap.get(nextAreaKey).size()));
+		if(iterator.hasNext())
+			nextAreaKey = iterator.next();	
+		Spot testSpot3 = areaSpotMap.get(nextAreaKey).get(random.nextInt(areaSpotMap.get(nextAreaKey).size()));
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DATE, -1);
+		
 						
-		CheckIn checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.ORDER_PLACED, "Test Open Orders", null);
+		CheckIn checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.ORDER_PLACED, "Test Open Orders", null, new Date());
 		createTestOrders(checkIn,testSpot, OrderStatus.PLACED, 3);
 		
-		testSpot = spots.get(random.nextInt(spots.size()));
-		createAndSaveCheckIn(testSpot, CheckInStatus.CHECKEDIN, "Test CheckedIn", null);
+		checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.ORDER_PLACED, "Test Open Orders inactive", null, calendar.getTime());
+		createTestOrders(checkIn,testSpot, OrderStatus.PLACED, 3);
 		
-		testSpot = spots.get(random.nextInt(spots.size()));
-		checkIn = createAndSaveCheckIn(testSpot, CheckInStatus.PAYMENT_REQUEST, "Test Payment Request", null);
-		List<Order> orders = createTestOrders(checkIn, testSpot, OrderStatus.RECEIVED, 2);
-		createTestBill(checkIn, orders, business.getPaymentMethods().get(0), testSpot, CurrencyUnit.of(business.getCurrency()), false);
+		createAndSaveCheckIn(testSpot2, CheckInStatus.CHECKEDIN, "Test CheckedIn", null, null);
+		
+		createAndSaveCheckIn(testSpot2, CheckInStatus.CHECKEDIN, "Test CheckedIn inactive", null, calendar.getTime());
+		
+		checkIn = createAndSaveCheckIn(testSpot3, CheckInStatus.PAYMENT_REQUEST, "Test Payment Request", null, new Date());
+		List<Order> orders = createTestOrders(checkIn, testSpot3, OrderStatus.RECEIVED, 2);
+		createTestBill(checkIn, orders, business.getPaymentMethods().get(0), testSpot3, CurrencyUnit.of(business.getCurrency()), false);
 		
 		List<Area> areas = importController.getAreas();
 		for (Area area : areas) {
@@ -329,10 +348,13 @@ public class TestDataGenerator {
 			availableProducts.addAll(products.get(menuKey.getId()));
 		}
 		
-		for (int i = 0; i < number; i++) {
+		KeyRange<Order> keyRange = ofyFactory.allocateIds(checkIn.getBusiness(), Order.class, number);
+		for (Key<Order> newKey : keyRange) {
+			
 			Product randomProduct = availableProducts.get(random.nextInt(availableProducts.size()));
 			logger.info("Create Order for : {}", randomProduct.getKey());
 			Order newOrder = new Order();
+			newOrder.setId(newKey.getId());
 			newOrder.setAmount(1);
 			newOrder.setBusiness(checkIn.getBusiness());
 			Key<CheckIn> checkInKey = checkIn.getKey();
@@ -361,7 +383,7 @@ public class TestDataGenerator {
 		return orders;
 	}
 
-	private CheckIn createAndSaveCheckIn(Spot spot, CheckInStatus status, String nickname, Key<Account> accountKey) {
+	private CheckIn createAndSaveCheckIn(Spot spot, CheckInStatus status, String nickname, Key<Account> accountKey, Date lastActivity) {
 		CheckIn checkIn = new CheckIn();
 		checkIn.setArea(spot.getArea());
 		checkIn.setBusiness(spot.getBusiness());
@@ -373,6 +395,7 @@ public class TestDataGenerator {
 			checkIn.setArchived(true);
 		checkIn.setUserId(IdHelper.generateId());
 		checkIn.setAccount(accountKey);
+		checkIn.setLastActivity(lastActivity);
 		
 		ofy.put(checkIn);
 		

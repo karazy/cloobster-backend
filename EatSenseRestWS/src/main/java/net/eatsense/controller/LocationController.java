@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -25,6 +26,7 @@ import net.eatsense.domain.Request;
 import net.eatsense.domain.Request.RequestType;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.event.CheckInActivityEvent;
 import net.eatsense.event.DeleteCustomerRequestEvent;
 import net.eatsense.event.DeleteSpotEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
@@ -57,8 +59,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -123,30 +128,51 @@ public class LocationController {
 	public List<SpotStatusDTO> getSpotStatusData(Business business){
 		checkNotNull(business, "business cannot be null");
 		checkNotNull(business.getId(), "business id cannot be null");
-		List<Spot> allSpots = spotRepo.getByParent(business);
+		
+		Iterable<Spot> allSpots = spotRepo.belongingToLocationAsync(business);
+		Iterable<CheckIn> allCheckIns = checkInRepo.iterateByLocation(business.getKey());
+		Iterable<Request> allRequests = requestRepo.belongingToLocationOrderedByReceivedTime(business);
+		
+		Map<Long, Integer> checkInCountBySpot = Maps.newHashMap();
+		Map<Long, String> statusBySpot = Maps.newHashMap();
+		
 		List<SpotStatusDTO> spotDtos = new ArrayList<SpotStatusDTO>();
 		
-		for (Spot spot : allSpots) {
-			SpotStatusDTO spotDto = new SpotStatusDTO();
-			spotDto.setId(spot.getId());
-			spotDto.setName(spot.getName());
-			if(spot.getArea()!=null) {
-				spotDto.setAreaId(spot.getArea().getId());
+		// Count every checkIn and save by spot id.
+		for (CheckIn checkIn : allCheckIns) {
+			Integer count = checkInCountBySpot.get(checkIn.getSpot().getId());
+			if(count == null) {
+				count = 1;
 			}
-			int checkInCount = checkInRepo.countActiveCheckInsAtSpot(spot.getKey());
+			else
+				count++;
+			
+			checkInCountBySpot.put(checkIn.getSpot().getId(), count);
+		}
+		
+		// Find every spot status
+		for (Request request : allRequests) {
+			if(statusBySpot.get(request.getSpot().getId()) == null) {
+				statusBySpot.put(request.getSpot().getId(), request.getStatus());
+			}
+		}
+		
+		for (Spot spot : allSpots) {
+			SpotStatusDTO spotDto = new SpotStatusDTO(spot);
+			Integer checkInCount = Objects.firstNonNull(checkInCountBySpot.get(spot.getId()), 0);
 			spotDto.setCheckInCount(checkInCount);
 			
+			// Dont add the spot if it is not active and there are 0 checkins.
+			if(!spot.isActive() && checkInCount == 0) {
+				continue;
+			}
+
 			if(checkInCount > 0) {
-				// Only check the request status if there are checkins.
-				Request request = requestRepo.ofy().query(Request.class).filter("spot",spot.getKey()).order("-receivedTime").get();
-				if(request != null) {
-					spotDto.setStatus(request.getStatus());
-				}
+				// Get the request status from memory
+				spotDto.setStatus(statusBySpot.get(spot.getId()));
 			}
 			
-			// Dont add the spot if it is not active and there are 0 checkins.
-			if(spot.isActive() || checkInCount > 0)
-				spotDtos.add(spotDto);
+			spotDtos.add(spotDto);
 		}
 		
 		return spotDtos;
@@ -207,7 +233,8 @@ public class LocationController {
 		
 		requestData.setId(request.getId());
 		
-		eventBus.post(new NewCustomerRequestEvent(location, checkIn, request));								
+		eventBus.post(new NewCustomerRequestEvent(location, checkIn, request));
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 		return requestData;
 	}
 	
@@ -328,6 +355,7 @@ public class LocationController {
 		requestRepo.delete(request);
 		
 		eventBus.post(new DeleteCustomerRequestEvent(locationRepo.getByKey(checkIn.getBusiness()), request, true));
+		eventBus.post(new CheckInActivityEvent(checkIn, true));
 		
 		return requestData;
 	}
@@ -477,6 +505,7 @@ public class LocationController {
 		business.setEmail(businessData.getEmail());
 		business.setStars(businessData.getStars());
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
+		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme

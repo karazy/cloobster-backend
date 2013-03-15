@@ -7,6 +7,7 @@ import java.util.List;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
+import net.eatsense.event.CheckInInactiveEvent;
 import net.eatsense.event.ConfirmAllOrdersEvent;
 import net.eatsense.event.DeleteCheckInEvent;
 import net.eatsense.event.DeleteCustomerRequestEvent;
@@ -325,5 +326,11 @@ public class MessageController {
 		messages.add(new MessageDTO("spot", "update", spotData));
 		
 		channelCtrl.sendMessages(event.getBusiness(), messages);
+	}
+	
+	@Subscribe
+	public void sendInactiveCheckInMessage(CheckInInactiveEvent event) {
+		// Send message to notify open cockpits
+		channelCtrl.sendMessage(event.getLocation(), new MessageDTO("checkin","inactive", null));
 	}
 }

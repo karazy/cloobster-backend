@@ -1,6 +1,7 @@
 package net.eatsense;
 
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import net.eatsense.auth.AccessTokenFilter;
@@ -9,13 +10,19 @@ import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
+import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.CounterController;
 import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Subscription;
+import net.eatsense.exceptions.CapabilityDisabledExceptionMapper;
 import net.eatsense.exceptions.ServiceExceptionMapper;
+import net.eatsense.filter.ApiVersionFilter;
+import net.eatsense.filter.ApiVersionFilterFactory;
+import net.eatsense.filter.CacheResponseFilter;
+import net.eatsense.filter.SuffixFilter;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ChannelResource;
@@ -91,7 +98,6 @@ public class EatSenseGuiceServletContextListener extends
 						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
 
 						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
-								ApiVersionFilter.class.getName() + "," +
 								AccessTokenFilter.class.getName() + ","+
 								SecurityFilter.class.getName()+ "," + 
 								SuffixFilter.class.getName());
@@ -102,8 +108,8 @@ public class EatSenseGuiceServletContextListener extends
 						
 						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
 						
-						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
-				                RolesAllowedResourceFilterFactory.class.getName());
+						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,RolesAllowedResourceFilterFactory.class.getName() + "," +
+								ApiVersionFilterFactory.class.getName());
 						bind(AccountsResource.class);
 						bind(LocationsResource.class);
 						bind(net.eatsense.restws.customer.AccountsResource.class);
@@ -118,6 +124,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(AdminResource.class);
 						bind(EventBus.class).in(Singleton.class);
 						bind(ServiceExceptionMapper.class);
+						bind(CapabilityDisabledExceptionMapper.class);
 						bind(NicknameGenerator.class);
 						bind(UploadsResource.class);
 						bind(DownloadResource.class);
@@ -197,6 +204,7 @@ public class EatSenseGuiceServletContextListener extends
 		eventBus.register(injector.getInstance(MailController.class));
 		eventBus.register(injector.getInstance(InfoPageController.class));
 		eventBus.register(injector.getInstance(CounterController.class));
+		eventBus.register(injector.getInstance(CheckInController.class));
 		
 		// Register Objectify datastore entities.
 		

@@ -248,15 +248,7 @@ public class Transformer {
 	public CheckInStatusDTO toStatusDto(CheckIn checkIn) {
 		if(checkIn == null)
 			return null;
-			
-		CheckInStatusDTO checkInStatus = new CheckInStatusDTO();
-		
-		checkInStatus.setId(checkIn.getId());
-		checkInStatus.setNickname(checkIn.getNickname());
-		checkInStatus.setStatus(checkIn.getStatus());
-		checkInStatus.setCheckInTime(checkIn.getCheckInTime());
-		checkInStatus.setSpotId(checkIn.getSpot().getId());
-		
-		return checkInStatus;
+				
+		return new CheckInStatusDTO(checkIn);
 	}
 }
