@@ -41,7 +41,7 @@ public class ReportController {
 			logger.warn("kpi was not set or empty");
 			throw new ValidationException("kpi was not set or empty");
 		}
-		
+			
 		if(fromDate == null) {
 			logger.warn("fromDate was not set");
 			throw new ValidationException("fromDate was not set");
