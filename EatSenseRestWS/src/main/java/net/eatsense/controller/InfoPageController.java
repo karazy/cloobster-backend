@@ -198,7 +198,7 @@ public class InfoPageController {
 			}
 			infoPageRepo.saveOrUpdateTranslation(infoPage, locale);
 		}
-		else if(infoPage.isDirty()){
+		else if(infoPage.isDirty()) {
 			infoPageRepo.saveOrUpdate(infoPage);
 		}
 		

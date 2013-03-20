@@ -46,7 +46,7 @@ public class InfoPageDTO {
 		
 		hideInDashboard = infoPage.isHideInDashboard();
 		url = infoPage.getUrl();
-		type = infoPage.getType();
+		type = infoPage.getType() == null ? InfoPageType.STATIC : infoPage.getType();
 		createdOn = infoPage.getCreatedOn();
 		date = infoPage.getDate();
 	}
