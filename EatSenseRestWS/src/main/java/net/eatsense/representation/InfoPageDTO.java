@@ -1,6 +1,9 @@
 package net.eatsense.representation;
 
+import java.util.Date;
+
 import net.eatsense.domain.InfoPage;
+import net.eatsense.domain.InfoPage.InfoPageType;
 
 public class InfoPageDTO {
 	private Long id;
@@ -8,6 +11,10 @@ public class InfoPageDTO {
 	private String title;
 	private String shortText;
 	private String html;
+	private String url;
+	private InfoPageType type;
+	private Date createdOn;
+	private Date date;
 	private String imageUrl;
 	private ImageDTO image;
 	private boolean hideInDashboard;
@@ -24,19 +31,24 @@ public class InfoPageDTO {
 	}
 	
 	public InfoPageDTO(InfoPage infoPage) {
-		if(infoPage != null) {
-			id = infoPage.getId();
-			title = infoPage.getTitle();
-			shortText = infoPage.getShortText();
-			html = infoPage.getHtml();
-			image = (infoPage.getImages() != null && !infoPage.getImages().isEmpty())
-					? infoPage.getImages().get(0)
-					: null;
-			imageUrl = (image != null) ? image.getUrl()
-					: null;
-			
-			hideInDashboard = infoPage.isHideInDashboard();
-		}
+		if(infoPage == null)
+			return;
+		
+		id = infoPage.getId();
+		title = infoPage.getTitle();
+		shortText = infoPage.getShortText();
+		html = infoPage.getHtml();
+		image = (infoPage.getImages() != null && !infoPage.getImages().isEmpty())
+				? infoPage.getImages().get(0)
+				: null;
+		imageUrl = (image != null) ? image.getUrl()
+				: null;
+		
+		hideInDashboard = infoPage.isHideInDashboard();
+		url = infoPage.getUrl();
+		type = infoPage.getType();
+		createdOn = infoPage.getCreatedOn();
+		date = infoPage.getDate();
 	}
 	
 	public String getTitle() {
@@ -78,5 +90,37 @@ public class InfoPageDTO {
 
 	public void setHideInDashboard(boolean hideInDashboard) {
 		this.hideInDashboard = hideInDashboard;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public InfoPageType getType() {
+		return type;
+	}
+
+	public void setType(InfoPageType type) {
+		this.type = type;
+	}
+
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}	
 }

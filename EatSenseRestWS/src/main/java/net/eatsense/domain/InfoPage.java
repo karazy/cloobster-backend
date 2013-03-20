@@ -1,5 +1,6 @@
 package net.eatsense.domain;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Embedded;
@@ -12,11 +13,26 @@ import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
 public class InfoPage extends GenericEntity<InfoPage> {
+	
+	public enum InfoPageType {
+		STATIC,
+		LINK
+	}
+
 	private String title;
 	private String shortText;
 	
 	@Unindexed
 	private String html;
+	
+	@Unindexed
+	private String url;
+	
+	private InfoPageType type;
+	
+	private Date createdOn;
+	
+	private Date date;
 	
 	@Embedded
 	@Unindexed
@@ -100,6 +116,47 @@ public class InfoPage extends GenericEntity<InfoPage> {
 		if(!Objects.equal(this.hideInDashboard, hideInDashboard)) {
 			this.setDirty(true);
 			this.hideInDashboard = hideInDashboard;
+		}
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		if(!Objects.equal(this.url, url)) {
+			this.setDirty(true);
+			this.url = url;
+		}
+	}
+
+	public InfoPageType getType() {
+		return type;
+	}
+
+	public void setType(InfoPageType type) {
+		if(!Objects.equal(this.type, type)) {
+			this.setDirty(true);
+			this.type = type;
+		}
+	}
+
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		if(!Objects.equal(this.date, date)) {
+			this.setDirty(true);
+			this.date = date;
 		}
 	}
 }

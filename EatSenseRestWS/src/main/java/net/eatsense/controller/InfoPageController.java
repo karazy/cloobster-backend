@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -160,6 +161,7 @@ public class InfoPageController {
 		checkNotNull(infoPageData, "infoPageData was null");
 		
 		InfoPage infoPage = infoPageRepo.newEntity();
+		infoPage.setCreatedOn(new Date());
 		infoPage.setBusiness(businessKey);
 			
 		return update(infoPage, infoPageData);
@@ -185,7 +187,10 @@ public class InfoPageController {
 		
 		infoPage.setShortText(infoPageData.getShortText());
 		infoPage.setTitle(infoPageData.getTitle());
-		infoPage.setHideInDashboard(infoPageData.isHideInDashboard());		
+		infoPage.setHideInDashboard(infoPageData.isHideInDashboard());
+		infoPage.setDate(infoPageData.getDate());
+		infoPage.setUrl(infoPageData.getUrl());
+		infoPage.setType(infoPageData.getType());
 		
 		if(locale != null) {
 			if(infoPage.getId() == null) {
