@@ -1,4 +1,6 @@
 package net.eatsense.restws.business;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -60,7 +62,11 @@ public class InfoPagesResource {
 	 */
 	@GET
 	@Path("{infoPageId}")
-	public InfoPageDTO getInfoPage(@PathParam("infoPageId") long id,@QueryParam("lang") List<Locale> locales) {
+	public InfoPageDTO getInfoPage(@PathParam("infoPageId") long id,@QueryParam("lang") String locale) {
+		List<Locale> locales = new ArrayList<Locale>();
+		for(String localeString : locale.split(",")){
+			locales.add(new Locale(localeString));
+		}
 		if(locales.isEmpty())
 			return new InfoPageDTO(infoPageCtrl.get(business.getKey(), id));
 		else
