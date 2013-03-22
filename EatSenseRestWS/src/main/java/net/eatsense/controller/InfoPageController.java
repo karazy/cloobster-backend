@@ -190,8 +190,7 @@ public class InfoPageController {
 		infoPage.setHideInDashboard(infoPageData.isHideInDashboard());
 		infoPage.setDate(infoPageData.getDate());
 		infoPage.setUrl(infoPageData.getUrl());
-		infoPage.setType(infoPageData.getType());
-		
+
 		if(locale != null) {
 			if(infoPage.getId() == null) {
 				infoPageRepo.saveOrUpdate(infoPage);

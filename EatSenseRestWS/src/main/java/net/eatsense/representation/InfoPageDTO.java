@@ -3,7 +3,6 @@ package net.eatsense.representation;
 import java.util.Date;
 
 import net.eatsense.domain.InfoPage;
-import net.eatsense.domain.InfoPage.InfoPageType;
 
 public class InfoPageDTO {
 	private Long id;
@@ -12,7 +11,6 @@ public class InfoPageDTO {
 	private String shortText;
 	private String html;
 	private String url;
-	private InfoPageType type;
 	private Date createdOn;
 	private Date date;
 	private String imageUrl;
@@ -46,7 +44,6 @@ public class InfoPageDTO {
 		
 		hideInDashboard = infoPage.isHideInDashboard();
 		url = infoPage.getUrl();
-		type = infoPage.getType() == null ? InfoPageType.STATIC : infoPage.getType();
 		createdOn = infoPage.getCreatedOn();
 		date = infoPage.getDate();
 	}
@@ -98,14 +95,6 @@ public class InfoPageDTO {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public InfoPageType getType() {
-		return type;
-	}
-
-	public void setType(InfoPageType type) {
-		this.type = type;
 	}
 
 	public Date getCreatedOn() {

@@ -13,11 +13,6 @@ import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
 public class InfoPage extends GenericEntity<InfoPage> {
-	
-	public enum InfoPageType {
-		STATIC,
-		LINK
-	}
 
 	private String title;
 	private String shortText;
@@ -27,8 +22,6 @@ public class InfoPage extends GenericEntity<InfoPage> {
 	
 	@Unindexed
 	private String url;
-	
-	private InfoPageType type;
 	
 	private Date createdOn;
 	
@@ -127,17 +120,6 @@ public class InfoPage extends GenericEntity<InfoPage> {
 		if(!Objects.equal(this.url, url)) {
 			this.setDirty(true);
 			this.url = url;
-		}
-	}
-
-	public InfoPageType getType() {
-		return type;
-	}
-
-	public void setType(InfoPageType type) {
-		if(!Objects.equal(this.type, type)) {
-			this.setDirty(true);
-			this.type = type;
 		}
 	}
 
