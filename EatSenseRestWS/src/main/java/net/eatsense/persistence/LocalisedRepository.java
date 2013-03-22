@@ -32,7 +32,7 @@ import com.googlecode.objectify.Query;
  */
 public  class LocalisedRepository<T extends GenericEntity<T>, U extends TranslatedEntity<T>> extends GenericRepository<T> {
 
-	public class EntityWithTranlations<V extends GenericEntity<V>, W extends TranslatedEntity<V>> {
+	public static class EntityWithTranlations<V extends GenericEntity<V>, W extends TranslatedEntity<V>> {
 		public EntityWithTranlations(V entity, Map<Locale, W> translations) {
 			super();
 			this.entity = entity;
@@ -94,7 +94,7 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 		return entity;
 	}
 	
-	public EntityWithTranlations<T,U> getWithTranslations(Key<T> entityKey, Locale... locales) {
+	public EntityWithTranlations<T,U> getWithTranslations(Key<T> entityKey, List<Locale> locales) {
 		checkNotNull(entityKey, "entityKey was null");
 		
 		List<Key<?>> entityKeys = new ArrayList<Key<?>>();

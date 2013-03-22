@@ -16,9 +16,11 @@ import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.InfoPage;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
+import net.eatsense.persistence.LocalisedRepository.EntityWithTranlations;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.service.FileServiceHelper;
@@ -143,6 +145,21 @@ public class InfoPageController {
 	public InfoPage get(Key<Business> businessKey, Long id, Locale locale) {
 		try {
 			return infoPageRepo.get(infoPageRepo.getKey(businessKey, id), locale);
+		} catch (NotFoundException e) {
+			
+			throw new net.eatsense.exceptions.NotFoundException("Could not find entity with id: "+id,e);
+		}
+	}
+	
+	/**
+	 * @param businessKey
+	 * @param id
+	 * @return InfoPage entity from the datastore.
+	 */
+	public InfoPageDTO getWithTranslations(Key<Business> businessKey, Long id, List<Locale> locales) {
+		try {
+			EntityWithTranlations<InfoPage, InfoPageT> compositeEntity = infoPageRepo.getWithTranslations(infoPageRepo.getKey(businessKey, id), locales);
+			return new InfoPageDTO(compositeEntity.getEntity(), compositeEntity.getTranslations());
 		} catch (NotFoundException e) {
 			
 			throw new net.eatsense.exceptions.NotFoundException("Could not find entity with id: "+id,e);
