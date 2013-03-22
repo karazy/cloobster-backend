@@ -61,8 +61,8 @@ public class InfoPageDTO {
 		if(infoPage == null)
 			return;
 		if(translations != null) {
+			this.translations = Maps.newHashMap();
 			for (Entry<Locale, InfoPageT> translationEntry : translations.entrySet()) {
-				this.translations = Maps.newHashMap();
 				this.translations.put(translationEntry.getKey().getLanguage(), new InfoPageTDTO(translationEntry.getValue()));
 			}
 		}

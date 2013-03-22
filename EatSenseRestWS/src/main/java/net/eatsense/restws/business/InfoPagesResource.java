@@ -64,7 +64,8 @@ public class InfoPagesResource {
 	@Path("{infoPageId}")
 	public InfoPageDTO getInfoPage(@PathParam("infoPageId") long id,@QueryParam("lang") String locale) {
 		List<Locale> locales = new ArrayList<Locale>();
-		for(String localeString : locale.split(",")){
+		String[] split = locale.split(",");
+		for(String localeString : split){
 			locales.add(new Locale(localeString));
 		}
 		if(locales.isEmpty())
