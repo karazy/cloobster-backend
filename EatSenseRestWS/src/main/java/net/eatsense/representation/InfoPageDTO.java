@@ -1,8 +1,14 @@
 package net.eatsense.representation;
 
 import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.google.common.collect.Maps;
 
 import net.eatsense.domain.InfoPage;
+import net.eatsense.domain.translation.InfoPageT;
 
 public class InfoPageDTO {
 	private Long id;
@@ -16,6 +22,8 @@ public class InfoPageDTO {
 	private String imageUrl;
 	private ImageDTO image;
 	private boolean hideInDashboard;
+	
+	private Map<String, InfoPageTDTO> translations;
 	
 	public ImageDTO getImage() {
 		return image;
@@ -46,6 +54,18 @@ public class InfoPageDTO {
 		url = infoPage.getUrl();
 		createdOn = infoPage.getCreatedOn();
 		date = infoPage.getDate();
+	}
+	
+	public InfoPageDTO(InfoPage infoPage, Map<Locale, InfoPageT> translations) {
+		this(infoPage);
+		if(infoPage == null)
+			return;
+		if(translations != null) {
+			for (Entry<Locale, InfoPageT> translationEntry : translations.entrySet()) {
+				this.translations = Maps.newHashMap();
+				this.translations.put(translationEntry.getKey().getLanguage(), new InfoPageTDTO(translationEntry.getValue()));
+			}
+		}
 	}
 	
 	public String getTitle() {
@@ -111,5 +131,13 @@ public class InfoPageDTO {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public Map<String, InfoPageTDTO> getTranslations() {
+		return translations;
+	}
+
+	public void setTranslations(Map<String, InfoPageTDTO> translations) {
+		this.translations = translations;
 	}	
 }
