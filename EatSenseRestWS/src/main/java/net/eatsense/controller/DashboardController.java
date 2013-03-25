@@ -74,7 +74,7 @@ public class DashboardController {
 		return item;
 	}
 	
-	public DashboardConfiguration updateConfig(Key<Business> locationKey, DashboardConfigDTO configData) {
+	public DashboardConfiguration getAndUpdateConfig(Key<Business> locationKey, DashboardConfigDTO configData) {
 		DashboardConfiguration config = itemRepo.getConfiguration(locationKey);
 		
 		if(configData.getItemIds() != null) {
@@ -93,6 +93,15 @@ public class DashboardController {
 		item.setEntityIds(itemData.getEntityIds());
 		
 		return itemRepo.saveOrUpdate(item);
+	}
+	
+	public DashboardItem getAndUpdate(Key<Business> locationKey, long id, DashboardItemDTO itemData) {
+		checkNotNull(locationKey, "locationKey was null");
+		
+		DashboardItem item = get(locationKey, id);
+		update(item, itemData);
+		
+		return item;
 	}
 	
 	public void delete(Key<Business> locationKey, long id) {
