@@ -678,4 +678,8 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		
 		return keys;
 	}
+	
+	public <V> long allocateId(Key<V> parent) {
+		return fact().allocateId(parent, clazz);
+	}
 }

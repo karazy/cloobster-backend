@@ -56,14 +56,14 @@ public class InfoPageDTO {
 		date = infoPage.getDate();
 	}
 	
-	public InfoPageDTO(InfoPage infoPage, Map<Locale, InfoPageT> translations) {
+	public InfoPageDTO(InfoPage infoPage, Iterable<InfoPageT> translations) {
 		this(infoPage);
 		if(infoPage == null)
 			return;
 		if(translations != null) {
 			this.translations = Maps.newHashMap();
-			for (Entry<Locale, InfoPageT> translationEntry : translations.entrySet()) {
-				this.translations.put(translationEntry.getKey().getLanguage(), new InfoPageTDTO(translationEntry.getValue()));
+			for (InfoPageT translationEntry : translations) {
+				this.translations.put(translationEntry.getLang(), new InfoPageTDTO(translationEntry));
 			}
 		}
 	}

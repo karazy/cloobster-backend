@@ -33,19 +33,19 @@ import com.googlecode.objectify.Query;
 public  class LocalisedRepository<T extends GenericEntity<T>, U extends TranslatedEntity<T>> extends GenericRepository<T> {
 
 	public static class EntityWithTranlations<V extends GenericEntity<V>, W extends TranslatedEntity<V>> {
-		public EntityWithTranlations(V entity, Map<Locale, W> translations) {
+		public EntityWithTranlations(V entity, Iterable<W> translations) {
 			super();
 			this.entity = entity;
 			this.translations = translations;
 		}
 		
 		private V entity;
-		private Map<Locale, W> translations;
+		private Iterable<W> translations;
 		
-		public Map<Locale, W> getTranslations() {
+		public Iterable<W> getTranslations() {
 			return translations;
 		}
-		public void setTranslations(Map<Locale, W> translations) {
+		public void setTranslations(Iterable<W> translations) {
 			this.translations = translations;
 		}
 		public V getEntity() {
@@ -112,31 +112,44 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 			
 			@SuppressWarnings("unchecked")
 			T entity = (T) resultMap.get(entityKey);
-			Map<Locale, U> translations = Maps.newHashMap();
 			
-			for ( Key<?> translationKey  : entityKeys) {
-				if(translationKey.getName() == null) {
-					// Skip the original entity
+			List<U> translations = new ArrayList<U>();
+			for (Key<?> translationKey : entityKeys) {
+				if(translationKey.getName() == null)
 					continue;
-				}
-				else {
-					U translatedEntity = (U) resultMap.get(translationKey);
-					if(translatedEntity == null) {
-						try {
-							translatedEntity = translationClass.newInstance();
-							translatedEntity.setLang(translationKey.getName());
-						} catch (Exception e) {
-							logger.error("Error instantiating translation class", e);
-							throw new ServiceException("Internal error while creating translation model", e);
-						}
+				
+				U translatedEntity = (U) resultMap.get(translationKey);
+				if (translatedEntity == null) {
+					try {
+						translatedEntity = translationClass.newInstance();
+						translatedEntity.setLang(translationKey.getName());
+					} catch (Exception e) {
+						logger.error("Error instantiating translation class", e);
+						throw new ServiceException(
+								"Internal error while creating translation model",
+								e);
 					}
-					
-					translations.put(new Locale(translationKey.getName()), translatedEntity);
 				}
+
+				translations.add(translatedEntity);
 			}
 			
 			return new EntityWithTranlations<T, U>(entity, translations);
 		}
+	}
+	
+	public EntityWithTranlations<T,U> saveWithTranslations(T entity, Iterable<U> translations) {
+		List<Object> allEntities = new ArrayList<Object>();
+		allEntities.add(entity);
+
+		for (U translationEntity : translations) {
+			translationEntity.setParent(entity.getKey());
+			allEntities.add(translationEntity);
+		}
+		
+		ofy().put(allEntities);
+		
+		return new EntityWithTranlations<T,U>(entity, translations);
 	}
 	
 	public <V> List<T> getByParent(Key<V> parentKey, Locale locale) {

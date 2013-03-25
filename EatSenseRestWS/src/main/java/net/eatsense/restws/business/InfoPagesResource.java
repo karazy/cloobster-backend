@@ -63,15 +63,14 @@ public class InfoPagesResource {
 	@GET
 	@Path("{infoPageId}")
 	public InfoPageDTO getInfoPage(@PathParam("infoPageId") long id,@QueryParam("lang") String locale) {
+		if(locale == null)
+			return new InfoPageDTO(infoPageCtrl.get(business.getKey(), id));
 		List<Locale> locales = new ArrayList<Locale>();
 		String[] split = locale.split(",");
 		for(String localeString : split){
 			locales.add(new Locale(localeString));
 		}
-		if(locales.isEmpty())
-			return new InfoPageDTO(infoPageCtrl.get(business.getKey(), id));
-		else
-			return infoPageCtrl.getWithTranslations(business.getKey(), id , locales);
+		return infoPageCtrl.getWithTranslations(business.getKey(), id , locales);
 	}
 	
 	/**

@@ -97,7 +97,7 @@ public class InfoPageControllerTest {
 		ctrl.create(businessKey, infoPageData );
 		
 		verify(infoPageRepo).saveOrUpdate(newInfoPage);
-		verify(infoPageRepo).saveOrUpdateTranslation(newInfoPage,locale);
+		//verify(infoPageRepo).saveOrUpdateTranslation(newInfoPage,locale);
 	}
 	
 	@Test
@@ -227,8 +227,8 @@ public class InfoPageControllerTest {
 		infoPage.setDirty(false);
 		ctrl.update(infoPage, infoPageData);
 		
-		verify(infoPageRepo).saveOrUpdateTranslation(infoPage, locale);
-		verify(infoPageRepo, never()).saveOrUpdate(infoPage);
+		//verify(infoPageRepo).saveOrUpdateTranslation(infoPage, locale);
+		verify(infoPageRepo).saveOrUpdate(infoPage);
 	}
 	
 	@Test
