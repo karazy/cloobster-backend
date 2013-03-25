@@ -33,7 +33,7 @@ import com.googlecode.objectify.util.DAOBase;
  */
 public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
-	protected Class<T> clazz;
+	protected final Class<T> clazz;
 	
 	static {
 		ObjectifyService.register(TrashEntry.class);
