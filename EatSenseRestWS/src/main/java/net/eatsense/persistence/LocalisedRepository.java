@@ -114,23 +114,24 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 			T entity = (T) resultMap.get(entityKey);
 			Map<Locale, U> translations = Maps.newHashMap();
 			
-			for ( Key<?> translationKeys  : entityKeys) {
-				if(translationKeys.getName() == null) {
+			for ( Key<?> translationKey  : entityKeys) {
+				if(translationKey.getName() == null) {
 					// Skip the original entity
 					continue;
 				}
 				else {
-					U translatedEntity = (U) resultMap.get(translationKeys);
+					U translatedEntity = (U) resultMap.get(translationKey);
 					if(translatedEntity == null) {
 						try {
 							translatedEntity = translationClass.newInstance();
+							translatedEntity.setLang(translationKey.getName());
 						} catch (Exception e) {
 							logger.error("Error instantiating translation class", e);
 							throw new ServiceException("Internal error while creating translation model", e);
 						}
 					}
 					
-					translations.put(new Locale(translationKeys.getName()), translatedEntity);
+					translations.put(new Locale(translationKey.getName()), translatedEntity);
 				}
 			}
 			
