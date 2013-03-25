@@ -58,8 +58,6 @@ public class LocationResource {
 
 	private FeedbackController feedbackCtrl;
 
-	private InfoPageController infoPageCtrl;
-
 	private LocationController locationCtrl;
 	
 	@Inject
@@ -253,5 +251,13 @@ public class LocationResource {
 	@RolesAllowed(Role.GUEST)
 	public List<SpotDTO> getSpots(@QueryParam("areaId")long areaId) {
 		return locationCtrl.getSpots(business.getKey(), areaId, false, true);
+	}
+	
+	@Path("dashboarditems")
+	public DashboardItemsResource getDashboardItemsResource() {
+		DashboardItemsResource resource = resourceContext.getResource(DashboardItemsResource.class);
+		resource.setLocation(business);
+		
+		return resource;
 	}
 }
