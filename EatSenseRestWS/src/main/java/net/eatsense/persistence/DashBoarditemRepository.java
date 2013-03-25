@@ -20,10 +20,10 @@ public class DashBoarditemRepository extends GenericRepository<DashboardItem> {
 	 * @param locationKey Key of the parent {@link Business}
 	 * @return {@link DashboardConfiguration} entity, child of the {@link Business}
 	 */
-	DashboardConfiguration getConfiguration(Key<Business> locationKey) {
+	public DashboardConfiguration getConfiguration(Key<Business> locationKey) {
 		Key<DashboardConfiguration> key = Key.create(locationKey, DashboardConfiguration.class, "dashboard");
 		logger.info("Getting DashboardConfiguration, key={}", key);
-		return ofy().get(key);
+		return ofy().find(key);
 	}
 	
 	/**
@@ -32,7 +32,7 @@ public class DashBoarditemRepository extends GenericRepository<DashboardItem> {
 	 * @param config the {@link DashboardConfiguration} entity to save.
 	 * @return
 	 */
-	DashboardConfiguration saveOrUpdateConfiguration(DashboardConfiguration config) {
+	public DashboardConfiguration saveOrUpdateConfiguration(DashboardConfiguration config) {
 		logger.info("Saving DashboardConfiguration, name={}, location={}", config.getName(), config.getLocation());
 		ofy().put(config);
 		

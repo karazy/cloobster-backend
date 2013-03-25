@@ -5,6 +5,12 @@ import java.util.List;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
+/**
+ * Representing one field of the dynamic location dashboard in the App.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class DashboardItem extends GenericEntity<DashboardItem> {
 	private String type;
 	
