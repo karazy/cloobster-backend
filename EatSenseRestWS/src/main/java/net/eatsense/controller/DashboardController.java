@@ -9,6 +9,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -16,6 +18,7 @@ import com.googlecode.objectify.NotFoundException;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.DashboardConfiguration;
 import net.eatsense.domain.DashboardItem;
+import net.eatsense.event.NewLocationEvent;
 import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.persistence.DashBoarditemRepository;
 import net.eatsense.representation.DashboardConfigDTO;
@@ -23,6 +26,9 @@ import net.eatsense.representation.DashboardItemDTO;
 
 public class DashboardController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	public final static List<String> DEFAULT_ITEMS = ImmutableList.of(
+			"infopages", "feedback", "actions", "products", "producstspecial",
+			"products", "infopagesall", "actionsall");
 	private final DashBoarditemRepository itemRepo;
 
 	@Inject
@@ -108,5 +114,45 @@ public class DashboardController {
 		checkNotNull(locationKey, "locationKey was null");
 		
 		itemRepo.delete(itemRepo.getKey(locationKey, id));
+	}
+	
+	/**
+	 * Handles default dashboard items creation during creation of a new Business in the store.
+	 * 
+	 * @param event
+	 */
+	@Subscribe
+	public void handleNewLocationEvent(NewLocationEvent event) {
+		createDefaultItems(event.getLocation().getKey());
+	}
+
+	/**
+	 * @param locationKey
+	 */
+	public void createDefaultItems(Key<Business> locationKey) {
+		checkNotNull(locationKey, "locationKey was null");
+		
+		logger.info("Adding default dashboard configuration for {}", locationKey);
+		
+		DashboardConfiguration config = new DashboardConfiguration();
+		config.setLocation(locationKey);
+		config.setName("dashboard");
+		
+		ArrayList<DashboardItem> dashboardItems = new ArrayList<DashboardItem>();
+		
+		//Create all default items
+		for (String itemType : DEFAULT_ITEMS) {
+			DashboardItem newItem = itemRepo.newEntity();
+			
+			newItem.setType(itemType);
+			newItem.setId(itemRepo.allocateId(locationKey));
+			newItem.setLocation(locationKey);
+
+			dashboardItems.add(newItem);
+			config.getItems().add(newItem.getKey());
+		}
+		
+		itemRepo.saveOrUpdateAsync(dashboardItems);
+		itemRepo.saveOrUpdateConfiguration(config);
 	}
 }

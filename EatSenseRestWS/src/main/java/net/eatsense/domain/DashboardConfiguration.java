@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
 
 @Unindexed
@@ -13,10 +15,12 @@ public class DashboardConfiguration {
 	@Id
 	private String name = "dashboard";
 	
+	@Parent
 	private Key<Business> location;
 	
 	private List<Key<DashboardItem>> items = new ArrayList<Key<DashboardItem>>();
 
+	@Transient
 	private Key<DashboardConfiguration> key; 
 
 	public String getName() {

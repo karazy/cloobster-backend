@@ -678,4 +678,14 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		
 		return keys;
 	}
+	
+	public <V> long allocateId(Key<V> parent) {
+		return fact().allocateId(parent, clazz);
+	}
+	
+	public Iterable<Key<T>> iterateKeysByProperty(String propName, Object propValue) {
+		logger.info("{} property: {}",  clazz, propName);
+		
+		return ofy().query(clazz).filter(propName, propValue).fetchKeys();
+	}
 }
