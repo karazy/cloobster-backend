@@ -27,8 +27,8 @@ import net.eatsense.representation.DashboardItemDTO;
 public class DashboardController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	public final static List<String> DEFAULT_ITEMS = ImmutableList.of(
-			"infopages", "feedback", "actions", "products", "productsspecial",
-			"productsall", "infopagesall", "actionsall");
+			"infopages", "products","actions", "productsspecial",
+			 "infopagesall","productsall","feedback");
 	private final DashBoarditemRepository itemRepo;
 
 	@Inject
