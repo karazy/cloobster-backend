@@ -112,8 +112,15 @@ public class DashboardController {
 	
 	public void delete(Key<Business> locationKey, long id) {
 		checkNotNull(locationKey, "locationKey was null");
+		DashboardConfiguration config = itemRepo.getConfiguration(locationKey);
+		if(config == null) {
+			return;
+		}
 		
-		itemRepo.delete(itemRepo.getKey(locationKey, id));
+		Key<DashboardItem> itemKey = itemRepo.getKey(locationKey, id);
+		if(config.getItems().remove(itemKey))
+			itemRepo.saveOrUpdateConfiguration(config);
+		itemRepo.delete(itemKey);
 	}
 	
 	/**
