@@ -22,7 +22,7 @@ public class DashBoarditemRepository extends GenericRepository<DashboardItem> {
 	 */
 	public DashboardConfiguration getConfiguration(Key<Business> locationKey) {
 		Key<DashboardConfiguration> key = Key.create(locationKey, DashboardConfiguration.class, "dashboard");
-		logger.info("Getting DashboardConfiguration, key={}", key);
+		logger.info("key={}", key);
 		return ofy().find(key);
 	}
 	
@@ -33,7 +33,7 @@ public class DashBoarditemRepository extends GenericRepository<DashboardItem> {
 	 * @return
 	 */
 	public DashboardConfiguration saveOrUpdateConfiguration(DashboardConfiguration config) {
-		logger.info("Saving DashboardConfiguration, name={}, location={}", config.getName(), config.getLocation());
+		logger.info("name={}, location={}", config.getName(), config.getLocation());
 		ofy().put(config);
 		
 		return config;

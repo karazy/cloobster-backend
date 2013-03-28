@@ -2,6 +2,8 @@ package net.eatsense.domain;
 
 import java.util.List;
 
+import javax.persistence.Transient;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 
@@ -19,6 +21,7 @@ public class DashboardItem extends GenericEntity<DashboardItem> {
 	@Parent
 	private Key<Business> location;
 
+	@Transient
 	private Key<DashboardItem> key;
 	
 	@Override

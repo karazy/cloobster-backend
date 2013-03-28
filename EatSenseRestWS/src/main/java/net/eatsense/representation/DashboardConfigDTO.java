@@ -2,6 +2,7 @@ package net.eatsense.representation;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
 
 import net.eatsense.domain.DashboardConfiguration;
@@ -17,7 +18,7 @@ public class DashboardConfigDTO {
 	public DashboardConfigDTO(DashboardConfiguration config) {
 		if(config == null)
 			return;
-		
+		itemIds = Lists.newArrayList();
 		for (Key<DashboardItem> itemKey : config.getItems()) {
 			itemIds.add(itemKey.getId());
 		}

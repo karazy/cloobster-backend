@@ -2,24 +2,35 @@ package net.eatsense.restws.administration;
 
 import java.util.List;
 
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
+import net.eatsense.controller.DashboardController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.DashBoarditemRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.DataUpgradesResultDTO;
@@ -33,15 +44,27 @@ public class DataUpgradesResource {
 	private final AreaRepository areaRepo;
 
 	private final SpotRepository spotRepo;
+
+	private final DashboardController dashboardCtrl;
+
+	private final LocationRepository locationRepo;
+
+	private final DashBoarditemRepository dashboardItemRepo;
+
+	private final UriInfo uriInfo;
 	
 	@Inject
 	public DataUpgradesResource(SubscriptionController subCtrl,
-			LocationController locationCtrl, AreaRepository areaRepo, SpotRepository spotRepo) {
+			LocationController locationCtrl, AreaRepository areaRepo, SpotRepository spotRepo, DashboardController dashboardCtrl, LocationRepository locationRepo, DashBoarditemRepository dashboardItemRepo, UriInfo uriInfo) {
 		super();
 		this.subCtrl = subCtrl;
 		this.locationCtrl = locationCtrl;
 		this.areaRepo = areaRepo;
 		this.spotRepo = spotRepo;
+		this.dashboardCtrl = dashboardCtrl;
+		this.locationRepo = locationRepo;
+		this.dashboardItemRepo = dashboardItemRepo;
+		this.uriInfo = uriInfo;
 	}
 	
 	@PUT
@@ -96,5 +119,32 @@ public class DataUpgradesResource {
 		}
 		
 		return new DataUpgradesResultDTO("OK", updateCount);
+	}
+	
+	@PUT
+	@Path("defaultdashboards")
+	@Produces("application/json")
+	public Response queueCreateLocationDashboards() {
+		QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/"+uriInfo.getPath()+"/process"));
+		
+		return Response.ok().build();
+	}
+
+	
+	@POST
+	@Path("defaultdashboards/process")
+	@Produces("application/json")
+	public Response createLocationDashboards() {
+		for (Key<Business> locationKey : locationRepo.iterateKeysByProperty("trash", false)) {
+			if(dashboardItemRepo.getConfiguration(locationKey) == null) {
+				dashboardCtrl.createDefaultItems(locationKey);
+			}
+			else {
+				logger.info("Skipped creation for {}", locationKey);
+			}
+			
+		}
+		
+		return Response.ok().build();
 	}
 }
