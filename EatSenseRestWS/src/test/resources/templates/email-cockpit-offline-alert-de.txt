@@ -9,7 +9,7 @@ die Kommunikation mit Ihrem cloobster Cockpit ist seit {1} unterbrochen. Möglic
 So können Sie das Problem beheben.
 - Prüfen Sie die Internetverbindung.
 - Starten Sie den Internetbrowser "Chrome" neu und klicken Sie auf "Seite neu laden".
-- Öffnen Sie die Internetseite Ihres Cockpits (https://www.cloobster.com/cockpit).
+- Öffnen Sie die Internetseite Ihres Cockpits (https://admin.cloobster.com/cockpit).
 - Loggen Sie sich erneut ein.
 
 Dies ist eine automatisch generierte Systembenachrichtigung. Wenn Sie weiterhin Probleme haben, können Sie sich gerne bei uns melden
