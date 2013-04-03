@@ -72,7 +72,7 @@ public class MailController {
 		
 		// Get uri for email links from system property or use default if not set.
 		this.baseUri = Objects.firstNonNull(Strings.emptyToNull(System.getProperty("net.karazy.url.outside")),
-				"https://www.cloobster.com");
+				"http://www.cloobster.com");
 	}
 	
 	/**
@@ -167,7 +167,7 @@ public class MailController {
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		
 		try {
-			String unsubcribeUrl = baseUriBuilder.path("/frontend/").fragment("/accounts/confirm/{token}").build(accessToken).toString();
+			String unsubcribeUrl = baseUriBuilder.fragment("/accounts/confirm/{token}").build(accessToken).toString();
 			sendRegistrationConfirmation(unsubcribeUrl, account);
 		} catch (AddressException e) {
 			logger.error("sending confirmation mail failed", e);
@@ -183,7 +183,7 @@ public class MailController {
 		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String accessToken = accountCtrl.createSetupAccountToken(newAccount).getToken();
 		
-		String setupUrl = baseUriBuilder.path("/frontend/").fragment("/accounts/setup/{token}").build(accessToken).toString();
+		String setupUrl = baseUriBuilder.fragment("/accounts/setup/{token}").build(accessToken).toString();
 		
 		try {
 			sendAccountSetupMail(newAccount, ownerAccount, setupUrl);
@@ -224,7 +224,7 @@ public class MailController {
 			uriBuilder = uriBuilder.path("/home/").fragment("/confirm-email/{token}");
 		}
 		else 
-			uriBuilder = uriBuilder.path("/frontend/").fragment("/accounts/confirm-email/{token}");
+			uriBuilder = uriBuilder.fragment("/accounts/confirm-email/{token}");
 		
 		String setupUrl = uriBuilder.build(accessToken).toString();
 		
@@ -297,7 +297,7 @@ public class MailController {
 			text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getEmail(), setupUrl);
 		}
 		else {
-			setupUrl = baseUriBuilder.path("/frontend/").fragment("/accounts/reset-password/{token}").build(accessToken).toString();
+			setupUrl = baseUriBuilder.fragment("/accounts/reset-password/{token}").build(accessToken).toString();
 			text = templateCtrl.getAndReplace("account-forgotpassword-email", account.getEmail(), setupUrl);
 		}
 		
