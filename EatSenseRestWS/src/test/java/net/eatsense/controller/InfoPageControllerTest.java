@@ -1,15 +1,12 @@
 package net.eatsense.controller;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Locale;
 
 import net.eatsense.controller.ImageController.UpdateImagesResult;
@@ -22,8 +19,6 @@ import net.eatsense.persistence.InfoPageRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
 import net.eatsense.service.FileServiceHelper;
-import net.eatsense.templates.Template;
-import net.eatsense.templates.TemplateRepository;
 import net.eatsense.validation.ValidationHelper;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -37,7 +32,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
-import com.google.appengine.api.images.ImagesServicePb.ImageData;
 import com.googlecode.objectify.Key;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -97,7 +91,7 @@ public class InfoPageControllerTest {
 		ctrl.create(businessKey, infoPageData );
 		
 		verify(infoPageRepo).saveOrUpdate(newInfoPage);
-		verify(infoPageRepo).saveOrUpdateTranslation(newInfoPage,locale);
+		//verify(infoPageRepo).saveOrUpdateTranslation(newInfoPage,locale);
 	}
 	
 	@Test
@@ -227,8 +221,8 @@ public class InfoPageControllerTest {
 		infoPage.setDirty(false);
 		ctrl.update(infoPage, infoPageData);
 		
-		verify(infoPageRepo).saveOrUpdateTranslation(infoPage, locale);
-		verify(infoPageRepo, never()).saveOrUpdate(infoPage);
+		//verify(infoPageRepo).saveOrUpdateTranslation(infoPage, locale);
+		verify(infoPageRepo).saveOrUpdate(infoPage);
 	}
 	
 	@Test

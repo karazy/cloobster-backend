@@ -8,7 +8,7 @@ import net.eatsense.counter.Counter.PeriodType;
 public class CounterReportDTO {
 	private String id;
 	private String kpi;
-	private long count;
+	private double count;
 	private Date date;
 	private long locationId;
 	private String locationName;
@@ -44,10 +44,10 @@ public class CounterReportDTO {
 	public void setKpi(String kpi) {
 		this.kpi = kpi;
 	}
-	public long getCount() {
+	public double getCount() {
 		return count;
 	}
-	public void setCount(long count) {
+	public void setCount(double count) {
 		this.count = count;
 	}
 	public Date getDate() {

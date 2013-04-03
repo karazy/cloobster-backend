@@ -1,5 +1,7 @@
 package net.eatsense.domain.translation;
 
+import com.google.common.base.Strings;
+
 import net.eatsense.domain.InfoPage;
 import net.eatsense.domain.TranslatedEntity;
 
@@ -10,9 +12,13 @@ public class InfoPageT extends TranslatedEntity<InfoPage> {
 
 	@Override
 	public InfoPage applyTranslation(InfoPage entity) {
-		entity.setHtml(html);
-		entity.setShortText(shortText);
-		entity.setTitle(title);
+		// Only override the values on the entity if we actually have content
+		if(!Strings.isNullOrEmpty(html))
+			entity.setHtml(html);
+		if(!Strings.isNullOrEmpty(shortText))
+			entity.setShortText(shortText);
+		if(!Strings.isNullOrEmpty(title))
+			entity.setTitle(title);
 		
 		return entity;
 	}

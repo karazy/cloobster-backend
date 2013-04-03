@@ -23,6 +23,7 @@ import net.eatsense.controller.SpotController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.persistence.DashBoarditemRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.SpotDTO;
@@ -302,6 +303,14 @@ public class LocationResource {
 	public ReportsResource getReportsResource() {
 		ReportsResource resource = resourceContext.getResource(ReportsResource.class);
 		resource.setLocation(business);
+		return resource;
+	}
+	
+	@Path("dashboarditems")
+	public DashboardItemsResource getDashboardItemsResource() {
+		DashboardItemsResource resource = resourceContext.getResource(DashboardItemsResource.class);
+		resource.setLocation(business);
+		
 		return resource;
 	}
 }
