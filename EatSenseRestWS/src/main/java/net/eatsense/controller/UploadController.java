@@ -119,7 +119,7 @@ public class UploadController {
 				}
 				else if(blobInfo.getSize() > MAX_UPLOADSIZE) {
 					blobStoreService.delete(blobKey);
-					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE, "fileupload.error.size");					
+					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE, "fileupload.error.size");
 				}
 				else {
 					// Add to uploaded images for this account.

@@ -3,6 +3,7 @@ package net.eatsense.service;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +13,14 @@ import net.eatsense.exceptions.ServiceException;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.files.AppEngineFile;
+import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.files.FinalizationException;
 import com.google.appengine.api.files.LockException;
+import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
+import com.sun.jersey.core.spi.component.ioc.IoCComponentProcessor;
 
 /**
  * Contains methods for Accessing the Appengine File API.
@@ -98,5 +102,19 @@ public class FileServiceHelper {
 		logger.info("Written {} bytes to blob: {}", byteCount, blobKey);
 		
 		return blobKey;
+	}
+	
+	/**
+	 * @param blobKey
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws LockException
+	 * @throws IOException
+	 */
+	public byte[] readBlob(BlobKey blobKey) throws FileNotFoundException, LockException, IOException {
+		AppEngineFile blobFile = fileService.getBlobFile(blobKey);
+		FileReadChannel readChannel = fileService.openReadChannel(blobFile, false);
+		
+		return ByteStreams.toByteArray(Channels.newInputStream(readChannel));
 	}
 }
