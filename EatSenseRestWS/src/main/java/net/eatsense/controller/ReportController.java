@@ -1,6 +1,10 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +19,9 @@ import com.googlecode.objectify.NotFoundException;
 
 import net.eatsense.counter.Counter;
 import net.eatsense.counter.CounterRepository;
+import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.domain.Area;
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
@@ -37,6 +43,9 @@ public class ReportController {
 	}
 	
 	public List<CounterReportDTO> getReportForLocationAreaAndDateRange(Business location, String kpi,  long areaId, Date fromDate, Date toDate) {
+		checkNotNull(location, "location was null");
+		checkArgument(!Strings.isNullOrEmpty(kpi), "kpi was null or empty");
+		
 		if(Strings.isNullOrEmpty(kpi)) {
 			logger.warn("kpi was not set or empty");
 			throw new ValidationException("kpi was not set or empty");
