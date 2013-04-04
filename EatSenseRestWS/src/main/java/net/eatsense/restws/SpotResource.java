@@ -5,12 +5,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
 import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 
 /**
  * Resource to retrieve spot information by a unique barcode.
@@ -29,6 +31,15 @@ public class SpotResource {
 	public SpotResource(CheckInController checkInCtr) {
 		super();
 		this.checkInCtr = checkInCtr;
+	}
+	
+	@GET
+	public String getSpot(@QueryParam("demo") boolean isDemo) {
+		if(isDemo)
+			return System.getProperty("net.karazy.spots.demo.barcode");
+		else {
+			throw new NotFoundException();
+		}
 	}
 	
 	/**
