@@ -39,9 +39,9 @@ import com.google.inject.Inject;
 public class UploadController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	/**
-	 * The limit for uploaded file size, appengine limit is 32mb, but we limit it to 3mb.
+	 * The limit for uploaded file size, appengine limit is 32mb, but we limit it to 5mb.
 	 */
-	public final static long MAX_UPLOADSIZE = 3145728;
+	public final static long MAX_UPLOADSIZE = 5242880;
 	private BlobstoreService blobStoreService;
 	private final AccountRepository accountRepo;
 	private final ImagesService imagesService;
@@ -119,7 +119,7 @@ public class UploadController {
 				}
 				else if(blobInfo.getSize() > MAX_UPLOADSIZE) {
 					blobStoreService.delete(blobKey);
-					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE, "fileupload.error.size");					
+					throw new ValidationException("Upload size too big. Limit is " + MAX_UPLOADSIZE, "fileupload.error.size");
 				}
 				else {
 					// Add to uploaded images for this account.
@@ -168,7 +168,7 @@ public class UploadController {
 					blobStoreService.delete(new BlobKey(blobKey));
 					accountRepo.saveOrUpdate(account);
 				}
-			}	
+			}
 		}
 	}
 	

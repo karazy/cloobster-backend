@@ -19,6 +19,8 @@
 		<property name="net.karazy.api.version" value="2"/>
 		<!-- Configure time out for inactive checkins -->	
 		<property name="net.karazy.checkins.inactive.timeout" value="24"/>
+		<!-- Barcode for demo spot used in app -->
+		<property name="net.karazy.spots.demo.barcode" value="103001-78004"/>
 	</system-properties>
 
 	<inbound-services>
