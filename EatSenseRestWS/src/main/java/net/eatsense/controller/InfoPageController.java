@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -15,11 +16,14 @@ import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.InfoPage;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.event.NewLocationEvent;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.InfoPageRepository;
+import net.eatsense.persistence.LocalisedRepository.EntityWithTranlations;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.InfoPageDTO;
+import net.eatsense.representation.InfoPageTDTO;
 import net.eatsense.service.FileServiceHelper;
 import net.eatsense.templates.TemplateRepository;
 import net.eatsense.validation.ValidationHelper;
@@ -149,6 +153,21 @@ public class InfoPageController {
 	}
 	
 	/**
+	 * @param businessKey
+	 * @param id
+	 * @return InfoPage entity from the datastore.
+	 */
+	public InfoPageDTO getWithTranslations(Key<Business> businessKey, Long id, List<Locale> locales) {
+		try {
+			EntityWithTranlations<InfoPage, InfoPageT> compositeEntity = infoPageRepo.getWithTranslations(infoPageRepo.getKey(businessKey, id), locales);
+			return new InfoPageDTO(compositeEntity.getEntity(), compositeEntity.getTranslations());
+		} catch (NotFoundException e) {
+			
+			throw new net.eatsense.exceptions.NotFoundException("Could not find entity with id: "+id,e);
+		}
+	}
+	
+	/**
 	 * Create and save new InfoPage entity with data.
 	 * 
 	 * @param businessKey
@@ -160,6 +179,8 @@ public class InfoPageController {
 		checkNotNull(infoPageData, "infoPageData was null");
 		
 		InfoPage infoPage = infoPageRepo.newEntity();
+		infoPage.setId(infoPageRepo.allocateId(businessKey));
+		infoPage.setCreatedOn(new Date());
 		infoPage.setBusiness(businessKey);
 			
 		return update(infoPage, infoPageData);
@@ -179,21 +200,31 @@ public class InfoPageController {
 		
 		validator.validate(infoPageData);
 		
-		Locale locale = localizationProvider.getContentLanguage();
-		
 		infoPage.setHtml(sanitizer.sanitize(infoPageData.getHtml()));
 		
 		infoPage.setShortText(infoPageData.getShortText());
 		infoPage.setTitle(infoPageData.getTitle());
-		infoPage.setHideInDashboard(infoPageData.isHideInDashboard());		
+		infoPage.setHideInDashboard(infoPageData.isHideInDashboard());
+		infoPage.setDate(infoPageData.getDate());
+		infoPage.setUrl(infoPageData.getUrl());
 		
-		if(locale != null) {
-			if(infoPage.getId() == null) {
-				infoPageRepo.saveOrUpdate(infoPage);
+		if(infoPageData.getTranslations() != null && !infoPageData.getTranslations().isEmpty()) {
+			List<InfoPageT> translations = new ArrayList<InfoPageT>();
+			for (InfoPageTDTO infoPageTDTO : infoPageData.getTranslations().values()) {
+				InfoPageT translationEntity = new InfoPageT();
+				translationEntity.setLang(infoPageTDTO.getLang());
+				translationEntity.setHtml(infoPageTDTO.getHtml());
+				translationEntity.setShortText(infoPageTDTO.getShortText());
+				translationEntity.setTitle(infoPageTDTO.getTitle());
+				
+				translations.add(translationEntity);
 			}
-			infoPageRepo.saveOrUpdateTranslation(infoPage, locale);
+			
+			infoPageRepo.saveWithTranslations(infoPage, translations);
+			
+			return new InfoPageDTO(infoPage, translations);
 		}
-		else if(infoPage.isDirty()){
+		else {
 			infoPageRepo.saveOrUpdate(infoPage);
 		}
 		

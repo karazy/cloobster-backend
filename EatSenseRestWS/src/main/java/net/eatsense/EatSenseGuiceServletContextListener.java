@@ -12,6 +12,7 @@ import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.CounterController;
+import net.eatsense.controller.DashboardController;
 import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
@@ -200,6 +201,7 @@ public class EatSenseGuiceServletContextListener extends
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
 		eventBus.register(injector.getInstance(SubscriptionController.class));
+		eventBus.register(injector.getInstance(DashboardController.class));
 		eventBus.register(injector.getInstance(MessageController.class));
 		eventBus.register(injector.getInstance(MailController.class));
 		eventBus.register(injector.getInstance(InfoPageController.class));

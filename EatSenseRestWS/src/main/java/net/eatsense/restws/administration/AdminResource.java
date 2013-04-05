@@ -1,6 +1,7 @@
 package net.eatsense.restws.administration;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -40,13 +41,13 @@ public class AdminResource {
 	}
 	
 	@Path("s")
-	public ServicesResource getServiceResource() {
-		String email = securityContext.getUserPrincipal().getName();
-		if(auth.isAwesome(email)) {
+	public ServicesResource getServiceResource(@HeaderParam("X-AppEngine-TaskName") String appEngineTask) {
+		if ((securityContext.getUserPrincipal() != null && auth
+				.isAwesome(securityContext.getUserPrincipal().getName()))
+				|| appEngineTask != null) {
 			return resourceContext.getResource(ServicesResource.class);
-		}
-		else {
-			throw new IllegalAccessException(email + " is not an awesome user!");
+		} else {
+			throw new IllegalAccessException(securityContext.getUserPrincipal().getName() + " is not an awesome user!");
 		}
 	}
 	
