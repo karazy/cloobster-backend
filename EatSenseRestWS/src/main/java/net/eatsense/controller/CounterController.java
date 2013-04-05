@@ -9,6 +9,7 @@ import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.NewFeedbackEvent;
 import net.eatsense.event.PlaceAllOrdersEvent;
+import net.eatsense.event.UpdateBillEvent;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;

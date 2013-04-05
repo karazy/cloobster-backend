@@ -1,5 +1,2 @@
 User-agent: *
-Disallow: /frontend
-Disallow: /cockpit
-Disallow: /app
-Disallow: /admin
+Disallow: /
