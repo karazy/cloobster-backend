@@ -1,6 +1,8 @@
 package net.eatsense.restws.administration;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -11,6 +13,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.mockito.asm.tree.MultiANewArrayInsnNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +22,19 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
 import net.eatsense.controller.DashboardController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SubscriptionController;
+import net.eatsense.counter.Counter;
+import net.eatsense.counter.CounterRepository;
+import net.eatsense.counter.CounterService;
+import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
@@ -52,10 +62,14 @@ public class DataUpgradesResource {
 	private final DashBoarditemRepository dashboardItemRepo;
 
 	private final UriInfo uriInfo;
+
+	private final CounterService counterService;
+
+	private final CounterRepository counterRepo;
 	
 	@Inject
 	public DataUpgradesResource(SubscriptionController subCtrl,
-			LocationController locationCtrl, AreaRepository areaRepo, SpotRepository spotRepo, DashboardController dashboardCtrl, LocationRepository locationRepo, DashBoarditemRepository dashboardItemRepo, UriInfo uriInfo) {
+			LocationController locationCtrl, AreaRepository areaRepo, SpotRepository spotRepo, DashboardController dashboardCtrl, LocationRepository locationRepo, DashBoarditemRepository dashboardItemRepo, UriInfo uriInfo, CounterRepository counterRepo, CounterService counterService) {
 		super();
 		this.subCtrl = subCtrl;
 		this.locationCtrl = locationCtrl;
@@ -65,6 +79,8 @@ public class DataUpgradesResource {
 		this.locationRepo = locationRepo;
 		this.dashboardItemRepo = dashboardItemRepo;
 		this.uriInfo = uriInfo;
+		this.counterRepo = counterRepo;
+		this.counterService = counterService;
 	}
 	
 	@PUT
@@ -143,6 +159,88 @@ public class DataUpgradesResource {
 				logger.info("Skipped creation for {}", locationKey);
 			}
 			
+		}
+		
+		return Response.ok().build();
+	}
+	
+	@PUT
+	@Path("sumdailycounters")
+	@Produces("application/json")
+	public Response queueGenerateDailyCounterReports() {
+		QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/"+uriInfo.getPath()+"/process"));
+		
+		return Response.ok().build();
+	}
+
+	
+	@POST
+	@Path("sumdailycounters/process")
+	@Produces("application/json")
+	public Response generateDailyCounterReports() {
+		
+		Map<String, Counter> aggregatedCounters = Maps.newHashMap();
+		
+		for (Counter counter : counterRepo.getDailyCountsByNameAreaAndLocation(null, 0, 0)) {
+			if(( counter.getLocationId() == null || counter.getLocationId().longValue() == 0) ||
+					(counter.getAreaId() == null || counter.getAreaId().longValue() == 0) ) {
+				logger.info("skipped: {}", counter.getId());
+				// Skip if we have an already summed up counter
+				continue;
+			}
+			
+			String counterKey = counterService.getCounterKeyName(counter.getName(), counter.getLocationId(), 0, PeriodType.DAY, counter.getPeriod());
+			Counter locationCounter = aggregatedCounters.get(counterKey);
+			if(locationCounter == null) {
+				// Create new location counter
+				locationCounter = new Counter(counter);
+				locationCounter.setAreaId(0l);
+				locationCounter.setId(counterKey);
+				
+				aggregatedCounters.put(counterKey, locationCounter );
+			}
+			else {
+				// Add to location counter
+				locationCounter.setCount(locationCounter.getCount() + counter.getCount());				
+			}
+			
+			counterKey = counterService.getCounterKeyName(counter.getName(), 0, 0, PeriodType.DAY, counter.getPeriod());
+			Counter dailyCounter = aggregatedCounters.get(counterKey);
+			
+			if(dailyCounter == null) {
+				// Create new daily counter for all location
+				dailyCounter = new Counter(counter);
+				dailyCounter.setAreaId(0l);
+				dailyCounter.setLocationId(0l);
+				dailyCounter.setId(counterKey);
+				
+				aggregatedCounters.put(counterKey, dailyCounter);
+			}
+			else {
+				// Add to daily counter
+				dailyCounter.setCount(dailyCounter.getCount() + counter.getCount() );
+			}
+			
+			counterKey = counterService.getCounterKeyName(counter.getName(), 0, 0, PeriodType.ALL, counter.getPeriod());
+			
+			Counter overallCounter = aggregatedCounters.get(counterKey);
+			if(overallCounter == null) {
+				overallCounter = new Counter(counter);
+				overallCounter.setPeriodType(PeriodType.ALL);
+				overallCounter.setLocationId(0l);
+				overallCounter.setAreaId(0l);
+				overallCounter.setId(counterKey);
+				
+				aggregatedCounters.put(counterKey, overallCounter);				
+			}
+			else {
+				// Add to overall counter
+				overallCounter.setCount(overallCounter.getCount() + counter.getCount());
+			}
+		}
+		
+		for (Counter newAggregateCounter : aggregatedCounters.values()) {
+			counterService.saveCounter(newAggregateCounter, true);
 		}
 		
 		return Response.ok().build();
