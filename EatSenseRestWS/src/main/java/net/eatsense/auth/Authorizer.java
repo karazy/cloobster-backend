@@ -100,7 +100,7 @@ public final class Authorizer implements SecurityContext {
      */
     public boolean isUserInRole(String role) {
     	// Check for "guest" role, requires an active checkin (either anonymous or authenticated)
-    	if( role.equals(Role.GUEST) && ( ( checkIn != null && checkIn.getUserId() != null ) ||
+    	if( role.equals(Role.GUEST) && ( ( checkIn != null && checkIn.getUserId() != null && !checkIn.isArchived()) ||
     										account.getActiveCheckIn() != null ) )
     		return true;
     	

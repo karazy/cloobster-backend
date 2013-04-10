@@ -8,11 +8,14 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
@@ -23,23 +26,28 @@ import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.Company;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.CounterReportDTO;
+import net.eatsense.representation.LocationReportDTO;
 
 public class ReportController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final CounterRepository counterRepo;
 	private final AreaRepository areaRepo;
 	private final LocationRepository locationRepo;
+	private final CompanyRepository companyRepo;
 
 	@Inject
-	public ReportController(CounterRepository counterRepo, LocationRepository locationRepo, AreaRepository areaRepo) {
+	public ReportController(CounterRepository counterRepo, LocationRepository locationRepo, AreaRepository areaRepo, CompanyRepository companyRepo) {
 		super();
 		this.counterRepo = counterRepo;
 		this.locationRepo = locationRepo;
 		this.areaRepo = areaRepo;
+		this.companyRepo = companyRepo;
 	}
 	
 	public List<CounterReportDTO> getReportForLocationAreaAndDateRange(Business location, String kpi,  long areaId, Date fromDate, Date toDate) {
@@ -87,5 +95,63 @@ public class ReportController {
 		}
 		
 		return counterReports;
+	}
+	
+	public List<LocationReportDTO> getReportForAllLocationsAndKPIs( Date fromDate, Date toDate) {
+		if(fromDate == null) {
+			logger.warn("fromDate was not set");
+			throw new ValidationException("fromDate was not set");
+		}
+		if(toDate == null) {
+			toDate = new Date();
+		}
+		// Get all not deleted locations
+		Iterable<Business> allLocations = locationRepo.iterateByProperty("trash", false);
+		// Company map for duplicate requests
+		Map<Key<Company>, Company> companyMap = Maps.newHashMap();
+		List<LocationReportDTO> allLocationsReport = Lists.newArrayList(); 
+		
+		for (Business location : allLocations) {
+			LocationReportDTO report = new LocationReportDTO();
+			report.setId(String.format("%d:ALL", location.getId()));
+			report.setLocationId(location.getId());
+			report.setLocationName(location.getName());
+			if(location.getCompany() != null) {
+				report.setCompanyId(location.getCompany().getId());
+				Company company = companyMap.get(location.getCompany());
+				if(company == null ){
+					company = companyRepo.getByKey(location.getCompany());
+					companyMap.put(location.getCompany(), company);
+				}
+				report.setCompanyName(company.getName());				
+			}
+			List<Key<Area>> areas = areaRepo.getKeysByParent(location.getKey());
+			
+			for (Key<Area> areaKey : areas) {
+				Collection<Counter> checkinCounters = counterRepo.getDailyCountsByNameAreaLocationAndDateRange("checkins", location.getId(), areaKey.getId(), fromDate, toDate);
+				for (Counter counter : checkinCounters) {
+					report.setCheckInCount(report.getCheckInCount() + counter.getCount());
+				}
+				Collection<Counter> orderCounters = counterRepo.getDailyCountsByNameAreaLocationAndDateRange("orders-placed", location.getId(), areaKey.getId(), fromDate, toDate);
+				for (Counter counter : orderCounters) {
+					report.setOrderCount(report.getOrderCount() + counter.getCount());
+				}
+				
+				Collection<Counter> serviceCallCounters = counterRepo.getDailyCountsByNameAreaLocationAndDateRange("customer-requests", location.getId(), areaKey.getId(), fromDate, toDate);
+				for (Counter counter : serviceCallCounters) {
+					report.setServiceCallCount(report.getServiceCallCount() + counter.getCount());
+				}
+				
+				Collection<Counter> feedbackCounters = counterRepo.getDailyCountsByNameAreaLocationAndDateRange("feedback", location.getId(), areaKey.getId(), fromDate, toDate);
+				for (Counter counter : feedbackCounters) {
+					report.setFeedbackCount(report.getFeedbackCount() + counter.getCount());
+				}
+				
+			}
+			
+			allLocationsReport.add(report);
+		}
+		
+		return allLocationsReport;
 	}
 }

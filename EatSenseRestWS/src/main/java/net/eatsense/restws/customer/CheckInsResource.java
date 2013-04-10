@@ -114,6 +114,10 @@ public class CheckInsResource {
 		}
 		
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
+		if(checkIn == null) {
+			throw new IllegalAccessException("Request not authorized.");
+		}
+		
 		// Check that the authenticated checkin owns the entity
 		boolean authenticated = false;
 		if(checkIn != null && checkInFromPath.getId().equals(checkIn.getId())) {

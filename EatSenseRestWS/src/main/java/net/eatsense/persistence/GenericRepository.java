@@ -480,6 +480,22 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 	 * 
 	 * @param propValue
 	 * 
+	 * @return Iterable<T> of matching objects
+	 */
+	public Iterable<T> iterateAll()	{
+		logger.info("{}", clazz);
+		return ofy().query(clazz).fetch();
+	}
+	
+	
+	/**
+	 * Convenience method to get all objects matching a single property
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
 	 * @return List<T> of matching objects
 	 */
 	public Iterable<T> iterateByProperty(String propName, Object propValue)
