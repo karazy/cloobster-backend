@@ -21,6 +21,32 @@ public class Counter {
 	private PeriodType periodType;
 	private Date period;
 	
+	public Counter() {
+	}
+	
+	public Counter(Counter counter) {
+		super();
+		this.id = counter.getId();
+		this.name = counter.getName();
+		this.locationId = counter.getLocationId();
+		this.areaId = counter.getAreaId();
+		this.count = counter.getCount();
+		this.periodType = counter.getPeriodType();
+		this.period = counter.getPeriod();
+	}
+	
+	public Counter(String id, String name, Long locationId, Long areaId,
+			long count, PeriodType periodType, Date period) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.locationId = locationId;
+		this.areaId = areaId;
+		this.count = count;
+		this.periodType = periodType;
+		this.period = period;
+	}
+
 	public enum PeriodType {
 		SECOND {
 			@Override

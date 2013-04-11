@@ -1,5 +1,7 @@
 package net.eatsense.configuration;
 
+import net.eatsense.persistence.OfyService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +15,7 @@ public class ConfigurationRepository extends DAOBase {
 	
 	
 	static {
-		ObjectifyService.register(Configuration.class);
+		OfyService.register(Configuration.class);
 	}
 	
 	/**

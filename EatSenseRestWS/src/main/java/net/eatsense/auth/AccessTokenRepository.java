@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.eatsense.auth.AccessToken.TokenType;
 import net.eatsense.domain.Account;
+import net.eatsense.persistence.OfyService;
 import net.eatsense.util.IdHelper;
 
 import com.google.inject.Singleton;
@@ -22,7 +23,7 @@ import com.googlecode.objectify.util.DAOBase;
 @Singleton
 public class AccessTokenRepository extends DAOBase {
 	static {
-		ObjectifyService.register(AccessToken.class);
+		OfyService.register(AccessToken.class);
 	}
 	
 	/**
