@@ -10,11 +10,13 @@ import net.eatsense.auth.AccessToken;
 import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.ReportController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
@@ -26,12 +28,14 @@ public class CronResource {
 	private final AccessTokenRepository accessTokenRepo;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private final Provider<CheckInController> checkInCtrlProvider;
+	private final Provider<ReportController> reportProvider;
 
 	@Inject
-	public CronResource(AccessTokenRepository accessTokenRepo, Provider<ChannelController> channelCtrlProvider, Provider<CheckInController> chekInCtrlProvider) {
+	public CronResource(AccessTokenRepository accessTokenRepo, Provider<ChannelController> channelCtrlProvider, Provider<CheckInController> chekInCtrlProvider, Provider<ReportController> reportProvider) {
 		this.accessTokenRepo = accessTokenRepo;
 		this.channelCtrlProvider = channelCtrlProvider;
 		this.checkInCtrlProvider = chekInCtrlProvider;
+		this.reportProvider = reportProvider;
 	}
 	
 	/**
@@ -64,4 +68,12 @@ public class CronResource {
 		
 		return Response.ok().build();
 	}
+	
+	@GET
+	@Path("generatedailycounters")
+	public Response generateDailyLocationCounterReport() {
+		reportProvider.get().generateDailyLocationCounterReport(Optional.<Date>absent());		
+		return Response.ok().build();
+	}
+	
 }

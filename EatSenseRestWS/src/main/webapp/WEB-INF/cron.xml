@@ -6,6 +6,11 @@
      <schedule>every 24 hours</schedule>
    </cron>
    <cron>
+     <url>/cron/generatedailycounters</url>
+     <description>Generate daily counter reports.</description>
+     <schedule>every day 00:01</schedule>
+   </cron>
+   <cron>
      <url>/cron/checkcockpits</url>
      <description>Check online status of cockpit channel connections.</description>
      <schedule>every 30 minutes</schedule>

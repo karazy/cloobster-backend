@@ -24,6 +24,7 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.common.base.Optional;
 import com.googlecode.objectify.Objectify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,6 +50,22 @@ public class CounterServiceTest {
 		when(ofyService.ofy()).thenReturn(ofy);
 		
 		counterService = new CounterService(memcache, ofyService, taskQueue);
+	}
+	
+	@Test
+	public void testGetCounterKeyFormatForArea() throws Exception {
+		Date now = new Date();
+		String counterKeyName = counterService.getCounterKeyName("test", 123l, 11l, PeriodType.DAY, now);
+		String result = counterService.getCounterKeyFormatForArea(counterKeyName);
+		assertThat(result, is(String.format("123:%%d:%s:%s:%s",PeriodType.DAY, PeriodType.DAY.getScope(now), "test")));
+	}
+	
+	@Test
+	public void testGetCounterNameFromKey() throws Exception {
+		Date now = new Date();
+		String counterKeyName = counterService.getCounterKeyName("test", 123l, 11l, PeriodType.DAY, now);
+		String result = counterService.getCounterNameFromKey(counterKeyName);
+		assertThat(result, is("test"));
 	}
 
 	@Test
@@ -162,6 +179,36 @@ public class CounterServiceTest {
 		
 		verify(ofy).put(counterCaptor.capture());
 		verify(memcache).delete(keyName+"_dirty");
+		
+		Counter counter = counterCaptor.getValue();
+		
+		assertThat(counter.getAreaId(), is(areaId));
+		assertThat(counter.getCount(), is(value));
+		assertThat(counter.getId(), is(keyName));
+		assertThat(counter.getLocationId(), is(locationId));
+		assertThat(counter.getName(), is(name));
+		assertThat(counter.getPeriod(), is(period));
+		assertThat(counter.getPeriodType(), is(periodType));
+		
+	}
+	
+	@Test
+	public void testPersistCounterOverrideValue() {
+		String name = "test";
+		long locationId = 123;
+		long areaId = 456;
+		PeriodType periodType = PeriodType.DAY;
+		Date period = new Date();
+		String keyName = counterService.getCounterKeyName(name, locationId, areaId, periodType, period );
+		Long value = 10l;
+		
+		counterService.persistCounter(name, periodType, period, locationId, areaId, Optional.of(value));
+		
+		ArgumentCaptor<Counter> counterCaptor = ArgumentCaptor.forClass(Counter.class);
+		
+		verify(ofy).put(counterCaptor.capture());
+		verify(memcache).delete(keyName+"_dirty");
+		verify(memcache).put(keyName, value);
 		
 		Counter counter = counterCaptor.getValue();
 		

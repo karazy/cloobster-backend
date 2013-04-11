@@ -1,5 +1,6 @@
 package net.eatsense.restws.administration;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -18,22 +19,26 @@ import com.google.inject.Inject;
 
 import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.LocationController;
+import net.eatsense.controller.ReportController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.representation.ChannelDTO;
 import net.eatsense.representation.LocationProfileDTO;
+import net.eatsense.representation.LocationReportDTO;
 import net.eatsense.representation.SubscriptionDTO;
 
 public class LocationsResource {
 	private final LocationController ctrl;
 	private final SubscriptionController subCtrl;
 	private final ChannelController channelController;
+	private final ReportController reportController;
 
 	@Inject
-	public LocationsResource(LocationController ctrl, SubscriptionController subCtrl, ChannelController channelController) {
+	public LocationsResource(LocationController ctrl, SubscriptionController subCtrl, ChannelController channelController, ReportController reportController) {
 		super();
 		this.ctrl = ctrl;
 		this.subCtrl = subCtrl;
 		this.channelController = channelController;
+		this.reportController = reportController;
 	}
 	
 	@GET
@@ -103,4 +108,11 @@ public class LocationsResource {
 		channelController.sendLocationOfflineWarning(locationId);
 	}
 	
+	@GET
+	@Path("reports")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public List<LocationReportDTO> getReport(@QueryParam("fromDate") long fromTimeStamp, @QueryParam("toDate") long toTimeStamp) {
+		return reportController.getReportForAllLocationsAndKPIs(new Date(fromTimeStamp), new Date(toTimeStamp));
+	}
 }
