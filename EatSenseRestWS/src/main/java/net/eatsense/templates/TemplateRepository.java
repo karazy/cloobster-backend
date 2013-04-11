@@ -4,6 +4,8 @@ package net.eatsense.templates;
 import java.util.List;
 import java.util.Map;
 
+import net.eatsense.persistence.OfyService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,7 @@ public class TemplateRepository extends DAOBase {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	static {
-		ObjectifyService.register(Template.class);
+		OfyService.register(Template.class);
 	}
 	
 	public Template getById(String id) {
