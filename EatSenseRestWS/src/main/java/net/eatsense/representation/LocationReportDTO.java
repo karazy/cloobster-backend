@@ -1,5 +1,7 @@
 package net.eatsense.representation;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 public class LocationReportDTO {
 	private Long companyId;
 	private Long locationId;
@@ -11,6 +13,7 @@ public class LocationReportDTO {
 	private long orderCount;
 	private long serviceCallCount;
 	private long feedbackCount;
+	private long turnoverAmount;
 		
 	public Long getCompanyId() {
 		return companyId;
@@ -66,5 +69,15 @@ public class LocationReportDTO {
 	public void setFeedbackCount(long feedbackCount) {
 		this.feedbackCount = feedbackCount;
 	}
+	@JsonIgnore
+	public long getTurnoverAmountMinor() {
+		return turnoverAmount;
+	}
 	
+	public double getTurnoverAmount() {
+		return turnoverAmount == 0 ? 0 : turnoverAmount / 100d;
+	}
+	public void setTurnoverAmount(long turnoverAmount) {
+		this.turnoverAmount = turnoverAmount;
+	}
 }

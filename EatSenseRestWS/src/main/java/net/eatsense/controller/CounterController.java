@@ -51,4 +51,9 @@ public class CounterController {
 	public void countFeedback(NewFeedbackEvent event) {
 		counterService.loadAndIncrementCounter("feedback", PeriodType.DAY, new Date(), event.getCheckIn().getBusiness().getId(), event.getCheckIn().getArea().getId(), 1);
 	}
+	
+	@Subscribe
+	public void countTurnover(UpdateBillEvent event) {
+		counterService.loadAndIncrementCounter("turnover", PeriodType.DAY, new Date(), event.getBusiness().getId(), event.getBill().getArea().getId(), event.getBill().getTotal());
+	}
 }
