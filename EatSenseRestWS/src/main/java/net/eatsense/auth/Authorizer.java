@@ -100,8 +100,7 @@ public final class Authorizer implements SecurityContext {
      */
     public boolean isUserInRole(String role) {
     	// Check for "guest" role, requires an active checkin (either anonymous or authenticated)
-    	if( role.equals(Role.GUEST) && ( ( checkIn != null && checkIn.getUserId() != null && !checkIn.isArchived()) ||
-    										account.getActiveCheckIn() != null ) )
+    	if( role.equals(Role.GUEST) && ( isValidCheckIn() || isActiveAccountWithActiveCheckIn() ) )
     		return true;
     	
     	// Check for "user" role, requires an active account.
@@ -122,6 +121,20 @@ public final class Authorizer implements SecurityContext {
     	
         return false;
     }
+
+	/**
+	 * @return
+	 */
+	private boolean isActiveAccountWithActiveCheckIn() {
+		return account != null && account.isActive() && account.getActiveCheckIn() != null;
+	}
+
+	/**
+	 * @return
+	 */
+	private boolean isValidCheckIn() {
+		return checkIn != null && checkIn.getUserId() != null && !checkIn.isArchived();
+	}
 
     public boolean isSecure() {
         return "https".equals(uriInfo.getRequestUri().getScheme());
