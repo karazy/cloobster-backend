@@ -2,6 +2,7 @@ package net.eatsense.restws.business;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import net.eatsense.auth.Role;
 import net.eatsense.controller.DashboardController;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.DashboardItem;
@@ -49,6 +51,7 @@ public class DashboardItemsResource {
 	 */
 	@POST
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public DashboardItemDTO create( DashboardItemDTO itemData) {
 		return new DashboardItemDTO(ctrl.createAndSave(location.getKey(), itemData));
 	}
@@ -59,6 +62,7 @@ public class DashboardItemsResource {
 	 */
 	@PUT
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public DashboardConfigDTO updateOrder(DashboardConfigDTO configData) {
 		return new DashboardConfigDTO(ctrl.getAndUpdateConfig(location.getKey(), configData));
 	}
@@ -76,12 +80,14 @@ public class DashboardItemsResource {
 	@PUT
 	@Path("{itemId}")
 	@Consumes("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public DashboardItemDTO update(@PathParam("itemId") long id, DashboardItemDTO itemData) {
 		return new DashboardItemDTO(ctrl.getAndUpdate(location.getKey(), id, itemData));
 	}
 
 	@DELETE
 	@Path("{itemId}")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void delete(@PathParam("itemId") long id) {
 		ctrl.delete(location.getKey(), id);
 	}

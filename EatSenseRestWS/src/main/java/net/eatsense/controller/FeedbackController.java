@@ -3,7 +3,9 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -13,11 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import com.google.common.collect.AbstractIterator;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
+import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Feedback;
@@ -57,22 +61,29 @@ public class FeedbackController {
 	/**
 	 * Get the feedback form transfer object for the given Business entity.
 	 * 
-	 * @param business
+	 * @param location
 	 * @return The feedback form dto.
 	 */
-	public FeedbackFormDTO getFeedbackFormForBusiness(Business business) {
-		checkNotNull(business, "business was null");
-		if(business.getFeedbackForm() == null) {
-			throw new net.eatsense.exceptions.NotFoundException("business has no feedback form");
+	public FeedbackFormDTO getActiveFeedbackFormForLocation(Business location) {
+		checkNotNull(location, "business was null");
+		if(location.getFeedbackForm() == null) {
+			throw new net.eatsense.exceptions.NotFoundException("location has no feedback form");
 		}
 		FeedbackForm feedbackForm;
 		try {
-			feedbackForm = feedbackFormRepo.getByKey(business.getFeedbackForm());
+			feedbackForm = feedbackFormRepo.getByKey(location.getFeedbackForm());
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException("feedback form for business not found");
 		}
 		
 		return new FeedbackFormDTO(feedbackForm);
+	}
+	
+	/**
+	 * @return
+	 */
+	public Iterable<FeedbackForm> getFeedbackFormsForLocation(Key<Business> locationKey) {
+		return feedbackFormRepo.iterateByProperty("location", locationKey);
 	}
 
 	/**
@@ -182,4 +193,34 @@ public class FeedbackController {
 		return new FeedbackDTO(feedbackRepo.getByKey(checkIn.getFeedback()));
 	}
 	
+	public Iterable<FeedbackDTO> getFeedbackReport(Business location, long formId, Date fromDate, Date toDate) {
+		if(formId == 0) {
+			if(location.getFeedbackForm() != null) {
+				formId = location.getFeedbackForm().getId();
+			}
+		}
+		
+		Iterable<Feedback> feedbackEntries = feedbackRepo.belongingToFormLocationAndDateRange(location, fromDate, toDate, formId);
+		
+		
+		final Iterator<Feedback> resultIter = feedbackEntries.iterator();
+		
+		return new Iterable<FeedbackDTO>() {
+			
+			@Override
+			public Iterator<FeedbackDTO> iterator() {
+				
+				return new AbstractIterator<FeedbackDTO>() {
+
+					@Override
+					protected FeedbackDTO computeNext() {
+						while (resultIter.hasNext()) {
+							return new FeedbackDTO(resultIter.next());
+				        }
+				        return endOfData();
+					}
+				};
+			}
+		};
+	}
 }

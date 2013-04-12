@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import net.eatsense.domain.Feedback;
 import net.eatsense.domain.embedded.FeedbackQuestion;
