@@ -65,7 +65,7 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 	 * @return
 	 */
 	Number makeNumber(int column, int row, double value) {
-		return new Number(column, column, value);
+		return new Number(column, row, value);
 	}
 	
 	WritableWorkbook makeWorkbook(OutputStream outputStream) throws IOException {
@@ -142,7 +142,14 @@ public class CounterReportXLSGenerator extends AbstractDocumentGenerator {
 		sheet.addCell(locationCell);
 		Label areaCell = makeLabel(2, row, areaName);
 		sheet.addCell(areaCell);
-		Number valueCell = makeNumber(3, row, counter.getCount());
+		double value;
+		if(counter.getName().equals("turnover") && counter.getCount() != 0) {
+			value = counter.getCount() / 100d;
+		}
+		else {
+			value = counter.getCount();
+		}
+		Number valueCell = makeNumber(3, row, value);
 		sheet.addCell(valueCell);
 		Number dayCell = makeNumber(4, row, calendar.get(Calendar.DAY_OF_MONTH));
 		sheet.addCell(dayCell);

@@ -16,6 +16,9 @@ public class FeedbackForm extends GenericEntity<FeedbackForm> {
 	@Embedded
 	List<FeedbackQuestion> questions;
 	
+	
+	private Key<Business> location;
+	
 	String title;
 	String description;
 
@@ -57,5 +60,13 @@ public class FeedbackForm extends GenericEntity<FeedbackForm> {
 	@JsonIgnore
 	public static Key<FeedbackForm> getKey(long id) {
 		return new Key<FeedbackForm>(FeedbackForm.class, id);
+	}
+
+	public Key<Business> getLocation() {
+		return location;
+	}
+
+	public void setLocation(Key<Business> location) {
+		this.location = location;
 	}
 }

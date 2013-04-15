@@ -148,7 +148,7 @@ public class CounterService {
 	 * @param delta
 	 * @return
 	 */
-	public Long loadAndIncrementCounter(String name, PeriodType periodType, Date period, long locationId, long areaId, int delta) {
+	public Long loadAndIncrementCounter(String name, PeriodType periodType, Date period, long locationId, long areaId, long delta) {
 		checkNotNull(name, "name was null");
 		
 		String keyName = getCounterKeyName(name, locationId, areaId, periodType, period);

@@ -153,6 +153,14 @@ public class ImportController {
     	
     	Business business = businessRepo.getById(businessId);
     	
+    	if(business.getFeedbackForm() != null) {
+    		FeedbackForm oldForm = feedbackFormRepo.getByKey(business.getFeedbackForm());
+    		if(oldForm.getLocation() == null ) {
+    			oldForm.setLocation(business.getKey());
+    			feedbackFormRepo.saveOrUpdate(oldForm);
+    		}
+    	}
+    	
     	FeedbackForm feedbackForm = new FeedbackForm();
     	feedbackForm.setDescription(feedbackFormData.getDescription());
     	
@@ -163,11 +171,12 @@ public class ImportController {
 		}
     	feedbackForm.setQuestions(feedbackFormData.getQuestions());
     	feedbackForm.setTitle(feedbackFormData.getTitle());
+    	feedbackForm.setLocation(business.getKey());
     	
     	Key<FeedbackForm> formKey = feedbackFormRepo.saveOrUpdate(feedbackForm);
     	business.setFeedbackForm(formKey);
     	businessRepo.saveOrUpdate(business);
-    	    	
+    	
     	return new FeedbackFormDTO(feedbackForm);
     }
     

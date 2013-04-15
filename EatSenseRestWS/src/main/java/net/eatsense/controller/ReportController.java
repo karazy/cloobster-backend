@@ -48,7 +48,7 @@ public class ReportController {
 	private final CompanyRepository companyRepo;
 	private final CounterService counterService;
 	
-	private final static ImmutableSet<String> counterNamesForReporting = ImmutableSet.of("checkins", "orders-placed", "customer-requests","feedback");
+	private final static ImmutableSet<String> counterNamesForReporting = ImmutableSet.of("checkins", "orders-placed", "customer-requests","feedback", "turnover");
 
 	@Inject
 	public ReportController(CounterRepository counterRepo, LocationRepository locationRepo, AreaRepository areaRepo, CompanyRepository companyRepo, CounterService counterService) {
@@ -89,7 +89,9 @@ public class ReportController {
 			Collection<Counter> counters = counterRepo.getDailyCountsByNameAreaLocationAndDateRange(kpi, location.getId(), areaId, fromDate, toDate);
 			
 			for (Counter counter : counters) {
-				counterReports.add(new CounterReportDTO(counter, location.getName(), area.getName()));
+				CounterReportDTO reportDto = new CounterReportDTO(counter, location.getName(), area.getName());
+				
+				counterReports.add(reportDto);
 			}
 		}
 		else {
@@ -155,6 +157,13 @@ public class ReportController {
 				report.setFeedbackCount(report.getFeedbackCount() + counter.getCount());
 			}
 			
+			Collection<Counter> turnoverCounters = counterRepo.getDailyCountsByNameAreaLocationAndDateRange("turnover", location.getId(), 0, fromDate, toDate);
+			for (Counter counter : turnoverCounters) {
+				report.setTurnoverAmount(report.getTurnoverAmountMinor() + counter.getCount());
+			}
+			
+			
+			
 			allLocationsReport.add(report);
 		}
 		
@@ -188,15 +197,17 @@ public class ReportController {
 				}
 				
 				// Save the sum for this location and kpi.
-				counterService.persistCounter(counterName, PeriodType.DAY, now, location.getId(), 0, Optional.of(counterValue));
-				
-				// Add to total count over all locations.
-				Long totalCount = totalCounts.get(counterName);
-				if(totalCount == null) {
-					totalCounts.put(counterName, counterValue);
-				}				
-				else {
-					totalCounts.put(counterName, counterValue + totalCount);
+				if(counterValue != 0) {
+					counterService.persistCounter(counterName, PeriodType.DAY, now, location.getId(), 0, Optional.of(counterValue));
+					
+					// Add to total count over all locations.
+					Long totalCount = totalCounts.get(counterName);
+					if(totalCount == null) {
+						totalCounts.put(counterName, counterValue);
+					}				
+					else {
+						totalCounts.put(counterName, counterValue + totalCount);
+					}
 				}
 			}
 		}

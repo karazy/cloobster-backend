@@ -313,4 +313,21 @@ public class LocationResource {
 		
 		return resource;
 	}
+	
+	@Path("feedback")
+	public FeedbackResource getFeedbackResource() {
+		FeedbackResource resource = resourceContext.getResource(FeedbackResource.class);
+		resource.setLocation(business);
+		
+		return resource;
+	}
+	
+	@Path("feedbackforms")
+	public FeedbackFormsResource getFeedbackFormsResource() {
+		FeedbackFormsResource resource = resourceContext.getResource(FeedbackFormsResource.class);
+		resource.setLocation(business);
+		
+		return resource;
+	}
+	
 }

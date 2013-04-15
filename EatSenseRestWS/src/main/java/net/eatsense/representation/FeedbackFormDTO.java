@@ -2,7 +2,10 @@ package net.eatsense.representation;
 
 import java.util.List;
 
+import com.google.common.base.Function;
+
 import net.eatsense.domain.FeedbackForm;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.FeedbackQuestion;
 
 public class FeedbackFormDTO {
@@ -52,4 +55,12 @@ public class FeedbackFormDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public final static Function<FeedbackForm, FeedbackFormDTO> toDTO = 
+		new Function<FeedbackForm, FeedbackFormDTO>() {
+			@Override
+			public FeedbackFormDTO apply(FeedbackForm input) {
+				return new FeedbackFormDTO(input);
+			}
+	    };
 }

@@ -188,7 +188,7 @@ public class LocationResource {
 	@Path("feedbackforms")
 	@Produces("application/json; charset=UTF-8")
 	public FeedbackFormDTO getFeedbackForm() {
-		return feedbackCtrl.getFeedbackFormForBusiness(business);
+		return feedbackCtrl.getActiveFeedbackFormForLocation(business);
 	}
 	
 	@POST

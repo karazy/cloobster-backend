@@ -122,7 +122,7 @@ public class CounterServiceTest {
 		long areaId = 456;
 		PeriodType periodType = PeriodType.DAY;
 		Date period = new Date();
-		int delta = 1;
+		long delta = 1;
 		String keyName = counterService.getCounterKeyName(name, locationId, areaId, periodType, period );
 		Long value = 2l;
 
@@ -142,7 +142,7 @@ public class CounterServiceTest {
 		long areaId = 456;
 		PeriodType periodType = PeriodType.DAY;
 		Date period = new Date();
-		int delta = 1;
+		long delta = 1;
 		String keyName = counterService.getCounterKeyName(name, locationId, areaId, periodType, period );
 		Long value = 2l;
 
