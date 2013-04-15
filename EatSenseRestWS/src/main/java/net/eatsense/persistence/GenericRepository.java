@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.Result;
@@ -695,8 +696,18 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		return keys;
 	}
 	
+	/**
+	 * {@link ObjectifyFactory#allocateId(Object, Class)}
+	 * 
+	 * @param parent
+	 * @return
+	 */
 	public <V> long allocateId(Key<V> parent) {
 		return fact().allocateId(parent, clazz);
+	}
+	
+	public long allocateId() {
+		return fact().allocateId(clazz);
 	}
 
 	public Iterable<Key<T>> iterateKeysByProperty(String propName, Object propValue) {

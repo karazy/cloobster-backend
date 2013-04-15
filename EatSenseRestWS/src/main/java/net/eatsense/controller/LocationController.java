@@ -1021,4 +1021,29 @@ public class LocationController {
 	private int countSpots(Key<Business> locationKey) {
 		return spotRepo.query().ancestor(locationKey).filter("trash", false).count();
 	}
+	
+	public Business copyLocationAndAllEntities(long fromLocationId, long newOwnerAccountId) {
+		
+		Key<Business> originalLocationKey = locationRepo.getKey(fromLocationId);
+		Account newOwnerAccount = accountRepo.getById(newOwnerAccountId);
+		Business location = locationRepo.getByKey(originalLocationKey);
+		
+		// Copy all image blobs for this location
+		location.setImages(imageController.copyImages(location.getImages()).getImages());
+		
+		// Set new id and company at location.
+		location.setId(locationRepo.allocateId());
+		location.setCompany(newOwnerAccount.getCompany());
+				
+		Map<Key<Area>, Area> allAreas = Maps.newHashMap();
+		Map<Long, Key<Area>> oldToNewAreaIdsMap = Maps.newHashMap();
+		Iterable<Spot> spotsIterable = spotRepo.iterateByParent(originalLocationKey);
+				
+		for (Area area : areaRepo.iterateByParent(originalLocationKey)) {			
+			// allocate new id for area, create key. add key to map with old id
+			// set new id on area, add area to map with new key
+		}
+						
+		return null;
+	}
 }

@@ -1,5 +1,7 @@
 package net.eatsense.service;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import net.eatsense.exceptions.ServiceException;
 
+import com.google.appengine.api.blobstore.BlobInfo;
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.files.AppEngineFile;
@@ -32,11 +36,13 @@ public class FileServiceHelper {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final com.google.appengine.api.files.FileService fileService;
 	private final BlobstoreService blobService;
+	private final BlobInfoFactory blobInfoFact;
 	
 	@Inject
-	public FileServiceHelper(FileService fileService, BlobstoreService blobService) {
+	public FileServiceHelper(FileService fileService, BlobstoreService blobService, BlobInfoFactory blobInfoFact) {
 		this.fileService = fileService;
 		this.blobService = blobService;
+		this.blobInfoFact = blobInfoFact;
 	}
 	
 	/**
@@ -79,6 +85,7 @@ public class FileServiceHelper {
 			logger.error("Could not write to newly created file, already locked!",e);
 			throw new ServiceException(e);
 		} catch (IOException e) {
+			logger.error("Could not write to newly created file, unknown problem.",e);
 			throw new ServiceException("Error while writing to blobstore file.", e);
 		}
 		
@@ -105,8 +112,10 @@ public class FileServiceHelper {
 	}
 	
 	/**
+	 * Completely load a blob file into memory.
+	 * 
 	 * @param blobKey
-	 * @return
+	 * @return all bytes of this blob
 	 * @throws FileNotFoundException
 	 * @throws LockException
 	 * @throws IOException
@@ -115,6 +124,37 @@ public class FileServiceHelper {
 		AppEngineFile blobFile = fileService.getBlobFile(blobKey);
 		FileReadChannel readChannel = fileService.openReadChannel(blobFile, false);
 		
-		return ByteStreams.toByteArray(Channels.newInputStream(readChannel));
+		byte[] bytes = ByteStreams.toByteArray(Channels.newInputStream(readChannel));
+		readChannel.close();
+		return bytes;
+	}
+	
+	/**
+	 * Load an existing blob file and create a new file with the same content.
+	 * 
+	 * @param originalBlobKey
+	 * @return blobKey identifying the copy of the blob
+	 */
+	public BlobKey copyBlob( BlobKey originalBlobKey) {
+		checkNotNull(originalBlobKey, "originalBlobKey was null");
+		BlobInfo originalBlobInfo = blobInfoFact.loadBlobInfo(originalBlobKey);
+		byte[] bytes;
+		
+		//TODO write test
+		
+		try {
+			bytes = readBlob(originalBlobInfo.getBlobKey());
+		} catch (FileNotFoundException e) {
+			logger.error("Could not find original blob for reading",e);
+			throw new ServiceException(e);
+		} catch (LockException e) {
+			logger.error("Could not read from original blob, already locked!",e);
+			throw new ServiceException(e);
+		} catch (IOException e) {
+			logger.error("Could not read from original blob, unknown problem.",e);
+			throw new ServiceException("Error while reading blobstore file.", e);
+		}
+		
+		return saveNewBlob(originalBlobInfo.getFilename(), originalBlobInfo.getContentType(), bytes);
 	}
 }
