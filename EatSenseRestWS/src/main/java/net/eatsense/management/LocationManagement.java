@@ -62,21 +62,23 @@ public class LocationManagement {
 		// Set new id and company at location.
 		location.setId(ofyService.factory().allocateId(Business.class));
 		location.setCompany(newOwnerAccount.getCompany());
+		// Remove active subscription ( setting basic subscription later)
 		location.setActiveSubscription(null);
+		location.setName(location.getName() + " Copy");
 		
+		// Clear active channels, no need to save this
 		if(location.getChannels() != null)
 			location.getChannels().clear();
 		
-		
+		// get the new key and add it to the owner account
 		Key<Business> newLocationKey = location.getKey();
 		if(newOwnerAccount.getBusinesses() == null) {
 			newOwnerAccount.setBusinesses(Lists.<Key<Business>>newArrayList());
 		}
 		newOwnerAccount.getBusinesses().add(newLocationKey);
-				
-		Map<Key<Area>, Area> allAreas = Maps.newHashMap();
-		Map<Long, Key<Area>> oldToNewAreaIdsMap = Maps.newHashMap();
 		
+		logger.info("Querying all relevant entities...");
+		// Query the datastore for all entities we want to copy
 		Iterable<Spot> spotsIterable = ofy.query(Spot.class).ancestor(originalLocationKey).filter("trash", false).fetch();
 		Iterable<Menu> menusIterable = ofy.query(Menu.class).ancestor(originalLocationKey).filter("trash", false).fetch();
 		Iterable<Area> areasIterable = ofy.query(Area.class).ancestor(originalLocationKey).filter("trash", false).fetch();
@@ -84,26 +86,33 @@ public class LocationManagement {
 		Iterable<Choice> choicesIterable = ofy.query(Choice.class).ancestor(originalLocationKey).filter("trash", false).fetch();
 		Iterable<InfoPage> infoPagesIterable = ofy.query(InfoPage.class).ancestor(originalLocationKey).filter("trash", false).fetch();
 		Iterable<InfoPageT> infoPageTransIterable = ofy.query(InfoPageT.class).ancestor(originalLocationKey).fetch();
-		QueryResultIterable<DashboardItem> dashBoardItems = ofy.query(DashboardItem.class).ancestor(originalLocationKey).fetch();
-		
-		Map<Key<Menu>,Menu> allMenus = Maps.newHashMap();
-		Map<Long, Key<Menu>> oldToNewMenuIdsMap = Maps.newHashMap();
-		Map<Key<Product>, Product> allProducts = Maps.newHashMap();
-		Map<Long, Key<Product>> oldToNewProductIdsMap = Maps.newHashMap();
-		Map<Long, Key<DashboardItem>> oldToNewDashboardItemIdsMap = Maps.newHashMap();
-		
-		Map<Key<InfoPage>, InfoPage> allInfoPages = Maps.newHashMap();
-		Map<Long, Key<InfoPage>> oldToNewInfoPageIdsMap = Maps.newHashMap();
+		Iterable<DashboardItem> dashBoardItems = ofy.query(DashboardItem.class).ancestor(originalLocationKey).fetch();
+
+		// Keep lists of all relevant entities for the copy
+		List<Area> allAreas = Lists.newArrayList();
+		List<Spot> allSpots = Lists.newArrayList();
+		List<Menu> allMenus = Lists.newArrayList();
+		List<Choice> allChoices = Lists.newArrayList();
+		List<InfoPage> allInfoPages = Lists.newArrayList();
 		List<InfoPageT> allInfoPageTrans = Lists.newArrayList();
 		List<DashboardItem> allDashboardItems = Lists.newArrayList();
-		List<Choice> allChoices = Lists.newArrayList();
+		
+		// Map new product keys to the product because of relation to choices
+		Map<Key<Product>,Product> allProducts = Maps.newHashMap();
+		
+		// Keep maps to map entity ids to the new keys
+		Map<Long, Key<Area>> oldToNewAreaIdsMap = Maps.newHashMap();
+		Map<Long, Key<Menu>> oldToNewMenuIdsMap = Maps.newHashMap();
+		Map<Long, Key<Product>> oldToNewProductIdsMap = Maps.newHashMap();
+		Map<Long, Key<DashboardItem>> oldToNewDashboardItemIdsMap = Maps.newHashMap();
+		Map<Long, Key<InfoPage>> oldToNewInfoPageIdsMap = Maps.newHashMap();
 		
 		for (Menu menu : menusIterable) {
 			menu.setBusiness(newLocationKey);
 			Key<Menu> newMenuKey = menu.getKey();
 			
 			oldToNewMenuIdsMap.put(menu.getId(), newMenuKey);
-			allMenus.put(newMenuKey, menu);
+			allMenus.add( menu);
 		}
 		
 		for (Area area : areasIterable) {
@@ -117,10 +126,8 @@ public class LocationManagement {
 			area.setMenus(newMenuKeys);
 			
 			oldToNewAreaIdsMap.put(area.getId(), newAreaKey);
-			allAreas.put(newAreaKey, area);
+			allAreas.add( area);
 		}
-		
-		List<Spot> allSpots = Lists.newArrayList();
 		
 		for (Spot spot : spotsIterable) {
 			spot.setBusiness(newLocationKey);
@@ -166,7 +173,7 @@ public class LocationManagement {
 			allChoices.add(choice);
 		}
 		
-		for (Menu menu : allMenus.values()) {
+		for (Menu menu : allMenus) {
 			if(menu.getProducts() != null && !menu.getProducts().isEmpty()) {
 				List<Key<Product>> newProductKeyList = Lists.newArrayList();
 				// add the new key for each product to the list
@@ -183,7 +190,7 @@ public class LocationManagement {
 			Key<InfoPage> newInfoPageKey = infoPage.getKey();
 			
 			oldToNewInfoPageIdsMap.put(infoPage.getId(), newInfoPageKey );
-			allInfoPages.put(newInfoPageKey, infoPage);
+			allInfoPages.add( infoPage);
 		}
 		
 		for (InfoPageT infoPageT : infoPageTransIterable) {
@@ -191,23 +198,28 @@ public class LocationManagement {
 			allInfoPageTrans.add(infoPageT);
 		}
 		
+		// get the dashboardconfig		
 		DashboardConfiguration dashBoardConfig = ofy.get(ofyService.keys().create(originalLocationKey, DashboardConfiguration.class, "dashboard"));
-				
+		
+		// set new location key for every item and populate key map
 		for (DashboardItem dashboardItem : dashBoardItems) {
 			dashboardItem.setLocation(newLocationKey);
 			oldToNewDashboardItemIdsMap.put(dashboardItem.getId(), dashboardItem.getKey());
 			allDashboardItems.add(dashboardItem);
 		}
 		
+		// update the list on the dashboardconfig to keep the original order
 		List<Key<DashboardItem>> newItemsList = Lists.newArrayList();
-		
 		for (Key<DashboardItem> oldItemKey : dashBoardConfig.getItems()) {
 			newItemsList.add(oldToNewDashboardItemIdsMap.get(oldItemKey.getId()));
 		}
 		
+		// set new item list and location
+		dashBoardConfig.setLocation(newLocationKey);
 		dashBoardConfig.setItems(newItemsList);
 		
 		FeedbackForm feedbackForm = null;
+		// Copy feedback form if it was set
 		if(location.getFeedbackForm() != null) {
 			feedbackForm = ofy.get(location.getFeedbackForm());
 			feedbackForm.setLocation(newLocationKey);
@@ -219,17 +231,17 @@ public class LocationManagement {
 		subscriptionController.setBasicSubscription(location);
 		// The location is saved now.
 		logger.info("Saving areas ...");
-		ofy.put(allAreas.values());
+		ofy.put(allAreas);
 		logger.info("Saving spots ...");
 		ofy.put(allSpots);
 		logger.info("Saving menus ...");
-		ofy.put(allMenus.values());
+		ofy.put(allMenus);
 		logger.info("Saving products ...");
 		ofy.put(allProducts.values());
 		logger.info("Saving choices ...");
 		ofy.put(allChoices);
 		logger.info("Saving infopages ...");
-		ofy.put(allInfoPages.values());
+		ofy.put(allInfoPages);
 		logger.info("Saving infopage translations ...");
 		ofy.put(allInfoPageTrans);
 		logger.info("Saving dashboard items ...");

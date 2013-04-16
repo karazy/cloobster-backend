@@ -218,11 +218,13 @@ public class ImageController {
 		List<ImageDTO> imagesCopy = Lists.newArrayList();
 		
 		for (ImageDTO originalImage : originalImages) {
-			ImageDTO image = new ImageDTO(null, originalImage.getId(), null);
-			// Copy blob and save new blob key
-			image.setBlobKey(fileHelper.copyBlob(new BlobKey(originalImage.getBlobKey())).getKeyString());
-			// Create new serving url from the new blob key.
-			image.setUrl(createServingUrl(image.getBlobKey()));
+			ImageDTO image = new ImageDTO(null, originalImage.getId(), originalImage.getUrl());
+			if(originalImage.getBlobKey() != null) {
+				// Copy blob and save new blob key
+				image.setBlobKey(fileHelper.copyBlob(new BlobKey(originalImage.getBlobKey())).getKeyString());
+				// Create new serving url from the new blob key.
+				image.setUrl(createServingUrl(image.getBlobKey()));
+			}
 			
 			imagesCopy.add(image);
 		}
