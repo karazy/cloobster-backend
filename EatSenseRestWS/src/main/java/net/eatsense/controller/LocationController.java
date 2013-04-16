@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +64,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -1034,16 +1036,58 @@ public class LocationController {
 		// Set new id and company at location.
 		location.setId(locationRepo.allocateId());
 		location.setCompany(newOwnerAccount.getCompany());
+		
+		Key<Business> newLocationKey = location.getKey();
 				
 		Map<Key<Area>, Area> allAreas = Maps.newHashMap();
 		Map<Long, Key<Area>> oldToNewAreaIdsMap = Maps.newHashMap();
-		Iterable<Spot> spotsIterable = spotRepo.iterateByParent(originalLocationKey);
-				
-		for (Area area : areaRepo.iterateByParent(originalLocationKey)) {			
+		
+		Iterable<Spot> spotsIterable = spotRepo.iterateByParentAndProperty(originalLocationKey,"trash", false);
+		Iterable<Menu> menusIterable = menuRepo.iterateByParentAndProperty(originalLocationKey, "trash", false);
+		Iterable<Area> areasIterable = areaRepo.iterateByParentAndProperty(originalLocationKey,"trash",false);
+		
+		Map<Key<Menu>,Menu> allMenus = Maps.newHashMap();
+		Map<Long, Key<Menu>> oldToNewMenuIdsMap = Maps.newHashMap();
+		
+		for (Menu menu : menusIterable) {
+			long newMenuId = menuRepo.allocateId(newLocationKey);
+			Key<Menu> newMenuKey = menuRepo.getKey(newLocationKey, newMenuId);
+			oldToNewMenuIdsMap.put(menu.getId(), newMenuKey);
+			menu.setId(newMenuId);
+			menu.setBusiness(newLocationKey);
+			allMenus.put(newMenuKey, menu);
+		}				
+		
+		for (Area area : areasIterable) {
 			// allocate new id for area, create key. add key to map with old id
+			long newAreaId = areaRepo.allocateId(newLocationKey);
+			Key<Area> newAreaKey = areaRepo.getKey(newLocationKey, newAreaId);
+			oldToNewAreaIdsMap.put(area.getId(), newAreaKey);
 			// set new id on area, add area to map with new key
+			area.setId(newAreaId);
+			area.setBusiness(newLocationKey);
+			List<Key<Menu>> newMenuKeys = Lists.newArrayList(); 
+			for (Key<Menu> oldMenuKey : area.getMenus()) {
+				newMenuKeys.add(oldToNewMenuIdsMap.get(oldMenuKey.getId()));
+			}
+			area.setMenus(newMenuKeys);
+			
+			allAreas.put(newAreaKey, area);
 		}
-						
+		
+		List<Spot> allSpots = Lists.newArrayList();
+		
+		for (Spot spot : spotsIterable) {
+			long newSpotId = spotRepo.allocateId(newLocationKey);
+			spot.setBusiness(newLocationKey);
+			spot.setId(newSpotId);
+			spot.generateBarcode();
+			Key<Area> newAreaKey = oldToNewAreaIdsMap.get(spot.getArea().getId());
+			spot.setArea(newAreaKey);
+			
+			allSpots.add(spot);
+		}
+		
 		return null;
 	}
 }

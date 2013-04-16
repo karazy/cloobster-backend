@@ -3,6 +3,7 @@ package net.eatsense.persistence;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -505,6 +506,25 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		Query<T> q = ofy().query(clazz);
 
 		q.filter(propName, propValue);
+
+		return q.fetch();
+	}
+	
+	/**
+	 * Convenience method to get all child objects matching a single property and parent
+	 * @param <V>
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public <V> Iterable<T> iterateByParentAndProperty(Key<V> parentKey, String propName, Object propValue)
+	{
+		logger.info("{}, property={}, parent=", new Object[]{ clazz, propName, parentKey});
+		Query<T> q = ofy().query(clazz).ancestor(parentKey).filter(propName, propValue);
 
 		return q.fetch();
 	}
