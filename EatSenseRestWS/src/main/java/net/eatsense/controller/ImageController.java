@@ -210,7 +210,7 @@ public class ImageController {
 	 */
 	public UpdateImagesResult copyImages(List<ImageDTO> originalImages) {
 		if( originalImages == null || originalImages.isEmpty()) {
-			return new UpdateImagesResult(Lists.<ImageDTO>newArrayList(), false, null);
+			return new UpdateImagesResult(originalImages, false, null);
 		}
 		
 		//TODO write test

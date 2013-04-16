@@ -3,8 +3,10 @@ package net.eatsense.restws.administration;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -12,7 +14,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -21,6 +28,7 @@ import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.ReportController;
 import net.eatsense.controller.SubscriptionController;
+import net.eatsense.management.LocationManagement;
 import net.eatsense.representation.ChannelDTO;
 import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.LocationReportDTO;
@@ -31,14 +39,18 @@ public class LocationsResource {
 	private final SubscriptionController subCtrl;
 	private final ChannelController channelController;
 	private final ReportController reportController;
+	private final LocationManagement locationManagement;
+	private final UriInfo uriInfo;
 
 	@Inject
-	public LocationsResource(LocationController ctrl, SubscriptionController subCtrl, ChannelController channelController, ReportController reportController) {
+	public LocationsResource(LocationController ctrl, SubscriptionController subCtrl, ChannelController channelController, ReportController reportController, LocationManagement locationManagement, UriInfo uriInfo) {
 		super();
 		this.ctrl = ctrl;
 		this.subCtrl = subCtrl;
 		this.channelController = channelController;
 		this.reportController = reportController;
+		this.locationManagement = locationManagement;
+		this.uriInfo = uriInfo;
 	}
 	
 	@GET
@@ -47,12 +59,32 @@ public class LocationsResource {
 		return Lists.transform(ctrl.getLocations(companyId), LocationProfileDTO.toDTO);
 	}
 	
+	@POST
+	@Produces(MediaType.TEXT_PLAIN)
+	public String createLocation(@FormParam("copyId") long originalLocationId,@FormParam("ownerAccountId") long newOwnerAccountId) {
+		QueueFactory.getDefaultQueue().add(
+				TaskOptions.Builder
+						.withUrl("/" + uriInfo.getPath() + "/processcopy")
+						.param("copyId", Long.toString(originalLocationId))
+						.param("ownerAccountId", Long.toString(newOwnerAccountId)));
+		return "Task queued.";
+	}
+	
+	@POST
+	@Path("processcopy")
+	public Response processCopyLocation(@FormParam("copyId") long originalLocationId,@FormParam("ownerAccountId") long newOwnerAccountId) {
+		locationManagement.copyLocationAndAllEntities(originalLocationId, newOwnerAccountId);
+		
+		return Response.ok().build();
+	}
+	
 	@GET
 	@Path("{locationId}")
 	@Produces("application/json")
 	public LocationProfileDTO getLocation(@PathParam("locationId") long locationId) {
 		return new LocationProfileDTO(ctrl.get(locationId, true));
 	}
+	
 	
 	@POST
 	@Path("{locationId}/subscriptions")
