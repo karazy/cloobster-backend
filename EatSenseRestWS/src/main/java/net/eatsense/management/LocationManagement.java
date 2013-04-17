@@ -46,6 +46,13 @@ public class LocationManagement {
 		this.subscriptionController = subscriptionController;
 	}
 	
+	/**
+	 * Copy location and all relevant content as a new location.
+	 * 
+	 * @param fromLocationId
+	 * @param newOwnerAccountId
+	 * @return
+	 */
 	public Business copyLocationAndAllEntities(long fromLocationId, long newOwnerAccountId) {
 		checkArgument(fromLocationId != 0, "fromLocationId was 0");
 		checkArgument(newOwnerAccountId != 0, "newOwnerAccountId was 0");

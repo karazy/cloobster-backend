@@ -18,6 +18,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.collect.Iterables;
@@ -28,6 +31,7 @@ import net.eatsense.controller.ChannelController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.ReportController;
 import net.eatsense.controller.SubscriptionController;
+import net.eatsense.exceptions.ValidationException;
 import net.eatsense.management.LocationManagement;
 import net.eatsense.representation.ChannelDTO;
 import net.eatsense.representation.LocationProfileDTO;
@@ -60,8 +64,21 @@ public class LocationsResource {
 	}
 	
 	@POST
+	@Consumes("application/json")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String createLocation(@FormParam("copyId") long originalLocationId,@FormParam("ownerAccountId") long newOwnerAccountId) {
+	public String createLocation(JSONObject parameters) {
+		long originalLocationId;
+		long newOwnerAccountId;
+		try {
+			originalLocationId = parameters.getLong("copyId");
+			newOwnerAccountId = parameters.getLong("ownerAccountId");
+		} catch (JSONException e) {
+			throw new ValidationException("Invalid JSON or \"copyId\" and \"ownerAccountId\" field not set.");
+		}
+		
+		if(originalLocationId == 0 || newOwnerAccountId == 0) {
+			throw new ValidationException("copyId or ownerAccountId parameter not set.");
+		}
 		QueueFactory.getDefaultQueue().add(
 				TaskOptions.Builder
 						.withUrl("/" + uriInfo.getPath() + "/processcopy")
