@@ -177,14 +177,17 @@ public class ReportController {
 	public void generateDailyLocationCounterReport(Optional<Date> optionalDate) {
 		// Get all not deleted locations
 		Iterable<Business> allLocations = locationRepo.iterateByProperty("trash", false);
-		Date now = optionalDate.or(new Date());
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		
+		Date dateToCount = optionalDate.or(calendar.getTime());
 		
 		Map<String, Long> totalCounts = Maps.newHashMap();
 		
 		for (Business location : allLocations) {
 			List<Key<Area>> areas = areaRepo.getKeysByParent(location.getKey());
 			for (String counterName : counterNamesForReporting) {
-				String counterKeyFormat = counterService.getCounterKeyFormatWithAreaPlaceholder(counterName, location.getId(), PeriodType.DAY, now);
+				String counterKeyFormat = counterService.getCounterKeyFormatWithAreaPlaceholder(counterName, location.getId(), PeriodType.DAY, dateToCount);
 				
 				ArrayList<String> areaCounterKeys = Lists.newArrayList();
 				for (Key<Area> key : areas) {
@@ -198,7 +201,8 @@ public class ReportController {
 				
 				// Save the sum for this location and kpi.
 				if(counterValue != 0) {
-					counterService.persistCounter(counterName, PeriodType.DAY, now, location.getId(), 0, Optional.of(counterValue));
+				counterService.persistCounter(counterName, PeriodType.DAY, dateToCount, location.getId(), 0, Optional.of(counterValue));
+				
 					
 					// Add to total count over all locations.
 					Long totalCount = totalCounts.get(counterName);
@@ -214,7 +218,7 @@ public class ReportController {
 		
 		// Persist overall counter values.
 		for (Entry<String, Long> totalCountEntry : totalCounts.entrySet()) {
-			counterService.persistCounter(totalCountEntry.getKey(), PeriodType.DAY, now, 0, 0, Optional.of(totalCountEntry.getValue()));
+			counterService.persistCounter(totalCountEntry.getKey(), PeriodType.DAY, dateToCount, 0, 0, Optional.of(totalCountEntry.getValue()));
 		}
 	}
 }
