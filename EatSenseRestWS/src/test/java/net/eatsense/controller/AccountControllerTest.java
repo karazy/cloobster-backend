@@ -430,7 +430,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -452,7 +452,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -474,7 +474,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	
@@ -497,7 +497,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -519,7 +519,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("login");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -541,7 +541,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -563,7 +563,7 @@ public class AccountControllerTest {
 		thrown.expect(ValidationException.class);
 		thrown.expectMessage("password");
 		
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -587,7 +587,7 @@ public class AccountControllerTest {
 		
 		data.setCompany(company);
 
-		ctr.registerNewCompanyAccount(data);
+		ctr.registerNewCompanyAccount(data, false);
 	}
 	
 	@Test
@@ -614,7 +614,7 @@ public class AccountControllerTest {
 		
 		when(ar.hashPassword(data.getPassword())).thenReturn(BCrypt.hashpw(data.getPassword(), BCrypt.gensalt()));
 		
-		account = ctr.registerNewCompanyAccount(data);
+		account = ctr.registerNewCompanyAccount(data, false);
 		
 		verify(ar).saveOrUpdate(newAccount);
 		
