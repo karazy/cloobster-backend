@@ -201,8 +201,7 @@ public class ReportController {
 				
 				// Save the sum for this location and kpi.
 				if(counterValue != 0) {
-				counterService.persistCounter(counterName, PeriodType.DAY, dateToCount, location.getId(), 0, Optional.of(counterValue));
-				
+					counterService.persistCounter(counterName, PeriodType.DAY, dateToCount, location.getId(), 0, Optional.of(counterValue));
 					
 					// Add to total count over all locations.
 					Long totalCount = totalCounts.get(counterName);
