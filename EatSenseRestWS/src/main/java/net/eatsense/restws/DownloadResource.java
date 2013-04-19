@@ -2,6 +2,7 @@ package net.eatsense.restws;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -59,13 +60,16 @@ public class DownloadResource {
 		String userAgent = servletRequest.getHeader("User-Agent");
 		ResponseBuilder resp = Response.noContent();
 		try {
+			Date now = new Date();
 			if (userAgent.contains(ANDROID)) {
 				// redirect to google play
-				resp = Response.seeOther(new URI(GOOGLE_PLAY));
+				resp = Response.seeOther(new URI(GOOGLE_PLAY));				
+				counters.loadAndIncrementCounter("download-android", PeriodType.DAY, now, 0, 0, 1);
 				counters.loadAndIncrementCounter("download-android", PeriodType.ALL, null, 0, 0, 1);
 			} else if (userAgent.contains(IPAD) || userAgent.contains(IPHONE) || userAgent.contains(IPOD)) {
 				// redirect to apple app store
 				resp = Response.seeOther(new URI(APPLE_APP_STORE));
+				counters.loadAndIncrementCounter("download-ios", PeriodType.DAY, now, 0, 0, 1);
 				counters.loadAndIncrementCounter("download-ios", PeriodType.ALL, null, 0, 0, 1);
 			} else {
 				// redirect to cloobster.com
