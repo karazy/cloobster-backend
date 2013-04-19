@@ -10,8 +10,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import net.eatsense.counter.CounterService;
+import net.eatsense.counter.Counter.PeriodType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
 
 /**
  * This resource is used to route incoming gets from 
@@ -35,6 +40,13 @@ public class DownloadResource {
 	protected final String IPAD = "iPad";
 	protected final String GOOGLE_PLAY = "http://play.google.com/store/apps/details?id=net.karazy.cloobster";
 	protected final String APPLE_APP_STORE = "http://itunes.apple.com/us/app/cloobster/id532351667?l=de&ls=1&mt=8";
+
+	protected final CounterService counters;
+	
+	@Inject
+	public DownloadResource(CounterService counters) {
+		this.counters = counters;
+	}
 	
 	/**
 	 * Analyses User-Agent and redirects to corresponding store
@@ -50,9 +62,11 @@ public class DownloadResource {
 			if (userAgent.contains(ANDROID)) {
 				// redirect to google play
 				resp = Response.seeOther(new URI(GOOGLE_PLAY));
+				counters.loadAndIncrementCounter("download-android", PeriodType.ALL, null, 0, 0, 1);
 			} else if (userAgent.contains(IPAD) || userAgent.contains(IPHONE) || userAgent.contains(IPOD)) {
 				// redirect to apple app store
 				resp = Response.seeOther(new URI(APPLE_APP_STORE));
+				counters.loadAndIncrementCounter("download-ios", PeriodType.ALL, null, 0, 0, 1);
 			} else {
 				// redirect to cloobster.com
 				resp = Response.seeOther(new URI("http://www.cloobster.com"));
