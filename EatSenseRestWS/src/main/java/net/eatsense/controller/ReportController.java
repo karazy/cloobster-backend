@@ -121,7 +121,9 @@ public class ReportController {
 		Iterable<Business> allLocations = locationRepo.iterateByProperty("trash", false);
 		// Company map for duplicate requests
 		Map<Key<Company>, Company> companyMap = Maps.newHashMap();
-		List<LocationReportDTO> allLocationsReport = Lists.newArrayList(); 
+		List<LocationReportDTO> allLocationsReport = Lists.newArrayList();
+		logger.info("counters={}",counterNamesForReporting);
+		logger.info("fromDate={}, toDate={}", fromDate, toDate);
 		
 		for (Business location : allLocations) {
 			LocationReportDTO report = new LocationReportDTO();
