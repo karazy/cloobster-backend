@@ -126,11 +126,15 @@ public class LocationManagement {
 			// set new location on area and create new key
 			area.setBusiness(newLocationKey);
 			Key<Area> newAreaKey = area.getKey();
-			List<Key<Menu>> newMenuKeys = Lists.newArrayList(); 
-			for (Key<Menu> oldMenuKey : area.getMenus()) {
-				newMenuKeys.add(oldToNewMenuIdsMap.get(oldMenuKey.getId()));
+			
+			// update area -> menu association
+			if(area.getMenus() != null) {
+				List<Key<Menu>> newMenuKeys = Lists.newArrayList(); 
+				for (Key<Menu> oldMenuKey : area.getMenus()) {
+					newMenuKeys.add(oldToNewMenuIdsMap.get(oldMenuKey.getId()));
+				}
+				area.setMenus(newMenuKeys);			
 			}
-			area.setMenus(newMenuKeys);
 			
 			oldToNewAreaIdsMap.put(area.getId(), newAreaKey);
 			allAreas.add( area);

@@ -10,7 +10,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+
+import net.eatsense.counter.Counter;
+import net.eatsense.counter.Counter.PeriodType;
+import net.eatsense.counter.CounterRepository;
+import net.eatsense.counter.CounterService;
+import net.eatsense.domain.Area;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.Company;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.AreaRepository;
+import net.eatsense.persistence.CompanyRepository;
+import net.eatsense.persistence.LocationRepository;
+import net.eatsense.representation.CounterReportDTO;
+import net.eatsense.representation.LocationReportDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,25 +33,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
-
-import net.eatsense.counter.Counter;
-import net.eatsense.counter.CounterRepository;
-import net.eatsense.counter.Counter.PeriodType;
-import net.eatsense.counter.CounterService;
-import net.eatsense.domain.Area;
-import net.eatsense.domain.Bill;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.Company;
-import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.CompanyRepository;
-import net.eatsense.persistence.LocationRepository;
-import net.eatsense.representation.CounterReportDTO;
-import net.eatsense.representation.LocationReportDTO;
 
 /**
  * Contains method for retrieving,processing and aggregating counters.
