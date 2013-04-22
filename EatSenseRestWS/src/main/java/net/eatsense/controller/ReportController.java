@@ -40,6 +40,12 @@ import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.CounterReportDTO;
 import net.eatsense.representation.LocationReportDTO;
 
+/**
+ * Contains method for retrieving,processing and aggregating counters.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class ReportController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final CounterRepository counterRepo;
@@ -60,6 +66,16 @@ public class ReportController {
 		this.counterService = counterService;
 	}
 	
+	/**
+	 * Generate reporting objects for a specified location, area, counter type and period.
+	 * 
+	 * @param location
+	 * @param kpi
+	 * @param areaId
+	 * @param fromDate
+	 * @param toDate
+	 * @return
+	 */
 	public List<CounterReportDTO> getReportForLocationAreaAndDateRange(Business location, String kpi,  long areaId, Date fromDate, Date toDate) {
 		checkNotNull(location, "location was null");
 		checkArgument(!Strings.isNullOrEmpty(kpi), "kpi was null or empty");
@@ -109,6 +125,14 @@ public class ReportController {
 		return counterReports;
 	}
 	
+	/**
+	 * Retrieve and sum up all daily counters for all locations.
+	 * Returns report objects for each location.
+	 * 
+	 * @param fromDate
+	 * @param toDate
+	 * @return
+	 */
 	public List<LocationReportDTO> getReportForAllLocationsAndKPIs( Date fromDate, Date toDate) {
 		if(fromDate == null) {
 			logger.warn("fromDate was not set");
