@@ -1,14 +1,10 @@
+
 package net.eatsense.management;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.awt.ImageCapabilities;
-import java.security.acl.Owner;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.eatsense.controller.ImageController;
 import net.eatsense.controller.SubscriptionController;
@@ -26,7 +22,9 @@ import net.eatsense.domain.Spot;
 import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.persistence.OfyService;
 
-import com.google.appengine.api.datastore.QueryResultIterable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -60,6 +58,7 @@ public class LocationManagement {
 		Objectify ofy = ofyService.ofy();		
 		
 		Key<Business> originalLocationKey = ofyService.keys().create(Business.class, fromLocationId);
+		logger.info("Starting copy of {} and all relevant children", originalLocationKey);
 		Account newOwnerAccount = ofy.get(Account.class, newOwnerAccountId);
 		Business location = ofy.get(originalLocationKey);
 		
@@ -84,7 +83,7 @@ public class LocationManagement {
 		}
 		newOwnerAccount.getBusinesses().add(newLocationKey);
 		
-		logger.info("Querying all relevant entities...");
+		logger.info("Querying all relevant child entities ...");
 		// Query the datastore for all entities we want to copy
 		Iterable<Spot> spotsIterable = ofy.query(Spot.class).ancestor(originalLocationKey).filter("trash", false).fetch();
 		Iterable<Menu> menusIterable = ofy.query(Menu.class).ancestor(originalLocationKey).filter("trash", false).fetch();
@@ -253,13 +252,13 @@ public class LocationManagement {
 		ofy.put(allChoices);
 		logger.info("Saving infopages ...");
 		ofy.put(allInfoPages);
-		logger.info("Saving infopage translations ...");
+		logger.info("Saving infopage translations ... ");
 		ofy.put(allInfoPageTrans);
 		logger.info("Saving dashboard items ...");
 		ofy.put(allDashboardItems);
 		logger.info("Saving dashboard config ...");
 		ofy.put(dashBoardConfig);
-		logger.info("Saving owner account ...");
+		logger.info("Saving owner account (login={]) ...", newOwnerAccount.getLogin());
 		ofy.put(newOwnerAccount);
 		
 		if(feedbackForm != null) {
