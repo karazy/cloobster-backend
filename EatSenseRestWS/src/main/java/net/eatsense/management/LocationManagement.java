@@ -140,6 +140,10 @@ public class LocationManagement {
 		}
 		
 		for (Spot spot : spotsIterable) {
+			if(spot.getArea() == null) {
+				logger.warn("Skipping Spot without Area. (id= {})",spot.getId());
+				continue;
+			}
 			spot.setBusiness(newLocationKey);
 			spot.generateBarcode();
 			Key<Area> newAreaKey = oldToNewAreaIdsMap.get(spot.getArea().getId());
