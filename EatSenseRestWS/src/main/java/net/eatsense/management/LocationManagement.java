@@ -21,6 +21,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.persistence.OfyService;
+import net.eatsense.representation.ImageDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +104,8 @@ public class LocationManagement {
 		List<InfoPageT> allInfoPageTrans = Lists.newArrayList();
 		List<DashboardItem> allDashboardItems = Lists.newArrayList();
 		
+		List<Product> productsWithChoices = Lists.newArrayList();
+		
 		// Map new product keys to the product because of relation to choices
 		Map<Key<Product>,Product> allProducts = Maps.newHashMap();
 		
@@ -112,6 +115,7 @@ public class LocationManagement {
 		Map<Long, Key<Product>> oldToNewProductIdsMap = Maps.newHashMap();
 		Map<Long, Key<DashboardItem>> oldToNewDashboardItemIdsMap = Maps.newHashMap();
 		Map<Long, Key<InfoPage>> oldToNewInfoPageIdsMap = Maps.newHashMap();
+		Map<Long, Key<Choice>> oldToNewChoiceIdsMap = Maps.newHashMap();
 		
 		for (Menu menu : menusIterable) {
 			menu.setBusiness(newLocationKey);
@@ -140,6 +144,10 @@ public class LocationManagement {
 		}
 		
 		for (Spot spot : spotsIterable) {
+			if(spot.getArea() == null) {
+				logger.warn("Skipping Spot without Area. (id= {})",spot.getId());
+				continue;
+			}
 			spot.setBusiness(newLocationKey);
 			spot.generateBarcode();
 			Key<Area> newAreaKey = oldToNewAreaIdsMap.get(spot.getArea().getId());
@@ -159,8 +167,8 @@ public class LocationManagement {
 			Key<Product> newProductKey = product.getKey();
 	
 			// Clear old choices list, we build it new when we iterate over all choices
-			if(product.getChoices() != null)
-				product.getChoices().clear();
+			if(product.getChoices() != null && !product.getChoices().isEmpty())
+				productsWithChoices.add(product);
 			
 			oldToNewProductIdsMap.put(product.getId(), newProductKey);
 			allProducts.put(newProductKey, product);
@@ -174,15 +182,23 @@ public class LocationManagement {
 			Key<Choice> newChoiceKey = choice.getKey();
 			
 			Product product = allProducts.get(newProductKey);
-			if(product.getChoices() == null) {
-				logger.warn("Data inconsitency, choice belongs to product, but product had no choices.");
-				product.setChoices(Lists.<Key<Choice>>newArrayList());
+			if(product == null) {
+				logger.warn("Product for choice does not exist. Skipped.");
+				continue;
 			}
-			product.getChoices().add(newChoiceKey);
+			else {
+				if(product.getChoices() == null) {
+					logger.warn("Choice belongs to product, but product had no choices.");
+					product.setChoices(Lists.<Key<Choice>>newArrayList());
+				}
+				product.getChoices().add(newChoiceKey);
+			}
 			
+			oldToNewChoiceIdsMap.put(choice.getId(), newChoiceKey);			
 			allChoices.add(choice);
 		}
 		
+		// Update product keys for all menus		
 		for (Menu menu : allMenus) {
 			if(menu.getProducts() != null && !menu.getProducts().isEmpty()) {
 				List<Key<Product>> newProductKeyList = Lists.newArrayList();
@@ -190,7 +206,21 @@ public class LocationManagement {
 				for (Key<Product> oldProductKey : menu.getProducts()) {
 					newProductKeyList.add(oldToNewProductIdsMap.get(oldProductKey.getId()));
 				}
+				menu.setProducts(newProductKeyList);
 			}
+		}
+		
+		// Update product choices for all choices
+		for (Product product : productsWithChoices) {
+			List<Key<Choice>> newChoiceKeyList = Lists.newArrayList();
+			
+			for (Key<Choice> oldKey : product.getChoices()) {
+				Key<Choice> newKey = oldToNewChoiceIdsMap.get(oldKey.getId());
+				if(newKey != null) {
+					newChoiceKeyList.add(newKey);
+				}
+			}
+			product.setChoices(newChoiceKeyList);
 		}
 		
 		for (InfoPage infoPage : infoPagesIterable) {
@@ -258,7 +288,7 @@ public class LocationManagement {
 		ofy.put(allDashboardItems);
 		logger.info("Saving dashboard config ...");
 		ofy.put(dashBoardConfig);
-		logger.info("Saving owner account (login={]) ...", newOwnerAccount.getLogin());
+		logger.info("Saving owner account (login={}) ...", newOwnerAccount.getLogin());
 		ofy.put(newOwnerAccount);
 		
 		if(feedbackForm != null) {
