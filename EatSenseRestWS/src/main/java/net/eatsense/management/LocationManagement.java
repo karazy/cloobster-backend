@@ -288,7 +288,7 @@ public class LocationManagement {
 		ofy.put(allDashboardItems);
 		logger.info("Saving dashboard config ...");
 		ofy.put(dashBoardConfig);
-		logger.info("Saving owner account (login={]) ...", newOwnerAccount.getLogin());
+		logger.info("Saving owner account (login={}) ...", newOwnerAccount.getLogin());
 		ofy.put(newOwnerAccount);
 		
 		if(feedbackForm != null) {
