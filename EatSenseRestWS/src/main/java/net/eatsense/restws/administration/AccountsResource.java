@@ -2,6 +2,7 @@ package net.eatsense.restws.administration;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -16,6 +17,7 @@ import net.eatsense.controller.AccountController;
 import net.eatsense.domain.Account;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.representation.BusinessAccountDTO;
+import net.eatsense.representation.RegistrationDTO;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -32,6 +34,13 @@ public class AccountsResource {
 		super();
 		this.ofy = ofyService.ofy();
 		this.accountCtrl = accountCtrl;
+	}
+	
+	@POST
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")	
+	public BusinessAccountDTO createAccount(RegistrationDTO accountData) {
+		return new BusinessAccountDTO( accountCtrl.registerNewCompanyAccount(accountData, true));
 	}
 	
 	@GET

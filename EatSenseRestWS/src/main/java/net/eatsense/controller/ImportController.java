@@ -100,6 +100,7 @@ public class ImportController {
 	private List<Area> areas = new ArrayList<Area>();
 	private Map<String, Menu> menuMap = new HashMap<String, Menu>();
 	private List<Spot> spots = new ArrayList<Spot>();
+	private final DashboardController dashboardCtrl;
 	
 
 	public List<Spot> getSpots() {
@@ -116,7 +117,9 @@ public class ImportController {
 			CheckInRepository chkr, OrderRepository or,
 			OrderChoiceRepository ocr, BillRepository br,
 			RequestRepository reqr, AccountRepository acr,
-			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo, Provider<Configuration> configProvider, LocationController locationController) {
+			FeedbackFormRepository feedbackFormRepo, AreaRepository areaRepo,
+			Provider<Configuration> configProvider,
+			LocationController locationController, DashboardController dashboardCtrl) {
 		this.areaRepo = areaRepo;
 		this.businessRepo = businessRepo;
 		this.spotRepo = sr;
@@ -132,6 +135,7 @@ public class ImportController {
 		this.feedbackFormRepo = feedbackFormRepo;
 		this.configProvider = configProvider;
 		this.locationController = locationController;
+		this.dashboardCtrl = dashboardCtrl;
 	}
 
     public void setValidator(Validator validator) {
@@ -234,6 +238,9 @@ public class ImportController {
 			logger.info("Creation of business in datastore failed, import aborted.");
 			return null;
 		}
+		
+		// Create default dashboard
+		dashboardCtrl.createDefaultItems(kR);
 		
 		// Create welcome area and spot
 		Area welcomeArea = locationController.createWelcomeAreaAndSpot(kR, Optional.fromNullable(Strings.emptyToNull(businessData.getWelcomeBarcode())));

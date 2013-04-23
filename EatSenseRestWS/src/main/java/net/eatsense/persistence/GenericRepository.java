@@ -3,6 +3,7 @@ package net.eatsense.persistence;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.Result;
@@ -508,6 +510,25 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		return q.fetch();
 	}
 	
+	/**
+	 * Convenience method to get all child objects matching a single property and parent
+	 * @param <V>
+	 * 
+	 * 
+	 * @param propName
+	 * 
+	 * @param propValue
+	 * 
+	 * @return List<T> of matching objects
+	 */
+	public <V> Iterable<T> iterateByParentAndProperty(Key<V> parentKey, String propName, Object propValue)
+	{
+		logger.info("{}, property={}, parent=", new Object[]{ clazz, propName, parentKey});
+		Query<T> q = ofy().query(clazz).ancestor(parentKey).filter(propName, propValue);
+
+		return q.fetch();
+	}
+	
 	
 	
 	/**
@@ -695,8 +716,18 @@ public class GenericRepository<T extends GenericEntity<T>> extends DAOBase{
 		return keys;
 	}
 	
+	/**
+	 * {@link ObjectifyFactory#allocateId(Object, Class)}
+	 * 
+	 * @param parent
+	 * @return
+	 */
 	public <V> long allocateId(Key<V> parent) {
 		return fact().allocateId(parent, clazz);
+	}
+	
+	public long allocateId() {
+		return fact().allocateId(clazz);
 	}
 
 	public Iterable<Key<T>> iterateKeysByProperty(String propName, Object propValue) {

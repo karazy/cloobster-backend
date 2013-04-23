@@ -12,6 +12,7 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.ImageUploadDTO;
+import net.eatsense.service.FileServiceHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.images.ServingUrlOptions;
 import com.google.appengine.api.images.Transform;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 public class ImageController {
@@ -32,15 +34,17 @@ public class ImageController {
 	private BlobstoreService blobstoreService;
 	private ImagesService imagesService;
 	private AccountRepository accountRepo;
+	private final FileServiceHelper fileHelper;
 	
 	
 	@Inject
 	public ImageController(BlobstoreService blobstoreService,
-			ImagesService imagesService, AccountRepository accountRepo) {
+			ImagesService imagesService, AccountRepository accountRepo, FileServiceHelper fileHelper) {
 		super();
 		this.blobstoreService = blobstoreService;
 		this.imagesService = imagesService;
 		this.accountRepo = accountRepo;
+		this.fileHelper = fileHelper;
 	}
 	
 	public static class UpdateImagesResult {
@@ -198,5 +202,33 @@ public class ImageController {
 		}
 		
 		return new UpdateImagesResult(images, dirty, removedImage);
+	}
+	
+	/**
+	 * @param originalImages
+	 * @return
+	 */
+	public UpdateImagesResult copyImages(List<ImageDTO> originalImages) {
+		if( originalImages == null || originalImages.isEmpty()) {
+			return new UpdateImagesResult(originalImages, false, null);
+		}
+		
+		//TODO write test
+		
+		List<ImageDTO> imagesCopy = Lists.newArrayList();
+		
+		for (ImageDTO originalImage : originalImages) {
+			ImageDTO image = new ImageDTO(null, originalImage.getId(), originalImage.getUrl());
+			if(originalImage.getBlobKey() != null) {
+				// Copy blob and save new blob key
+				image.setBlobKey(fileHelper.copyBlob(new BlobKey(originalImage.getBlobKey())).getKeyString());
+				// Create new serving url from the new blob key.
+				image.setUrl(createServingUrl(image.getBlobKey()));
+			}
+			
+			imagesCopy.add(image);
+		}
+		
+		return new UpdateImagesResult(imagesCopy, true, null);
 	}
 }

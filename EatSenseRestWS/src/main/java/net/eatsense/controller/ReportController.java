@@ -10,27 +10,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
 
 import net.eatsense.counter.Counter;
-import net.eatsense.counter.CounterRepository;
 import net.eatsense.counter.Counter.PeriodType;
+import net.eatsense.counter.CounterRepository;
 import net.eatsense.counter.CounterService;
 import net.eatsense.domain.Area;
-import net.eatsense.domain.Bill;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.exceptions.ValidationException;
@@ -40,6 +25,24 @@ import net.eatsense.persistence.LocationRepository;
 import net.eatsense.representation.CounterReportDTO;
 import net.eatsense.representation.LocationReportDTO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
+
+/**
+ * Contains method for retrieving,processing and aggregating counters.
+ * 
+ * @author Nils Weiher
+ *
+ */
 public class ReportController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final CounterRepository counterRepo;
@@ -60,6 +63,16 @@ public class ReportController {
 		this.counterService = counterService;
 	}
 	
+	/**
+	 * Generate reporting objects for a specified location, area, counter type and period.
+	 * 
+	 * @param location
+	 * @param kpi
+	 * @param areaId
+	 * @param fromDate
+	 * @param toDate
+	 * @return
+	 */
 	public List<CounterReportDTO> getReportForLocationAreaAndDateRange(Business location, String kpi,  long areaId, Date fromDate, Date toDate) {
 		checkNotNull(location, "location was null");
 		checkArgument(!Strings.isNullOrEmpty(kpi), "kpi was null or empty");
@@ -109,6 +122,14 @@ public class ReportController {
 		return counterReports;
 	}
 	
+	/**
+	 * Retrieve and sum up all daily counters for all locations.
+	 * Returns report objects for each location.
+	 * 
+	 * @param fromDate
+	 * @param toDate
+	 * @return
+	 */
 	public List<LocationReportDTO> getReportForAllLocationsAndKPIs( Date fromDate, Date toDate) {
 		if(fromDate == null) {
 			logger.warn("fromDate was not set");
@@ -121,7 +142,9 @@ public class ReportController {
 		Iterable<Business> allLocations = locationRepo.iterateByProperty("trash", false);
 		// Company map for duplicate requests
 		Map<Key<Company>, Company> companyMap = Maps.newHashMap();
-		List<LocationReportDTO> allLocationsReport = Lists.newArrayList(); 
+		List<LocationReportDTO> allLocationsReport = Lists.newArrayList();
+		logger.info("counters={}",counterNamesForReporting);
+		logger.info("fromDate={}, toDate={}", fromDate, toDate);
 		
 		for (Business location : allLocations) {
 			LocationReportDTO report = new LocationReportDTO();
@@ -177,14 +200,17 @@ public class ReportController {
 	public void generateDailyLocationCounterReport(Optional<Date> optionalDate) {
 		// Get all not deleted locations
 		Iterable<Business> allLocations = locationRepo.iterateByProperty("trash", false);
-		Date now = optionalDate.or(new Date());
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		
+		Date dateToCount = optionalDate.or(calendar.getTime());
 		
 		Map<String, Long> totalCounts = Maps.newHashMap();
 		
 		for (Business location : allLocations) {
 			List<Key<Area>> areas = areaRepo.getKeysByParent(location.getKey());
 			for (String counterName : counterNamesForReporting) {
-				String counterKeyFormat = counterService.getCounterKeyFormatWithAreaPlaceholder(counterName, location.getId(), PeriodType.DAY, now);
+				String counterKeyFormat = counterService.getCounterKeyFormatWithAreaPlaceholder(counterName, location.getId(), PeriodType.DAY, dateToCount);
 				
 				ArrayList<String> areaCounterKeys = Lists.newArrayList();
 				for (Key<Area> key : areas) {
@@ -198,7 +224,7 @@ public class ReportController {
 				
 				// Save the sum for this location and kpi.
 				if(counterValue != 0) {
-					counterService.persistCounter(counterName, PeriodType.DAY, now, location.getId(), 0, Optional.of(counterValue));
+					counterService.persistCounter(counterName, PeriodType.DAY, dateToCount, location.getId(), 0, Optional.of(counterValue));
 					
 					// Add to total count over all locations.
 					Long totalCount = totalCounts.get(counterName);
@@ -214,7 +240,7 @@ public class ReportController {
 		
 		// Persist overall counter values.
 		for (Entry<String, Long> totalCountEntry : totalCounts.entrySet()) {
-			counterService.persistCounter(totalCountEntry.getKey(), PeriodType.DAY, now, 0, 0, Optional.of(totalCountEntry.getValue()));
+			counterService.persistCounter(totalCountEntry.getKey(), PeriodType.DAY, dateToCount, 0, 0, Optional.of(totalCountEntry.getValue()));
 		}
 	}
 }

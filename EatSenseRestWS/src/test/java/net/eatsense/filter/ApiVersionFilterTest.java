@@ -34,7 +34,6 @@ public class ApiVersionFilterTest {
 	@Before
 	public void setUp() throws Exception {
 		filter = new ApiVersionFilter( 0, Arrays.asList(1));
-		System.setProperty("net.karazy.api.version", "1");
 	}
 	@Test
 	public void testFilterMinVersion() throws Exception {

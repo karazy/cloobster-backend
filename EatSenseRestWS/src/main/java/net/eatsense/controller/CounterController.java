@@ -2,9 +2,8 @@ package net.eatsense.controller;
 
 import java.util.Date;
 
-import net.eatsense.counter.CounterService;
 import net.eatsense.counter.Counter.PeriodType;
-import net.eatsense.event.CustomerRequestEvent;
+import net.eatsense.counter.CounterService;
 import net.eatsense.event.NewCheckInEvent;
 import net.eatsense.event.NewCustomerRequestEvent;
 import net.eatsense.event.NewFeedbackEvent;
@@ -56,4 +55,5 @@ public class CounterController {
 	public void countTurnover(UpdateBillEvent event) {
 		counterService.loadAndIncrementCounter("turnover", PeriodType.DAY, new Date(), event.getBusiness().getId(), event.getBill().getArea().getId(), event.getBill().getTotal());
 	}
+
 }
