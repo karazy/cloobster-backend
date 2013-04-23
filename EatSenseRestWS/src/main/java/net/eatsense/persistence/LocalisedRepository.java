@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -166,8 +167,12 @@ public  class LocalisedRepository<T extends GenericEntity<T>, U extends Translat
 	}
 	
 	public List<T> loadAndApplyTranslations(Query<T> entityQuery, Locale locale) {
-				
-		List<Key<T>> entityKeys = entityQuery.listKeys();
+		return loadAndApplyTranslations(entityQuery.listKeys(), locale);
+	}
+		
+	public List<T> loadAndApplyTranslations(Collection<Key<T>> entityKeys, Locale locale) {
+		checkNotNull(locale, "locale was null");
+		
 		List<Key<?>> allKeys = new ArrayList<Key<?>>();
 		List<Key<U>> translationKeys = new ArrayList<Key<U>>();
 		List<T> entities = new ArrayList<T>();

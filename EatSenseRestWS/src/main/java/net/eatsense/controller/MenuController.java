@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
-import net.eatsense.domain.Spot;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.ChoiceRepository;
 import net.eatsense.persistence.MenuRepository;
@@ -39,6 +40,7 @@ import net.eatsense.validation.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
@@ -61,9 +63,10 @@ public class MenuController {
 	private final ChoiceRepository choiceRepo;
 	private final ImageController imageCtrl;
 	private final AreaRepository areaRepo;
+	private final LocalizationProvider localeProvider;
 
 	@Inject
-	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl) {
+	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl, LocalizationProvider localeProvider) {
 		this.areaRepo = areaRepo;
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
@@ -71,6 +74,7 @@ public class MenuController {
 		this.transform = trans;
 		this.imageCtrl = imageCtrl;
 		this.validator = validator;
+		this.localeProvider = localeProvider;
 	}
 	
 	/**
@@ -85,12 +89,14 @@ public class MenuController {
 			return menuDTOs;
 		
 		List<Menu> menus;
+		Optional<Locale> optLocale = Optional.fromNullable(localeProvider.getAcceptableLanguage());
 		
 		if(areaId == 0) {
-			menus = menuRepo.getActiveMenusForBusiness(businessKey);
+			
+			menus = menuRepo.getActiveMenusForBusiness(businessKey, optLocale);
 		}
 		else {
-			menus = menuRepo.getActiveMenusForBusinessAndArea(businessKey, areaId);
+			menus = menuRepo.getActiveMenusForBusinessAndArea(businessKey, areaId, optLocale);
 		}
 		
 		if(menus.isEmpty()) {

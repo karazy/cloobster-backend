@@ -30,6 +30,7 @@ import net.eatsense.domain.embedded.ChoiceOverridePrice;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.NotFoundException;
 import net.eatsense.exceptions.ValidationException;
+import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
@@ -99,6 +100,9 @@ public class MenuControllerTest {
 	@Mock
 	private Key<Business> locationKey;
 
+	@Mock
+	private LocalizationProvider localeProvider;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -111,7 +115,7 @@ public class MenuControllerTest {
 		spotRepo = injector.getInstance(SpotRepository.class);
 		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
 		trans = injector.getInstance(Transformer.class);
-		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl, localeProvider);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -128,7 +132,7 @@ public class MenuControllerTest {
 		Transformer trans = mock(Transformer.class);
 		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
 		
-		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl, localeProvider);
 	}
 
 	@After
