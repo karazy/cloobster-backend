@@ -23,10 +23,12 @@ import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.translation.MenuT;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.localization.LocalizationProvider;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.ChoiceRepository;
+import net.eatsense.persistence.LocalisedRepository.EntityWithTranlations;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.ProductRepository;
 import net.eatsense.representation.ChoiceDTO;
@@ -161,15 +163,21 @@ public class MenuController {
 	}
 	
 	/**
-	 * @param business 
+	 * @param business
+	 * @param optLocale (optional) locale of translation to load 
 	 * @return List of transfer objects without embedded Products.
 	 */
-	public List<MenuDTO> getMenus(Business business) {
+	public List<MenuDTO> getMenus(Business business, Optional<Locale> optLocale) {
 		List<MenuDTO> menuDTOs = new ArrayList<MenuDTO>();
 		if(business == null )
 			return menuDTOs;
 		
-		List<Menu> menus = menuRepo.getByParent( business );
+		List<Menu> menus;
+		if(optLocale.isPresent())
+			menus = menuRepo.getByParent(business.getKey(), optLocale.get());
+		else
+			menus = menuRepo.getByParent( business );
+		
 		
 		for ( Menu menu : menus) {
 			MenuDTO menuDTO = new MenuDTO(menu);
@@ -792,5 +800,20 @@ public class MenuController {
 				choiceRepo.delete(choiceKeysToDelete);
 			}
 		}
+	}
+
+	/**
+	 * @param key
+	 * @param id
+	 * @param locales
+	 * @return
+	 */
+	public MenuDTO getWithTranslations(Key<Business> key, long id,
+			List<Locale> locales) {
+		EntityWithTranlations<Menu, MenuT> compositeEntity = menuRepo.getWithTranslations(menuRepo.getKey(key, id), locales);
+		if(compositeEntity.getEntity() == null)
+			throw new net.eatsense.exceptions.NotFoundException();
+		
+		return new MenuDTO(compositeEntity.getEntity(), compositeEntity.getTranslations());
 	}
 }

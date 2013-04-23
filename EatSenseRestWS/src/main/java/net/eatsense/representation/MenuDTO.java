@@ -3,6 +3,7 @@ package net.eatsense.representation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -10,10 +11,12 @@ import javax.validation.groups.Default;
 
 import net.eatsense.domain.Menu;
 import net.eatsense.domain.Product;
+import net.eatsense.domain.translation.MenuT;
 import net.eatsense.validation.CreationChecks;
 
 import org.apache.bval.constraints.NotEmpty;
 
+import com.google.common.collect.Maps;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 
@@ -42,6 +45,8 @@ public class MenuDTO {
 	
 	private List<Long> productIds;
 	
+	private Map<String, MenuTDTO> translations;
+	
 	public MenuDTO() {
 		super();
 		this.productIds = new ArrayList<Long>();
@@ -52,6 +57,8 @@ public class MenuDTO {
 	 */
 	public MenuDTO(Menu menu) {
 		this();
+		if(menu==null)
+			return;
 		this.title = menu.getTitle();
 		this.description = menu.getDescription();
 		this.order = menu.getOrder();
@@ -64,6 +71,18 @@ public class MenuDTO {
 			}
 		}
 	}
+	
+	public MenuDTO(Menu menu, Iterable<MenuT> translationEntities) {
+		this(menu);
+		
+		if(translationEntities != null) {
+			this.translations = Maps.newHashMap();
+			for (MenuT menuT : translationEntities) {
+				this.translations.put(menuT.getLang(), new MenuTDTO(menuT));
+			}
+		}
+	}
+	
 	
 	/**
 	 * All products that are listed under this menu entry.
