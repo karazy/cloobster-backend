@@ -12,6 +12,7 @@ import java.util.List;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.representation.ImageDTO;
+import net.eatsense.service.FileServiceHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,11 +34,13 @@ public class ImageControllerTest {
 	private ImagesService imagesService;
 	@Mock
 	private AccountRepository accountRepo;
+	@Mock
+	private FileServiceHelper fileHelper;
 	
 
 	@Before
 	public void setUp() throws Exception {
-		ctrl = new ImageController(blobstoreService, imagesService, accountRepo);
+		ctrl = new ImageController(blobstoreService, imagesService, accountRepo, fileHelper);
 	}
 
 	@Test

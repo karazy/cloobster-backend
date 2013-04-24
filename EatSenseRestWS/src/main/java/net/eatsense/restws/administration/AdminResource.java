@@ -1,5 +1,6 @@
 package net.eatsense.restws.administration;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -18,12 +19,15 @@ import com.sun.jersey.api.core.ResourceContext;
 public class AdminResource {
 	
 	private final AwesomeUserAuthorizer auth;
+
+	private final ServletContext servletContext;
 	
 	
 	@Inject
-	public AdminResource(AwesomeUserAuthorizer auth) {
+	public AdminResource(AwesomeUserAuthorizer auth, ServletContext servletContext) {
 		super();
 		this.auth = auth;
+		this.servletContext = servletContext;
 	}
 
 	@Context
@@ -37,7 +41,7 @@ public class AdminResource {
 	@Produces("application/json")
 	public ManagementUserDTO getAuthorizedUser() {
 		String email = securityContext.getUserPrincipal().getName();
-		return new ManagementUserDTO(email, auth.isAwesome(email));
+		return new ManagementUserDTO(email, auth.isAwesome(email), servletContext.getInitParameter("net.karazy.environment"));
 	}
 	
 	@Path("s")

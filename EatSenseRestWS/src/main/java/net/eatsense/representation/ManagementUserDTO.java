@@ -3,6 +3,7 @@ package net.eatsense.representation;
 public class ManagementUserDTO {
 	private final String email;
 	private final boolean awesome;
+	private final String environment;
 	
 	/**
 	 * Create new object
@@ -10,10 +11,11 @@ public class ManagementUserDTO {
 	 * @param email
 	 * @param awesome
 	 */
-	public ManagementUserDTO(String email, boolean awesome) {
+	public ManagementUserDTO(String email, boolean awesome, String environment) {
 		super();
 		this.email = email;
 		this.awesome = awesome;
+		this.environment = environment;
 	}
 	
 	public String getEmail() {
@@ -22,5 +24,9 @@ public class ManagementUserDTO {
 	
 	public boolean isAwesome() {
 		return awesome;
+	}
+
+	public String getEnvironment() {
+		return environment;
 	}
 }

@@ -88,7 +88,12 @@ public class TestDataGenerator {
 	private ObjectifyFactory ofyFactory;
 	
 	@Inject
-	public TestDataGenerator(BillController billCtrl, ImportController importController, InfoPageGenerator infoPageGenerator, OfyService ofyService, ProductRepository productRepo, OrderRepository orderRepo, AccountRepository accountRepo, ObjectMapper mapper, CounterService counterService) {
+	public TestDataGenerator(BillController billCtrl,
+			ImportController importController,
+			InfoPageGenerator infoPageGenerator, OfyService ofyService,
+			ProductRepository productRepo, OrderRepository orderRepo,
+			AccountRepository accountRepo, ObjectMapper mapper,
+			CounterService counterService) {
 		this.billCtrl = billCtrl;
 		this.importController = importController;
 		this.infoPageGenerator = infoPageGenerator;

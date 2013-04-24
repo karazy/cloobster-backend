@@ -15,7 +15,6 @@
 		<property name="net.karazy.uploads.token.timeout" value="120"/>
 		<property name="net.karazy.app.download.url" value="http://www.cloobster.com/download"/>
 		<property name="net.karazy.url.outside" value="https://admin.cloobster.com"/>
-		<property name="net.karazy.api.version" value="2"/>
 		<!-- Configure time out for inactive checkins -->	
 		<property name="net.karazy.checkins.inactive.timeout" value="24"/>
 		<!-- Barcode for demo spot used in app -->

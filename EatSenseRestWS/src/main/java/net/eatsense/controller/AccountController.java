@@ -284,6 +284,18 @@ public class AccountController {
 	 * @return
 	 */
 	public Account registerNewCompanyAccount(RegistrationDTO accountData) {
+		return registerNewCompanyAccount(accountData, false);
+	}
+
+
+	/**
+	 * Create and save an inactive account if all data was validated. 
+	 * 
+	 * @param accountData
+	 * @param activateAndConfirm if <code>true</code> activate the account without verification
+	 * @return
+	 */
+	public Account registerNewCompanyAccount(RegistrationDTO accountData, boolean activateAndConfirm) {
 		checkNotNull(accountData, "accountData was null");
 		
 		validator.validate(accountData);
@@ -306,7 +318,7 @@ public class AccountController {
 		
 		Account account = accountRepo.newEntity();
 		
-		account.setActive(false);
+		account.setActive(activateAndConfirm);
 		account.setCreationDate(new Date());
 		account.setName(accountData.getName());
 		account.setLogin(accountData.getLogin());
@@ -315,7 +327,7 @@ public class AccountController {
 		account.setCompany(companyKey);
 		account.setPhone(accountData.getPhone());
 			
-		account.setEmailConfirmed(false);
+		account.setEmailConfirmed(activateAndConfirm);
 		account.setHashedPassword(accountRepo.hashPassword(accountData.getPassword()));
 		
 		accountRepo.saveOrUpdate(account);
