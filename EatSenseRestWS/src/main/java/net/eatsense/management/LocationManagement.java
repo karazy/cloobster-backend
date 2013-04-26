@@ -134,7 +134,11 @@ public class LocationManagement {
 			if(area.getMenus() != null) {
 				List<Key<Menu>> newMenuKeys = Lists.newArrayList(); 
 				for (Key<Menu> oldMenuKey : area.getMenus()) {
-					newMenuKeys.add(oldToNewMenuIdsMap.get(oldMenuKey.getId()));
+					Key<Menu> newMenuKey = oldToNewMenuIdsMap.get(oldMenuKey.getId());
+					// Added null check to make sure we only add keys from existing menus
+					if(newMenuKey != null) {
+						newMenuKeys.add(newMenuKey);
+					}
 				}
 				area.setMenus(newMenuKeys);			
 			}
@@ -220,7 +224,10 @@ public class LocationManagement {
 				List<Key<Product>> newProductKeyList = Lists.newArrayList();
 				// add the new key for each product to the list
 				for (Key<Product> oldProductKey : menu.getProducts()) {
-					newProductKeyList.add(oldToNewProductIdsMap.get(oldProductKey.getId()));
+					Key<Product> newProductKey = oldToNewProductIdsMap.get(oldProductKey.getId());
+					// check that the product key exits, so that we dont add null values to the list
+					if(newProductKey != null)
+						newProductKeyList.add(newProductKey);
 				}
 				menu.setProducts(newProductKeyList);
 			}
