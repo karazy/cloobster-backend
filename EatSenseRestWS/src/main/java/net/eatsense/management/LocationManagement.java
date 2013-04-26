@@ -134,7 +134,11 @@ public class LocationManagement {
 			if(area.getMenus() != null) {
 				List<Key<Menu>> newMenuKeys = Lists.newArrayList(); 
 				for (Key<Menu> oldMenuKey : area.getMenus()) {
-					newMenuKeys.add(oldToNewMenuIdsMap.get(oldMenuKey.getId()));
+					Key<Menu> newMenuKey = oldToNewMenuIdsMap.get(oldMenuKey.getId());
+					// Added null check to make sure we only add keys from existing menus
+					if(newMenuKey != null) {
+						newMenuKeys.add(newMenuKey);
+					}
 				}
 				area.setMenus(newMenuKeys);			
 			}
@@ -160,7 +164,12 @@ public class LocationManagement {
 			// set new id and business key
 			product.setBusiness(newLocationKey);
 			// Set new menu key
-			product.setMenu(oldToNewMenuIdsMap.get(product.getMenu().getId()));
+			if(product.getMenu() != null) {
+				product.setMenu(oldToNewMenuIdsMap.get(product.getMenu().getId()));
+			} else {
+				logger.warn("Orphaned product without menu (id= {})", product.getId());
+			}
+			
 			
 			product.setImages(imageController.copyImages(product.getImages()).getImages());
 			
@@ -176,12 +185,23 @@ public class LocationManagement {
 		
 		for (Choice choice : choicesIterable) {
 			
-			choice.setBusiness(newLocationKey);
-			Key<Product> newProductKey = oldToNewProductIdsMap.get(choice.getProduct().getId());
-			choice.setProduct(newProductKey);
-			Key<Choice> newChoiceKey = choice.getKey();
+			Product product = null;
+			Key<Choice> newChoiceKey = null;
 			
-			Product product = allProducts.get(newProductKey);
+			choice.setBusiness(newLocationKey);
+			if(choice.getProduct() != null) {
+				Key<Product> newProductKey = oldToNewProductIdsMap.get(choice.getProduct().getId());
+				choice.setProduct(newProductKey);
+				
+				newChoiceKey = choice.getKey();
+				
+				product = allProducts.get(newProductKey);
+			} else {
+				logger.warn("Choice has no product assigned! Skipped");
+				continue;
+			}
+			
+			
 			if(product == null) {
 				logger.warn("Product for choice does not exist. Skipped.");
 				continue;
@@ -204,7 +224,10 @@ public class LocationManagement {
 				List<Key<Product>> newProductKeyList = Lists.newArrayList();
 				// add the new key for each product to the list
 				for (Key<Product> oldProductKey : menu.getProducts()) {
-					newProductKeyList.add(oldToNewProductIdsMap.get(oldProductKey.getId()));
+					Key<Product> newProductKey = oldToNewProductIdsMap.get(oldProductKey.getId());
+					// check that the product key exits, so that we dont add null values to the list
+					if(newProductKey != null)
+						newProductKeyList.add(newProductKey);
 				}
 				menu.setProducts(newProductKeyList);
 			}
@@ -288,7 +311,7 @@ public class LocationManagement {
 		ofy.put(allDashboardItems);
 		logger.info("Saving dashboard config ...");
 		ofy.put(dashBoardConfig);
-		logger.info("Saving owner account (login={]) ...", newOwnerAccount.getLogin());
+		logger.info("Saving owner account (login={}) ...", newOwnerAccount.getLogin());
 		ofy.put(newOwnerAccount);
 		
 		if(feedbackForm != null) {

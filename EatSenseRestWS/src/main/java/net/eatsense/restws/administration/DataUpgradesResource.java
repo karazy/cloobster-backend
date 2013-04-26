@@ -2,48 +2,39 @@ package net.eatsense.restws.administration;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
-import org.mockito.asm.tree.MultiANewArrayInsnNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.api.taskqueue.TaskOptions.Method;
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.SetMultimap;
-import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
 
 import net.eatsense.controller.DashboardController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.controller.SubscriptionController;
 import net.eatsense.counter.Counter;
+import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.counter.CounterRepository;
 import net.eatsense.counter.CounterService;
-import net.eatsense.counter.Counter.PeriodType;
 import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Spot;
 import net.eatsense.persistence.AreaRepository;
 import net.eatsense.persistence.DashBoarditemRepository;
 import net.eatsense.persistence.LocationRepository;
-import net.eatsense.persistence.OfyService;
 import net.eatsense.persistence.SpotRepository;
 import net.eatsense.representation.DataUpgradesResultDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
 
 public class DataUpgradesResource {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());

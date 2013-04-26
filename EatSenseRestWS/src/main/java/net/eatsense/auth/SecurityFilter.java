@@ -79,6 +79,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 		String fbUserId = servletRequest.getHeader(FacebookService.FB_USERID_HEADER);
 		String fbAccessToken = servletRequest.getHeader(FacebookService.FB_ACCESSTOKEN_HEADER);
 		Account account = null;
+		CheckIn checkIn = null;
 		
 		if(login != null && !login.isEmpty()) {
 			logger.info("recieved login request from user: " +login);
@@ -106,11 +107,12 @@ public class SecurityFilter implements ContainerRequestFilter {
 		}
 		
 		if( account != null) {
+			// Authorize the account and load the associated checkIn
 			servletRequest.setAttribute("net.eatsense.domain.Account", account);
 			
 			if(account.getActiveCheckIn() != null) {
 				try {
-					CheckIn checkIn = checkInRepo.getByKey(account.getActiveCheckIn());
+					checkIn = checkInRepo.getByKey(account.getActiveCheckIn());
 					
 					// We check here, if the activeCheckIn of the account is
 					// different to the supplied checkIn from the header
@@ -118,10 +120,7 @@ public class SecurityFilter implements ContainerRequestFilter {
 					if (!Strings.isNullOrEmpty(checkInId) && !checkInId.equals(checkIn.getUserId())) {
 						// If it is different, there was an older checkIn from the account not completed.
 						// Override the CheckIn for this request with the new checkin.
-						servletRequest.setAttribute( "net.eatsense.domain.CheckIn",	checkInRepo.getByProperty("userId", checkInId));
-					}
-					else {
-						servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+						checkIn = checkInRepo.getByProperty("userId", checkInId);
 					}
 				} catch (com.googlecode.objectify.NotFoundException e) {
 					logger.warn("activeCheckin for account not found, removing reference");
@@ -129,27 +128,32 @@ public class SecurityFilter implements ContainerRequestFilter {
 				}
 			}
 			else if (!Strings.isNullOrEmpty(checkInId)) {
-				CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
-				if(checkIn == null) {
-					logger.warn("Invalid checkInId given {}", checkInId);
-				}
-				servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+				checkIn = checkInRepo.getByProperty("userId", checkInId);								
 			}
 		}
 		else if(!Strings.isNullOrEmpty(checkInId)) {
-			CheckIn checkIn = checkInRepo.getByProperty("userId", checkInId);
-			if(checkIn == null) {
-				logger.warn("Invalid checkInId given {}", checkInId);
-				return request;
-			}
-			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
+			// No account data supplied, authorize anonymous request via checkIn
+			checkIn = checkInRepo.getByProperty("userId", checkInId);
 			
-			// Set authorization for GUEST role, no account data was supplied.
-			logger.info("Valid guest request recieved from " + checkIn.getNickname());
-			Authorizer auth = authorizerFactory.createForCheckIn(checkIn);
-			if(auth != null) {
-				request.setSecurityContext(auth);
+			if(checkIn != null && !checkIn.isArchived()) {
+				// Set authorization for GUEST role, no account data was supplied.
+				logger.info("Valid guest request recieved from " + checkIn.getNickname());
+				Authorizer auth = authorizerFactory.createForCheckIn(checkIn);
+				if(auth != null) {
+					request.setSecurityContext(auth);
+				}
 			}
+		}
+		
+		if(checkIn == null) {
+			if(!Strings.isNullOrEmpty(checkInId))
+				logger.warn("Invalid checkInId given {}", checkInId);
+		}
+		else if(checkIn.isArchived()) {
+			logger.warn("CheckIn already archived, unauthorized access. id={}", checkIn.getId());
+		}
+		else {
+			servletRequest.setAttribute("net.eatsense.domain.CheckIn", checkIn);
 		}
 		
 		return request;

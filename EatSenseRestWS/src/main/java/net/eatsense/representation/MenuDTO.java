@@ -60,7 +60,9 @@ public class MenuDTO {
 				
 		if(menu.getProducts() != null) {
 			for(Key<Product> productKey : menu.getProducts()) {
-				this.productIds.add(productKey.getId());
+				if(productKey != null) {
+					this.productIds.add(productKey.getId());
+				}
 			}
 		}
 	}

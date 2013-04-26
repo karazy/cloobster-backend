@@ -45,7 +45,8 @@ public class AreaDTO {
 		menuIds = new ArrayList<Long>();
 		if(area.getMenus() != null && !area.getMenus().isEmpty()) {
 			for (Key<Menu> menuKey : area.getMenus()) {
-				menuIds.add(menuKey.getId());
+				if( menuKey != null )
+					menuIds.add(menuKey.getId());
 			}
 		}
 		welcome = area.isWelcome();		
