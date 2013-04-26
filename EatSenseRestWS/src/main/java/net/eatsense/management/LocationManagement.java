@@ -160,7 +160,12 @@ public class LocationManagement {
 			// set new id and business key
 			product.setBusiness(newLocationKey);
 			// Set new menu key
-			product.setMenu(oldToNewMenuIdsMap.get(product.getMenu().getId()));
+			if(product.getMenu() != null) {
+				product.setMenu(oldToNewMenuIdsMap.get(product.getMenu().getId()));
+			} else {
+				logger.warn("Orphaned product without menu (id= {})", product.getId());
+			}
+			
 			
 			product.setImages(imageController.copyImages(product.getImages()).getImages());
 			
