@@ -181,12 +181,23 @@ public class LocationManagement {
 		
 		for (Choice choice : choicesIterable) {
 			
-			choice.setBusiness(newLocationKey);
-			Key<Product> newProductKey = oldToNewProductIdsMap.get(choice.getProduct().getId());
-			choice.setProduct(newProductKey);
-			Key<Choice> newChoiceKey = choice.getKey();
+			Product product = null;
+			Key<Choice> newChoiceKey = null;
 			
-			Product product = allProducts.get(newProductKey);
+			choice.setBusiness(newLocationKey);
+			if(choice.getProduct() != null) {
+				Key<Product> newProductKey = oldToNewProductIdsMap.get(choice.getProduct().getId());
+				choice.setProduct(newProductKey);
+				
+				newChoiceKey = choice.getKey();
+				
+				product = allProducts.get(newProductKey);
+			} else {
+				logger.warn("Choice has no product assigned! Skipped");
+				continue;
+			}
+			
+			
 			if(product == null) {
 				logger.warn("Product for choice does not exist. Skipped.");
 				continue;
