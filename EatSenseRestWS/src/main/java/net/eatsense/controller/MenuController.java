@@ -480,6 +480,7 @@ public class MenuController {
 		product.setActive(productData.isActive());
 		product.setSpecial(productData.isSpecial());
 		product.setHideInDashboard(productData.isHideInDashboard());
+		product.setNoOrder(productData.isNoOrder());
 		
 		if(productData.getChoices() != null) {
 			// Update Choices

@@ -476,8 +476,15 @@ public class OrderController {
 		try {
 			product = productRepo.getById(checkIn.getBusiness(), orderData.getProductId());
 		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Unable to place order: Unknown productId={}", orderData.getProductId());
 			throw new ValidationException("Order cannot be placed, productId unknown",e);
 		}
+		
+		if(product.isNoOrder()) {
+			logger.error("Unable to place order for Product, noOrder=true. id={}", product.getId());
+			throw new ValidationException("Order cannot be placed, product can't be ordered.");
+		}
+		
 		boolean isProductAssignedToArea = false;
 		
 		// Check if the Menu of the ordered Product is assigned to this Area.

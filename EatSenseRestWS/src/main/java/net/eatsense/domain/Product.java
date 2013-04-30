@@ -48,6 +48,8 @@ public class Product extends GenericEntity<Product> {
 	private boolean special;
 	
 	private boolean hideInDashboard;
+	
+	private boolean noOrder;
 
 	@Embedded
 	@Unindexed
@@ -233,6 +235,19 @@ public class Product extends GenericEntity<Product> {
 		if(!Objects.equal(this.hideInDashboard, hideInDashboard)) {
 			this.setDirty(true);
 			this.hideInDashboard = hideInDashboard;
+		}
+	}
+
+
+	public boolean isNoOrder() {
+		return noOrder;
+	}
+
+
+	public void setNoOrder(boolean noOrder) {
+		if(!Objects.equal(this.noOrder, noOrder)) {
+			this.setDirty(true);
+			this.noOrder = noOrder;
 		}
 	}
 }
