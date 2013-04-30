@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.embedded.Channel;
+import net.eatsense.domain.embedded.ConfigurationFlag;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.representation.ImageDTO;
 
@@ -17,6 +18,7 @@ import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -138,6 +140,10 @@ public class Business extends GenericEntity<Business> {
 	private boolean basic = true;
 	
 	private boolean inactiveCheckInNotificationActive = true;
+	
+	@Unindexed
+	@Embedded
+	private List<ConfigurationFlag> features = Lists.newArrayList();
 	
 	public Business() {
 	}
@@ -409,5 +415,43 @@ public class Business extends GenericEntity<Business> {
 	public void setInactiveCheckInNotificationActive(
 			boolean inactiveCheckInNotificationActive) {
 		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
+	}
+
+	public List<ConfigurationFlag> getFeatures() {
+		return features;
+	}
+
+	public void setFeatures(List<ConfigurationFlag> features) {
+		this.features = features;
+	}
+	
+	@Transient
+	public boolean isFeatureActive(String name) {
+		return features.contains(new ConfigurationFlag(name, true));
+	}
+	
+	/**
+	 * Set value of a feature flag and set dirty flag on the entity if the value changed.
+	 * 
+	 * @param name
+	 * @param active
+	 * @return <code>true</code> if the flag was changed
+	 */
+	@Transient
+	public boolean setFeature(String name, boolean active) {
+		for (ConfigurationFlag flag : features) {
+			if(flag.getName().equals(name)) {
+				if(flag.isActive() != active) {
+					flag.setActive(active);
+					setDirty(true);
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		setDirty(true);
+		return features.add(new ConfigurationFlag(name, active));
 	}
 }

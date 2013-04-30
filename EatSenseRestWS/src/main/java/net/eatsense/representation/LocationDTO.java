@@ -1,16 +1,19 @@
 package net.eatsense.representation;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.Business;
+import net.eatsense.domain.embedded.ConfigurationFlag;
+import net.eatsense.domain.embedded.PaymentMethod;
+
 import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Strings;
-
-import net.eatsense.domain.Business;
-import net.eatsense.domain.embedded.PaymentMethod;
+import com.google.common.collect.Maps;
 
 public class LocationDTO {
 	@NotNull
@@ -38,11 +41,15 @@ public class LocationDTO {
 	private Long pendingSubscriptionId;
 	private boolean inactiveCheckInNotificationActive;
 	
+	private Map<String, Boolean> features;
+	
 	public LocationDTO() {
 		super();
+		this.features = Maps.newHashMap();
 	}
 	
 	public LocationDTO(Business business) {
+		this();
 		if(business == null)
 			return;
 		this.name = business.getName();
@@ -60,6 +67,11 @@ public class LocationDTO {
 		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
 		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();
 		
+		for (ConfigurationFlag flag : business.getFeatures()) {
+			if(flag != null) {
+				getFeatures().put(flag.getName(), flag.isActive());
+			}
+		}		
 	}
 	
 	public String getName() {
@@ -168,6 +180,14 @@ public class LocationDTO {
 	public void setInactiveCheckInNotificationActive(
 			boolean inactiveCheckInNotificationActive) {
 		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
+	}
+
+	public Map<String, Boolean> getFeatures() {
+		return features;
+	}
+
+	public void setFeatures(Map<String, Boolean> features) {
+		this.features = features;
 	}
 
 }

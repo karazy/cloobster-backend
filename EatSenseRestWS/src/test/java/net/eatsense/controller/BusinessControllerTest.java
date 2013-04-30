@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
@@ -32,6 +33,7 @@ import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.FeedbackForm;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.ConfigurationFlag;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
@@ -72,6 +74,7 @@ import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -475,6 +478,38 @@ public class BusinessControllerTest {
 		assertThat(business.getPostcode(), is(businessData.getPostcode()));
 		assertThat(business.getSlogan(), is(businessData.getSlogan()));
 		assertThat(business.getPaymentMethods(), is(paymentMethods));
+	}
+	
+	@Test
+	public void testUpdateBusinessFeaturesUnknownFeature() throws Exception {
+		rr = mock(LocationRepository.class);
+		businessCtrl = createController();
+		
+		LocationProfileDTO businessData = getTestProfileData();
+		
+		businessData.setFeatures(Maps.<String,Boolean>newHashMap());
+		businessData.getFeatures().put("crap", true);
+		
+		businessCtrl.updateBusiness(business, businessData);
+		
+		assertThat(business.getFeatures(), not(hasItem(new ConfigurationFlag("crap", true))));
+	}
+	
+	@Test
+	public void testUpdateBusinessFeatures() throws Exception {
+		rr = mock(LocationRepository.class);
+		businessCtrl = createController();
+		
+		LocationProfileDTO businessData = getTestProfileData();
+		
+		businessData.setFeatures(Maps.<String,Boolean>newHashMap());
+		businessData.getFeatures().put("feedback", true);
+		businessData.getFeatures().put("products", true);
+		
+		businessCtrl.updateBusiness(business, businessData);
+		
+		assertThat(business.getFeatures(), hasItem(new ConfigurationFlag("feedback", true)));
+		assertThat(business.getFeatures(), hasItem(new ConfigurationFlag("products", true)));
 	}
 	
 	@Test

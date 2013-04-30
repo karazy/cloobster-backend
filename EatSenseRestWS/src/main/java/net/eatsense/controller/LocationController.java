@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -64,6 +65,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
@@ -95,6 +97,8 @@ public class LocationController {
 	private final Provider<Configuration> configProvider;
 	private FeedbackFormRepository feedbackRepo;
 	private final OfyService ofyService;
+	
+	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products", "infopages", "feedback", "requests-call", "facebook-post", "contact");
 	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
@@ -508,6 +512,21 @@ public class LocationController {
 		business.setStars(businessData.getStars());
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
+		
+		if(businessData.getFeatures() != null) {
+			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
+				if(!AVAILABLE_FEATURES.contains(featureEntry.getKey())) {
+					logger.warn("Unknown feature name: {}", featureEntry.getKey());
+				}
+				else {
+					if(featureEntry.getValue() == null ) {
+						logger.warn("Value for feature flag was null. name={}", featureEntry.getKey());
+					}
+					else
+						business.setFeature(featureEntry.getKey(), featureEntry.getValue());
+				}
+			}
+		}
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme
