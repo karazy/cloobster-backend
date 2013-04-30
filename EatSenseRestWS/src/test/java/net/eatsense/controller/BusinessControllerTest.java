@@ -488,7 +488,7 @@ public class BusinessControllerTest {
 		LocationProfileDTO businessData = getTestProfileData();
 		
 		businessData.setFeatures(Maps.<String,Boolean>newHashMap());
-		businessData.getFeatures().put("crap", true);
+		businessData.getFeatures().put("crap", false);
 		
 		businessCtrl.updateBusiness(business, businessData);
 		
