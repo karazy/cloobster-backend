@@ -40,6 +40,6 @@ public class DashboardItemsResource {
 	 */
 	@GET
 	public List<DashboardItemDTO> get() {
-		return Lists.transform(ctrl.getItems(location.getKey()), DashboardItemDTO.toDTO);
+		return Lists.transform(ctrl.getItemsForActiveFeatures(location), DashboardItemDTO.toDTO);
 	}
 }

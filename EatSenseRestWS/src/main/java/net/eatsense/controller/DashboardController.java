@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -49,6 +50,37 @@ public class DashboardController {
 		else {
 			return itemRepo.getByParent(locationKey);
 		}
+	}
+	
+	public List<DashboardItem> getItemsForActiveFeatures(Business location) {
+		DashboardConfiguration config = itemRepo.getConfiguration(location.getKey());
+		List<DashboardItem> items;
+		
+		if(config != null) {
+			items = new ArrayList<DashboardItem>(itemRepo.getByKeys(config.getItems()));
+		}
+		else {
+			items = itemRepo.getByParent(location.getKey());
+		}
+		boolean isFeedbackActive = location.isFeatureActive("feedback");
+		boolean isProductsActive = location.isFeatureActive("products");
+		boolean isInfopagesActive = location.isFeatureActive("infopages");
+		
+		// filter list by active features only
+		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {
+			DashboardItem dashboardItem = iterator.next();
+			if(dashboardItem.getType().equals("feedback") && !isFeedbackActive) {			
+				iterator.remove();
+			}
+			if(dashboardItem.getType().startsWith("products") && !isProductsActive) {
+				iterator.remove();
+			}
+			if(dashboardItem.getType().startsWith("infopages") && !isInfopagesActive) {				
+				iterator.remove();
+			}
+		}
+				
+		return items;
 	}
 	
 	public DashboardItem get(Key<Business> locationKey, long id) {
