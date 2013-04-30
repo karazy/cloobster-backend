@@ -492,7 +492,7 @@ public class BusinessControllerTest {
 		
 		businessCtrl.updateBusiness(business, businessData);
 		
-		assertThat(business.getFeatures(), not(hasItem(new ConfigurationFlag("crap", true))));
+		assertThat(business.getDisabledFeatures(), not(hasItem("crap")));
 	}
 	
 	@Test
@@ -503,13 +503,13 @@ public class BusinessControllerTest {
 		LocationProfileDTO businessData = getTestProfileData();
 		
 		businessData.setFeatures(Maps.<String,Boolean>newHashMap());
-		businessData.getFeatures().put("feedback", true);
+		businessData.getFeatures().put("feedback", false);
 		businessData.getFeatures().put("products", true);
 		
 		businessCtrl.updateBusiness(business, businessData);
 		
-		assertThat(business.getFeatures(), hasItem(new ConfigurationFlag("feedback", true)));
-		assertThat(business.getFeatures(), hasItem(new ConfigurationFlag("products", true)));
+		assertThat(business.getDisabledFeatures(), hasItem("feedback"));
+		assertThat(business.getDisabledFeatures(), not(hasItem("products")));
 	}
 	
 	@Test

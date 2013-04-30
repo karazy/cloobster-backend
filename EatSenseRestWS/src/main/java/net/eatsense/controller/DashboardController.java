@@ -62,9 +62,9 @@ public class DashboardController {
 		else {
 			items = itemRepo.getByParent(location.getKey());
 		}
-		boolean isFeedbackActive = location.isFeatureActive("feedback");
-		boolean isProductsActive = location.isFeatureActive("products");
-		boolean isInfopagesActive = location.isFeatureActive("infopages");
+		boolean isFeedbackActive = location.getDisabledFeatures().contains("feedback");
+		boolean isProductsActive = location.getDisabledFeatures().contains("products");
+		boolean isInfopagesActive = location.getDisabledFeatures().contains("infopages");
 		
 		// filter list by active features only
 		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {

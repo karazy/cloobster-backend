@@ -18,7 +18,9 @@ import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -31,6 +33,9 @@ import com.googlecode.objectify.annotation.Unindexed;
  */
 @Cached
 public class Business extends GenericEntity<Business> {
+	
+	@Transient
+	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products", "infopages", "feedback", "requests-call", "facebook-post", "contact");
  
 	/**
 	 * Name of location.
@@ -142,8 +147,7 @@ public class Business extends GenericEntity<Business> {
 	private boolean inactiveCheckInNotificationActive = true;
 	
 	@Unindexed
-	@Embedded
-	private List<ConfigurationFlag> features = Lists.newArrayList();
+	private Set<String> disabledFeatures = Sets.newHashSet();
 	
 	public Business() {
 	}
@@ -417,41 +421,11 @@ public class Business extends GenericEntity<Business> {
 		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
 	}
 
-	public List<ConfigurationFlag> getFeatures() {
-		return features;
+	public Set<String> getDisabledFeatures() {
+		return disabledFeatures;
 	}
 
-	public void setFeatures(List<ConfigurationFlag> features) {
-		this.features = features;
-	}
-	
-	@Transient
-	public boolean isFeatureActive(String name) {
-		return features.contains(new ConfigurationFlag(name, true));
-	}
-	
-	/**
-	 * Set value of a feature flag and set dirty flag on the entity if the value changed.
-	 * 
-	 * @param name
-	 * @param active
-	 * @return <code>true</code> if the flag was changed
-	 */
-	@Transient
-	public boolean setFeature(String name, boolean active) {
-		for (ConfigurationFlag flag : features) {
-			if(flag.getName().equals(name)) {
-				if(flag.isActive() != active) {
-					flag.setActive(active);
-					setDirty(true);
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-		}
-		setDirty(true);
-		return features.add(new ConfigurationFlag(name, active));
+	public void setDisabledFeatures(Set<String> disabledFeatures) {
+		this.disabledFeatures = disabledFeatures;
 	}
 }

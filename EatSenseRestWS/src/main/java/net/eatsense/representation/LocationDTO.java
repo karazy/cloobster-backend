@@ -41,11 +41,8 @@ public class LocationDTO {
 	private Long pendingSubscriptionId;
 	private boolean inactiveCheckInNotificationActive;
 	
-	private Map<String, Boolean> features;
-	
 	public LocationDTO() {
 		super();
-		this.features = Maps.newHashMap();
 	}
 	
 	public LocationDTO(Business business) {
@@ -65,13 +62,7 @@ public class LocationDTO {
 		this.basic = business.isBasic();
 		this.activeSubscriptionId = business.getActiveSubscription() != null ? business.getActiveSubscription().getId() : null;
 		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
-		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();
-		
-		for (ConfigurationFlag flag : business.getFeatures()) {
-			if(flag != null) {
-				getFeatures().put(flag.getName(), flag.isActive());
-			}
-		}		
+		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();	
 	}
 	
 	public String getName() {
@@ -181,13 +172,4 @@ public class LocationDTO {
 			boolean inactiveCheckInNotificationActive) {
 		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
 	}
-
-	public Map<String, Boolean> getFeatures() {
-		return features;
-	}
-
-	public void setFeatures(Map<String, Boolean> features) {
-		this.features = features;
-	}
-
 }

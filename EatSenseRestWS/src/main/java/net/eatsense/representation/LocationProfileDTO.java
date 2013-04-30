@@ -1,6 +1,7 @@
 package net.eatsense.representation;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import net.eatsense.domain.Business;
 import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 public class LocationProfileDTO extends LocationDTO {
 
@@ -36,6 +38,8 @@ public class LocationProfileDTO extends LocationDTO {
 	private Integer spotCount;
 	
 	private boolean offlineEmailAlertActive;
+	
+	private Map<String, Boolean> features = Maps.newHashMap();
 
 	public LocationProfileDTO() {
 		super();
@@ -45,7 +49,7 @@ public class LocationProfileDTO extends LocationDTO {
 	 * @param business - Business entity to copy the data from.
 	 */
 	public LocationProfileDTO(Business business) {
-		super(business);
+		super(business);		
 		this.address = business.getAddress();
 		this.city = business.getCity();
 		// Convert the images List to a Map, use id as the key.
@@ -63,6 +67,10 @@ public class LocationProfileDTO extends LocationDTO {
 		this.slogan = business.getSlogan();
 		this.spotCount = business.getSpotCount();
 		this.offlineEmailAlertActive = business.isOfflineEmailAlertActive();
+		
+		for (String featureName : Business.AVAILABLE_FEATURES) {
+			getFeatures().put(featureName, !business.getDisabledFeatures().contains(featureName));
+		}	
 	}
 
 	public String getCity() {
@@ -143,6 +151,14 @@ public class LocationProfileDTO extends LocationDTO {
 
 	public void setOfflineEmailAlertActive(boolean offlineEmailAlertActive) {
 		this.offlineEmailAlertActive = offlineEmailAlertActive;
+	}
+
+	public Map<String, Boolean> getFeatures() {
+		return features;
+	}
+
+	public void setFeatures(Map<String, Boolean> features) {
+		this.features = features;
 	}
 
 	public final static Function<Business, LocationProfileDTO> toDTO = 

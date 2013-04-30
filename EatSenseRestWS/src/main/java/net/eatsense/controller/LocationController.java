@@ -98,8 +98,6 @@ public class LocationController {
 	private FeedbackFormRepository feedbackRepo;
 	private final OfyService ofyService;
 	
-	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products", "infopages", "feedback", "requests-call", "facebook-post", "contact");
-	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
 			SpotRepository sr, LocationRepository br, EventBus eventBus,
@@ -515,15 +513,14 @@ public class LocationController {
 		
 		if(businessData.getFeatures() != null) {
 			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
-				if(!AVAILABLE_FEATURES.contains(featureEntry.getKey())) {
-					logger.warn("Unknown feature name: {}", featureEntry.getKey());
+				String featureName = featureEntry.getKey();
+				if(!Business.AVAILABLE_FEATURES.contains(featureName)) {
+					logger.warn("Unknown feature name: {}", featureName);
 				}
 				else {
-					if(featureEntry.getValue() == null ) {
-						logger.warn("Value for feature flag was null. name={}", featureEntry.getKey());
+					if(featureEntry.getValue() == false) {
+						business.getDisabledFeatures().add(featureName);
 					}
-					else
-						business.setFeature(featureEntry.getKey(), featureEntry.getValue());
 				}
 			}
 		}
