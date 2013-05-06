@@ -23,6 +23,7 @@ import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.domain.Order;
 import net.eatsense.domain.Subscription;
 import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
 import net.eatsense.event.ConfirmedAccountEvent;
@@ -31,6 +32,7 @@ import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
 import net.eatsense.event.NewPendingSubscription;
+import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
@@ -406,5 +408,29 @@ public class MailController {
 		} catch (MessagingException e) {
 			logger.error("Error during e-mail sending", e);
 		}
+	}
+	
+	@Subscribe
+	public void sendIncomingOrderNotificationEmail(PlaceAllOrdersEvent event) {
+		// get location entity from event or business
+		Business location = event.getOptBusiness().or(ofy.get(event.getCheckIn().getBusiness()));
+		if(!location.isIncomingOrderNotifcationEnabled()) {
+			logger.info("Incoming Order notification disabled, skipped sending.");
+			return;
+		}
+		
+		String receivingAdress = location.getEmail();
+		if(Strings.isNullOrEmpty(receivingAdress)) {
+			logger.warn("Unable to send Order notification, location has no email set.");
+			return;
+		}
+		
+		
+		StringBuilder summaryBuilder = new StringBuilder();
+		for (Order order : event.getOrders()) {
+			summaryBuilder.append(String.format("\t%d - %s\n",order.getAmount(), order.getProductName()));
+		}
+		// Template parameter: orders count, area name, spot name, order summary text, cockpit url
+		String mailText = templateCtrl.getAndReplace("order-placed-alert-de", String.valueOf(event.getEntityCount()));
 	}
 }

@@ -1,19 +1,16 @@
 package net.eatsense.representation;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Business;
-import net.eatsense.domain.embedded.ConfigurationFlag;
 import net.eatsense.domain.embedded.PaymentMethod;
 
 import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 public class LocationDTO {
 	@NotNull
@@ -40,6 +37,7 @@ public class LocationDTO {
 	private Long activeSubscriptionId;
 	private Long pendingSubscriptionId;
 	private boolean inactiveCheckInNotificationActive;
+	private boolean isIncomingOrderNotificationEnabled;
 	
 	public LocationDTO() {
 		super();
@@ -62,7 +60,8 @@ public class LocationDTO {
 		this.basic = business.isBasic();
 		this.activeSubscriptionId = business.getActiveSubscription() != null ? business.getActiveSubscription().getId() : null;
 		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
-		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();	
+		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();
+		this.isIncomingOrderNotificationEnabled = business.isIncomingOrderNotifcationEnabled();
 	}
 	
 	public String getName() {
@@ -171,5 +170,14 @@ public class LocationDTO {
 	public void setInactiveCheckInNotificationActive(
 			boolean inactiveCheckInNotificationActive) {
 		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
+	}
+
+	public boolean isIncomingOrderNotificationEnabled() {
+		return isIncomingOrderNotificationEnabled;
+	}
+
+	public void setIncomingOrderNotificationEnabled(
+			boolean isIncomingOrderNotificationEnabled) {
+		this.isIncomingOrderNotificationEnabled = isIncomingOrderNotificationEnabled;
 	}
 }

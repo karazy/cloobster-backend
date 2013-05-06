@@ -10,7 +10,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.embedded.Channel;
-import net.eatsense.domain.embedded.ConfigurationFlag;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.representation.ImageDTO;
 
@@ -19,7 +18,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
@@ -144,7 +142,11 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private boolean basic = true;
 	
+	@Unindexed
 	private boolean inactiveCheckInNotificationActive = true;
+	
+	@Unindexed
+	private boolean incomingOrderNotifcationEnabled = false;
 	
 	@Unindexed
 	private Set<String> disabledFeatures = Sets.newHashSet();
@@ -427,5 +429,17 @@ public class Business extends GenericEntity<Business> {
 
 	public void setDisabledFeatures(Set<String> disabledFeatures) {
 		this.disabledFeatures = disabledFeatures;
+	}
+
+	public boolean isIncomingOrderNotifcationEnabled() {
+		return incomingOrderNotifcationEnabled;
+	}
+
+	public void setIncomingOrderNotifcationEnabled(
+			boolean incomingOrderNotifcationEnabled) {
+		if(!Objects.equal(this.incomingOrderNotifcationEnabled, incomingOrderNotifcationEnabled)) {
+			this.setDirty(true);
+			this.incomingOrderNotifcationEnabled = incomingOrderNotifcationEnabled;
+		}
 	}
 }

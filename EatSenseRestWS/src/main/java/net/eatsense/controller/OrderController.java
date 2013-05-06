@@ -584,9 +584,11 @@ public class OrderController {
 			return;
 		}
 		
+		
+		
 		Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 		// If we have no older request in the database ...
-		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size());
+		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size(), orders);
 		if( oldestRequest == null ) {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}

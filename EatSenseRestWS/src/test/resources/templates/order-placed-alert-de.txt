@@ -1,0 +1,13 @@
+[Cloobster] {0} neue Bestellung(en) im Bereich "{1}" 
+Lieber cloobster Operator,
+
+Es liegen {0} neue Bestellungen bei "{2}" im Bereich "{1}" vor.
+
+Übersicht:
+{3}
+
+Bitte klicken Sie hier für Details:
+{4}
+
+Viele Grüße
+Ihr cloobster Cockpit

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.eatsense.domain.Business;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
@@ -33,6 +34,7 @@ import net.eatsense.representation.cockpit.SpotStatusDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
@@ -84,7 +86,9 @@ public class MessageController {
 		}
 		messages.add(new MessageDTO("checkin","confirm-orders",statusDto));
 		// Send update messages.
-		channelCtrl.sendMessages(businessRepo.getByKey(event.getCheckIn().getBusiness()), messages);
+		Business business = businessRepo.getByKey(event.getCheckIn().getBusiness());
+		
+		channelCtrl.sendMessages(business, messages);
 	}
 	
 	@Subscribe
@@ -105,7 +109,9 @@ public class MessageController {
 		}
 		messages.add(new MessageDTO("checkin","update-orders",statusDto));
 		// Send update messages.
-		channelCtrl.sendMessages(businessRepo.getByKey(event.getCheckIn().getBusiness()), messages);
+		Business business = businessRepo.getByKey(event.getCheckIn().getBusiness());
+		event.setOptBusiness(Optional.of(business));
+		channelCtrl.sendMessages(business, messages);
 	}
 	
 	@Subscribe
