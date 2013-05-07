@@ -68,13 +68,13 @@ public class DashboardController {
 		// filter list by active features only
 		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {
 			DashboardItem dashboardItem = iterator.next();
-			if(dashboardItem.getType().equals("feedback") && !isFeedbackDisabled) {			
+			if(dashboardItem.getType().equals("feedback") && isFeedbackDisabled) {			
 				iterator.remove();
 			}
-			if(dashboardItem.getType().startsWith("products") && !isProductsDisabled) {
+			if(dashboardItem.getType().startsWith("products") && isProductsDisabled) {
 				iterator.remove();
 			}
-			if(dashboardItem.getType().startsWith("infopages") && !isInfopagesDisabled) {				
+			if(dashboardItem.getType().startsWith("infopages") && isInfopagesDisabled) {				
 				iterator.remove();
 			}
 		}
