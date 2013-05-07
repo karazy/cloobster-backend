@@ -64,6 +64,7 @@ public class DashboardController {
 		boolean isFeedbackDisabled = location.getDisabledFeatures().contains("feedback");
 		boolean isProductsDisabled = location.getDisabledFeatures().contains("products");
 		boolean isInfopagesDisabled = location.getDisabledFeatures().contains("infopages");
+		boolean isServiceCallDisabled = location.getDisabledFeatures().contains("requests-call");
 		
 		// filter list by active features only
 		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {
@@ -71,10 +72,13 @@ public class DashboardController {
 			if(dashboardItem.getType().equals("feedback") && isFeedbackDisabled) {			
 				iterator.remove();
 			}
-			if(dashboardItem.getType().startsWith("products") && isProductsDisabled) {
+			else if(dashboardItem.getType().startsWith("products") && isProductsDisabled) {
 				iterator.remove();
 			}
-			if(dashboardItem.getType().startsWith("infopages") && isInfopagesDisabled) {				
+			else if(dashboardItem.getType().startsWith("infopages") && isInfopagesDisabled) {				
+				iterator.remove();
+			}
+			else if(dashboardItem.getType().equals("actions") && isServiceCallDisabled) {
 				iterator.remove();
 			}
 		}

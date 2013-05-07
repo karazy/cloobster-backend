@@ -58,6 +58,7 @@ import net.eatsense.validation.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -589,6 +590,7 @@ public class OrderController {
 		Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 		// If we have no older request in the database ...
 		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size(), orders);
+		updateEvent.setOptSpot(Optional.of(spot));
 		if( oldestRequest == null ) {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}

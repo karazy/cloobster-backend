@@ -20,10 +20,12 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.domain.Order;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Subscription;
 import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
 import net.eatsense.event.ConfirmedAccountEvent;
@@ -412,6 +414,7 @@ public class MailController {
 	
 	@Subscribe
 	public void sendIncomingOrderNotificationEmail(PlaceAllOrdersEvent event) {
+		logger.info("Building mail ...");
 		// get location entity from event or business
 		Business location = event.getOptBusiness().or(ofy.get(event.getCheckIn().getBusiness()));
 		if(!location.isIncomingOrderNotifcationEnabled()) {
@@ -419,8 +422,8 @@ public class MailController {
 			return;
 		}
 		
-		String receivingAdress = location.getEmail();
-		if(Strings.isNullOrEmpty(receivingAdress)) {
+		String receivingAddress = location.getEmail();
+		if(Strings.isNullOrEmpty(receivingAddress)) {
 			logger.warn("Unable to send Order notification, location has no email set.");
 			return;
 		}
@@ -428,9 +431,28 @@ public class MailController {
 		
 		StringBuilder summaryBuilder = new StringBuilder();
 		for (Order order : event.getOrders()) {
-			summaryBuilder.append(String.format("\t%d - %s\n",order.getAmount(), order.getProductName()));
+			summaryBuilder.append(String.format("\t%dx %s\n",order.getAmount(), order.getProductName()));
 		}
+		
+		UriBuilder uriBuilder = UriBuilder.fromUri(baseUri).path("cockpit");
+		Area area = ofy.get(event.getCheckIn().getArea());
+		Spot spot = event.getOptSpot().or(ofy.get(event.getCheckIn().getSpot()));
+		
 		// Template parameter: orders count, area name, spot name, order summary text, cockpit url
-		String mailText = templateCtrl.getAndReplace("order-placed-alert-de", String.valueOf(event.getEntityCount()));
+		String mailText = templateCtrl.getAndReplace("order-placed-alert-de",
+				String.valueOf(event.getEntityCount()),
+				area.getName(),
+				spot.getName(),
+				summaryBuilder.toString(),
+				uriBuilder.build().toString());
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(receivingAddress, mailText);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
 	}
 }
