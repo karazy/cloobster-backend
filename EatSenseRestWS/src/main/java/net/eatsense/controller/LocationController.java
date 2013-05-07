@@ -516,7 +516,8 @@ public class LocationController {
 				}
 				else {
 					if(featureEntry.getValue() == false) {
-						business.getDisabledFeatures().add(featureName);
+						if(business.getDisabledFeatures().add(featureName))
+							business.setDirty(true);
 					}
 				}
 			}

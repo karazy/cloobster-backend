@@ -2,19 +2,9 @@ package net.eatsense.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.eventbus.Subscribe;
-import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
 
 import net.eatsense.domain.Business;
 import net.eatsense.domain.DashboardConfiguration;
@@ -24,6 +14,15 @@ import net.eatsense.exceptions.DataConflictException;
 import net.eatsense.persistence.DashBoarditemRepository;
 import net.eatsense.representation.DashboardConfigDTO;
 import net.eatsense.representation.DashboardItemDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
 
 public class DashboardController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -62,20 +61,20 @@ public class DashboardController {
 		else {
 			items = itemRepo.getByParent(location.getKey());
 		}
-		boolean isFeedbackActive = location.getDisabledFeatures().contains("feedback");
-		boolean isProductsActive = location.getDisabledFeatures().contains("products");
-		boolean isInfopagesActive = location.getDisabledFeatures().contains("infopages");
+		boolean isFeedbackDisabled = location.getDisabledFeatures().contains("feedback");
+		boolean isProductsDisabled = location.getDisabledFeatures().contains("products");
+		boolean isInfopagesDisabled = location.getDisabledFeatures().contains("infopages");
 		
 		// filter list by active features only
 		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {
 			DashboardItem dashboardItem = iterator.next();
-			if(dashboardItem.getType().equals("feedback") && !isFeedbackActive) {			
+			if(dashboardItem.getType().equals("feedback") && !isFeedbackDisabled) {			
 				iterator.remove();
 			}
-			if(dashboardItem.getType().startsWith("products") && !isProductsActive) {
+			if(dashboardItem.getType().startsWith("products") && !isProductsDisabled) {
 				iterator.remove();
 			}
-			if(dashboardItem.getType().startsWith("infopages") && !isInfopagesActive) {				
+			if(dashboardItem.getType().startsWith("infopages") && !isInfopagesDisabled) {				
 				iterator.remove();
 			}
 		}
