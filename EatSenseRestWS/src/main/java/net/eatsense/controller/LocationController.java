@@ -515,7 +515,11 @@ public class LocationController {
 					logger.warn("Unknown feature name: {}", featureName);
 				}
 				else {
-					if(featureEntry.getValue() == false) {
+					if(featureEntry.getValue()) {
+						if(business.getDisabledFeatures().remove(featureName))
+							business.setDirty(true);
+					}
+					else {
 						if(business.getDisabledFeatures().add(featureName))
 							business.setDirty(true);
 					}
