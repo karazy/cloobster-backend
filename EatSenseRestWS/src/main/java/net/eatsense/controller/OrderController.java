@@ -58,6 +58,7 @@ import net.eatsense.validation.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
@@ -476,8 +477,15 @@ public class OrderController {
 		try {
 			product = productRepo.getById(checkIn.getBusiness(), orderData.getProductId());
 		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Unable to place order: Unknown productId={}", orderData.getProductId());
 			throw new ValidationException("Order cannot be placed, productId unknown",e);
 		}
+		
+		if(product.isNoOrder()) {
+			logger.error("Unable to place order for Product, noOrder=true. id={}", product.getId());
+			throw new ValidationException("Order cannot be placed, product can't be ordered.");
+		}
+		
 		boolean isProductAssignedToArea = false;
 		
 		// Check if the Menu of the ordered Product is assigned to this Area.
@@ -577,9 +585,12 @@ public class OrderController {
 			return;
 		}
 		
+		
+		
 		Key<Request> oldestRequest = requestRepo.query().filter("spot",checkIn.getSpot()).order("-receivedTime").getKey();
 		// If we have no older request in the database ...
-		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size());
+		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size(), orders);
+		updateEvent.setOptSpot(Optional.of(spot));
 		if( oldestRequest == null ) {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}

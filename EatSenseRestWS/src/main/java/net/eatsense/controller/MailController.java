@@ -20,9 +20,12 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Area;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.domain.Order;
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Subscription;
 import net.eatsense.event.ChannelOnlineCheckTimeOutEvent;
 import net.eatsense.event.ConfirmedAccountEvent;
@@ -31,6 +34,7 @@ import net.eatsense.event.NewAccountEvent;
 import net.eatsense.event.NewCompanyAccountEvent;
 import net.eatsense.event.NewNewsletterRecipientEvent;
 import net.eatsense.event.NewPendingSubscription;
+import net.eatsense.event.PlaceAllOrdersEvent;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountEmailEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
@@ -401,6 +405,50 @@ public class MailController {
 		try {
 			// Send e-mail with password reset link.
 			sendMail(mailAddress, mailText);
+		} catch (AddressException e) {
+			logger.error("Error with e-mail address",e);
+		} catch (MessagingException e) {
+			logger.error("Error during e-mail sending", e);
+		}
+	}
+	
+	@Subscribe
+	public void sendIncomingOrderNotificationEmail(PlaceAllOrdersEvent event) {
+		logger.info("Building mail ...");
+		// get location entity from event or business
+		Business location = event.getOptBusiness().or(ofy.get(event.getCheckIn().getBusiness()));
+		if(!location.isIncomingOrderNotifcationEnabled()) {
+			logger.info("Incoming Order notification disabled, skipped sending.");
+			return;
+		}
+		
+		String receivingAddress = location.getEmail();
+		if(Strings.isNullOrEmpty(receivingAddress)) {
+			logger.warn("Unable to send Order notification, location has no email set.");
+			return;
+		}
+		
+		
+		StringBuilder summaryBuilder = new StringBuilder();
+		for (Order order : event.getOrders()) {
+			summaryBuilder.append(String.format("\t%dx %s\n",order.getAmount(), order.getProductName()));
+		}
+		
+		UriBuilder uriBuilder = UriBuilder.fromUri(baseUri).path("cockpit");
+		Area area = ofy.get(event.getCheckIn().getArea());
+		Spot spot = event.getOptSpot().or(ofy.get(event.getCheckIn().getSpot()));
+		
+		// Template parameter: orders count, area name, spot name, order summary text, cockpit url
+		String mailText = templateCtrl.getAndReplace("order-placed-alert-de",
+				String.valueOf(event.getEntityCount()),
+				area.getName(),
+				spot.getName(),
+				summaryBuilder.toString(),
+				uriBuilder.build().toString());
+		
+		try {
+			// Send e-mail with password reset link.
+			sendMail(receivingAddress, mailText);
 		} catch (AddressException e) {
 			logger.error("Error with e-mail address",e);
 		} catch (MessagingException e) {

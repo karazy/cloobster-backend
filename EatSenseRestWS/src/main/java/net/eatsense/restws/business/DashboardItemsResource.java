@@ -15,7 +15,6 @@ import javax.ws.rs.Produces;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.DashboardController;
 import net.eatsense.domain.Business;
-import net.eatsense.domain.DashboardItem;
 import net.eatsense.representation.DashboardConfigDTO;
 import net.eatsense.representation.DashboardItemDTO;
 

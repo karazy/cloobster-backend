@@ -5,9 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -63,8 +63,6 @@ import com.google.appengine.api.blobstore.BlobKey;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
@@ -508,6 +506,26 @@ public class LocationController {
 		business.setStars(businessData.getStars());
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
+		business.setIncomingOrderNotifcationEnabled(businessData.isIncomingOrderNotificationEnabled());
+		
+		if(businessData.getFeatures() != null) {
+			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
+				String featureName = featureEntry.getKey();
+				if(!Business.AVAILABLE_FEATURES.contains(featureName)) {
+					logger.warn("Unknown feature name: {}", featureName);
+				}
+				else {
+					if(featureEntry.getValue()) {
+						if(business.getDisabledFeatures().remove(featureName))
+							business.setDirty(true);
+					}
+					else {
+						if(business.getDisabledFeatures().add(featureName))
+							business.setDirty(true);
+					}
+				}
+			}
+		}
 		
 		if( !Strings.isNullOrEmpty(businessData.getTheme()) ) {
 			// Do not override default theme
