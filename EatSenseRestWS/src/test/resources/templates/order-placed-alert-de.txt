@@ -9,5 +9,8 @@ Es liegen {0} neue Bestellungen bei "{2}" im Bereich "{1}" vor.
 Bitte klicken Sie hier für Details:
 {4}
 
-Viele Grüße
-Ihr cloobster Cockpit
+
+Beste Grüße vom
+cloobster Service Team
+
+Dies ist eine automatisch generierte Systembenachrichtigung. Sie können die Benachrichtigung in den Location Einstellungen im Frontend deaktivieren.
