@@ -33,7 +33,7 @@ import com.googlecode.objectify.annotation.Unindexed;
 public class Business extends GenericEntity<Business> {
 	
 	@Transient
-	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products", "infopages", "feedback", "requests-call", "facebook-post", "contact");
+	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products","products-order", "infopages", "feedback", "requests-call", "facebook-post", "contact");
  
 	/**
 	 * Name of location.
