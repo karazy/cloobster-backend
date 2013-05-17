@@ -17,6 +17,8 @@ import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -29,6 +31,9 @@ import com.googlecode.objectify.annotation.Unindexed;
  */
 @Cached
 public class Business extends GenericEntity<Business> {
+	
+	@Transient
+	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products","products-order", "infopages", "feedback", "requests-call", "facebook-post", "contact");
  
 	/**
 	 * Name of location.
@@ -137,7 +142,14 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private boolean basic = true;
 	
+	@Unindexed
 	private boolean inactiveCheckInNotificationActive = true;
+	
+	@Unindexed
+	private boolean incomingOrderNotifcationEnabled = false;
+	
+	@Unindexed
+	private Set<String> disabledFeatures = Sets.newHashSet();
 	
 	public Business() {
 	}
@@ -409,5 +421,25 @@ public class Business extends GenericEntity<Business> {
 	public void setInactiveCheckInNotificationActive(
 			boolean inactiveCheckInNotificationActive) {
 		this.inactiveCheckInNotificationActive = inactiveCheckInNotificationActive;
+	}
+
+	public Set<String> getDisabledFeatures() {
+		return disabledFeatures;
+	}
+
+	public void setDisabledFeatures(Set<String> disabledFeatures) {
+		this.disabledFeatures = disabledFeatures;
+	}
+
+	public boolean isIncomingOrderNotifcationEnabled() {
+		return incomingOrderNotifcationEnabled;
+	}
+
+	public void setIncomingOrderNotifcationEnabled(
+			boolean incomingOrderNotifcationEnabled) {
+		if(!Objects.equal(this.incomingOrderNotifcationEnabled, incomingOrderNotifcationEnabled)) {
+			this.setDirty(true);
+			this.incomingOrderNotifcationEnabled = incomingOrderNotifcationEnabled;
+		}
 	}
 }

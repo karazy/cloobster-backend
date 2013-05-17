@@ -7,13 +7,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import mediautil.gen.directio.OutStreamToIterativeReader;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.domain.Document;
@@ -31,7 +29,6 @@ import com.pdfjet.Font;
 import com.pdfjet.Image;
 import com.pdfjet.ImageType;
 import com.pdfjet.PDF;
-import com.pdfjet.PDFobj;
 import com.pdfjet.Page;
 import com.pdfjet.TextLine;
 

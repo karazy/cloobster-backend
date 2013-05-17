@@ -1,11 +1,6 @@
 package net.eatsense.restws.customer;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -17,8 +12,6 @@ import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.filter.HttpMethods;
 import net.eatsense.persistence.LocationRepository;
 
-import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
-import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;

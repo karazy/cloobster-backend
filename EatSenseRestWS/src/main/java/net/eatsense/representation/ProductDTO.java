@@ -50,6 +50,8 @@ public class ProductDTO {
 	private boolean checked;
 	
 	private boolean hideInDashboard;
+
+	private boolean noOrder;
 	
 	public ProductDTO() {
 		super();
@@ -78,6 +80,7 @@ public class ProductDTO {
 		this.active = product.isActive();
 		this.setSpecial(product.isSpecial());
 		this.hideInDashboard = product.isHideInDashboard();
+		this.setNoOrder(product.isNoOrder());
 	}
 
 	public String getName() {
@@ -201,6 +204,14 @@ public class ProductDTO {
 		this.hideInDashboard = hideInDashboard;
 	}
 	
+	public boolean isNoOrder() {
+		return noOrder;
+	}
+
+	public void setNoOrder(boolean noOrder) {
+		this.noOrder = noOrder;
+	}
+
 	public final static Function<Product, ProductDTO> toDTO = 
 			new Function<Product, ProductDTO>() {
 				@Override

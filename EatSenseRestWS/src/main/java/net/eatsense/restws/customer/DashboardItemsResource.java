@@ -2,19 +2,11 @@ package net.eatsense.restws.customer;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import net.eatsense.controller.DashboardController;
 import net.eatsense.domain.Business;
-import net.eatsense.domain.DashboardItem;
-import net.eatsense.representation.DashboardConfigDTO;
 import net.eatsense.representation.DashboardItemDTO;
 
 import com.google.common.collect.Lists;
@@ -40,6 +32,6 @@ public class DashboardItemsResource {
 	 */
 	@GET
 	public List<DashboardItemDTO> get() {
-		return Lists.transform(ctrl.getItems(location.getKey()), DashboardItemDTO.toDTO);
+		return Lists.transform(ctrl.getItemsForActiveFeatures(location), DashboardItemDTO.toDTO);
 	}
 }
