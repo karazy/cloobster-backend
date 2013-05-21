@@ -4,10 +4,8 @@ import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 
-import net.eatsense.domain.Spot;
 import net.eatsense.domain.Visit;
 
-import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Function;
 
 public class ToVisitDTO {
@@ -27,7 +25,8 @@ public class ToVisitDTO {
 	
 	private Date visitDate;
 	
-	private GeoPt geoLocation;
+	private Float geoLong;
+	private Float geoLat;
 	
 	public ToVisitDTO() {
 		super();
@@ -42,7 +41,11 @@ public class ToVisitDTO {
 		this.comment = visit.getComment();
 		this.createdOn = visit.getCreatedOn();
 		this.visitDate = visit.getVisitDate();
-		this.geoLocation = visit.getGeoLocation();
+		
+		if(visit.getGeoLocation() != null) {
+			this.geoLat = visit.getGeoLocation().getLatitude();
+			this.geoLong = visit.getGeoLocation().getLongitude();
+		}
 	}
 	
 	public String getLocationName() {
@@ -93,20 +96,28 @@ public class ToVisitDTO {
 		this.visitDate = visitDate;
 	}
 
-	public GeoPt getGeoLocation() {
-		return geoLocation;
-	}
-
-	public void setGeoLocation(GeoPt geoLocation) {
-		this.geoLocation = geoLocation;
-	}
-	
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Float getGeoLat() {
+		return geoLat;
+	}
+
+	public void setGeoLat(Float geoLat) {
+		this.geoLat = geoLat;
+	}
+
+	public Float getGeoLong() {
+		return geoLong;
+	}
+
+	public void setGeoLong(Float geoLong) {
+		this.geoLong = geoLong;
 	}
 
 	public final static Function<Visit, ToVisitDTO> toDTO = 

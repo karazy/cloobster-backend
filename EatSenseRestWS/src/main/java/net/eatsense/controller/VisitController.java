@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.NotFoundException;
@@ -72,7 +73,14 @@ public class VisitController {
 		checkNotNull(visitData, "visitData was null");
 		
 		visit.setComment(visitData.getComment());
-		visit.setGeoLocation(visit.getGeoLocation());
+		
+		if(visitData.getGeoLat() != null && visitData.getGeoLong() != null) {
+			try {
+				visit.setGeoLocation(new GeoPt(visitData.getGeoLat(), visitData.getGeoLong()));
+			} catch (IllegalArgumentException e) {
+				throw new ValidationException("Illegal value for geoLat or geoLong.");
+			}
+		}
 		
 		if(visitData.getLocationId() != null) {
 			// Link the visit to a cloobster location.
