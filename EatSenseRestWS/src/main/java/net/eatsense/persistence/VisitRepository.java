@@ -7,8 +7,8 @@ import net.eatsense.domain.Visit;
 
 public class VisitRepository extends GenericRepository<Visit> {
 
-	public VisitRepository(Class<Visit> clazz) {
-		super(clazz);
+	public VisitRepository() {
+		super(Visit.class);
 	}
 
 	public Iterable<Visit> belongingToAccountSortedByVisitAndCreationDate(Key<Account> account, int start, int limit) {

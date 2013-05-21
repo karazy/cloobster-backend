@@ -2,12 +2,19 @@ package net.eatsense.representation;
 
 import java.util.Date;
 
+import javax.validation.constraints.NotNull;
+
+import net.eatsense.domain.Spot;
 import net.eatsense.domain.Visit;
 
 import com.google.appengine.api.datastore.GeoPt;
+import com.google.common.base.Function;
 
 public class ToVisitDTO {
 	
+	private Long id;
+	
+	@NotNull
 	private String locationName;
 
 	private Long locationId;
@@ -28,6 +35,7 @@ public class ToVisitDTO {
 	
 	public ToVisitDTO(Visit visit) {
 		this();
+		this.id = visit.getId();
 		this.locationName = visit.getLocationName();
 		this.locationId = visit.getLocation() != null ? visit.getLocation().getId() : null;
 		this.locationRefId = visit.getLocationRefId();
@@ -92,5 +100,20 @@ public class ToVisitDTO {
 	public void setGeoLocation(GeoPt geoLocation) {
 		this.geoLocation = geoLocation;
 	}
+	
+	public Long getId() {
+		return id;
+	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public final static Function<Visit, ToVisitDTO> toDTO = 
+			new Function<Visit, ToVisitDTO>() {
+				@Override
+				public ToVisitDTO apply(Visit input) {
+					return new ToVisitDTO(input);
+				}
+		    };
 }

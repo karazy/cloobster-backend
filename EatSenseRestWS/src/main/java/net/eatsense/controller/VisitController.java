@@ -11,10 +11,13 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.VisitRepository;
 import net.eatsense.representation.ToVisitDTO;
+import net.eatsense.validation.ValidationHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.googlecode.objectify.NotFoundException;
 
@@ -27,12 +30,14 @@ public class VisitController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final VisitRepository visitRepo;
 	private final LocationRepository locationRepo;
+	private final ValidationHelper validator;
 	
 	@Inject
-	public VisitController(VisitRepository allVisits, LocationRepository allLocations) {
+	public VisitController(VisitRepository allVisits, LocationRepository allLocations, ValidationHelper validator) {
 		super();
 		this.visitRepo = allVisits;
 		this.locationRepo = allLocations;
+		this.validator = validator;
 	}
 
 
@@ -82,7 +87,11 @@ public class VisitController {
 		else {
 			// Save an app user supplied location name
 			visit.setLocationName(visitData.getLocationName());
+			if(Strings.isNullOrEmpty(visit.getLocationName())) {
+				throw new ValidationException("locationName was empty");
+			}
 		}
+		
 		
 		visit.setLocationRefId(visitData.getLocationRefId());
 		visit.setVisitDate(visitData.getVisitDate());
