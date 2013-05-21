@@ -3,6 +3,7 @@ package net.eatsense.domain;
 import java.util.Date;
 
 import com.google.appengine.api.datastore.GeoPt;
+import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -52,7 +53,10 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setLocationName(String locationName) {
-		this.locationName = locationName;
+		if(!Objects.equal(this.locationName, locationName)) {
+			this.setDirty(true);
+			this.locationName = locationName;
+		}
 	}
 
 	public Key<Business> getLocation() {
@@ -60,7 +64,10 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setLocation(Key<Business> location) {
-		this.location = location;
+		if(!Objects.equal(this.location, location)) {
+			this.setDirty(true);
+			this.location = location;
+		}
 	}
 
 	public String getLocationRefId() {
@@ -68,7 +75,10 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setLocationRefId(String locationRefId) {
-		this.locationRefId = locationRefId;
+		if(!Objects.equal(this.locationRefId, locationRefId)) {
+			this.setDirty(true);
+			this.locationRefId = locationRefId;
+		}
 	}
 
 	public String getComment() {
@@ -76,7 +86,10 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setComment(String comment) {
-		this.comment = comment;
+		if(!Objects.equal(this.comment, comment)) {
+			this.setDirty(true);
+			this.comment = comment;
+		}
 	}
 
 	public Date getCreatedOn() {
@@ -84,7 +97,10 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setCreatedOn(Date createdOn) {
-		this.createdOn = createdOn;
+		if(!Objects.equal(this.createdOn, createdOn)) {
+			this.setDirty(true);
+			this.createdOn = createdOn;
+		}
 	}
 
 	public Date getVisitDate() {
@@ -92,7 +108,10 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setVisitDate(Date visitDate) {
-		this.visitDate = visitDate;
+		if(!Objects.equal(this.visitDate, visitDate)) {
+			this.setDirty(true);
+			this.visitDate = visitDate;
+		}
 	}
 
 	public GeoPt getGeoLocation() {
@@ -100,6 +119,9 @@ public class Visit extends GenericEntity<Visit> {
 	}
 
 	public void setGeoLocation(GeoPt geoLocation) {
-		this.geoLocation = geoLocation;
+		if(!Objects.equal(this.geoLocation, geoLocation)) {
+			this.setDirty(true);
+			this.geoLocation = geoLocation;
+		}
 	}
 }

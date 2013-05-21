@@ -1,9 +1,142 @@
 package net.eatsense.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Date;
+
+import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
+import net.eatsense.domain.Visit;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.LocationRepository;
+import net.eatsense.persistence.VisitRepository;
+import net.eatsense.representation.ToVisitDTO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+import com.googlecode.objectify.NotFoundException;
+
+/**
+ * Manages Visit logic and processes, like retrieving, creating and updating of Visit entities in the datastore.
+ * @author Nils Weiher
+ *
+ */
 public class VisitController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final VisitRepository visitRepo;
+	private final LocationRepository locationRepo;
 	
+	@Inject
+	public VisitController(VisitRepository allVisits, LocationRepository allLocations) {
+		super();
+		this.visitRepo = allVisits;
+		this.locationRepo = allLocations;
+	}
+
+
+	/**
+	 * Create Visit entity, fill with the supplied data and save in the datastore.
+	 * 
+	 * @param account Must be valid user account;
+	 * @param visitData
+	 * @return New {@link Visit} with id field set.
+	 */
+	public Visit createVisit(Account account, ToVisitDTO visitData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(visitData , "visitData was null");
+		
+		Visit visit = visitRepo.newEntity();
+		visit.setCreatedOn(new Date());
+		visit.setAccount(account.getKey());
+		
+		return updateVisit(visit, visitData);
+	}
+	
+	/**
+	 * Update fields of a Visit entity with the supplied data.
+	 * Save the entity if dirty.
+	 * 
+	 * @param visit
+	 * @param visitData
+	 * @return
+	 */
+	public Visit updateVisit(Visit visit, ToVisitDTO visitData) {
+		checkNotNull(visit, "visit was null");
+		checkNotNull(visitData, "visitData was null");
+		
+		visit.setComment(visitData.getComment());
+		visit.setGeoLocation(visit.getGeoLocation());
+		
+		if(visitData.getLocationId() != null) {
+			// Link the visit to a cloobster location.
+			try {
+				visit.setLocation(locationRepo.getKey(visitData.getLocationId()));
+				Business location = locationRepo.getByKey(visit.getLocation());
+				visit.setLocationName(location.getName());
+			} catch (NotFoundException e) {
+				throw new ValidationException("Unknown locationId");				
+			}
+		}
+		else {
+			// Save an app user supplied location name
+			visit.setLocationName(visitData.getLocationName());
+		}
+		
+		visit.setLocationRefId(visitData.getLocationRefId());
+		visit.setVisitDate(visitData.getVisitDate());
+		
+		if(visit.isDirty())
+			visitRepo.saveOrUpdate(visit);
+		
+		return visit;
+	}
+	
+	/**
+	 * @param account
+	 * @param id
+	 * @return
+	 */
+	public Visit getVisit(Account account, long id) {
+		try {
+			return visitRepo.getById(account.getKey(), id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+	}
+	
+	/**
+	 * Shortcut method to retrieve and update a Visit entity from the store.
+	 * 
+	 * @param account
+	 * @param id
+	 * @param visitData
+	 * @return
+	 */
+	public Visit getAndUpdateVisit(Account account, long id, ToVisitDTO visitData) {
+		return updateVisit(getVisit(account, id), visitData);
+	}
+	
+	/**
+	 * Return Visit entities of the supplied Account, sorted by creation date.
+	 * 
+	 * @param account
+	 * @param start 
+	 * @param limit 
+	 * @return
+	 */
+	public Iterable<Visit> getVisitsSorted(Account account, int start, int limit) {
+		checkNotNull(account, "account was null");
+		
+		return visitRepo.belongingToAccountSortedByVisitAndCreationDate(account.getKey(), start, limit);
+	}
+	
+	/**
+	 * Delete Visit entity with the supplied id from the store.
+	 * No exception if the entity did not exist.
+	 */
+	public void deleteVisit(Account account, long id) {
+		visitRepo.delete(visitRepo.getKey(account.getKey(), id));
+	}
 }
