@@ -1022,6 +1022,29 @@ public class LocationController {
 		
 		return location;
 	}
+	
+	/**
+	 * Retrieve the location data for a given QR-code.
+	 * 
+	 * @param spotCode
+	 * @return
+	 */
+	public Business getLocationBySpotCode(String spotCode) {
+		Spot spot = spotRepo.getByProperty("barcode", spotCode);
+		if(spot== null) {
+			throw new NotFoundException("Unknown spotCode");
+		}
+		
+		Business location;
+		try {
+			location = locationRepo.getByKey(spot.getBusiness());
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Unable to retrieve {} for Spot (id={})", spot.getBusiness(), spot.getId());
+			throw new NotFoundException();
+		}
+		
+		return location;
+	}
 
 	/**
 	 * @param location Business entity 

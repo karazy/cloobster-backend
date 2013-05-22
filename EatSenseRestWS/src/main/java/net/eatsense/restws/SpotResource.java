@@ -9,6 +9,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
@@ -27,16 +28,22 @@ public class SpotResource {
 	@Context
 	HttpServletRequest servletRequest;
 
+	private final LocationController locationCtrl;
+
 	@Inject
-	public SpotResource(CheckInController checkInCtr) {
+	public SpotResource(CheckInController checkInCtr, LocationController locationCtrl) {
 		super();
 		this.checkInCtr = checkInCtr;
+		this.locationCtrl = locationCtrl;
 	}
 	
 	@GET
-	public String getSpot(@QueryParam("demo") boolean isDemo) {
+	public String getSpot(@QueryParam("demo") boolean isDemo, @QueryParam("locationId") Long locationId) {
 		if(isDemo)
 			return System.getProperty("net.karazy.spots.demo.barcode");
+		else if(locationId != null){
+			return null;
+		}
 		else {
 			throw new NotFoundException();
 		}

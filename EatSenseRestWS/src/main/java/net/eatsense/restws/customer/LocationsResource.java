@@ -1,17 +1,26 @@
 package net.eatsense.restws.customer;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import net.eatsense.controller.LocationController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.exceptions.IllegalAccessException;
 import net.eatsense.filter.HttpMethods;
 import net.eatsense.persistence.LocationRepository;
+import net.eatsense.representation.LocationProfileDTO;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.ResourceContext;
@@ -32,10 +41,25 @@ public class LocationsResource{
 
 	@Context
 	HttpServletRequest servletRequest;
+
+	private final LocationController locationCtrl;
 	
 	@Inject
-	public LocationsResource(LocationRepository repo) {
+	public LocationsResource(LocationRepository repo, LocationController locationCtrl) {
 		this.businessRepo = repo;
+		this.locationCtrl = locationCtrl;
+	}
+	
+	@GET
+	@Produces("application/json; charset=utf-8")
+	public List<LocationProfileDTO> getBusinesses(@QueryParam("spotCode") String spotCode) {
+		
+		try {
+			return ImmutableList.of(new LocationProfileDTO(locationCtrl.getLocationBySpotCode(spotCode)));
+		} catch (net.eatsense.exceptions.NotFoundException e) {
+			// Return empty collection if no business found for this code.
+			return ImmutableList.of();
+		}
 	}
 
 	@Path("{businessId}")

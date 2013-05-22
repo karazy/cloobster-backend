@@ -100,7 +100,7 @@ public class VisitController {
 			}
 		}
 		
-		
+		visit.setLocationCity(visitData.getLocationCity());
 		visit.setLocationRefId(visitData.getLocationRefId());
 		visit.setVisitDate(visitData.getVisitDate());
 		

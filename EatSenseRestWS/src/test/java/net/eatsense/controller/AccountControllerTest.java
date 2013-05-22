@@ -122,8 +122,7 @@ public class AccountControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		injector = Guice.createInjector(new EatSenseDomainModule(),
-				new ValidationModule());
+		injector = Guice.createInjector(new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
 				validator, facebookService, imageCtrl, accessTokenRepo, eventBus, profileRepo, checkInRepo);

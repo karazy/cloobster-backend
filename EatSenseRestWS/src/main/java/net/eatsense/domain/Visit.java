@@ -1,6 +1,9 @@
 package net.eatsense.domain;
 
 import java.util.Date;
+import java.util.List;
+
+import net.eatsense.representation.ImageDTO;
 
 import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Objects;
@@ -25,6 +28,8 @@ public class Visit extends GenericEntity<Visit> {
 	private Key<Business> location;
 	
 	private String locationRefId;
+	private String locationCity;
+	
 	
 	@Unindexed
 	private String comment;
@@ -34,7 +39,9 @@ public class Visit extends GenericEntity<Visit> {
 	private Date visitDate;
 	
 	private GeoPt geoLocation;
-			
+	
+	private List<ImageDTO> images;
+	
 	@Override
 	public Key<Visit> getKey() {
 		return Key.create(account, Visit.class, getId());
@@ -123,5 +130,24 @@ public class Visit extends GenericEntity<Visit> {
 			this.setDirty(true);
 			this.geoLocation = geoLocation;
 		}
+	}
+
+	public String getLocationCity() {
+		return locationCity;
+	}
+
+	public void setLocationCity(String locationCity) {
+		if(!Objects.equal(this.locationCity, locationCity)) {
+			this.setDirty(true);
+			this.locationCity = locationCity;
+		}
+	}
+
+	public List<ImageDTO> getImages() {
+		return images;
+	}
+
+	public void setImages(List<ImageDTO> images) {
+		this.images = images;
 	}
 }
