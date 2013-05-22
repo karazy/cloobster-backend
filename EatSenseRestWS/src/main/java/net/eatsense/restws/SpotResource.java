@@ -38,12 +38,9 @@ public class SpotResource {
 	}
 	
 	@GET
-	public String getSpot(@QueryParam("demo") boolean isDemo, @QueryParam("locationId") Long locationId) {
+	public String getSpot(@QueryParam("demo") boolean isDemo) {
 		if(isDemo)
 			return System.getProperty("net.karazy.spots.demo.barcode");
-		else if(locationId != null){
-			return null;
-		}
 		else {
 			throw new NotFoundException();
 		}
@@ -58,7 +55,11 @@ public class SpotResource {
 	@GET
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
-	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
+	public SpotDTO getSpot(@PathParam("barcode") String barcode,  @QueryParam("locationId") Long locationId) {
+		if(locationId != null){	
+			return locationCtrl.getWelcomeSpot(locationId);
+		}
+
 		boolean checkInResume = servletRequest.getAttribute("net.eatsense.domain.CheckIn") != null;
 		return checkInCtr.getSpotInformation(barcode, checkInResume );
 	}

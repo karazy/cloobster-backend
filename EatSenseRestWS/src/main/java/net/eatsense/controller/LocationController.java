@@ -1045,6 +1045,35 @@ public class LocationController {
 		
 		return location;
 	}
+	
+	/**
+	 * @param locationId
+	 * @return
+	 */
+	public SpotDTO getWelcomeSpot(long locationId) {
+		if(locationId == 0) {
+			throw new ValidationException("locationId was 0");
+		}
+		
+		Key<Business> locationKey = locationRepo.getKey(locationId);
+		Business location;
+		try {
+			location = locationRepo.getByKey(locationKey);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Not found: {}", locationKey);			
+			throw new NotFoundException("Unknown locationId");
+		}
+		
+		Spot spot = spotRepo.belongingToLocationAndWelcomeSpot(locationKey);
+		
+		if(spot == null) {
+			logger.error("Welcome spot not found for {}", locationKey);
+			throw new NotFoundException("No welcome spot found");
+		}
+		
+		Area area = areaRepo.getByKey(spot.getArea());
+		return new SpotDTO(spot, location, area);
+	}
 
 	/**
 	 * @param location Business entity 
