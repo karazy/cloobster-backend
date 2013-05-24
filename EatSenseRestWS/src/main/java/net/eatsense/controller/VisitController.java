@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
 
+import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Visit;
@@ -32,13 +33,15 @@ public class VisitController {
 	private final VisitRepository visitRepo;
 	private final LocationRepository locationRepo;
 	private final ValidationHelper validator;
+	private final ImageController imageCtrl;
 	
 	@Inject
-	public VisitController(VisitRepository allVisits, LocationRepository allLocations, ValidationHelper validator) {
+	public VisitController(VisitRepository allVisits, LocationRepository allLocations, ValidationHelper validator, ImageController imageCtrl) {
 		super();
 		this.visitRepo = allVisits;
 		this.locationRepo = allLocations;
 		this.validator = validator;
+		this.imageCtrl = imageCtrl;
 	}
 
 
@@ -57,7 +60,7 @@ public class VisitController {
 		visit.setCreatedOn(new Date());
 		visit.setAccount(account.getKey());
 		
-		return updateVisit(visit, visitData);
+		return updateVisit(account, visit, visitData);
 	}
 	
 	/**
@@ -68,7 +71,7 @@ public class VisitController {
 	 * @param visitData
 	 * @return
 	 */
-	public Visit updateVisit(Visit visit, ToVisitDTO visitData) {
+	public Visit updateVisit(Account account, Visit visit, ToVisitDTO visitData) {
 		checkNotNull(visit, "visit was null");
 		checkNotNull(visitData, "visitData was null");
 		
@@ -100,6 +103,14 @@ public class VisitController {
 			}
 		}
 		
+		if(visitData.getImage() != null) {
+			UpdateImagesResult result = imageCtrl.updateImages(account, visit.getImages(), visitData.getImage());
+			if(result.isDirty()) {
+				visit.setImages(result.getImages());
+				visit.setDirty(true);
+			}
+		}
+				
 		visit.setLocationCity(visitData.getLocationCity());
 		visit.setLocationRefId(visitData.getLocationRefId());
 		visit.setVisitDate(visitData.getVisitDate());
@@ -132,7 +143,7 @@ public class VisitController {
 	 * @return
 	 */
 	public Visit getAndUpdateVisit(Account account, long id, ToVisitDTO visitData) {
-		return updateVisit(getVisit(account, id), visitData);
+		return updateVisit(account, getVisit(account, id), visitData);
 	}
 	
 	/**

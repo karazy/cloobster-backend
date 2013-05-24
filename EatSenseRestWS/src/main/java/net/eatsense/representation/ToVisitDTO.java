@@ -23,6 +23,8 @@ public class ToVisitDTO {
 	
 	private String imageUrl;
 	
+	private ImageDTO image;
+	
 	private String comment;
 	
 	private Date createdOn;
@@ -46,9 +48,11 @@ public class ToVisitDTO {
 		this.comment = visit.getComment();
 		this.createdOn = visit.getCreatedOn();
 		this.visitDate = visit.getVisitDate();
-		if(visit.getImages() != null && !visit.getImages().isEmpty())
+		if(visit.getImages() != null && !visit.getImages().isEmpty()) {
 			this.imageUrl = visit.getImages().get(0).getUrl();
-		
+			this.image = visit.getImages().get(0);
+		}
+			
 		if(visit.getGeoLocation() != null) {
 			this.geoLat = visit.getGeoLocation().getLatitude();
 			this.geoLong = visit.getGeoLocation().getLongitude();
@@ -141,6 +145,14 @@ public class ToVisitDTO {
 
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
+	}
+
+	public ImageDTO getImage() {
+		return image;
+	}
+
+	public void setImage(ImageDTO image) {
+		this.image = image;
 	}
 
 	public final static Function<Visit, ToVisitDTO> toDTO = 
