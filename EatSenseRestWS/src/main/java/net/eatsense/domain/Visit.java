@@ -3,6 +3,8 @@ package net.eatsense.domain;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Embedded;
+
 import net.eatsense.representation.ImageDTO;
 
 import com.google.appengine.api.datastore.GeoPt;
@@ -40,6 +42,8 @@ public class Visit extends GenericEntity<Visit> {
 	
 	private GeoPt geoLocation;
 	
+	@Embedded
+	@Unindexed
 	private List<ImageDTO> images;
 	
 	@Override
