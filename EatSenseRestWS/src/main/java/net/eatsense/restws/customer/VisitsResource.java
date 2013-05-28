@@ -63,4 +63,10 @@ public class VisitsResource {
 		visitCtrl.deleteVisit(account, visitId);
 	}
 	
+	@DELETE
+	@Path("{visitId}/image")
+	public void deleteVisitImage(@PathParam("visitId") long visitId) {
+		visitCtrl.deleteVisitImage(account, visitId);
+	}
+	
 }

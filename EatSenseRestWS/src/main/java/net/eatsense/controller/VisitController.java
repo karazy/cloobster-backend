@@ -104,6 +104,7 @@ public class VisitController {
 		}
 		
 		if(visitData.getImage() != null) {
+			visitData.getImage().setId("image");
 			UpdateImagesResult result = imageCtrl.updateImages(account, visit.getImages(), visitData.getImage());
 			if(result.isDirty()) {
 				visit.setImages(result.getImages());
@@ -166,5 +167,25 @@ public class VisitController {
 	 */
 	public void deleteVisit(Account account, long id) {
 		visitRepo.delete(visitRepo.getKey(account.getKey(), id));
+	}
+
+
+	/**
+	 * Remove the assigned image from a Visit entity
+	 * Also delete the blobstore file.
+	 * 
+	 * @param account
+	 * @param visitId
+	 */
+	public void deleteVisitImage(Account account, long visitId) {
+		checkNotNull(account, "account was null");
+		
+		Visit visit = getVisit(account, visitId);
+		UpdateImagesResult result = imageCtrl.removeImage("image", visit.getImages());
+		
+		if(result.isDirty()) {
+			visit.setImages(result.getImages());
+			visitRepo.saveOrUpdate(visit);
+		}
 	}
 }
