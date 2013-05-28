@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import javax.validation.constraints.NotNull;
 
 import net.eatsense.domain.Company;
-import net.eatsense.domain.Spot;
 
 import org.apache.bval.constraints.NotEmpty;
 

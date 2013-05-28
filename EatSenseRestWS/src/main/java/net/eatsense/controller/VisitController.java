@@ -103,8 +103,7 @@ public class VisitController {
 			}
 		}
 		
-		if(visitData.getImage() != null) {
-			visitData.getImage().setId("image");
+		if(visitData.getImage() != null) {			
 			UpdateImagesResult result = imageCtrl.updateImages(account, visit.getImages(), visitData.getImage());
 			if(result.isDirty()) {
 				visit.setImages(result.getImages());
@@ -181,7 +180,7 @@ public class VisitController {
 		checkNotNull(account, "account was null");
 		
 		Visit visit = getVisit(account, visitId);
-		UpdateImagesResult result = imageCtrl.removeImage("image", visit.getImages());
+		UpdateImagesResult result = imageCtrl.removeImage(0, visit.getImages());
 		
 		if(result.isDirty()) {
 			visit.setImages(result.getImages());
