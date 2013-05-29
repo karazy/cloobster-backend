@@ -11,6 +11,7 @@ import net.eatsense.domain.Visit;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.VisitRepository;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.ToVisitDTO;
 import net.eatsense.validation.ValidationHelper;
 
@@ -81,6 +82,7 @@ public class VisitController {
 			try {
 				visit.setGeoLocation(new GeoPt(visitData.getGeoLat(), visitData.getGeoLong()));
 			} catch (IllegalArgumentException e) {
+				logger.error("Illegal value for geoLat or geoLong", e);
 				throw new ValidationException("Illegal value for geoLat or geoLong.");
 			}
 		}
@@ -91,7 +93,16 @@ public class VisitController {
 				visit.setLocation(locationRepo.getKey(visitData.getLocationId()));
 				Business location = locationRepo.getByKey(visit.getLocation());
 				visit.setLocationName(location.getName());
+				if(location.getImages() != null) {
+					for (ImageDTO i : location.getImages()) {
+		    			if(i.getId().equals("logo")) {
+		    				visit.setLocationLogoUrl(i.getUrl());
+		    			}
+					}
+				}
+				
 			} catch (NotFoundException e) {
+				logger.error("Unknown locationId", e);
 				throw new ValidationException("Unknown locationId");				
 			}
 		}
@@ -99,6 +110,7 @@ public class VisitController {
 			// Save an app user supplied location name
 			visit.setLocationName(visitData.getLocationName());
 			if(Strings.isNullOrEmpty(visit.getLocationName())) {
+				logger.error("locationName was empty");
 				throw new ValidationException("locationName was empty");
 			}
 		}
@@ -114,6 +126,7 @@ public class VisitController {
 		visit.setLocationCity(visitData.getLocationCity());
 		visit.setLocationRefId(visitData.getLocationRefId());
 		visit.setVisitDate(visitData.getVisitDate());
+		
 		
 		if(visit.isDirty())
 			visitRepo.saveOrUpdate(visit);

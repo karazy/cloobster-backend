@@ -29,6 +29,9 @@ public class Visit extends GenericEntity<Visit> {
 	
 	private Key<Business> location;
 	
+	@Unindexed 
+	private String locationLogoUrl;
+	
 	private String locationRefId;
 	private String locationCity;
 	
@@ -153,5 +156,16 @@ public class Visit extends GenericEntity<Visit> {
 
 	public void setImages(List<ImageDTO> images) {
 		this.images = images;
+	}
+
+	public String getLocationLogoUrl() {
+		return locationLogoUrl;
+	}
+
+	public void setLocationLogoUrl(String locationLogoUrl) {
+		if(!Objects.equal(this.locationLogoUrl, locationLogoUrl)) {
+			this.setDirty(true);
+			this.locationLogoUrl = locationLogoUrl;
+		}
 	}
 }

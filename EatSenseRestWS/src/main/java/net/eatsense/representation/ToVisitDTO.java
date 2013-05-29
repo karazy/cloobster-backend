@@ -48,8 +48,8 @@ public class ToVisitDTO {
 		this.comment = visit.getComment();
 		this.createdOn = visit.getCreatedOn();
 		this.visitDate = visit.getVisitDate();
-		if(visit.getImages() != null && !visit.getImages().isEmpty()) {
-			this.imageUrl = visit.getImages().get(0).getUrl();
+		this.imageUrl = visit.getLocationLogoUrl();
+		if(visit.getImages() != null && !visit.getImages().isEmpty()) {			
 			this.image = visit.getImages().get(0);
 		}
 			
