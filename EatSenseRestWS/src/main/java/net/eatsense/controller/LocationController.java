@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -507,6 +508,16 @@ public class LocationController {
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
 		business.setIncomingOrderNotifcationEnabled(businessData.isIncomingOrderNotificationEnabled());
+		
+		if(businessData.getGeoLat() != null && businessData.getGeoLong() != null) {
+			try {
+				business.setGeoLocation(new GeoPt(businessData.getGeoLat(), businessData.getGeoLong()));
+			} catch (IllegalArgumentException e) {
+				logger.error("Illegal value for geoLat or geoLong", e);
+				throw new ValidationException("Illegal value for geoLat or geoLong.");
+			}
+		}
+		
 		
 		if(businessData.getFeatures() != null) {
 			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
