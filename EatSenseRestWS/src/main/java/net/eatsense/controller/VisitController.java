@@ -115,7 +115,7 @@ public class VisitController {
 			}
 		}
 		UpdateImagesResult updateImagesResult;
-		if(visitData.getImage() != null || Strings.isNullOrEmpty(visitData.getImage().getBlobKey())) {			
+		if(visitData.getImage() != null && !Strings.isNullOrEmpty(visitData.getImage().getBlobKey())) {			
 			updateImagesResult = imageCtrl.updateImages(account, visit.getImages(), visitData.getImage());
 			visit.setImages(updateImagesResult.getImages());
 		}
