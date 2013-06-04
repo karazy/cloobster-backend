@@ -114,13 +114,18 @@ public class VisitController {
 				throw new ValidationException("locationName was empty");
 			}
 		}
-		
-		if(visitData.getImage() != null) {			
-			UpdateImagesResult result = imageCtrl.updateImages(account, visit.getImages(), visitData.getImage());
-			if(result.isDirty()) {
-				visit.setImages(result.getImages());
-				visit.setDirty(true);
-			}
+		UpdateImagesResult updateImagesResult;
+		if(visitData.getImage() != null || Strings.isNullOrEmpty(visitData.getImage().getBlobKey())) {			
+			updateImagesResult = imageCtrl.updateImages(account, visit.getImages(), visitData.getImage());
+			visit.setImages(updateImagesResult.getImages());
+		}
+		else {
+			logger.info("No image supplied. Removing image from visit ...");
+			updateImagesResult = imageCtrl.removeImage(0, visit.getImages());
+		}
+		if(updateImagesResult.isDirty()) {
+			logger.info("Added/removed image.");
+			visit.setDirty(true);
 		}
 				
 		visit.setLocationCity(visitData.getLocationCity());
