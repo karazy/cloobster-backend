@@ -381,12 +381,14 @@ public class AccountController {
 			logger.info("Valid access token recieved for {}", jsonMe.optString("name"));
 			account = accountRepo.getByProperty( "facebookUid", facebookUid);
 			if(account == null) {
+				logger.error("unknown facebookUid=" + facebookUid);
 				throw new IllegalAccessException("unregistered facebook user " + jsonMe.optString("name"));
 			}
 			else
 				return account;
 		}
 		else {
+			
 			throw new IllegalAccessException("facebook uid not belonging to access token, token owner: " + jsonMe.optString("name"));
 		}
 	}
