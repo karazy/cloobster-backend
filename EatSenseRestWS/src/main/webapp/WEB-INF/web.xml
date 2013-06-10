@@ -14,7 +14,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
         <mime-type>text/cache-manifest</mime-type>
 	</mime-mapping>
 	
-	</filter>
+	<filter>
     	<display-name>IOsUrlSchemeFilter</display-name>
     	<filter-name>IOsUrlSchemeFilter</filter-name>
     	<filter-class>net.eatsense.filter.IOsUrlSchemeFilter</filter-class>
