@@ -1,7 +1,6 @@
 package net.eatsense;
 
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import net.eatsense.auth.AccessTokenFilter;
@@ -17,10 +16,8 @@ import net.eatsense.controller.InfoPageController;
 import net.eatsense.controller.MailController;
 import net.eatsense.controller.MessageController;
 import net.eatsense.controller.SubscriptionController;
-import net.eatsense.domain.Subscription;
 import net.eatsense.exceptions.CapabilityDisabledExceptionMapper;
 import net.eatsense.exceptions.ServiceExceptionMapper;
-import net.eatsense.filter.ApiVersionFilter;
 import net.eatsense.filter.ApiVersionFilterFactory;
 import net.eatsense.filter.CacheResponseFilter;
 import net.eatsense.filter.SuffixFilter;
@@ -35,20 +32,19 @@ import net.eatsense.restws.NicknameResource;
 import net.eatsense.restws.SpotResource;
 import net.eatsense.restws.UploadsResource;
 import net.eatsense.restws.administration.AdminResource;
-import net.eatsense.restws.administration.ServicesResource;
 import net.eatsense.restws.business.AccountsResource;
-import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.CompaniesResource;
+import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.SubscriptionTemplatesResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
+import net.eatsense.restws.customer.VisitsResource;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
 import org.owasp.html.AttributePolicy;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -71,7 +67,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
-import com.googlecode.objectify.Objectify;
 import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
@@ -134,6 +129,7 @@ public class EatSenseGuiceServletContextListener extends
 						bind(ProfilesResource.class);
 						bind(SubscriptionTemplatesResource.class);
 						bind(CounterTasksResource.class);
+						bind(VisitsResource.class);
 						
 						// Create Configuration binding to automatically load configuration if needed.
 						bind(Configuration.class).toProvider(ConfigurationProvider.class);
@@ -142,7 +138,8 @@ public class EatSenseGuiceServletContextListener extends
 						bind(Queue.class).annotatedWith(Names.named("counter-writebacks")).toInstance(QueueFactory.getQueue("counter-writebacks"));
 												
 						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*tasks/counter(.)*",
+						serveRegex("(.)*c/visits(.)*",
+								"(.)*tasks/counter(.)*",
 								"(.)*b/subscriptions(.)*",
 								"(.)*c/profiles(.)*",
 								"(.)*c/accounts(.)*",

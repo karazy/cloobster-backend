@@ -16,6 +16,7 @@ import net.eatsense.representation.ImageDTO;
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -150,6 +151,8 @@ public class Business extends GenericEntity<Business> {
 	
 	@Unindexed
 	private Set<String> disabledFeatures = Sets.newHashSet();
+	
+	private GeoPt geoLocation;
 	
 	public Business() {
 	}
@@ -440,6 +443,17 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.incomingOrderNotifcationEnabled, incomingOrderNotifcationEnabled)) {
 			this.setDirty(true);
 			this.incomingOrderNotifcationEnabled = incomingOrderNotifcationEnabled;
+		}
+	}
+
+	public GeoPt getGeoLocation() {
+		return geoLocation;
+	}
+
+	public void setGeoLocation(GeoPt geoLocation) {
+		if(!Objects.equal(this.geoLocation, geoLocation)) {
+			this.setDirty(true);
+			this.geoLocation = geoLocation;
 		}
 	}
 }

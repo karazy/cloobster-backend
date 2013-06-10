@@ -13,6 +13,15 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
         <extension>manifest</extension>
         <mime-type>text/cache-manifest</mime-type>
 	</mime-mapping>
+
+    <display-name>IOsUrlSchemeFilter</display-name>
+    <filter-name>IOsUrlSchemeFilter</filter-name>
+    <filter-class>net.eatsense.filter.IOsUrlSchemeFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>IOsUrlSchemeFilter</filter-name>
+    <url-pattern>/x/*</url-pattern>
+  </filter-mapping
 	<filter>
 		<filter-name>guiceFilter</filter-name>
 		<filter-class>com.google.inject.servlet.GuiceFilter</filter-class>

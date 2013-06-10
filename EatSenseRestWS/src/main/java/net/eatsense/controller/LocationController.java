@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -507,6 +508,16 @@ public class LocationController {
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
 		business.setIncomingOrderNotifcationEnabled(businessData.isIncomingOrderNotificationEnabled());
+		
+		if(businessData.getGeoLat() != null && businessData.getGeoLong() != null) {
+			try {
+				business.setGeoLocation(new GeoPt(businessData.getGeoLat(), businessData.getGeoLong()));
+			} catch (IllegalArgumentException e) {
+				logger.error("Illegal value for geoLat or geoLong", e);
+				throw new ValidationException("Illegal value for geoLat or geoLong.");
+			}
+		}
+		
 		
 		if(businessData.getFeatures() != null) {
 			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
@@ -1021,6 +1032,58 @@ public class LocationController {
 		}
 		
 		return location;
+	}
+	
+	/**
+	 * Retrieve the location data for a given QR-code.
+	 * 
+	 * @param spotCode
+	 * @return
+	 */
+	public Business getLocationBySpotCode(String spotCode) {
+		Spot spot = spotRepo.getByProperty("barcode", spotCode);
+		if(spot== null) {
+			throw new NotFoundException("Unknown spotCode");
+		}
+		
+		Business location;
+		try {
+			location = locationRepo.getByKey(spot.getBusiness());
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Unable to retrieve {} for Spot (id={})", spot.getBusiness(), spot.getId());
+			throw new NotFoundException();
+		}
+		
+		return location;
+	}
+	
+	/**
+	 * @param locationId
+	 * @return
+	 */
+	public SpotDTO getWelcomeSpot(long locationId) {
+		if(locationId == 0) {
+			throw new ValidationException("locationId was 0");
+		}
+		
+		Key<Business> locationKey = locationRepo.getKey(locationId);
+		Business location;
+		try {
+			location = locationRepo.getByKey(locationKey);
+		} catch (com.googlecode.objectify.NotFoundException e) {
+			logger.error("Not found: {}", locationKey);			
+			throw new NotFoundException("Unknown locationId");
+		}
+		
+		Spot spot = spotRepo.belongingToLocationAndWelcomeSpot(locationKey);
+		
+		if(spot == null) {
+			logger.error("Welcome spot not found for {}", locationKey);
+			throw new NotFoundException("No welcome spot found");
+		}
+		
+		Area area = areaRepo.getByKey(spot.getArea());
+		return new SpotDTO(spot, location, area);
 	}
 
 	/**

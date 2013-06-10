@@ -49,7 +49,7 @@ public class LocationProfileDTO extends LocationDTO {
 	 * @param business - Business entity to copy the data from.
 	 */
 	public LocationProfileDTO(Business business) {
-		super(business);		
+		super(business);
 		this.address = business.getAddress();
 		this.city = business.getCity();
 		// Convert the images List to a Map, use id as the key.

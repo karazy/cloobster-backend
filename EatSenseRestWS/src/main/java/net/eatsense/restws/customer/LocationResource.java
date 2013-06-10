@@ -234,7 +234,6 @@ public class LocationResource {
 	@GET
 	@Path("areas")
 	@Produces("application/json; charset=UTF-8")
-	@RolesAllowed(Role.GUEST)
 	public List<AreaDTO> getAreas() {
 		return locationCtrl.getAreas(business.getKey(),true, true);
 	}

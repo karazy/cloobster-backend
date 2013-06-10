@@ -1,6 +1,5 @@
 package net.eatsense.restws;
 
-import java.awt.image.CropImageFilter;
 import java.util.Collection;
 
 import javax.annotation.security.RolesAllowed;
@@ -17,17 +16,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.appengine.api.utils.SystemProperty;
-import com.google.inject.Inject;
-
 import net.eatsense.auth.Role;
 import net.eatsense.controller.UploadController;
 import net.eatsense.domain.Account;
 import net.eatsense.representation.ImageCropDTO;
 import net.eatsense.representation.ImageUploadDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.utils.SystemProperty;
+import com.google.inject.Inject;
 
 @Path("uploads")
 public class UploadsResource {
