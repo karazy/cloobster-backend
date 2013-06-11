@@ -19,7 +19,7 @@ public class EatSenseDomainModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(LocationsResource.class);
+		
 		bind(Spot.class);
 		bind(ObjectifyService.class);
 	}

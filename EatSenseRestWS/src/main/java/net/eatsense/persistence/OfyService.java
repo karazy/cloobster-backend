@@ -27,6 +27,7 @@ import net.eatsense.domain.Product;
 import net.eatsense.domain.Request;
 import net.eatsense.domain.Spot;
 import net.eatsense.domain.Subscription;
+import net.eatsense.domain.Visit;
 import net.eatsense.domain.translation.InfoPageT;
 import net.eatsense.templates.Template;
 
@@ -81,6 +82,7 @@ public class OfyService {
 		register(Subscription.class);
 		register(Spot.class);
 		register(Template.class);
+		register(Visit.class);
 	}
 	
 	@Inject

@@ -9,6 +9,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import net.eatsense.controller.CheckInController;
+import net.eatsense.controller.LocationController;
 import net.eatsense.representation.SpotDTO;
 
 import com.google.inject.Inject;
@@ -27,10 +28,13 @@ public class SpotResource {
 	@Context
 	HttpServletRequest servletRequest;
 
+	private final LocationController locationCtrl;
+
 	@Inject
-	public SpotResource(CheckInController checkInCtr) {
+	public SpotResource(CheckInController checkInCtr, LocationController locationCtrl) {
 		super();
 		this.checkInCtr = checkInCtr;
+		this.locationCtrl = locationCtrl;
 	}
 	
 	@GET
@@ -51,7 +55,11 @@ public class SpotResource {
 	@GET
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
-	public SpotDTO getSpot(@PathParam("barcode") String barcode) {
+	public SpotDTO getSpot(@PathParam("barcode") String barcode,  @QueryParam("locationId") Long locationId) {
+		if(locationId != null){	
+			return locationCtrl.getWelcomeSpot(locationId);
+		}
+
 		boolean checkInResume = servletRequest.getAttribute("net.eatsense.domain.CheckIn") != null;
 		return checkInCtr.getSpotInformation(barcode, checkInResume );
 	}

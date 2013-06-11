@@ -205,6 +205,40 @@ public class ImageController {
 	}
 	
 	/**
+	 * Remove an image from the list and from the blobstore.
+	 * 
+	 * @param index Index of the image in the list
+	 * @param images Collection of images
+	 *  
+	 * @return
+	 */
+	public UpdateImagesResult removeImage(int index, List<ImageDTO> images) {
+		if( images == null || images.isEmpty()) {
+			return new UpdateImagesResult(images, false, null);
+		}
+		
+		boolean dirty = false;
+		ImageDTO removedImage = null;
+		
+		if(index < images.size()) {
+			dirty = true;
+			ImageDTO imageDTO = images.remove(index);
+			
+			if(!Strings.isNullOrEmpty(imageDTO.getBlobKey())) {
+				BlobKey blobKey = new BlobKey(imageDTO.getBlobKey());
+				blobstoreService.delete(blobKey);
+				imagesService.deleteServingUrl(blobKey);
+			}
+			else {
+				logger.warn("No BlobKey saved for image (id={}), probably test data.", imageDTO.getId());
+			}
+			removedImage = imageDTO;
+		}
+		
+		return new UpdateImagesResult(images, dirty, removedImage);
+	}
+	
+	/**
 	 * @param originalImages
 	 * @return
 	 */

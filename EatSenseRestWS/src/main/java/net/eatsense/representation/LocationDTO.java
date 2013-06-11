@@ -39,6 +39,9 @@ public class LocationDTO {
 	private boolean inactiveCheckInNotificationActive;
 	private boolean isIncomingOrderNotificationEnabled;
 	
+	private Float geoLong;
+	private Float geoLat;
+	
 	public LocationDTO() {
 		super();
 	}
@@ -62,6 +65,10 @@ public class LocationDTO {
 		this.pendingSubscriptionId = business.getPendingSubscription() != null ? business.getPendingSubscription().getId() : null;
 		this.inactiveCheckInNotificationActive = business.isInactiveCheckInNotificationActive();
 		this.isIncomingOrderNotificationEnabled = business.isIncomingOrderNotifcationEnabled();
+		if(business.getGeoLocation() != null) {
+			this.setGeoLat(business.getGeoLocation().getLatitude());
+			this.setGeoLong(business.getGeoLocation().getLongitude());
+		}
 	}
 	
 	public String getName() {
@@ -180,4 +187,21 @@ public class LocationDTO {
 			boolean isIncomingOrderNotificationEnabled) {
 		this.isIncomingOrderNotificationEnabled = isIncomingOrderNotificationEnabled;
 	}
+
+	public Float getGeoLong() {
+		return geoLong;
+	}
+
+	public void setGeoLong(Float geoLong) {
+		this.geoLong = geoLong;
+	}
+
+	public Float getGeoLat() {
+		return geoLat;
+	}
+
+	public void setGeoLat(Float geoLat) {
+		this.geoLat = geoLat;
+	}
+
 }

@@ -35,12 +35,12 @@ public class DownloadResource {
 	private HttpServletRequest servletRequest;
 	
 	
-	protected final String ANDROID = "Android";	
-	protected final String IPHONE = "iPhone";
-	protected final String IPOD = "iPod";
-	protected final String IPAD = "iPad";
-	protected final String GOOGLE_PLAY = "http://play.google.com/store/apps/details?id=net.karazy.cloobster";
-	protected final String APPLE_APP_STORE = "http://itunes.apple.com/us/app/cloobster/id532351667?l=de&ls=1&mt=8";
+	public final static String ANDROID = "Android";	
+	public final static String IPHONE = "iPhone";
+	public final static String IPOD = "iPod";
+	public final static String IPAD = "iPad";
+	public final static String GOOGLE_PLAY = "http://play.google.com/store/apps/details?id=net.karazy.cloobster";
+	public final static String APPLE_APP_STORE = "http://itunes.apple.com/us/app/cloobster/id532351667?l=de&ls=1&mt=8";
 
 	protected final CounterService counters;
 	
