@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.eatsense.AppEngineServiceModule;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
@@ -39,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -46,7 +48,7 @@ import com.google.inject.Injector;
 public class OrderControllerTest {
 	
 	private final LocalServiceTestHelper helper =
-	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+	        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig(), new LocalMemcacheServiceTestConfig());
 	    
 	    private Injector injector;
 	    private OrderController orderCtrl;
@@ -73,7 +75,7 @@ public class OrderControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule(), new AppEngineServiceModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		rr = injector.getInstance(LocationRepository.class);

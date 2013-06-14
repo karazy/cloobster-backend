@@ -3,6 +3,7 @@ package net.eatsense.controller.bill;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import net.eatsense.AppEngineServiceModule;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.CheckInController;
@@ -71,7 +72,7 @@ public class CalculateTotalPriceTest {
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule(), new AppEngineServiceModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		billCtrl = injector.getInstance(BillController.class);

@@ -6,8 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
-import java.util.List;
 
+import net.eatsense.AppEngineServiceModule;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.controller.BillController;
 import net.eatsense.controller.CheckInController;
@@ -21,7 +21,6 @@ import net.eatsense.domain.embedded.CheckInStatus;
 import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.PaymentMethod;
 import net.eatsense.domain.embedded.ProductOption;
-import net.eatsense.exceptions.BillFailureException;
 import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.BillRepository;
 import net.eatsense.persistence.LocationRepository;
@@ -82,7 +81,7 @@ public class UpdateBillTest {
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule(), new AppEngineServiceModule());
 		orderCtrl = injector.getInstance(OrderController.class);
 		checkinCtrl = injector.getInstance(CheckInController.class);
 		billCtrl = injector.getInstance(BillController.class);
