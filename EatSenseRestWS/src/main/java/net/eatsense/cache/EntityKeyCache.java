@@ -61,7 +61,6 @@ public class EntityKeyCache {
 		
 		String cacheKey = buildCacheKey(identifier, clazz); 
 		
-		logger.debug("cacheKey={}", cacheKey);
 		// Get the raw key saved under this identifier
 		// 1. try from memory
 		// 2. call memcache
