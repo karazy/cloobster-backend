@@ -15,16 +15,16 @@
 	<datastore-index kind="CheckIn" ancestor="false" source="manual">
         <property name="account" direction="asc"/>
         <property name="status" direction="asc"/>
-        <property name="__key__" direction="desc"/>
+        <property name="checkInTime" direction="desc"/>
     </datastore-index>
 	<datastore-index kind="CheckIn" ancestor="false" source="manual">
         <property name="status" direction="asc"/>
-        <property name="__key__" direction="desc"/>
+        <property name="checkInTime" direction="desc"/>
     </datastore-index>
     <datastore-index kind="CheckIn" ancestor="false" source="manual">
         <property name="area" direction="asc"/>
         <property name="status" direction="asc"/>
-        <property name="__key__" direction="desc"/>
+        <property name="checkInTime" direction="desc"/>
     </datastore-index>
 	<datastore-index kind="Order" ancestor="true" source="manual">
         <property name="status" direction="asc"/>

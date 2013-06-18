@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.validation.Validator;
 
+import net.eatsense.AppEngineServiceModule;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
@@ -72,6 +73,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Maps;
@@ -155,7 +157,7 @@ public class BusinessControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule(), new AppEngineServiceModule());
 		
 		
 		checkinCtrl = injector.getInstance(CheckInController.class);

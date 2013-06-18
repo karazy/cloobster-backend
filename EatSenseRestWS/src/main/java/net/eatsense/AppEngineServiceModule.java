@@ -6,6 +6,8 @@ import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.inject.AbstractModule;
@@ -33,5 +35,10 @@ public class AppEngineServiceModule extends AbstractModule {
 	@Provides
 	public ImagesService providesImagesService() {
 		return ImagesServiceFactory.getImagesService();
+	}
+	
+	@Provides
+	public MemcacheService providesMemcacheService() {
+		return MemcacheServiceFactory.getMemcacheService();
 	}
 }
