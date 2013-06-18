@@ -67,7 +67,6 @@ public class EntityKeyCache {
 		Key datastoreKey = cache.getIfPresent(cacheKey);
 		
 		if(datastoreKey == null) {
-			logger.debug("not in memory. try memcache ...");
 			datastoreKey =  (com.google.appengine.api.datastore.Key) memcache.get(cacheKey);
 		}
 		
