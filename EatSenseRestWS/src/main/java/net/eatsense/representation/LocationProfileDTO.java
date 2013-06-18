@@ -70,7 +70,10 @@ public class LocationProfileDTO extends LocationDTO {
 		
 		for (String featureName : Business.AVAILABLE_FEATURES) {
 			getFeatures().put(featureName, !business.getDisabledFeatures().contains(featureName));
-		}	
+		}
+		for (String featureName : Business.AVAILABLE_OPTIONAL_FEATURES) {
+			getFeatures().put(featureName, business.getEnabledOptionalFeatures().contains(featureName));
+		}
 	}
 
 	public String getCity() {

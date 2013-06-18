@@ -522,10 +522,7 @@ public class LocationController {
 		if(businessData.getFeatures() != null) {
 			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
 				String featureName = featureEntry.getKey();
-				if(!Business.AVAILABLE_FEATURES.contains(featureName)) {
-					logger.warn("Unknown feature name: {}", featureName);
-				}
-				else {
+				if(Business.AVAILABLE_FEATURES.contains(featureName)) {
 					if(featureEntry.getValue()) {
 						if(business.getDisabledFeatures().remove(featureName))
 							business.setDirty(true);
@@ -533,7 +530,21 @@ public class LocationController {
 					else {
 						if(business.getDisabledFeatures().add(featureName))
 							business.setDirty(true);
+					}					
+				}
+				else if(Business.AVAILABLE_OPTIONAL_FEATURES.contains(featureName)) {
+					if(featureEntry.getValue()) {
+						if(business.getEnabledOptionalFeatures().add(featureName))
+							business.setDirty(true);
 					}
+					else {
+						if(business.getEnabledOptionalFeatures().remove(featureName)) {
+							business.setDirty(true);
+						}
+					}
+				}
+				else {
+					logger.warn("Unknown feature name: {}", featureName);
 				}
 			}
 		}
