@@ -2,51 +2,25 @@ package net.eatsense.persistence;
 
 import java.util.List;
 
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
-import com.google.inject.Inject;
-import com.googlecode.objectify.Key;
-
+import net.eatsense.cache.EntityKeyCache;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Spot;
 
+import com.google.inject.Inject;
+import com.googlecode.objectify.Key;
+
 public class CheckInRepository extends GenericRepository<CheckIn> {
 	final static Class<CheckIn> entityClass = CheckIn.class;
-	
-	private final MemcacheService memcache;
+	private final EntityKeyCache keyCache;
 	
 	@Inject
-	public CheckInRepository(MemcacheService memcache) {
+	public CheckInRepository(EntityKeyCache keyCache) {
 		super(CheckIn.class);
-		this.memcache = memcache;
+		this.keyCache = keyCache;
 	}
 	
-	private String putCachedKeyByUserId(String userId, Key<CheckIn> key) {
-		String cacheKey = "checkIn_"+ userId;
-		// Put the raw datastore key only, we dont need the typed key
-		
-		logger.debug("Putting to cache (key={})", cacheKey);
-		memcache.put(cacheKey, key.getRaw(),null, SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
-		
-		return cacheKey;
-	}
-	
-	private Key<CheckIn> getCachedKeyByUserId(String userId) {
-		String key = "checkIn_"+ userId; 
-		logger.debug("cacheKey={}", key);
-		// Get the raw key saved under this identifier
-		com.google.appengine.api.datastore.Key checkInKey =  (com.google.appengine.api.datastore.Key) memcache.get(key);
-		
-		if(checkInKey != null) {
-			return Key.typed(checkInKey);
-		}
-		else {
-			return null;
-		}
-	}
-	
+
 	/**
 	 * Uses memcache to translate userId to a datastore key for the corresponding checkIn. 
 	 * 
@@ -54,14 +28,14 @@ public class CheckInRepository extends GenericRepository<CheckIn> {
 	 * @return <code>null</code> if not found, or {@link CheckIn} stored under this userId
 	 */
 	public CheckIn getByUserId(String userId) {
-		Key<CheckIn> checkInKey = getCachedKeyByUserId(userId);
+		Key<CheckIn> checkInKey = keyCache.get(userId, CheckIn.class);
 		if(checkInKey != null) {
-			logger.debug("Cached key found {}",checkInKey);
+			logger.debug("from cache. key={}",checkInKey);
 			return ofy().find(checkInKey);
 		}
 		else {
-			logger.debug("No cached key found. Querying datastore ...");
-			CheckIn checkIn = ofy().query(CheckIn.class).filter("userId", userId).get();			
+			logger.debug("userId not cached. querying datastore ...");
+			CheckIn checkIn = ofy().query(CheckIn.class).filter("userId", userId).get();
 			return checkIn;
 		}
 	}
@@ -78,7 +52,8 @@ public class CheckInRepository extends GenericRepository<CheckIn> {
 	@Override
 	public Key<CheckIn> saveOrUpdate(CheckIn obj) {
 		Key<CheckIn> key = super.saveOrUpdate(obj);
-		putCachedKeyByUserId(obj.getUserId(), key);
+		keyCache.put(obj.getUserId(), key);
+		
 		return key; 
 	}
 
