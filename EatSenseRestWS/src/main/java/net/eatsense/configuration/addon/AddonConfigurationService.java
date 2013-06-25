@@ -1,14 +1,16 @@
-package net.eatsense.configuration.external;
+package net.eatsense.configuration.addon;
 
 import java.util.Map;
+
+import com.google.appengine.api.datastore.Key;
 
 public interface AddonConfigurationService {
 	
 	public AddonConfiguration get(String addonName);
 	
-	public AddonConfiguration get(String addonName, com.googlecode.objectify.Key<?> parent);
+	public AddonConfiguration get(String addonName, Key parent);
 	
-	public void put(AddonConfiguration config);
+	public Key put(AddonConfiguration config);
 	
 	public void create(String addonName, Map<String, String> configMap);
 }

@@ -1,4 +1,4 @@
-package net.eatsense.configuration.external;
+package net.eatsense.configuration.addon;
 
 import java.util.Map;
 
@@ -13,6 +13,10 @@ public class AddonConfiguration {
 	private Map<String, String> configMap = Maps.newHashMap();
 	private Key parent;
 	private Key key;
+	
+	protected AddonConfiguration(String name) {
+		this.addonName = name;
+	}
 	
 	public Key getKey() {
 		if(Strings.isNullOrEmpty(addonName)) {

@@ -161,39 +161,14 @@ public class EatSenseGuiceServletContextListener extends
 								"(.)*_ah/channel/disconnected(.)*",
 								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
 					}
-					@Provides
-					public ChannelService providesChannelService() {						
-						return ChannelServiceFactory.getChannelService();
-					}
-					@Provides
-					public URLFetchService providesURLFetchService() {
-						return URLFetchServiceFactory.getURLFetchService();
-					}
-					@Provides
-					public BlobstoreService providesBlobStoreService() {
-						return BlobstoreServiceFactory.getBlobstoreService();
-					}
-					@Provides
-					public ImagesService providesImagesService() {
-						return ImagesServiceFactory.getImagesService();
-					}
-					
-					@Provides
-					public FileService providesFileService() {
-						return FileServiceFactory.getFileService();
-					}
-					
-					@Provides
-					public MemcacheService providesMemcacheService() {
-						return MemcacheServiceFactory.getMemcacheService();
-					}
 					
 					@Provides
 					public PolicyFactory providesHTMLPolicyFactory() {
 						return new HtmlPolicyBuilder().allowCommonBlockElements().allowCommonInlineFormattingElements()
 				         .allowAttributes("style").matching(AttributePolicy.IDENTITY_ATTRIBUTE_POLICY).globally().toFactory();
 					}
-				}, new ValidationModule());
+					
+				}, new ValidationModule(), new AppEngineServiceModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
