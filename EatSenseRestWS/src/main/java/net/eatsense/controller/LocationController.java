@@ -595,8 +595,8 @@ public class LocationController {
 			// Only save if we updated or added an image to the list.
 			business.setImages(result.getImages());
 			locationRepo.saveOrUpdate(business);
-		}
-
+		}	
+		
 		return result.getUpdatedImage();
 	}
 	

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink" 
+  xsi:schemaLocation="http://multicodes.giatamedia.com/xsd/1.0/property.xsd">
+  <property giataId="23051" lastUpdate="2009-03-05T11:41:22+01:00">
+    <name>The Westin Grand Berlin</name>
+    <city cityId="2791">Berlin</city>
+    <country>DE</country>
+    <addresses>
+      <address>
+        <addressLine addressLineNumber="1">Friedrichstraße
+          158-164</addressLine>
+        <addressLine addressLineNumber="2">10117 Berlin</addressLine>
+        <street>Friedrichstraße</street>
+        <streetNumber>158-164</streetNumber>
+        <cityName>Berlin</cityName>
+        <postalCode>10117</postalCode>
+        <country>DE</country>
+      </address>
+    </addresses>
+    <phones>
+      <phone tech="voice">+493020270</phone>
+      <phone tech="fax">+493020273362</phone>
+    </phones>
+    <emails>
+      <email>info@westin-grand.com</email>
+    </emails>
+    <urls>
+      <url>http://aktuelles.westin.de/berlin/1/111</url>
+    </urls>
+    <geoCodes>
+      <geoCode accuracy="address">
+        <latitude>52.515819335265</latitude>
+        <longitude>13.388605713844</longitude>
+      </geoCode>
+    </geoCodes>
+    <propertyCodes>
+      <provider providerCode="hotelbeds" providerType="gds">
+        <code>
+          <value>5855</value>
+        </code>
+      </provider>
+      <provider providerCode="gta" providerType="gds">
+        <code>
+          <value name="Country Code">DE</value>
+          <value name="City Code">BER</value>
+          <value name="Hotel Code">WES</value>
+        </code>
+        <code>
+          <value name="Country Code">DE</value>
+          <value name="City Code">BER</value>
+          <value name="Hotel Code">WES1</value>
+        </code>
+      </provider>
+      <provider providerCode="AME" providerType="tourOperator">
+        <code>
+          <value>901235</value>
+        </code>
+      </provider>
+      <provider providerCode="ATI" providerType="tourOperator">
+        <code>
+          <value>BER10057</value>
+        </code>
+        <code>
+          <value>BER10057YCU35</value>
+        </code>
+      </provider>
+    </propertyCodes>
+    <chains>
+      <chain chainId="1135" chainName="Westin" chainCode="wi" />
+    </chains>
+    <ghgml xlink:href="http://ghgml.giatamedia.com/webservice/rest/1.0/items/23051" />
+  </property>
+</properties>
