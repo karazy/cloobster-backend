@@ -10,7 +10,9 @@ public interface AddonConfigurationService {
 	
 	public AddonConfiguration get(String addonName, Key parent);
 	
+	public Iterable<AddonConfiguration> getAll(Key parent, boolean onlyKeys);
+	
 	public Key put(AddonConfiguration config);
 	
-	public void create(String addonName, Map<String, String> configMap);
+	public AddonConfiguration create(String addonName, Map<String, String> configMap);
 }

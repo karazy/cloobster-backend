@@ -1,7 +1,11 @@
 package net.eatsense.configuration.addon;
 
-import java.util.Map;
+import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Strings;
@@ -12,10 +16,42 @@ public class AddonConfiguration {
 	private String addonName;
 	private Map<String, String> configMap = Maps.newHashMap();
 	private Key parent;
+	
+	/**
+	 * Create AddonConfiguration instance from a datastore entity
+	 * 
+	 * @param entity
+	 */
+	protected AddonConfiguration(Entity entity) {
+		if(entity == null || !entity.getKind().equals(KIND))
+			return;
+		addonName = entity.getKey().getName();
+		parent = entity.getParent();
+		
+		setFrom(entity);		
+	}
+	
+	public String getAddonName() {
+		return addonName;
+	}
+
+	public void setAddonName(String addonName) {
+		this.addonName = addonName;
+	}
+
+	public Key getParent() {
+		return parent;
+	}
+
+	public void setParent(Key parent) {
+		this.parent = parent;
+	}
+
 	private Key key;
 	
-	protected AddonConfiguration(String name) {
+	protected AddonConfiguration(String name, Map<String, String> configMap) {
 		this.addonName = name;
+		this.configMap = configMap;
 	}
 	
 	public Key getKey() {
@@ -35,7 +71,31 @@ public class AddonConfiguration {
 		
 		return key;
 	}
-
+	
+	public Entity buildEntity() {
+		Entity entity;
+		if(parent != null)
+			entity = new Entity(KIND, addonName, parent);
+		else
+			entity = new Entity(KIND, addonName);
+		
+		for (Entry<String, String> entry : configMap.entrySet()) {
+			if(entry.getValue() != null) {
+				entity.setUnindexedProperty(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		return entity;
+	}
+	
+	public void setFrom(Entity entity) {
+		checkArgument(entity.getKind().equals(KIND), "entity must be of kind: " + KIND);
+		
+		for (Entry<String, Object> property : entity.getProperties().entrySet()) {
+			configMap.put(property.getKey(), (String) property.getValue());
+		}
+	}
+	
 	public Map<String, String> getConfigMap() {
 		return configMap;
 	}
