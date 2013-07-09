@@ -9,6 +9,8 @@ import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
+import net.eatsense.configuration.addon.AddonConfigurationService;
+import net.eatsense.configuration.addon.AddonConfigurationServiceImpl;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.CounterController;
 import net.eatsense.controller.DashboardController;
@@ -50,6 +52,7 @@ import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.images.ImagesService;
@@ -65,8 +68,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.googlecode.objectify.cache.CachingDatastoreService;
+import com.googlecode.objectify.cache.CachingDatastoreServiceFactory;
 import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
@@ -136,6 +142,8 @@ public class EatSenseGuiceServletContextListener extends
 						
 						// Add binding for counter task queue
 						bind(Queue.class).annotatedWith(Names.named("counter-writebacks")).toInstance(QueueFactory.getQueue("counter-writebacks"));
+						
+						bind(AddonConfigurationService.class).to(AddonConfigurationServiceImpl.class);
 												
 						//serve("*").with(GuiceContainer.class, parameters);
 						serveRegex("(.)*c/visits(.)*",

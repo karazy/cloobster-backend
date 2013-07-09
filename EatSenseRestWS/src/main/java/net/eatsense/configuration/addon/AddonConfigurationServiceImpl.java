@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Strings;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * Loads and stores configuration Objects for feature configuration
@@ -33,7 +34,7 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	private final DatastoreService datastore;
 	
 	@Inject
-	public AddonConfigurationServiceImpl(DatastoreService datastore) {
+	public AddonConfigurationServiceImpl(@Named("caching") DatastoreService  datastore) {
 		this.datastore = datastore;
 		
 	}
@@ -55,7 +56,7 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	@Override
 	public AddonConfiguration get(String addonName,
 			Key parent) {
-		Key key = KeyFactory.createKey(AddonConfiguration.KIND, addonName);
+		Key key = KeyFactory.createKey(parent,  AddonConfiguration.KIND, addonName);
 		
 		Entity entity; 
 		try {
@@ -69,7 +70,7 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	@Override
 	public Key put(AddonConfiguration config) {
 		checkNotNull(config, "config cannot be null");
-		checkArgument(Strings.isNullOrEmpty(config.getAddonName()), "config");
+		checkArgument(!Strings.isNullOrEmpty(config.getAddonName()), "config");
 		
 		Entity entity = config.buildEntity();
 						
@@ -78,7 +79,7 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 
 	@Override
 	public AddonConfiguration create(String addonName, Map<String, String> configMap) {
-		checkArgument(Strings.isNullOrEmpty(addonName), "addonName must not be null or empty");
+		checkArgument(!Strings.isNullOrEmpty(addonName), "addonName must not be null or empty");
 		checkNotNull(configMap, "configMap must not be null");
 		
 		return new AddonConfiguration(addonName, configMap);
