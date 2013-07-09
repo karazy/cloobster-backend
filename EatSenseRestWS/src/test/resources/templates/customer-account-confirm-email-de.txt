@@ -2,9 +2,11 @@
 
 Liebes cloobster Mitglied,
 
-haben Sie vielen Dank für Ihre Registrierung. Mit cloobster haben Sie Ihren Concierge immer dabei. Egal ob im Hotel oder Restaurant mit der App haben Sie jeder Zeit einen direkten Draht zu allen angebotenen Services.
+haben Sie vielen Dank für Ihre Registrierung. Mit cloobster haben Sie Ihre Lieblingsorte immer bei sich.
+Egal ob im Hotel, Restaurant oder Ihrem Lieblingsladen, mit cloobster haben Sie zu jeder Zeit Zugriff auf alle Informationen und Angebote.
 
-Sollte Ihr Lieblingshotel- oder Restaurant nicht anbieten, dann fragen Sie doch nach oder geben Sie uns einen Tipp. Wir werden dann Kontakt aufnehmen.
+Sollte Ihr Lieblingshotel, Restaurant oder Laden nicht auf cloobster vertreten sein, dann fragen Sie doch nach oder geben Sie uns einen Tipp. 
+Wir werden dann Kontakt aufnehmen.
 
 Um Ihre Registrierung zu bestätigen, folgen Sie bitte diesem Link:
 {0}
