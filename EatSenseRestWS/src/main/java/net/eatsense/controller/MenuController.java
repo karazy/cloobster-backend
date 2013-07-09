@@ -36,6 +36,7 @@ import net.eatsense.representation.Transformer;
 import net.eatsense.validation.CreationChecks;
 import net.eatsense.validation.ValidationHelper;
 
+import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,9 +62,10 @@ public class MenuController {
 	private final ChoiceRepository choiceRepo;
 	private final ImageController imageCtrl;
 	private final AreaRepository areaRepo;
+	private final PolicyFactory sanitizer;
 
 	@Inject
-	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl) {
+	public MenuController(AreaRepository areaRepo, MenuRepository mr, ProductRepository pr, ChoiceRepository cr, Transformer trans, ValidationHelper validator, ImageController imageCtrl,  PolicyFactory sanitizer ) {
 		this.areaRepo = areaRepo;
 		this.choiceRepo = cr;
 		this.menuRepo = mr;
@@ -71,6 +73,7 @@ public class MenuController {
 		this.transform = trans;
 		this.imageCtrl = imageCtrl;
 		this.validator = validator;
+		this.sanitizer = sanitizer;
 	}
 	
 	/**
@@ -472,7 +475,8 @@ public class MenuController {
 		if(productData.getMenuId() != null)
 			product.setMenu(menuRepo.getKey(product.getBusiness(), productData.getMenuId()));
 		
-		product.setLongDesc(productData.getLongDesc());
+		// Sanitize input 
+		product.setLongDesc(sanitizer.sanitize(productData.getLongDesc()));
 		product.setName(productData.getName());
 		product.setOrder(productData.getOrder());
 		product.setPrice(productData.getPriceMinor());
