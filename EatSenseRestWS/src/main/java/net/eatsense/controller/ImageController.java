@@ -157,6 +157,86 @@ public class ImageController {
 		
 		return new UpdateImagesResult(images, dirty, image);
 	}
+	
+	/**
+	 * Update the existing image or add a new to the given list,
+	 * also manages deletion of old blobstore file and update of serving url.
+	 * 
+	 * @param account - Account that uploaded the image.
+	 * @param images - List of images to update.
+	 * @param updatedImage - Image object to update or create.
+	 * @return Result object, {@link UpdateImagesResult}.
+	 */
+	public UpdateImagesResult updateImages(Account account, List<ImageDTO> images, List<ImageDTO> updatedImages) {
+		checkNotNull(updatedImages, "updatedImages was null ");
+		
+		for (ImageDTO imageDTO : updatedImages) {
+			checkArgument(!Strings.isNullOrEmpty(imageDTO.getId()), "updatedImage id was null or empty");
+		}
+		
+		
+		ImageDTO image = null;
+		// Check if there already images.
+		if(images == null) {
+			images = new ArrayList<ImageDTO>();
+		}
+		
+		boolean dirty = false;
+		
+		for (ImageDTO updatedImage : updatedImages) {
+			
+			// Look if we already have an image saved under this id.
+			for (ImageDTO imageDTO : images) {
+				if(imageDTO.getId().equals(updatedImage.getId()))
+					image = imageDTO;
+			}
+			// It's an unknown image, create a new one.
+			if( image == null ) {
+				image = new ImageDTO();
+				image.setId(updatedImage.getId());
+				images.add(image);
+			}
+			
+			// Check if the blobKey has changed.
+			if(!Strings.isNullOrEmpty(updatedImage.getBlobKey()) && !updatedImage.getBlobKey().equals(image.getBlobKey())) {
+				if(image.getBlobKey() != null) {
+					blobstoreService.delete(new BlobKey(image.getBlobKey()));
+				}
+				image.setBlobKey(updatedImage.getBlobKey());
+				// Check if we got an image serving url supplied.
+				if(!Strings.isNullOrEmpty(updatedImage.getUrl()) && !updatedImage.getUrl().equals(image.getUrl())) {
+					// Use the supplied url.
+					image.setUrl(updatedImage.getUrl());
+				}
+				else {
+					// Create new serving url from the new blob key.
+					image.setUrl(createServingUrl(image.getBlobKey()));
+				}
+				if(account.getImageUploads() == null || account.getImageUploads().isEmpty()) {
+					throw new ValidationException("No uploaded images for Account"+ account.getId());
+				}
+				else {
+					boolean found = false;
+					for (Iterator<ImageUploadDTO> iterator = account.getImageUploads().iterator(); iterator.hasNext();) {
+						ImageUploadDTO upload = iterator.next();
+						if(upload.getBlobKey().equals(updatedImage.getBlobKey())) {
+							// Found the corresponding upload, delete the object.
+							found = true;
+							dirty = true;
+							iterator.remove();
+							
+						}
+					}
+					if(!found) {
+						throw new ValidationException("No image with that blobKey was uploaded by account "+ account.getId());
+					}
+				}
+			}
+		}
+		accountRepo.saveOrUpdate(account);
+		
+		return new UpdateImagesResult(images, dirty, image);
+	}
 
 	/**
 	 * @param image
