@@ -233,7 +233,8 @@ public class ImageController {
 				}
 			}
 		}
-		accountRepo.saveOrUpdate(account);
+		if(dirty)
+			accountRepo.saveOrUpdate(account);
 		
 		return new UpdateImagesResult(images, dirty, image);
 	}

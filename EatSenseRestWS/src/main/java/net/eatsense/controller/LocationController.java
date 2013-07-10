@@ -589,7 +589,7 @@ public class LocationController {
 		return result.getUpdatedImage();
 	}
 	
-	public void updateBusinessImages(Account account, Business business, List<ImageDTO> images) {
+	public List<ImageDTO> updateBusinessImages(Account account, Business business, List<ImageDTO> images) {
 		checkNotNull(account, "account was null");
 		checkNotNull(business, "business was null");
 		checkNotNull(images, "images was null ");
@@ -612,7 +612,7 @@ public class LocationController {
 			locationRepo.saveOrUpdate(business);
 		}
 
-//		return result.getUpdatedImage();
+		return result.getImages();
 	}
 	
 

@@ -136,8 +136,8 @@ public class LocationResource {
 	@Consumes("application/json; charset=UTF-8")
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
-	public void createMultipleImages(@PathParam("id") String imageId, List<ImageDTO> images) {
-		businessCtrl.updateBusinessImages(account, business, images);
+	public List<ImageDTO> createMultipleImages(@PathParam("id") String imageId, List<ImageDTO> images) {
+		return businessCtrl.updateBusinessImages(account, business, images);
 	}
 	
 	
