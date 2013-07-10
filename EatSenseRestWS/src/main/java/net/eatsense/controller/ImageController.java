@@ -175,7 +175,6 @@ public class ImageController {
 		}
 		
 		
-		ImageDTO image = null;
 		// Check if there already images.
 		if(images == null) {
 			images = new ArrayList<ImageDTO>();
@@ -184,6 +183,7 @@ public class ImageController {
 		boolean dirty = false;
 		
 		for (ImageDTO updatedImage : updatedImages) {
+			ImageDTO image = null;
 			
 			// Look if we already have an image saved under this id.
 			for (ImageDTO imageDTO : images) {
@@ -236,7 +236,7 @@ public class ImageController {
 		if(dirty)
 			accountRepo.saveOrUpdate(account);
 		
-		return new UpdateImagesResult(images, dirty, image);
+		return new UpdateImagesResult(images, dirty, null);
 	}
 
 	/**
