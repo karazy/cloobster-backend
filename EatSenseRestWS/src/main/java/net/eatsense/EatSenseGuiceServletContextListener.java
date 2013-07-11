@@ -188,12 +188,7 @@ public class EatSenseGuiceServletContextListener extends
 						return MemcacheServiceFactory.getMemcacheService();
 					}
 					
-					@Provides
-					public PolicyFactory providesHTMLPolicyFactory() {
-						return new HtmlPolicyBuilder().allowCommonBlockElements().allowCommonInlineFormattingElements()
-				         .allowAttributes("style").matching(AttributePolicy.IDENTITY_ATTRIBUTE_POLICY).globally().toFactory();
-					}
-				}, new ValidationModule());
+				}, new ValidationModule(), new HtmlSanitizerModule());
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);
 		
