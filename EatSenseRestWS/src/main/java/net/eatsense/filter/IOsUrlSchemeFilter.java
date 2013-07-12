@@ -1,6 +1,8 @@
 package net.eatsense.filter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -54,19 +56,50 @@ public class IOsUrlSchemeFilter implements Filter {
 			String requestUrl = url.toString();
 			
 			String redirectUrl = "http://www.cloobster.com/";
+			String downloadUrl = "http://www.cloobster.com/download";
 			
-			if (userAgent.contains(DownloadResource.ANDROID)
-					|| userAgent.contains(DownloadResource.IPHONE)
+			HttpServletResponse httpResponse = (HttpServletResponse) response;
+			
+			if (userAgent.contains(DownloadResource.IPHONE)
 					|| userAgent.contains(DownloadResource.IPAD)
 					|| userAgent.contains(DownloadResource.IPOD)) {
 				String suffix = requestUrl.substring(requestUrl
 						.indexOf(URL_PREFIX) + URL_PREFIX.length());
 				
 				redirectUrl = REDIRECT_URL_PREFIX + suffix;
+				
+				PrintWriter pw = httpResponse.getWriter();
+				StringBuffer html = new StringBuffer();
+				//generate a simple html page. tries to start cloobster via url scheme and given action. 
+				//if no handler is present, will redirect to download url to load the app
+				html.append("<!DOCTYPE html><html><head></head><body><script type='text/javascript'>");
+				html.append("setTimeout(function() {");
+				html.append("window.location = '"+downloadUrl+"';");
+				html.append("}, 100);");
+				html.append("window.location = '" + redirectUrl + "'");
+				html.append("</script></body></html>");
+				pw.print(html.toString());
+			} else if(userAgent.contains(DownloadResource.ANDROID)) {
+				String suffix = requestUrl.substring(requestUrl
+						.indexOf(URL_PREFIX) + URL_PREFIX.length());
+				
+				//Remove after next update. Android App will handle everything via download url
+				//if app is not installed, will redirect to store
+				//OLD URL
+				//redirectUrl = REDIRECT_URL_PREFIX + suffix;
+				redirectUrl = downloadUrl + "#" + suffix;
+//				httpResponse.sendRedirect(redirectUrl);
+				//use same approach like iOS. A sendRedirect won't work. But here we only need one url.
+				PrintWriter pw = httpResponse.getWriter();
+				StringBuffer html = new StringBuffer();
+				html.append("<!DOCTYPE html><html><head></head><body><script type='text/javascript'>");
+				html.append("window.location = '" + redirectUrl + "'");
+				html.append("</script></body></html>");
+				pw.print(html.toString());
+			} else {
+				httpResponse.sendRedirect(redirectUrl);
 			}
-
-			HttpServletResponse httpResponse = (HttpServletResponse) response;
-			httpResponse.sendRedirect(redirectUrl);
+			
 			logger.info("Redirecting to " + redirectUrl);
 			return;
 		}

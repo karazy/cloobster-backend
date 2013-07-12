@@ -51,7 +51,7 @@ public class ApiVersionFilterFactoryTest {
 		int[] versions = {1};
 		when(value.value()).thenReturn(versions );
 		when(am.getAnnotation(ApiVersion.class)).thenReturn(value );
-		when(am.getResource()).thenReturn(ar );
+		when(am.getResource()).thenReturn(ar);
 		
 		Assert.assertThat(factory.create(am), hasItem(any(ResourceFilter.class)));
 	}
