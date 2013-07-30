@@ -40,8 +40,8 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	}
 	
 	@Override
-	public AddonConfiguration get(String addonName) {
-		Key key = KeyFactory.createKey(AddonConfiguration.KIND, addonName);
+	public AddonConfiguration get(String name) {
+		Key key = KeyFactory.createKey(AddonConfiguration.KIND, name);
 		
 		Entity entity; 
 		try {
@@ -54,9 +54,9 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	}
 	
 	@Override
-	public AddonConfiguration get(String addonName,
+	public AddonConfiguration get(String name,
 			Key parent) {
-		Key key = KeyFactory.createKey(parent,  AddonConfiguration.KIND, addonName);
+		Key key = KeyFactory.createKey(parent,  AddonConfiguration.KIND, name);
 		
 		Entity entity; 
 		try {
@@ -78,11 +78,11 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	}
 
 	@Override
-	public AddonConfiguration create(String addonName, Map<String, String> configMap) {
-		checkArgument(!Strings.isNullOrEmpty(addonName), "addonName must not be null or empty");
+	public AddonConfiguration create(String name, Map<String, String> configMap) {
+		checkArgument(!Strings.isNullOrEmpty(name), "addonName must not be null or empty");
 		checkNotNull(configMap, "configMap must not be null");
 		
-		return new AddonConfiguration(addonName, configMap);
+		return new AddonConfiguration(name,null, configMap);
 	}
 
 	@Override
@@ -120,6 +120,16 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 				};
 			}
 		};
+	}
+
+	@Override
+	public AddonConfiguration create(String name, Key parent,
+			Map<String, String> configMap) {
+		checkArgument(!Strings.isNullOrEmpty(name), "addonName must not be null or empty");
+		checkNotNull(configMap, "configMap must not be null");
+		checkNotNull(parent, "parent must not be null");
+		
+		return new AddonConfiguration(name, parent, configMap);
 	}
 
 }

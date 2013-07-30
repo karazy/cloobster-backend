@@ -1,6 +1,7 @@
 package net.eatsense.restws.business;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +52,7 @@ public class LocationResource {
 	HttpServletRequest servletRequest;
 	
 	private Business business;
-	private LocationController businessCtrl;
+	private LocationController locationCtrl;
 	private Account account;
 	private final Provider<ChannelController> channelCtrlProvider;
 	private SpotController spotController;
@@ -68,7 +69,7 @@ public class LocationResource {
 	public LocationResource(LocationController businessCtrl, SpotController spotCtrl, Provider<ChannelController> channelCtrlProvider) {
 		super();
 		this.channelCtrlProvider = channelCtrlProvider;
-		this.businessCtrl = businessCtrl;
+		this.locationCtrl = businessCtrl;
 		this.spotController = spotCtrl;
 	}
 
@@ -79,7 +80,7 @@ public class LocationResource {
 		if(business == null)
 			throw new NotFoundException();
 		if(countSpots) {
-			businessCtrl.setSpotCount(business);
+			locationCtrl.setSpotCount(business);
 		}
 		return new LocationProfileDTO(business);
 	}
@@ -90,14 +91,14 @@ public class LocationResource {
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public LocationProfileDTO updateBusinessProfile(LocationProfileDTO businessData) {
 		//Update Business synchronizes data between the entity and transfer object.
-		businessCtrl.updateBusiness(business, businessData);
+		locationCtrl.updateBusiness(business, businessData);
 		return new LocationProfileDTO(business);
 	}
 	
 	@DELETE
 	@RolesAllowed({Role.COMPANYOWNER})
 	public void deleteBusiness() {
-		businessCtrl.trashBusiness(business, account);
+		locationCtrl.trashBusiness(business, account);
 	}
 	
 	
@@ -128,14 +129,14 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public ImageDTO updateOrCreateImage(@PathParam("id") String imageId, ImageDTO imageData) {
-		return businessCtrl.updateBusinessImage(account, business, imageData);
+		return locationCtrl.updateBusinessImage(account, business, imageData);
 	}
 	
 	@DELETE
 	@Path("images/{id}")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void removeImage(@PathParam("id") String imageId) {
-		if(!businessCtrl.removeBusinessImage(business, imageId)) {
+		if(!locationCtrl.removeBusinessImage(business, imageId)) {
 			throw new NotFoundException(String.format("No image found with id '%s'", imageId));
 		}
 	}
@@ -239,7 +240,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public List<SpotDTO> getSpots(@QueryParam("areaId") long areaId, @QueryParam("welcome") boolean welcome) {
-		return businessCtrl.getSpots(business.getKey(), areaId, welcome, false);
+		return locationCtrl.getSpots(business.getKey(), areaId, welcome, false);
 	}
 	
 	@Path("spotsdata")
@@ -248,7 +249,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO createSpot(SpotDTO spotData) {
-		return businessCtrl.createSpot(business.getKey(), spotData, false);
+		return locationCtrl.createSpot(business.getKey(), spotData, false);
 	}
 	
 	@Path("spotsdata/{spotId}")
@@ -257,7 +258,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO updateSpot(@PathParam("spotId") long spotId, SpotDTO spotData) {
-		return new SpotDTO(businessCtrl.updateSpot(businessCtrl.getSpot(business.getKey(), spotId), spotData));
+		return new SpotDTO(locationCtrl.updateSpot(locationCtrl.getSpot(business.getKey(), spotId), spotData));
 	}
 	
 	@Path("spotsdata")
@@ -281,7 +282,7 @@ public class LocationResource {
 	@DELETE
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void deleteSpot(@PathParam("spotId") long spotId) {
-		businessCtrl.trashSpot(businessCtrl.getSpot(business.getKey(), spotId), account);
+		locationCtrl.trashSpot(locationCtrl.getSpot(business.getKey(), spotId), account);
 	}
 	
 	@Path("spotsdata/{spotId}")
@@ -289,7 +290,7 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public SpotDTO getSpot(@PathParam("spotId") long spotId) {
-		return new SpotDTO(businessCtrl.getSpot(business.getKey(), spotId));
+		return new SpotDTO(locationCtrl.getSpot(business.getKey(), spotId));
 	}
 	
 	@Path("subscriptions")
@@ -330,4 +331,21 @@ public class LocationResource {
 		return resource;
 	}
 	
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@Path("configurations/{name}")
+	public Map<String, String> getConfiguration(@PathParam("name") String name){
+		return locationCtrl.getConfiguration(business, name);
+	}
+	
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@Path("configurations/{name}")
+	public Map<String, String> saveConfiguration(@PathParam("name") String name, Map<String, String> configMap){
+		return locationCtrl.saveConfiguration(business, name, configMap);
+	}
+		
 }

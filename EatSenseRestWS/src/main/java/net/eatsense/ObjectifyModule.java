@@ -16,6 +16,7 @@ public class ObjectifyModule extends AbstractModule {
 	@Provides
 	@Named("caching")
 	public DatastoreService providesCachingDatastoreService() {
+		
 		return CachingDatastoreServiceFactory.getDatastoreService();
 	}
 }

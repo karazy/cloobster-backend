@@ -40,6 +40,7 @@ public class LocationProfileDTO extends LocationDTO {
 	private boolean offlineEmailAlertActive;
 	
 	private Map<String, Boolean> features = Maps.newHashMap();
+	private Map<String, Map<String, String>> configuration;
 
 	public LocationProfileDTO() {
 		super();
@@ -162,6 +163,14 @@ public class LocationProfileDTO extends LocationDTO {
 
 	public void setFeatures(Map<String, Boolean> features) {
 		this.features = features;
+	}
+
+	public Map<String, Map<String, String>> getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(Map<String, Map<String, String>> configuration) {
+		this.configuration = configuration;
 	}
 
 	public final static Function<Business, LocationProfileDTO> toDTO = 

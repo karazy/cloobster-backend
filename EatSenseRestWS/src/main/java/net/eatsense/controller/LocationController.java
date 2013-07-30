@@ -15,6 +15,8 @@ import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.addon.AddonConfiguration;
+import net.eatsense.configuration.addon.AddonConfigurationService;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
@@ -94,6 +96,7 @@ public class LocationController {
 	private final Provider<Configuration> configProvider;
 	private FeedbackFormRepository feedbackRepo;
 	private final OfyService ofyService;
+	private final AddonConfigurationService addonConfig;
 	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
@@ -103,6 +106,7 @@ public class LocationController {
 			MenuRepository menuRepository,
 			FeedbackFormRepository feedbackRepository,
 			Provider<Configuration> configProvider,
+			AddonConfigurationService addonConfig,
 			OfyService ofyService) {
 		this.areaRepo = areaRepository;
 		this.menuRepo = menuRepository;
@@ -116,6 +120,7 @@ public class LocationController {
 		this.imageController = imageController;
 		this.configProvider = configProvider;
 		this.feedbackRepo = feedbackRepository;
+		this.addonConfig = addonConfig;
 		this.ofyService = ofyService;
 	}
 	
@@ -1114,5 +1119,48 @@ public class LocationController {
 	 */
 	private int countSpots(Key<Business> locationKey) {
 		return spotRepo.query().ancestor(locationKey).filter("trash", false).count();
+	}
+
+	/**
+	 * Load all configuration entities for this Location.
+	 * 
+	 * @param location
+	 * @return Map of configuration maps
+	 */
+	public Map<String, Map<String,String>> getConfigurationMaps(Business location) {
+		Map<String, Map<String,String>> allConfigMaps = Maps.newHashMap();
+		
+		Key<Business> locationKey = location.getKey();
+		Iterable<AddonConfiguration> configIter = addonConfig.getAll(locationKey.getRaw(), false);
+		
+		for (AddonConfiguration addonConfiguration : configIter) {
+			allConfigMaps.put(addonConfiguration.getAddonName(), addonConfiguration.getConfigMap());
+		}
+						
+		return allConfigMaps;
+	}
+
+	/**
+	 * @param name
+	 * @return
+	 */
+	public Map<String, String> getConfiguration(Business location, String name) {		
+		return addonConfig.get(name, location.getKey().getRaw()).getConfigMap();
+	}
+	
+
+	/**
+	 * @param business
+	 * @param name
+	 * @param configMap
+	 * @return
+	 */
+	public Map<String, String> saveConfiguration(Business business,
+			String name, Map<String, String> configMap) {
+		
+		AddonConfiguration config = addonConfig.create(name, business.getKey().getRaw(), configMap);
+		addonConfig.put(config);
+		
+		return config.getConfigMap();
 	}
 }

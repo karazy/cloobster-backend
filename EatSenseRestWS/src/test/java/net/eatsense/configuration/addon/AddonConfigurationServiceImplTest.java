@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -60,7 +61,7 @@ public class AddonConfigurationServiceImplTest {
 		entity.setUnindexedProperty("param1", "test1");
 		entity.setUnindexedProperty("param2", "test2");
 		
-		testConfig = new AddonConfiguration(testname, testConfigMap);
+		testConfig = new AddonConfiguration(testname,null, testConfigMap);
 		
 		datastore.put(entity);
 	}
@@ -86,7 +87,6 @@ public class AddonConfigurationServiceImplTest {
 
 	@Test
 	public void testGetAll() {
-		
 	}
 
 	@Test
@@ -95,13 +95,23 @@ public class AddonConfigurationServiceImplTest {
 		service.put(testConfig);
 		AddonConfiguration result = service.get(testConfig.getAddonName());
 		
-		assertThat(result.getConfigMap().get("param3"), is("test3"));		
+		assertThat(result.getConfigMap().get("param3"), is("test3"));
 	}
 
 	@Test
 	public void testCreate() {
 		AddonConfiguration result = service.create(testname, testConfigMap);
 		
+		assertThat(result.getAddonName(), is(testname));
+		assertThat(result.getConfigMap(), is(testConfigMap));
+	}
+	
+	@Test
+	public void testCreateWithParent() {
+		Key testParent = KeyFactory.createKey("Test", 1);
+		AddonConfiguration result = service.create(testname, testParent, testConfigMap);
+		
+		assertThat(result.getParent(), is(testParent));
 		assertThat(result.getAddonName(), is(testname));
 		assertThat(result.getConfigMap(), is(testConfigMap));
 	}

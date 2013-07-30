@@ -2,6 +2,7 @@ package net.eatsense.restws.customer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -90,6 +91,8 @@ public class LocationResource {
 		LocationProfileDTO businessDto = new LocationProfileDTO(business);
 		Subscription activeSubscription = subCtrl.getActiveSubscription(business);
 		businessDto.setBasic(activeSubscription != null ? activeSubscription.isBasic() : true);
+		Map<String, Map<String, String>> configMaps = locationCtrl.getConfigurationMaps(business);
+		businessDto.setConfiguration(configMaps);
 		return businessDto;
 	}
 	

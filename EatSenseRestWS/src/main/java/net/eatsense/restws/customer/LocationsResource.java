@@ -76,6 +76,7 @@ public class LocationsResource{
 				throw new IllegalAccessException("Can not modified trashed resource.");
 			}
 		}
+		
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CheckIn checkIn = (CheckIn)servletRequest.getAttribute("net.eatsense.domain.CheckIn");
 		
