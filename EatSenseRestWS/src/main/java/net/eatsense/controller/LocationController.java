@@ -589,6 +589,32 @@ public class LocationController {
 		return result.getUpdatedImage();
 	}
 	
+	public List<ImageDTO> updateBusinessImages(Account account, Business business, List<ImageDTO> images) {
+		checkNotNull(account, "account was null");
+		checkNotNull(business, "business was null");
+		checkNotNull(images, "images was null ");
+		
+		UpdateImagesResult result = null;
+		
+		for (ImageDTO imageDTO : images) {
+			checkArgument(!Strings.isNullOrEmpty(imageDTO.getId()),	"imageDTO id was null or empty");
+		}
+		
+//		UpdateImagesResult result = imageController.updateImages(account, business.getImages(), updatedImage);
+		
+//		for (ImageDTO imageDTO : images) {
+		result = imageController.updateImages(account, business.getImages(), images);
+//		}
+
+		if (result != null && result.isDirty()) {
+			// Only save if we updated or added an image to the list.
+			business.setImages(result.getImages());
+			locationRepo.saveOrUpdate(business);
+		}
+
+		return result.getImages();
+	}
+	
 
 	/**
 	 * Remove an image embedded in this Business entity.
