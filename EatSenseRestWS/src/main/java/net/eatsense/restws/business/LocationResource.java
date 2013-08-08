@@ -132,6 +132,17 @@ public class LocationResource {
 		return locationCtrl.updateBusinessImage(account, business, imageData);
 	}
 	
+	@PUT
+	@Path("images")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public List<ImageDTO> createMultipleImages(@PathParam("id") String imageId, List<ImageDTO> images) {
+		return locationCtrl.updateBusinessImages(account, business, images);
+	}
+	
+	
+	
 	@DELETE
 	@Path("images/{id}")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})

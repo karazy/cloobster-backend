@@ -1,9 +1,12 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,8 +22,8 @@ import net.eatsense.domain.embedded.OrderStatus;
 import net.eatsense.domain.embedded.ProductOption;
 import net.eatsense.exceptions.OrderFailureException;
 import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.ChoiceRepository;
+import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.MenuRepository;
 import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;

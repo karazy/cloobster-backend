@@ -21,6 +21,7 @@ import java.util.List;
 import javax.validation.Validator;
 
 import net.eatsense.EatSenseDomainModule;
+import net.eatsense.HtmlSanitizerModule;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.Choice;
 import net.eatsense.domain.Menu;
@@ -57,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
+import org.owasp.html.PolicyFactory;
 
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.datastore.Blob;
@@ -99,10 +101,12 @@ public class MenuControllerTest {
 	@Mock
 	private Key<Business> locationKey;
 
+	private PolicyFactory sanitizer;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
-		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule());
+		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule(), new HtmlSanitizerModule());
 		
 		rr = injector.getInstance(LocationRepository.class);
 		pr = injector.getInstance(ProductRepository.class);
@@ -111,7 +115,8 @@ public class MenuControllerTest {
 		spotRepo = injector.getInstance(SpotRepository.class);
 		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
 		trans = injector.getInstance(Transformer.class);
-		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl);
+		sanitizer = injector.getInstance(PolicyFactory.class);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl, sanitizer);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -127,8 +132,9 @@ public class MenuControllerTest {
 		
 		Transformer trans = mock(Transformer.class);
 		ValidationHelper validator = injector.getInstance(ValidationHelper.class);
+		sanitizer = injector.getInstance(PolicyFactory.class);
 		
-		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl);
+		ctr = new MenuController(areaRepo, mr, pr, cr, trans, validator, imageCtrl, sanitizer);
 	}
 
 	@After
@@ -804,6 +810,8 @@ public class MenuControllerTest {
 			
 		ProductDTO testProductData = getTestProductData();
 		when(mr.getKey(businessKey, testProductData.getMenuId())).thenReturn(menuKey);
+		String longDesc = "new longdesc";
+		testProductData.setLongDesc(longDesc + "<script> not good</script><a></a>");
 		
 		Product product = new Product();
 		product.setBusiness(businessKey);
@@ -819,8 +827,8 @@ public class MenuControllerTest {
 		ProductDTO result = ctr.updateProduct(product, testProductData);
 		verify(pr).saveOrUpdate(product);
 		
-		assertThat(product.getLongDesc(), is(testProductData.getLongDesc()));
-		assertThat(result.getLongDesc(), is(testProductData.getLongDesc()));
+		assertThat(product.getLongDesc(), is(longDesc));
+		assertThat(result.getLongDesc(), is(longDesc));
 	}
 	
 	@Test

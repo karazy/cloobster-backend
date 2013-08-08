@@ -1,6 +1,5 @@
 package net.eatsense;
 
-
 import java.util.HashMap;
 
 import net.eatsense.auth.AccessTokenFilter;
@@ -78,108 +77,94 @@ import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
- 
+
 /**
- * Configures google guice for use in a servlet environment.
- * All condifured requests are send through the guice servlet.
+ * Configures google guice for use in a servlet environment. All condifured
+ * requests are send through the guice servlet.
  * 
  * @author Frederik Reifschneider
- *
+ * 
  */
-public class EatSenseGuiceServletContextListener extends
-		GuiceServletContextListener {
+public class EatSenseGuiceServletContextListener extends GuiceServletContextListener {
 
 	@Override
 	protected Injector getInjector() {
-		Injector injector = Guice.createInjector(
-				new JerseyServletModule() {
-					@Override 		
-					protected void configureServlets() {
-						HashMap<String, String> parameters = new HashMap<String, String>();
-						
-						parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
+		Injector injector = Guice.createInjector(new JerseyServletModule() {
+			@Override
+			protected void configureServlets() {
+				HashMap<String, String> parameters = new HashMap<String, String>();
 
-						parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS,
-								AccessTokenFilter.class.getName() + ","+
-								SecurityFilter.class.getName()+ "," + 
-								SuffixFilter.class.getName());
-						
-						
-						// add cache control response filter.
-						parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CacheResponseFilter.class.getName());
-						
-						parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
-						
-						parameters.put(ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,RolesAllowedResourceFilterFactory.class.getName() + "," +
-								ApiVersionFilterFactory.class.getName());
-						bind(AccountsResource.class);
-						bind(LocationsResource.class);
-						bind(net.eatsense.restws.customer.AccountsResource.class);
-						bind(net.eatsense.restws.customer.LocationsResource.class);
-						bind(NicknameResource.class);
-						bind(NewsletterResource.class);
-						bind(SpotResource.class);
-						bind(CheckInsResource.class);
-						bind(CronResource.class);
-						bind(AccountResource.class);
-						bind(ChannelResource.class);
-						bind(AdminResource.class);
-						bind(EventBus.class).in(Singleton.class);
-						bind(ServiceExceptionMapper.class);
-						bind(CapabilityDisabledExceptionMapper.class);
-						bind(NicknameGenerator.class);
-						bind(UploadsResource.class);
-						bind(DownloadResource.class);
-						bind(CompaniesResource.class);
-						bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
-						bind(ProfilesResource.class);
-						bind(SubscriptionTemplatesResource.class);
-						bind(CounterTasksResource.class);
-						bind(VisitsResource.class);
-						
-						// Create Configuration binding to automatically load configuration if needed.
-						bind(Configuration.class).toProvider(ConfigurationProvider.class);
-						
-						// Add binding for counter task queue
-						bind(Queue.class).annotatedWith(Names.named("counter-writebacks")).toInstance(QueueFactory.getQueue("counter-writebacks"));
-						
-						bind(AddonConfigurationService.class).to(AddonConfigurationServiceImpl.class);
-												
-						//serve("*").with(GuiceContainer.class, parameters);
-						serveRegex("(.)*c/visits(.)*",
-								"(.)*tasks/counter(.)*",
-								"(.)*b/subscriptions(.)*",
-								"(.)*c/profiles(.)*",
-								"(.)*c/accounts(.)*",
-								"(.)*b/companies(.)*",
-								"(.)*uploads(.)*",
-								"(.)*b/accounts(.)*",
-								"(.)*admin/user(.)*",
-								"(.)*admin/m(.)*",
-								"(.)*admin/s(.)*",
-								"(.)*newsletter(.)*",
-								"(.)*b/businesses(.)*",
-								"(.)*c/businesses(.)*",
-								"(.)*c/checkins(.)*",
-								"(.)*accounts(.)*",
-								"(.)*spots(.)*",
-								"(.)*nickname(.)*",
-								"(.)*download(.)*",
-								"(.)*_ah/channel/connected(.)*",
-								"(.)*_ah/channel/disconnected(.)*",
-								"(.)*cron(.)*").with(GuiceContainer.class, parameters);
-					}
-					
-					@Provides
-					public PolicyFactory providesHTMLPolicyFactory() {
-						return new HtmlPolicyBuilder().allowCommonBlockElements().allowCommonInlineFormattingElements()
-				         .allowAttributes("style").matching(AttributePolicy.IDENTITY_ATTRIBUTE_POLICY).globally().toFactory();
-					}
-					
-				}, new ValidationModule(), new AppEngineServiceModule());
+				parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
+
+				parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName()
+						+ "," + SecurityFilter.class.getName() + "," + SuffixFilter.class.getName());
+
+				// add cache control response filter.
+				parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CacheResponseFilter.class.getName());
+
+				parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
+
+				parameters.put(
+						ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES,
+						RolesAllowedResourceFilterFactory.class.getName() + ","
+								+ ApiVersionFilterFactory.class.getName());
+				bind(AccountsResource.class);
+				bind(LocationsResource.class);
+				bind(net.eatsense.restws.customer.AccountsResource.class);
+				bind(net.eatsense.restws.customer.LocationsResource.class);
+				bind(NicknameResource.class);
+				bind(NewsletterResource.class);
+				bind(SpotResource.class);
+				bind(CheckInsResource.class);
+				bind(CronResource.class);
+				bind(AccountResource.class);
+				bind(ChannelResource.class);
+				bind(AdminResource.class);
+				bind(EventBus.class).in(Singleton.class);
+				bind(ServiceExceptionMapper.class);
+				bind(CapabilityDisabledExceptionMapper.class);
+				bind(NicknameGenerator.class);
+				bind(UploadsResource.class);
+				bind(DownloadResource.class);
+				bind(CompaniesResource.class);
+				bind(AuthorizerFactory.class).to(AuthorizerFactoryImpl.class);
+				bind(ProfilesResource.class);
+				bind(SubscriptionTemplatesResource.class);
+				bind(CounterTasksResource.class);
+				bind(VisitsResource.class);
+
+				// Create Configuration binding to automatically load
+				// configuration if needed.
+				bind(Configuration.class).toProvider(ConfigurationProvider.class);
+
+				// Add binding for counter task queue
+				bind(Queue.class).annotatedWith(Names.named("counter-writebacks")).toInstance(
+						QueueFactory.getQueue("counter-writebacks"));
+
+				bind(AddonConfigurationService.class).to(AddonConfigurationServiceImpl.class);
+
+				// serve("*").with(GuiceContainer.class, parameters);
+				serveRegex("(.)*c/visits(.)*", "(.)*tasks/counter(.)*", "(.)*b/subscriptions(.)*",
+						"(.)*c/profiles(.)*", "(.)*c/accounts(.)*", "(.)*b/companies(.)*", "(.)*uploads(.)*",
+						"(.)*b/accounts(.)*", "(.)*admin/user(.)*", "(.)*admin/m(.)*", "(.)*admin/s(.)*",
+						"(.)*newsletter(.)*", "(.)*b/businesses(.)*", "(.)*c/businesses(.)*", "(.)*c/checkins(.)*",
+						"(.)*accounts(.)*", "(.)*spots(.)*", "(.)*nickname(.)*", "(.)*download(.)*",
+						"(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*", "(.)*cron(.)*").with(
+						GuiceContainer.class, parameters);
+			}
+
+			@Provides
+			public PolicyFactory providesHTMLPolicyFactory() {
+				return new HtmlPolicyBuilder().allowCommonBlockElements().allowCommonInlineFormattingElements()
+						.allowAttributes("style").matching(AttributePolicy.IDENTITY_ATTRIBUTE_POLICY).globally()
+						.toFactory();
+			}
+
+		}, new ValidationModule(), new AppEngineServiceModule(), new HtmlSanitizerModule());
+
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);
-		
+
 		eventBus.register(injector.getInstance(SubscriptionController.class));
 		eventBus.register(injector.getInstance(DashboardController.class));
 		eventBus.register(injector.getInstance(MessageController.class));
@@ -187,11 +172,11 @@ public class EatSenseGuiceServletContextListener extends
 		eventBus.register(injector.getInstance(InfoPageController.class));
 		eventBus.register(injector.getInstance(CounterController.class));
 		eventBus.register(injector.getInstance(CheckInController.class));
-		
+
 		// Register Objectify datastore entities.
-		
+
 		OfyService.registerEntities();
-		
+
 		return injector;
 	}
 

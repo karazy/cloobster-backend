@@ -34,7 +34,8 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 	private final DatastoreService datastore;
 	
 	@Inject
-	public AddonConfigurationServiceImpl(@Named("caching") DatastoreService  datastore) {
+	public AddonConfigurationServiceImpl(@Named("caching")DatastoreService  datastore) {
+		//TODO 20130808 Fred Removed @Named("caching") 
 		this.datastore = datastore;
 		
 	}

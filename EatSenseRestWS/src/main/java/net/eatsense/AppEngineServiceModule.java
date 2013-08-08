@@ -16,6 +16,7 @@ import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 
 public class AppEngineServiceModule extends AbstractModule {
 
@@ -52,6 +53,7 @@ public class AppEngineServiceModule extends AbstractModule {
 	}
 	
 	@Provides
+	@Named("caching") 
 	public DatastoreService providesDatastoreService() {
 		return DatastoreServiceFactory.getDatastoreService();
 	}
