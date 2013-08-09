@@ -1,5 +1,7 @@
 package net.eatsense.restws.business;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,11 @@ import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.SpotsData;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -355,8 +362,8 @@ public class LocationResource {
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	@Path("configurations/{name}")
-	public Map<String, String> saveConfiguration(@PathParam("name") String name, Map<String, String> configMap){
-		return locationCtrl.saveConfiguration(business, name, configMap);
+	public Map<String, String> saveConfiguration(@PathParam("name") String name, JSONObject configMap){
+		return locationCtrl.saveConfiguration(business, name, configMap); 
 	}
 		
 }

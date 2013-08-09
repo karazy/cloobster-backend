@@ -153,12 +153,6 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 						GuiceContainer.class, parameters);
 			}
 
-			@Provides
-			public PolicyFactory providesHTMLPolicyFactory() {
-				return new HtmlPolicyBuilder().allowCommonBlockElements().allowCommonInlineFormattingElements()
-						.allowAttributes("style").matching(AttributePolicy.IDENTITY_ATTRIBUTE_POLICY).globally()
-						.toFactory();
-			}
 
 		}, new ValidationModule(), new AppEngineServiceModule(), new HtmlSanitizerModule());
 

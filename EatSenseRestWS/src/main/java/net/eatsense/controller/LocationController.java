@@ -3,8 +3,10 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,6 +60,10 @@ import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.validation.CreationChecks;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1182,9 +1188,21 @@ public class LocationController {
 	 * @return
 	 */
 	public Map<String, String> saveConfiguration(Business business,
-			String name, Map<String, String> configMap) {
+			String name, JSONObject configMap) {
 		
-		AddonConfiguration config = addonConfig.create(name, business.getKey().getRaw(), configMap);
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String, String>  _map = null;
+		try {
+			_map = mapper.readValue(configMap.toString(), HashMap.class);
+		} catch (JsonParseException e1) {
+			throw new ValidationException("Could not parse json configuration. " + e1.toString());
+		} catch (JsonMappingException e1) {
+			throw new ValidationException("Could not parse json configuration. " + e1.toString());
+		} catch (IOException e1) {
+			throw new ValidationException("Could not parse json configuration. " + e1.toString());
+		}
+		
+		AddonConfiguration config = addonConfig.create(name, business.getKey().getRaw(), _map);
 		addonConfig.put(config);
 		
 		return config.getConfigMap();
