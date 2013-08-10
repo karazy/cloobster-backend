@@ -164,6 +164,7 @@ public class LocationResource {
 	public MenusResource getMenusResource() {
 		MenusResource menusResource = resourceContext.getResource(MenusResource.class);
 		menusResource.setBusiness(business);
+		menusResource.setAccount(account);
 		return menusResource;
 	}
 	

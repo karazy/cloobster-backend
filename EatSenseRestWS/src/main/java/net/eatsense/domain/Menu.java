@@ -2,7 +2,10 @@ package net.eatsense.domain;
 
 import java.util.List;
 
+import javax.persistence.Embedded;
 import javax.persistence.Transient;
+
+import net.eatsense.representation.ImageDTO;
 
 import com.google.common.base.Objects;
 import com.googlecode.objectify.Key;
@@ -24,6 +27,10 @@ public class Menu extends GenericEntity<Menu>{
 	private Integer order;
 	
 	private boolean active = false;
+	
+	@Embedded
+	@Unindexed
+	private List<ImageDTO> images;
 	
 	
 	/**
@@ -101,6 +108,15 @@ public class Menu extends GenericEntity<Menu>{
 			this.setDirty(true);
 			this.products = products;
 		}
+	}
+	
+	public List<ImageDTO> getImages() {
+		return images;
+	}
+
+
+	public void setImages(List<ImageDTO> images) {
+		this.images = images;
 	}
 	
 }

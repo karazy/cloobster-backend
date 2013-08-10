@@ -42,6 +42,10 @@ public class MenuDTO {
 	
 	private List<Long> productIds;
 	
+	private ImageDTO image;
+
+	private String imageUrl;
+	
 	public MenuDTO() {
 		super();
 		this.productIds = new ArrayList<Long>();
@@ -65,6 +69,12 @@ public class MenuDTO {
 				}
 			}
 		}
+		
+		this.image = (menu.getImages() != null && !menu.getImages().isEmpty())
+				? menu.getImages().get(0)
+				: null;
+		this.setImageUrl((image != null) ? image.getUrl()
+				: null);
 	}
 	
 	/**
@@ -121,5 +131,23 @@ public class MenuDTO {
 	public void setProductIds(List<Long> productIds) {
 		this.productIds = productIds;
 	}
+
+	public ImageDTO getImage() {
+		return image;
+	}
+
+	public void setImage(ImageDTO image) {
+		this.image = image;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+	
+	
 	
 }

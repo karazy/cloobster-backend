@@ -309,6 +309,52 @@ public class MenuController {
 		
 		menuRepo.delete(menuKey);
 	}
+	
+	/**
+	 * Create or override the image for a Menu entity.
+	 * 
+	 * @param account
+	 * @param menu
+	 * @param imageData
+	 * @return
+	 */
+	public ImageDTO updateMenuImage(Account account, Menu menu, ImageDTO imageData) {
+		checkNotNull(account, "account was null");
+		checkNotNull(menu, "menuwas null");
+		checkNotNull(imageData, "imageData was null");
+		
+		// For the moment we only have one image per info page.
+		// Always override this image.
+		imageData.setId("image");
+		
+		UpdateImagesResult result = imageCtrl.updateImages(account, menu.getImages(), imageData);
+		
+		if(result.isDirty()) {
+			menu.setImages(result.getImages());
+			menuRepo.saveOrUpdate(menu);
+		}
+		
+		return result.getUpdatedImage();
+	}
+	
+	/**
+	 * Remove the image from the Menu entity and from the blobstore.
+	 * 
+	 * @param menu
+	 * @return
+	 */
+	public boolean removeMenuImage(Menu menu) {
+		checkNotNull(menu, "menu was null");
+		
+		UpdateImagesResult result = imageCtrl.removeImage("image", menu.getImages());
+		
+		if(result.isDirty()) {
+			menu.setImages(result.getImages());
+			menuRepo.saveOrUpdate(menu);
+		}
+		
+		return result.isDirty();
+	}
 
 	/**
 	 * Retrieve all products saved for the given business.
