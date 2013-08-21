@@ -154,7 +154,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 			}
 
 
-		}, new ValidationModule(), new AppEngineServiceModule(), new HtmlSanitizerModule());
+		}, new ValidationModule(), new AppEngineServiceModule(), new HtmlSanitizerModule(), new ObjectifyModule());
 
 		// Register event listeners
 		EventBus eventBus = injector.getInstance(EventBus.class);

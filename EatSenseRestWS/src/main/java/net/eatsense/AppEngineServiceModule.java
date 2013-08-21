@@ -53,7 +53,6 @@ public class AppEngineServiceModule extends AbstractModule {
 	}
 	
 	@Provides
-	@Named("caching") 
 	public DatastoreService providesDatastoreService() {
 		return DatastoreServiceFactory.getDatastoreService();
 	}
