@@ -3,8 +3,10 @@ package net.eatsense.controller;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +17,8 @@ import javax.validation.Validator;
 import javax.validation.groups.Default;
 
 import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.addon.AddonConfiguration;
+import net.eatsense.configuration.addon.AddonConfigurationService;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
@@ -56,6 +60,10 @@ import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.validation.CreationChecks;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +102,7 @@ public class LocationController {
 	private final Provider<Configuration> configProvider;
 	private FeedbackFormRepository feedbackRepo;
 	private final OfyService ofyService;
+	private final AddonConfigurationService addonConfig;
 	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
@@ -103,6 +112,7 @@ public class LocationController {
 			MenuRepository menuRepository,
 			FeedbackFormRepository feedbackRepository,
 			Provider<Configuration> configProvider,
+			AddonConfigurationService addonConfig,
 			OfyService ofyService) {
 		this.areaRepo = areaRepository;
 		this.menuRepo = menuRepository;
@@ -116,6 +126,7 @@ public class LocationController {
 		this.imageController = imageController;
 		this.configProvider = configProvider;
 		this.feedbackRepo = feedbackRepository;
+		this.addonConfig = addonConfig;
 		this.ofyService = ofyService;
 	}
 	
@@ -522,10 +533,7 @@ public class LocationController {
 		if(businessData.getFeatures() != null) {
 			for (Entry<String, Boolean> featureEntry : businessData.getFeatures().entrySet()) {
 				String featureName = featureEntry.getKey();
-				if(!Business.AVAILABLE_FEATURES.contains(featureName)) {
-					logger.warn("Unknown feature name: {}", featureName);
-				}
-				else {
+				if(Business.AVAILABLE_FEATURES.contains(featureName)) {
 					if(featureEntry.getValue()) {
 						if(business.getDisabledFeatures().remove(featureName))
 							business.setDirty(true);
@@ -533,7 +541,21 @@ public class LocationController {
 					else {
 						if(business.getDisabledFeatures().add(featureName))
 							business.setDirty(true);
+					}					
+				}
+				else if(Business.AVAILABLE_OPTIONAL_FEATURES.contains(featureName)) {
+					if(featureEntry.getValue()) {
+						if(business.getEnabledOptionalFeatures().add(featureName))
+							business.setDirty(true);
 					}
+					else {
+						if(business.getEnabledOptionalFeatures().remove(featureName)) {
+							business.setDirty(true);
+						}
+					}
+				}
+				else {
+					logger.warn("Unknown feature name: {}", featureName);
 				}
 			}
 		}
@@ -1129,5 +1151,60 @@ public class LocationController {
 	 */
 	private int countSpots(Key<Business> locationKey) {
 		return spotRepo.query().ancestor(locationKey).filter("trash", false).count();
+	}
+
+	/**
+	 * Load all configuration entities for this Location.
+	 * 
+	 * @param location
+	 * @return Map of configuration maps
+	 */
+	public Map<String, Map<String,String>> getConfigurationMaps(Business location) {
+		Map<String, Map<String,String>> allConfigMaps = Maps.newHashMap();
+		
+		Key<Business> locationKey = location.getKey();
+		Iterable<AddonConfiguration> configIter = addonConfig.getAll(locationKey.getRaw(), false);
+		
+		for (AddonConfiguration addonConfiguration : configIter) {
+			allConfigMaps.put(addonConfiguration.getAddonName(), addonConfiguration.getConfigMap());
+		}
+						
+		return allConfigMaps;
+	}
+
+	/**
+	 * @param name
+	 * @return
+	 */
+	public Map<String, String> getConfiguration(Business location, String name) {		
+		return addonConfig.get(name, location.getKey().getRaw()).getConfigMap();
+	}
+	
+
+	/**
+	 * @param business
+	 * @param name
+	 * @param configMap
+	 * @return
+	 */
+	public Map<String, String> saveConfiguration(Business business,
+			String name, JSONObject configMap) {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String, String>  _map = null;
+		try {
+			_map = mapper.readValue(configMap.toString(), HashMap.class);
+		} catch (JsonParseException e1) {
+			throw new ValidationException("Could not parse json configuration. " + e1.toString());
+		} catch (JsonMappingException e1) {
+			throw new ValidationException("Could not parse json configuration. " + e1.toString());
+		} catch (IOException e1) {
+			throw new ValidationException("Could not parse json configuration. " + e1.toString());
+		}
+		
+		AddonConfiguration config = addonConfig.create(name, business.getKey().getRaw(), _map);
+		addonConfig.put(config);
+		
+		return config.getConfigMap();
 	}
 }

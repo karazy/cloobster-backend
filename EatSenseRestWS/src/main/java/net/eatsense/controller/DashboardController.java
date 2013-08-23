@@ -65,6 +65,9 @@ public class DashboardController {
 		boolean isProductsDisabled = location.getDisabledFeatures().contains("products");
 		boolean isInfopagesDisabled = location.getDisabledFeatures().contains("infopages");
 		boolean isServiceCallDisabled = location.getDisabledFeatures().contains("requests-call");
+		//External partners
+		boolean isDeZtixEnabled = location.getEnabledOptionalFeatures().contains("de-ztix");
+		;
 		
 		// filter list by active features only
 		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {
@@ -75,10 +78,16 @@ public class DashboardController {
 			else if(dashboardItem.getType().startsWith("products") && isProductsDisabled) {
 				iterator.remove();
 			}
+			else if(dashboardItem.getType().startsWith("menus") && isProductsDisabled) {
+				iterator.remove();
+			}
 			else if(dashboardItem.getType().startsWith("infopages") && isInfopagesDisabled) {				
 				iterator.remove();
 			}
 			else if(dashboardItem.getType().equals("actions") && isServiceCallDisabled) {
+				iterator.remove();
+			}
+			else if(dashboardItem.getType().equals("deztixevents") && !isDeZtixEnabled) {
 				iterator.remove();
 			}
 		}

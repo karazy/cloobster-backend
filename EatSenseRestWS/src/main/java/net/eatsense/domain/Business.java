@@ -35,6 +35,10 @@ public class Business extends GenericEntity<Business> {
 	
 	@Transient
 	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products","products-order", "infopages", "feedback", "requests-call", "facebook-post", "contact");
+	
+	@Transient
+	public final static Set<String> AVAILABLE_OPTIONAL_FEATURES = ImmutableSet.of("de-panorama-fotobuch", "de-ztix");
+	
  
 	/**
 	 * Name of location.
@@ -151,6 +155,10 @@ public class Business extends GenericEntity<Business> {
 	
 	@Unindexed
 	private Set<String> disabledFeatures = Sets.newHashSet();
+	
+	@Unindexed
+	private Set<String> enabledOptionalFeatures = Sets.newHashSet();
+	
 	
 	private GeoPt geoLocation;
 	
@@ -455,5 +463,13 @@ public class Business extends GenericEntity<Business> {
 			this.setDirty(true);
 			this.geoLocation = geoLocation;
 		}
+	}
+
+	public Set<String> getEnabledOptionalFeatures() {
+		return enabledOptionalFeatures;
+	}
+
+	public void setEnabledOptionalFeatures(Set<String> enabledOptionalFeatures) {
+		this.enabledOptionalFeatures = enabledOptionalFeatures;
 	}
 }

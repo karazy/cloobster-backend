@@ -26,6 +26,8 @@ import javax.validation.Validator;
 import net.eatsense.AppEngineServiceModule;
 import net.eatsense.EatSenseDomainModule;
 import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.addon.AddonConfiguration;
+import net.eatsense.configuration.addon.AddonConfigurationService;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Area;
@@ -154,6 +156,9 @@ public class BusinessControllerTest {
 	@Mock
 	private ObjectifyFactory ofyFactory;
 
+	@Mock
+	private AddonConfigurationService addonConfig;
+
 	@Before
 	public void setUp() throws Exception {
 		helper.setUp();
@@ -175,7 +180,8 @@ public class BusinessControllerTest {
 		CheckInRepository checkInrepo = injector.getInstance(CheckInRepository.class);
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
 		when(ofyService.factory()).thenReturn(ofyFactory);
-		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, ofyService);
+		
+		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, addonConfig , ofyService);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -533,7 +539,7 @@ public class BusinessControllerTest {
 	private LocationController createController() {
 		return new LocationController(requestRepo, checkInrepo, spotRepo, rr,
 				eventBus, accountRepo, imageController, areaRepo, validator,
-				mr, feedbackRepo, configProvider, ofyService);
+				mr, feedbackRepo, configProvider, addonConfig, ofyService);
 	}
 	
 	@Test

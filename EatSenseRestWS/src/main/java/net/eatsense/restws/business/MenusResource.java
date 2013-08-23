@@ -16,13 +16,16 @@ import com.google.inject.Inject;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.MenuController;
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.MenuDTO;
 
 public class MenusResource {
 
 	private Business business;
 	private MenuController menuCtrl;
+	private Account account;
 	
 	@Inject
 	public MenusResource(MenuController menuCtrl) {
@@ -35,6 +38,12 @@ public class MenusResource {
 		this.business = business;
 	}
 	
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
+
 	@GET
 	@Produces("application/json; charset=UTF-8")
 	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
@@ -72,5 +81,23 @@ public class MenusResource {
 	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
 	public void deleteMenu(@PathParam("id") long id) {
 		menuCtrl.deleteMenu(business, id);
+	}
+	
+	@DELETE
+	@Path("{id}/image")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public void removeImage(@PathParam("id") long id) {
+		if(!menuCtrl.removeMenuImage(menuCtrl.getMenu(business, id))) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+	}
+	
+	@POST
+	@Path("{id}/image")
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public ImageDTO updateImage(@PathParam("id") long id, ImageDTO imageData) {
+		return menuCtrl.updateMenuImage(account, menuCtrl.getMenu(business, id), imageData);
 	}
 }
