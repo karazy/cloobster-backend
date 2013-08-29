@@ -92,11 +92,13 @@ public class ConfigurationController {
 	 * @param name
 	 */
 	public void deleteWhitelabel(Key<WhiteLabelConfiguration> wlc, String name) {
-		AddonConfiguration cfg = addonService.get(name, wlc.getRaw());
-		if(cfg.getConfigMap().containsValue(name)) {
-			cfg.getConfigMap().remove(name);
-			addonService.put(cfg);
-		}
+		addonService.delete(name, wlc.getRaw());
+//		AddonConfiguration cfg = addonService.get(name, wlc.getRaw());
+//		if(cfg.getConfigMap().containsValue(name)) {
+//			cfg.getConfigMap().remove(name);
+//			addonService.put(cfg);
+//			
+//		}
 	}
 
 }

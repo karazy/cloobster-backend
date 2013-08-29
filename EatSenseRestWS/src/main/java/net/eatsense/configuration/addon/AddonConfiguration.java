@@ -92,7 +92,7 @@ public class AddonConfiguration {
 		}
 		// ... with parent.
 		if(key == null && parent != null) {
-			KeyFactory.createKey(parent, KIND, name);
+			key = KeyFactory.createKey(parent, KIND, name);
 		}
 		
 		return key;
