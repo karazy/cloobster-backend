@@ -2,6 +2,8 @@ package net.eatsense.configuration;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.List;
+
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 import javax.persistence.Transient;
@@ -38,6 +40,9 @@ public class Configuration {
 	private SpotPurePDFConfiguration spotPurePdfConfiguration;
 
 	private Key<FeedbackForm> defaultFeedbackForm;
+	
+	@Embedded
+	private Key<WhiteLabelConfiguration> whitelabels;
 
 	public Key<FeedbackForm> getDefaultFeedbackForm() {
 		return defaultFeedbackForm;
@@ -55,6 +60,21 @@ public class Configuration {
 		this.id = id;
 	}
 	
+
+	/**
+	 * @return the whitelabels
+	 */
+	public Key<WhiteLabelConfiguration> getWhitelabels() {
+		return whitelabels;
+	}
+
+	/**
+	 * @param whitelabels the whitelabels to set
+	 */
+	public void setWhitelabels(Key<WhiteLabelConfiguration> whitelabels) {
+		this.whitelabels = whitelabels;
+	}
+
 	public void save() throws IllegalStateException {
 		checkState(repository != null, "no respository set");
 		

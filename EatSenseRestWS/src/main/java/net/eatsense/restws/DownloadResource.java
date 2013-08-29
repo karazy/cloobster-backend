@@ -109,7 +109,7 @@ public class DownloadResource {
 		if(loc == null) {
 			//redirect to default download url
 			logger.warn("No location found. Redirect to default download URL.");
-			return redirectToStore();	
+			return redirectToStore();
 		}
 		
 		Map<String, String> config = addonConfig.get("whitelabel", loc.getCompany().getRaw()).getConfigMap();
@@ -130,7 +130,7 @@ public class DownloadResource {
 		}
 		
 		
-		return null;
+		return redirectToStore();
 	}
 
 }

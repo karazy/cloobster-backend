@@ -16,6 +16,7 @@ public class ConfigurationRepository extends DAOBase {
 	
 	static {
 		OfyService.register(Configuration.class);
+		OfyService.register(WhiteLabelConfiguration.class);
 	}
 	
 	/**
@@ -38,5 +39,10 @@ public class ConfigurationRepository extends DAOBase {
 
 	public Key<Configuration> save(Configuration configuration) {
 		return ofy().put(configuration);		
+	}
+	
+	public Key<WhiteLabelConfiguration> createWhitelabelConfiguration() {
+		WhiteLabelConfiguration wlc = new WhiteLabelConfiguration();
+		return ofy().put(wlc);
 	}
 }

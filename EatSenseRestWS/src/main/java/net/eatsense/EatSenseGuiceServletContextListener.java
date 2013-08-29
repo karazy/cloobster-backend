@@ -8,6 +8,7 @@ import net.eatsense.auth.AuthorizerFactoryImpl;
 import net.eatsense.auth.SecurityFilter;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.ConfigurationProvider;
+import net.eatsense.configuration.WhiteLabelConfiguration;
 import net.eatsense.configuration.addon.AddonConfigurationService;
 import net.eatsense.configuration.addon.AddonConfigurationServiceImpl;
 import net.eatsense.controller.CheckInController;
@@ -136,6 +137,8 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				// Create Configuration binding to automatically load
 				// configuration if needed.
 				bind(Configuration.class).toProvider(ConfigurationProvider.class);
+				
+				bind(WhiteLabelConfiguration.class);
 
 				// Add binding for counter task queue
 				bind(Queue.class).annotatedWith(Names.named("counter-writebacks")).toInstance(

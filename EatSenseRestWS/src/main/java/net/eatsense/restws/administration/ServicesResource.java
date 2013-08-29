@@ -2,6 +2,7 @@ package net.eatsense.restws.administration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -19,6 +20,7 @@ import javax.ws.rs.core.Context;
 import net.eatsense.configuration.Configuration;
 import net.eatsense.configuration.SpotPurePDFConfiguration;
 import net.eatsense.controller.ChannelController;
+import net.eatsense.controller.ConfigurationController;
 import net.eatsense.controller.ImportController;
 import net.eatsense.controller.TemplateController;
 import net.eatsense.domain.Business;
@@ -27,7 +29,6 @@ import net.eatsense.domain.NicknameAdjective;
 import net.eatsense.domain.NicknameNoun;
 import net.eatsense.domain.TrashEntry;
 import net.eatsense.exceptions.ServiceException;
-import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.FeedbackFormRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NicknameAdjectiveRepository;
@@ -43,6 +44,7 @@ import net.eatsense.util.InfoPageGenerator;
 import net.eatsense.util.TestDataGenerator;
 import net.eatsense.validation.ValidationHelper;
 
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,7 @@ public class ServicesResource {
 	@Context
 	private ResourceContext resourceContext;
 	private final TestDataGenerator testDataGen;
+	private final ConfigurationController configCtrl;
 
 	@Inject
 	public ServicesResource(ServletContext servletContext, DummyDataDumper ddd,
@@ -81,7 +84,7 @@ public class ServicesResource {
 			Configuration configuration,
 			Provider<InfoPageGenerator> infoPageGenerator,
 			ValidationHelper validator,
-			TestDataGenerator testDataGen) {
+			TestDataGenerator testDataGen, ConfigurationController configCtrl) {
 		super();
 		this.channelCtrl = channelCtrl;
 		this.templateCtrl = templateCtrl;
@@ -101,6 +104,7 @@ public class ServicesResource {
 		logger.info("net.karazy.environment: {}", environment);
 		// Check for dev environment
 		devEnvironment = "dev".equals(environment);
+		this.configCtrl = configCtrl;
 	}
 
 	@GET
@@ -301,4 +305,59 @@ public class ServicesResource {
 		else
 			throw new WebApplicationException(405);
 	}
+	
+	//Whitelabel Methods
+	
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@Path("configuration/whitelabels")
+	public List<Map<String, String>> getWhitelabels(){
+		return configCtrl.getAllWhitelabels(configuration.getWhitelabels());
+	}
+	
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@Path("configuration/whitelabels/{name}")
+	public Map<String, String> getWhitelabel(@PathParam("name") String name){
+		return configCtrl.getWhitelabel(configuration.getWhitelabels(), name);
+	}
+	
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@Path("configuration/whitelabels/{name}")
+	public Map<String, String> saveWhitelabel(@PathParam("name") String name, JSONObject configMap){
+		return configCtrl.saveWhitelabel(configuration.getWhitelabels(), name, configMap);
+	}
+	
+	@DELETE
+	@Path("configuration/whitelabels/{name}")
+	public void deleteWhitelabel(@PathParam("name") String name){
+		configCtrl.deleteWhitelabel(configuration.getWhitelabels(), name);
+	}
+	
+//	@GET
+//	@Path("configuration/whitelabel")
+//	public List<WhiteLabelConfiguration> getWhitelabels() {
+//		return null;
+//	}
+//	
+//	@PUT
+//	@Path("configuration/whitelabel/{wlID}")
+//	public WhiteLabelConfiguration updateWhitelabel(@PathParam("wlId") long id, WhiteLabelConfiguration wlc) {
+//		return null;
+//	}
+//	
+//	@POST
+//	@Path("configuration/whitelabel")
+//	public WhiteLabelConfiguration createWhitelabel(WhiteLabelConfiguration wlc) {
+//		return null;
+//	}
+//	
+//	@DELETE
+//	@Path("configuration/whitelabel/{wlID}")
+//	public WhiteLabelConfiguration createWhitelabel(@PathParam("wlId") long id) {
+//		return null;
+//	}
+	
 }

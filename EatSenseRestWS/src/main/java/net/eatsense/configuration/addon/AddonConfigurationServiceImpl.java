@@ -131,5 +131,16 @@ public class AddonConfigurationServiceImpl implements AddonConfigurationService 
 		
 		return new AddonConfiguration(name, parent, configMap);
 	}
+	
+	@Override
+	public void delete(String name, Key parent) {
+		checkArgument(!Strings.isNullOrEmpty(name), "addonName must not be null or empty");
+		checkNotNull(parent, "parent must not be null");
+		
+		AddonConfiguration cfg = get(name, parent);
+		if(cfg != null) {
+			datastore.delete(cfg.getKey());
+		}		
+	}
 
 }
