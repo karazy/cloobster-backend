@@ -123,7 +123,9 @@ public class Spot extends GenericEntity<Spot>{
 	}
 	
 	public String getBarcodeWithDownloadURL() {
-		return System.getProperty("net.karazy.app.download.url") + "#" + barcode;
+//		return System.getProperty("net.karazy.app.download.url") + "#" + barcode;
+		//2013-08-29 Fred URL change needed to detect whitelabel of company based on spot. The # at the end is kept for backwards compatibility. 
+		return System.getProperty("net.karazy.app.download.url") + "/" + barcode + "#" + barcode;
 	}
 	
 	public String getQrImageUrl() {
