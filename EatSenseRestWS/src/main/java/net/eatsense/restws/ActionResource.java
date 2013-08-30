@@ -1,7 +1,6 @@
 package net.eatsense.restws;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -18,7 +17,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import net.eatsense.configuration.addon.AddonConfiguration;
 import net.eatsense.controller.ConfigurationController;
-import net.eatsense.controller.bill.CreateBillTest;
 import net.eatsense.util.DeviceType;
 
 import org.slf4j.Logger;
