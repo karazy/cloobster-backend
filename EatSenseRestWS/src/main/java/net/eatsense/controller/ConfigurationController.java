@@ -25,6 +25,12 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.googlecode.objectify.Key;
 
+/**
+ * Handles everything related to cloobster configuration.
+ * 
+ * @author Frederik Reifschneider
+ *
+ */
 public class ConfigurationController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -49,6 +55,7 @@ public class ConfigurationController {
 	}
 	
 	/**
+	 * Get a map of all configured whitelabels.
 	 * @param wlc
 	 * @return
 	 */
@@ -63,8 +70,9 @@ public class ConfigurationController {
 	}
 	
 	/**
-	 * Get whitelabel configuration.
+	 * Get a speficif whitelabel.
 	 * @param name
+	 *  Name of whitelabel
 	 * @return
 	 */
 	public Map<String, String> getWhitelabel(Key<WhiteLabelConfiguration> wlc ,String name) {		
@@ -101,24 +109,22 @@ public class ConfigurationController {
 	}
 	
 	/**
+	 * Delete a whitelabel from {@link WhiteLabelConfiguration}
 	 * @param wlc
+	 *  Key of configuration
 	 * @param name
+	 *  Name of whitelabel
 	 */
 	public void deleteWhitelabel(Key<WhiteLabelConfiguration> wlc, String name) {
 		addonService.delete(name, wlc.getRaw());
-//		AddonConfiguration cfg = addonService.get(name, wlc.getRaw());
-//		if(cfg.getConfigMap().containsValue(name)) {
-//			cfg.getConfigMap().remove(name);
-//			addonService.put(cfg);
-//			
-//		}
 	}
 	
 	/**
 	 * Get the whitelabel configuration for given Spot. 
 	 * @param spotCode
-	 * @param wlKey
+	 *  Spot qr code to get configuration for.
 	 * @return
+	 *  Matching whitelabel configuration or <code>null</code> if none was found
 	 */
 	public AddonConfiguration getWhitelabelConfigurationBySpot(String spotCode) {
 		checkNotNull(spotCode, "spotCode was null");

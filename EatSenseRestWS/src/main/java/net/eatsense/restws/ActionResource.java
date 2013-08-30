@@ -29,7 +29,7 @@ import com.google.inject.Inject;
 /**
  * Handles incoming requests with prefix /x/{Action}
  * Will analyze and create a redirect based on {@link DeviceType}
- * To start cloobster and execute desired action.
+ * attempts to start cloobster (or whitelabel) app and execute desired action.
  * 
  * @author Frederik Reifschneider
  *
@@ -61,11 +61,10 @@ public class ActionResource {
 	}
 	
 	/**
-	 * Invoked by all URLS Starting with /x.
-	 * Parses the suffix and executes action.
-	 * Handled Actions
-	 *  - /x/spot/qrcode
+	 * Invoked by all URLS Starting with /x/spot.
+	 * Attempts to start the app when installed, otherwise or when desktop browser will do a redirect do download url.
 	 * @param code
+	 * 	Spot QR code to do checkin with.
 	 * @return
 	 * @throws IOException 
 	 * @throws URISyntaxException 
