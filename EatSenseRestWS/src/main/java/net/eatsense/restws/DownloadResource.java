@@ -151,8 +151,11 @@ public class DownloadResource {
 			return redirectToStore();			
 		}
 		
+		//TODO use configuration controller to get whitelabel
+		
 		Business loc = locationCtrl.getLocationBySpotCode(spotCode);
 		AddonConfiguration tempCfg;
+		AddonConfiguration whitelabelContainer;
 		
 		if(loc == null) {
 			//redirect to default download url
@@ -160,7 +163,19 @@ public class DownloadResource {
 			return redirectToStore();
 		}
 		
-		Map<String, String> config = addonConfig.get("whitelabel", loc.getCompany().getRaw()).getConfigMap();
+		if(loc.getCompany() == null) {
+			logger.warn("Location has no company. Redirect to default download URL.");
+			return redirectToStore();
+		}
+		
+		whitelabelContainer = addonConfig.get("whitelabel", loc.getCompany().getRaw());
+		
+		if(whitelabelContainer == null) {
+			logger.warn("Could not optain whitelabel from company configuration.");
+			return redirectToStore();
+		}
+		
+		Map<String, String> config = whitelabelContainer.getConfigMap();
 		
 		if(config == null) {
 			logger.warn("No whitelabel configuration found. Redirect to default download URL.");
