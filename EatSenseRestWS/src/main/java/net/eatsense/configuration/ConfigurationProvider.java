@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 
 public class ConfigurationProvider implements Provider<Configuration> {
@@ -27,5 +28,18 @@ public class ConfigurationProvider implements Provider<Configuration> {
 			config = repository.createDefault();
 		}
 		return config;
+	}
+	
+	public Key<WhiteLabelConfiguration> getWhitelabels() {
+		Key<WhiteLabelConfiguration> wlc = get().getWhitelabels();
+		Configuration cfg = get();
+		
+		if(wlc == null) {
+			wlc = repository.createWhitelabelConfiguration();
+			cfg.setWhitelabels(wlc);
+			cfg.save();
+		} 
+		
+		return wlc;
 	}
 }

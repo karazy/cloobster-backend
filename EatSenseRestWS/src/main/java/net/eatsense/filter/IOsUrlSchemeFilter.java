@@ -22,11 +22,10 @@ import org.slf4j.LoggerFactory;
  */
 public class IOsUrlSchemeFilter implements Filter {
 	private static final String REDIRECT_URL_PREFIX = "cloobster://";
+	public final static String URL_PREFIX = "/x/";
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public final static String URL_PREFIX = "/x/";
-
     /**
      * Default constructor. 
      */
@@ -74,7 +73,7 @@ public class IOsUrlSchemeFilter implements Filter {
 				//if no handler is present, will redirect to download url to load the app
 				html.append("<!DOCTYPE html><html><head></head><body><script type='text/javascript'>");
 				html.append("setTimeout(function() {");
-				html.append("window.location = '"+downloadUrl+"';");
+				html.append("window.location = '"+downloadUrl + "/" + suffix + "#" + suffix + "';");
 				html.append("}, 100);");
 				html.append("window.location = '" + redirectUrl + "'");
 				html.append("</script></body></html>");
@@ -87,7 +86,7 @@ public class IOsUrlSchemeFilter implements Filter {
 				//if app is not installed, will redirect to store
 				//OLD URL
 				//redirectUrl = REDIRECT_URL_PREFIX + suffix;
-				redirectUrl = downloadUrl + "#" + suffix;
+				redirectUrl = downloadUrl + "/" + suffix + "#" + suffix;
 //				httpResponse.sendRedirect(redirectUrl);
 				//use same approach like iOS. A sendRedirect won't work. But here we only need one url.
 				PrintWriter pw = httpResponse.getWriter();

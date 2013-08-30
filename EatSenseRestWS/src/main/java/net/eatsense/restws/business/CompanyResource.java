@@ -1,6 +1,7 @@
 package net.eatsense.restws.business;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.UriInfo;
 
 import net.eatsense.auth.Role;
 import net.eatsense.controller.AccountController;
+import net.eatsense.controller.CompanyController;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Company;
 import net.eatsense.event.NewCompanyAccountEvent;
@@ -27,6 +29,7 @@ import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.ImageDTO;
 
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,7 @@ public class CompanyResource {
 	HttpServletRequest servletRequest;
 	
 	private final AccountController accountCtrl;
+	private final CompanyController companyCtrl;
 	
 	private Company company;
 
@@ -51,10 +55,11 @@ public class CompanyResource {
 	private final EventBus eventBus;
 	
 	@Inject
-	public CompanyResource(AccountController accountCtrl, EventBus eventBus) {
+	public CompanyResource(AccountController accountCtrl, EventBus eventBus, CompanyController companyCtrl) {
 		super();
 		this.eventBus = eventBus;
 		this.accountCtrl = accountCtrl;
+		this.companyCtrl = companyCtrl;
 	}
 
 	public void setCompany(Company company) {
@@ -187,5 +192,22 @@ public class CompanyResource {
 
 	public void setAuthorized(boolean authorized) {
 		this.authorized = authorized;
+	}
+	
+	@GET
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@Path("configurations/{name}")
+	public Map<String, String> getConfiguration(@PathParam("name") String name){
+		return companyCtrl.getConfiguration(company, name);
+	}
+	
+	@PUT
+	@Consumes("application/json; charset=UTF-8")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	@Path("configurations/{name}")
+	public Map<String, String> saveConfiguration(@PathParam("name") String name, JSONObject configMap){
+		return companyCtrl.saveConfiguration(company, name, configMap); 
 	}
 }

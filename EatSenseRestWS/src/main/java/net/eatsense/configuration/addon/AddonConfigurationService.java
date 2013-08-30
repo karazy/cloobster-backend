@@ -31,4 +31,6 @@ public interface AddonConfigurationService {
 	
 	public AddonConfiguration create(String name, Map<String, String> configMap);
 	public AddonConfiguration create(String name, Key parent, Map<String, String> configMap);
+	
+	public void delete(String name, Key parent);
 }
