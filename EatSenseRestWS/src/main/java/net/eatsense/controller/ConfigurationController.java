@@ -131,12 +131,23 @@ public class ConfigurationController {
 		
 		Business loc = locCtrl.getLocationBySpotCode(spotCode);
 		AddonConfiguration tempCfg;
+		AddonConfiguration companyWhitelabel;
 		
 		if(loc == null) {
 			throw new net.eatsense.exceptions.NotFoundException("Unknown location for spot="+ spotCode);
 		}
 		
-		Map<String, String> config = addonService.get("whitelabel", loc.getCompany().getRaw()).getConfigMap();
+		if(loc.getCompany() == null) {
+			throw new net.eatsense.exceptions.NotFoundException("Location has no company");
+		}
+		
+		companyWhitelabel = addonService.get("whitelabel", loc.getCompany().getRaw());
+		
+		if(companyWhitelabel == null) {
+			throw new net.eatsense.exceptions.NotFoundException("Company configuration has no whitelabel configuration.");
+		}
+		
+		Map<String, String> config = companyWhitelabel.getConfigMap();
 		
 		if(config == null) {
 			throw new net.eatsense.exceptions.NotFoundException("No whitelabel configuration found.");
@@ -144,6 +155,7 @@ public class ConfigurationController {
 		
 		String whitelabel = config.get("key");
 		
+		//iterate over all avail whitelabels
 		while(whitelabelCfg.iterator().hasNext()) {
 			tempCfg = whitelabelCfg.iterator().next();
 			//check if configuration contains a key and value for that key, then check if selected whitelabel matches the config map value
