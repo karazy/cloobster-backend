@@ -3,7 +3,6 @@ package net.eatsense.restws;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +14,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import net.eatsense.configuration.Configuration;
-import net.eatsense.configuration.WhiteLabelConfiguration;
 import net.eatsense.configuration.addon.AddonConfiguration;
 import net.eatsense.configuration.addon.AddonConfigurationService;
 import net.eatsense.controller.CompanyController;
@@ -84,6 +82,8 @@ public class DownloadResource {
 	/**
 	 * Analyses User-Agent and redirects to corresponding store
 	 * if an iOS or Android device is detected.
+	 * @param whitelabel
+	 *  If given uses whitelabel to determine correct redirect.
 	 * @return
 	 * 	Response
 	 */
@@ -137,6 +137,12 @@ public class DownloadResource {
 		return redirectToStore(null);
 	}
 	
+	/**
+	 * Does a redirect by taking the configured whitelabel into account.
+	 * @param spotCode
+	 * 	QR Code of Spot
+	 * @return
+	 */
 	@GET
 	@Path("{spotCode}")
 	public Response redirectToStoreByWhitelabel(@PathParam("spotCode") String spotCode) {
