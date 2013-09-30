@@ -36,6 +36,7 @@ import net.eatsense.management.LocationManagement;
 import net.eatsense.representation.ChannelDTO;
 import net.eatsense.representation.LocationProfileDTO;
 import net.eatsense.representation.LocationReportDTO;
+import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.SubscriptionDTO;
 
 public class LocationsResource {
@@ -163,5 +164,12 @@ public class LocationsResource {
 	@Produces("application/json")
 	public List<LocationReportDTO> getReport(@QueryParam("fromDate") long fromTimeStamp, @QueryParam("toDate") long toTimeStamp) {
 		return reportController.getReportForAllLocationsAndKPIs(new Date(fromTimeStamp), new Date(toTimeStamp));
+	}
+	
+	@GET
+	@Path("{locationId}/welcomespot")
+	@Produces("application/json")
+	public SpotDTO getWelcomeSpot(@PathParam("locationId") long locationId) {
+		return ctrl.getWelcomeSpot(locationId);
 	}
 }
