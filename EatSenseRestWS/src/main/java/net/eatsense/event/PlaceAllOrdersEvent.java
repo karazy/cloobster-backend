@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
+import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Order;
@@ -16,6 +17,7 @@ public class PlaceAllOrdersEvent extends MultiUpdateEvent {
 	private final List<Order> orders;
 	private Optional<Business> optBusiness;
 	private Optional<Spot> optSpot;
+	private Optional<Account> optAccount;
 
 	public PlaceAllOrdersEvent(CheckIn checkIn, int entityCount, Collection<Order> orders) {
 		super(checkIn, entityCount);
@@ -43,4 +45,14 @@ public class PlaceAllOrdersEvent extends MultiUpdateEvent {
 	public void setOptSpot(Optional<Spot> optSpot) {
 		this.optSpot = optSpot;
 	}
+
+	public Optional<Account> getOptAccount() {
+		return optAccount;
+	}
+
+	public void setOptAccount(Optional<Account> optAccount) {
+		this.optAccount = optAccount;
+	}
+	
+	
 }

@@ -437,6 +437,17 @@ public class MailController {
 		UriBuilder uriBuilder = UriBuilder.fromUri(baseUri).path("cockpit");
 		Area area = ofy.get(event.getCheckIn().getArea());
 		Spot spot = event.getOptSpot().or(ofy.get(event.getCheckIn().getSpot()));
+		//20131005 Added Account email and nickname to to message. 
+		Account account = null;
+		String email = "";
+		
+		try{
+			account = event.getOptAccount().or(ofy.get(event.getCheckIn().getAccount()));
+			email = account.getEmail();
+		} catch(NotFoundException e) {
+			logger.warn("Could not optain an account for checkin {0}", event.getCheckIn().getUserId());
+			email = "No valid email found";
+		}
 		
 		// Template parameter: orders count, area name, spot name, order summary text, cockpit url
 		String mailText = templateCtrl.getAndReplace("order-placed-alert-de",
@@ -444,7 +455,9 @@ public class MailController {
 				area.getName(),
 				spot.getName(),
 				summaryBuilder.toString(),
-				uriBuilder.build().toString());
+				uriBuilder.build().toString(),
+				event.getCheckIn().getNickname(),
+				email);
 		
 		try {
 			// Send e-mail with password reset link.
