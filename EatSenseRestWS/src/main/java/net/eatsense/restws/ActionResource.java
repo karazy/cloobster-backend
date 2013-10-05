@@ -122,8 +122,8 @@ public class ActionResource {
 			resp = Response.ok(html.toString(), MediaType.TEXT_HTML);
 			
 		} else {
-			//Desktop an dother mobile Platforms
-			redirectUrl = downloadUrl;
+			//Desktop and other mobile Platforms, append spot to redirect to correct website
+			redirectUrl = downloadUrl  + "/" + code + "#" + code;
 			resp = Response.seeOther(new URI(redirectUrl));
 		}
 		
