@@ -47,6 +47,7 @@ import net.eatsense.persistence.OrderChoiceRepository;
 import net.eatsense.persistence.OrderRepository;
 import net.eatsense.persistence.RequestRepository;
 import net.eatsense.persistence.SpotRepository;
+import net.eatsense.representation.AccountForServiceDTO;
 import net.eatsense.representation.CheckInDTO;
 import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.HistoryStatusDTO;
@@ -739,5 +740,33 @@ public class CheckInController {
 		if(event.isSave()) {
 			checkInRepo.saveOrUpdate(event.getCheckIn());
 		}
+	}
+	
+	
+	/**
+	 * Returns non sensitive account information for given checkin uid.
+	 * @param checkInId
+	 * @return
+	 */
+	public AccountForServiceDTO getAccountByCheckInId(Long checkInId) {
+		checkNotNull(checkInId, "checkInId was null");
+		
+		CheckIn checkIn = checkInRepo.getById(checkInId);
+		
+		if(checkIn.getAccount() == null) {
+			//CheckIn without account. This checkin should not have orders.
+			//fail silently to not spam the logs!
+			throw new NotFoundException();
+		}
+		
+		Account account = accountRepo.getByKey(checkIn.getAccount());
+		if(account == null) {
+			logger.warn("No account for checkIn {} found", checkInId);
+			throw new NotFoundException();
+		}
+			
+		AccountForServiceDTO afs = new AccountForServiceDTO(account);
+		
+		return afs;
 	}
 }

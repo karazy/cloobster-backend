@@ -1,12 +1,13 @@
-[Cloobster] {0} neue Bestellung(en) im Bereich "{1}" 
+[Cloobster Platform] {0} neue Bestellung(en) im Bereich "{1}" 
 Lieber cloobster Operator,
 
-Es liegen {0} neue Bestellungen bei "{2}" im Bereich "{1}" vor.
+Es liegt/liegen {0} neue Bestellung(en) an Spot "{2}" im Bereich "{1}" vor.
 
-Übersicht:
+{5} ({6}) hat bestellt:
+
 {3}
 
-Bitte klicken Sie hier für Details:
+Um alle Details zu sehen, melden Sie sich bitte im Cockpit an:
 {4}
 
 

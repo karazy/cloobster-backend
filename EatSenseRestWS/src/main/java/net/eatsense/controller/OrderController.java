@@ -561,7 +561,7 @@ public class OrderController {
 	/**
 	 * @param checkIn
 	 */
-	public void updateCartOrdersToPlaced(CheckIn checkIn) {
+	public void updateCartOrdersToPlaced(CheckIn checkIn, Optional<Account> optAccount) {
 		checkNotNull(checkIn, "checkIn was null");
 		checkNotNull(checkIn.getId(), "checkIn id was null");
 		checkNotNull(checkIn.getBusiness(), "checkIn business was null");
@@ -591,6 +591,8 @@ public class OrderController {
 		// If we have no older request in the database ...
 		PlaceAllOrdersEvent updateEvent = new PlaceAllOrdersEvent(checkIn, orders.size(), orders);
 		updateEvent.setOptSpot(Optional.of(spot));
+		updateEvent.setOptAccount(optAccount);
+		
 		if( oldestRequest == null ) {
 			updateEvent.setNewSpotStatus(CheckInStatus.ORDER_PLACED.toString());
 		}
