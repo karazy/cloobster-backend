@@ -445,7 +445,7 @@ public class MailController {
 			account = event.getOptAccount().or(ofy.get(event.getCheckIn().getAccount()));
 			email = account.getEmail();
 		} catch(NotFoundException e) {
-			logger.warn("Could not optain an account for checkin {0}", event.getCheckIn().getUserId());
+			logger.warn("Could not optain an account for checkin {}", event.getCheckIn().getUserId());
 			email = "No valid email found";
 		}
 		

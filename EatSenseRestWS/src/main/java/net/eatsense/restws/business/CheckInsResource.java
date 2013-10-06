@@ -17,6 +17,7 @@ import net.eatsense.auth.Role;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.OrderController;
 import net.eatsense.domain.Business;
+import net.eatsense.representation.AccountForServiceDTO;
 import net.eatsense.representation.CheckInHistoryDTO;
 import net.eatsense.representation.cockpit.CheckInStatusDTO;
 
@@ -52,6 +53,18 @@ public class CheckInsResource {
 			return Iterables.transform(checkInController.getInactiveCheckIns(business.getKey()),CheckInStatusDTO.toDTO);
 		}
 		return checkInController.getCheckInStatusesBySpot(business, spotId);	
+	}
+	
+	/**
+	 * Return none senstive account information to help business fullfill its service.
+	 * @return
+	 */
+	@GET
+	@Path("{checkInId}/account")
+	@Produces("application/json; charset=UTF-8")
+	@RolesAllowed({Role.COCKPITUSER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public AccountForServiceDTO getAccount(@PathParam("checkInId") Long checkInId) {
+		return checkInController.getAccountByCheckInId(checkInId);
 	}
 	
 	

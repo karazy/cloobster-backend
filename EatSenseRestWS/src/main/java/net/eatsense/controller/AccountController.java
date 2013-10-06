@@ -33,6 +33,7 @@ import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.AccountDTO;
+import net.eatsense.representation.AccountForServiceDTO;
 import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.CustomerAccountDTO;
@@ -1163,4 +1164,5 @@ public class AccountController {
 		
 		return profile;
 	}
+
 }
