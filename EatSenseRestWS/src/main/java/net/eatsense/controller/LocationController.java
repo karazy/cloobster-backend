@@ -1,72 +1,5 @@
 package net.eatsense.controller;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import javax.validation.groups.Default;
-
-import net.eatsense.configuration.Configuration;
-import net.eatsense.configuration.addon.AddonConfiguration;
-import net.eatsense.configuration.addon.AddonConfigurationService;
-import net.eatsense.controller.ImageController.UpdateImagesResult;
-import net.eatsense.domain.Account;
-import net.eatsense.domain.Area;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.Company;
-import net.eatsense.domain.FeedbackForm;
-import net.eatsense.domain.Menu;
-import net.eatsense.domain.Request;
-import net.eatsense.domain.Request.RequestType;
-import net.eatsense.domain.Spot;
-import net.eatsense.domain.embedded.PaymentMethod;
-import net.eatsense.event.CheckInActivityEvent;
-import net.eatsense.event.DeleteCustomerRequestEvent;
-import net.eatsense.event.DeleteSpotEvent;
-import net.eatsense.event.NewCustomerRequestEvent;
-import net.eatsense.event.NewLocationEvent;
-import net.eatsense.event.NewSpotEvent;
-import net.eatsense.event.TrashBusinessEvent;
-import net.eatsense.exceptions.IllegalAccessException;
-import net.eatsense.exceptions.NotFoundException;
-import net.eatsense.exceptions.ServiceException;
-import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.FeedbackFormRepository;
-import net.eatsense.persistence.LocationRepository;
-import net.eatsense.persistence.MenuRepository;
-import net.eatsense.persistence.OfyService;
-import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.SpotRepository;
-import net.eatsense.representation.AreaDTO;
-import net.eatsense.representation.ImageDTO;
-import net.eatsense.representation.LocationDTO;
-import net.eatsense.representation.LocationProfileDTO;
-import net.eatsense.representation.RequestDTO;
-import net.eatsense.representation.SpotDTO;
-import net.eatsense.representation.cockpit.SpotStatusDTO;
-import net.eatsense.validation.CreationChecks;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.datastore.GeoPt;
 import com.google.common.base.Objects;
@@ -78,6 +11,38 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
+import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.addon.AddonConfiguration;
+import net.eatsense.configuration.addon.AddonConfigurationService;
+import net.eatsense.controller.ImageController.UpdateImagesResult;
+import net.eatsense.domain.*;
+import net.eatsense.domain.Request.RequestType;
+import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.event.*;
+import net.eatsense.exceptions.IllegalAccessException;
+import net.eatsense.exceptions.NotFoundException;
+import net.eatsense.exceptions.ServiceException;
+import net.eatsense.exceptions.ValidationException;
+import net.eatsense.persistence.*;
+import net.eatsense.representation.*;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
+import net.eatsense.validation.CreationChecks;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import javax.validation.groups.Default;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -193,7 +158,7 @@ public class LocationController {
 	/**
 	 * Save an outstanding request posted by a checkedin customer.
 	 * 
-	 * @param checkInUid
+	 * @param checkIn
 	 * @param requestData
 	 * @return requestData
 	 */
@@ -716,12 +681,14 @@ public class LocationController {
 		
 		return spotDTOList;
 	}
-	
-	/**
-	 * @param business
-	 * @param spotData
-	 * @return 
-	 */
+
+  /**
+   *
+   * @param locationKey
+   * @param spotData
+   * @param welcome
+   * @return
+   */
 	public SpotDTO createSpot(Key<Business> locationKey, SpotDTO spotData, boolean welcome) {
 		checkNotNull(locationKey, "businessKey was null");
 		
@@ -877,12 +844,13 @@ public class LocationController {
 			throw new NotFoundException();
 		}
 	}
-	
-	/**
-	 * @param business
-	 * @param areaData
-	 * @return
-	 */
+
+  /**
+   *
+   * @param businessKey
+   * @param areaData
+   * @return
+   */
 	public Area createArea(Key<Business> businessKey, AreaDTO areaData) {
 		checkNotNull(businessKey, "businessKey was null");
 		checkNotNull(areaData, "areaData was null");
@@ -901,7 +869,7 @@ public class LocationController {
 	 * Helper function to create a master Spot for an Area. 
 	 * 
 	 * @param businessKey
-	 * @param area
+	 * @param areaKey
 	 * @return 
 	 */
 	public Spot createMasterSpot(Key<Business> businessKey, Key<Area> areaKey) {
@@ -913,7 +881,7 @@ public class LocationController {
 	 * 
 	 * @param locationKey
 	 * @param optBarcode TODO
-	 * @param area
+	 * @param areaKey
 	 * @return 
 	 */
 	public Spot createMasterSpot(Key<Business> locationKey, Key<Area> areaKey, Optional<String> optBarcode) {
@@ -1061,7 +1029,7 @@ public class LocationController {
 		else 
 			return locationRepo.getListByProperty("company", Company.getKey(companyId));
 	}
-	
+
 	/**
 	 * @param locationId
 	 * @param countSpots
