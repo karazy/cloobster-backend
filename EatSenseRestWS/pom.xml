@@ -11,13 +11,13 @@
 
 	<properties>
 
-		<!-- GWT needs at least java 1.6 -->
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.7.7</gae.version>
+		<gae.version>1.8.5</gae.version>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
+		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<gae.application.version>1</gae.application.version>
 		<maven-gae-plugin.version>0.9.5</maven-gae-plugin.version>
 
@@ -40,12 +40,12 @@
 
 		<!-- ant run plugin -->
 		<antrun.version>1.7</antrun.version>
-		
+
 		<!-- Cloobster Projects -->
 		<cloobster.app>../../cloobster_app/app</cloobster.app>
 		<cloobster.cockpit>../../cloobster_cockpit</cloobster.cockpit>
 		<cloobster.frontend>../../cloobster_frontend/</cloobster.frontend>
-		
+
 	</properties>
 
 	<profiles>
@@ -54,25 +54,25 @@
 			<build>
 				<plugins>
 					<plugin>
-			        	<groupId>org.codehaus.enunciate</groupId>
-			        	<artifactId>maven-enunciate-plugin</artifactId>
-			        	<!-- check for the latest version -->
-			        	<version>1.25</version>
+						<groupId>org.codehaus.enunciate</groupId>
+						<artifactId>maven-enunciate-plugin</artifactId>
+						<!-- check for the latest version -->
+						<version>1.25</version>
 						<configuration>
 							<configFile>enunciate.xml</configFile>
 						</configuration>
-			        	<executions>
-			          		<execution>
-				            	<goals>
-			              			<goal>docs</goal>
-			            		</goals>
-			            		<configuration>
-			              			<!-- the directory where to put the docs -->
-			              			<docsDir>${project.build.directory}/docs</docsDir>
-			            		</configuration>
-			          		</execution>
-			        	</executions>
-			      </plugin>
+						<executions>
+							<execution>
+								<goals>
+									<goal>docs</goal>
+								</goals>
+								<configuration>
+									<!-- the directory where to put the docs -->
+									<docsDir>${project.build.directory}/docs</docsDir>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
 				<pluginManagement>
 					<plugins>
@@ -89,14 +89,14 @@
 												<artifactId>maven-enunciate-plugin</artifactId>
 												<!-- check for the latest version -->
 												<versionRange>[1.25,)</versionRange>
-					        					<goals>
-					              					<goal>docs</goal>
-					            				</goals>
-					            			</pluginExecutionFilter>
-					            			<action>			            
+												<goals>
+													<goal>docs</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
 												<execute />
 											</action>
-					           			</pluginExecution>
+										</pluginExecution>
 									</pluginExecutions>
 								</lifecycleMappingMetadata>
 							</configuration>
@@ -113,7 +113,7 @@
 						<artifactId>maven-resources-plugin</artifactId>
 						<version>2.4.2</version>
 						<executions>
-						    <execution>
+							<execution>
 								<id>copy-cloobster-frontend-adminhome</id>
 								<phase>compile</phase>
 								<goals>
@@ -125,8 +125,8 @@
 										<resource>
 											<directory>../../cloobster_frontend/src/</directory>
 											<excludes>
-											    <exclude>frontend/**/*</exclude>
-											</excludes>											
+												<exclude>frontend/**/*</exclude>
+											</excludes>
 										</resource>
 									</resources>
 								</configuration>
@@ -141,7 +141,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src/frontend</directory>											
+											<directory>../../cloobster_frontend/src/frontend</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -165,7 +165,7 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>		
+		</profile>
 		<profile>
 			<id>website</id>
 			<build>
@@ -198,19 +198,19 @@
 			<id>api-dev</id>
 			<build>
 				<filters>
-                    <filter>${basedir}/src/main/filters/dev.properties</filter>
-                </filters>
-            </build>
-        </profile>
-        <profile>
-        	<id>app-dev</id>
-        	<build>
-        		<plugins>
-	        		<plugin>
+					<filter>${basedir}/src/main/filters/dev.properties</filter>
+				</filters>
+			</build>
+		</profile>
+		<profile>
+			<id>app-dev</id>
+			<build>
+				<plugins>
+					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
 						<version>2.4.2</version>
 						<executions>
-			        		<execution>
+							<execution>
 								<id>copy-app-dev</id>
 								<phase>compile</phase>
 								<goals>
@@ -221,7 +221,7 @@
 									<resources>
 										<resource>
 											<directory>${cloobster.app}/src</directory>
-												<excludes>
+											<excludes>
 												<exclude>**/*.phone.*</exclude>
 												<exclude>**/*.iphone.*</exclude>
 											</excludes>
@@ -240,28 +240,28 @@
 									<resources>
 										<resource>
 											<directory>${cloobster.app}/siesta</directory>
-<!-- 											<excludes> -->
-<!-- 											    <exclude>**/docs/*</exclude> -->
-<!-- 											    <exclude>examples/**/*.js</exclude> -->
-<!-- 											    <exclude>examples-touch/*</exclude> -->
-<!-- 											    <exclude>tests/*</exclude> -->
-<!-- 											</excludes> -->
+											<!-- <excludes> -->
+											<!-- <exclude>**/docs/*</exclude> -->
+											<!-- <exclude>examples/**/*.js</exclude> -->
+											<!-- <exclude>examples-touch/*</exclude> -->
+											<!-- <exclude>tests/*</exclude> -->
+											<!-- </excludes> -->
 										</resource>
 									</resources>
 								</configuration>
 							</execution>
 						</executions>
 					</plugin>
-        		</plugins>
-        	</build>
-        </profile>
-        
+				</plugins>
+			</build>
+		</profile>
+
 		<profile>
 			<id>dev</id>
 			<build>
 				<filters>
-                    <filter>${basedir}/src/main/filters/dev.properties</filter>
-                </filters>
+					<filter>${basedir}/src/main/filters/dev.properties</filter>
+				</filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -279,8 +279,8 @@
 										<resource>
 											<directory>../../cloobster_frontend/src/</directory>
 											<excludes>
-											    <exclude>frontend/**/*</exclude>
-											</excludes>											
+												<exclude>frontend/**/*</exclude>
+											</excludes>
 										</resource>
 									</resources>
 								</configuration>
@@ -295,7 +295,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src/frontend</directory>											
+											<directory>../../cloobster_frontend/src/frontend</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -315,33 +315,33 @@
 									</resources>
 								</configuration>
 							</execution>
-<!-- 							<execution> -->
-<!-- 								<id>copy-admin-dev</id> -->
-<!-- 								<phase>compile</phase> -->
-<!-- 								<goals> -->
-<!-- 									<goal>copy-resources</goal> -->
-<!-- 								</goals> -->
-<!-- 								<configuration> -->
-<!-- 									<outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory> -->
-<!-- 									<resources> -->
-<!-- 										<resource> -->
-<!-- 											<directory>src/main/admin</directory> -->
-<!-- 											<includes> -->
-<!-- 												<include>js/app.js</include> -->
-<!-- 											</includes> -->
-<!-- 											Filter app.js with properties. -->
-<!-- 											<filtering>true</filtering> -->
-<!-- 										</resource> -->
-<!-- 										<resource> -->
-<!-- 											<directory>src/main/admin</directory> -->
-<!-- 											<excludes> -->
-<!-- 												<exclude>js/app.js</exclude> -->
-<!-- 											</excludes> -->
-<!-- 											<filtering>false</filtering> -->
-<!-- 										</resource> -->
-<!-- 									</resources> -->
-<!-- 								</configuration> -->
-<!-- 							</execution> -->
+							<!-- <execution> -->
+							<!-- <id>copy-admin-dev</id> -->
+							<!-- <phase>compile</phase> -->
+							<!-- <goals> -->
+							<!-- <goal>copy-resources</goal> -->
+							<!-- </goals> -->
+							<!-- <configuration> -->
+							<!-- <outputDirectory>${project.build.directory}/${project.build.finalName}/admin/</outputDirectory> -->
+							<!-- <resources> -->
+							<!-- <resource> -->
+							<!-- <directory>src/main/admin</directory> -->
+							<!-- <includes> -->
+							<!-- <include>js/app.js</include> -->
+							<!-- </includes> -->
+							<!-- Filter app.js with properties. -->
+							<!-- <filtering>true</filtering> -->
+							<!-- </resource> -->
+							<!-- <resource> -->
+							<!-- <directory>src/main/admin</directory> -->
+							<!-- <excludes> -->
+							<!-- <exclude>js/app.js</exclude> -->
+							<!-- </excludes> -->
+							<!-- <filtering>false</filtering> -->
+							<!-- </resource> -->
+							<!-- </resources> -->
+							<!-- </configuration> -->
+							<!-- </execution> -->
 							<execution>
 								<id>copy-cockpit-dev</id>
 								<phase>compile</phase>
@@ -355,8 +355,8 @@
 											<directory>${cloobster.cockpit}/src</directory>
 										</resource>
 									</resources>
-								</configuration>	
-							</execution>							
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
@@ -366,8 +366,8 @@
 			<id>frontend-dev-only</id>
 			<build>
 				<filters>
-                    <filter>${basedir}/src/main/filters/dev.properties</filter>
-                </filters>
+					<filter>${basedir}/src/main/filters/dev.properties</filter>
+				</filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -383,7 +383,7 @@
 									<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 									<resources>
 										<resource>
-											<directory>../../cloobster_frontend/src/frontend</directory>											
+											<directory>../../cloobster_frontend/src/frontend</directory>
 										</resource>
 									</resources>
 								</configuration>
@@ -397,8 +397,8 @@
 			<id>app-prod</id>
 			<build>
 				<filters>
-            		<filter>${basedir}/src/main/filters/prod.properties</filter>
-            	</filters>	
+					<filter>${basedir}/src/main/filters/prod.properties</filter>
+				</filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -428,8 +428,8 @@
 			<id>cockpit-prod</id>
 			<build>
 				<filters>
-            		<filter>${basedir}/src/main/filters/prod.properties</filter>
-            	</filters>	
+					<filter>${basedir}/src/main/filters/prod.properties</filter>
+				</filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -459,8 +459,8 @@
 			<id>prod</id>
 			<build>
 				<filters>
-            		<filter>${basedir}/src/main/filters/prod.properties</filter>
-            	</filters>	
+					<filter>${basedir}/src/main/filters/prod.properties</filter>
+				</filters>
 				<plugins>
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -542,23 +542,23 @@
 			<layout>default</layout>
 		</repository>
 		<repository>
-      		<id>owasp-java-html-sanitizer</id>
-      		<url>http://owasp-java-html-sanitizer.googlecode.com/svn/maven</url>
-   		</repository>
+			<id>owasp-java-html-sanitizer</id>
+			<url>http://owasp-java-html-sanitizer.googlecode.com/svn/maven</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
-	    <dependency>
+		<dependency>
 			<groupId>net.sourceforge.jexcelapi</groupId>
 			<artifactId>jxl</artifactId>
 			<version>2.6.12</version>
 		</dependency>
-	 	<dependency>
-      		<groupId>owasp-java-html-sanitizer</groupId>
-      		<artifactId>owasp-java-html-sanitizer</artifactId>
-      		<version>r129</version>
-      		<scope>compile</scope>
-    	</dependency>
+		<dependency>
+			<groupId>owasp-java-html-sanitizer</groupId>
+			<artifactId>owasp-java-html-sanitizer</artifactId>
+			<version>r129</version>
+			<scope>compile</scope>
+		</dependency>
 		<!-- From local repository -->
 		<dependency>
 			<groupId>com.innovatics</groupId>
@@ -566,9 +566,9 @@
 			<version>3.11</version>
 		</dependency>
 		<dependency>
-    		<groupId>com.google.guava</groupId>
-    		<artifactId>guava</artifactId>
-    		<version>12.0</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>12.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -706,12 +706,12 @@
 			<version>${jersey.version}</version>
 		</dependency>
 		<!-- Ant run plugin for special purposes -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.maven.plugins</groupId> -->
-<!-- 			<artifactId>maven-antrun-plugin</artifactId> -->
-<!-- 			<version>${antrun.version}</version> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.maven.plugins</groupId> -->
+		<!-- <artifactId>maven-antrun-plugin</artifactId> -->
+		<!-- <version>${antrun.version}</version> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.joda</groupId>
 			<artifactId>joda-money</artifactId>
@@ -734,10 +734,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-  			<artifactId>mockito-core</artifactId>  
-  			<version>1.9.0</version> 
-  			<scope>test</scope>
-  		</dependency>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.0</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
@@ -752,9 +752,9 @@
 		<outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
 		<plugins>
 			<plugin>
-    			<groupId>com.google.appengine</groupId>
-    			<artifactId>appengine-maven-plugin</artifactId>
-    			<version>1.7.4</version>
+				<groupId>com.google.appengine</groupId>
+				<artifactId>appengine-maven-plugin</artifactId>
+				<version>${gae.version}</version>
 			</plugin>
 			<!-- Add source folders to test classpath in order to run gwt-tests as 
 				normal junit-tests -->
@@ -814,11 +814,11 @@
 							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
 							<resources>
 								<resource>
-                					<directory>${basedir}/src/main/webapp</directory>
-                					<filtering>true</filtering>
-                					<includes>
-                    					<include>WEB-INF/web.xml</include>
-                					</includes>
+									<directory>${basedir}/src/main/webapp</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>WEB-INF/web.xml</include>
+									</includes>
 								</resource>
 								<resource>
 									<directory>${basedir}/src/main/webapp</directory>
@@ -861,32 +861,71 @@
 				</executions>
 			</plugin>
 			<plugin>
-                <groupId>net.kindleit</groupId>
-                <artifactId>maven-gae-plugin</artifactId>
-                <version>${maven-gae-plugin.version}</version>
-                <dependencies>
-                  <dependency>
-                    <groupId>net.kindleit</groupId>
-                    <artifactId>gae-runtime</artifactId>
-                    <version>${gae.version}</version>
-                    <type>pom</type>
-                  </dependency>
-                </dependencies>
-                <executions>
-	          		<execution>
-	            	<id />
-	            		<phase>validate</phase>
-	            	<goals>
-	              		<goal>unpack</goal>
-	            		</goals>
-	          		</execution>
-	        	</executions>
-            </plugin>
+				<groupId>net.kindleit</groupId>
+				<artifactId>maven-gae-plugin</artifactId>
+				<version>${maven-gae-plugin.version}</version>
+				<configuration>
+					<unpackVersion>${gae.version}</unpackVersion>
+					<appDir>${webappDirectory}</appDir>
+					<sdkDir>${gae.home}</sdkDir>
+					<splitJars>true</splitJars>
+				</configuration>
+				<dependencies>
+					<!-- Google App Engine API -->
+					<dependency>
+						<groupId>com.google.appengine</groupId>
+						<artifactId>appengine-api-1.0-sdk</artifactId>
+						<version>${gae.version}</version>
+					</dependency>
+					<!-- Google App Engine Runtime Dependencies -->
+					<dependency>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-jta_1.1_spec</artifactId>
+						<version>1.1.1</version>
+						<scope>runtime</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-jpa_3.0_spec</artifactId>
+						<version>1.1.1</version>
+						<scope>runtime</scope>
+					</dependency>
+					<dependency>
+						<groupId>javax.jdo</groupId>
+						<artifactId>jdo2-api</artifactId>
+						<version>2.3-eb</version>
+						<scope>runtime</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-core</artifactId>
+						<version>1.1.5</version>
+					</dependency>
+					<dependency>
+						<groupId>com.google.appengine.orm</groupId>
+						<artifactId>datanucleus-appengine</artifactId>
+						<version>1.0.10</version>
+						<scope>runtime</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-jpa</artifactId>
+						<version>1.1.5</version>
+						<scope>runtime</scope>
+					</dependency>
+					<!-- App Engine Runtime Dependencies -->
+					<dependency>
+						<groupId>com.google.appengine</groupId>
+						<artifactId>appengine-tools-sdk</artifactId>
+						<version>${gae.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<version>2.8</version>
-				<configuration>				
+				<configuration>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>false</downloadJavadocs>
 					<wtpversion>2.0</wtpversion>
@@ -947,18 +986,18 @@
 									</action>
 								</pluginExecution>
 								<pluginExecution>
-                  					<pluginExecutionFilter>
-                    					<groupId>net.kindleit</groupId>
-					                    <artifactId>maven-gae-plugin</artifactId>
-					                    <versionRange>[0.7.3,)</versionRange>
-					                    <goals>
-					                      <goal>unpack</goal>
-					                    </goals>
-					                </pluginExecutionFilter>
-					             	<action>
-					                	<execute />
-					                </action>
-				                </pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>net.kindleit</groupId>
+										<artifactId>maven-gae-plugin</artifactId>
+										<versionRange>[0.7.3,)</versionRange>
+										<goals>
+											<goal>unpack</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -966,13 +1005,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest-core</artifactId>
-				<version>1.2.1</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>
