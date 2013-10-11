@@ -1,18 +1,12 @@
 package net.eatsense.representation;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
-import net.eatsense.domain.Company;
-import net.eatsense.domain.Business;
-
-import org.apache.bval.constraints.NotEmpty;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import net.eatsense.domain.Business;
+
+import javax.validation.constraints.Min;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class LocationProfileDTO extends LocationDTO {
 
@@ -41,6 +35,8 @@ public class LocationProfileDTO extends LocationDTO {
 	
 	private Map<String, Boolean> features = Maps.newHashMap();
 	private Map<String, Map<String, String>> configuration;
+
+  private Double distance;
 
 	public LocationProfileDTO() {
 		super();
@@ -180,4 +176,12 @@ public class LocationProfileDTO extends LocationDTO {
 					return new LocationProfileDTO(input);
 				}
 		    };
+
+  public Double getDistance() {
+    return distance;
+  }
+
+  public void setDistance(Double distance) {
+    this.distance = distance;
+  }
 }

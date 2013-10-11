@@ -1,7 +1,18 @@
 package net.eatsense;
 
-import java.util.HashMap;
-
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.common.eventbus.EventBus;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
+import com.google.inject.servlet.GuiceServletContextListener;
+import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
+import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
+import com.sun.jersey.guice.JerseyServletModule;
+import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import net.eatsense.auth.AccessTokenFilter;
 import net.eatsense.auth.AuthorizerFactory;
 import net.eatsense.auth.AuthorizerFactoryImpl;
@@ -11,29 +22,14 @@ import net.eatsense.configuration.ConfigurationProvider;
 import net.eatsense.configuration.WhiteLabelConfiguration;
 import net.eatsense.configuration.addon.AddonConfigurationService;
 import net.eatsense.configuration.addon.AddonConfigurationServiceImpl;
-import net.eatsense.controller.CheckInController;
-import net.eatsense.controller.CounterController;
-import net.eatsense.controller.DashboardController;
-import net.eatsense.controller.InfoPageController;
-import net.eatsense.controller.MailController;
-import net.eatsense.controller.MessageController;
-import net.eatsense.controller.SubscriptionController;
+import net.eatsense.controller.*;
 import net.eatsense.exceptions.CapabilityDisabledExceptionMapper;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.filter.ApiVersionFilterFactory;
 import net.eatsense.filter.CacheResponseFilter;
 import net.eatsense.filter.SuffixFilter;
 import net.eatsense.persistence.OfyService;
-import net.eatsense.restws.AccountResource;
-import net.eatsense.restws.ActionResource;
-import net.eatsense.restws.ChannelResource;
-import net.eatsense.restws.CounterTasksResource;
-import net.eatsense.restws.CronResource;
-import net.eatsense.restws.DownloadResource;
-import net.eatsense.restws.NewsletterResource;
-import net.eatsense.restws.NicknameResource;
-import net.eatsense.restws.SpotResource;
-import net.eatsense.restws.UploadsResource;
+import net.eatsense.restws.*;
 import net.eatsense.restws.administration.AdminResource;
 import net.eatsense.restws.business.AccountsResource;
 import net.eatsense.restws.business.CompaniesResource;
@@ -42,43 +38,11 @@ import net.eatsense.restws.business.SubscriptionTemplatesResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.restws.customer.VisitsResource;
+import net.eatsense.search.LocationSearchService;
 import net.eatsense.util.NicknameGenerator;
-
 import org.apache.bval.guice.ValidationModule;
-import org.owasp.html.AttributePolicy;
-import org.owasp.html.HtmlPolicyBuilder;
-import org.owasp.html.PolicyFactory;
 
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.files.FileService;
-import com.google.appengine.api.files.FileServiceFactory;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.urlfetch.URLFetchService;
-import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
-import com.google.common.eventbus.EventBus;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
-import com.google.inject.servlet.GuiceServletContextListener;
-import com.googlecode.objectify.cache.CachingDatastoreService;
-import com.googlecode.objectify.cache.CachingDatastoreServiceFactory;
-import com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
-import com.sun.jersey.guice.JerseyServletModule;
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import java.util.HashMap;
 
 /**
  * Configures google guice for use in a servlet environment. All condifured
@@ -135,6 +99,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				bind(CounterTasksResource.class);
 				bind(VisitsResource.class);
 				bind(ActionResource.class);
+        bind(LocationSearchService.class).in(Singleton.class);
 
 				// Create Configuration binding to automatically load
 				// configuration if needed.
@@ -171,6 +136,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 		eventBus.register(injector.getInstance(InfoPageController.class));
 		eventBus.register(injector.getInstance(CounterController.class));
 		eventBus.register(injector.getInstance(CheckInController.class));
+    eventBus.register(injector.getInstance(LocationSearchService.class));
 
 		// Register Objectify datastore entities.
 
@@ -178,5 +144,4 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 
 		return injector;
 	}
-
 }

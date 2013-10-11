@@ -47,9 +47,14 @@ public class LocationsResource{
 	
 	@GET
 	@Produces("application/json; charset=utf-8")
-	public List<LocationProfileDTO> getBusinesses(@QueryParam("spotCode") String spotCode) {
-		
+	public List<LocationProfileDTO> getBusinesses(@QueryParam("spotCode") String spotCode, @QueryParam("lat") Double latitude, @QueryParam("long") Double longitude, @QueryParam("distance") Integer distance) {
+
 		try {
+
+      if(latitude != null && longitude != null && distance != null) {
+        return locationCtrl.getLocations(latitude, longitude, distance);
+      }
+
       if(!Strings.isNullOrEmpty(spotCode))
 			  return ImmutableList.of(new LocationProfileDTO(locationCtrl.getLocationBySpotCode(spotCode)));
       else

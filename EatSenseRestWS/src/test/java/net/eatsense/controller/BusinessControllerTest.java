@@ -1,81 +1,7 @@
 package net.eatsense.controller;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.awt.Menu;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.validation.Validator;
-
-import net.eatsense.AppEngineServiceModule;
-import net.eatsense.EatSenseDomainModule;
-import net.eatsense.configuration.Configuration;
-import net.eatsense.configuration.addon.AddonConfiguration;
-import net.eatsense.configuration.addon.AddonConfigurationService;
-import net.eatsense.controller.ImageController.UpdateImagesResult;
-import net.eatsense.domain.Account;
-import net.eatsense.domain.Area;
-import net.eatsense.domain.Business;
-import net.eatsense.domain.CheckIn;
-import net.eatsense.domain.FeedbackForm;
-import net.eatsense.domain.Spot;
-import net.eatsense.domain.embedded.CheckInStatus;
-import net.eatsense.domain.embedded.ConfigurationFlag;
-import net.eatsense.domain.embedded.PaymentMethod;
-import net.eatsense.exceptions.ValidationException;
-import net.eatsense.persistence.AccountRepository;
-import net.eatsense.persistence.AreaRepository;
-import net.eatsense.persistence.LocationRepository;
-import net.eatsense.persistence.CheckInRepository;
-import net.eatsense.persistence.ChoiceRepository;
-import net.eatsense.persistence.FeedbackFormRepository;
-import net.eatsense.persistence.FeedbackRepository;
-import net.eatsense.persistence.MenuRepository;
-import net.eatsense.persistence.OfyService;
-import net.eatsense.persistence.OrderChoiceRepository;
-import net.eatsense.persistence.OrderRepository;
-import net.eatsense.persistence.ProductRepository;
-import net.eatsense.persistence.RequestRepository;
-import net.eatsense.persistence.SpotRepository;
-import net.eatsense.representation.AreaDTO;
-import net.eatsense.representation.LocationProfileDTO;
-import net.eatsense.representation.CheckInDTO;
-import net.eatsense.representation.RequestDTO;
-import net.eatsense.representation.ImageDTO;
-import net.eatsense.representation.SpotDTO;
-import net.eatsense.representation.Transformer;
-import net.eatsense.representation.cockpit.SpotStatusDTO;
-import net.eatsense.util.DummyDataDumper;
-
-import org.apache.bval.guice.ValidationModule;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Maps;
@@ -86,6 +12,39 @@ import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.Query;
+import net.eatsense.AppEngineServiceModule;
+import net.eatsense.EatSenseDomainModule;
+import net.eatsense.configuration.Configuration;
+import net.eatsense.configuration.addon.AddonConfigurationService;
+import net.eatsense.controller.ImageController.UpdateImagesResult;
+import net.eatsense.domain.*;
+import net.eatsense.domain.embedded.CheckInStatus;
+import net.eatsense.domain.embedded.PaymentMethod;
+import net.eatsense.persistence.*;
+import net.eatsense.representation.*;
+import net.eatsense.representation.cockpit.SpotStatusDTO;
+import net.eatsense.search.LocationSearchService;
+import net.eatsense.util.DummyDataDumper;
+import org.apache.bval.guice.ValidationModule;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BusinessControllerTest {
@@ -158,8 +117,10 @@ public class BusinessControllerTest {
 
 	@Mock
 	private AddonConfigurationService addonConfig;
+  @Mock
+  private LocationSearchService searchService;
 
-	@Before
+  @Before
 	public void setUp() throws Exception {
 		helper.setUp();
 		injector = Guice.createInjector(new EatSenseDomainModule(), new ValidationModule(), new AppEngineServiceModule());
@@ -181,7 +142,7 @@ public class BusinessControllerTest {
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
 		when(ofyService.factory()).thenReturn(ofyFactory);
 		
-		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, addonConfig , ofyService);
+		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, addonConfig , ofyService, searchService);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -539,7 +500,7 @@ public class BusinessControllerTest {
 	private LocationController createController() {
 		return new LocationController(requestRepo, checkInrepo, spotRepo, rr,
 				eventBus, accountRepo, imageController, areaRepo, validator,
-				mr, feedbackRepo, configProvider, addonConfig, ofyService);
+				mr, feedbackRepo, configProvider, addonConfig, ofyService, searchService);
 	}
 	
 	@Test

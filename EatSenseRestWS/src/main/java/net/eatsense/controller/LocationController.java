@@ -2,6 +2,10 @@ package net.eatsense.controller;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.datastore.GeoPt;
+import com.google.appengine.api.search.Field;
+import com.google.appengine.api.search.Results;
+import com.google.appengine.api.search.ScoredDocument;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -26,9 +30,8 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.*;
 import net.eatsense.representation.*;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
+import net.eatsense.search.LocationSearchService;
 import net.eatsense.validation.CreationChecks;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -67,7 +70,8 @@ public class LocationController {
 	private final Provider<Configuration> configProvider;
 	private FeedbackFormRepository feedbackRepo;
 	private final OfyService ofyService;
-	private final AddonConfigurationService addonConfig;
+  private final LocationSearchService searchService;
+  private final AddonConfigurationService addonConfig;
 	
 	@Inject
 	public LocationController(RequestRepository rr, CheckInRepository cr,
@@ -78,7 +82,8 @@ public class LocationController {
 			FeedbackFormRepository feedbackRepository,
 			Provider<Configuration> configProvider,
 			AddonConfigurationService addonConfig,
-			OfyService ofyService) {
+			OfyService ofyService,
+      LocationSearchService searchService) {
 		this.areaRepo = areaRepository;
 		this.menuRepo = menuRepository;
 		this.validator = validator;
@@ -93,10 +98,11 @@ public class LocationController {
 		this.feedbackRepo = feedbackRepository;
 		this.addonConfig = addonConfig;
 		this.ofyService = ofyService;
-	}
-	
+    this.searchService = searchService;
+  }
+
 	/**
-	 * Retrieve initial status data of all spots for the given business id.<br>
+	 * Retrieve initial status data of all spots for the given Business entity.<br>
 	 * (mainly used by the Eatsense Cockpit application).
 	 * 
 	 * @param business
@@ -484,10 +490,16 @@ public class LocationController {
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
 		business.setIncomingOrderNotifcationEnabled(businessData.isIncomingOrderNotificationEnabled());
-		
+
+    boolean updateSearchIndex = false;
 		if(businessData.getGeoLat() != null && businessData.getGeoLong() != null) {
 			try {
-				business.setGeoLocation(new GeoPt(businessData.getGeoLat(), businessData.getGeoLong()));
+        GeoPt geoLocation = new GeoPt(businessData.getGeoLat(), businessData.getGeoLong());
+        if(!Objects.equal(geoLocation, business.getGeoLocation())) {
+          updateSearchIndex = true;
+          business.setGeoLocation(geoLocation);
+        }
+
 			} catch (IllegalArgumentException e) {
 				logger.error("Illegal value for geoLat or geoLong", e);
 				throw new ValidationException("Illegal value for geoLat or geoLong.");
@@ -538,6 +550,8 @@ public class LocationController {
 		
 		if(business.isDirty()) {
 			key = locationRepo.saveOrUpdate(business);
+      if(updateSearchIndex)
+        eventBus.post(new UpdateGeoLocation(business));
 		}
 		else {
 			key = locationRepo.getKey(business);
@@ -1030,6 +1044,43 @@ public class LocationController {
 			return locationRepo.getListByProperty("company", Company.getKey(companyId));
 	}
 
+  /**
+   *
+   * @param latitude
+   * @param longitude
+   * @param distance
+   * @return
+   */
+  public List<LocationProfileDTO> getLocations(double latitude, double longitude, int distance) {
+    Results<ScoredDocument> result = searchService.query(latitude, longitude, distance);
+
+    List<Key<Business>> locationKeys = Lists.newArrayList();
+    List<Double> distances = Lists.newArrayList();
+
+    for (ScoredDocument doc : result.getResults()) {
+      Key<Business> key = new Key<Business>(doc.getId());
+      locationKeys.add(key);
+      for (Field exp :  doc.getExpressions()) {
+        if(exp.getName().equals("distance")) {
+          distances.add(exp.getNumber());
+        }
+      }
+    }
+
+    Collection<Business> locations = locationRepo.getByKeys(locationKeys);
+    List<LocationProfileDTO> locationDtos = Lists.newArrayList();
+    int locationIndex = 0;
+    for (Business location : locations) {
+      LocationProfileDTO dto = new LocationProfileDTO(location);
+      dto.setDistance(distances.get(locationIndex));
+      locationDtos.add(dto);
+      ++locationIndex;
+    }
+
+
+    return locationDtos;
+  }
+
 	/**
 	 * @param locationId
 	 * @param countSpots
@@ -1162,10 +1213,6 @@ public class LocationController {
 		HashMap<String, String>  _map = null;
 		try {
 			_map = mapper.readValue(configMap.toString(), HashMap.class);
-		} catch (JsonParseException e1) {
-			throw new ValidationException("Could not parse json configuration. " + e1.toString());
-		} catch (JsonMappingException e1) {
-			throw new ValidationException("Could not parse json configuration. " + e1.toString());
 		} catch (IOException e1) {
 			throw new ValidationException("Could not parse json configuration. " + e1.toString());
 		}

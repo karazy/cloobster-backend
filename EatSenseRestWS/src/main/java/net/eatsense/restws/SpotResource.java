@@ -1,19 +1,14 @@
 package net.eatsense.restws;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-
+import com.google.inject.Inject;
+import com.sun.jersey.api.NotFoundException;
 import net.eatsense.controller.CheckInController;
 import net.eatsense.controller.LocationController;
 import net.eatsense.representation.SpotDTO;
 
-import com.google.inject.Inject;
-import com.sun.jersey.api.NotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 
 /**
  * Resource to retrieve spot information by a unique barcode.
@@ -56,6 +51,7 @@ public class SpotResource {
 	@Path("{barcode}")
 	@Produces("application/json; charset=UTF-8")
 	public SpotDTO getSpot(@PathParam("barcode") String barcode,  @QueryParam("locationId") Long locationId) {
+    //TODO Ugly way of retrieving welcome spot, refactor later
 		if(locationId != null){	
 			return locationCtrl.getWelcomeSpot(locationId);
 		}
