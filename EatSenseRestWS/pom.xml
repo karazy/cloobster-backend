@@ -16,8 +16,9 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- GAE properties -->
-		<gae.version>1.7.7</gae.version>
-		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
+		<gae.version>1.8.6</gae.version>
+		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-maven-plugin/${gae.version}</gae.home>
+		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<gae.application.version>1</gae.application.version>
 		<maven-gae-plugin.version>0.9.5</maven-gae-plugin.version>
 
