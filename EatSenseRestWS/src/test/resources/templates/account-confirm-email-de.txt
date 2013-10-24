@@ -1,11 +1,14 @@
-[Cloobster] Konto E-Mail Bestätigung für {0}
+Konto E-Mail Bestätigung für {0}
 Hallo {0},
 
-haben Sie vielen Dank für Ihre Registrierung bei Cloobster.
+Sie haben einen Account für die App
+Cloobster oder FRIZZ+ angelegt.
 
-Dies ist eine automatische Nachricht. Um Ihre Registrierung zu bestätigen, folgen Sie bitte diesem Link:
+Um Ihre Registrierung zu bestätigen, folgen Sie bitte diesem Link:
 {1}
 
+Dies ist eine automatische Nachricht der Karazy App Platform auf der
+cloobster und FRIZZ+ basieren.
 
-Ihr cloobster Team
-Sirko Polster
+
+Das Karazy App Platform Team
