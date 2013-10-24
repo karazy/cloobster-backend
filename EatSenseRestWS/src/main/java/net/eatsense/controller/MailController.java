@@ -160,10 +160,12 @@ public class MailController {
 	public void sendRegistrationConfirmationMail(NewAccountEvent event) {
 		Account account = event.getAccount();
 		UriInfo uriInfo = event.getUriInfo();
+		String whitelabel = event.getWhitelabel();
+		
 		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		
 		if(account.getRole().equals(Role.USER)) {
-			sendCustomerAccountEmailConfirmation(account, uriInfo);
+			sendCustomerAccountEmailConfirmation(account, uriInfo, whitelabel);
 			return;
 		}
 		
@@ -315,12 +317,24 @@ public class MailController {
 		}
 	}
 	
-	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo) {
+	public void sendCustomerAccountEmailConfirmation(Account account, UriInfo uriInfo, String whitelabel) {
 		String accessToken = accountCtrl.createEmailConfirmationToken(account).getToken();
 		UriBuilder baseUriBuilder = UriBuilder.fromUri(baseUri);
 		String confirmUrl = baseUriBuilder.path("/home/").fragment(ACCOUNTS_CUSTOMER_CONFIRM).build(accessToken).toString();
 		
-		String confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);
+		final String template = "customer-account-confirm-email";
+		String confirmationText = null;
+		
+		if(whitelabel != null) {
+			//if we have a whitelabel, look if a spcific mail exists
+			confirmationText = templateCtrl.getAndReplace(whitelabel+"-"+template, confirmUrl);
+		} 
+		
+		//no whitelabel or no specific template found
+		if(confirmationText == null) {
+			confirmationText = templateCtrl.getAndReplace("customer-account-confirm-email", confirmUrl);
+		}
+		
 		
 		try {
 			// Send e-mail with password reset link.

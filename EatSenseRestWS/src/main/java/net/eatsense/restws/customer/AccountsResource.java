@@ -76,7 +76,9 @@ public class AccountsResource {
 	public CustomerAccountDTO createAccount(CustomerAccountDTO accountData, @Context UriInfo uriInfo) {
 		AccountController accountCtrl = accountCtrlProvider.get();
 		Account account = accountCtrl.registerNewCustomerAccount(accountData);
-		eventBus.post(new NewAccountEvent(account, uriInfo));
+		String whitelabel = servletRequest.getHeader("cloobster-whitelabel");
+		
+		eventBus.post(new NewAccountEvent(account, uriInfo, whitelabel));
 		CustomerAccountDTO accountDto = new CustomerAccountDTO(account);
 		
 		AccessToken authToken = accountCtrl.createCustomerAuthToken(account);
@@ -84,7 +86,6 @@ public class AccountsResource {
 		logger.info("Permanent customer Token created");
 		accountDto.setAccessToken(authToken.getToken());
 
-		
 		return accountDto;
 	}
 	

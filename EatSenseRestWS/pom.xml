@@ -849,7 +849,7 @@
 				<version>${antrun.version}</version>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<phase>compile</phase>
 						<configuration>
 							<target>
 								<ant target="default" />

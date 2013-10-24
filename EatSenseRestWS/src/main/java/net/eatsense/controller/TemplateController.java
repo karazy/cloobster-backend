@@ -47,7 +47,10 @@ public class TemplateController {
 				"location-upgrade-request",
 				"infopage-demo-de.json",
 				"email-cockpit-offline-alert-de",
-				"order-placed-alert-de");
+				"order-placed-alert-de",
+				//Whitelabels
+				//FRIZZ
+				"frizz-customer-account-confirm-email");
 	}
 	
 	/**
