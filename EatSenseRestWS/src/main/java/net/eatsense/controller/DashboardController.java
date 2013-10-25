@@ -67,7 +67,7 @@ public class DashboardController {
 		boolean isServiceCallDisabled = location.getDisabledFeatures().contains("requests-call");
 		//External partners
 		boolean isDeZtixEnabled = location.getEnabledOptionalFeatures().contains("de-ztix");
-		;
+		boolean isDeZtixCouponsEnabled = location.getEnabledOptionalFeatures().contains("de-ztix-coupons");
 		
 		// filter list by active features only
 		for (Iterator<DashboardItem> iterator = items.iterator(); iterator.hasNext();) {
@@ -88,6 +88,9 @@ public class DashboardController {
 				iterator.remove();
 			}
 			else if(dashboardItem.getType().equals("deztixevents") && !isDeZtixEnabled) {
+				iterator.remove();
+			}
+			else if(dashboardItem.getType().equals("deztixcoupons") && !isDeZtixCouponsEnabled) {
 				iterator.remove();
 			}
 		}
