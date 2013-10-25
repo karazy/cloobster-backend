@@ -1,17 +1,28 @@
 [FRIZZ+] Konto E-Mail Bestätigung
 
-Liebes FRIZZ+ Mitglied,
 
-haben Sie vielen Dank für Ihre Registrierung. Mit FRIZZ+ haben Sie Ihre Lieblingsorte immer bei sich.
-Egal ob im Restaurant, Cafe oder Ihrem Lieblingsladen, mit FRIZZ+ haben Sie zu jeder Zeit Zugriff auf alle Informationen und Angebote.
+Lieber"FRIZZ+"-Nutzer,
 
-Sollte Ihr Lieblingshotel, Restaurant oder Laden nicht auf cloobster vertreten sein, dann fragen Sie doch nach oder geben Sie uns einen Tipp. 
-Wir werden dann Kontakt aufnehmen.
+
+vielen Dank für die Registrierung.
+
+Mit FRIZZ+ haben Sie Ihre Lieblingsorte immer dabei und zu jeder Zeit Zugriff auf die neusten Infos und Angebote.
+
+Sollte Ihr Lieblings-Restaurant oder Geschäft noch nicht auf FRIZZ+ vertreten sein, dann fragen Sie einfach nach oder geben
+Sie uns einen Tipp. Wir werden dann Kontakt aufnehmen.
+
+
 
 Um Ihre Registrierung zu bestätigen, folgen Sie bitte diesem Link:
 {0}
 
-Das FRIZZ+ Team wünscht Ihnen viel Spaß !
 
-Mit besten Grüßen
-Sirko Polster
+
+Das "FRIZZ+"-Team wünscht viel Spaß!
+
+Sie haben eine Frage? Dann schreiben Sie uns an app@frizz-darmstadt.de
+
+
+
+--
+FRIZZ+ basiert auf der cloobster App Platform.
