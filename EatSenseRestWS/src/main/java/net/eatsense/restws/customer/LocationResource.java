@@ -100,7 +100,7 @@ public class LocationResource {
 	@Path("menus")
 	@Produces("application/json; charset=UTF-8")
 	public Collection<MenuDTO> getMenus(@QueryParam("areaId")long areaId, @QueryParam("includeProducts") Boolean includeProducts) {
-		if(includeProducts != null && includeProducts) {
+		if(includeProducts != null && includeProducts) { 
 			return menuCtrl.getMenusWithProducts(business.getKey(), areaId);
 		}
 		else {
