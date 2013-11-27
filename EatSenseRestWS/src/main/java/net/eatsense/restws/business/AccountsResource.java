@@ -67,7 +67,7 @@ public class AccountsResource {
 	@Produces("application/json; charset=UTF-8")
 	public RegistrationDTO registerAccount(RegistrationDTO accountData) {
 		Account newAccount = accountCtr.registerNewCompanyAccount(accountData, false);
-		eventBus.post(new NewAccountEvent(newAccount, uriInfo));
+		eventBus.post(new NewAccountEvent(newAccount, uriInfo, null));
 		return accountData;
 	}
 	

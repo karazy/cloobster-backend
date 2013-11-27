@@ -9,6 +9,7 @@ public class NewAccountEvent extends AccountEvent {
 	private final String whitelabel;
 	
 	public NewAccountEvent(Account account, UriInfo uriInfo, String whitelabel) {
+		//TODO refactor whitelabel as Optional<String> whitelabel 
 		super(account);
 		this.uriInfo = uriInfo;
 		this.whitelabel = whitelabel;
