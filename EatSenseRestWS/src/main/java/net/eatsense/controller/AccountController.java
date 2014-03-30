@@ -22,6 +22,7 @@ import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
+import net.eatsense.domain.StoreCard;
 import net.eatsense.event.ResetAccountPasswordEvent;
 import net.eatsense.event.UpdateAccountPasswordEvent;
 import net.eatsense.exceptions.IllegalAccessException;
@@ -32,6 +33,7 @@ import net.eatsense.persistence.CompanyRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
+import net.eatsense.persistence.StoreCardRepository;
 import net.eatsense.representation.AccountDTO;
 import net.eatsense.representation.AccountForServiceDTO;
 import net.eatsense.representation.BusinessAccountDTO;
@@ -41,6 +43,7 @@ import net.eatsense.representation.ImageDTO;
 import net.eatsense.representation.LocationDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
+import net.eatsense.representation.StoreCardDTO;
 import net.eatsense.service.FacebookService;
 import net.eatsense.validation.CockpitUserChecks;
 import net.eatsense.validation.EmailChecks;
@@ -79,12 +82,15 @@ public class AccountController {
 	private final EventBus eventBus;
 	private final CustomerProfileRepository customerProfileRepo;
 	private final CheckInRepository checkInRepo;
+	private final StoreCardRepository storeCardRepo;
 
 	@Inject
 	public AccountController(AccountRepository accountRepo, LocationRepository businessRepository,
 			NewsletterRecipientRepository recipientRepo, CompanyRepository companyRepo,
 			ValidationHelper validator, FacebookService facebookService,
-			ImageController imageController, AccessTokenRepository accessTokenRepo, EventBus eventBus, CustomerProfileRepository customerProfileRepo, CheckInRepository checkInRepo) {
+			ImageController imageController, AccessTokenRepository accessTokenRepo, 
+			EventBus eventBus, CustomerProfileRepository customerProfileRepo, CheckInRepository checkInRepo,
+			StoreCardRepository scRepo) {
 		super();
 		this.accessTokenRepo = accessTokenRepo;
 		this.validator = validator;
@@ -97,6 +103,7 @@ public class AccountController {
 		this.checkInRepo = checkInRepo;
 		this.eventBus = eventBus;
 		this.customerProfileRepo = customerProfileRepo;
+		this.storeCardRepo = scRepo;
 	}
 	
 	
@@ -1163,6 +1170,51 @@ public class AccountController {
 		accountRepo.saveOrUpdate(account);
 		
 		return profile;
+	}
+	
+	//Start logic for storeCard
+	
+	/**
+	 * Creates and saves a new {@link StoreCard}
+	 * @param account
+	 * 		Account to assign this storecard to.
+	 * @param scDTO
+	 * 		store card data
+	 * @return
+	 * 		Created store card.
+	 */
+	public StoreCardDTO createStoreCard(Account account, StoreCardDTO scDTO) {
+		checkNotNull(scDTO, "store card was null");
+		checkNotNull(account, "account was null");
+		
+		StoreCard sc = storeCardRepo.newEntity();
+		sc.setId(storeCardRepo.allocateId());
+		
+		sc.setCardNumber(scDTO.getCardNumber());
+		sc.setAccount(account.getKey());
+		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
+		
+		storeCardRepo.saveOrUpdate(sc);
+		
+		return new StoreCardDTO(sc);
+	}
+	
+	/**
+	 * Get all store cards of a user.
+	 * @param account
+	 * 		Account to retrieve store cards for.
+	 * @return
+	 * 		
+	 */
+	public List<StoreCardDTO> getStoreCards(Account account) {
+		checkNotNull(account, "account was null");
+		List<StoreCardDTO> cards = new ArrayList<StoreCardDTO>();
+		
+		for(StoreCard sc : storeCardRepo.getByParent(account.getKey())) {
+			cards.add(new StoreCardDTO(sc));
+		}
+		
+		return cards;
 	}
 
 }

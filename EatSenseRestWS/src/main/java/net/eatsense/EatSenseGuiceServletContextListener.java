@@ -41,6 +41,7 @@ import net.eatsense.restws.business.LocationsResource;
 import net.eatsense.restws.business.SubscriptionTemplatesResource;
 import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
+import net.eatsense.restws.customer.StoreCardResource;
 import net.eatsense.restws.customer.VisitsResource;
 import net.eatsense.util.NicknameGenerator;
 
@@ -135,6 +136,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				bind(CounterTasksResource.class);
 				bind(VisitsResource.class);
 				bind(ActionResource.class);
+				bind(StoreCardResource.class);
 
 				// Create Configuration binding to automatically load
 				// configuration if needed.
