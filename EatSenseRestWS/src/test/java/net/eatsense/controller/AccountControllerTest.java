@@ -22,6 +22,7 @@ import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.domain.Account;
 import net.eatsense.domain.Business;
+import net.eatsense.domain.StoreCard;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
 import net.eatsense.domain.NewsletterRecipient;
@@ -30,11 +31,13 @@ import net.eatsense.exceptions.ValidationException;
 import net.eatsense.persistence.AccountRepository;
 import net.eatsense.persistence.CheckInRepository;
 import net.eatsense.persistence.CompanyRepository;
+import net.eatsense.persistence.StoreCardRepository;
 import net.eatsense.persistence.CustomerProfileRepository;
 import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CompanyDTO;
+import net.eatsense.representation.StoreCardDTO;
 import net.eatsense.representation.CustomerAccountDTO;
 import net.eatsense.representation.RecipientDTO;
 import net.eatsense.representation.RegistrationDTO;
@@ -43,6 +46,8 @@ import net.eatsense.validation.ValidationHelper;
 
 import org.apache.bval.guice.ValidationModule;
 import org.codehaus.jettison.json.JSONObject;
+import org.hamcrest.core.Is;
+import org.hamcrest.core.IsNot;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -120,12 +125,15 @@ public class AccountControllerTest {
 	@Mock
 	private CheckInRepository checkInRepo;
 	
+	@Mock
+	private StoreCardRepository storeCardRepo;
+	
 	@Before
 	public void setUp() throws Exception {
 		injector = Guice.createInjector(new ValidationModule());
 		validator = injector.getInstance(ValidationHelper.class);
 		ctr = new AccountController(ar, rr, recipientRepo, companyRepo,
-				validator, facebookService, imageCtrl, accessTokenRepo, eventBus, profileRepo, checkInRepo);
+				validator, facebookService, imageCtrl, accessTokenRepo, eventBus, profileRepo, checkInRepo, storeCardRepo);
 
 		password = "diesisteintestpasswort";
 		login = "testlogin";
@@ -142,6 +150,7 @@ public class AccountControllerTest {
 		account.setEmailConfirmed(true);
 		account.setHashedPassword(hashedPassword);
 		account.setCompany(companyKey);
+		
 		when(ar.getByProperty("login", login)).thenReturn(account);
 		when(ar.checkPassword(password, hashedPassword)).thenReturn(true);
 		
@@ -1042,6 +1051,28 @@ public class AccountControllerTest {
 		assertThat(newAccount.getRole(), is(Role.USER));
 	}
 	
+	@Test
+	public void testCreateStoreCard() throws Exception {
+		Long id = 1l;
+		StoreCardDTO scDTO = getStoreCard();
+		StoreCardDTO newCard;
+		StoreCard newStoreCard = new StoreCard();
+		@SuppressWarnings("unchecked")
+		Key<Account> accountKey = mock(Key.class);
+		@SuppressWarnings("unchecked")
+		Key<Business> businessKey = mock(Key.class);
+		Account account = mock(Account.class);
+			
+		
+		when(storeCardRepo.newEntity()).thenReturn(newStoreCard );
+		when(rr.getKey(id)).thenReturn(businessKey);
+		when(account.getKey()).thenReturn(accountKey);
+		
+		newCard = ctr.createStoreCard(account, scDTO);
+		
+		assertThat(newCard.getId(), notNullValue());
+	}
+	
 	private CustomerAccountDTO getTestCustomerAccountData() {
 		CustomerAccountDTO data = new CustomerAccountDTO();
 		
@@ -1051,5 +1082,15 @@ public class AccountControllerTest {
 		data.setPassword("passw0rd");
 		
 		return data;
+	}
+	
+	private StoreCardDTO getStoreCard() {
+		Long id = 1l;
+		StoreCardDTO scDTO = new StoreCardDTO();
+		scDTO.setAccountId(account.getId());
+		scDTO.setCardNumber("cloobsterCard123");
+		scDTO.setLocationId(id);
+		
+		return scDTO;
 	}
 }
