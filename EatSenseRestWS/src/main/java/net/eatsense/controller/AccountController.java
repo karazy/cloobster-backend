@@ -1200,6 +1200,35 @@ public class AccountController {
 	}
 	
 	/**
+	 * Updates a {@link StoreCard}.
+	 * @param id
+	 * @param account
+	 * @param scDTO
+	 * @return
+	 */
+	public StoreCardDTO updateStoreCard(Long id, Account account, StoreCardDTO scDTO) {		
+		checkNotNull(id, "id was null");
+		checkNotNull(account, "account was null");
+		checkNotNull(scDTO, "store card was null");
+		
+		
+		StoreCard sc = storeCardRepo.getById(id);
+		
+		if(sc == null) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		
+		if(scDTO.getAccountId() != account.getKey().getId()) {
+			throw new ValidationException("StoreCard does not belong to account of request.");
+		}
+		
+		sc.setCardNumber(scDTO.getCardNumber());
+		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
+		
+		return scDTO;
+	}
+	
+	/**
 	 * Get all store cards of a user.
 	 * @param account
 	 * 		Account to retrieve store cards for.
@@ -1215,6 +1244,59 @@ public class AccountController {
 		}
 		
 		return cards;
+	}
+	
+	/**
+	 * Get a {@link StoreCard}
+	 * @param id
+	 * 	Id of card.
+	 * @param account
+	 * @return
+	 *  {@link StoreCard} found
+	 */
+	public StoreCard getStoreCard(Long id, Account account) {
+		checkNotNull(id, "id was null");
+		checkNotNull(account, "account was null");
+		
+		StoreCard sc = null;
+		
+		try{
+			sc = storeCardRepo.getById(id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		
+		if(sc.getAccount() != account.getKey()) {
+			throw new IllegalAccessException("StoreCard does not belong to account of request.");
+		}
+		
+		return sc;
+	}
+	
+	/**
+	 * Delete a {@link StoreCard}
+	 * @param id
+	 * 	Id of StoreCard
+	 * @param account
+	 * 	Owner of StoreCard
+	 */
+	public void deleteStoreCard(Long id, Account account) {
+		checkNotNull(id, "id was null");
+		checkNotNull(account, "account was null");
+		
+		StoreCard sc = null;
+		
+		try{
+			sc = storeCardRepo.getById(id);
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		
+		if(sc.getAccount() != account.getKey()) {
+			throw new IllegalAccessException("StoreCard does not belong to account of request.");
+		}
+		
+		storeCardRepo.delete(sc.getKey());
 	}
 
 }
