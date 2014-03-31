@@ -867,28 +867,28 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-                <groupId>net.kindleit</groupId>
-                <artifactId>maven-gae-plugin</artifactId>
-                <version>${maven-gae-plugin.version}</version>
-                <dependencies>
-                  <dependency>
-                    <groupId>net.kindleit</groupId>
-                    <artifactId>gae-runtime</artifactId>
-                    <version>${gae.version}</version>
-                    <type>pom</type>
-                  </dependency>
-                </dependencies>
-                <executions>
-	          		<execution>
-	            	<id />
-	            		<phase>validate</phase>
-	            	<goals>
-	              		<goal>unpack</goal>
-	            		</goals>
-	          		</execution>
-	        	</executions>
-            </plugin>
+<!-- 			<plugin> -->
+<!--                 <groupId>net.kindleit</groupId> -->
+<!--                 <artifactId>maven-gae-plugin</artifactId> -->
+<!--                 <version>${maven-gae-plugin.version}</version> -->
+<!--                 <dependencies> -->
+<!--                   <dependency> -->
+<!--                     <groupId>net.kindleit</groupId> -->
+<!--                     <artifactId>gae-runtime</artifactId> -->
+<!--                     <version>${gae.version}</version> -->
+<!--                     <type>pom</type> -->
+<!--                   </dependency> -->
+<!--                 </dependencies> -->
+<!--                 <executions> -->
+<!-- 	          		<execution> -->
+<!-- 	            	<id /> -->
+<!-- 	            		<phase>validate</phase> -->
+<!-- 	            	<goals> -->
+<!-- 	              		<goal>unpack</goal> -->
+<!-- 	            		</goals> -->
+<!-- 	          		</execution> -->
+<!-- 	        	</executions> -->
+<!--             </plugin> -->
 			<!-- Mark the project for Google Plugin for Eclipse (GPE) -->
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -953,19 +953,19 @@
 										<execute />
 									</action>
 								</pluginExecution>
-								<pluginExecution>
-                  					<pluginExecutionFilter>
-                    					<groupId>net.kindleit</groupId>
-					                    <artifactId>maven-gae-plugin</artifactId>
-					                    <versionRange>[0.7.3,)</versionRange>
-					                    <goals>
-					                      <goal>unpack</goal>
-					                    </goals>
-					                </pluginExecutionFilter>
-					             	<action>
-					                	<execute />
-					                </action>
-				                </pluginExecution>
+<!-- 								<pluginExecution> -->
+<!--                   					<pluginExecutionFilter> -->
+<!--                     					<groupId>net.kindleit</groupId> -->
+<!-- 					                    <artifactId>maven-gae-plugin</artifactId> -->
+<!-- 					                    <versionRange>[0.7.3,)</versionRange> -->
+<!-- 					                    <goals> -->
+<!-- 					                      <goal>unpack</goal> -->
+<!-- 					                    </goals> -->
+<!-- 					                </pluginExecutionFilter> -->
+<!-- 					             	<action> -->
+<!-- 					                	<execute /> -->
+<!-- 					                </action> -->
+<!-- 				                </pluginExecution> -->
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>

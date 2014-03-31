@@ -1192,6 +1192,8 @@ public class AccountController {
 		
 		sc.setCardNumber(scDTO.getCardNumber());
 		sc.setAccount(account.getKey());
+		//TODO check location ID not null and if a location exists with this id
+		//TODO check if a store card for this account and user already exists
 		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
 		
 		storeCardRepo.saveOrUpdate(sc);
@@ -1212,18 +1214,23 @@ public class AccountController {
 		checkNotNull(scDTO, "store card was null");
 		
 		
-		StoreCard sc = storeCardRepo.getById(id);
+		StoreCard sc = null;
 		
-		if(sc == null) {
+		try{
+			sc = storeCardRepo.getById(account.getKey(), id);
+		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
 		
-		if(scDTO.getAccountId() != account.getKey().getId()) {
-			throw new ValidationException("StoreCard does not belong to account of request.");
-		}
+//		if(scDTO.getAccountId() != account.getKey().getId()) {
+//			throw new ValidationException("StoreCard does not belong to account of request.");
+//		}
 		
 		sc.setCardNumber(scDTO.getCardNumber());
+		//Does it make sense to update the location?
 		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
+		
+		storeCardRepo.saveOrUpdate(sc);
 		
 		return scDTO;
 	}
@@ -1261,14 +1268,14 @@ public class AccountController {
 		StoreCard sc = null;
 		
 		try{
-			sc = storeCardRepo.getById(id);
+			sc = storeCardRepo.getById(account.getKey(), id);
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
-		
-		if(sc.getAccount() != account.getKey()) {
-			throw new IllegalAccessException("StoreCard does not belong to account of request.");
-		}
+		//not relevant since this is an ancestore query
+//		if(!sc.getAccount().equals(account.getKey())) {
+//			throw new IllegalAccessException("StoreCard does not belong to account of request.");
+//		}
 		
 		return sc;
 	}
@@ -1287,14 +1294,14 @@ public class AccountController {
 		StoreCard sc = null;
 		
 		try{
-			sc = storeCardRepo.getById(id);
+			sc = storeCardRepo.getById(account.getKey(), id);
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
 		
-		if(sc.getAccount() != account.getKey()) {
-			throw new IllegalAccessException("StoreCard does not belong to account of request.");
-		}
+//		if(!sc.getAccount().equals(account.getKey())) {
+//			throw new IllegalAccessException("StoreCard does not belong to account of request.");
+//		}
 		
 		storeCardRepo.delete(sc.getKey());
 	}

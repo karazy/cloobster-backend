@@ -41,6 +41,7 @@ public class StoreCardResource {
 	
 	
 	@GET
+	@Produces("application/json; charset=UTF-8")
 	public List<StoreCardDTO> getStoreCards() {		
 		return accountCtrl.getStoreCards(getAccount());
 	}
