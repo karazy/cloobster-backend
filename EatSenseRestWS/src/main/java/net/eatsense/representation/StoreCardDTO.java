@@ -1,6 +1,7 @@
 package net.eatsense.representation;
 
 import net.eatsense.domain.StoreCard;
+import net.eatsense.domain.embedded.BarcodeType;
 
 /**
  * Representation of {@link net.eatsense.domain.StoreCard}.
@@ -28,6 +29,11 @@ public class StoreCardDTO {
 	 * Location this card is assigned to.
 	 */
 	private Long locationId;
+	
+	/**
+	 * Type of barcode this store card uses.
+	 */
+	private BarcodeType codeType;
 
 	/**
 	 * @return the id
@@ -86,6 +92,21 @@ public class StoreCardDTO {
 	public void setLocationId(Long locationId) {
 		this.locationId = locationId;
 	}
+		
+
+	/**
+	 * @return the codeType
+	 */
+	public BarcodeType getCodeType() {
+		return codeType;
+	}
+
+	/**
+	 * @param codeType the codeType to set
+	 */
+	public void setCodeType(BarcodeType codeType) {
+		this.codeType = codeType;
+	}
 
 	public StoreCardDTO() {		
 	}
@@ -101,6 +122,7 @@ public class StoreCardDTO {
 		this.cardNumber = sc.getCardNumber();
 		this.locationId = sc.getLocation().getId();
 		this.accountId = sc.getAccount().getId();
+		this.codeType = sc.getCodeType();
 	}
 	
 	

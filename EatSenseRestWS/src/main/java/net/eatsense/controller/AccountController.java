@@ -1195,6 +1195,7 @@ public class AccountController {
 		//TODO check location ID not null and if a location exists with this id
 		//TODO check if a store card for this account and user already exists
 		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
+		sc.setCodeType(scDTO.getCodeType());
 		
 		storeCardRepo.saveOrUpdate(sc);
 		
@@ -1227,6 +1228,7 @@ public class AccountController {
 //		}
 		
 		sc.setCardNumber(scDTO.getCardNumber());
+		sc.setCodeType(scDTO.getCodeType());
 		//Does it make sense to update the location?
 		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
 		

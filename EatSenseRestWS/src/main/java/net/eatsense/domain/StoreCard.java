@@ -3,6 +3,8 @@ package net.eatsense.domain;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import net.eatsense.domain.embedded.BarcodeType;
+
 import org.apache.bval.constraints.NotEmpty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -41,6 +43,12 @@ public class StoreCard extends GenericEntity<StoreCard> {
 	@NotNull
 	@NotEmpty
 	private String cardNumber;
+	
+	/**
+	 * Type of code this store card uses.
+	 */
+	@NotNull
+	private BarcodeType codeType;
 	
 	public StoreCard() {
 		
@@ -87,6 +95,22 @@ public class StoreCard extends GenericEntity<StoreCard> {
 	public void setCardNumber(String cardNumber) {
 		this.cardNumber = cardNumber;
 	}
+	
+	
+
+	/**
+	 * @return the codeType
+	 */
+	public BarcodeType getCodeType() {
+		return codeType;
+	}
+
+	/**
+	 * @param codeType the codeType to set
+	 */
+	public void setCodeType(BarcodeType codeType) {
+		this.codeType = codeType;
+	}
 
 	@Transient
 	@JsonIgnore
@@ -101,7 +125,7 @@ public class StoreCard extends GenericEntity<StoreCard> {
 	public static Key<StoreCard> getKey(Long id) {
 		
 		return new Key<StoreCard>(StoreCard.class, id);
-	}
+	}	
 	
 	
 	
