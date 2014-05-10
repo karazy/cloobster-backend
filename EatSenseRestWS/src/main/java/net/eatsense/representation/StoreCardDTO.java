@@ -1,5 +1,7 @@
 package net.eatsense.representation;
 
+import javax.validation.constraints.NotNull;
+
 import net.eatsense.domain.StoreCard;
 import net.eatsense.domain.embedded.BarcodeType;
 
@@ -18,6 +20,7 @@ public class StoreCardDTO {
 	/**
 	 * Number identifying the card in reality.
 	 */
+	@NotNull
 	private String cardNumber;
 	
 	/**
@@ -28,6 +31,7 @@ public class StoreCardDTO {
 	/**
 	 * Location this card is assigned to.
 	 */
+	@NotNull
 	private Long locationId;
 	
 	/**
