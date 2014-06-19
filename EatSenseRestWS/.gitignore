@@ -1,2 +1,4 @@
 .settings/com.google.gdt.eclipse.core.prefs
+.settings
 .classpath
+/target

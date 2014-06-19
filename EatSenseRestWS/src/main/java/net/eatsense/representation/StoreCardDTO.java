@@ -33,11 +33,6 @@ public class StoreCardDTO {
 	 */
 	@NotNull
 	private Long locationId;
-	
-	/**
-	 * Type of barcode this store card uses.
-	 */
-	private BarcodeType codeType;
 
 	/**
 	 * @return the id
@@ -98,20 +93,6 @@ public class StoreCardDTO {
 	}
 		
 
-	/**
-	 * @return the codeType
-	 */
-	public BarcodeType getCodeType() {
-		return codeType;
-	}
-
-	/**
-	 * @param codeType the codeType to set
-	 */
-	public void setCodeType(BarcodeType codeType) {
-		this.codeType = codeType;
-	}
-
 	public StoreCardDTO() {		
 	}
 	
@@ -126,7 +107,6 @@ public class StoreCardDTO {
 		this.cardNumber = sc.getCardNumber();
 		this.locationId = sc.getLocation().getId();
 		this.accountId = sc.getAccount().getId();
-		this.codeType = sc.getCodeType();
 	}
 	
 	

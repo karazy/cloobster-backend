@@ -44,11 +44,6 @@ public class StoreCard extends GenericEntity<StoreCard> {
 	@NotEmpty
 	private String cardNumber;
 	
-	/**
-	 * Type of code this store card uses.
-	 */
-	@NotNull
-	private BarcodeType codeType;
 	
 	public StoreCard() {
 		
@@ -96,21 +91,6 @@ public class StoreCard extends GenericEntity<StoreCard> {
 		this.cardNumber = cardNumber;
 	}
 	
-	
-
-	/**
-	 * @return the codeType
-	 */
-	public BarcodeType getCodeType() {
-		return codeType;
-	}
-
-	/**
-	 * @param codeType the codeType to set
-	 */
-	public void setCodeType(BarcodeType codeType) {
-		this.codeType = codeType;
-	}
 
 	@Transient
 	@JsonIgnore

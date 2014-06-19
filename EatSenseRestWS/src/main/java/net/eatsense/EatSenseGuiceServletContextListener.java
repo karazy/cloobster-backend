@@ -26,6 +26,7 @@ import net.eatsense.filter.SuffixFilter;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
 import net.eatsense.restws.ActionResource;
+import net.eatsense.restws.BarcodeResource;
 import net.eatsense.restws.ChannelResource;
 import net.eatsense.restws.CounterTasksResource;
 import net.eatsense.restws.CronResource;
@@ -137,6 +138,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				bind(VisitsResource.class);
 				bind(ActionResource.class);
 				bind(StoreCardResource.class);
+				bind(BarcodeResource.class);
 
 				// Create Configuration binding to automatically load
 				// configuration if needed.
@@ -155,7 +157,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 						"(.)*c/profiles(.)*", "(.)*c/accounts(.)*", "(.)*b/companies(.)*", "(.)*uploads(.)*",
 						"(.)*b/accounts(.)*", "(.)*admin/user(.)*", "(.)*admin/m(.)*", "(.)*admin/s(.)*",
 						"(.)*newsletter(.)*", "(.)*b/businesses(.)*", "(.)*c/businesses(.)*", "(.)*c/checkins(.)*",
-						"(.)*accounts(.)*", "(.)*spots(.)*", "(.)*nickname(.)*", "(.)*download(.)*","(.)*x(.)*",
+						"(.)*accounts(.)*", "(.)*spots(.)*", "(.)*nickname(.)*", "(.)*download(.)*","(.)*barcodes(.)*","(.)*x(.)*",
 						"(.)*_ah/channel/connected(.)*", "(.)*_ah/channel/disconnected(.)*", "(.)*cron(.)*").with(
 						GuiceContainer.class, parameters);
 			}

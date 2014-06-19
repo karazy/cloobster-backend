@@ -34,10 +34,10 @@ import com.googlecode.objectify.annotation.Unindexed;
 public class Business extends GenericEntity<Business> {
 	
 	@Transient
-	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products","products-order", "infopages", "feedback", "requests-call", "facebook-post", "contact", "storecard");
+	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products","products-order", "infopages", "feedback", "requests-call", "facebook-post", "contact");
 	
 	@Transient
-	public final static Set<String> AVAILABLE_OPTIONAL_FEATURES = ImmutableSet.of("de-panorama-fotobuch", "de-ztix", "de-ztix-coupons");
+	public final static Set<String> AVAILABLE_OPTIONAL_FEATURES = ImmutableSet.of("de-panorama-fotobuch", "de-ztix", "de-ztix-coupons", "storecard");
 	
  
 	/**
