@@ -28,7 +28,7 @@ public class DashboardController {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	public final static List<String> DEFAULT_ITEMS = ImmutableList.of(
 			"infopages", "products","actions", "productsspecial",
-			 "infopagesall","productsall","feedback","storecard");
+			 "infopagesall","productsall","feedback");
 	private final DashBoarditemRepository itemRepo;
 
 	@Inject
@@ -65,7 +65,7 @@ public class DashboardController {
 		boolean isProductsDisabled = location.getDisabledFeatures().contains("products");
 		boolean isInfopagesDisabled = location.getDisabledFeatures().contains("infopages");
 		boolean isServiceCallDisabled = location.getDisabledFeatures().contains("requests-call");
-		boolean isStoreCardDisabled = location.getDisabledFeatures().contains("storecard");
+		boolean isStoreCardDisabled = location.getEnabledOptionalFeatures().contains("storecard");
 		//External partners
 		boolean isDeZtixEnabled = location.getEnabledOptionalFeatures().contains("de-ztix");
 		boolean isDeZtixCouponsEnabled = location.getEnabledOptionalFeatures().contains("de-ztix-coupons");
@@ -88,7 +88,7 @@ public class DashboardController {
 			else if(dashboardItem.getType().equals("actions") && isServiceCallDisabled) {
 				iterator.remove();
 			}
-			else if(dashboardItem.getType().equals("storecard") && isStoreCardDisabled) {
+			else if(dashboardItem.getType().equals("storecard") && !isStoreCardDisabled) {
 				iterator.remove();
 			}
 			else if(dashboardItem.getType().equals("deztixevents") && !isDeZtixEnabled) {
