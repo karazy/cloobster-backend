@@ -12,6 +12,13 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
+/**
+ * Generic configuration mechanism.
+ * 
+ * @author Nils Weiher
+ * @author Frederik Reifschneider
+ *
+ */
 public class AddonConfiguration {
 	public final static String KIND = "AddonConfiguration";
 	private String name;
