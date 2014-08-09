@@ -1305,7 +1305,7 @@ public class AccountController {
 //			throw new IllegalAccessException("StoreCard does not belong to account of request.");
 //		}
 		
-		storeCardRepo.delete(sc.getKey());
+		storeCardRepo.delete(storeCardRepo.getKey(account.getKey(), id));
 	}
 
 }
