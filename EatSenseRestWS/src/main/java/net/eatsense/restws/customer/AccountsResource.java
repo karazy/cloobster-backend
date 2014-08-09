@@ -40,6 +40,7 @@ import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.sun.jersey.api.core.ResourceContext;
 
 @Path("/c/accounts")
 @Produces("application/json; charset=utf-8")
@@ -49,6 +50,9 @@ public class AccountsResource {
 	
 	@Context
 	HttpServletRequest servletRequest;
+	
+	@Context
+	private ResourceContext resourceContext;
 	
 	private final Provider<AccessTokenRepository> accessTokenRepoProvider;
 
@@ -194,5 +198,22 @@ public class AccountsResource {
 		accessTokenRepository.delete(token);
 		
 		return new CustomerAccountDTO(account);
+	}
+	
+	
+	@Path("{accountId}/storecards")
+	@RolesAllowed({Role.USER, Role.BUSINESSADMIN, Role.COMPANYOWNER})
+	public StoreCardResource getStoreCardResource(@PathParam("accountId") Long accountId) {
+		StoreCardResource scr;
+		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
+		
+		if(!account.getId().equals(accountId)) {
+			throw new IllegalAccessException("Tried to load wrong account!");
+		}
+		
+		scr = resourceContext.getResource(StoreCardResource.class);
+		scr.setAccount(account);
+		
+		return scr;
 	}
 }

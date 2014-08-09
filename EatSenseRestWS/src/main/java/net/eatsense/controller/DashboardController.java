@@ -65,6 +65,7 @@ public class DashboardController {
 		boolean isProductsDisabled = location.getDisabledFeatures().contains("products");
 		boolean isInfopagesDisabled = location.getDisabledFeatures().contains("infopages");
 		boolean isServiceCallDisabled = location.getDisabledFeatures().contains("requests-call");
+		boolean isStoreCardDisabled = location.getEnabledOptionalFeatures().contains("storecard");
 		//External partners
 		boolean isDeZtixEnabled = location.getEnabledOptionalFeatures().contains("de-ztix");
 		boolean isDeZtixCouponsEnabled = location.getEnabledOptionalFeatures().contains("de-ztix-coupons");
@@ -87,12 +88,15 @@ public class DashboardController {
 			else if(dashboardItem.getType().equals("actions") && isServiceCallDisabled) {
 				iterator.remove();
 			}
+			else if(dashboardItem.getType().equals("storecard") && !isStoreCardDisabled) {
+				iterator.remove();
+			}
 			else if(dashboardItem.getType().equals("deztixevents") && !isDeZtixEnabled) {
 				iterator.remove();
 			}
 			else if(dashboardItem.getType().equals("deztixcoupons") && !isDeZtixCouponsEnabled) {
 				iterator.remove();
-			}
+			}			
 		}
 				
 		return items;
