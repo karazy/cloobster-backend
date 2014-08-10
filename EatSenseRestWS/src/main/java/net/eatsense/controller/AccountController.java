@@ -1283,6 +1283,29 @@ public class AccountController {
 	}
 	
 	/**
+	 * Get a {@link StoreCard}
+	 * @param id
+	 * 	Id of card.
+	 * @param account
+	 * @return
+	 *  {@link StoreCard} found
+	 */
+	public StoreCard getStoreCardByLocationId(Long locationId, Account account) {
+		checkNotNull(locationId, "locationId was null");
+		checkNotNull(account, "account was null");
+		
+		StoreCard sc = null;
+		
+		try{
+			sc = storeCardRepo.query().ancestor(account.getKey()).filter("location", Business.getKey(locationId)).get();
+		} catch (NotFoundException e) {
+			throw new net.eatsense.exceptions.NotFoundException();
+		}
+		
+		return sc;
+	}
+	
+	/**
 	 * Delete a {@link StoreCard}
 	 * @param id
 	 * 	Id of StoreCard

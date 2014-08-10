@@ -1073,6 +1073,32 @@ public class AccountControllerTest {
 		assertThat(newCard.getId(), notNullValue());
 	}
 	
+//	@Test
+//	public void getGetStoreCardByLocationId() {
+//		Long id = 1l;
+//		StoreCardDTO scDTO = getStoreCard();
+//		StoreCard foundCard;
+//		StoreCard newStoreCard = new StoreCard();
+//		@SuppressWarnings("unchecked")
+//		Key<Account> accountKey = mock(Key.class);
+//		@SuppressWarnings("unchecked")
+//		Key<Business> businessKey = mock(Key.class);
+//		Account account = mock(Account.class);
+//			
+//		
+//		when(storeCardRepo.newEntity()).thenReturn(newStoreCard );
+//		when(rr.getKey(id)).thenReturn(businessKey);
+//		when(account.getKey()).thenReturn(accountKey);
+//		when(businessKey.getId()).thenReturn(1l);
+//		
+//		ctr.createStoreCard(account, scDTO);
+//		
+//		foundCard = ctr.getStoreCardByLocationId(1l, account);
+//		
+//		assertThat(foundCard.getId(), notNullValue());
+//		assertThat(foundCard.getId(), is(1l));
+//	}
+	
 	private CustomerAccountDTO getTestCustomerAccountData() {
 		CustomerAccountDTO data = new CustomerAccountDTO();
 		
