@@ -55,6 +55,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -1182,19 +1183,27 @@ public class AccountController {
 	 * 		store card data
 	 * @return
 	 * 		Created store card.
+	 * @throws BadRequestException 
 	 */
 	public StoreCardDTO createStoreCard(Account account, StoreCardDTO scDTO) {
 		checkNotNull(scDTO, "store card was null");
 		checkNotNull(account, "account was null");
+		checkNotNull(scDTO.getLocationId(), "locationId was null");
 		
 		StoreCard sc = storeCardRepo.newEntity();
 		sc.setId(storeCardRepo.allocateId());
 		
+		try {
+			businessRepo.getById(scDTO.getLocationId());
+		} catch(NotFoundException ex) {
+			throw new ValidationException("Invalid location id provided.", ex);
+		}		
+		
 		sc.setCardNumber(scDTO.getCardNumber());
 		sc.setAccount(account.getKey());
-		//TODO check location ID not null and if a location exists with this id
-		//TODO check if a store card for this account and user already exists
 		sc.setLocation(businessRepo.getKey(scDTO.getLocationId()));
+		
+		//TODO check if storecard for location already exists
 
 		
 		storeCardRepo.saveOrUpdate(sc);
@@ -1295,10 +1304,10 @@ public class AccountController {
 		checkNotNull(account, "account was null");
 		
 		StoreCard sc = null;
-		
-		try{
-			sc = storeCardRepo.query().ancestor(account.getKey()).filter("location", Business.getKey(locationId)).get();
-		} catch (NotFoundException e) {
+
+		sc = storeCardRepo.query().ancestor(account.getKey()).filter("location", Business.getKey(locationId)).get();
+			
+		if(sc == null) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
 		
