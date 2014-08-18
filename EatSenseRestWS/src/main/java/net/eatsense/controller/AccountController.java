@@ -17,10 +17,10 @@ import net.eatsense.auth.AccessTokenRepository;
 import net.eatsense.auth.Role;
 import net.eatsense.controller.ImageController.UpdateImagesResult;
 import net.eatsense.domain.Account;
+import net.eatsense.domain.Business;
 import net.eatsense.domain.CheckIn;
 import net.eatsense.domain.Company;
 import net.eatsense.domain.CustomerProfile;
-import net.eatsense.domain.Business;
 import net.eatsense.domain.NewsletterRecipient;
 import net.eatsense.domain.StoreCard;
 import net.eatsense.event.ResetAccountPasswordEvent;
@@ -35,7 +35,6 @@ import net.eatsense.persistence.LocationRepository;
 import net.eatsense.persistence.NewsletterRecipientRepository;
 import net.eatsense.persistence.StoreCardRepository;
 import net.eatsense.representation.AccountDTO;
-import net.eatsense.representation.AccountForServiceDTO;
 import net.eatsense.representation.BusinessAccountDTO;
 import net.eatsense.representation.CompanyDTO;
 import net.eatsense.representation.CustomerAccountDTO;
@@ -55,7 +54,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.api.server.spi.response.BadRequestException;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -1183,7 +1181,6 @@ public class AccountController {
 	 * 		store card data
 	 * @return
 	 * 		Created store card.
-	 * @throws BadRequestException 
 	 */
 	public StoreCardDTO createStoreCard(Account account, StoreCardDTO scDTO) {
 		checkNotNull(scDTO, "store card was null");

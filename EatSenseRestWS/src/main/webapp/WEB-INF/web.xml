@@ -39,4 +39,8 @@
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
+<<<<<<< HEAD
 </web-app>
+=======
+</web-app>
+>>>>>>> master
