@@ -11,6 +11,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +43,19 @@ public class StoreCardResource {
 	
 	@GET
 	@Produces("application/json; charset=UTF-8")
-	public List<StoreCardDTO> getStoreCards() {		
-		return accountCtrl.getStoreCards(getAccount());
-	}
+	public List<StoreCardDTO> getStoreCards(@QueryParam("locationId") Long locationId) {
+		if(locationId == null) {
+			//get all storecards
+			return accountCtrl.getStoreCards(getAccount());
+		} else {
+			//get storecard assigned to a location (should be only one!)
+			StoreCardDTO sc = new StoreCardDTO(accountCtrl.getStoreCardByLocationId(locationId, getAccount()));
+			List<StoreCardDTO> l = new ArrayList<StoreCardDTO>();
+			l.add(sc);
+			return l;
+		}
+		
+	}	
 	
 	@GET
 	@Path("{id}")
@@ -52,6 +63,7 @@ public class StoreCardResource {
 	public StoreCardDTO getStoreCard(@PathParam("id") Long id) {
 		return new StoreCardDTO(accountCtrl.getStoreCard(id, account));
 	}
+
 	
 	@POST
 	@Consumes("application/json; charset=UTF-8")

@@ -4,6 +4,12 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
+/**
+ * Cross Origin Request Filter
+ * to allow requests from other domains.
+ * @author Nils Weiher
+ *
+ */
 public class CrossOriginResourceSharingFilter implements
 		ContainerResponseFilter {
 

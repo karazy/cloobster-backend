@@ -22,6 +22,7 @@ import net.eatsense.exceptions.CapabilityDisabledExceptionMapper;
 import net.eatsense.exceptions.ServiceExceptionMapper;
 import net.eatsense.filter.ApiVersionFilterFactory;
 import net.eatsense.filter.CacheResponseFilter;
+import net.eatsense.filter.CrossOriginResourceSharingFilter;
 import net.eatsense.filter.SuffixFilter;
 import net.eatsense.persistence.OfyService;
 import net.eatsense.restws.AccountResource;
@@ -98,13 +99,14 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 			protected void configureServlets() {
 				HashMap<String, String> parameters = new HashMap<String, String>();
 
-				parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");
+				parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");				
 
 				parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName()
 						+ "," + SecurityFilter.class.getName() + "," + SuffixFilter.class.getName());
-
-				// add cache control response filter.
-				parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CacheResponseFilter.class.getName());
+				
+				// add cache control response and CORS filter.
+				parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CrossOriginResourceSharingFilter.class.getName() + "," 
+						+ CacheResponseFilter.class.getName());
 
 				parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
 
