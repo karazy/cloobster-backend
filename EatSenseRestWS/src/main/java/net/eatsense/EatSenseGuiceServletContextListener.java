@@ -100,13 +100,13 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				HashMap<String, String> parameters = new HashMap<String, String>();
 
 				parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");				
-
-				parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName()
-						+ "," + SecurityFilter.class.getName() + "," + SuffixFilter.class.getName());
 				
 				// add cache control response and CORS filter.
 				parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CrossOriginResourceSharingFilter.class.getName() + "," 
 						+ CacheResponseFilter.class.getName());
+
+				parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName()
+						+ "," + SecurityFilter.class.getName() + "," + SuffixFilter.class.getName());							
 
 				parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
 
