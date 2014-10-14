@@ -4,12 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 
-import net.eatsense.domain.Company;
 import net.eatsense.domain.Business;
-
-import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
@@ -41,6 +37,8 @@ public class LocationProfileDTO extends LocationDTO {
 	
 	private Map<String, Boolean> features = Maps.newHashMap();
 	private Map<String, Map<String, String>> configuration;
+	
+	private Double distance;
 
 	public LocationProfileDTO() {
 		super();
@@ -171,7 +169,17 @@ public class LocationProfileDTO extends LocationDTO {
 
 	public void setConfiguration(Map<String, Map<String, String>> configuration) {
 		this.configuration = configuration;
+	}		
+
+	public Double getDistance() {
+		return distance;
 	}
+
+	public void setDistance(Double distance) {
+		this.distance = distance;
+	}
+
+
 
 	public final static Function<Business, LocationProfileDTO> toDTO = 
 			new Function<Business, LocationProfileDTO>() {
