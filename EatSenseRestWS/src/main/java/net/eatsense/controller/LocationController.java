@@ -541,6 +541,7 @@ public class LocationController {
 		business.setOfflineEmailAlertActive(businessData.isOfflineEmailAlertActive());
 		business.setInactiveCheckInNotificationActive(businessData.isInactiveCheckInNotificationActive());
 		business.setIncomingOrderNotifcationEnabled(businessData.isIncomingOrderNotificationEnabled());
+		business.setHideFromGeoSearch(businessData.isHideFromGeoSearch());
 		
 		boolean updateSearchIndex = false;
 		
@@ -1102,7 +1103,7 @@ public class LocationController {
 			return locationRepo.getListByProperty("company", Company.getKey(companyId));
 	}
 	
-    /**
+  /**
    *
    * @param latitude
    * @param longitude
@@ -1129,10 +1130,13 @@ public class LocationController {
     List<LocationProfileDTO> locationDtos = Lists.newArrayList();
     int locationIndex = 0;
     for (Business location : locations) {
-      LocationProfileDTO dto = new LocationProfileDTO(location);
-      dto.setDistance(distances.get(locationIndex));
-      locationDtos.add(dto);
-      ++locationIndex;
+    	//only show locations that don't have searchable disabled
+    	if(!location.isHideFromGeoSearch()) {
+    		LocationProfileDTO dto = new LocationProfileDTO(location);
+    	      dto.setDistance(distances.get(locationIndex));
+    	      locationDtos.add(dto);
+    	      ++locationIndex;
+    	}
     }
 
 

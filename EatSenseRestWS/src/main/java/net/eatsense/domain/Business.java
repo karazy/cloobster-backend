@@ -25,7 +25,7 @@ import com.googlecode.objectify.annotation.Cached;
 import com.googlecode.objectify.annotation.Unindexed;
 
 /**
- * Represents a location where you can check in and order food/drinks what ever.
+ * Represents a location/business where you can check in and order food/drinks what ever.
  * 
  * @author Frederik Reifschneider
  * @author Nils Weiher
@@ -33,9 +33,15 @@ import com.googlecode.objectify.annotation.Unindexed;
 @Cached
 public class Business extends GenericEntity<Business> {
 	
+	/**
+	 * List of standard features.
+	 */
 	@Transient
 	public final static Set<String> AVAILABLE_FEATURES = ImmutableSet.of("products","products-order", "infopages", "feedback", "requests-call", "facebook-post", "contact");
 	
+	/**
+	 * List of optional features. Mostly 3rd party.
+	 */
 	@Transient
 	public final static Set<String> AVAILABLE_OPTIONAL_FEATURES = ImmutableSet.of("de-panorama-fotobuch", "de-ztix", "de-ztix-coupons", "storecard");
 	
@@ -159,7 +165,16 @@ public class Business extends GenericEntity<Business> {
 	@Unindexed
 	private Set<String> enabledOptionalFeatures = Sets.newHashSet();
 	
+	/**
+	 * Hide a location from being found in a geosearch.
+	 * Defaults to false.
+	 */
+	@Unindexed
+	private boolean hideFromGeoSearch = false;
 	
+	/**
+	 * The geolocation (longitude and latitude)
+	 */
 	private GeoPt geoLocation;
 	
 	public Business() {
@@ -462,6 +477,17 @@ public class Business extends GenericEntity<Business> {
 		if(!Objects.equal(this.geoLocation, geoLocation)) {
 			this.setDirty(true);
 			this.geoLocation = geoLocation;
+		}
+	}
+	
+	public boolean isHideFromGeoSearch() {
+		return hideFromGeoSearch;
+	}
+
+	public void setHideFromGeoSearch(boolean hideFromGeoSearch) {
+		if(!Objects.equal(this.hideFromGeoSearch, hideFromGeoSearch)) {
+			this.setDirty(true);
+			this.hideFromGeoSearch = hideFromGeoSearch;
 		}
 	}
 
