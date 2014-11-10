@@ -62,6 +62,7 @@ import net.eatsense.representation.SpotDTO;
 import net.eatsense.representation.Transformer;
 import net.eatsense.representation.cockpit.SpotStatusDTO;
 import net.eatsense.util.DummyDataDumper;
+import net.eatsense.search.LocationSearchService;
 
 import org.apache.bval.guice.ValidationModule;
 import org.junit.After;
@@ -103,6 +104,7 @@ public class BusinessControllerTest {
 	private ChoiceRepository cr;
 	private OrderRepository or;
 	private DummyDataDumper ddd;
+	private LocationSearchService lss;
 	
 	
 	private SpotRepository spotRepo;
@@ -181,7 +183,7 @@ public class BusinessControllerTest {
 		RequestRepository requestRepo = injector.getInstance(RequestRepository.class);
 		when(ofyService.factory()).thenReturn(ofyFactory);
 		
-		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, addonConfig , ofyService);
+		businessCtrl = new LocationController(requestRepo, checkInrepo , spotRepo, rr , eventBus, accountRepo, imageController, areaRepo, validator, mr,feedbackRepo , configProvider, addonConfig , ofyService, lss);
 		
 		ddd= injector.getInstance(DummyDataDumper.class);
 		
@@ -539,7 +541,7 @@ public class BusinessControllerTest {
 	private LocationController createController() {
 		return new LocationController(requestRepo, checkInrepo, spotRepo, rr,
 				eventBus, accountRepo, imageController, areaRepo, validator,
-				mr, feedbackRepo, configProvider, addonConfig, ofyService);
+				mr, feedbackRepo, configProvider, addonConfig, ofyService, lss);
 	}
 	
 	@Test
