@@ -1104,7 +1104,7 @@ public class LocationController {
 	}
 	
   /**
-   *
+   *Get locations by geo location.
    * @param latitude
    * @param longitude
    * @param distance
@@ -1130,8 +1130,8 @@ public class LocationController {
     List<LocationProfileDTO> locationDtos = Lists.newArrayList();
     int locationIndex = 0;
     for (Business location : locations) {
-    	//only show locations that don't have searchable disabled
-    	if(!location.isHideFromGeoSearch()) {
+    	//only show locations that don't have searchable disabled and are not trashed
+    	if(!location.isHideFromGeoSearch() && !location.isTrash()) {
     		LocationProfileDTO dto = new LocationProfileDTO(location);
     	      dto.setDistance(distances.get(locationIndex));
     	      locationDtos.add(dto);
