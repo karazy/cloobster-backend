@@ -30,17 +30,25 @@ public class CompaniesResource {
 	
 	@Path("{id}")
 	public CompanyResource getCompanyResource(@PathParam("id") Long id) {
-		Company company;
+		Company company;		
+		
 		try {
 			company = companyRepo.getById(id);
 		} catch (NotFoundException e) {
 			throw new net.eatsense.exceptions.NotFoundException();
 		}
+		
 		Account account = (Account)servletRequest.getAttribute("net.eatsense.domain.Account");
 		CompanyResource resource = resourceContext.getResource(CompanyResource.class);
 		resource.setCompany(company);
 		resource.setAccount(account);
-		resource.setAuthorized(company.getKey().equals(account.getCompany()));
+		
+		if(account == null) {
+			resource.setAuthorized(false);
+		} else {
+			resource.setAuthorized(company.getKey().equals(account.getCompany()));
+		}		
+		
 		return resource;
 	}
 }

@@ -1,5 +1,6 @@
 package net.eatsense.restws.customer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +35,9 @@ import com.sun.jersey.api.core.ResourceContext;
  */
 @Path("c/businesses")
 public class LocationsResource{
+	
+	private static final int defaultDistance = 5000;
+	
 	@Context
 	private ResourceContext resourceContext;
 
@@ -52,15 +56,31 @@ public class LocationsResource{
 	
 	@GET
 	@Produces("application/json; charset=utf-8")
-	public List<LocationProfileDTO> getBusinesses(@QueryParam("spotCode") String spotCode) {
+	public List<LocationProfileDTO> getBusinesses(@QueryParam("spotCode") String spotCode, @QueryParam("geolat") Double geolat, @QueryParam("geolong") Double geolong, @QueryParam("distance") Integer distance) {
 		
-		try {
-			return ImmutableList.of(new LocationProfileDTO(locationCtrl.getLocationBySpotCode(spotCode)));
-		} catch (net.eatsense.exceptions.NotFoundException e) {
-			// Return empty collection if no business found for this code.
-			return ImmutableList.of();
+		if(spotCode != null) {
+			try {
+				return ImmutableList.of(new LocationProfileDTO(locationCtrl.getLocationBySpotCode(spotCode)));
+			} catch (net.eatsense.exceptions.NotFoundException e) {
+				// Return empty collection if no business found for this code.
+				return ImmutableList.of();
+			}
 		}
+		
+		if(geolat != null && geolong != null) {
+			
+			if(distance == null) {
+				distance = defaultDistance;
+			}
+			
+			List<LocationProfileDTO> locations = locationCtrl.getLocations(geolat, geolong, distance);
+			return locations;
+		}
+		
+		return ImmutableList.of();
+		
 	}
+	
 
 	@Path("{businessId}")
 	public LocationResource getBusinessResource(@PathParam("businessId") Long businessId) {

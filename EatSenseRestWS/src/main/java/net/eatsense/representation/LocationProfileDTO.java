@@ -4,12 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 
-import net.eatsense.domain.Company;
 import net.eatsense.domain.Business;
-
-import org.apache.bval.constraints.NotEmpty;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
@@ -41,6 +37,10 @@ public class LocationProfileDTO extends LocationDTO {
 	
 	private Map<String, Boolean> features = Maps.newHashMap();
 	private Map<String, Map<String, String>> configuration;
+	
+	private Double distance;
+	
+	private boolean hideFromGeoSearch;
 
 	public LocationProfileDTO() {
 		super();
@@ -68,6 +68,7 @@ public class LocationProfileDTO extends LocationDTO {
 		this.slogan = business.getSlogan();
 		this.spotCount = business.getSpotCount();
 		this.offlineEmailAlertActive = business.isOfflineEmailAlertActive();
+		this.hideFromGeoSearch = business.isHideFromGeoSearch();
 		
 		for (String featureName : Business.AVAILABLE_FEATURES) {
 			getFeatures().put(featureName, !business.getDisabledFeatures().contains(featureName));
@@ -171,7 +172,28 @@ public class LocationProfileDTO extends LocationDTO {
 
 	public void setConfiguration(Map<String, Map<String, String>> configuration) {
 		this.configuration = configuration;
+	}		
+
+	public Double getDistance() {
+		return distance;
 	}
+
+	public void setDistance(Double distance) {
+		this.distance = distance;
+	}
+	
+
+	public boolean isHideFromGeoSearch() {
+		return hideFromGeoSearch;
+	}
+
+	public void setHideFromGeoSearch(boolean hideFromGeoSearch) {
+		this.hideFromGeoSearch = hideFromGeoSearch;
+	}
+
+
+
+
 
 	public final static Function<Business, LocationProfileDTO> toDTO = 
 			new Function<Business, LocationProfileDTO>() {

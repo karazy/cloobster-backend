@@ -45,6 +45,7 @@ import net.eatsense.restws.customer.CheckInsResource;
 import net.eatsense.restws.customer.ProfilesResource;
 import net.eatsense.restws.customer.StoreCardResource;
 import net.eatsense.restws.customer.VisitsResource;
+import net.eatsense.search.LocationSearchService;
 import net.eatsense.util.NicknameGenerator;
 
 import org.apache.bval.guice.ValidationModule;
@@ -100,13 +101,13 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				HashMap<String, String> parameters = new HashMap<String, String>();
 
 				parameters.put(JSONConfiguration.FEATURE_POJO_MAPPING, "true");				
-
-				parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName()
-						+ "," + SecurityFilter.class.getName() + "," + SuffixFilter.class.getName());
 				
 				// add cache control response and CORS filter.
 				parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CrossOriginResourceSharingFilter.class.getName() + "," 
 						+ CacheResponseFilter.class.getName());
+
+				parameters.put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, AccessTokenFilter.class.getName()
+						+ "," + SecurityFilter.class.getName() + "," + SuffixFilter.class.getName());							
 
 				parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, "true");
 
@@ -141,6 +142,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 				bind(ActionResource.class);
 				bind(StoreCardResource.class);
 				bind(BarcodeResource.class);
+				bind(LocationSearchService.class).in(Singleton.class);
 
 				// Create Configuration binding to automatically load
 				// configuration if needed.
@@ -177,6 +179,7 @@ public class EatSenseGuiceServletContextListener extends GuiceServletContextList
 		eventBus.register(injector.getInstance(InfoPageController.class));
 		eventBus.register(injector.getInstance(CounterController.class));
 		eventBus.register(injector.getInstance(CheckInController.class));
+		eventBus.register(injector.getInstance(LocationSearchService.class));
 
 		// Register Objectify datastore entities.
 
