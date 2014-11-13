@@ -1111,8 +1111,9 @@ public class LocationController {
    * @return
    */
   public List<LocationProfileDTO> getLocations(double latitude, double 	longitude, int distance) {
+	logger.info("Get locations for lat {} long{} distance {}", new Object[]{latitude, longitude, distance});
     Results<ScoredDocument> result = searchService.query(latitude, longitude, distance);
-
+    
     List<Key<Business>> locationKeys = Lists.newArrayList();
     List<Double> distances = Lists.newArrayList();
 
@@ -1124,20 +1125,25 @@ public class LocationController {
           distances.add(exp.getNumber());
         }
       }
-    }
+    }        
 
     Collection<Business> locations = locationRepo.getByKeys(locationKeys);
     List<LocationProfileDTO> locationDtos = Lists.newArrayList();
+    
     int locationIndex = 0;
     for (Business location : locations) {
     	//only show locations that don't have searchable disabled and are not trashed
     	if(!location.isHideFromGeoSearch() && !location.isTrash()) {
     		LocationProfileDTO dto = new LocationProfileDTO(location);
-    	      dto.setDistance(distances.get(locationIndex));
-    	      locationDtos.add(dto);
-    	      ++locationIndex;
+    		if(distances.get(locationIndex) != null) {
+    			dto.setDistance(distances.get(locationIndex).intValue());
+    		}    	    
+    	    locationDtos.add(dto);
+    	    ++locationIndex;
     	}
     }
+    
+    logger.info("Found {} locations. {} eligible to shown.", new Object[]{result.getResults().size(), locationDtos.size()});
 
 
     return locationDtos;
