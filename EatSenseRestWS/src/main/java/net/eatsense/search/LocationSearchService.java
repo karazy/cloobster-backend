@@ -59,12 +59,13 @@ public class LocationSearchService {
     logger.info("queryString={}", queryString);
     
     //2014-11-16 apparently it is not possible to search on a field expression, hence we calculate the distance multiple times
-    SortOptions.Builder sortOptions = SortOptions.newBuilder().
-    	addSortExpression(SortExpression.newBuilder().setExpression(distanceExpression).setDirection(SortDirection.ASCENDING).setDefaultValueNumeric(0)).setLimit(1000);
+    //also search seems to create false results, so search is done programmatically
+//    SortOptions.Builder sortOptions = SortOptions.newBuilder().
+//    	addSortExpression(SortExpression.newBuilder().setExpression(distanceExpression).setDirection(SortDirection.ASCENDING).setDefaultValueNumeric(0)).setLimit(1000);
     
     QueryOptions.Builder options = QueryOptions.newBuilder()
-            .addExpressionToReturn(FieldExpression.newBuilder().setName("distanceComputed").setExpression(distanceExpression))
-            .setSortOptions(sortOptions);
+            .addExpressionToReturn(FieldExpression.newBuilder().setName("distance").setExpression(distanceExpression));
+//            .setSortOptions(sortOptions);
     
     Query query = Query.newBuilder().setOptions(
             options).build(queryString);

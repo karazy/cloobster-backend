@@ -88,7 +88,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.eventbus.EventBus;
+import com.google.common.primitives.Ints;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
@@ -1121,7 +1123,7 @@ public class LocationController {
       Key<Business> key = new Key<Business>(doc.getId());
       locationKeys.add(key);
       for (Field exp :  doc.getExpressions()) {
-        if(exp.getName().equals("distanceComputed")) {
+        if(exp.getName().equals("distance")) {
           distances.add(exp.getNumber());
         }
       }
@@ -1142,6 +1144,15 @@ public class LocationController {
     	    ++locationIndex;
     	}
     }
+    	//sort by distance
+		Ordering<LocationProfileDTO> byLengthOrdering = new Ordering<LocationProfileDTO>() {
+			public int compare(LocationProfileDTO left, LocationProfileDTO right) {
+				return Ints.compare(left.getDistance(), right.getDistance());
+			}
+		};
+    
+		locationDtos = byLengthOrdering.sortedCopy(locationDtos);
+    
     
     logger.info("Found {} locations. {} eligible to shown.", new Object[]{result.getResults().size(), locationDtos.size()});
 
