@@ -1,9 +1,12 @@
 package net.eatsense.search;
 
 import com.google.appengine.api.search.*;
+import com.google.appengine.api.search.SortExpression.SortDirection;
 import com.google.common.eventbus.Subscribe;
+
 import net.eatsense.domain.Business;
 import net.eatsense.event.UpdateGeoLocation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,12 +57,18 @@ public class LocationSearchService {
     String distanceExpression = String.format(Locale.US, "distance(geolocation, geopoint(%f, %f))", latitude, longitude);
 
     logger.info("queryString={}", queryString);
-
+    
+    //2014-11-16 apparently it is not possible to search on a field expression, hence we calculate the distance multiple times
+    SortOptions.Builder sortOptions = SortOptions.newBuilder().
+    	addSortExpression(SortExpression.newBuilder().setExpression(distanceExpression).setDirection(SortDirection.DESCENDING).setDefaultValueNumeric(0)).setLimit(1000);
+    
     QueryOptions.Builder options = QueryOptions.newBuilder()
-            .addExpressionToReturn(FieldExpression.newBuilder().setExpression(distanceExpression).setName("distance"));
+            .addExpressionToReturn(FieldExpression.newBuilder().setName("distanceComputed").setExpression(distanceExpression))
+            .setSortOptions(sortOptions);
+    
     Query query = Query.newBuilder().setOptions(
             options).build(queryString);
-
+    
     return index.search(query);
   }
 

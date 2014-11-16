@@ -1121,7 +1121,7 @@ public class LocationController {
       Key<Business> key = new Key<Business>(doc.getId());
       locationKeys.add(key);
       for (Field exp :  doc.getExpressions()) {
-        if(exp.getName().equals("distance")) {
+        if(exp.getName().equals("distanceComputed")) {
           distances.add(exp.getNumber());
         }
       }
