@@ -60,7 +60,7 @@ public class LocationSearchService {
     
     //2014-11-16 apparently it is not possible to search on a field expression, hence we calculate the distance multiple times
     SortOptions.Builder sortOptions = SortOptions.newBuilder().
-    	addSortExpression(SortExpression.newBuilder().setExpression(distanceExpression).setDirection(SortDirection.DESCENDING).setDefaultValueNumeric(0)).setLimit(1000);
+    	addSortExpression(SortExpression.newBuilder().setExpression(distanceExpression).setDirection(SortDirection.ASCENDING).setDefaultValueNumeric(0)).setLimit(1000);
     
     QueryOptions.Builder options = QueryOptions.newBuilder()
             .addExpressionToReturn(FieldExpression.newBuilder().setName("distanceComputed").setExpression(distanceExpression))
