@@ -38,7 +38,11 @@ public class LocationProfileDTO extends LocationDTO {
 	private Map<String, Boolean> features = Maps.newHashMap();
 	private Map<String, Map<String, String>> configuration;
 	
-	private Double distance;
+	
+	/**
+	 * Distance in meters compared to a users current location.
+	 */
+	private Integer distance;
 	
 	private boolean hideFromGeoSearch;
 
@@ -174,11 +178,11 @@ public class LocationProfileDTO extends LocationDTO {
 		this.configuration = configuration;
 	}		
 
-	public Double getDistance() {
+	public Integer getDistance() {
 		return distance;
 	}
 
-	public void setDistance(Double distance) {
+	public void setDistance(Integer distance) {
 		this.distance = distance;
 	}
 	
